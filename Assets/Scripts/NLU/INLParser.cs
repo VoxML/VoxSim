@@ -1,6 +1,6 @@
-﻿namespace Assets.Scripts.NLU
+﻿namespace NLU
 {
-	public interface NLParser
+	public interface INLParser
 	{
 		string NLParse(string rawSent);
 

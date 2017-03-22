@@ -2,13 +2,13 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.Runtime.InteropServices;
-using Assets.Scripts.NLU;
+using NLU;
 
 public class PluginImport : MonoBehaviour {
 	// port definitions
 	public string port = "";
 
-	private NLParser parser;
+	private INLParser _parser;
 
 	// Make our calls from the Plugin
 	[DllImport ("CommunicationsBridge")]
@@ -48,14 +48,14 @@ public class PluginImport : MonoBehaviour {
 		if (parserUrl.Length == 0)
 		{
 			Debug.Log("Initializing Simple Parser");
-			parser = new SimpleParser();
+			_parser = new SimpleParser();
 		}
 		else
 		{
 			Debug.Log("Initializing Stanford Dependency Parser");
 			//parser = new StanfordWrapper();
 			Debug.Log("Finding Stanford service at " + parserUrl);
-			parser.InitParserService(parserUrl);
+			_parser.InitParserService(parserUrl);
 		}
 	}
 
@@ -95,7 +95,7 @@ public class PluginImport : MonoBehaviour {
 	public string NLParse(string input) {
 //		string[] args = new string[]{input};
 //		string result = Marshal.PtrToStringAuto(PythonCall (Application.dataPath + "/Externals/python/", "change_to_forms", "parse_sent", args, args.Length));
-		var result = parser.NLParse(input);
+		var result = _parser.NLParse(input);
 		Debug.Log ("Parsed as: " + result);
 
 		return result;

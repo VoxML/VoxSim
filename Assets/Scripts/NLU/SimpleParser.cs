@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using UnityEngine;
 
-namespace Assets.Scripts.NLU
+namespace NLU
 {
-	public class SimpleParser : NLParser {
+	public class SimpleParser : INLParser {
 
 		private List<string> _events = new List<string>(new[]
 		{
