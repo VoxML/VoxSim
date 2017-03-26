@@ -64,6 +64,8 @@ public class ModuleVoxemeCreation : ModalWindow {
 
 	// Use this for initialization
 	void Start () {
+		base.Start ();
+		
 		actionButtonText = "Add";
 		windowTitle = "Add Voxeme Object";
 		persistent = true;
@@ -76,7 +78,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 		voxemeInit = GameObject.Find ("BlocksWorld").GetComponent<VoxemeInit> ();
 		preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
-		windowManager = GameObject.Find ("BlocksWorld").GetComponent<ModalWindowManager> ();
+		//windowManager = GameObject.Find ("BlocksWorld").GetComponent<ModalWindowManager> ();
 
 		cameraControl = Camera.main.GetComponent<GhostFreeRoamCamera> ();
 
@@ -93,8 +95,6 @@ public class ModuleVoxemeCreation : ModalWindow {
 		windowRect = new Rect (Screen.width - 215, Screen.height - (35 + (int)(20 * fontSizeModifier)) - 205, 200, 200);
 
 		windowManager.NewModalWindow += NewInspector;
-
-		base.Start ();
 	}
 
 	// Update is called once per frame

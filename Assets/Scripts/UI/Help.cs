@@ -29,6 +29,8 @@ public class Help : ModalWindow {
 
 	// Use this for initialization
 	void Start () {
+		base.Start ();
+
 		windowTitle = "Help";
 		persistent = true;
 
@@ -57,7 +59,5 @@ public class Help : ModalWindow {
 		scrollPosition = GUILayout.BeginScrollView (scrollPosition);
 		GUILayout.Label (helpText);
 		GUILayout.EndScrollView ();
-		//makes GUI window draggable
-		GUI.DragWindow (new Rect (0, 0, 10000, 20));
 	}
 }
