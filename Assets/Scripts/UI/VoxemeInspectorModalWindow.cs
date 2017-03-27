@@ -87,7 +87,8 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	// LEX
 	string mlPred = "";
 	
-	string[] mlTypeOptions = new string[]{"physobj","human","artifact"};
+	string[] mlObjectTypeOptions = new string[]{"physobj", "human", "artifact"};
+	string[] mlProgramTypeOptions = new string[]{"process", "transition_event", "1", "2"};
 	List<int> mlTypeSelectVisible = new List<int>(new int[]{-1});
 	List<int> mlTypeSelected = new List<int>(new int[]{-1});
 	int mlAddType = -1;
@@ -96,7 +97,8 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	List<string> mlTypes = new List<string>(new string[]{""});
 
 	// TYPE
-	string[] mlHeadOptions = new string[]{"cylindroid", "ellipsoid", "rectangular_prism", "toroid", "pyramidoid", "sheet"};
+	string[] mlObjectHeadOptions = new string[]{"cylindroid", "ellipsoid", "rectangular_prism", "toroid", "pyramidoid", "sheet"};
+	string[] mlProgramHeadOptions = new string[]{"state", "process", "transition", "assignment", "test"};
 	int mlHeadSelectVisible = -1;
 	int mlHeadSelected = -1;
 	string mlHead = "";
@@ -108,7 +110,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	List<string> mlComponents = new List<string>();
 	List<string> mlComponentReentrancies = new List<string>();
 	
-	string[] mlConcavityOptions = new string[]{"Concave","Flat","Convex"};
+	string[] mlConcavityOptions = new string[]{"Concave", "Flat", "Convex"};
 	int mlConcavitySelectVisible = -1;
 	int mlConcavitySelected = -1;
 	string mlConcavity = "";
@@ -121,25 +123,33 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	bool mlReflSymXZ = false;
 	bool mlReflSymYZ = false;
 
+	int mlAddArg = -1;
+	List<int> mlRemoveArg = new List<int>();
 	int mlArgCount = 0;
 	List<string> mlArgs = new List<string>();
 
+	int mlAddSubevent = -1;
+	List<int> mlRemoveSubevent = new List<int>();
 	int mlSubeventCount = 0;
 	List<string> mlSubevents = new List<string>();
 
-	string mlClass = "";
-	string mlValue = "";
-	string mlConstr = "";
-
-	string[] mlTypeScaleOptions = new string[]{"nominal","binary","ordinal","interval","rational"};
+	string[] mlTypeScaleOptions = new string[]{"nominal", "binary", "ordinal", "interval", "rational"};
 	int mlTypeScaleSelectVisible = -1;
 	int mlTypeScaleSelected = -1;
 	string mlTypeScale = "";
 
-	string[] mlArityOptions = new string[]{"intransitive","transitive"};
+	string[] mlArityOptions = new string[]{"intransitive", "transitive"};
 	int mlAritySelectVisible = -1;
 	int mlAritySelected = -1;
 	string mlArity = "";
+
+	string[] mlClassOptions = new string[]{"config", "force_dynamic"};
+	int mlClassSelectVisible = -1;
+	int mlClassSelected = -1;
+	string mlClass = "";
+
+	string mlValue = "";
+	string mlConstr = "";
 	
 	// HABITAT
 	int mlAddIntrHabitat = -1;
@@ -159,7 +169,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	List<string> mlAffordances = new List<string>();
 	
 	// EMBODIMENT
-	string[] mlEmbodimentScaleOptions = new string[]{"<agent","agent",">agent"};
+	string[] mlEmbodimentScaleOptions = new string[]{"<agent", "agent", ">agent"};
 	int mlEmbodimentScaleSelectVisible = -1;
 	int mlEmbodimentScaleSelected = -1;
 	string mlEmbodimentScale = "";
@@ -384,9 +394,9 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 				if (mlTypeSelectVisible [i] == 0) {
 					GUILayout.BeginVertical (inspectorStyle);
 					mlTypeSelected [i] = -1;
-					mlTypeSelected [i] = GUILayout.SelectionGrid (mlTypeSelected [i], mlTypeOptions, 1, listStyle, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+					mlTypeSelected [i] = GUILayout.SelectionGrid (mlTypeSelected [i], mlObjectTypeOptions, 1, listStyle, GUILayout.Width (70), GUILayout.ExpandWidth (true));
 					if (mlTypeSelected [i] != -1) {
-						mlTypes [i] = mlTypeOptions [mlTypeSelected [i]];
+						mlTypes [i] = mlObjectTypeOptions [mlTypeSelected [i]];
 						mlTypeSelectVisible [i] = -1;
 					}
 					GUILayout.EndVertical ();
@@ -447,9 +457,9 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 			if (mlHeadSelectVisible == 0) {
 				GUILayout.BeginVertical (inspectorStyle);
 				mlHeadSelected = -1;
-				mlHeadSelected = GUILayout.SelectionGrid (mlHeadSelected, mlHeadOptions, 1, listStyle, GUILayout.Width (60), GUILayout.ExpandWidth (true));
+				mlHeadSelected = GUILayout.SelectionGrid (mlHeadSelected, mlObjectHeadOptions, 1, listStyle, GUILayout.Width (60), GUILayout.ExpandWidth (true));
 				if (mlHeadSelected != -1) {
-					mlHead = mlHeadOptions [mlHeadSelected];
+					mlHead = mlObjectHeadOptions [mlHeadSelected];
 					mlHeadSelectVisible = -1;
 				}
 				GUILayout.EndVertical ();
@@ -1000,23 +1010,77 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		GUILayout.Label ("LEX");
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Pred");
-		GUILayout.Box (mlPred, GUILayout.Width (inspectorWidth-100));
+
+		if (editable) {
+			mlPred = GUILayout.TextField (mlPred, GUILayout.Width (inspectorWidth - 100));
+		}
+		else {
+			GUILayout.Box (mlPred, GUILayout.Width (inspectorWidth - 100));
+		}
+
 		GUILayout.EndHorizontal ();
 		GUILayout.BeginVertical (inspectorStyle);
 		GUILayout.BeginHorizontal ();
 		GUILayout.Label ("Type");
 
 		GUILayout.BeginVertical ();
-		for (int i = 0; i < mlTypeCount; i++) {
-			GUILayout.BeginHorizontal ();
 
-			GUILayout.Box (mlTypes [i], GUILayout.Width (inspectorWidth - 130), GUILayout.ExpandWidth (true));
+		if (editable) {
+			for (int i = 0; i < mlTypeCount; i++) {
+				GUILayout.BeginHorizontal ();
+				if (mlTypeSelectVisible [i] == 0) {
+					GUILayout.BeginVertical (inspectorStyle);
+					mlTypeSelected [i] = -1;
+					mlTypeSelected [i] = GUILayout.SelectionGrid (mlTypeSelected [i], mlProgramTypeOptions, 1, listStyle, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+					if (mlTypeSelected [i] != -1) {
+						mlTypes [i] = mlProgramTypeOptions [mlTypeSelected [i]];
+						mlTypeSelectVisible [i] = -1;
+					}
+					GUILayout.EndVertical ();
+				}
+				else {
+					mlTypeSelectVisible [i] = GUILayout.SelectionGrid (mlTypeSelectVisible [i], new string[]{ mlTypes [i] }, 1, GUI.skin.button, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+				}
+				if (i != 0) { // can't remove first type
+					mlRemoveType [i] = GUILayout.SelectionGrid (mlRemoveType [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+				}
+				GUILayout.EndHorizontal ();
+			}
+		}
+		else {
+			for (int i = 0; i < mlTypeCount; i++) {
+				GUILayout.BeginHorizontal ();
 
-			GUILayout.EndHorizontal ();
+				GUILayout.Box (mlTypes [i], GUILayout.Width (inspectorWidth - 130), GUILayout.ExpandWidth (true));
+
+				GUILayout.EndHorizontal ();
+			}
 		}
 		GUILayout.EndVertical ();
 
 		GUILayout.EndHorizontal ();
+
+		if (editable) {
+			mlAddType = GUILayout.SelectionGrid (mlAddType, new string[]{ "+" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+
+			if (mlAddType == 0) {	// add new type
+				mlTypeCount++;
+				mlTypes.Add ("");
+				mlTypeSelectVisible.Add (-1);
+				mlTypeSelected.Add (-1);
+				mlRemoveType.Add (-1);
+				mlAddType = -1;
+			}
+
+			for (int i = 0; i < mlTypeCount; i++) {
+				if (mlRemoveType [i] == 0) {
+					mlRemoveType [i] = -1;
+					mlTypes.RemoveAt (i);
+					mlRemoveType.RemoveAt (i);
+					mlTypeCount--;
+				}
+			}
+		}
 
 		GUILayout.EndVertical ();
 		GUILayout.EndVertical ();
@@ -1026,35 +1090,197 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Head");
 
-		GUILayout.Box (mlHead, GUILayout.Width (inspectorWidth-130), GUILayout.ExpandWidth (true));
+		GUILayout.BeginHorizontal (inspectorStyle);
+		if (editable) {
+			if (mlHeadSelectVisible == 0) {
+				GUILayout.BeginVertical (inspectorStyle);
+				mlHeadSelected = -1;
+				mlHeadSelected = GUILayout.SelectionGrid (mlHeadSelected, mlProgramHeadOptions, 1, listStyle, GUILayout.Width (60), GUILayout.ExpandWidth (true));
+				if (mlHeadSelected != -1) {
+					mlHead = mlProgramHeadOptions [mlHeadSelected];
+					mlHeadSelectVisible = -1;
+				}
+				GUILayout.EndVertical ();
+			}
+			else {
+				mlHeadSelectVisible = GUILayout.SelectionGrid (mlHeadSelectVisible, new string[]{ mlHead }, 1, GUI.skin.button, GUILayout.Width (60), GUILayout.ExpandWidth (true));
+			}
+		}
+		else {
+			GUILayout.Box (mlHead, GUILayout.Width (inspectorWidth - 130), GUILayout.ExpandWidth (true));
+		}
+		GUILayout.EndHorizontal ();
 
 		GUILayout.EndHorizontal ();
 		GUILayout.BeginVertical (inspectorStyle);
 		GUILayout.BeginHorizontal ();
 		GUILayout.Label ("Args");
+
+		if (editable) {
+			mlAddArg = GUILayout.SelectionGrid (mlAddArg, new string[]{ "+" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+		}
+
 		GUILayout.EndHorizontal ();
+
+		if (editable) {
+			if (mlAddArg == 0) {	// add new argument
+				mlArgCount++;
+				mlArgs.Add ("");
+				mlAddArg = -1;
+				mlRemoveArg.Add (-1);
+			}
+		}
 
 		GUILayout.BeginVertical (inspectorStyle);
 		for (int i = 0; i < mlArgCount; i++) {
-			GUILayout.Box (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+			if (editable) {
+				GUILayout.BeginHorizontal (inspectorStyle);
+				mlArgs[i] = GUILayout.TextField (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+				mlRemoveArg.Add (-1);
+				mlRemoveArg [i] = GUILayout.SelectionGrid (mlRemoveArg [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+				GUILayout.EndHorizontal ();
+			}
+			else {
+				GUILayout.Box (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+			}
 		}
 		GUILayout.EndVertical ();
+
+		if (editable) {
+			for (int i = 0; i < mlArgCount; i++) {
+				if (mlRemoveArg [i] == 0) {
+					mlRemoveArg [i] = -1;
+					mlArgs.RemoveAt (i);
+					mlRemoveArg.RemoveAt (i);
+					mlArgCount--;
+				}
+			}
+		}
 
 		GUILayout.EndVertical ();
 
 		GUILayout.BeginVertical (inspectorStyle);
 		GUILayout.BeginHorizontal ();
 		GUILayout.Label ("Body");
+
+		if (editable) {
+			mlAddSubevent = GUILayout.SelectionGrid (mlAddSubevent, new string[]{ "+" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+		}
+
 		GUILayout.EndHorizontal ();
+
+		if (editable) {
+			if (mlAddSubevent == 0) {	// add new subevent
+				mlSubeventCount++;
+				mlSubevents.Add ("");
+				mlAddSubevent = -1;
+				mlRemoveSubevent.Add (-1);
+			}
+		}
 
 		GUILayout.BeginVertical (inspectorStyle);
 		for (int i = 0; i < mlSubeventCount; i++) {
-		GUILayout.Box (mlSubevents [i], GUILayout.Width (inspectorWidth - 85));
+			if (editable) {
+				GUILayout.BeginHorizontal (inspectorStyle);
+				mlSubevents [i] = GUILayout.TextField (mlSubevents [i], GUILayout.Width (inspectorWidth - 85));
+				mlRemoveSubevent.Add (-1);
+				mlRemoveSubevent [i] = GUILayout.SelectionGrid (mlRemoveSubevent [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+				GUILayout.EndHorizontal ();
+			}
+			else {
+				GUILayout.Box (mlSubevents [i], GUILayout.Width (inspectorWidth - 85));
+			}
 		}
 		GUILayout.EndVertical ();
 
+		if (editable) {
+			for (int i = 0; i < mlSubeventCount; i++) {
+				if (mlRemoveSubevent [i] == 0) {
+					mlRemoveSubevent [i] = -1;
+					mlSubevents.RemoveAt (i);
+					mlRemoveSubevent.RemoveAt (i);
+					mlSubeventCount--;
+				}
+			}
+		}
+
+		GUILayout.EndVertical ();
 		GUILayout.EndVertical ();
 
+		GUILayout.BeginVertical (inspectorStyle);
+		GUILayout.Label ("PARTICIPATION");
+		GUILayout.BeginVertical (inspectorStyle);
+		List<string> participations = new List<string> ();
+
+		object[] programs = Directory.GetFiles (string.Format ("{0}/programs", Data.voxmlDataPath));
+		//object[] assets = Resources.LoadAll ("Programs");
+		foreach (object program in programs) {
+			if (program != null) {
+				foreach (string subevent in mlSubevents) {
+					if (subevent.Contains (((string)program).Substring (((string)program).LastIndexOf ('/') + 1).Split ('.') [0])) {
+						if (!participations.Contains (((string)program).Substring (((string)program).LastIndexOf ('/') + 1).Split ('.') [0])) {
+							participations.Add (((string)program).Substring (((string)program).LastIndexOf ('/') + 1).Split ('.') [0]);
+						}
+					}
+				}
+			}
+		}
+
+		object[] relations = Directory.GetFiles (string.Format ("{0}/relations", Data.voxmlDataPath));
+		//object[] assets = Resources.LoadAll ("Programs");
+		foreach (object relation in relations) {
+			if (relation != null) {
+				foreach (string subevent in mlSubevents) {
+					if (subevent.Contains (((string)relation).Substring (((string)relation).LastIndexOf ('/') + 1).Split ('.') [0])) {
+						if (!participations.Contains (((string)relation).Substring (((string)relation).LastIndexOf ('/') + 1).Split ('.') [0])) {
+							participations.Add (((string)relation).Substring (((string)relation).LastIndexOf ('/') + 1).Split ('.') [0]);
+						}
+					}
+				}
+			}
+		}
+
+		foreach (string p in participations) {
+			string filePath = string.Empty;
+			string dir = string.Empty;
+			if (File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("programs/{0}.xml", p)))) {
+				dir = "programs/";
+				filePath = string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("programs/{0}.xml", p));
+			}
+			else if (File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("relations/{0}.xml", p)))) {
+				dir = "relations/";
+				filePath = string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("relations/{0}.xml", p));
+			}
+
+			if (filePath != string.Empty) {
+				using (StreamReader sr = new StreamReader (filePath)) {
+					String ml = sr.ReadToEnd ();
+					if (ml != null) {
+						float textSize = GUI.skin.label.CalcSize (new GUIContent (p)).x;
+						float padSize = GUI.skin.label.CalcSize (new GUIContent (" ")).x;
+						int padLength = (int)(((inspectorWidth - 85) - textSize) / (int)padSize);
+						if (GUILayout.Button (p.PadRight (padLength + p.Length - 3), GUILayout.Width (inspectorWidth - 85))) {
+							if (ml != null) {
+								VoxemeInspectorModalWindow newInspector = gameObject.AddComponent<VoxemeInspectorModalWindow> ();
+								//LoadMarkup (ml.text);
+								//newInspector.DrawInspector = true;
+								newInspector.windowRect = new Rect (windowRect.x + 25, windowRect.y + 25, inspectorWidth, inspectorHeight);
+								//newInspector.InspectorTitle = mlComponents [i];
+								newInspector.InspectorVoxeme = dir + p;
+								newInspector.Render = true;
+							}
+							else {
+							}
+						}
+					}
+					else {
+						GUILayout.Box ((string)p, GUILayout.Width (inspectorWidth - 85));
+					}
+				}
+			}
+		}
+
+		GUILayout.EndVertical ();
 		GUILayout.EndVertical ();
 
 		GUILayout.EndScrollView ();
@@ -1070,7 +1296,14 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		GUILayout.Label ("LEX");
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Pred");
-		GUILayout.Box (mlPred, GUILayout.Width (inspectorWidth-100));
+
+		if (editable) {
+			mlPred = GUILayout.TextField (mlPred, GUILayout.Width (inspectorWidth - 100));
+		}
+		else {
+			GUILayout.Box (mlPred, GUILayout.Width (inspectorWidth - 100));
+		}
+
 		GUILayout.EndHorizontal ();
 		GUILayout.EndVertical ();
 
@@ -1079,25 +1312,60 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Scale");
-		GUILayout.Box (mlTypeScale, GUILayout.Width (inspectorWidth-130), GUILayout.ExpandWidth (true));
+		if (editable) {
+			if (mlTypeScaleSelectVisible == 0) {
+				GUILayout.BeginVertical (inspectorStyle);
+				mlTypeScaleSelected = -1;
+				mlTypeScaleSelected = GUILayout.SelectionGrid (mlTypeScaleSelected, mlTypeScaleOptions, 1, listStyle, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+				if (mlTypeScaleSelected != -1) {
+					mlTypeScale = mlTypeScaleOptions [mlTypeScaleSelected];
+					mlTypeScaleSelectVisible = -1;
+				}
+				GUILayout.EndVertical ();
+			}
+			else {
+				mlTypeScaleSelectVisible = GUILayout.SelectionGrid (mlTypeScaleSelectVisible, new string[]{ mlTypeScale }, 1, GUI.skin.button, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+			}
+		}
+		else {
+			GUILayout.Box (mlTypeScale, GUILayout.Width (inspectorWidth - 130), GUILayout.ExpandWidth (true));
+		}
 		GUILayout.EndHorizontal ();
 
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Arity");
-		GUILayout.Box (mlArity, GUILayout.Width (inspectorWidth-130), GUILayout.ExpandWidth (true));
+		if (editable) {
+			if (mlAritySelectVisible == 0) {
+				GUILayout.BeginVertical (inspectorStyle);
+				mlAritySelected = -1;
+				mlAritySelected = GUILayout.SelectionGrid (mlAritySelected, mlArityOptions, 1, listStyle, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+				if (mlAritySelected != -1) {
+					mlArity = mlArityOptions [mlAritySelected];
+					mlAritySelectVisible = -1;
+				}
+				GUILayout.EndVertical ();
+			}
+			else {
+				mlAritySelectVisible = GUILayout.SelectionGrid (mlAritySelectVisible, new string[]{ mlArity }, 1, GUI.skin.button, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+			}
+		}
+		else {
+			GUILayout.Box (mlArity, GUILayout.Width (inspectorWidth - 130), GUILayout.ExpandWidth (true));
+		}
 		GUILayout.EndHorizontal ();
 
 		GUILayout.BeginVertical (inspectorStyle);
 		GUILayout.BeginHorizontal ();
-		GUILayout.Label ("Args");
-		GUILayout.EndHorizontal ();
+		GUILayout.Label ("Arg");
 
-		GUILayout.BeginVertical (inspectorStyle);
-		for (int i = 0; i < mlArgCount; i++) {
-			GUILayout.Box (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+		if (editable) {
+			mlArgs [0] = GUILayout.TextField (mlArgs [0], GUILayout.Width (inspectorWidth - 85));
 		}
-		GUILayout.EndVertical ();
+		else {
+			GUILayout.Box (mlArgs [0], GUILayout.Width (inspectorWidth - 85));
+		}
 
+		GUILayout.EndHorizontal ();
 		GUILayout.EndVertical ();
 
 		GUILayout.EndVertical ();
@@ -1115,7 +1383,15 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		GUILayout.Label ("LEX");
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Pred");
-		GUILayout.Box (mlPred, GUILayout.Width (inspectorWidth-100));
+
+		if (editable) {
+			mlPred = GUILayout.TextField (mlPred, GUILayout.Width (inspectorWidth - 100));
+		}
+		else {
+			GUILayout.Box (mlPred, GUILayout.Width (inspectorWidth - 100));
+		}
+
+
 		GUILayout.EndHorizontal ();
 		GUILayout.EndVertical ();
 
@@ -1124,30 +1400,95 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Class");
-		GUILayout.Box (mlClass, GUILayout.Width (inspectorWidth-130), GUILayout.ExpandWidth (true));
+		if (editable) {
+			if (mlClassSelectVisible == 0) {
+				GUILayout.BeginVertical (inspectorStyle);
+				mlClassSelected = -1;
+				mlClassSelected = GUILayout.SelectionGrid (mlClassSelected, mlClassOptions, 1, listStyle, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+				if (mlClassSelected != -1) {
+					mlClass = mlClassOptions [mlClassSelected];
+					mlClassSelectVisible = -1;
+				}
+				GUILayout.EndVertical ();
+			}
+			else {
+				mlClassSelectVisible = GUILayout.SelectionGrid (mlClassSelectVisible, new string[]{ mlClass }, 1, GUI.skin.button, GUILayout.Width (70), GUILayout.ExpandWidth (true));
+			}
+		}
+		else {
+			GUILayout.Box (mlClass, GUILayout.Width (inspectorWidth - 130), GUILayout.ExpandWidth (true));
+		}
 		GUILayout.EndHorizontal ();
 
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Value");
-		GUILayout.Box (mlValue, GUILayout.Width (inspectorWidth-130), GUILayout.ExpandWidth (true));
+
+		if (editable) {
+			mlValue = GUILayout.TextField (mlValue, GUILayout.Width (inspectorWidth - 100));
+		}
+		else {
+			GUILayout.Box (mlValue, GUILayout.Width (inspectorWidth - 100));
+		}
+
 		GUILayout.EndHorizontal ();
 
 		GUILayout.BeginVertical (inspectorStyle);
 		GUILayout.BeginHorizontal ();
 		GUILayout.Label ("Args");
+
+		if (editable) {
+			mlAddArg = GUILayout.SelectionGrid (mlAddArg, new string[]{ "+" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+		}
+
 		GUILayout.EndHorizontal ();
+
+		if (editable) {
+			if (mlAddArg == 0) {	// add new argument
+				mlArgCount++;
+				mlArgs.Add ("");
+				mlAddArg = -1;
+				mlRemoveArg.Add (-1);
+			}
+		}
 
 		GUILayout.BeginVertical (inspectorStyle);
 		for (int i = 0; i < mlArgCount; i++) {
-			GUILayout.Box (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+			if (editable) {
+				GUILayout.BeginHorizontal (inspectorStyle);
+				mlArgs [i] = GUILayout.TextField (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+				mlRemoveArg.Add (-1);
+				mlRemoveArg [i] = GUILayout.SelectionGrid (mlRemoveArg [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+				GUILayout.EndHorizontal ();
+			}
+			else {
+				GUILayout.Box (mlArgs [i], GUILayout.Width (inspectorWidth - 85));
+			}
 		}
 		GUILayout.EndVertical ();
+
+		if (editable) {
+			for (int i = 0; i < mlArgCount; i++) {
+				if (mlRemoveArg [i] == 0) {
+					mlRemoveArg [i] = -1;
+					mlArgs.RemoveAt (i);
+					mlRemoveArg.RemoveAt (i);
+					mlArgCount--;
+				}
+			}
+		}
 
 		GUILayout.EndVertical ();
 
 		GUILayout.BeginHorizontal (inspectorStyle);
 		GUILayout.Label ("Constr");
-		GUILayout.Box (mlConstr, GUILayout.Width (inspectorWidth-130), GUILayout.ExpandWidth (true));
+
+		if (editable) {
+			mlConstr = GUILayout.TextField (mlConstr, GUILayout.Width (inspectorWidth - 100));
+		}
+		else {
+			GUILayout.Box (mlConstr, GUILayout.Width (inspectorWidth - 100));
+		}
+
 		GUILayout.EndHorizontal ();
 
 		GUILayout.EndVertical ();
@@ -1312,8 +1653,17 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 			voxml.Type.Args [i].Value = mlArgs [i];
 		}
 
+		for (int i = 0; i < mlSubeventCount; i++) {
+			voxml.Type.Body.Add (new VoxTypeSubevent ());
+			voxml.Type.Body [i].Value = mlSubevents [i];
+		}
+
 		voxml.Type.Scale = mlTypeScale;
 		voxml.Type.Arity = mlArity;
+
+		voxml.Type.Class = mlClass;
+		voxml.Type.Value = mlValue;
+		voxml.Type.Constr = mlConstr;
 
 		// HABITAT
 		for (int i = 0; i < mlIntrHabitatCount; i++) {

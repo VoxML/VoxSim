@@ -15,11 +15,11 @@
       <Arg Value="x:physobj" />
     </Args>
     <Body />
+    <Scale>nominal</Scale>
+    <Arity>intransitive</Arity>
     <Class />
     <Value />
     <Constr />
-    <Scale>nominal</Scale>
-    <Arity>intransitive</Arity>
   </Type>
   <Habitat>
     <Intrinsic />

@@ -67,12 +67,12 @@ namespace Vox {
 		[XmlArrayItem("Subevent")]
 		public List<VoxTypeSubevent> Body = new List<VoxTypeSubevent>();
 
+		public string Scale = "";
+		public string Arity = "";
+
 		public string Class = "";
 		public string Value = "";
 		public string Constr = "";
-
-		public string Scale = "";
-		public string Arity = "";
 	}
 
 	/// <summary>
