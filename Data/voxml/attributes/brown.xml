@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Entity Type="Attribute" />
+  <Lex>
+    <Pred>brown</Pred>
+    <Type />
+  </Lex>
+  <Type>
+    <Head />
+    <Components />
+    <Concavity />
+    <RotatSym />
+    <ReflSym />
+    <Args>
+      <Arg Value="x:physobj" />
+    </Args>
+    <Body />
+    <Class />
+    <Value />
+    <Constr />
+    <Scale>nominal</Scale>
+    <Arity>intransitive</Arity>
+  </Type>
+  <Habitat>
+    <Intrinsic />
+    <Extrinsic />
+  </Habitat>
+  <Afford_Str>
+    <Affordances />
+  </Afford_Str>
+  <Embodiment>
+    <Scale />
+    <Movable>false</Movable>
+  </Embodiment>
+  <Attributes>
+    <Attrs />
+  </Attributes>
+</VoxML>

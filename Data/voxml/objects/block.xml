@@ -36,7 +36,6 @@
   <Attributes>
     <Attrs>
       <Attr Value="black" />
-      <Attr Value="small" />
     </Attrs>
   </Attributes>
 </VoxML>

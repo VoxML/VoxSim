@@ -141,10 +141,10 @@ public class GhostFreeRoamCamera : MonoBehaviour
 			//adding in zooming
 			if (Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width &&
 			    Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height) {
-				zoomAmount += Input.GetAxis ("Mouse ScrollWheel");
-				zoomAmount = Mathf.Clamp (zoomAmount, -maxToClamp, maxToClamp);
-				var translate = Mathf.Min (Mathf.Abs (Input.GetAxis ("Mouse ScrollWheel")), maxToClamp - Mathf.Abs (zoomAmount));
-				gameObject.transform.Translate (0, 0, translate * zoomSpeed * Mathf.Sign (Input.GetAxis ("Mouse ScrollWheel")));
+//				zoomAmount += Input.GetAxis ("Mouse ScrollWheel");
+//				zoomAmount = Mathf.Clamp (zoomAmount, -maxToClamp, maxToClamp);
+//				var translate = Mathf.Min (Mathf.Abs (Input.GetAxis ("Mouse ScrollWheel")), maxToClamp - Mathf.Abs (zoomAmount));
+				gameObject.transform.Translate (0, 0, Input.GetAxis ("Mouse ScrollWheel") * zoomSpeed);
 			}
 
 			//adding in panning
@@ -224,13 +224,13 @@ public class GhostFreeRoamCamera : MonoBehaviour
 		}
 	}
 //	void OnCollisionEnter(Collision other) {
-//		if (other.gameObject.tag != "Ground") {
+//		if (other.gameObject.tag != "CameraBoundary") {
 //			Physics.IgnoreCollision (GetComponent<Collider> (), other.gameObject.GetComponent<Collider> ());
 //		}
 //	}
 //	
 //	void OnCollisionStay(Collision other) {
-//		if (other.gameObject.tag != "Ground") {
+//		if (other.gameObject.tag != "CameraBoundary") {
 //			Physics.IgnoreCollision(GetComponent<Collider>(), other.gameObject.GetComponent<Collider>());
 //		}
 //
