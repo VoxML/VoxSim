@@ -26,8 +26,10 @@ namespace Global {
 	public static class Data {
 	#if UNITY_EDITOR
 		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
-	#elif UNITY_STANDALONE
+	#elif UNITY_STANDALONE_OSX
 		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
+	#elif UNITY_STANDALONE_WIN
+		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
 	#endif
 	}
 

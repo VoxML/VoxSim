@@ -30,11 +30,14 @@ public class Builder : Editor {
 				}
 			}
 
+			//Debug.Log(@"Build/mac/VoxSim/Contents".Remove (@"Build/mac/VoxSim/Contents".LastIndexOf('/', @"Build/mac/VoxSim/Contents".LastIndexOf('/') - 1)) + string.Format ("/Data/voxml"));
+			//Debug.Log(@"Build/win/VoxSim_Data".Remove (@"Build/win/VoxSim_Data".LastIndexOf('/') + 1) + string.Format ("Data/voxml"));
+
 			DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
 			DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
 
 			BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/mac/"+buildName,BuildTarget.StandaloneOSXUniversal,BuildOptions.None);
-            BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/win/"+buildName,BuildTarget.StandaloneWindows,BuildOptions.None);
+            BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/win/"+buildName+".exe",BuildTarget.StandaloneWindows,BuildOptions.None);
 			//BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/web/"+buildName,BuildTarget.WebPlayer,BuildOptions.None);
 		}
 	}
