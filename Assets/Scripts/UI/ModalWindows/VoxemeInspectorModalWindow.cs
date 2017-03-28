@@ -217,107 +217,49 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	}
 	
 	protected override void OnGUI () {
-		/*if (DrawInspector) {
-			inspectorPositionAdjX = inspectorPosition.x;
-			inspectorPositionAdjY = inspectorPosition.y;
-			if (inspectorPosition.x + inspectorWidth > Screen.width) {
-				if (inspectorPosition.y > Screen.height - inspectorMargin) {
-					inspectorPositionAdjX = inspectorPosition.x - inspectorWidth;
-					inspectorPositionAdjY = inspectorPosition.y - inspectorHeight;
-					inspectorRect = new Rect (inspectorPosition.x - inspectorWidth, inspectorPosition.y - inspectorHeight, inspectorWidth, inspectorHeight);
-				}
-				else
-				if (inspectorPosition.y + inspectorHeight > Screen.height) {
-					inspectorPositionAdjX = inspectorPosition.x - inspectorWidth;
-					inspectorRect = new Rect (inspectorPosition.x - inspectorWidth, inspectorPosition.y, inspectorWidth, Screen.height - inspectorPosition.y);
-				}
-				else {
-					inspectorPositionAdjX = inspectorPosition.x - inspectorWidth;
-					inspectorRect = new Rect (inspectorPosition.x - inspectorWidth, inspectorPosition.y, inspectorWidth, inspectorHeight);
-				}
-			}
-			else
-			if (inspectorPosition.y > Screen.height - inspectorMargin) {
-				inspectorPositionAdjY = inspectorPosition.y - inspectorHeight;
-				inspectorRect = new Rect (inspectorPosition.x, inspectorPosition.y - inspectorHeight, inspectorWidth, inspectorHeight);
-			}
-			else
-			if (inspectorPosition.y + inspectorHeight > Screen.height) {
-				inspectorRect = new Rect (inspectorPosition.x, inspectorPosition.y, inspectorWidth, Screen.height - inspectorPosition.y);
-			}
-			else {
-				inspectorRect = new Rect (inspectorPosition.x, inspectorPosition.y, inspectorWidth, inspectorHeight);
-			}*/
-
-/*#if UNITY_EDITOR || UNITY_STANDALONE
-			if (File.Exists (inspectorObject.name + ".xml")) {
-				if (!ObjectLoaded (inspectorObject)) {
-					loadedObject = LoadMarkup (inspectorObject);
+		if (File.Exists (string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("{0}.xml", InspectorVoxeme)))) {
+			using (StreamReader sr = new StreamReader (string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("{0}.xml", InspectorVoxeme)))) {
+				String markup = sr.ReadToEnd ();
+				if (!ObjectLoaded (markup)) {
+					loadedObject = LoadMarkup (markup);
+					windowTitle = InspectorVoxeme.Substring(InspectorVoxeme.LastIndexOf('/') + 1);
 					markupCleared = false;
 				}
 			}
-			else {
-				if (!markupCleared) {
-					InitNewMarkup ();
-					loadedObject = new VoxML ();
+		}
+		else {
+			if (!markupCleared) {
+				InitNewMarkup ();
+				//loadedObject = new VoxML ();
+	
+				switch (InspectorVoxeme.Remove(InspectorVoxeme.LastIndexOf('/'))) {
+				case "objects":
+					mlEntityType = VoxEntity.EntityType.Object;
+					break;
+
+				case "programs":
+					mlEntityType = VoxEntity.EntityType.Program;
+					break;
+
+				case "attributes":
+					mlEntityType = VoxEntity.EntityType.Attribute;
+					break;
+
+				case "relations":
+					mlEntityType = VoxEntity.EntityType.Relation;
+					break;
+
+				case "functions":
+					mlEntityType = VoxEntity.EntityType.Function;
+					break;
+
+				default:
+					break;
 				}
+
+				windowTitle = InspectorVoxeme.Substring(InspectorVoxeme.LastIndexOf('/') + 1);
 			}
-#endif
-#if UNITY_WEBPLAYER*/
-			// Resources load here
-//			TextAsset markup = Resources.Load (InspectorVoxeme) as TextAsset;
-//			if (markup != null) {
-//				if (!ObjectLoaded (markup.text)) {
-//					loadedObject = LoadMarkup (markup.text);
-//					windowTitle = InspectorVoxeme;
-//					markupCleared = false;
-//				}
-//			}
-			if (File.Exists (string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("{0}.xml", InspectorVoxeme)))) {
-				using (StreamReader sr = new StreamReader (string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("{0}.xml", InspectorVoxeme)))) {
-					String markup = sr.ReadToEnd ();
-					if (!ObjectLoaded (markup)) {
-						loadedObject = LoadMarkup (markup);
-						windowTitle = InspectorVoxeme.Substring(InspectorVoxeme.LastIndexOf('/') + 1);
-						markupCleared = false;
-					}
-				}
-			}
-			else {
-				if (!markupCleared) {
-					InitNewMarkup ();
-					//loadedObject = new VoxML ();
-		
-					switch (InspectorVoxeme.Remove(InspectorVoxeme.LastIndexOf('/'))) {
-					case "objects":
-						mlEntityType = VoxEntity.EntityType.Object;
-						break;
-
-					case "programs":
-						mlEntityType = VoxEntity.EntityType.Program;
-						break;
-
-					case "attributes":
-						mlEntityType = VoxEntity.EntityType.Attribute;
-						break;
-
-					case "relations":
-						mlEntityType = VoxEntity.EntityType.Relation;
-						break;
-
-					case "functions":
-						mlEntityType = VoxEntity.EntityType.Function;
-						break;
-
-					default:
-						break;
-					}
-
-					windowTitle = InspectorVoxeme.Substring(InspectorVoxeme.LastIndexOf('/') + 1);
-				}
-			}
-//#endif
-		//}
+		}
 
 		base.OnGUI ();
 	}

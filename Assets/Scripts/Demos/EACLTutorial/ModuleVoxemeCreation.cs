@@ -268,14 +268,16 @@ public class ModuleVoxemeCreation : ModalWindow {
 			foreach (Renderer renderer in go.GetComponentsInChildren<Renderer> ()) {
 				defaultShaders [renderer] = renderer.material.shader;
 			}
-		
+						
 			voxemeInit.InitializeVoxemes ();
-
+							
 //			Debug.Log (go);
 //			foreach (Voxeme vox in objSelector.allVoxemes) {
 //				Debug.Log (vox.gameObject);
 //			}
 			selectedObject = objSelector.allVoxemes.Find (v => v.gameObject.transform.FindChild(go.name) != null).gameObject;
+			selectedObject.GetComponent<Voxeme> ().VoxMLLoaded += VoxMLUpdated;
+
 			surfacePlacementOffset = (Helper.GetObjectWorldSize (selectedObject.gameObject).center.y - Helper.GetObjectWorldSize (selectedObject.gameObject).min.y) +
 			(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
 			selectedObject.transform.position = new Vector3 (sandboxSurface.transform.position.x,
@@ -322,11 +324,14 @@ public class ModuleVoxemeCreation : ModalWindow {
 		GameObject voxeme = ((VoxMLEventArgs)e).Voxeme;
 		VoxML voxml = ((VoxMLEventArgs)e).VoxML;
 		if (voxeme.GetComponent<AttributeSet> () != null) {
+			Debug.Log (voxeme.GetComponent<AttributeSet> ().attributes.Count);
 			foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
 				Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
 				Debug.Log (newMat);
 				foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
+					Shader shader = renderer.material.shader;
 					renderer.material = newMat;
+					renderer.material.shader = shader;
 				}
 			}
 		}

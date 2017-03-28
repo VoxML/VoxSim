@@ -70,6 +70,16 @@ public class Voxeme : MonoBehaviour {
 	public Vector3 startRotation;
 	public Vector3 startScale;
 
+	public event EventHandler VoxMLLoaded;
+
+	public void OnVoxMLLoaded(object sender, EventArgs e)
+	{
+		if (VoxMLLoaded != null)
+		{
+			VoxMLLoaded(this, e);
+		}
+	}
+
 	// Use this for initialization
 	void Start () {
 		// load in VoxML knowledge
@@ -779,7 +789,23 @@ public class Voxeme : MonoBehaviour {
 				opVox.Affordance.Affordances[index].Add (new Pair<string,Pair<string,string>>(cFormula,affordance));
 			}
 		}
+			
+		opVox.Embodiment.Scale = voxml.Embodiment.Scale;
+		opVox.Embodiment.Movable = voxml.Embodiment.Movable;
 
+		if (voxml.Entity.Type == VoxEntity.EntityType.Object) {
+			AttributeSet attrSet = gameObject.GetComponent<AttributeSet> ();
+			if (attrSet != null) {
+				attrSet.attributes.Clear ();
+				for (int i = 0; i < voxml.Attributes.Attrs.Count; i++) {
+					attrSet.attributes.Add (voxml.Attributes.Attrs [i].Value);
+					Debug.Log (attrSet.attributes[i]);
+				}
+			}
+		}
+
+		OnVoxMLLoaded (this, new VoxMLEventArgs (gameObject, voxml));
+		
 #if UNITY_EDITOR
 		using (System.IO.StreamWriter file = 
 			new System.IO.StreamWriter(gameObject.name+@".txt"))

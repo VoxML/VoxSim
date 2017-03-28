@@ -58,6 +58,7 @@ public class VoxemeInit : MonoBehaviour {
 							newAttrSet.attributes.Add (s);
 						}
 					}
+					Debug.Log (newAttrSet.attributes.Count);
 
 					// set up for physics
 					// add box colliders and rigid bodies to all subobjects that have MeshFilters
