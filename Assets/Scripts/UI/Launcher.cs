@@ -276,6 +276,8 @@ public class Launcher : FontManager {
 		eulaWindow.windowRect = new Rect (bgLeft + 25 , bgTop + 25, bgWidth - 50, bgHeight - 50);
 		eulaWindow.windowTitle = "VoxSim End User License Agreement";
 		eulaWindow.Render = true;
+		eulaWindow.AllowDrag = false;
+		eulaWindow.AllowResize = false;
 	}
 
 	void EULAAccepted(bool accepted) {

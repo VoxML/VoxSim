@@ -41,7 +41,7 @@ public class GhostFreeRoamCamera : MonoBehaviour
 
 	private float angle = 0;
 
-	Help help;
+	HelpModalWindow help;
 	InputController inputController;
 	OutputController outputController;
 	VoxemeInspector inspector;
@@ -49,7 +49,7 @@ public class GhostFreeRoamCamera : MonoBehaviour
 
 	private void OnEnable()
 	{
-		help = GameObject.Find ("Help").GetComponent<Help> ();
+		help = GameObject.Find ("Help").GetComponent<HelpModalWindow> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 		outputController = GameObject.Find ("IOController").GetComponent<OutputController> ();
 		inspector = GameObject.Find ("BlocksWorld").GetComponent<VoxemeInspector> ();

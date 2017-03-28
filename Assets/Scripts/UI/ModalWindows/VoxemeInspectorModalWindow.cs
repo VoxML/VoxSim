@@ -351,8 +351,24 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		}
 
 		if (editable) {
-			if (GUILayout.Button ("Save")) {
-				SaveMarkup(InspectorVoxeme, mlEntityType);
+			string saveText = "Save";
+
+			if (Input.GetKey (KeyCode.LeftShift) || Input.GetKey (KeyCode.RightShift)) {
+				saveText = "Save As...";
+			}
+			
+			if (GUILayout.Button (saveText)) {
+				if (saveText == "Save As...") {
+					SaveAsModalWindow saveAs = gameObject.AddComponent<SaveAsModalWindow> ();
+					saveAs.windowRect = new Rect (InspectorRect.x + 25, InspectorRect.y + 25, 185, 60);
+					saveAs.entityType = mlEntityType;
+					saveAs.Render = true;
+					saveAs.AllowResize = false;
+					saveAs.SaveAsEvent += SaveMarkupAs;
+				}
+				else {
+					SaveMarkup (InspectorVoxeme, mlEntityType);
+				}
 			}
 			else if (GUILayout.Button ("Import")) {
 				ImportMarkup(InspectorVoxeme, mlEntityType);
@@ -1593,6 +1609,63 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 					//windowTitle = InspectorVoxeme.Substring (InspectorVoxeme.LastIndexOf ('/') + 1);
 				//}
 			}
+		}
+
+		if (mlEntityType == VoxEntity.EntityType.Object) {
+			if (InspectorObject != null) {
+				AttributeSet attrSet = InspectorObject.GetComponent<AttributeSet> ();
+				if (attrSet != null) {
+					attrSet.attributes.Clear ();
+					for (int i = 0; i < mlAttributeCount; i++) {
+						attrSet.attributes.Add (mlAttributes [i]);
+					}
+				}
+			}
+		}
+	}
+
+	void SaveMarkupAs(object sender, EventArgs e) {
+		if (((ModalWindowEventArgs)e).Data is SaveAsInfo) {
+			SaveAsInfo saveInfo = (SaveAsInfo)((ModalWindowEventArgs)e).Data;
+
+			string dir = string.Empty;
+			switch (saveInfo.EntityType) {
+			case VoxEntity.EntityType.Object:
+				dir = "objects/";
+				break;
+
+			case VoxEntity.EntityType.Program:
+				dir = "programs/";
+				break;
+
+			case VoxEntity.EntityType.Attribute:
+				dir = "attributes/";
+				break;
+
+			case VoxEntity.EntityType.Relation:
+				dir = "relations/";
+				break;
+
+			case VoxEntity.EntityType.Function:
+				dir = "functions/";
+				break;
+
+			default:
+				break;
+			}
+
+			windowManager.windowManager [((ModalWindowEventArgs)e).WindowID].DestroyWindow ();
+			SaveMarkup (dir + saveInfo.FileName, saveInfo.EntityType);
+			InspectorVoxeme = dir + saveInfo.FileName;
+			Debug.Log (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("{0}.xml", InspectorVoxeme)));
+			if (File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("{0}.xml", InspectorVoxeme)))) {
+				using (StreamReader sr = new StreamReader (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("{0}.xml", InspectorVoxeme)))) {
+					String markup = sr.ReadToEnd ();
+					loadedObject = LoadMarkup (markup);
+					windowTitle = InspectorVoxeme.Substring (InspectorVoxeme.LastIndexOf ('/') + 1);
+				}
+			}
+			InspectorObject.name = windowTitle;
 		}
 	}
 

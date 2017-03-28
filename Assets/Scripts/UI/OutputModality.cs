@@ -15,7 +15,7 @@ public class OutputModality : FontManager {
 
 	float fontSizeModifier;
 
-	Help help;
+	HelpModalWindow help;
 
 	// Use this for initialization
 	void Start () {
@@ -23,7 +23,7 @@ public class OutputModality : FontManager {
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
 		buttonStyle.fontSize = fontSize;
 
-		help = GameObject.Find ("Help").GetComponent<Help> ();
+		help = GameObject.Find ("Help").GetComponent<HelpModalWindow> ();
 	}
 	
 	// Update is called once per frame

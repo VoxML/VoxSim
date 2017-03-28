@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Help : ModalWindow {
+public class HelpModalWindow : ModalWindow {
 	[TextArea(3,10)]
 	public string helpText = "Available behaviors:\n" +
 		"- put(x,f(y)), where f={on,in} -- places object x at position f(y)\n" +

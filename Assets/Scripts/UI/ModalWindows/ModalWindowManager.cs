@@ -6,10 +6,12 @@ using System.Collections.Generic;
 public class ModalWindowEventArgs : EventArgs {
 
 	public int WindowID { get; set; }
+	public object Data { get; set; }
 
-	public ModalWindowEventArgs(int windowID)
+	public ModalWindowEventArgs(int windowID, object data = null)
 	{
 		this.WindowID = windowID;
+		this.Data = data;
 	}
 }
 
