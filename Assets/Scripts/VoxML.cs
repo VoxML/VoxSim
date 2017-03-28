@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
@@ -139,6 +140,18 @@ namespace Vox {
 		[XmlArray("Attrs")]
 		[XmlArrayItem("Attr")]
 		public List<VoxAttributesAttr> Attrs = new List<VoxAttributesAttr>();
+	}
+
+	public class VoxMLEventArgs : EventArgs {
+	
+		public GameObject Voxeme { get; set; }
+		public VoxML VoxML { get; set; }
+
+		public VoxMLEventArgs(GameObject voxObj, VoxML voxml)
+		{
+			this.Voxeme = voxObj;
+			this.VoxML = voxml;
+		}
 	}
 
 	/// <summary>

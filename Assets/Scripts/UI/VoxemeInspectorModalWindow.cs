@@ -499,9 +499,11 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 
 		GUILayout.BeginVertical (inspectorStyle);
 		for (int i = 0; i < mlComponentCount; i++) {
+			GUI.SetNextControlName (string.Format("component{0}",i.ToString()));
 			string componentName = mlComponents [i].Split (new char[]{ '[' }) [0];
 			//TextAsset ml = Resources.Load (componentName) as TextAsset;
-			if (File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", componentName)))) {
+			if ((File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", componentName)))) && 
+				(GUI.GetNameOfFocusedControl() != string.Format("component{0}",i.ToString()))) {
 				using (StreamReader sr = new StreamReader (
 					                         string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", componentName)))) {
 					String ml = sr.ReadToEnd ();
@@ -520,30 +522,16 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 						GUILayout.EndHorizontal ();
 				
 						if (componentButton) {
-//							if (ml != null) {
-//								LoadMarkup (ml);
-//								inspectorTitle = mlPred;
 							VoxemeInspectorModalWindow newInspector = gameObject.AddComponent<VoxemeInspectorModalWindow> ();
-							//LoadMarkup (ml.text);
-							//newInspector.DrawInspector = true;
 							newInspector.windowRect = new Rect (windowRect.x + 25, windowRect.y + 25, inspectorWidth, inspectorHeight);
-							//newInspector.InspectorTitle = mlComponents [i];
 							newInspector.InspectorVoxeme = "objects/" + mlComponents [i];
-							newInspector.Render = true;
-//							}
-//							else {
-//								if (editable) {
-//									mlComponents [i] = GUILayout.TextField (mlComponents [i], 25, GUILayout.Width (inspectorWidth - 85));
-//									mlComponentReentrancies [i] = GUILayout.TextField (mlComponents [i], 25, GUILayout.Width (20));
-//									mlRemoveComponent.Add (-1);
-//									mlRemoveComponent [i] = GUILayout.SelectionGrid (mlRemoveComponent [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
-//								}
-//								else {
-//									GUILayout.Box (mlComponents [i], GUILayout.Width (inspectorWidth - 85));
-//									GUILayout.Box (mlComponentReentrancies [i], GUILayout.Width (20), GUILayout.ExpandWidth (true));
-//								}
+							if (GameObject.Find (mlComponents [i]) != null) {
+								if (GameObject.Find (mlComponents [i]).GetComponent<Voxeme> () != null) {
+									newInspector.InspectorObject = GameObject.Find (mlComponents [i]);
+								}
 							}
-//						}
+							newInspector.Render = true;
+						}
 					}
 					else {
 						if (editable) {
@@ -914,61 +902,64 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		GUILayout.Label ("ATTRIBUTES");
 
 		GUILayout.BeginVertical (inspectorStyle);
-		AttributeSet attrSet = inspectorObject.GetComponent<AttributeSet> ();
-		if (attrSet != null) {
-			for (int i = 0; i < mlAttributeCount; i++) {
-				if (File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("attributes/{0}.xml", mlAttributes [i])))) {
-					using (StreamReader sr = new StreamReader (
-						string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("attributes/{0}.xml", mlAttributes [i])))) {
-						String ml = sr.ReadToEnd ();
-						if (ml != null) {
-							float textSize = GUI.skin.label.CalcSize (new GUIContent (mlAttributes [i])).x;
-							float padSize = GUI.skin.label.CalcSize (new GUIContent (" ")).x;
-							int padLength = (int)(((inspectorWidth - 85) - textSize) / (int)padSize);
+		if (InspectorObject != null) {
+			AttributeSet attrSet = InspectorObject.GetComponent<AttributeSet> ();
+			if (attrSet != null) {
+				for (int i = 0; i < mlAttributeCount; i++) {
+					GUI.SetNextControlName (string.Format("attribute{0}",i.ToString()));
+					if ((File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("attributes/{0}.xml", mlAttributes [i])))) &&
+						(GUI.GetNameOfFocusedControl() != string.Format("attribute{0}",i.ToString()))) {
+						using (StreamReader sr = new StreamReader (
+							                         string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("attributes/{0}.xml", mlAttributes [i])))) {
+							String ml = sr.ReadToEnd ();
+							if (ml != null) {
+								float textSize = GUI.skin.label.CalcSize (new GUIContent (mlAttributes [i])).x;
+								float padSize = GUI.skin.label.CalcSize (new GUIContent (" ")).x;
+								int padLength = (int)(((inspectorWidth - 85) - textSize) / (int)padSize);
 
-							GUILayout.BeginHorizontal (inspectorStyle);
-							bool attributeButton = GUILayout.Button (mlAttributes [i].PadRight (padLength + mlAttributes [i].Length - 3), GUILayout.Width (inspectorWidth - 85));
-							if (editable) {
-								mlRemoveAttribute.Add (-1);
-								mlRemoveAttribute [i] = GUILayout.SelectionGrid (mlRemoveAttribute [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
-							}
-							GUILayout.EndHorizontal ();
-
-							if (attributeButton) {
-								VoxemeInspectorModalWindow newInspector = gameObject.AddComponent<VoxemeInspectorModalWindow> ();
-								newInspector.windowRect = new Rect (windowRect.x + 25, windowRect.y + 25, inspectorWidth, inspectorHeight);
-								newInspector.InspectorVoxeme = "attributes/" + mlAttributes [i];
-								newInspector.Render = true;
-							}
-						}
-						else {
-							if (editable) {
 								GUILayout.BeginHorizontal (inspectorStyle);
-								mlAttributes [i] = GUILayout.TextField (mlAttributes [i], 25, GUILayout.Width (inspectorWidth - 85));
-								mlRemoveAttribute.Add (-1);
-								mlRemoveAttribute [i] = GUILayout.SelectionGrid (mlRemoveAttribute [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+								bool attributeButton = GUILayout.Button (mlAttributes [i].PadRight (padLength + mlAttributes [i].Length - 3), GUILayout.Width (inspectorWidth - 85));
+								if (editable) {
+									mlRemoveAttribute.Add (-1);
+									mlRemoveAttribute [i] = GUILayout.SelectionGrid (mlRemoveAttribute [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+								}
 								GUILayout.EndHorizontal ();
-							}
+
+								if (attributeButton) {
+									VoxemeInspectorModalWindow newInspector = gameObject.AddComponent<VoxemeInspectorModalWindow> ();
+									newInspector.windowRect = new Rect (windowRect.x + 25, windowRect.y + 25, inspectorWidth, inspectorHeight);
+									newInspector.InspectorVoxeme = "attributes/" + mlAttributes [i];
+									newInspector.Render = true;
+								}
+							} 
 							else {
-								GUILayout.BeginHorizontal (inspectorStyle);
-								GUILayout.Box (mlAttributes [i], GUILayout.Width (inspectorWidth - 85));
-								GUILayout.EndHorizontal ();
+								if (editable) {
+									GUILayout.BeginHorizontal (inspectorStyle);
+									mlAttributes [i] = GUILayout.TextField (mlAttributes [i], 25, GUILayout.Width (inspectorWidth - 85));
+									mlRemoveAttribute.Add (-1);
+									mlRemoveAttribute [i] = GUILayout.SelectionGrid (mlRemoveAttribute [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+									GUILayout.EndHorizontal ();
+								} else {
+									GUILayout.BeginHorizontal (inspectorStyle);
+									GUILayout.Box (mlAttributes [i], GUILayout.Width (inspectorWidth - 85));
+									GUILayout.EndHorizontal ();
+								}
 							}
 						}
-					}
-				}
-				else {
-					if (editable) {
-						GUILayout.BeginHorizontal (inspectorStyle);
-						mlAttributes [i] = GUILayout.TextField (mlAttributes [i], 25, GUILayout.Width (inspectorWidth - 85));
-						mlRemoveAttribute.Add (-1);
-						mlRemoveAttribute [i] = GUILayout.SelectionGrid (mlRemoveAttribute [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
-						GUILayout.EndHorizontal ();
-					}
+					} 
 					else {
-						GUILayout.BeginHorizontal (inspectorStyle);
-						GUILayout.Box (mlAttributes [i], GUILayout.Width (inspectorWidth - 85));
-						GUILayout.EndHorizontal ();
+						if (editable) {
+							GUILayout.BeginHorizontal (inspectorStyle);
+							mlAttributes [i] = GUILayout.TextField (mlAttributes [i], 25, GUILayout.Width (inspectorWidth - 85));
+							mlRemoveAttribute.Add (-1);
+							mlRemoveAttribute [i] = GUILayout.SelectionGrid (mlRemoveAttribute [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+							GUILayout.EndHorizontal ();
+						} 
+						else {
+							GUILayout.BeginHorizontal (inspectorStyle);
+							GUILayout.Box (mlAttributes [i], GUILayout.Width (inspectorWidth - 85));
+							GUILayout.EndHorizontal ();
+						}
 					}
 				}
 			}
@@ -1689,19 +1680,26 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 
 		// ATTRIBUTES
 		if (mlEntityType == VoxEntity.EntityType.Object) {
-			AttributeSet attrSet = inspectorObject.GetComponent<AttributeSet> ();
-			if (attrSet != null) {
-				attrSet.attributes.Clear ();
-				for (int i = 0; i < mlAttributeCount; i++) {
-					attrSet.attributes.Add (mlAttributes [i]);
-					voxml.Attributes.Attrs.Add (new VoxAttributesAttr ());
-					voxml.Attributes.Attrs [i].Value = mlAttributes [i];
+			if (InspectorObject != null) {
+				AttributeSet attrSet = InspectorObject.GetComponent<AttributeSet> ();
+				if (attrSet != null) {
+					attrSet.attributes.Clear ();
+					for (int i = 0; i < mlAttributeCount; i++) {
+						attrSet.attributes.Add (mlAttributes [i]);
+					}
 				}
+			}
+
+			for (int i = 0; i < mlAttributeCount; i++) {
+				voxml.Attributes.Attrs.Add (new VoxAttributesAttr ());
+				voxml.Attributes.Attrs [i].Value = mlAttributes [i];
 			}
 		}
 
 		voxml.Save (Data.voxmlDataPath + "/" + markupPath + ".xml");
 		//		voxml.SaveToServer (obj.name + ".xml");
+
+		windowManager.OnActiveWindowSaved(this, new VoxMLEventArgs(InspectorObject,voxml));
 	}
 
 	VoxML LoadMarkup(GameObject obj) {
@@ -1839,11 +1837,13 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		mlAttributeCount = mlAttributes.Count;
 
 		if (mlEntityType == VoxEntity.EntityType.Object) {
-			AttributeSet attrSet = inspectorObject.GetComponent<AttributeSet> ();
-			if (attrSet != null) {
-				attrSet.attributes.Clear ();
-				for (int i = 0; i < mlAttributeCount; i++) {
-					attrSet.attributes.Add (mlAttributes [i]);
+			if (InspectorObject != null) {
+				AttributeSet attrSet = InspectorObject.GetComponent<AttributeSet> ();
+				if (attrSet != null) {
+					attrSet.attributes.Clear ();
+					for (int i = 0; i < mlAttributeCount; i++) {
+						attrSet.attributes.Add (mlAttributes [i]);
+					}
 				}
 			}
 		}

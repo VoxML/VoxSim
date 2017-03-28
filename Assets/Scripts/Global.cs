@@ -11,7 +11,7 @@ namespace Global {
 	/// <summary>
 	/// Constants
 	/// </summary>
-	static class Constants {
+	public static class Constants {
 		public const float EPSILON = 0.003f;
 		public static Vector3 xAxis = Vector3.right;
 		public static Vector3 yAxis = Vector3.up;
@@ -23,7 +23,7 @@ namespace Global {
 		};
 	}
 
-	static class Data {
+	public static class Data {
 	#if UNITY_EDITOR
 		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
 	#elif UNITY_STANDALONE

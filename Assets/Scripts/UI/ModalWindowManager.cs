@@ -27,6 +27,16 @@ public class ModalWindowManager : MonoBehaviour {
 		}
 	}
 
+	public event EventHandler ActiveWindowSaved;
+
+	public void OnActiveWindowSaved(object sender, EventArgs e)
+	{
+		if (ActiveWindowSaved != null)
+		{
+			ActiveWindowSaved(this, e);
+		}
+	}
+
 	// Use this for initialization
 	void Start () {
 	

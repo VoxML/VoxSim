@@ -2,8 +2,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using Global;
+using Vox;
 
 public class ModuleVoxemeCreation : ModalWindow {
 
@@ -95,6 +97,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 		windowRect = new Rect (Screen.width - 215, Screen.height - (35 + (int)(20 * fontSizeModifier)) - 205, 200, 200);
 
 		windowManager.NewModalWindow += NewInspector;
+		windowManager.ActiveWindowSaved += VoxMLUpdated;
 	}
 
 	// Update is called once per frame
@@ -312,6 +315,20 @@ public class ModuleVoxemeCreation : ModalWindow {
 			Debug.Log (((ModalWindowEventArgs)e).WindowID);
 			Debug.Log (sender);
 			((ModalWindowManager)sender).windowManager [((ModalWindowEventArgs)e).WindowID].DestroyWindow();
+		}
+	}
+
+	void VoxMLUpdated(object sender, EventArgs e) {
+		GameObject voxeme = ((VoxMLEventArgs)e).Voxeme;
+		VoxML voxml = ((VoxMLEventArgs)e).VoxML;
+		if (voxeme.GetComponent<AttributeSet> () != null) {
+			foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
+				Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
+				Debug.Log (newMat);
+				foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
+					renderer.material = newMat;
+				}
+			}
 		}
 	}
 }
