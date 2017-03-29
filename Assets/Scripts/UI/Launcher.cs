@@ -55,17 +55,14 @@ public class Launcher : FontManager {
 	
 	GUIStyle customStyle;
 
-	GUIStyle labelStyle = new GUIStyle ("Label");
-	GUIStyle textFieldStyle = new GUIStyle ("TextField");
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	private GUIStyle labelStyle;
+	private GUIStyle textFieldStyle;
+	private GUIStyle buttonStyle;
 
 	float fontSizeModifier;
 	
 	// Use this for initialization
 	void Start () {
-		labelStyle = new GUIStyle ("Label");
-		textFieldStyle = new GUIStyle ("TextField");
-		buttonStyle = new GUIStyle ("Button");
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
 		LoadPrefs ();
 		
@@ -106,6 +103,9 @@ public class Launcher : FontManager {
 	}
 	
 	void OnGUI () {
+		labelStyle = new GUIStyle ("Label");
+		textFieldStyle = new GUIStyle ("TextField");
+		buttonStyle = new GUIStyle ("Button");
 		bgLeft = Screen.width/6;
 		bgTop = Screen.height/12;
 		bgWidth = 4*Screen.width/6;
