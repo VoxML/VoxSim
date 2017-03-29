@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Help : ModalWindow {
+public class HelpModalWindow : ModalWindow {
 	[TextArea(3,10)]
 	public string helpText = "Available behaviors:\n" +
 		"- put(x,f(y)), where f={on,in} -- places object x at position f(y)\n" +
@@ -29,6 +29,8 @@ public class Help : ModalWindow {
 
 	// Use this for initialization
 	void Start () {
+		base.Start ();
+
 		windowTitle = "Help";
 		persistent = true;
 
@@ -57,7 +59,5 @@ public class Help : ModalWindow {
 		scrollPosition = GUILayout.BeginScrollView (scrollPosition);
 		GUILayout.Label (helpText);
 		GUILayout.EndScrollView ();
-		//makes GUI window draggable
-		GUI.DragWindow (new Rect (0, 0, 10000, 20));
 	}
 }

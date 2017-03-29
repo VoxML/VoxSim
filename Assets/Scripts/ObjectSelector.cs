@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Global;
 
@@ -14,11 +16,27 @@ public class ObjectSelector : MonoBehaviour {
 	
 	VoxemeInspector inspector;
 	RelationTracker relationTracker;
+	ModalWindowManager windowManager;
+
+	public int fontSize = 12;
+
+	GUIStyle buttonStyle = new GUIStyle ("Button");
+
+	float fontSizeModifier;	
+	public float FontSizeModifier {
+		get { return fontSizeModifier; }
+		set { fontSizeModifier = value; }
+	}
+
+	bool editableVoxemes;
 	
 	// Use this for initialization
 	void Start () {
 		inspector = gameObject.GetComponent ("VoxemeInspector") as VoxemeInspector;
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker> ();
+		windowManager = gameObject.GetComponent<ModalWindowManager> ();
+
+		editableVoxemes = (PlayerPrefs.GetInt ("Make Voxemes Editable") == 1);
 	}
 	
 	// Update is called once per frame
@@ -60,18 +78,59 @@ public class ObjectSelector : MonoBehaviour {
 				RaycastHit hit;
 				// Casts the ray and get the first game object hit
 				Physics.Raycast (ray, out hit);
-				if (hit.collider == null) {
-					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
-						inspector.DrawInspector = false;
+//				if (hit.collider == null) {
+//					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+//						inspector.DrawInspector = false;
+//					}
+//				}
+//				else {
+//					inspector.DrawInspector = true;
+//					inspector.ScrollPosition = new Vector2 (0, 0);
+//					inspector.InspectorChoice = -1;
+//					inspector.InspectorObject = Helper.GetMostImmediateParentVoxeme (hit.transform.gameObject);
+//					//inspector.InspectorObject = hit.transform.root.gameObject;
+//					inspector.InspectorPosition = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+//				}
+
+				if (hit.collider != null) {
+					string objName = hit.collider.gameObject.transform.root.gameObject.name;
+					if (File.Exists (string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", objName)))) {
+						using (StreamReader sr = new StreamReader (
+							                         string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", objName)))) {
+							String ml = sr.ReadToEnd ();
+							if (ml != null) {
+//								float textSize = GUI.skin.label.CalcSize (new GUIContent (objName)).x;
+//								float padSize = GUI.skin.label.CalcSize (new GUIContent (" ")).x;
+//								int padLength = (int)(((inspectorWidth - 85) - textSize) / (int)padSize);
+//								if (GUILayout.Button (objName.PadRight (padLength + objName.Length - 3), GUILayout.Width (inspectorWidth - 85))) {
+//									if (ml != null) {
+								if (windowManager.windowManager.Values.Where (v => v.GetType () == typeof(VoxemeInspectorModalWindow) &&
+								    ((VoxemeInspectorModalWindow)v).InspectorObject == hit.collider.gameObject.transform.root.gameObject).ToList ().Count == 0) {
+									VoxemeInspectorModalWindow newInspector = gameObject.AddComponent<VoxemeInspectorModalWindow> ();
+									//LoadMarkup (ml.text);
+									//newInspector.DrawInspector = true;
+									newInspector.InspectorPosition = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+									newInspector.windowRect = new Rect (newInspector.InspectorPosition.x, newInspector.InspectorPosition.y, newInspector.inspectorWidth, newInspector.inspectorHeight);
+									newInspector.InspectorVoxeme = "objects/" + objName;
+									newInspector.InspectorObject = hit.collider.gameObject.transform.root.gameObject;
+									newInspector.Render = true;
+								}
+//									}
+//									else {
+//									}
+							}
+						}
 					}
-				}
-				else {
-					inspector.DrawInspector = true;
-					inspector.ScrollPosition = new Vector2 (0, 0);
-					inspector.InspectorChoice = -1;
-					inspector.InspectorObject = Helper.GetMostImmediateParentVoxeme (hit.transform.gameObject);
-					//inspector.InspectorObject = hit.transform.root.gameObject;
-					inspector.InspectorPosition = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+					else {
+						if (editableVoxemes) {
+							VoxemeInspectorModalWindow newInspector = gameObject.AddComponent<VoxemeInspectorModalWindow> ();
+							newInspector.InspectorPosition = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+							newInspector.windowRect = new Rect (newInspector.InspectorPosition.x, newInspector.InspectorPosition.y, newInspector.inspectorWidth, newInspector.inspectorHeight);
+							newInspector.InspectorVoxeme = "objects/" + objName;
+							newInspector.InspectorObject = hit.collider.gameObject.transform.root.gameObject;
+							newInspector.Render = true;
+						}
+					}
 				}
 			}
 		}

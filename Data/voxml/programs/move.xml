@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Entity Type="Program" />
+  <Lex>
+    <Pred>put</Pred>
+    <Type>transition_event</Type>
+  </Lex>
+  <Type>
+    <Head>transition</Head>
+    <Args>
+      <Arg Value="x:agent" />
+      <Arg Value="y:physobj" />
+      <Arg Value="z:location" />
+    </Args>
+    <Body>
+        <Subevent Value="grasp(x,y)" />
+        <Subevent Value="[while(hold(x,y),move(x)]" />
+        <Subevent Value="[at(y,z)-&gt;ungrasp(x,y)]" />
+    </Body>
+  </Type>
+</VoxML>

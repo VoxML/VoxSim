@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 
 using Global;
 
@@ -40,7 +41,7 @@ public class GhostFreeRoamCamera : MonoBehaviour
 
 	private float angle = 0;
 
-	Help help;
+	HelpModalWindow help;
 	InputController inputController;
 	OutputController outputController;
 	VoxemeInspector inspector;
@@ -48,7 +49,7 @@ public class GhostFreeRoamCamera : MonoBehaviour
 
 	private void OnEnable()
 	{
-		help = GameObject.Find ("Help").GetComponent<Help> ();
+		help = GameObject.Find ("Help").GetComponent<HelpModalWindow> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 		outputController = GameObject.Find ("IOController").GetComponent<OutputController> ();
 		inspector = GameObject.Find ("BlocksWorld").GetComponent<VoxemeInspector> ();
@@ -95,16 +96,26 @@ public class GhostFreeRoamCamera : MonoBehaviour
 
 		bool masked = false;	// assume mouse not masked by some open modal window
 		for (int i = 0; i < windowManager.windowManager.Count; i++) {
-			if (windowManager.windowManager[i] != null) {
-				if (!Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
-					new Rect[]{ windowManager.windowManager[i].windowRect }) && (windowManager.windowManager[i].Render)) {
-					masked = true;
-					break;
+			if (windowManager.windowManager.ContainsKey (i)) {
+				if (windowManager.windowManager [i] != null) {
+					if (!Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
+						   new Rect[]{ windowManager.windowManager [i].windowRect }) && (windowManager.windowManager [i].Render)) {
+						masked = true;
+						break;
+					}
 				}
 			}
 		}
+
 		if (masked) {
 			return;
+		}
+		else {
+			// if a modal window is resizing
+			//  then mouse may be outside of masked area but we still don't want to move the camera
+			if (windowManager.windowManager.Values.Where (w => w.isResizing).ToList ().Count > 0) {
+				return;
+			}
 		}
 
 		if (allowMovement)
@@ -130,10 +141,10 @@ public class GhostFreeRoamCamera : MonoBehaviour
 			//adding in zooming
 			if (Input.mousePosition.x >= 0 && Input.mousePosition.x <= Screen.width &&
 			    Input.mousePosition.y >= 0 && Input.mousePosition.y <= Screen.height) {
-				zoomAmount += Input.GetAxis ("Mouse ScrollWheel");
-				zoomAmount = Mathf.Clamp (zoomAmount, -maxToClamp, maxToClamp);
-				var translate = Mathf.Min (Mathf.Abs (Input.GetAxis ("Mouse ScrollWheel")), maxToClamp - Mathf.Abs (zoomAmount));
-				gameObject.transform.Translate (0, 0, translate * zoomSpeed * Mathf.Sign (Input.GetAxis ("Mouse ScrollWheel")));
+//				zoomAmount += Input.GetAxis ("Mouse ScrollWheel");
+//				zoomAmount = Mathf.Clamp (zoomAmount, -maxToClamp, maxToClamp);
+//				var translate = Mathf.Min (Mathf.Abs (Input.GetAxis ("Mouse ScrollWheel")), maxToClamp - Mathf.Abs (zoomAmount));
+				gameObject.transform.Translate (0, 0, Input.GetAxis ("Mouse ScrollWheel") * zoomSpeed);
 			}
 
 			//adding in panning
@@ -213,13 +224,13 @@ public class GhostFreeRoamCamera : MonoBehaviour
 		}
 	}
 //	void OnCollisionEnter(Collision other) {
-//		if (other.gameObject.tag != "Ground") {
+//		if (other.gameObject.tag != "CameraBoundary") {
 //			Physics.IgnoreCollision (GetComponent<Collider> (), other.gameObject.GetComponent<Collider> ());
 //		}
 //	}
 //	
 //	void OnCollisionStay(Collision other) {
-//		if (other.gameObject.tag != "Ground") {
+//		if (other.gameObject.tag != "CameraBoundary") {
 //			Physics.IgnoreCollision(GetComponent<Collider>(), other.gameObject.GetComponent<Collider>());
 //		}
 //

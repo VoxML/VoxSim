@@ -140,8 +140,6 @@ public class VoxemeInspector : MonoBehaviour {
 	bool markupCleared = false;
 	VoxML loadedObject = new VoxML();
 
-	string voxmlDataPath;
-	
 	// Use this for initialization
 	void Start () {
 		colors = new Color[]{Color.white,Color.white,Color.white,Color.white};
@@ -154,12 +152,6 @@ public class VoxemeInspector : MonoBehaviour {
 		listStyle.hover.background = tex;
 		listStyle.onHover.background = tex;
 		listStyle.padding.left = listStyle.padding.right = listStyle.padding.top = listStyle.padding.bottom = 4;
-
-#if UNITY_EDITOR
-		voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
-#elif UNITY_STANDALONE
-		voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
-#endif
 	}
 	
 	// Update is called once per frame
@@ -217,9 +209,9 @@ public class VoxemeInspector : MonoBehaviour {
 #if UNITY_WEBPLAYER*/
 			// Resources load here
 			//TextAsset markup = Resources.Load (inspectorObject.name) as TextAsset;
-			if (File.Exists (string.Format("{0}/{1}",voxmlDataPath,string.Format("objects/{0}.xml",inspectorObject.name)))) {
+			if (File.Exists (string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("objects/{0}.xml",inspectorObject.name)))) {
 				using (StreamReader sr = new StreamReader (
-					string.Format("{0}/{1}",voxmlDataPath,string.Format("objects/{0}.xml",inspectorObject.name)))) {
+					string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("objects/{0}.xml",inspectorObject.name)))) {
 					String markup = sr.ReadToEnd ();
 					//if (markup != null) {
 						if (!ObjectLoaded (markup)) {
@@ -321,9 +313,9 @@ public class VoxemeInspector : MonoBehaviour {
 		for (int i = 0; i < mlComponentCount; i++) {
 			string componentName = mlComponents [i].Split (new char[]{ '[' }) [0];
 			//TextAsset ml = Resources.Load (componentName) as TextAsset;
-			if (File.Exists (string.Format ("{0}/{1}",voxmlDataPath,string.Format ("objects/{0}.xml", componentName)))) {
+			if (File.Exists (string.Format ("{0}/{1}",Data.voxmlDataPath,string.Format ("objects/{0}.xml", componentName)))) {
 				using (StreamReader sr = new StreamReader (
-					string.Format ("{0}/{1}",voxmlDataPath,string.Format ("objects/{0}.xml", componentName)))) {
+					string.Format ("{0}/{1}",Data.voxmlDataPath,string.Format ("objects/{0}.xml", componentName)))) {
 					String ml = sr.ReadToEnd ();
 					if (ml != null) {
 						float textSize = GUI.skin.label.CalcSize (new GUIContent (mlComponents [i])).x;
@@ -443,7 +435,7 @@ public class VoxemeInspector : MonoBehaviour {
 		GUILayout.BeginVertical (inspectorStyle);
 		GUILayout.Label ("PARTICIPATION");
 		GUILayout.BeginVertical (inspectorStyle);
-		object[] programs = Directory.GetFiles (string.Format ("{0}/programs", voxmlDataPath));
+		object[] programs = Directory.GetFiles (string.Format ("{0}/programs", Data.voxmlDataPath));
 		//object[] assets = Resources.LoadAll ("Programs");
 		foreach (object program in programs) {
 			if (program != null) {
@@ -458,7 +450,7 @@ public class VoxemeInspector : MonoBehaviour {
 
 				foreach (string p in participations) {
 					using (StreamReader sr = new StreamReader (
-						string.Format("{0}/{1}",voxmlDataPath,string.Format("programs/{0}.xml",p)))){
+						string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("programs/{0}.xml",p)))){
 						//TextAsset ml = Resources.Load ("Programs/" + p) as TextAsset;
 						String ml = sr.ReadToEnd();
 						if (ml != null) {

@@ -70,7 +70,15 @@ public class Voxeme : MonoBehaviour {
 	public Vector3 startRotation;
 	public Vector3 startScale;
 
-	string voxmlDataPath;
+	public event EventHandler VoxMLLoaded;
+
+	public void OnVoxMLLoaded(object sender, EventArgs e)
+	{
+		if (VoxMLLoaded != null)
+		{
+			VoxMLLoaded(this, e);
+		}
+	}
 
 	// Use this for initialization
 	void Start () {
@@ -87,16 +95,16 @@ public class Voxeme : MonoBehaviour {
 
 //		voxml = VoxML.LoadFromText (www.text);
 
-#if UNITY_EDITOR
-		voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
-#elif UNITY_STANDALONE
-		voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
-#endif
-
-		using (StreamReader sr = new StreamReader(
-			string.Format("{0}/{1}",voxmlDataPath,string.Format("objects/{0}.xml",gameObject.name))))
-		{
-			voxml = VoxML.LoadFromText (sr.ReadToEnd());
+		try {
+			using (StreamReader sr = new StreamReader(
+				string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("objects/{0}.xml",gameObject.name))))
+			{
+				voxml = VoxML.LoadFromText (sr.ReadToEnd());
+			}
+		}
+		catch (FileNotFoundException ex) {
+			voxml = new VoxML();
+			voxml.Entity.Type = VoxEntity.EntityType.Object;
 		}
 
 		// populate operational voxeme structure
@@ -638,14 +646,20 @@ public class Voxeme : MonoBehaviour {
 
 		// set component as semantic head
 		string[] str = voxml.Type.Head.Split('[');
-		int i = Helper.StringToInt (str[1].Remove (str[1].IndexOf (']')));
-		if (opVox.Type.Components.FindIndex (c => c.Item3 == i) != -1) {
-			opVox.Type.Head = opVox.Type.Components.First (c => c.Item3 == i);
+		if (str.Length > 1) {
+			int i = Helper.StringToInt (str [1].Remove (str [1].IndexOf (']')));
+			if (opVox.Type.Components.FindIndex (c => c.Item3 == i) != -1) {
+				opVox.Type.Head = opVox.Type.Components.First (c => c.Item3 == i);
+			}
+			// if none, add entire game object as semantic head for voxeme
+			else {
+				opVox.Type.Head = new Triple<string,GameObject,int> (gameObject.name, gameObject, i);
+				opVox.Type.Components.Add (new Triple<string,GameObject,int> (gameObject.name, gameObject, i));
+			}
 		}
-		// if none, add entire game object as semantic head for voxeme
 		else {
-			opVox.Type.Head = new Triple<string,GameObject,int> (gameObject.name, gameObject, i);
-			opVox.Type.Components.Add (new Triple<string,GameObject,int> (gameObject.name, gameObject, i));
+			opVox.Type.Head = new Triple<string,GameObject,int> (gameObject.name, gameObject, -1);
+			opVox.Type.Components.Add (new Triple<string,GameObject,int> (gameObject.name, gameObject, -1));
 		}
 
 		// set concavity info
@@ -775,7 +789,23 @@ public class Voxeme : MonoBehaviour {
 				opVox.Affordance.Affordances[index].Add (new Pair<string,Pair<string,string>>(cFormula,affordance));
 			}
 		}
+			
+		opVox.Embodiment.Scale = voxml.Embodiment.Scale;
+		opVox.Embodiment.Movable = voxml.Embodiment.Movable;
 
+		if (voxml.Entity.Type == VoxEntity.EntityType.Object) {
+			AttributeSet attrSet = gameObject.GetComponent<AttributeSet> ();
+			if (attrSet != null) {
+				attrSet.attributes.Clear ();
+				for (int i = 0; i < voxml.Attributes.Attrs.Count; i++) {
+					attrSet.attributes.Add (voxml.Attributes.Attrs [i].Value);
+					Debug.Log (attrSet.attributes[i]);
+				}
+			}
+		}
+
+		OnVoxMLLoaded (this, new VoxMLEventArgs (gameObject, voxml));
+		
 #if UNITY_EDITOR
 		using (System.IO.StreamWriter file = 
 			new System.IO.StreamWriter(gameObject.name+@".txt"))

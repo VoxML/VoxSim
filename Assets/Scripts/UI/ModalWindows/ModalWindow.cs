@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 
 public class ModalWindow : FontManager
@@ -18,17 +19,31 @@ public class ModalWindow : FontManager
 		set { render = value; }
 	}
 
+	public bool allowResize = true;
+	public virtual bool AllowResize {
+		get { return allowResize; }
+		set { allowResize = value; }
+	}
+
+	public bool allowDrag = true;
+	public virtual bool AllowDrag {
+		get { return allowDrag; }
+		set { allowDrag = value; }
+	}
+
 	protected ModalWindowManager windowManager;
 
 	// Use this for initialization
 	protected virtual void Start () {
-		windowManager = gameObject.GetComponent<ModalWindowManager> ();
+		windowManager = GameObject.Find("BlocksWorld").GetComponent<ModalWindowManager> ();
+
+		id = windowManager.windowManager.Count;
 
 		if (!windowManager.windowManager.ContainsKey (id)) {
 			windowManager.RegisterWindow (this);
 		}
 		else {
-			Debug.Log ("ModalWindow of id " + id.ToString () + "already exists on this object!");
+			Debug.Log ("ModalWindow of id " + id.ToString () + " already exists on this object!");
 			Destroy(this);
 		}
 	}
@@ -45,7 +60,9 @@ public class ModalWindow : FontManager
 			windowRect.x = Mathf.Clamp(windowRect.x,0,Screen.width-windowRect.width);
 			windowRect.y = Mathf.Clamp(windowRect.y,0,Screen.height-windowRect.height);
 			//Resizing GUI window
-			windowRect = ResizeWindow (windowRect, ref isResizing, ref resizeStart, minWindowSize);
+			if (allowResize) {
+				windowRect = ResizeWindow (windowRect, ref isResizing, ref resizeStart, minWindowSize);
+			}
 		} 
 	}
 
@@ -77,10 +94,19 @@ public class ModalWindow : FontManager
 				Render = false;
 			}
 			else {
-				windowManager.UnregisterWindow (this);
-				Destroy (this);
+				DestroyWindow ();
 			}
 		}
+
+		//makes GUI window draggable
+		if (allowDrag) {
+			GUI.DragWindow (new Rect (0, 0, 10000, 20));
+		}
+	}
+
+	public virtual void DestroyWindow() {
+		windowManager.UnregisterWindow (this);
+		Destroy (this);
 	}
 }
 

@@ -47,9 +47,9 @@ public class EULAModalWindow : ModalWindow {
 	}	
 
 	protected override void OnGUI () {
-		if (GUI.Button (new Rect (Screen.width-(15 + (int)(110*fontSizeModifier/3)),
-			Screen.height-(10 + (int)(20*fontSizeModifier)), 38*fontSizeModifier, 20*fontSizeModifier), "Help", buttonStyle))
-			render = true;
+//		if (GUI.Button (new Rect (Screen.width-(15 + (int)(110*fontSizeModifier/3)),
+//			Screen.height-(10 + (int)(20*fontSizeModifier)), 38*fontSizeModifier, 20*fontSizeModifier), "Help", buttonStyle))
+//			render = true;
 
 		base.OnGUI ();
 	}
@@ -61,8 +61,6 @@ public class EULAModalWindow : ModalWindow {
 		scrollPosition = GUILayout.BeginScrollView (scrollPosition);
 		GUILayout.Label (licenseText);
 		GUILayout.EndScrollView ();
-		//makes GUI window draggable
-		GUI.DragWindow (new Rect (0, 0, 10000, 20));
 
 		string acceptanceText = "Accept the End User License Agreement";
 		if (GUI.Button (new Rect (windowRect.width / 2 - GUI.skin.label.CalcSize (new GUIContent (acceptanceText)).x / 2,

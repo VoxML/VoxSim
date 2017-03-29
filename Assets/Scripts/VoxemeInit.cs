@@ -7,11 +7,20 @@ using Global;
 
 public class VoxemeInit : MonoBehaviour {
 	Predicates preds;
+	ObjectSelector objSelector;
 
 	// Use this for initialization
 	void Start () {
-		ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 		Macros macros = GameObject.Find ("BehaviorController").GetComponent<Macros> ();
+
+		InitializeVoxemes ();
+
+		objSelector.InitDisabledObjects ();
+		macros.PopulateMacros ();
+	}
+
+	public void InitializeVoxemes() {
 
 		preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
 
@@ -26,7 +35,8 @@ public class VoxemeInit : MonoBehaviour {
 				// set up all objects to enable consistent manipulation
 				// (i.e.) flatten any pos/rot inconsistencies in modeling or prefab setup due to human error
 				voxeme = go.GetComponent<Voxeme> ();
-				if (voxeme != null) {	// object has Voxeme component
+				Rigging rigging = go.GetComponent<Rigging> ();
+				if ((voxeme != null) && (voxeme.enabled) && (rigging == null)) {	// object has Voxeme component and no Rigging
 					GameObject container = new GameObject (go.name, typeof(Rigging), typeof(Voxeme));
 
 					if (go.transform.root != go.transform) { // not a top-level object
@@ -42,13 +52,14 @@ public class VoxemeInit : MonoBehaviour {
 
 					// copy attribute set
 					AttributeSet newAttrSet = container.AddComponent<AttributeSet> ();
-					AttributeSet attrSet = go.GetComponent<AttributeSet>();
+					AttributeSet attrSet = go.GetComponent<AttributeSet> ();
 					if (attrSet != null) {
 						foreach (string s in attrSet.attributes) {
 							newAttrSet.attributes.Add (s);
 						}
 					}
-		
+					Debug.Log (newAttrSet.attributes.Count);
+
 					// set up for physics
 					// add box colliders and rigid bodies to all subobjects that have MeshFilters
 					Renderer[] renderers = go.GetComponentsInChildren<Renderer> ();
@@ -105,7 +116,7 @@ public class VoxemeInit : MonoBehaviour {
 					}
 					// add to master voxeme list
 					objSelector.allVoxemes.Add (container.GetComponent<Voxeme> ());
-					Debug.Log (Helper.VectorToParsable(container.transform.position - Helper.GetObjectWorldSize (container).center));
+					Debug.Log (Helper.VectorToParsable (container.transform.position - Helper.GetObjectWorldSize (container).center));
 				}
 			}
 		}
@@ -137,19 +148,18 @@ public class VoxemeInit : MonoBehaviour {
 							//  if the connectedBody is on a GameObject that has a Voxeme component AND IS NOT the top-level voxeme
 							Rigidbody connectedBody = sub2.GetComponent<Rigidbody> ();
 
-							if ((Helper.GetMostImmediateParentVoxeme (sub1).gameObject.transform.parent == null) && 
-								(Helper.GetMostImmediateParentVoxeme (connectedBody.gameObject).gameObject.transform.parent == null)) {
-								FixedJoint fixedJoint = sub1.AddComponent<FixedJoint> ();
-								fixedJoint.connectedBody = connectedBody;
+							if (connectedBody != null) {
+								if ((Helper.GetMostImmediateParentVoxeme (sub1).gameObject.transform.parent == null) &&
+								   (Helper.GetMostImmediateParentVoxeme (connectedBody.gameObject).gameObject.transform.parent == null)) {
+									FixedJoint fixedJoint = sub1.AddComponent<FixedJoint> ();
+									fixedJoint.connectedBody = connectedBody;
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-
-		macros.PopulateMacros ();
-		objSelector.InitDisabledObjects ();
 	}
 	
 	// Update is called once per frame

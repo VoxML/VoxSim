@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
@@ -67,6 +68,9 @@ namespace Vox {
 		[XmlArrayItem("Subevent")]
 		public List<VoxTypeSubevent> Body = new List<VoxTypeSubevent>();
 
+		public string Scale = "";
+		public string Arity = "";
+
 		public string Class = "";
 		public string Value = "";
 		public string Constr = "";
@@ -125,16 +129,53 @@ namespace Vox {
 	}
 
 	/// <summary>
+	/// ATTRIBUTES
+	/// </summary>
+	public class VoxAttributesAttr {
+		[XmlAttribute]
+		public string Value { get; set; }
+	}
+
+	public class VoxAttributes {
+		[XmlArray("Attrs")]
+		[XmlArrayItem("Attr")]
+		public List<VoxAttributesAttr> Attrs = new List<VoxAttributesAttr>();
+	}
+
+	public class VoxMLEventArgs : EventArgs {
+	
+		public GameObject Voxeme { get; set; }
+		public VoxML VoxML { get; set; }
+
+		public VoxMLEventArgs(GameObject voxObj, VoxML voxml)
+		{
+			this.Voxeme = voxObj;
+			this.VoxML = voxml;
+		}
+	}
+
+	/// <summary>
 	///  VOXEME
 	/// </summary>
 	public class VoxML {
 
+		// all VoxML entities encode a subset of the following structures
 		public VoxEntity Entity = new VoxEntity ();
 		public VoxLex Lex = new VoxLex();
 		public VoxType Type = new VoxType();
 		public VoxHabitat Habitat = new VoxHabitat();
 		public VoxAfford_Str Afford_Str = new VoxAfford_Str();
 		public VoxEmbodiment Embodiment = new VoxEmbodiment();
+		public VoxAttributes Attributes = new VoxAttributes();
+
+		public void Save(string path)
+		{
+			XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
+			using(var stream = new FileStream(path, FileMode.Create))
+			{
+				serializer.Serialize(stream, this);
+			}
+		}
 		
 		public static VoxML Load(string path)
 		{
