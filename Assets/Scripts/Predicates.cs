@@ -9,8 +9,7 @@ using System.Timers;
 using Global;
 using RCC;
 using Satisfaction;
-
-
+using Vox;
 
 /// <summary>
 /// Semantics of each predicate should be explicated within the method itself
@@ -3371,32 +3370,32 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
 	// OUT: none
-	public void SWITCH(object[] args)
-	{
-		if ((args [0] is GameObject) && (args [1] is GameObject)) {
-			Debug.Log ((args [0] is GameObject));
-			Debug.Log ((args [1] is GameObject));
-			Vector3[] startPos = new Vector3[] { (args [0] as GameObject).transform.position,(args [1] as GameObject).transform.position };
-
-			if (startPos [0].x < startPos [1].x) {	// if args[0] is left of args[1]
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1] + (Vector3.right*.8f))), 1);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
-					Helper.VectorToParsable (startPos [0])), 2);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1])), 3);
-			}
-			else if (startPos [0].x > startPos [1].x) {	// if args[0] is right of args[1]
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1] + (Vector3.left*.8f))), 1);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
-					Helper.VectorToParsable (startPos [0])), 2);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1])), 3);
-			}
-			//eventManager.RemoveEvent (3);
-		}
-	}
+//	public void SWITCH(object[] args)
+//	{
+//		if ((args [0] is GameObject) && (args [1] is GameObject)) {
+//			Debug.Log ((args [0] is GameObject));
+//			Debug.Log ((args [1] is GameObject));
+//			Vector3[] startPos = new Vector3[] { (args [0] as GameObject).transform.position,(args [1] as GameObject).transform.position };
+//
+//			if (startPos [0].x < startPos [1].x) {	// if args[0] is left of args[1]
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1] + (Vector3.right*.8f))), 1);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
+//					Helper.VectorToParsable (startPos [0])), 2);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1])), 3);
+//			}
+//			else if (startPos [0].x > startPos [1].x) {	// if args[0] is right of args[1]
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1] + (Vector3.left*.8f))), 1);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
+//					Helper.VectorToParsable (startPos [0])), 2);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1])), 3);
+//			}
+//			//eventManager.RemoveEvent (3);
+//		}
+//	}
 
 	// IN: Objects
 	// OUT: none
@@ -4316,5 +4315,11 @@ public class Predicates : MonoBehaviour {
 		bool r = false;
 
 		return r;
+	}
+
+	public void COMPOSE(VoxML voxml) {
+		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
+			Debug.Log (subevent.Value);
+		}
 	}
 }

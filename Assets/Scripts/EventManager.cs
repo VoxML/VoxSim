@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Timers;
 
 using Global;
 using Satisfaction;
+using Vox;
 
 public class EventManagerArgs : EventArgs {
 
@@ -33,6 +35,7 @@ public class EventManager : MonoBehaviour {
 	//public string lastObjectResolved = string.Empty;
 	public Dictionary<String,String> evalOrig = new Dictionary<String, String>();
 	public Dictionary<String,String> evalResolved = new Dictionary<String, String>();
+	public Dictionary<String,object> globalVars = new Dictionary<String, object> ();
 
 	public double eventWaitTime = 2000.0;
 	Timer eventWaitTimer;
@@ -346,11 +349,20 @@ public class EventManager : MonoBehaviour {
 			objs.Add (true);
 			methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
-			if ((methodToCall != null) &&  (preds.rdfTriples.Count > 0)) {
-				Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
-				object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
-				Debug.Log (evaluatedCommand);
-				OnExecuteEvent(this, new EventManagerArgs (evaluatedCommand));
+			if (preds.rdfTriples.Count > 0) {
+				if (methodToCall != null) {
+					Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
+					object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
+					Debug.Log (evaluatedCommand);
+					OnExecuteEvent (this, new EventManagerArgs (evaluatedCommand));
+				}
+				else {
+					if (File.Exists (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
+						using (StreamReader sr = new StreamReader (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
+							preds.COMPOSE (VoxML.LoadFromText (sr.ReadToEnd ()));
+						}
+					}
+				}
 			}
 		}
 	}

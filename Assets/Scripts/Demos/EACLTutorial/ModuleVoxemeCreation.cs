@@ -108,17 +108,23 @@ public class ModuleVoxemeCreation : ModalWindow {
 
 		if (placementState == PlacementState.Delete) {
 			if (Input.GetMouseButtonDown (0)) {
-				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-				// Casts the ray and get the first game object hit
-				Physics.Raycast (ray, out selectRayhit);
-				if (selectRayhit.collider != null) {
-					if (selectRayhit.collider.gameObject.transform.root.gameObject != sandboxSurface) {
-						selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
-						DeleteVoxeme (selectedObject);
-						actionButtonText = "Add";
-						placementState = PlacementState.Add;
-						selected = -1;
-						cameraControl.allowRotation = true;
+				if (Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
+					    new Rect[] { new Rect (Screen.width - (15 + (int)(110 * fontSizeModifier / 3)) + 38 * fontSizeModifier - 60,
+							Screen.height - (35 + (int)(20 * fontSizeModifier)),
+							60, 20 * fontSizeModifier)
+					})) {
+					Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+					// Casts the ray and get the first game object hit
+					Physics.Raycast (ray, out selectRayhit);
+					if (selectRayhit.collider != null) {
+						if (selectRayhit.collider.gameObject.transform.root.gameObject != sandboxSurface) {
+							selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
+							DeleteVoxeme (selectedObject);
+							actionButtonText = "Add";
+							placementState = PlacementState.Add;
+							selected = -1;
+							cameraControl.allowRotation = true;
+						}
 					}
 				}
 			}
@@ -258,7 +264,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 			go.SetActive (true);
 			go.name = go.name.Replace ("(Clone)", "");
 
-			int exisitingObjCount = objSelector.allVoxemes.FindAll (v => v.gameObject.name.StartsWith(go.name)).Count;
+			int exisitingObjCount = objSelector.allVoxemes.FindAll(v => v.gameObject.name.StartsWith(go.name)).Count;
 			Debug.Log (exisitingObjCount);
 			if (exisitingObjCount > 0) {
 				go.name = go.name + (exisitingObjCount + 1).ToString ();
@@ -308,7 +314,9 @@ public class ModuleVoxemeCreation : ModalWindow {
 	}
 
 	void DeleteVoxeme(GameObject obj) {
-		objSelector.allVoxemes.Remove(objSelector.allVoxemes.Find (v => v.gameObject == obj));
+		foreach (Voxeme child in obj.GetComponentsInChildren<Voxeme>()) {
+			objSelector.allVoxemes.Remove (objSelector.allVoxemes.Find (v => v == child));
+		}
 		Destroy (obj);
 	}
 

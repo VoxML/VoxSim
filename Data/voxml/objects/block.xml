@@ -13,6 +13,8 @@
     <ReflSym>XY,XZ,YZ</ReflSym>
     <Args />
     <Body />
+    <Scale />
+    <Arity />
     <Class />
     <Value />
     <Constr />
@@ -34,8 +36,6 @@
     <Movable>true</Movable>
   </Embodiment>
   <Attributes>
-    <Attrs>
-      <Attr Value="black" />
-    </Attrs>
+    <Attrs />
   </Attributes>
 </VoxML>

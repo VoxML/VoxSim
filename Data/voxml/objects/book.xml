@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <Entity Type="Object" />
+  <Entity Type="Object" />
   <Lex>
     <Pred>book</Pred>
     <Type>physobj*artifact</Type>
@@ -8,35 +8,44 @@
   <Type>
     <Head>rectangular_prism[1]</Head>
     <Components>
-        <Component Value="front_cover[2]" />
-        <Component Value="back_cover[6]" />
-        <Component Value="spine[3]" />
-        <Component Value="interior[4]" />
+      <Component Value="front_cover[2]" />
+      <Component Value="back_cover[6]" />
+      <Component Value="spine[3]" />
+      <Component Value="interior[4]" />
     </Components>
     <Concavity>Flat</Concavity>
     <RotatSym />
     <ReflSym>XY</ReflSym>
+    <Args />
+    <Body />
+    <Scale />
+    <Arity />
+    <Class />
+    <Value />
+    <Constr />
   </Type>
   <Habitat>
     <Intrinsic>
-        <Intr Name="UP[5]" Value="align(Y,E_z)" />
-        <Intr Name="FRONT[5]" Value="front(-Z)" />
-        <Intr Name="DEPTH[7]" Value="Z([4])" />
+      <Intr Name="UP[5]" Value="align(Y,E_z)" />
+      <Intr Name="FRONT[5]" Value="front(-Z)" />
+      <Intr Name="DEPTH[7]" Value="Z([4])" />
     </Intrinsic>
     <Extrinsic />
   </Habitat>
   <Afford_Str>
     <Affordances>
-        <Affordance Formula="H-&gt;[grasp(x, [1])]hold(x, [1])" />
-        <Affordance Formula="H,hold(x, [1])-&gt;[lift([1])]" />
-        <Affordance Formula="H-&gt;[lift(x, [1])]hold(x, [1])" />
-        <Affordance Formula="H-&gt;[slide([1])]" />
-        <!--<Affordance Formula="H-&gt;[put(x, on([1]))]support([1], x)" />-->
-        <Affordance Formula="H-&gt;[put([2], on([4]))]close([1])" />
+      <Affordance Formula="H-&gt;[grasp(x, [1])]hold(x, [1])" />
+      <Affordance Formula="H,hold(x, [1])-&gt;[lift([1])]" />
+      <Affordance Formula="H-&gt;[lift(x, [1])]hold(x, [1])" />
+      <Affordance Formula="H-&gt;[slide([1])]" />
+      <Affordance Formula="H-&gt;[put([2], on([4]))]close([1])" />
     </Affordances>
   </Afford_Str>
   <Embodiment>
     <Scale>&lt;agent</Scale>
     <Movable>true</Movable>
   </Embodiment>
+  <Attributes>
+    <Attrs />
+  </Attributes>
 </VoxML>
