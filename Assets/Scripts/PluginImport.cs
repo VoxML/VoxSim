@@ -1,7 +1,7 @@
 using UnityEngine;
-using System.Collections;
 using System;
 using System.Runtime.InteropServices;
+using Network;
 using NLU;
 
 public class PluginImport : MonoBehaviour {
@@ -9,20 +9,9 @@ public class PluginImport : MonoBehaviour {
 	public string port = "";
 
 	private INLParser _parser;
+	private CmdServer _cmdServer;
 
 	// Make our calls from the Plugin
-	[DllImport ("CommunicationsBridge")]
-	private static extern bool OpenPort(string id);
-
-	[DllImport ("CommunicationsBridge")]
-	private static extern void SelfHandshake(string port);
-
-	[DllImport ("CommunicationsBridge")]
-	private static extern IntPtr Process();
-
-	[DllImport ("CommunicationsBridge")]
-	private static extern bool ClosePort(string id);
-
 	[DllImport ("CommunicationsBridge")]
 	public static extern IntPtr PythonCall(string scriptsPath, string module, string function, string[] args, int numArgs);
 
@@ -60,11 +49,12 @@ public class PluginImport : MonoBehaviour {
 	}
 
 	void Update () {
-		if (port == "") {
+		if (port == "" || _cmdServer == null) {
 			return;
 		}
 
-		string input = Marshal.PtrToStringAuto (Process ());
+		// ask Nihkil
+		string input = _cmdServer.GetMessage();
 		if (input != "") {
 			Debug.Log (input);
 			((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = input.Trim();
@@ -74,22 +64,21 @@ public class PluginImport : MonoBehaviour {
 
 	public void OpenPortInternal(string port) {
 		if (port != "") {
-			if (OpenPort (port)) {
-				Debug.Log ("Listening on port " + port);
-				SelfHandshakeInternal (port);
-				OnPortOpened (this, null);
+			try
+			{
+				// pass true as first param to make the server visible only to 'localhost'
+				// (for testing, for exmaple)
+                _cmdServer = new CmdServer(true, int.Parse(port), 1);
+                OnPortOpened (this, null);
 			}
-			else {
+			catch (Exception e) {
 				Debug.Log ("Failed to open port " + port);
+				Debug.Log(e.StackTrace);
 			}
 		}
 		else {
-			Debug.Log ("No listener port specified.  Skipping interface startup.");
+			Debug.Log ("No listener port specified. Skipping interface startup.");
 		}
-	}
-
-	public void SelfHandshakeInternal(string port) {
-		SelfHandshake (port);
 	}
 
 	public string NLParse(string input) {
@@ -107,8 +96,7 @@ public class PluginImport : MonoBehaviour {
 		}
 
 		Debug.Log ("Closing port " + port);
-
-		ClosePort (port);
+		_cmdServer.Close();
 	}
 
 	void OnApplicationQuit () {
@@ -118,6 +106,6 @@ public class PluginImport : MonoBehaviour {
 
 		Debug.Log ("Closing port " + port);
 
-		ClosePort (port);
+		_cmdServer.Close();
 	}
 }

@@ -6,6 +6,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 
 using Global;
+using Network;
 using VideoCapture;
 
 public class Launcher : FontManager {
@@ -65,7 +66,7 @@ public class Launcher : FontManager {
 		labelStyle = new GUIStyle ("Label");
 		textFieldStyle = new GUIStyle ("TextField");
 		buttonStyle = new GUIStyle ("Button");
-		fontSizeModifier = (int)(fontSize / defaultFontSize);
+		fontSizeModifier = fontSize / defaultFontSize;
 		LoadPrefs ();
 		
 #if UNITY_EDITOR
@@ -91,7 +92,7 @@ public class Launcher : FontManager {
 		listItems = availableScenes.ToArray ();
 
 		// get IP address
-		foreach (IPAddress ipAddress in System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName()).AddressList) {
+		foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
 			if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
 				//Debug.Log(ipAddress.ToString());
 				ip = ipAddress.ToString ();
