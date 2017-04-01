@@ -298,7 +298,7 @@ namespace Satisfaction {
 					}
 					else if (arg is String) {	// if arg is String
 						if ((arg as String) != string.Empty) {
-							Regex q = new Regex("\".*\"");
+							Regex q = new Regex("[\'\"].*[\'\"]");
 							if (q.IsMatch (arg as String)) {
 								objs.Add (arg as String);
 							}

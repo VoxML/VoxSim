@@ -13,7 +13,12 @@
       <Arg Value="z:physobj" />
     </Args>
     <Body>
-        <Subevent Value="def(loc(y),as(l1));def(loc(z),as(l2));put(y,l2);put(z,l1)" />
+        <!--<Subevent Value="def(loc(y),as('l1'));def(loc(z),as('l2'));put(y,near(z));put(z,l1);put(y,l2)" />-->
+        <Subevent Value="def(loc(y),as('l1'))" />
+        <Subevent Value="def(loc(z),as('l2'))" />
+        <Subevent Value="put(y,near(z))" />
+        <Subevent Value="put(z,l1)" />
+        <Subevent Value="put(y,l2)" />
     </Body>
   </Type>
 </VoxML>

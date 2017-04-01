@@ -1607,6 +1607,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 					windowTitle = InspectorVoxeme.Substring (InspectorVoxeme.LastIndexOf ('/') + 1);
 				}
 			}
+			InspectorObject.transform.Find (InspectorObject.name + "*").name = windowTitle + "*";
 			InspectorObject.name = windowTitle;
 		}
 	}

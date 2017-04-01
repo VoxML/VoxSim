@@ -184,6 +184,7 @@ namespace Global {
 	public static class Helper {
 		public static Regex v = new Regex (@"<.*>");
 		public static Regex cv = new Regex (@",<.*>");
+		public static Regex l = new Regex ("[\'\"].*[\'\"]");
 
 		// DATA METHODS
 		public static Hashtable ParsePredicate(String predicate) {
@@ -267,14 +268,27 @@ namespace Global {
 					//Debug.Log (s);
 					GameObject obj = GameObject.Find (s);
 					if (obj != null) {
-						if (triple.Item1 == "") {
-							triple.Item1 = s;
-						} else if (triple.Item3 == "") {
-							triple.Item3 = s;
+						if (components [0] == "def") {
+							if (triple.Item1 == "") {
+								triple.Item1 = s;
+							}
+						}
+						else {
+							if (triple.Item1 == "") {
+								triple.Item1 = s;
+							}
+							else if (triple.Item3 == "") {
+								triple.Item3 = s;
+							}
 						}
 					}
 					else {
 						if (v.IsMatch (s)) {
+							if (triple.Item3 == "") {
+								triple.Item3 = s;
+							}
+						}
+						else if (l.IsMatch (s)) {
 							if (triple.Item3 == "") {
 								triple.Item3 = s;
 							}
@@ -289,7 +303,8 @@ namespace Global {
 			if (triple.Item2.Length > 0) {
 				triple.Item2 = triple.Item2.Remove (triple.Item2.Length - 1, 1);
 			}
-			//Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
+			
+			Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 			return triple;
 		}
 

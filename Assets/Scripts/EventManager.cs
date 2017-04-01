@@ -35,7 +35,7 @@ public class EventManager : MonoBehaviour {
 	//public string lastObjectResolved = string.Empty;
 	public Dictionary<String,String> evalOrig = new Dictionary<String, String>();
 	public Dictionary<String,String> evalResolved = new Dictionary<String, String>();
-	public Dictionary<String,object> globalVars = new Dictionary<String, object> ();
+	public Hashtable globalVars = new Hashtable();
 
 	public double eventWaitTime = 2000.0;
 	Timer eventWaitTimer;
@@ -126,6 +126,7 @@ public class EventManager : MonoBehaviour {
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 
 		inputController.ParseComplete += StoreParse;
+		inputController.ParseComplete += ClearGlobalVars;
 		//inputController.InputReceived += StartEventWaitTimer;
 
 		//eventWaitTimer = new Timer (eventWaitTime);
@@ -195,6 +196,10 @@ public class EventManager : MonoBehaviour {
 		lastParse = ((InputEventArgs)e).InputString;
 	}
 
+	public void ClearGlobalVars(object sender, EventArgs e) {
+		globalVars.Clear ();
+	}
+
 	public void WaitComplete(object sender, EventArgs e) {
 		((System.Timers.Timer)sender).Enabled = false;
 //		RemoveEvent (0);
@@ -238,8 +243,11 @@ public class EventManager : MonoBehaviour {
 		ClearRDFTriples ();
 		ClearSkolems ();
 		ParseCommand (command);
+
+		string globalsApplied = ApplyGlobals (command);
+
 		FinishSkolemization ();
-		skolemized = Skolemize (command);
+		skolemized = Skolemize (globalsApplied);
 		Debug.Log ("Skolemized command: " + skolemized);
 		//EvaluateSkolemizedCommand(skolemized);
 
@@ -315,9 +323,10 @@ public class EventManager : MonoBehaviour {
 			
 				if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
 					objs.Add (Helper.ParsableToVector ((String)arg));
-				} else if (arg is String) {	// if arg is String
+				}
+				else if (arg is String) {	// if arg is String
 					if ((arg as String) != string.Empty) {
-						Regex q = new Regex ("\".*\"");
+						Regex q = new Regex ("[\'\"].*[\'\"]");
 						if (q.IsMatch (arg as String)) {
 							objs.Add (arg as String);
 						} 
@@ -359,7 +368,7 @@ public class EventManager : MonoBehaviour {
 				else {
 					if (File.Exists (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
 						using (StreamReader sr = new StreamReader (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
-							preds.COMPOSE (VoxML.LoadFromText (sr.ReadToEnd ()));
+							preds.ComposeSubevents (VoxML.LoadFromText (sr.ReadToEnd ()), objs.ToArray ());
 						}
 					}
 				}
@@ -515,6 +524,48 @@ public class EventManager : MonoBehaviour {
 		return outString;
 	}
 
+	public String ApplyGlobals(String inString) {
+		String outString = inString;
+		String temp = inString;
+
+		int parenCount = temp.Count(f => f == '(') + 
+			temp.Count(f => f == ')');
+		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+
+		foreach (DictionaryEntry kv in globalVars) {
+			if (kv.Value is Vector3) {
+				outString = (String)outString.Replace ((String)kv.Key, Helper.VectorToParsable ((Vector3)kv.Value));
+			}
+			else if (kv.Value is GameObject) {
+				outString = (String)outString.Replace ((String)kv.Key, ((GameObject)kv.Value).name);
+				Dictionary<string,string> changeValues = skolems.Cast<DictionaryEntry>().ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value).
+					Where(kkv => ((String)kkv.Value).Contains((String)kv.Key)).ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
+				foreach (string key in changeValues.Keys) {
+					skolems [key] = changeValues [key].Replace ((String)kv.Key, ((GameObject)kv.Value).name);
+				}
+
+				Helper.PrintKeysAndValues (skolems);
+//				foreach (string key in changeValues.Keys) {
+//					Debug.Log (key + ":" + changeValues [key]);
+//				}
+			}
+			else if (kv.Value is String) {
+				outString = (String)outString.Replace ((String)kv.Key, (String)kv.Value);
+			}
+			else if (kv.Value is List<String>) {
+				String list = String.Join (",", ((List<String>)kv.Value).ToArray());
+				outString = (String)outString.Replace ((String)kv.Key, list);
+			}
+		}
+		temp = outString;
+		parenCount = temp.Count(f => f == '(') + 
+			temp.Count(f => f == ')');
+		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+
+		Debug.Log (outString);
+		return outString;
+	}
+
 	public String ApplySkolems(String inString) {
 		String outString = inString;
 		String temp = inString;
@@ -623,7 +674,7 @@ public class EventManager : MonoBehaviour {
 								}
 
 								if (objs.Count == 0) {
-									Regex q = new Regex ("\".*\"");
+									Regex q = new Regex ("[\'\"].*[\'\"]");
 									if (q.IsMatch (arg as String)) {
 										objs.Add (arg);
 									}

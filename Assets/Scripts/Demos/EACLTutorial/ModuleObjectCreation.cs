@@ -7,7 +7,7 @@ using System.Linq;
 using Global;
 using Vox;
 
-public class ModuleVoxemeCreation : ModalWindow {
+public class ModuleObjectCreation : ModalWindow {
 
 	public int fontSize = 12;
 
@@ -68,7 +68,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 	void Start () {
 		base.Start ();
 		
-		actionButtonText = "Add";
+		actionButtonText = "Add Object";
 		windowTitle = "Add Voxeme Object";
 		persistent = true;
 
@@ -117,10 +117,9 @@ public class ModuleVoxemeCreation : ModalWindow {
 					// Casts the ray and get the first game object hit
 					Physics.Raycast (ray, out selectRayhit);
 					if (selectRayhit.collider != null) {
-						if (selectRayhit.collider.gameObject.transform.root.gameObject != sandboxSurface) {
-							selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
+						if (selectRayhit.collider.gameObject.transform.root.gameObject == selectedObject) {
 							DeleteVoxeme (selectedObject);
-							actionButtonText = "Add";
+							actionButtonText = "Add Object";
 							placementState = PlacementState.Add;
 							selected = -1;
 							cameraControl.allowRotation = true;
@@ -162,7 +161,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 			}
 
 			if (Input.GetKeyDown (KeyCode.Return)) {
-				actionButtonText = "Add";
+				actionButtonText = "Add Object";
 				placementState = PlacementState.Add;
 				selected = -1;
 				cameraControl.allowRotation = true;
@@ -177,7 +176,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 					// Casts the ray and get the first game object hit
 					Physics.Raycast (ray, out selectRayhit);
 					if (selectRayhit.collider != null) {
-						if (selectRayhit.collider.gameObject.transform.root.gameObject != sandboxSurface) {
+						if (Helper.IsSupportedBy(selectRayhit.collider.gameObject.transform.root.gameObject, sandboxSurface)) {
 							if (selectRayhit.collider.gameObject.transform.root.gameObject.GetComponent<Voxeme> () != null) {
 								selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
 								SetShader (selectedObject, ShaderType.Highlight);
@@ -215,12 +214,12 @@ public class ModuleVoxemeCreation : ModalWindow {
 			    Screen.height - (35 + (int)(20 * fontSizeModifier)), GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
 			    actionButtonText, buttonStyle)) {
 			switch (actionButtonText) {
-			case "Add":
+			case "Add Object":
 				render = true;
 				break;
 		
 			case "Place":
-				actionButtonText = "Add";
+				actionButtonText = "Add Object";
 				placementState = PlacementState.Add;
 				selected = -1;
 				cameraControl.allowRotation = true;
@@ -230,7 +229,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 
 			case "Delete":
 				DeleteVoxeme (selectedObject);
-				actionButtonText = "Add";
+				actionButtonText = "Add Object";
 				placementState = PlacementState.Add;
 				selected = -1;
 				cameraControl.allowRotation = true;
@@ -264,10 +263,23 @@ public class ModuleVoxemeCreation : ModalWindow {
 			go.SetActive (true);
 			go.name = go.name.Replace ("(Clone)", "");
 
-			int exisitingObjCount = objSelector.allVoxemes.FindAll(v => v.gameObject.name.StartsWith(go.name)).Count;
-			Debug.Log (exisitingObjCount);
-			if (exisitingObjCount > 0) {
-				go.name = go.name + (exisitingObjCount + 1).ToString ();
+			List<Voxeme> existingObjsOfType = objSelector.allVoxemes.FindAll (v => v.gameObject.name.StartsWith (go.name));
+			List<int> objIndices = existingObjsOfType.Select (v => System.Convert.ToInt32 (v.name.Replace (go.name, "0"))).ToList();
+			for (int i = 0; i < objIndices.Count; i++) {
+				if (objIndices [i] == 0) {
+					objIndices [i] = 1;
+				}
+			}
+
+			int j;
+			for (j = 0; j < objIndices.Count; j++) {
+				if (objIndices [j] != j+1) {
+					break;
+				}
+			}
+				
+			if (j > 0) {
+				go.name = go.name + (j + 1).ToString ();
 			}
 
 			// store shaders
@@ -335,11 +347,13 @@ public class ModuleVoxemeCreation : ModalWindow {
 			Debug.Log (voxeme.GetComponent<AttributeSet> ().attributes.Count);
 			foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
 				Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
-				Debug.Log (newMat);
-				foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
-					Shader shader = renderer.material.shader;
-					renderer.material = newMat;
-					renderer.material.shader = shader;
+				if (newMat != null) {
+					Debug.Log (newMat);
+					foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
+						Shader shader = renderer.material.shader;
+						renderer.material = newMat;
+						renderer.material.shader = shader;
+					}
 				}
 			}
 		}
