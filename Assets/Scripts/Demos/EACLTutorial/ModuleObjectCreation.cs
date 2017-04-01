@@ -343,16 +343,19 @@ public class ModuleObjectCreation : ModalWindow {
 	void VoxMLUpdated(object sender, EventArgs e) {
 		GameObject voxeme = ((VoxMLEventArgs)e).Voxeme;
 		VoxML voxml = ((VoxMLEventArgs)e).VoxML;
-		if (voxeme.GetComponent<AttributeSet> () != null) {
-			Debug.Log (voxeme.GetComponent<AttributeSet> ().attributes.Count);
-			foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
-				Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
-				if (newMat != null) {
-					Debug.Log (newMat);
-					foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
-						Shader shader = renderer.material.shader;
-						renderer.material = newMat;
-						renderer.material.shader = shader;
+
+		if (voxeme != null) {
+			if (voxeme.GetComponent<AttributeSet> () != null) {
+				Debug.Log (voxeme.GetComponent<AttributeSet> ().attributes.Count);
+				foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
+					Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
+					if (newMat != null) {
+						Debug.Log (newMat);
+						foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
+							Shader shader = renderer.material.shader;
+							renderer.material = newMat;
+							renderer.material.shader = shader;
+						}
 					}
 				}
 			}

@@ -295,6 +295,7 @@ public class EventManager : MonoBehaviour {
 		Triple<String,String,String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
 		Debug.Log(evalOrig[evaluated]);
 		Debug.Log(evalResolved[evaluated]);
+		Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 
 		if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
 			preds.rdfTriples.Add(triple);
@@ -327,7 +328,8 @@ public class EventManager : MonoBehaviour {
 				else if (arg is String) {	// if arg is String
 					if ((arg as String) != string.Empty) {
 						Regex q = new Regex ("[\'\"].*[\'\"]");
-						if (q.IsMatch (arg as String)) {
+						int i;
+						if ((q.IsMatch (arg as String)) || (int.TryParse(arg as String, out i))) {
 							objs.Add (arg as String);
 						} 
 						else {
@@ -675,8 +677,9 @@ public class EventManager : MonoBehaviour {
 
 								if (objs.Count == 0) {
 									Regex q = new Regex ("[\'\"].*[\'\"]");
-									if (q.IsMatch (arg as String)) {
-										objs.Add (arg);
+									int i;
+									if ((q.IsMatch (arg as String)) || (int.TryParse(arg as String, out i))) {
+										objs.Add (arg as String);
 									}
 									else {
 										objs.Add (GameObject.Find (arg as String));

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Timers;
 
 using Global;
@@ -4389,16 +4390,41 @@ public class Predicates : MonoBehaviour {
 	}
 
 	// IN: Object (single element array)
-	// OUT: Vector3
-//	public Vector3 VEC(object[] args)
-//	{
-//		Vector3 vec = Vector3.zero;
-//		if (args [0] is String) {
-//			Debug.Break ();
-//		}
-//
-//		return vec;
-//	}
+	// OUT: String
+	public void CLEAR_GLOBALS(object[] args)
+	{
+		eventManager.globalVars.Clear ();
+
+		return;
+	}
+
+	// IN: Object (single element array)
+	// OUT: none
+	public void REPEAT(object[] args)
+	{
+		if (args [args.Length - 1] is bool) {
+			if ((bool)args [args.Length - 1] == false) {
+				if (args [0] is string) {
+					int i;
+					if (int.TryParse ((string)args [0], out i)) {
+						Debug.Log (i);
+						if (args [1] is string) {
+							Debug.Log ((string)args [1]);
+							for (int j = 0; j < i; j++) {
+								eventManager.InsertEvent (((string)args [1]).Replace ("[", "(").Replace ("]", ")").Replace (":", ",")
+									.Replace ("\"", "").Replace ("\'", ""), eventManager.events.Count);
+								eventManager.InsertEvent ("clear_globals()",eventManager.events.Count);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		Debug.Break ();
+
+		return;
+	}
 
 	public void ComposeSubevents(VoxML voxml, object[] args) {
 		//List<GameObject> typedArgs = new List<GameObject> ();
@@ -4408,14 +4434,17 @@ public class Predicates : MonoBehaviour {
 			Debug.Log (arg.Value.Split (':') [0]);
 			Debug.Log (arg.Value.Split (':') [1]);
 		
-			List<GameObject> filteredArgs = args.Where (a => (a.GetType () == typeof(GameObject))).Cast<GameObject> ().ToList ();
-			filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> () != null).ToList ();
-			filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> ().voxml.Lex.Type.Contains(arg.Value.Split (':') [1])).ToList();
-			filteredArgs = filteredArgs.Where (a => !eventManager.globalVars.ContainsValue (a)).ToList ();
+			if (arg.Value.Split (':') [0].Contains ("[]")) {
+			} else {
+				List<GameObject> filteredArgs = args.Where (a => (a.GetType () == typeof(GameObject))).Cast<GameObject> ().ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> () != null).ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> ().voxml.Lex.Type.Contains (arg.Value.Split (':') [1])).ToList ();
+				filteredArgs = filteredArgs.Where (a => !eventManager.globalVars.ContainsValue (a)).ToList ();
 
-			if (filteredArgs.Count > 0) {
-				//typedArgs.Add (filteredArgs [0]);
-				eventManager.globalVars.Add (arg.Value.Split (':') [0], filteredArgs [0]);
+				if (filteredArgs.Count > 0) {
+					//typedArgs.Add (filteredArgs [0]);
+					eventManager.globalVars.Add (arg.Value.Split (':') [0], filteredArgs [0]);
+				}
 			}
 		}
 
@@ -4427,8 +4456,15 @@ public class Predicates : MonoBehaviour {
 		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
 			string[] commands = subevent.Value.Split (';');
 			foreach (string command in commands) {
-				Debug.Log (command);
-				eventManager.InsertEvent (command, index);
+				string modifiedCommand = command;
+				Regex q = new Regex ("[\'\"].*[\'\"]");
+				MatchCollection matches = q.Matches (command);
+				for (int i = 0; i < matches.Count; i++) {
+					String match = matches [i].Value;
+					String replace = match.Replace ("(", "[").Replace (")", "]").Replace (",", ":");
+					modifiedCommand = command.Replace (match, replace);
+				}
+				eventManager.InsertEvent (modifiedCommand, index);
 				index++;
 				//Debug.Log (eventManager.EvaluateCommand (command));
 			}

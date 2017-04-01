@@ -283,7 +283,23 @@ namespace Global {
 						}
 					}
 					else {
-						if (v.IsMatch (s)) {
+						if (components [0] == "repeat") {
+							int i;
+							if (int.TryParse (s, out i)) {
+								if (triple.Item3 == "") {
+									triple.Item3 = s;
+								}
+							}
+							else if (l.IsMatch (s)) {
+								if (triple.Item1 == "") {
+									triple.Item1 = s;
+								} 
+							}
+							else {
+								triple.Item2 = triple.Item2 + s + "_";
+							}
+						}
+						else if (v.IsMatch (s)) {
 							if (triple.Item3 == "") {
 								triple.Item3 = s;
 							}
