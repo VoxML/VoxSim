@@ -695,23 +695,27 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
 	// OUT: String
-	public List<String> TWO(object[] args)
+	public String TWO(object[] args)
 	{
+		//Debug.Log (args.Length);
 		List<String> objNames = new List<String>();
 		System.Random random = new System.Random ();
 
 		if (args [0] is GameObject) {	// assume all inputs are of same type
-			if (args.Length > 2) {
+			if (args.Length >= 2) {
 				while (objNames.Count < 2) {
 					int index = random.Next (args.Length);
-					if (!objNames.Contains ((args [index] as GameObject).name)) {	// make sure all entries are distinct
-						objNames.Add ((args [index] as GameObject).name);
+					if (args [index].GetType () == args [0].GetType ()) {
+						if (!objNames.Contains ((args [index] as GameObject).name)) {	// make sure all entries are distinct
+							objNames.Add ((args [index] as GameObject).name);
+						}
 					}
 				}
 			}
 		}
 
-		return objNames;
+		//Debug.Log(string.Join(",",objNames.ToArray()));
+		return string.Join(",",objNames.ToArray());
 	}
 
 	public String LEFTMOST(object[] args) {
@@ -4411,7 +4415,7 @@ public class Predicates : MonoBehaviour {
 						if (args [1] is string) {
 							Debug.Log ((string)args [1]);
 							for (int j = 0; j < i; j++) {
-								eventManager.InsertEvent (((string)args [1]).Replace ("[", "(").Replace ("]", ")").Replace (":", ",")
+								eventManager.InsertEvent (((string)args [1]).Replace ("{", "(").Replace ("}", ")").Replace (":", ",")
 									.Replace ("\"", "").Replace ("\'", ""), eventManager.events.Count);
 								eventManager.InsertEvent ("clear_globals()",eventManager.events.Count);
 							}
@@ -4420,8 +4424,6 @@ public class Predicates : MonoBehaviour {
 				}
 			}
 		}
-
-		Debug.Break ();
 
 		return;
 	}
@@ -4435,7 +4437,16 @@ public class Predicates : MonoBehaviour {
 			Debug.Log (arg.Value.Split (':') [1]);
 		
 			if (arg.Value.Split (':') [0].Contains ("[]")) {
-			} else {
+				List<GameObject> filteredArgs = args.Where (a => (a.GetType () == typeof(GameObject))).Cast<GameObject> ().ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> () != null).ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> ().voxml.Lex.Type.Contains (arg.Value.Split (':') [1])).ToList ();
+				filteredArgs = filteredArgs.Where (a => !eventManager.globalVars.ContainsValue (a)).ToList ();
+
+				if (filteredArgs.Count > 0) {
+					eventManager.globalVars.Add (arg.Value.Split (':') [0], filteredArgs);
+				}
+			}
+			else {
 				List<GameObject> filteredArgs = args.Where (a => (a.GetType () == typeof(GameObject))).Cast<GameObject> ().ToList ();
 				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> () != null).ToList ();
 				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> ().voxml.Lex.Type.Contains (arg.Value.Split (':') [1])).ToList ();
@@ -4451,7 +4462,7 @@ public class Predicates : MonoBehaviour {
 		foreach (string key in eventManager.globalVars.Keys) {
 			Debug.Log (string.Format ("{0} : {1}", key, eventManager.globalVars [key]));
 		}
-
+			
 		int index = 1;
 		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
 			string[] commands = subevent.Value.Split (';');
@@ -4461,7 +4472,7 @@ public class Predicates : MonoBehaviour {
 				MatchCollection matches = q.Matches (command);
 				for (int i = 0; i < matches.Count; i++) {
 					String match = matches [i].Value;
-					String replace = match.Replace ("(", "[").Replace (")", "]").Replace (",", ":");
+					String replace = match.Replace ("(", "{").Replace (")", "}").Replace (",", ":");
 					modifiedCommand = command.Replace (match, replace);
 				}
 				eventManager.InsertEvent (modifiedCommand, index);

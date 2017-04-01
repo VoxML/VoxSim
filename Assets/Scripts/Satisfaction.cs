@@ -330,9 +330,11 @@ namespace Satisfaction {
 										}
 									}
 									else {
-										Debug.Log (string.Format ("Which {0}?", (arg as String)));
-										OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("Which {0}?", (arg as String)));
-										return false;	// abort
+										//if (!em.evalOrig.ContainsKey(command)){
+											Debug.Log (string.Format ("Which {0}?", (arg as String)));
+											OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("Which {0}?", (arg as String)));
+											return false;	// abort
+										//}
 									}
 								}
 								objs.Add (go);

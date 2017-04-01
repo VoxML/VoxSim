@@ -540,8 +540,8 @@ public class EventManager : MonoBehaviour {
 			}
 			else if (kv.Value is GameObject) {
 				outString = (String)outString.Replace ((String)kv.Key, ((GameObject)kv.Value).name);
-				Dictionary<string,string> changeValues = skolems.Cast<DictionaryEntry>().ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value).
-					Where(kkv => ((String)kkv.Value).Contains((String)kv.Key)).ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
+				Dictionary<string,string> changeValues = skolems.Cast<DictionaryEntry> ().ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value).
+					Where (kkv => ((String)kkv.Value).Contains ((String)kv.Key)).ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value);
 				foreach (string key in changeValues.Keys) {
 					skolems [key] = changeValues [key].Replace ((String)kv.Key, ((GameObject)kv.Value).name);
 				}
@@ -550,6 +550,16 @@ public class EventManager : MonoBehaviour {
 //				foreach (string key in changeValues.Keys) {
 //					Debug.Log (key + ":" + changeValues [key]);
 //				}
+			}
+			else if (kv.Value is List<GameObject>) {
+				String list = String.Join (":", ((List<GameObject>)kv.Value).Select(go => go.name).ToArray());
+				outString = (String)outString.Replace ((String)kv.Key, list);
+				list = String.Join (",", ((List<GameObject>)kv.Value).Select(go => go.name).ToArray());
+				Dictionary<string,string> changeValues = skolems.Cast<DictionaryEntry> ().ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value).
+					Where (kkv => ((String)kkv.Value).Contains ((String)kv.Key)).ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value);
+				foreach (string key in changeValues.Keys) {
+					skolems [key] = changeValues [key].Replace ((String)kv.Key, list);
+				}
 			}
 			else if (kv.Value is String) {
 				outString = (String)outString.Replace ((String)kv.Key, (String)kv.Value);

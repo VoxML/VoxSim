@@ -277,10 +277,8 @@ public class ModuleObjectCreation : ModalWindow {
 					break;
 				}
 			}
-				
-			if (j > 0) {
-				go.name = go.name + (j + 1).ToString ();
-			}
+
+			go.name = go.name + (j + 1).ToString ();
 
 			// store shaders
 			foreach (Renderer renderer in go.GetComponentsInChildren<Renderer> ()) {

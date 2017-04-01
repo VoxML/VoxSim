@@ -96,16 +96,16 @@ public class Voxeme : MonoBehaviour {
 //		voxml = VoxML.LoadFromText (www.text);
 
 		try {
-			using (StreamReader sr = new StreamReader(
-				string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("objects/{0}.xml",gameObject.name))))
-			{
-				voxml = VoxML.LoadFromText (sr.ReadToEnd());
+			using (StreamReader sr = new StreamReader (
+				string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", gameObject.name)))) {
+				voxml = VoxML.LoadFromText (sr.ReadToEnd ());
 			}
 		}
 		catch (FileNotFoundException ex) {
-			voxml = new VoxML();
+			voxml = new VoxML ();
 			voxml.Entity.Type = VoxEntity.EntityType.Object;
 		}
+
 
 		// populate operational voxeme structure
 		PopulateOperationalVoxeme();
