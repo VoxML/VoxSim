@@ -15,7 +15,7 @@ public class Voxeme : MonoBehaviour {
 	[HideInInspector]
 	public VoxML voxml = new VoxML();
 
-	public OperationalVox opVox = new OperationalVox ();
+	public OperationalVox opVox;
 
 	// rotation information for each subobject's rigidbody
 	// (physics-resultant changes between the completion of one event and the start of the next must be brought into line)
@@ -95,20 +95,7 @@ public class Voxeme : MonoBehaviour {
 
 //		voxml = VoxML.LoadFromText (www.text);
 
-		try {
-			using (StreamReader sr = new StreamReader (
-				string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", gameObject.name)))) {
-				voxml = VoxML.LoadFromText (sr.ReadToEnd ());
-			}
-		}
-		catch (FileNotFoundException ex) {
-			voxml = new VoxML ();
-			voxml.Entity.Type = VoxEntity.EntityType.Object;
-		}
-
-
-		// populate operational voxeme structure
-		PopulateOperationalVoxeme();
+		LoadVoxML ();
 
 		// get movement blocking
 		minYBound = Helper.GetObjectWorldSize(gameObject).min.y;
@@ -588,7 +575,26 @@ public class Voxeme : MonoBehaviour {
 		}
 	}
 
+	public void LoadVoxML() {
+		try {
+			using (StreamReader sr = new StreamReader (
+				string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", gameObject.name)))) {
+				voxml = VoxML.LoadFromText (sr.ReadToEnd ());
+			}
+		}
+		catch (FileNotFoundException ex) {
+			voxml = new VoxML ();
+			voxml.Entity.Type = VoxEntity.EntityType.Object;
+		}
+
+
+		// populate operational voxeme structure
+		PopulateOperationalVoxeme();
+	}
+
 	void PopulateOperationalVoxeme() {
+		opVox = new OperationalVox ();
+		
 		// set entity type
 		opVox.VoxemeType = voxml.Entity.Type;
 

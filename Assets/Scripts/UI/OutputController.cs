@@ -77,4 +77,19 @@ public static class OutputHelper {
 			}
 		}
 	}
+
+	public static string GetCurrentOutputString(OutputController.Role role) {
+		string output = string.Empty;
+		OutputController[] outputs;
+		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
+
+		foreach (OutputController outputController in outputs) {
+			if (outputController.role == role) {
+				output = outputController.outputString;
+				break;
+			}
+		}
+
+		return output;
+	}
 }

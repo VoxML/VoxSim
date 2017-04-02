@@ -310,6 +310,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 				}
 				else {
 					SaveMarkup (InspectorVoxeme, mlEntityType);
+					InspectorObject.GetComponent<Voxeme> ().LoadVoxML ();
 				}
 			}
 			else if (GUILayout.Button ("Import")) {

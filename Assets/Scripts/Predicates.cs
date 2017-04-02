@@ -667,15 +667,19 @@ public class Predicates : MonoBehaviour {
 	// OUT: String
 	public String THE(object[] args)
 	{
-		String objName = "";
-		System.Random random = new System.Random ();
+		List<String> objNames = new List<String>();
+		//System.Random random = new System.Random ();
 
 		if (args [0] is GameObject) {	// assume all inputs are of same type
-			int index = random.Next(args.Length);
-			objName = (args [index] as GameObject).name;
+			//int index = random.Next(args.Length);
+			for (int index = 0; index < args.Length; index++) {
+				if (args [index] is GameObject) {
+					objNames.Add ((args [index] as GameObject).name);
+				}
+			}
 		}
 
-		return objName;
+		return string.Join(",",objNames.ToArray());
 	}
 
 	// IN: Objects
@@ -3811,7 +3815,6 @@ public class Predicates : MonoBehaviour {
 					}
 				}
 				else {
-
 					if (voxComponent.supportingSurface != null) {
 						if (theme != null) {
 							GameObject interior = voxComponent.opVox.Type.Concavity.Item2;

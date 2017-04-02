@@ -314,6 +314,8 @@ namespace Satisfaction {
 										}
 									}
 
+									Debug.Log (matches.Count);
+
 									if (matches.Count == 0) {
 										go = GameObject.Find (arg as String);
 										if (go == null) {

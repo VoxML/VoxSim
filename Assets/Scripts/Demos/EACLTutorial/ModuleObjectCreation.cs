@@ -179,6 +179,8 @@ public class ModuleObjectCreation : ModalWindow {
 						if (Helper.IsSupportedBy(selectRayhit.collider.gameObject.transform.root.gameObject, sandboxSurface)) {
 							if (selectRayhit.collider.gameObject.transform.root.gameObject.GetComponent<Voxeme> () != null) {
 								selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
+								surfacePlacementOffset = (Helper.GetObjectWorldSize (selectedObject.gameObject).center.y - Helper.GetObjectWorldSize (selectedObject.gameObject).min.y) +
+									(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
 								SetShader (selectedObject, ShaderType.Highlight);
 								actionButtonText = "Place";
 								placementState = PlacementState.Place;
@@ -259,7 +261,8 @@ public class ModuleObjectCreation : ModalWindow {
 			render = false;
 
 			GameObject go = (GameObject)GameObject.Instantiate (prefabs[selected]);
-			go.transform.position = Vector3.zero;
+			go.transform.position = Helper.FindClearRegion(sandboxSurface, go).center;
+			Debug.Log (go.transform.position);
 			go.SetActive (true);
 			go.name = go.name.Replace ("(Clone)", "");
 
@@ -295,10 +298,10 @@ public class ModuleObjectCreation : ModalWindow {
 			selectedObject.GetComponent<Voxeme> ().VoxMLLoaded += VoxMLUpdated;
 
 			surfacePlacementOffset = (Helper.GetObjectWorldSize (selectedObject.gameObject).center.y - Helper.GetObjectWorldSize (selectedObject.gameObject).min.y) +
-			(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
-			selectedObject.transform.position = new Vector3 (sandboxSurface.transform.position.x,
-					preds.ON(new object[] { sandboxSurface }).y + surfacePlacementOffset,
-					sandboxSurface.transform.position.z);
+				(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
+			selectedObject.transform.position = new Vector3 (go.transform.position.x,
+				preds.ON(new object[] { sandboxSurface }).y + surfacePlacementOffset,
+				go.transform.position.z);
 			SetShader (selectedObject, ShaderType.Highlight);
 			actionButtonText = "Place";
 			placementState = PlacementState.Place;
