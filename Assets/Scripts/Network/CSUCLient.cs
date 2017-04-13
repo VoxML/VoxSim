@@ -12,23 +12,30 @@ namespace Network
 		private TcpClient _client;
 		private Thread _t;
 		private Queue<string> _messages;
+		private byte[] _ok = new byte[] { 0x20 };
+
+	    public bool IsConnected()
+	    {
+	        return _client.Connected;
+	    }
 
 		public void Connect(string address, int port)
 		{
 			_messages = new Queue<string>();
 			_client = new TcpClient();
 			_client.Connect(address, port);
-			_t  = new Thread(loop);
+			_t  = new Thread(Loop);
 			_t.Start();
 		}
 
-		private void loop()
+		private void Loop()
 		{
 			while (_client.Connected)
 			{
 				int len = GetMessageLength();
 				_messages.Enqueue(GetMessage(len));
 			}
+			_client.Close();
 		}
 
 		public void Close()
@@ -41,8 +48,11 @@ namespace Network
 		{
             byte[] byteBuffer = new byte[len];
 			NetworkStream stream = _client.GetStream();
+//		    stream.ReadTimeout = 4000;
             int numBytesRead = stream.Read(byteBuffer, 0, len);
-            return Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
+            string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
+			stream.Write(_ok, 0, 1);
+			return message;
 		}
 
 		private int GetMessageLength()
@@ -66,7 +76,10 @@ namespace Network
 		{
 			if (_messages.Count > 0)
 			{
-                return _messages.Dequeue();
+			    lock (_messages)
+			    {
+                    return _messages.Dequeue();
+			    }
 			}
 			return "";
 		}

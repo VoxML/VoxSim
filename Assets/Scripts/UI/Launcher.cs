@@ -13,6 +13,7 @@ public class Launcher : FontManager {
 	public int fontSize = 12;
 
 	string ip;
+	string csuUrl;
 	string parserUrl;
 	string inPort;
 	string sriUrl;
@@ -138,6 +139,9 @@ public class Launcher : FontManager {
 
 		GUI.Label (new Rect (bgLeft + 10, bgTop + 180, 90*fontSizeModifier, 25*fontSizeModifier), "Capture Video");
 		captureVideo = GUI.Toggle (new Rect (bgLeft+100, bgTop+180, 150, 25*fontSizeModifier), captureVideo, string.Empty);
+
+		GUI.Label (new Rect (bgLeft + 10, bgTop + 210, 90*fontSizeModifier, 25*fontSizeModifier), "CSU URL");
+		csuUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+210, 150, 25*fontSizeModifier), csuUrl);
 
 		if (captureVideo) {
 			string warningText = "Enabling this option may affect performance";
@@ -290,6 +294,7 @@ public class Launcher : FontManager {
 		inPort = PlayerPrefs.GetString("Listener Port");
 		sriUrl = PlayerPrefs.GetString("SRI URL");
 		parserUrl = PlayerPrefs.GetString("Parser URL");
+		csuUrl = PlayerPrefs.GetString("CSU URL");
 		makeLogs = (PlayerPrefs.GetInt("Make Logs") == 1);
 		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
 		videoCaptureMode = (VideoCaptureMode)PlayerPrefs.GetInt("Video Capture Mode");
@@ -319,6 +324,10 @@ public class Launcher : FontManager {
 					sriUrl = line.Split (',') [1].Trim();
 					break;
 				
+				case "CSU URL":
+					csuUrl = line.Split (',') [1].Trim();
+					break;
+
 				case "Parser URL":
 					parserUrl = line.Split (',') [1].Trim();
 					break;
@@ -394,6 +403,7 @@ public class Launcher : FontManager {
 		Dictionary<string, object> prefsDict = new Dictionary<string, object> ();
 		prefsDict.Add ("Listener Port", PlayerPrefs.GetString ("Listener Port"));
 		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
+		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
 		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
 		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
 		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
@@ -427,7 +437,8 @@ public class Launcher : FontManager {
 
 		PlayerPrefs.SetString("Listener Port", inPort);
 		PlayerPrefs.SetString("SRI URL", sriUrl);
-		PlayerPrefs.GetString("Parser URL", parserUrl);
+		PlayerPrefs.SetString("CSU URL", csuUrl);
+		PlayerPrefs.SetString("Parser URL", parserUrl);
 		PlayerPrefs.SetInt("Make Logs", System.Convert.ToInt32(makeLogs));
 		PlayerPrefs.SetInt("Capture Video", System.Convert.ToInt32(captureVideo));
 		PlayerPrefs.SetInt("Video Capture Mode", System.Convert.ToInt32(videoCaptureMode));

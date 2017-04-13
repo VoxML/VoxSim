@@ -5,11 +5,10 @@ using Network;
 using NLU;
 
 public class PluginImport : MonoBehaviour {
-	// port definitions
-	public string port = "";
 
 	private INLParser _parser;
 	private CmdServer _cmdServer;
+	private CSUClient _csuClient;
 
 	// Make our calls from the Plugin
 	[DllImport ("CommunicationsBridge")]
@@ -27,8 +26,28 @@ public class PluginImport : MonoBehaviour {
 
 	void Start()
 	{
-		port = PlayerPrefs.GetString("Listener Port");
-		OpenPortInternal(port);
+		string port = PlayerPrefs.GetString("Listener Port");
+		if (port != "")
+		{
+			OpenPortInternal(port);
+		}
+		else
+		{
+			Debug.Log ("No listener port specified. Skipping interface startup.");
+		}
+
+		string[] csuUrl = PlayerPrefs.GetString("CSU URL").Split(':');
+		string csuAddress = csuUrl[0];
+		int csuPort = Convert.ToInt32(csuUrl[1]);
+		if (csuAddress != "")
+		{
+			ConnectCSU(csuAddress, csuPort);
+		}
+		else
+		{
+			Debug.Log ("CSU gesture input is not specified.");
+		}
+
 		InitParser();
 
 	}
@@ -49,35 +68,53 @@ public class PluginImport : MonoBehaviour {
 	}
 
 	void Update () {
-		if (port == "" || _cmdServer == null) {
-			return;
+		if (_csuClient != null)
+		{
+			if (_csuClient.IsConnected())
+			{
+				string inputFromCSU = _csuClient.GetMessage();
+				if (inputFromCSU != "")
+				{
+					Debug.Log(inputFromCSU);
+					Debug.Log(_csuClient.HowManyLeft() + " messages left.");
+				}
+			}
+			else
+			{
+				Debug.LogError("Connection to CSU server is lost!");
+				_csuClient = null;
+			}
 		}
 
-		// ask Nihkil
-		string input = _cmdServer.GetMessage();
-		if (input != "") {
-			Debug.Log (input);
-			((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = input.Trim();
-			((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(input.Trim());
+		if (_cmdServer != null)
+		{
+			string inputFromCommander = _cmdServer.GetMessage();
+			if (inputFromCommander != "") {
+				Debug.Log (inputFromCommander);
+				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = inputFromCommander.Trim();
+				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(inputFromCommander.Trim());
+			}
 		}
 	}
 
+	public void ConnectCSU(string address, int port)
+	{
+		_csuClient = new CSUClient();
+		_csuClient.Connect(address, port);
+		Debug.Log(string.Format("{2} :: Connected to CSU recognizer @ {0}:{1}", address, port, _csuClient.IsConnected()));
+	}
+
 	public void OpenPortInternal(string port) {
-		if (port != "") {
-			try
-			{
-				// pass true as first param to make the server visible only to 'localhost'
-				// (for testing, for exmaple)
-                _cmdServer = new CmdServer(true, int.Parse(port), 1);
-                OnPortOpened (this, null);
-			}
-			catch (Exception e) {
-				Debug.Log ("Failed to open port " + port);
-				Debug.Log(e.StackTrace);
-			}
+		try
+		{
+			// pass true as first param to make the server visible only to 'localhost'
+			// (for testing, for exmaple)
+			_cmdServer = new CmdServer(true, int.Parse(port), 1);
+			OnPortOpened (this, null);
 		}
-		else {
-			Debug.Log ("No listener port specified. Skipping interface startup.");
+		catch (Exception e) {
+			Debug.Log ("Failed to open port " + port);
+			Debug.Log(e.StackTrace);
 		}
 	}
 
@@ -91,21 +128,18 @@ public class PluginImport : MonoBehaviour {
 	}
 
 	void OnDestroy () {
-		if (port == "") {
-			return;
+		if (_csuClient != null)
+		{
+			_cmdServer.Close();
 		}
 
-		Debug.Log ("Closing port " + port);
-		_cmdServer.Close();
+		if (_cmdServer == null && _csuClient.IsConnected())
+		{
+			_csuClient.Close();
+		}
 	}
 
 	void OnApplicationQuit () {
-		if (port == "") {
-			return;
-		}
-
-		Debug.Log ("Closing port " + port);
-
-		_cmdServer.Close();
+		OnDestroy();
 	}
 }
