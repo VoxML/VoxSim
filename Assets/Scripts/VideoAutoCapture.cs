@@ -71,7 +71,7 @@ namespace VideoCapture {
 
 		bool initialWaitComplete = false;
 
-		bool capture;
+		bool captureVideo, captureParams;
 
 		bool capturing = false;
 		bool writingFile = false;
@@ -117,7 +117,8 @@ namespace VideoCapture {
 			commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 			preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
 
-			capture = (PlayerPrefs.GetInt ("Capture Video") == 1);
+			captureVideo = (PlayerPrefs.GetInt ("Capture Video") == 1);
+			captureParams = (PlayerPrefs.GetInt ("Capture Params") == 1);
 			captureMode = (VideoCaptureMode)PlayerPrefs.GetInt ("Video Capture Mode");
 			resetScene = (PlayerPrefs.GetInt ("Reset Between Events") == 1);
 			eventResetCounter = PlayerPrefs.GetInt ("Event Reset Counter");
@@ -129,7 +130,7 @@ namespace VideoCapture {
 			eventIndex = PlayerPrefs.GetInt ("Start Index");
 			videoDir = PlayerPrefs.GetString ("Video Output Directory");
 
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -158,6 +159,7 @@ namespace VideoCapture {
 				eventManager.SatisfactionCalculated += InsertWaitPeriod;
 				//eventManager.SatisfactionCalculated += StartCapture;
 				//eventManager.ExecuteEvent += EnableAffectedObjects;
+				//eventManager.EventInserted += EventInserted;
 				eventManager.ExecuteEvent += StartCapture;
 				eventManager.QueueEmpty += EventComplete;
 
@@ -196,7 +198,7 @@ namespace VideoCapture {
 		
 		// Update is called once per frame
 		void Update () {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -227,7 +229,7 @@ namespace VideoCapture {
 		}
 
 		public void InitObjectDisabling() {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -237,7 +239,7 @@ namespace VideoCapture {
 		}
 
 		void DisableObjects() {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -248,7 +250,7 @@ namespace VideoCapture {
 		}
 
 		void EnableObjects() {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -259,7 +261,7 @@ namespace VideoCapture {
 		}
 
 		void InputStringReceived(object sender, EventArgs e) {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -285,7 +287,7 @@ namespace VideoCapture {
 		}
 
 		void ParseReceived(object sender, EventArgs e) {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -301,7 +303,7 @@ namespace VideoCapture {
 		}
 
 		void PrepareScene(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -316,7 +318,7 @@ namespace VideoCapture {
 		}
 
 		void StartCapture(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -338,7 +340,7 @@ namespace VideoCapture {
 		}
 
 		void InsertWaitPeriod(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -354,7 +356,7 @@ namespace VideoCapture {
 		}
 
 		void WaitComplete (object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -362,7 +364,7 @@ namespace VideoCapture {
 		}
 
 		void EnableAffectedObjects(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -374,7 +376,7 @@ namespace VideoCapture {
 		}
 
 		void SaveCapture () {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -412,7 +414,7 @@ namespace VideoCapture {
 		}
 
 		void StopCapture(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -422,7 +424,7 @@ namespace VideoCapture {
 		}
 
 		void EventTimedOut(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -430,7 +432,7 @@ namespace VideoCapture {
 		}
 
 		void EventComplete(object sender, EventArgs e) {
-			if (!capture) {
+			if (!captureVideo) {
 				return;
 			}
 
@@ -464,7 +466,7 @@ namespace VideoCapture {
 		}
 
 		void FilterSpecifiedManner(object sender, EventArgs e) {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -473,19 +475,24 @@ namespace VideoCapture {
 			AddConstituentObjectsToAffectedList (specifiedEvent);
 
 			if (specifiedEvent != ((EventManagerArgs)e).EventString) {
-				paramValues["MotionManner"] = specifiedEvent;
+				paramValues ["MotionManner"] = specifiedEvent;
 
-				eventManager.InsertEvent (specifiedEvent, 1);
-				eventManager.RemoveEvent (0);
-
-				if (captureMode == VideoCaptureMode.PerEvent) {
-					eventManager.InsertEvent ("wait()", 0);
+				if ((captureVideo) && (!captureParams)) {
+					eventManager.InsertEvent (specifiedEvent, 1);
+					eventManager.RemoveEvent (0);
+					if (captureMode == VideoCaptureMode.PerEvent) {
+						eventManager.InsertEvent ("wait()", 0);
+					}
+				}
+				else if ((captureParams) && (!captureVideo)) {
+					eventManager.InsertEvent (specifiedEvent, 1);
+					eventManager.AbortEvent ();
 				}
 			}
 		}
 
 		void SatisfactionCalculated (object sender, EventArgs e){
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -508,10 +515,20 @@ namespace VideoCapture {
 			if (dbEntry != null) {
 				dbEntry.ParameterValues = Helper.SerializeObjectToJSON (new PredicateParametersJSON (values));
 			}
+
+			if ((captureParams) && (!captureVideo)) {
+				if (dbFile != string.Empty) {
+					WriteToDB ();
+				}
+				eventManager.AbortEvent ();
+				paramValues.Clear();
+				GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
+				CaptureComplete (null, null);
+			}
 		}
 
 		void CaptureComplete(object sender, EventArgs e) {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 
@@ -534,7 +551,7 @@ namespace VideoCapture {
 		}
 
 		void AddConstituentObjectsToAffectedList(string eventForm) {
-			if (!capture) {
+			if ((!captureVideo) && (!captureParams)) {
 				return;
 			}
 

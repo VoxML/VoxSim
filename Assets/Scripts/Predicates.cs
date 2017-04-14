@@ -2351,8 +2351,12 @@ public class Predicates : MonoBehaviour {
 				Debug.Log(Mathf.Rad2Deg * Constants.EPSILON);
 				OnPrepareLog (this, new ParamsEventArgs ("SymmetryAxis", Constants.Axes.FirstOrDefault (a => 
 					(Helper.AngleCloseEnough(objAxis,a.Value) || Helper.AngleCloseEnough(-objAxis,a.Value))).Key.ToString()));
-				OnPrepareLog (this, new ParamsEventArgs ("RotAxis", Constants.Axes.FirstOrDefault (a => 
-					(Helper.AngleCloseEnough(objRotAxis,a.Value) || Helper.AngleCloseEnough(-objRotAxis,a.Value))).Key.ToString()));
+				KeyValuePair<string,Vector3> rotAxis = Constants.Axes.FirstOrDefault (a => 
+					(Helper.AngleCloseEnough (objRotAxis, a.Value) || Helper.AngleCloseEnough (-objRotAxis, a.Value)));
+				if (rotAxis.Value == Vector3.zero) {
+					rotAxis = Constants.Axes.FirstOrDefault(a => a.Value == Constants.xAxis);
+				}
+				OnPrepareLog (this, new ParamsEventArgs ("RotAxis", rotAxis.Key.ToString()));
 				OnParamsCalculated (null, null);
 				return;
 			}

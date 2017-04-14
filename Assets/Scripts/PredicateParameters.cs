@@ -175,7 +175,7 @@ public static class PredicateParameters {
 		{ "move", new Pair<List<Triple<string, string, int>>, bool>(
 			new List<Triple<string, string, int>>(){
 				new Triple<string, string, int>("turn", "", 1),
-				new Triple<string, string, int>("roll", "", 1),
+				//new Triple<string, string, int>("roll", "", 1),
 				new Triple<string, string, int>("slide", "", 1),
 				new Triple<string, string, int>("spin", "", 1),
 				new Triple<string, string, int>("lift", "", 1),
