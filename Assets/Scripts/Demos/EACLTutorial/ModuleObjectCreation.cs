@@ -7,7 +7,7 @@ using System.Linq;
 using Global;
 using Vox;
 
-public class ModuleVoxemeCreation : ModalWindow {
+public class ModuleObjectCreation : ModalWindow {
 
 	public int fontSize = 12;
 
@@ -68,7 +68,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 	void Start () {
 		base.Start ();
 		
-		actionButtonText = "Add";
+		actionButtonText = "Add Object";
 		windowTitle = "Add Voxeme Object";
 		persistent = true;
 
@@ -108,17 +108,22 @@ public class ModuleVoxemeCreation : ModalWindow {
 
 		if (placementState == PlacementState.Delete) {
 			if (Input.GetMouseButtonDown (0)) {
-				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-				// Casts the ray and get the first game object hit
-				Physics.Raycast (ray, out selectRayhit);
-				if (selectRayhit.collider != null) {
-					if (selectRayhit.collider.gameObject.transform.root.gameObject != sandboxSurface) {
-						selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
-						DeleteVoxeme (selectedObject);
-						actionButtonText = "Add";
-						placementState = PlacementState.Add;
-						selected = -1;
-						cameraControl.allowRotation = true;
+				if (Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
+					    new Rect[] { new Rect (Screen.width - (15 + (int)(110 * fontSizeModifier / 3)) + 38 * fontSizeModifier - 60,
+							Screen.height - (35 + (int)(20 * fontSizeModifier)),
+							60, 20 * fontSizeModifier)
+					})) {
+					Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+					// Casts the ray and get the first game object hit
+					Physics.Raycast (ray, out selectRayhit);
+					if (selectRayhit.collider != null) {
+						if (selectRayhit.collider.gameObject.transform.root.gameObject == selectedObject) {
+							DeleteVoxeme (selectedObject);
+							actionButtonText = "Add Object";
+							placementState = PlacementState.Add;
+							selected = -1;
+							cameraControl.allowRotation = true;
+						}
 					}
 				}
 			}
@@ -156,7 +161,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 			}
 
 			if (Input.GetKeyDown (KeyCode.Return)) {
-				actionButtonText = "Add";
+				actionButtonText = "Add Object";
 				placementState = PlacementState.Add;
 				selected = -1;
 				cameraControl.allowRotation = true;
@@ -171,9 +176,11 @@ public class ModuleVoxemeCreation : ModalWindow {
 					// Casts the ray and get the first game object hit
 					Physics.Raycast (ray, out selectRayhit);
 					if (selectRayhit.collider != null) {
-						if (selectRayhit.collider.gameObject.transform.root.gameObject != sandboxSurface) {
+						if (Helper.IsSupportedBy(selectRayhit.collider.gameObject.transform.root.gameObject, sandboxSurface)) {
 							if (selectRayhit.collider.gameObject.transform.root.gameObject.GetComponent<Voxeme> () != null) {
 								selectedObject = selectRayhit.collider.gameObject.transform.root.gameObject;
+								surfacePlacementOffset = (Helper.GetObjectWorldSize (selectedObject.gameObject).center.y - Helper.GetObjectWorldSize (selectedObject.gameObject).min.y) +
+									(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
 								SetShader (selectedObject, ShaderType.Highlight);
 								actionButtonText = "Place";
 								placementState = PlacementState.Place;
@@ -209,12 +216,12 @@ public class ModuleVoxemeCreation : ModalWindow {
 			    Screen.height - (35 + (int)(20 * fontSizeModifier)), GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
 			    actionButtonText, buttonStyle)) {
 			switch (actionButtonText) {
-			case "Add":
+			case "Add Object":
 				render = true;
 				break;
 		
 			case "Place":
-				actionButtonText = "Add";
+				actionButtonText = "Add Object";
 				placementState = PlacementState.Add;
 				selected = -1;
 				cameraControl.allowRotation = true;
@@ -224,7 +231,7 @@ public class ModuleVoxemeCreation : ModalWindow {
 
 			case "Delete":
 				DeleteVoxeme (selectedObject);
-				actionButtonText = "Add";
+				actionButtonText = "Add Object";
 				placementState = PlacementState.Add;
 				selected = -1;
 				cameraControl.allowRotation = true;
@@ -254,15 +261,27 @@ public class ModuleVoxemeCreation : ModalWindow {
 			render = false;
 
 			GameObject go = (GameObject)GameObject.Instantiate (prefabs[selected]);
-			go.transform.position = Vector3.zero;
+			go.transform.position = Helper.FindClearRegion(sandboxSurface, go).center;
+			Debug.Log (go.transform.position);
 			go.SetActive (true);
 			go.name = go.name.Replace ("(Clone)", "");
 
-			int exisitingObjCount = objSelector.allVoxemes.FindAll (v => v.gameObject.name.StartsWith(go.name)).Count;
-			Debug.Log (exisitingObjCount);
-			if (exisitingObjCount > 0) {
-				go.name = go.name + (exisitingObjCount + 1).ToString ();
+			List<Voxeme> existingObjsOfType = objSelector.allVoxemes.FindAll (v => v.gameObject.name.StartsWith (go.name));
+			List<int> objIndices = existingObjsOfType.Select (v => System.Convert.ToInt32 (v.name.Replace (go.name, "0"))).ToList();
+			for (int i = 0; i < objIndices.Count; i++) {
+				if (objIndices [i] == 0) {
+					objIndices [i] = 1;
+				}
 			}
+
+			int j;
+			for (j = 0; j < objIndices.Count; j++) {
+				if (objIndices [j] != j+1) {
+					break;
+				}
+			}
+
+			go.name = go.name + (j + 1).ToString ();
 
 			// store shaders
 			foreach (Renderer renderer in go.GetComponentsInChildren<Renderer> ()) {
@@ -279,10 +298,10 @@ public class ModuleVoxemeCreation : ModalWindow {
 			selectedObject.GetComponent<Voxeme> ().VoxMLLoaded += VoxMLUpdated;
 
 			surfacePlacementOffset = (Helper.GetObjectWorldSize (selectedObject.gameObject).center.y - Helper.GetObjectWorldSize (selectedObject.gameObject).min.y) +
-			(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
-			selectedObject.transform.position = new Vector3 (sandboxSurface.transform.position.x,
-					preds.ON(new object[] { sandboxSurface }).y + surfacePlacementOffset,
-					sandboxSurface.transform.position.z);
+				(selectedObject.gameObject.transform.position.y - Helper.GetObjectWorldSize (selectedObject.gameObject).center.y);
+			selectedObject.transform.position = new Vector3 (go.transform.position.x,
+				preds.ON(new object[] { sandboxSurface }).y + surfacePlacementOffset,
+				go.transform.position.z);
 			SetShader (selectedObject, ShaderType.Highlight);
 			actionButtonText = "Place";
 			placementState = PlacementState.Place;
@@ -308,7 +327,9 @@ public class ModuleVoxemeCreation : ModalWindow {
 	}
 
 	void DeleteVoxeme(GameObject obj) {
-		objSelector.allVoxemes.Remove(objSelector.allVoxemes.Find (v => v.gameObject == obj));
+		foreach (Voxeme child in obj.GetComponentsInChildren<Voxeme>()) {
+			objSelector.allVoxemes.Remove (objSelector.allVoxemes.Find (v => v == child));
+		}
 		Destroy (obj);
 	}
 
@@ -323,15 +344,20 @@ public class ModuleVoxemeCreation : ModalWindow {
 	void VoxMLUpdated(object sender, EventArgs e) {
 		GameObject voxeme = ((VoxMLEventArgs)e).Voxeme;
 		VoxML voxml = ((VoxMLEventArgs)e).VoxML;
-		if (voxeme.GetComponent<AttributeSet> () != null) {
-			Debug.Log (voxeme.GetComponent<AttributeSet> ().attributes.Count);
-			foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
-				Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
-				Debug.Log (newMat);
-				foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
-					Shader shader = renderer.material.shader;
-					renderer.material = newMat;
-					renderer.material.shader = shader;
+
+		if (voxeme != null) {
+			if (voxeme.GetComponent<AttributeSet> () != null) {
+				Debug.Log (voxeme.GetComponent<AttributeSet> ().attributes.Count);
+				foreach (string attr in voxeme.GetComponent<AttributeSet> ().attributes) {
+					Material newMat = Resources.Load (string.Format ("DemoTextures/{0}", attr)) as Material;
+					if (newMat != null) {
+						Debug.Log (newMat);
+						foreach (Renderer renderer in voxeme.GetComponentsInChildren<Renderer>()) {
+							Shader shader = renderer.material.shader;
+							renderer.material = newMat;
+							renderer.material.shader = shader;
+						}
+					}
 				}
 			}
 		}

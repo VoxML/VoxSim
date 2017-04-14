@@ -4,13 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Timers;
 
 using Global;
 using RCC;
 using Satisfaction;
-
-
+using Vox;
 
 /// <summary>
 /// Semantics of each predicate should be explicated within the method itself
@@ -409,6 +409,7 @@ public class Predicates : MonoBehaviour {
 	// OUT: Location
 	public Vector3 NEAR(object[] args)
 	{
+		Debug.Log (args [0].GetType ());
 		Vector3 outValue = Vector3.zero;
 		if (args [0] is GameObject) {	// near an object
 			GameObject obj = ((GameObject)args [0]);
@@ -504,13 +505,6 @@ public class Predicates : MonoBehaviour {
 		}
 
 		return outValue;
-	}
-
-	// IN: Object (single element array)
-	// OUT: String
-	public String AS(object[] args)
-	{
-		return args[0].ToString();
 	}
 
 	/// <summary>
@@ -673,15 +667,19 @@ public class Predicates : MonoBehaviour {
 	// OUT: String
 	public String THE(object[] args)
 	{
-		String objName = "";
-		System.Random random = new System.Random ();
+		List<String> objNames = new List<String>();
+		//System.Random random = new System.Random ();
 
 		if (args [0] is GameObject) {	// assume all inputs are of same type
-			int index = random.Next(args.Length);
-			objName = (args [index] as GameObject).name;
+			//int index = random.Next(args.Length);
+			for (int index = 0; index < args.Length; index++) {
+				if (args [index] is GameObject) {
+					objNames.Add ((args [index] as GameObject).name);
+				}
+			}
 		}
 
-		return objName;
+		return string.Join(",",objNames.ToArray());
 	}
 
 	// IN: Objects
@@ -701,23 +699,27 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
 	// OUT: String
-	public List<String> TWO(object[] args)
+	public String TWO(object[] args)
 	{
+		//Debug.Log (args.Length);
 		List<String> objNames = new List<String>();
 		System.Random random = new System.Random ();
 
 		if (args [0] is GameObject) {	// assume all inputs are of same type
-			if (args.Length > 2) {
+			if (args.Length >= 2) {
 				while (objNames.Count < 2) {
 					int index = random.Next (args.Length);
-					if (!objNames.Contains ((args [index] as GameObject).name)) {	// make sure all entries are distinct
-						objNames.Add ((args [index] as GameObject).name);
+					if (args [index].GetType () == args [0].GetType ()) {
+						if (!objNames.Contains ((args [index] as GameObject).name)) {	// make sure all entries are distinct
+							objNames.Add ((args [index] as GameObject).name);
+						}
 					}
 				}
 			}
 		}
 
-		return objNames;
+		//Debug.Log(string.Join(",",objNames.ToArray()));
+		return string.Join(",",objNames.ToArray());
 	}
 
 	public String LEFTMOST(object[] args) {
@@ -1480,6 +1482,39 @@ public class Predicates : MonoBehaviour {
 
 						if (voxComponent.moveSpeed == 0.0f) {
 							voxComponent.moveSpeed = RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+						}
+							
+						RaycastHit[] hits = Physics.RaycastAll (
+							new Vector3(targetPosition.x,targetPosition.y + Constants.EPSILON,
+								targetPosition.z), -Constants.yAxis);
+						List<RaycastHit> hitList = new List<RaycastHit> ((RaycastHit[])hits);
+						hits = hitList.OrderBy (h => h.distance).ToArray ();
+
+						GameObject supportingSurface = null;
+						foreach (RaycastHit hit in hits) {
+							if (hit.collider.gameObject.GetComponent<BoxCollider> () != null) {
+								if ((!hit.collider.gameObject.GetComponent<BoxCollider> ().isTrigger) &&
+									(!hit.collider.gameObject.transform.IsChildOf (gameObject.transform))) {
+									if (!Helper.FitsIn (Helper.GetObjectWorldSize (hit.collider.gameObject),
+										Helper.GetObjectWorldSize (gameObject), true)) {
+										supportingSurface = hit.collider.gameObject;
+										break;
+									}
+								}
+							}
+						}
+
+						if (supportingSurface != null) {
+							Debug.Log (targetPosition.y);
+							Debug.Log ((themeBounds.center.y-themeBounds.min.y));
+							Debug.Log (Helper.GetObjectWorldSize(supportingSurface).max.y);
+							Debug.Log (supportingSurface.name);
+							if (targetPosition.y - (themeBounds.center.y-themeBounds.min.y) < Helper.GetObjectWorldSize(supportingSurface).max.y) {
+								targetPosition = new Vector3 (targetPosition.x,
+									Helper.GetObjectWorldSize(supportingSurface).max.y + (themeBounds.center.y-themeBounds.min.y),
+									targetPosition.z);
+								Debug.Log (Helper.VectorToParsable (targetPosition));
+							}
 						}
 
 						voxComponent.targetPosition = targetPosition;
@@ -2316,8 +2351,12 @@ public class Predicates : MonoBehaviour {
 				Debug.Log(Mathf.Rad2Deg * Constants.EPSILON);
 				OnPrepareLog (this, new ParamsEventArgs ("SymmetryAxis", Constants.Axes.FirstOrDefault (a => 
 					(Helper.AngleCloseEnough(objAxis,a.Value) || Helper.AngleCloseEnough(-objAxis,a.Value))).Key.ToString()));
-				OnPrepareLog (this, new ParamsEventArgs ("RotAxis", Constants.Axes.FirstOrDefault (a => 
-					(Helper.AngleCloseEnough(objRotAxis,a.Value) || Helper.AngleCloseEnough(-objRotAxis,a.Value))).Key.ToString()));
+				KeyValuePair<string,Vector3> rotAxis = Constants.Axes.FirstOrDefault (a => 
+					(Helper.AngleCloseEnough (objRotAxis, a.Value) || Helper.AngleCloseEnough (-objRotAxis, a.Value)));
+				if (rotAxis.Value == Vector3.zero) {
+					rotAxis = Constants.Axes.FirstOrDefault(a => a.Value == Constants.xAxis);
+				}
+				OnPrepareLog (this, new ParamsEventArgs ("RotAxis", rotAxis.Key.ToString()));
 				OnParamsCalculated (null, null);
 				return;
 			}
@@ -3371,32 +3410,32 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
 	// OUT: none
-	public void SWITCH(object[] args)
-	{
-		if ((args [0] is GameObject) && (args [1] is GameObject)) {
-			Debug.Log ((args [0] is GameObject));
-			Debug.Log ((args [1] is GameObject));
-			Vector3[] startPos = new Vector3[] { (args [0] as GameObject).transform.position,(args [1] as GameObject).transform.position };
-
-			if (startPos [0].x < startPos [1].x) {	// if args[0] is left of args[1]
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1] + (Vector3.right*.8f))), 1);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
-					Helper.VectorToParsable (startPos [0])), 2);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1])), 3);
-			}
-			else if (startPos [0].x > startPos [1].x) {	// if args[0] is right of args[1]
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1] + (Vector3.left*.8f))), 1);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
-					Helper.VectorToParsable (startPos [0])), 2);
-				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (startPos [1])), 3);
-			}
-			//eventManager.RemoveEvent (3);
-		}
-	}
+//	public void SWITCH(object[] args)
+//	{
+//		if ((args [0] is GameObject) && (args [1] is GameObject)) {
+//			Debug.Log ((args [0] is GameObject));
+//			Debug.Log ((args [1] is GameObject));
+//			Vector3[] startPos = new Vector3[] { (args [0] as GameObject).transform.position,(args [1] as GameObject).transform.position };
+//
+//			if (startPos [0].x < startPos [1].x) {	// if args[0] is left of args[1]
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1] + (Vector3.right*.8f))), 1);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
+//					Helper.VectorToParsable (startPos [0])), 2);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1])), 3);
+//			}
+//			else if (startPos [0].x > startPos [1].x) {	// if args[0] is right of args[1]
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1] + (Vector3.left*.8f))), 1);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [1] as GameObject).name,
+//					Helper.VectorToParsable (startPos [0])), 2);
+//				eventManager.InsertEvent (string.Format ("slide({0},{1})", (args [0] as GameObject).name,
+//					Helper.VectorToParsable (startPos [1])), 3);
+//			}
+//			//eventManager.RemoveEvent (3);
+//		}
+//	}
 
 	// IN: Objects
 	// OUT: none
@@ -3780,7 +3819,6 @@ public class Predicates : MonoBehaviour {
 					}
 				}
 				else {
-
 					if (voxComponent.supportingSurface != null) {
 						if (theme != null) {
 							GameObject interior = voxComponent.opVox.Type.Concavity.Item2;
@@ -4316,5 +4354,138 @@ public class Predicates : MonoBehaviour {
 		bool r = false;
 
 		return r;
+	}
+
+	// IN: Object (single element array)
+	// OUT: Vector3
+	public Vector3 LOC(object[] args)
+	{
+		Vector3 loc = Vector3.zero;
+
+		if (args [0] is GameObject) {
+			loc = (args [0] as GameObject).transform.position;
+		}
+
+		return loc;
+	}
+
+	// IN: Object (single element array)
+	// OUT: none
+	public void DEF(object[] args)
+	{
+		Debug.Log (args [1].GetType ());
+		if (args [1] is string) {
+			string val = ((string)args [1]).Replace ("\"", "").Replace ("\'", "");
+			Debug.Log (string.Format ("{0} : {1}",val, args [0]));
+			if (!eventManager.globalVars.ContainsKey (val)) {
+				eventManager.globalVars.Add (val, args [0]);
+			}
+			else {
+				eventManager.globalVars[val] = args [0];
+			}
+		}
+
+		foreach (string key in eventManager.globalVars.Keys) {
+			Debug.Log (string.Format ("{0} : {1}",key, eventManager.globalVars[key]));
+		}
+
+		return;
+	}
+
+	// IN: Object (single element array)
+	// OUT: String
+	public String AS(object[] args)
+	{
+		Debug.Log (args [0].ToString ());
+		return args[0].ToString();
+	}
+
+	// IN: Object (single element array)
+	// OUT: String
+	public void CLEAR_GLOBALS(object[] args)
+	{
+		eventManager.globalVars.Clear ();
+
+		return;
+	}
+
+	// IN: Object (single element array)
+	// OUT: none
+	public void REPEAT(object[] args)
+	{
+		if (args [args.Length - 1] is bool) {
+			if ((bool)args [args.Length - 1] == false) {
+				if (args [0] is string) {
+					int i;
+					if (int.TryParse ((string)args [0], out i)) {
+						Debug.Log (i);
+						if (args [1] is string) {
+							Debug.Log ((string)args [1]);
+							for (int j = 0; j < i; j++) {
+								eventManager.InsertEvent (((string)args [1]).Replace ("{", "(").Replace ("}", ")").Replace (":", ",")
+									.Replace ("\"", "").Replace ("\'", ""), eventManager.events.Count);
+								eventManager.InsertEvent ("clear_globals()",eventManager.events.Count);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return;
+	}
+
+	public void ComposeSubevents(VoxML voxml, object[] args) {
+		//List<GameObject> typedArgs = new List<GameObject> ();
+
+		for (int i = 0; i < voxml.Type.Args.Count; i++) {
+			VoxTypeArg arg = voxml.Type.Args [i];
+			Debug.Log (arg.Value.Split (':') [0]);
+			Debug.Log (arg.Value.Split (':') [1]);
+		
+			if (arg.Value.Split (':') [0].Contains ("[]")) {
+				List<GameObject> filteredArgs = args.Where (a => (a.GetType () == typeof(GameObject))).Cast<GameObject> ().ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> () != null).ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> ().voxml.Lex.Type.Contains (arg.Value.Split (':') [1])).ToList ();
+				filteredArgs = filteredArgs.Where (a => !eventManager.globalVars.ContainsValue (a)).ToList ();
+
+				if (filteredArgs.Count > 0) {
+					eventManager.globalVars.Add (arg.Value.Split (':') [0], filteredArgs);
+				}
+			}
+			else {
+				List<GameObject> filteredArgs = args.Where (a => (a.GetType () == typeof(GameObject))).Cast<GameObject> ().ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> () != null).ToList ();
+				filteredArgs = filteredArgs.Where (a => a.GetComponent<Voxeme> ().voxml.Lex.Type.Contains (arg.Value.Split (':') [1])).ToList ();
+				filteredArgs = filteredArgs.Where (a => !eventManager.globalVars.ContainsValue (a)).ToList ();
+
+				if (filteredArgs.Count > 0) {
+					//typedArgs.Add (filteredArgs [0]);
+					eventManager.globalVars.Add (arg.Value.Split (':') [0], filteredArgs [0]);
+				}
+			}
+		}
+
+		foreach (string key in eventManager.globalVars.Keys) {
+			Debug.Log (string.Format ("{0} : {1}", key, eventManager.globalVars [key]));
+		}
+			
+		int index = 1;
+		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
+			string[] commands = subevent.Value.Split (';');
+			foreach (string command in commands) {
+				string modifiedCommand = command;
+				Regex q = new Regex ("[\'\"].*[\'\"]");
+				MatchCollection matches = q.Matches (command);
+				for (int i = 0; i < matches.Count; i++) {
+					String match = matches [i].Value;
+					String replace = match.Replace ("(", "{").Replace (")", "}").Replace (",", ":");
+					modifiedCommand = command.Replace (match, replace);
+				}
+				eventManager.InsertEvent (modifiedCommand, index);
+				index++;
+				//Debug.Log (eventManager.EvaluateCommand (command));
+			}
+		}
 	}
 }

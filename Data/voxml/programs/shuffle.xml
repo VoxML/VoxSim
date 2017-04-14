@@ -1,19 +1,44 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <Entity Type="Program" />
+  <Entity Type="Program" />
   <Lex>
     <Pred>shuffle</Pred>
     <Type>process</Type>
   </Lex>
   <Type>
     <Head>process</Head>
+    <Components />
+    <Concavity />
+    <RotatSym />
+    <ReflSym />
     <Args>
       <Arg Value="x:agent" />
-      <Arg Value="y[]:physobj" />
+      <Arg Value="y:physobj" />
+      <Arg Value="z:physobj" />
+      <!--<Arg Value="y[]:physobj" />-->
     </Args>
     <Body>
-        <Subevent Value="def(i,as(0))" />
-        <Subevent Value="[while(i < 5),def(z,as(elem(y))),def(w,as(elem(y),w != z)),switch(x,y),def(i,as(i+1))]" />
+      <Subevent Value="repeat(5,'switch(y,z)')" />
+      <!--<Subevent Value="repeat(2,'switch(two(y[]))')" />-->
     </Body>
+    <Scale />
+    <Arity />
+    <Class />
+    <Value />
+    <Constr />
   </Type>
+  <Habitat>
+    <Intrinsic />
+    <Extrinsic />
+  </Habitat>
+  <Afford_Str>
+    <Affordances />
+  </Afford_Str>
+  <Embodiment>
+    <Scale />
+    <Movable>false</Movable>
+  </Embodiment>
+  <Attributes>
+    <Attrs />
+  </Attributes>
 </VoxML>

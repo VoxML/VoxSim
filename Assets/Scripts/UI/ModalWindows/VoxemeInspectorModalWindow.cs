@@ -88,7 +88,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 	string mlPred = "";
 	
 	string[] mlObjectTypeOptions = new string[]{"physobj", "human", "artifact"};
-	string[] mlProgramTypeOptions = new string[]{"process", "transition_event", "1", "2"};
+	string[] mlProgramTypeOptions = new string[]{"process", "transition_event"};
 	List<int> mlTypeSelectVisible = new List<int>(new int[]{-1});
 	List<int> mlTypeSelected = new List<int>(new int[]{-1});
 	int mlAddType = -1;
@@ -310,6 +310,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 				}
 				else {
 					SaveMarkup (InspectorVoxeme, mlEntityType);
+					InspectorObject.GetComponent<Voxeme> ().LoadVoxML ();
 				}
 			}
 			else if (GUILayout.Button ("Import")) {
@@ -1607,6 +1608,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 					windowTitle = InspectorVoxeme.Substring (InspectorVoxeme.LastIndexOf ('/') + 1);
 				}
 			}
+			InspectorObject.transform.Find (InspectorObject.name + "*").name = windowTitle + "*";
 			InspectorObject.name = windowTitle;
 		}
 	}

@@ -36,7 +36,7 @@ public class ClearEvents : FontManager {
 	}	
 
 	protected virtual void OnGUI () {
-		if (GUI.Button (new Rect (10, Screen.height - ((10 + (int)(20*exitToMenu.FontSizeModifier)) + (5 + (int)(20*fontSizeModifier))),
+		if (GUI.Button (new Rect (10, Screen.height - ((10 + (int)(45*exitToMenu.FontSizeModifier)) + (5 + (int)(20*fontSizeModifier))),
 			100*fontSizeModifier, 20*fontSizeModifier), "Clear Events", buttonStyle)) {
 			eventManager.SendMessage ("ClearEvents");
 			return;

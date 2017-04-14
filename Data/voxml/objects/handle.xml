@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <Entity Type="Object" />
+  <Entity Type="Object" />
   <Lex>
-    <Pred>cup</Pred>
+    <Pred>handle</Pred>
     <Type>physobj*artifact</Type>
   </Lex>
   <Type>
@@ -11,6 +11,13 @@
     <Concavity>Flat</Concavity>
     <RotatSym>X</RotatSym>
     <ReflSym>XY,YZ</ReflSym>
+    <Args />
+    <Body />
+    <Scale />
+    <Arity />
+    <Class />
+    <Value />
+    <Constr />
   </Type>
   <Habitat>
     <Intrinsic />
@@ -18,11 +25,14 @@
   </Habitat>
   <Afford_Str>
     <Affordances>
-        <Affordance Formula="H-&gt;[grasp(x, [1])]" />
+      <Affordance Formula="H-&gt;[grasp(x, [1])]" />
     </Affordances>
   </Afford_Str>
   <Embodiment>
     <Scale>&lt;agent</Scale>
     <Movable>true</Movable>
   </Embodiment>
+  <Attributes>
+    <Attrs />
+  </Attributes>
 </VoxML>
