@@ -1182,7 +1182,7 @@ namespace Global {
 			}
 
 			PluginImport commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
-			commBridge.OpenPortInternal (commBridge.port);
+			commBridge.OpenPortInternal (PlayerPrefs.GetString("Listener Port"));
 		}
 	}
 }
