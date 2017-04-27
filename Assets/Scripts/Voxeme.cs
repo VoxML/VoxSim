@@ -15,7 +15,7 @@ public class Voxeme : MonoBehaviour {
 	[HideInInspector]
 	public VoxML voxml = new VoxML();
 
-	public OperationalVox opVox = new OperationalVox ();
+	public OperationalVox opVox;
 
 	// rotation information for each subobject's rigidbody
 	// (physics-resultant changes between the completion of one event and the start of the next must be brought into line)
@@ -95,20 +95,7 @@ public class Voxeme : MonoBehaviour {
 
 //		voxml = VoxML.LoadFromText (www.text);
 
-		try {
-			using (StreamReader sr = new StreamReader(
-				string.Format("{0}/{1}",Data.voxmlDataPath,string.Format("objects/{0}.xml",gameObject.name))))
-			{
-				voxml = VoxML.LoadFromText (sr.ReadToEnd());
-			}
-		}
-		catch (FileNotFoundException ex) {
-			voxml = new VoxML();
-			voxml.Entity.Type = VoxEntity.EntityType.Object;
-		}
-
-		// populate operational voxeme structure
-		PopulateOperationalVoxeme();
+		LoadVoxML ();
 
 		// get movement blocking
 		minYBound = Helper.GetObjectWorldSize(gameObject).min.y;
@@ -287,83 +274,8 @@ public class Voxeme : MonoBehaviour {
 			}
 		}
 			
-		Vector3 rayStartX = new Vector3 (Helper.GetObjectWorldSize(gameObject).min.x-Constants.EPSILON,
-			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).center.z);
-		Vector3 contactPointX = Helper.RayIntersectionPoint (rayStartX, Vector3.right);
-		//contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
-
-		Vector3 rayStartZ = new Vector3 (Helper.GetObjectWorldSize(gameObject).center.x,
-			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).min.z-Constants.EPSILON);
-		Vector3 contactPointZ = Helper.RayIntersectionPoint (rayStartZ, Vector3.forward);
-		//contactPointZ = new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z);
-
-		Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
-			new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z) : 
-			new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
-
-		RaycastHit[] hits;
-
-//		hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
-		hits = Physics.RaycastAll (contactPoint, AxisVector.negYAxis);
-		List<RaycastHit> hitList = new List<RaycastHit> ((RaycastHit[])hits);
-		hits = hitList.OrderBy (h => h.distance).ToArray ();
-		foreach (RaycastHit hit in hits) {
-			if (hit.collider.gameObject.GetComponent<BoxCollider> () != null) {
-				if ((!hit.collider.gameObject.GetComponent<BoxCollider> ().isTrigger) &&
-				    (!hit.collider.gameObject.transform.IsChildOf (gameObject.transform))) {
-					if (!Helper.FitsIn (Helper.GetObjectWorldSize (hit.collider.gameObject),
-						    Helper.GetObjectWorldSize (gameObject), true)) {
-						supportingSurface = hit.collider.gameObject;
-
-						if (!isGrasped) {
-							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme (gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
-							bool themeIsUpright = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
-							bool themeIsUpsideDown = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
-
-							bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme (supportingSurface).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
-							bool supportIsUpright = (Vector3.Dot (supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
-							bool supportIsUpsideDown = (Vector3.Dot (supportingSurface.transform.root.transform.up, Vector3.up) < -0.5f);
-
-							// if theme is concave, the concavity isn't enabled, and the object is on top of an object that fits inside of it
-							// e.g. cup on top of ball
-							if ((themeIsConcave) && (Concavity.IsEnabled (Helper.GetMostImmediateParentVoxeme (gameObject))) &&
-							   (Helper.FitsIn (Helper.GetObjectWorldSize (supportingSurface.transform.root.gameObject), Helper.GetObjectWorldSize (gameObject)))) {
-								minYBound = Helper.GetObjectWorldSize (supportingSurface).min.y;
-								//flip the plate.  flip the cup.  put the plate under the cup
-								//flip the cup.  put the ball under the cup
-							}
-							else {	// otherwise
-								if (supportIsConcave) {	// if the object under this object is concave
-									if (Concavity.IsEnabled (Helper.GetMostImmediateParentVoxeme (supportingSurface))) {	// if the object under this object has its concavity enabled
-										minYBound = PhysicsHelper.GetConcavityMinimum (supportingSurface.transform.root.gameObject);
-//										Debug.Log (gameObject.name);
-//										Debug.Log (supportingSurface.name);
-//										Debug.Log (minYBound);
-										//Debug.Break ();
-									}
-									else {	// if the object under this object is not upright
-										//Debug.Break ();
-										minYBound = Helper.GetObjectWorldSize (supportingSurface).max.y;
-//								Debug.Log (minYBound);
-										//Debug.Log (minYBound);
-									}
-								}
-								else {	// if the object under this object is not concave
-									minYBound = Helper.GetObjectWorldSize (supportingSurface).max.y;
-//							Debug.Log (minYBound);
-									//Debug.Break ();
-								}
-								//**
-								//Bug list:
-								// put the plate under the cup jitter
-							}
-
-							break;
-						}
-					}
-				}
-			}
-		}
+		// Don't let the object sink below supporting surface
+		AdjustToSupportingSurface();
 
 		if (rigging != null) {
 			if (rigging.usePhysicsRig) {
@@ -432,6 +344,86 @@ public class Voxeme : MonoBehaviour {
 
 		// check relationships
 
+	}
+
+	void AdjustToSupportingSurface() {
+		Vector3 rayStartX = new Vector3 (Helper.GetObjectWorldSize(gameObject).min.x-Constants.EPSILON,
+			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).center.z);
+		Vector3 contactPointX = Helper.RayIntersectionPoint (rayStartX, Vector3.right);
+		//contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
+
+		Vector3 rayStartZ = new Vector3 (Helper.GetObjectWorldSize(gameObject).center.x,
+			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).min.z-Constants.EPSILON);
+		Vector3 contactPointZ = Helper.RayIntersectionPoint (rayStartZ, Vector3.forward);
+		//contactPointZ = new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z);
+
+		Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
+			new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z) : 
+			new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
+
+		RaycastHit[] hits;
+
+		//		hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
+		hits = Physics.RaycastAll (contactPoint, AxisVector.negYAxis);
+		List<RaycastHit> hitList = new List<RaycastHit> ((RaycastHit[])hits);
+		hits = hitList.OrderBy (h => h.distance).ToArray ();
+		foreach (RaycastHit hit in hits) {
+			if (hit.collider.gameObject.GetComponent<BoxCollider> () != null) {
+				if ((!hit.collider.gameObject.GetComponent<BoxCollider> ().isTrigger) &&
+					(!hit.collider.gameObject.transform.IsChildOf (gameObject.transform))) {
+					if (!Helper.FitsIn (Helper.GetObjectWorldSize (hit.collider.gameObject),
+						Helper.GetObjectWorldSize (gameObject), true)) {
+						supportingSurface = hit.collider.gameObject;
+
+						if (!isGrasped) {
+							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme (gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
+							bool themeIsUpright = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
+							bool themeIsUpsideDown = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
+
+							bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme (supportingSurface).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
+							bool supportIsUpright = (Vector3.Dot (supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
+							bool supportIsUpsideDown = (Vector3.Dot (supportingSurface.transform.root.transform.up, Vector3.up) < -0.5f);
+
+							// if theme is concave, the concavity isn't enabled, and the object is on top of an object that fits inside of it
+							// e.g. cup on top of ball
+							if ((themeIsConcave) && (Concavity.IsEnabled (Helper.GetMostImmediateParentVoxeme (gameObject))) &&
+								(Helper.FitsIn (Helper.GetObjectWorldSize (supportingSurface.transform.root.gameObject), Helper.GetObjectWorldSize (gameObject)))) {
+								minYBound = Helper.GetObjectWorldSize (supportingSurface).min.y;
+								//flip the plate.  flip the cup.  put the plate under the cup
+								//flip the cup.  put the ball under the cup
+							}
+							else {	// otherwise
+								if (supportIsConcave) {	// if the object under this object is concave
+									if (Concavity.IsEnabled (Helper.GetMostImmediateParentVoxeme (supportingSurface))) {	// if the object under this object has its concavity enabled
+										minYBound = PhysicsHelper.GetConcavityMinimum (supportingSurface.transform.root.gameObject);
+										//										Debug.Log (gameObject.name);
+										//										Debug.Log (supportingSurface.name);
+										//										Debug.Log (minYBound);
+										//Debug.Break ();
+									}
+									else {	// if the object under this object is not upright
+										//Debug.Break ();
+										minYBound = Helper.GetObjectWorldSize (supportingSurface).max.y;
+										//								Debug.Log (minYBound);
+										//Debug.Log (minYBound);
+									}
+								}
+								else {	// if the object under this object is not concave
+									minYBound = Helper.GetObjectWorldSize (supportingSurface).max.y;
+									//							Debug.Log (minYBound);
+									//Debug.Break ();
+								}
+								//**
+								//Bug list:
+								// put the plate under the cup jitter
+							}
+
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	public void Reset() {
@@ -583,7 +575,26 @@ public class Voxeme : MonoBehaviour {
 		}
 	}
 
+	public void LoadVoxML() {
+		try {
+			using (StreamReader sr = new StreamReader (
+				string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", gameObject.name)))) {
+				voxml = VoxML.LoadFromText (sr.ReadToEnd ());
+			}
+		}
+		catch (FileNotFoundException ex) {
+			voxml = new VoxML ();
+			voxml.Entity.Type = VoxEntity.EntityType.Object;
+		}
+
+
+		// populate operational voxeme structure
+		PopulateOperationalVoxeme();
+	}
+
 	void PopulateOperationalVoxeme() {
+		opVox = new OperationalVox ();
+		
 		// set entity type
 		opVox.VoxemeType = voxml.Entity.Type;
 

@@ -1,19 +1,46 @@
 <?xml version="1.0" encoding="us-ascii"?>
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-    <Entity Type="Program" />
+  <Entity Type="Program" />
   <Lex>
     <Pred>switch</Pred>
     <Type>process</Type>
   </Lex>
   <Type>
     <Head>process</Head>
+    <Components />
+    <Concavity />
+    <RotatSym />
+    <ReflSym />
     <Args>
       <Arg Value="x:agent" />
       <Arg Value="y:physobj" />
       <Arg Value="z:physobj" />
     </Args>
     <Body>
-        <Subevent Value="def(loc(y),as(l1)),def(loc(z),as(l2)),put(y,l1),put(z,l2)" />
+      <Subevent Value="def(loc(y),as('l1'))" />
+      <Subevent Value="def(loc(z),as('l2'))" />
+      <Subevent Value="slide(y,near(z))" />
+      <Subevent Value="slide(z,l1)" />
+      <Subevent Value="slide(y,l2)" />
     </Body>
+    <Scale />
+    <Arity />
+    <Class />
+    <Value />
+    <Constr />
   </Type>
+  <Habitat>
+    <Intrinsic />
+    <Extrinsic />
+  </Habitat>
+  <Afford_Str>
+    <Affordances />
+  </Afford_Str>
+  <Embodiment>
+    <Scale />
+    <Movable>false</Movable>
+  </Embodiment>
+  <Attributes>
+    <Attrs />
+  </Attributes>
 </VoxML>

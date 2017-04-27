@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -297,8 +298,9 @@ namespace Satisfaction {
 					}
 					else if (arg is String) {	// if arg is String
 						if ((arg as String) != string.Empty) {
-							Regex q = new Regex("\".*\"");
-							if (q.IsMatch (arg as String)) {
+							Regex q = new Regex("[\'\"].*[\'\"]");
+							int i;
+							if ((q.IsMatch (arg as String)) || (int.TryParse(arg as String, out i))) {
 								objs.Add (arg as String);
 							}
 							else {
@@ -311,6 +313,8 @@ namespace Satisfaction {
 											matches.Add (voxeme.gameObject);
 										}
 									}
+
+									Debug.Log (matches.Count);
 
 									if (matches.Count == 0) {
 										go = GameObject.Find (arg as String);
@@ -328,9 +332,11 @@ namespace Satisfaction {
 										}
 									}
 									else {
-										Debug.Log (string.Format ("Which {0}?", (arg as String)));
-										OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("Which {0}?", (arg as String)));
-										return false;	// abort
+										//if (!em.evalOrig.ContainsKey(command)){
+											Debug.Log (string.Format ("Which {0}?", (arg as String)));
+											OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("Which {0}?", (arg as String)));
+											return false;	// abort
+										//}
 									}
 								}
 								objs.Add (go);
@@ -348,8 +354,14 @@ namespace Satisfaction {
 					object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
 				}
 				else {
-					OutputHelper.PrintOutput (OutputController.Role.Affector,"Sorry, what does " + "\"" + pred + "\" mean?");
-					return false;
+					// no coded-behavior
+					// see if a VoxML markup exists
+					// if so, we might be able to figure this out,
+					if (!File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml",pred))) {
+						// otherwise return error
+						OutputHelper.PrintOutput (OutputController.Role.Affector,"Sorry, what does " + "\"" + pred + "\" mean?");
+						return false;
+					}
 				}
 			}
 			else {

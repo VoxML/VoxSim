@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Timers;
 
 using Global;
 using Satisfaction;
+using Vox;
 
 public class EventManagerArgs : EventArgs {
 
@@ -33,6 +35,7 @@ public class EventManager : MonoBehaviour {
 	//public string lastObjectResolved = string.Empty;
 	public Dictionary<String,String> evalOrig = new Dictionary<String, String>();
 	public Dictionary<String,String> evalResolved = new Dictionary<String, String>();
+	public Hashtable globalVars = new Hashtable();
 
 	public double eventWaitTime = 2000.0;
 	Timer eventWaitTimer;
@@ -123,6 +126,7 @@ public class EventManager : MonoBehaviour {
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 
 		inputController.ParseComplete += StoreParse;
+		inputController.ParseComplete += ClearGlobalVars;
 		//inputController.InputReceived += StartEventWaitTimer;
 
 		//eventWaitTimer = new Timer (eventWaitTime);
@@ -158,9 +162,11 @@ public class EventManager : MonoBehaviour {
 					ExecuteNextCommand ();
 				}
 				else {
-					OutputHelper.PrintOutput (OutputController.Role.Affector, "OK, I did it.");
-					EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
-					OnEventComplete (this, eventArgs);
+					if (OutputHelper.GetCurrentOutputString (OutputController.Role.Affector) != "I'm sorry, I can't do that.") {
+						OutputHelper.PrintOutput (OutputController.Role.Affector, "OK, I did it.");
+						EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
+						OnEventComplete (this, eventArgs);
+					}
 				}
 			}
 		}
@@ -190,6 +196,10 @@ public class EventManager : MonoBehaviour {
 
 	public void StoreParse(object sender, EventArgs e) {
 		lastParse = ((InputEventArgs)e).InputString;
+	}
+
+	public void ClearGlobalVars(object sender, EventArgs e) {
+		globalVars.Clear ();
 	}
 
 	public void WaitComplete(object sender, EventArgs e) {
@@ -235,8 +245,11 @@ public class EventManager : MonoBehaviour {
 		ClearRDFTriples ();
 		ClearSkolems ();
 		ParseCommand (command);
+
+		string globalsApplied = ApplyGlobals (command);
+
 		FinishSkolemization ();
-		skolemized = Skolemize (command);
+		skolemized = Skolemize (globalsApplied);
 		Debug.Log ("Skolemized command: " + skolemized);
 		//EvaluateSkolemizedCommand(skolemized);
 
@@ -281,8 +294,9 @@ public class EventManager : MonoBehaviour {
 		events [events.IndexOf (command)] = evaluated;
 
 		Triple<String,String,String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
-//		Debug.Log(evalOrig[evaluated]);
-//		Debug.Log(evalResolved[evaluated]);
+		Debug.Log(evalOrig[evaluated]);
+		Debug.Log(evalResolved[evaluated]);
+		Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 
 		if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
 			preds.rdfTriples.Add(triple);
@@ -311,10 +325,12 @@ public class EventManager : MonoBehaviour {
 			
 				if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
 					objs.Add (Helper.ParsableToVector ((String)arg));
-				} else if (arg is String) {	// if arg is String
+				}
+				else if (arg is String) {	// if arg is String
 					if ((arg as String) != string.Empty) {
-						Regex q = new Regex ("\".*\"");
-						if (q.IsMatch (arg as String)) {
+						Regex q = new Regex ("[\'\"].*[\'\"]");
+						int i;
+						if ((q.IsMatch (arg as String)) || (int.TryParse(arg as String, out i))) {
 							objs.Add (arg as String);
 						} 
 						else {
@@ -345,11 +361,20 @@ public class EventManager : MonoBehaviour {
 			objs.Add (true);
 			methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
-			if ((methodToCall != null) &&  (preds.rdfTriples.Count > 0)) {
-				Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
-				object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
-				Debug.Log (evaluatedCommand);
-				OnExecuteEvent(this, new EventManagerArgs (evaluatedCommand));
+			if (preds.rdfTriples.Count > 0) {
+				if (methodToCall != null) {
+					Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
+					object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
+					Debug.Log (evaluatedCommand);
+					OnExecuteEvent (this, new EventManagerArgs (evaluatedCommand));
+				}
+				else {
+					if (File.Exists (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
+						using (StreamReader sr = new StreamReader (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
+							preds.ComposeSubevents (VoxML.LoadFromText (sr.ReadToEnd ()), objs.ToArray ());
+						}
+					}
+				}
 			}
 		}
 	}
@@ -502,6 +527,58 @@ public class EventManager : MonoBehaviour {
 		return outString;
 	}
 
+	public String ApplyGlobals(String inString) {
+		String outString = inString;
+		String temp = inString;
+
+		int parenCount = temp.Count(f => f == '(') + 
+			temp.Count(f => f == ')');
+		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+
+		foreach (DictionaryEntry kv in globalVars) {
+			if (kv.Value is Vector3) {
+				outString = (String)outString.Replace ((String)kv.Key, Helper.VectorToParsable ((Vector3)kv.Value));
+			}
+			else if (kv.Value is GameObject) {
+				outString = (String)outString.Replace ((String)kv.Key, ((GameObject)kv.Value).name);
+				Dictionary<string,string> changeValues = skolems.Cast<DictionaryEntry> ().ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value).
+					Where (kkv => ((String)kkv.Value).Contains ((String)kv.Key)).ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value);
+				foreach (string key in changeValues.Keys) {
+					skolems [key] = changeValues [key].Replace ((String)kv.Key, ((GameObject)kv.Value).name);
+				}
+
+				Helper.PrintKeysAndValues (skolems);
+//				foreach (string key in changeValues.Keys) {
+//					Debug.Log (key + ":" + changeValues [key]);
+//				}
+			}
+			else if (kv.Value is List<GameObject>) {
+				String list = String.Join (":", ((List<GameObject>)kv.Value).Select(go => go.name).ToArray());
+				outString = (String)outString.Replace ((String)kv.Key, list);
+				list = String.Join (",", ((List<GameObject>)kv.Value).Select(go => go.name).ToArray());
+				Dictionary<string,string> changeValues = skolems.Cast<DictionaryEntry> ().ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value).
+					Where (kkv => ((String)kkv.Value).Contains ((String)kv.Key)).ToDictionary (kkv => (String)kkv.Key, kkv => (String)kkv.Value);
+				foreach (string key in changeValues.Keys) {
+					skolems [key] = changeValues [key].Replace ((String)kv.Key, list);
+				}
+			}
+			else if (kv.Value is String) {
+				outString = (String)outString.Replace ((String)kv.Key, (String)kv.Value);
+			}
+			else if (kv.Value is List<String>) {
+				String list = String.Join (",", ((List<String>)kv.Value).ToArray());
+				outString = (String)outString.Replace ((String)kv.Key, list);
+			}
+		}
+		temp = outString;
+		parenCount = temp.Count(f => f == '(') + 
+			temp.Count(f => f == ')');
+		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+
+		Debug.Log (outString);
+		return outString;
+	}
+
 	public String ApplySkolems(String inString) {
 		String outString = inString;
 		String temp = inString;
@@ -610,9 +687,10 @@ public class EventManager : MonoBehaviour {
 								}
 
 								if (objs.Count == 0) {
-									Regex q = new Regex ("\".*\"");
-									if (q.IsMatch (arg as String)) {
-										objs.Add (arg);
+									Regex q = new Regex ("[\'\"].*[\'\"]");
+									int i;
+									if ((q.IsMatch (arg as String)) || (int.TryParse(arg as String, out i))) {
+										objs.Add (arg as String);
 									}
 									else {
 										objs.Add (GameObject.Find (arg as String));

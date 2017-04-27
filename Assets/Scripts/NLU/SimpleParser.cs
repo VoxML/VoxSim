@@ -69,6 +69,35 @@ namespace NLU
 			"cork",
 		});
 
+		private Dictionary<string,string> shittyPorterStemmer = new Dictionary<string, string> () {
+			// not even a goddamn stemmer
+			{"blocks","block"},
+			{"balls","ball"},
+			{"plates","plate"},
+			{"cups","cup"},
+			{"discs","disc"},
+			{"spoons","spoon"},
+			{"books","book"},
+			{"blackboards","blackboard"},
+			{"bottles","bottle"},
+			{"grapes","grape"},
+			{"apples","apple"},
+			{"bananas","banana"},
+			{"tables","table"},
+			{"bowls","bowl"},
+			{"knives","knife"},
+			{"pencils","pencil"},
+			{"paper sheets","paper_sheet"},
+			{"mugs","mug"},
+			{"lids","lid"},
+			{"stack","stack"},
+			{"starcases","staircase"},
+			{"pyramids","pyramid"},
+			{"corks","cork"}
+			// sorry about this, Keigh
+			// let us delete this when EACL is over and never speak of it again
+		};
+
 
 		private List<string> _relations = new List<string>(new[]
 		{
@@ -122,6 +151,10 @@ namespace NLU
 
 		public string NLParse(string rawSent)
 		{
+			foreach (string plural in shittyPorterStemmer.Keys) {
+				rawSent = rawSent.Replace (plural, shittyPorterStemmer [plural]);
+			}
+
 			var tokens = SentSplit(rawSent);
 			var form = tokens[0] + "(";
 			var cur = 1;
