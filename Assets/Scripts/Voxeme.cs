@@ -131,6 +131,10 @@ public class Voxeme : MonoBehaviour {
 				}
 			}
 		}
+
+		Debug.Log (gameObject);
+		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).min));
+		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).max));
 	}
 		
 	// Update is called once per frame
@@ -167,7 +171,7 @@ public class Voxeme : MonoBehaviour {
 						Vector3 offset = MoveToward (targetPosition+graspController.graspTrackerOffset);
 
 						if (offset.sqrMagnitude <= Constants.EPSILON) {
-							graspTracker.transform.position = targetPosition;//+graspController.graspTrackerOffset;
+							graspTracker.transform.position = targetPosition+graspController.graspTrackerOffset;
 						}
 					}
 				}

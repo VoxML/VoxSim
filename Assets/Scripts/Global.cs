@@ -62,6 +62,11 @@ namespace Global {
 			max = Vector3.zero;
 		}
 
+		public Region(Vector3 minimum, Vector3 maximum) {
+			min = minimum;
+			max = maximum;
+		}
+
 		public bool Contains(Vector3 point) {
 			return ((point.x >= min.x) && (point.x <= max.x) &&
 				(point.y >= min.y) && (point.y <= max.y) &&
@@ -789,6 +794,111 @@ namespace Global {
 			region.min = testPoint - testBounds.extents;
 			region.max = testPoint + testBounds.extents;
 					
+			return region;
+		}
+
+		public static Region FindClearRegion(GameObject surface, Region region, GameObject testObj) {
+			Bounds testBounds = GetObjectWorldSize (testObj);
+
+			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+
+			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
+				UnityEngine.Random.Range (region.min.y, region.max.y),
+				UnityEngine.Random.Range (region.min.z, region.max.z));
+			bool clearRegionFound = false;
+			while (!clearRegionFound) {
+				testBounds.center = testPoint;
+				bool regionClear = true;
+				foreach (Voxeme voxeme in objSelector.allVoxemes) {
+					if (voxeme.gameObject != surface) {
+						if (testBounds.Intersects (Helper.GetObjectWorldSize (voxeme.gameObject))) {
+							regionClear = false;
+							break;
+						}
+					}
+				}
+
+				if (regionClear) {
+					clearRegionFound = true;
+					break;
+				}
+
+				testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
+					UnityEngine.Random.Range (region.min.y, region.max.y),
+					UnityEngine.Random.Range (region.min.z, region.max.z));
+			}
+
+			region.min = testPoint - testBounds.extents;
+			region.max = testPoint + testBounds.extents;
+
+			return region;
+		}
+
+		public static Region FindClearRegion(GameObject surface, Region[] regions, GameObject testObj) {
+			Region region = new Region ();
+			Bounds testBounds = GetObjectWorldSize (testObj);
+
+			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+
+			Region intersection = new Region ();
+			intersection.min = regions [0].min;
+			intersection.max = regions [0].max;
+
+			foreach (Region r in regions) {
+				if (r.min.x > intersection.min.x) {
+					intersection.min = new Vector3 (r.min.x, intersection.min.y, intersection.min.z);		
+				}
+
+				if (r.min.y > intersection.min.y) {
+					intersection.min = new Vector3 (intersection.min.x, r.min.y, intersection.min.z);		
+				}
+
+				if (r.min.z > intersection.min.z) {
+					intersection.min = new Vector3 (intersection.min.x, intersection.min.y, r.min.z);		
+				}
+
+				if (r.max.x < intersection.max.x) {
+					intersection.max = new Vector3 (r.max.x, intersection.max.y, intersection.max.z);		
+				}
+
+				if (r.max.y < intersection.max.y) {
+					intersection.max = new Vector3 (intersection.max.x, r.max.y, intersection.max.z);		
+				}
+
+				if (r.max.z < intersection.max.z) {
+					intersection.max = new Vector3 (intersection.max.x, intersection.max.y, r.max.z);		
+				}
+			}
+
+			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (intersection.min.x, intersection.max.x),
+				UnityEngine.Random.Range (intersection.min.y, intersection.max.y),
+				UnityEngine.Random.Range (intersection.min.z, intersection.max.z));
+			bool clearRegionFound = false;
+			while (!clearRegionFound) {
+				testBounds.center = testPoint;
+				bool regionClear = true;
+				foreach (Voxeme voxeme in objSelector.allVoxemes) {
+					if (voxeme.gameObject != surface) {
+						if (testBounds.Intersects (Helper.GetObjectWorldSize (voxeme.gameObject))) {
+							regionClear = false;
+							break;
+						}
+					}
+				}
+
+				if (regionClear) {
+					clearRegionFound = true;
+					break;
+				}
+
+				testPoint = new Vector3 (UnityEngine.Random.Range (intersection.min.x, intersection.max.x),
+					UnityEngine.Random.Range (intersection.min.y, intersection.max.y),
+					UnityEngine.Random.Range (intersection.min.z, intersection.max.z));
+			}
+
+			region.min = testPoint - testBounds.extents;
+			region.max = testPoint + testBounds.extents;
+
 			return region;
 		}
 

@@ -170,14 +170,19 @@ namespace Satisfaction {
 					//Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
 					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 					Vector3 testLocation = voxComponent.isGrasped ? voxComponent.graspTracker.transform.position : theme.transform.position;
+					//Vector3 testLocation = theme.transform.position;
 
-					if (Helper.CloseEnough (testLocation, Helper.ParsableToVector ((String)argsStrings [1]))) {
-						if (voxComponent.isGrasped) {
-							//preds.UNGRASP (new object[]{ theme, true });
-							//em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-							theme.transform.position = Helper.ParsableToVector ((String)argsStrings [1]);
+					if (voxComponent.isGrasped) {
+						if (Helper.CloseEnough (testLocation, Helper.ParsableToVector ((String)argsStrings [1])+
+							voxComponent.grasperCoord.root.gameObject.GetComponent<GraspScript> ().graspTrackerOffset)) {
+							theme.transform.position = Helper.ParsableToVector ((String)argsStrings [1]);//+
+							//voxComponent.grasperCoord.root.gameObject.GetComponent<GraspScript> ().graspTrackerOffset;
 							theme.transform.rotation = Quaternion.identity;
 						}
+						satisfied = true;
+						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+					}
+					else if (Helper.CloseEnough (testLocation, Helper.ParsableToVector ((String)argsStrings [1]))) {
 						satisfied = true;
 						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 						//theme.GetComponent<Rigging> ().ActivatePhysics (true);
@@ -230,8 +235,10 @@ namespace Satisfaction {
 				if (theme != null) {
 					if (agent != null) {
 						if (!theme.transform.IsChildOf (agent.transform)) {
-							if (!graspController.isGrasping) {
+							if (!theme.GetComponent<Voxeme>().isGrasped) {
+								//Debug.Break ();
 								satisfied = true;
+								ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 							}
 						}
 					}
@@ -397,7 +404,7 @@ namespace Satisfaction {
 			Bounds objBounds = Helper.GetObjectWorldSize(obj.gameObject);
 
 			// get list of all voxeme entities
-			Voxeme[] allVoxemes = UnityEngine.Object.FindObjectsOfType<Voxeme>();
+			Voxeme[] allVoxemes = UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => a.isActiveAndEnabled).ToArray();
 
 			// reactivate physics by default
 			//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
@@ -444,6 +451,7 @@ namespace Satisfaction {
 							Bounds testBounds = Helper.GetObjectWorldSize (test.gameObject);
 							if (!test.gameObject.name.Contains ("*")) { // hacky fix to filter out unparented objects w/ disabled voxeme components
 								//if (test.enabled) {	// if voxeme is active
+								Debug.Log(test);
 								foreach (int testHabitat in test.opVox.Affordance.Affordances.Keys) {
 									//if (TestHabitat (test.gameObject, testHabitat)) {	// test habitats
 										for (int i = 0; i < test.opVox.Affordance.Affordances[testHabitat].Count; i++) {	// condition/event/result list for this habitat index

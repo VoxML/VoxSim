@@ -163,7 +163,7 @@ public class EventManager : MonoBehaviour {
 				}
 				else {
 					if (OutputHelper.GetCurrentOutputString (OutputController.Role.Affector) != "I'm sorry, I can't do that.") {
-						OutputHelper.PrintOutput (OutputController.Role.Affector, "OK, I did it.");
+						//OutputHelper.PrintOutput (OutputController.Role.Affector, "OK, I did it.");
 						EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
 						OnEventComplete (this, eventArgs);
 					}

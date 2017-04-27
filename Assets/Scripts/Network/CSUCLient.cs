@@ -6,8 +6,37 @@ using System.Threading;
 
 namespace Network
 {
+	public class GestureEventArgs : EventArgs {
+		public string Content { get; set; }
+
+		public GestureEventArgs(string content, bool macroEvent = false)
+		{
+			this.Content = content;
+		}
+	}
+
 	public class CSUClient
 	{
+		public event EventHandler GestureReceived;
+
+		public void OnGestureReceived(object sender, EventArgs e)
+		{
+			if (GestureReceived != null)
+			{
+				GestureReceived(this, e);
+			}
+		}
+
+		public event EventHandler ConnectionLost;
+
+		public void OnConnectionLost(object sender, EventArgs e)
+		{
+			if (ConnectionLost != null)
+			{
+				ConnectionLost(this, e);
+			}
+		}
+
 		private const int IntSize = sizeof(Int32);
 		private TcpClient _client;
 		private Thread _t;

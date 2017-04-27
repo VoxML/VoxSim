@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
+
 using UnityEngine;
 
 namespace Network
@@ -22,52 +23,47 @@ namespace Network
 		{
 			while (true)
 			{
-				Debug.Log("Listening for a remote commander");
-				// make sure we have a socket connected; this line BLOCKS,
-				// so Process() needs to be run from a sep. thread.
+				// make sure we have a socket connected
 				Socket clientSocket = _listener.AcceptSocket();
-				string connectedpoint = clientSocket.RemoteEndPoint.ToString();
-				Debug.Log("Remote commander accepted at: " + connectedpoint);
+				if (!clientSocket.Connected) continue;
+				// then check if the stream is readable
 				NetworkStream stream = new NetworkStream(clientSocket);
+				if (!stream.CanRead) continue;
+
+				byte[] okResponse = Encoding.ASCII.GetBytes("OK");
 
 				byte[] byteBuffer = new byte[128];
 				_sb = new StringBuilder();
 
-				while (IsConnected(clientSocket))
+				try
 				{
-					int numBytesRead = stream.Read(byteBuffer, 0, byteBuffer.Length);
-					if (numBytesRead == 0) continue;
-					string gotten = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
-					string[] lines = gotten.Split(MessageDelimiter);
-					if (lines.Length == 0) continue;
-
-					// take chunks until the second to last
-					for (int i = 0; i < lines.Length - 1; i++)
+					do
 					{
-						_sb.Append(lines[i]);
-						_messages.Enqueue(_sb.ToString());
-						// TODO 3/29/17-12:38 do we need to send something back?
-						byte[] okResponse = {0x20};
-						stream.Write(okResponse, 0, okResponse.Length);
-						_sb = new StringBuilder();
-					}
-					// leave the last piece to concatenate with the following chunks
-					_sb.Append(lines[lines.Length - 1]);
-				}
-				clientSocket.Close();
-				stream.Dispose();
-				Debug.Log("Disconnected: " + connectedpoint);
-			}
-		}
+						int numBytesRead = stream.Read(byteBuffer, 0, byteBuffer.Length);
+						string gotten = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
+						string[] lines = gotten.Split(MessageDelimiter);
+						if (lines.Length == 0) continue;
 
-		// method to check if the client is still connected
-		private bool IsConnected(Socket socket)
-		{
-			try
-			{
-				return !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
+						// take chunks until the second to last
+						for (int i = 0; i < lines.Length - 1; i++)
+						{
+							_sb.Append(lines[i]);
+							_messages.Enqueue(_sb.ToString());
+							// TODO 3/29/17-12:38 do we need to send something back?
+//                        stream.Write(okResponse, 0, okResponse.Length);
+							_sb = new StringBuilder();
+						}
+                        // leave the last piece to concatenate with the following chunks
+						_sb.Append(lines[lines.Length - 1]);
+//					} while (stream.DataAvailable);
+					} while (true);
+				}
+				finally
+				{
+					clientSocket.Close();
+					stream.Dispose();
+				}
 			}
-			catch (SocketException) { return false; }
 		}
 
 		public string GetMessage()

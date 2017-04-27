@@ -19,15 +19,23 @@ public class OutputController : FontManager {
 
 	public enum Alignment {
 		Left,
+		Center,
 		Right
 	}
 	public Alignment alignment;
+
+	public enum Placement {
+		Top,
+		Bottom
+	}
+	public Placement placement;
 
 	public int fontSize = 12;
 
 	public String outputLabel;
 	public String outputString;
-	public int outputHeight = 25;
+	public int outputWidth;
+	public int outputHeight;
 	public Rect outputRect = new Rect();
 
 	GUIStyle labelStyle = new GUIStyle ("Label");
@@ -38,18 +46,37 @@ public class OutputController : FontManager {
 	void Start() {
 		labelStyle = new GUIStyle ("Label");
 		textFieldStyle = new GUIStyle ("TextField");
-		fontSizeModifier = (int)(fontSize / defaultFontSize);
+		fontSizeModifier = (float)((float)fontSize / (float)defaultFontSize);
 
-		outputHeight = (int)(25 * fontSizeModifier);
+		outputWidth = System.Convert.ToInt32(385.0f * (float)fontSizeModifier);
+		outputHeight = System.Convert.ToInt32(25.0f * (float)fontSizeModifier);
 
 		labelStyle.fontSize = fontSize;
 		textFieldStyle.fontSize = fontSize;
 
 		if (alignment == Alignment.Left) {
-			outputRect = new Rect (5, outputRect.y, (int)(365*fontSizeModifier), outputHeight);
+			if (placement == Placement.Top) {
+				outputRect = new Rect (5, 5, outputWidth, outputHeight);
+			}
+			else if (placement == Placement.Bottom) {
+				outputRect = new Rect (5, Screen.height - outputHeight - 5, outputWidth, outputHeight);
+			}
+		}
+		else if (alignment == Alignment.Center) {
+			if (placement == Placement.Top) {
+				outputRect = new Rect ((int)((Screen.width / 2) - (outputWidth / 2)), 5, outputWidth, outputHeight);
+			}
+			else if (placement == Placement.Bottom) {
+				outputRect = new Rect ((int)((Screen.width / 2) - (outputWidth / 2)), Screen.height - outputHeight - 5, outputWidth, outputHeight);
+			}
 		}
 		else if (alignment == Alignment.Right) {
-			outputRect = new Rect (Screen.width - (5 + (int)(365*fontSizeModifier)), outputRect.y, (int)(365*fontSizeModifier), outputHeight);
+			if (placement == Placement.Top) {
+				outputRect = new Rect (Screen.width - (5 + outputWidth), 5, outputWidth, outputHeight);
+			}
+			else if (placement == Placement.Bottom) {
+				outputRect = new Rect (Screen.width - (5 + outputWidth), Screen.height - outputHeight - 5, outputWidth, outputHeight);
+			}
 		}
 	}
 
@@ -60,7 +87,7 @@ public class OutputController : FontManager {
 		GUILayout.BeginArea (outputRect);
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(outputLabel+":", labelStyle);
-		outputString = GUILayout.TextArea(outputString, textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+		outputString = GUILayout.TextArea(outputString, textFieldStyle, GUILayout.Width(outputWidth-(65*fontSizeModifier)), GUILayout.ExpandHeight (false));
 		GUILayout.EndHorizontal ();
 		GUILayout.EndArea();
 	}
