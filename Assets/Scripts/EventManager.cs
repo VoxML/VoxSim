@@ -225,7 +225,7 @@ public class EventManager : MonoBehaviour {
 
 	public void ExecuteNextCommand() {
 		PhysicsHelper.ResolveAllPhysicsDiscepancies (false);
-		Debug.Log (events [0]);
+		Debug.Log ("Next Command: " + events [0]);
 
 		if (!EvaluateCommand (events [0])) {
 			return;
@@ -258,7 +258,7 @@ public class EventManager : MonoBehaviour {
 			return false;
 		}
 		string objectResolved = ApplySkolems (skolemized);
-		Debug.Log (objectResolved);
+//		Debug.Log (objectResolved);
 
 		if (objectResolved != command) {
 			OnObjectsResolved (this, new EventManagerArgs (objectResolved));
@@ -283,8 +283,7 @@ public class EventManager : MonoBehaviour {
 		}
 
 		evaluated = ApplySkolems (skolemized);
-		Debug.Log ("Evaluated command: " + evaluated);
-		Debug.Log (events.IndexOf (command));
+		Debug.Log (string.Format("Evaluated command@{0}: {1}", events.IndexOf(command), evaluated));
 		if (!evalOrig.ContainsKey (evaluated)) {
 			evalOrig.Add (evaluated, command);
 		}
@@ -461,7 +460,7 @@ public class EventManager : MonoBehaviour {
 				//Debug.Log(predString + " : " + argsList);
 
 				for(int i = 0; i < argsStrings.Count; i++) {
-					Debug.Log (argsStrings.ElementAt (i));
+					Debug.Log ("Input: " + argsStrings.ElementAt (i));
 					if (r.IsMatch (argsStrings.ElementAt (i))) {
 						String v = argVarPrefix+argVarIndex.ToString();
 						skolems[v] = argsStrings.ElementAt (i);

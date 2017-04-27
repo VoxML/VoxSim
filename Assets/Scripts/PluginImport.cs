@@ -36,21 +36,27 @@ public class PluginImport : MonoBehaviour {
 			Debug.Log ("No listener port specified. Skipping interface startup.");
 		}
 
-		string[] csuUrl = PlayerPrefs.GetString("CSU URL").Split(':');
-		string csuAddress = csuUrl[0];
-		int csuPort = Convert.ToInt32(csuUrl[1]);
-		if (csuAddress != "")
+		string csuUrlRaw = PlayerPrefs.GetString("CSU URL");
+
+		if (csuUrlRaw != "")
 		{
-			ConnectCSU(csuAddress, csuPort);
-		}
-		else
-		{
-			Debug.Log ("CSU gesture input is not specified.");
+			string[] csuUrl = csuUrlRaw.Split(':');
+			string csuAddress = csuUrl[0];
+			int csuPort = Convert.ToInt32(csuUrl[1]);
+			if (csuAddress != "")
+			{
+				ConnectCSU(csuAddress, csuPort);
+			}
+			else
+			{
+				Debug.Log ("CSU gesture input is not specified.");
+			}
+
 		}
 
 		InitParser();
-
 	}
+
 	public void InitParser() {
 		var parserUrl = PlayerPrefs.GetString ("Parser URL");
 		if (parserUrl.Length == 0)
@@ -90,7 +96,6 @@ public class PluginImport : MonoBehaviour {
 		{
 			string inputFromCommander = _cmdServer.GetMessage();
 			if (inputFromCommander != "") {
-				Debug.Log (inputFromCommander);
 				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = inputFromCommander.Trim();
 				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(inputFromCommander.Trim());
 			}
@@ -122,18 +127,17 @@ public class PluginImport : MonoBehaviour {
 //		string[] args = new string[]{input};
 //		string result = Marshal.PtrToStringAuto(PythonCall (Application.dataPath + "/Externals/python/", "change_to_forms", "parse_sent", args, args.Length));
 		var result = _parser.NLParse(input);
-		Debug.Log ("Parsed as: " + result);
 
 		return result;
 	}
 
 	void OnDestroy () {
-		if (_csuClient != null)
+		if (_cmdServer != null)
 		{
 			_cmdServer.Close();
 		}
 
-		if (_cmdServer == null && _csuClient.IsConnected())
+		if (_csuClient != null && _csuClient.IsConnected())
 		{
 			_csuClient.Close();
 		}
