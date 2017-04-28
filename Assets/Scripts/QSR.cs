@@ -13,9 +13,8 @@ namespace QSR
 		// left
 		public static bool Left(Bounds x, Bounds y) {
 			bool left = false;
-			Vector3 offset = x.center - y.center;
 
-			if (x.center.x > y.center.x) {
+			if (x.min.x >= y.max.x-Constants.EPSILON) {
 				left = true;
 			}
 
@@ -26,7 +25,7 @@ namespace QSR
 		public static bool Right(Bounds x, Bounds y) {
 			bool right = false;
 
-			if (x.center.x < y.center.x) {
+			if (x.max.x <= y.min.x+Constants.EPSILON) {
 				right = true;
 			}
 
@@ -37,7 +36,7 @@ namespace QSR
 		public static bool Behind(Bounds x, Bounds y) {
 			bool behind = false;
 
-			if (x.center.z > y.center.z) {
+			if (x.min.z >= y.max.z-Constants.EPSILON) {
 				behind = true;
 			}
 
@@ -48,7 +47,7 @@ namespace QSR
 		public static bool InFront(Bounds x, Bounds y) {
 			bool inFront = false;
 
-			if (x.center.z < y.center.z) {
+			if (x.max.z <= y.min.z+Constants.EPSILON) {
 				inFront = true;
 			}
 
@@ -59,7 +58,7 @@ namespace QSR
 		public static bool Below(Bounds x, Bounds y) {
 			bool below = false;
 
-			if (x.max.y <= y.min.y-Constants.EPSILON) {
+			if (x.max.y <= y.min.y+Constants.EPSILON) {
 				below = true;
 			}
 
