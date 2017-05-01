@@ -45,8 +45,8 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		DeicticGestural
 	};
 
-	public VerbosityLevel verbosityLevel = VerbosityLevel.Everything;
-	public DisambiguationStrategy disambiguationStrategy = DisambiguationStrategy.Elimination;
+	public VerbosityLevel verbosityLevel = VerbosityLevel.Disambiguation;
+	public DisambiguationStrategy disambiguationStrategy = DisambiguationStrategy.DeicticGestural;
 
 	string actionButtonText;
 

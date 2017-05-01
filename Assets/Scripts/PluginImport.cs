@@ -45,7 +45,11 @@ public class PluginImport : MonoBehaviour {
 			string csuAddress = csuUrl [0];
 			int csuPort = Convert.ToInt32 (csuUrl [1]);
 			if (csuAddress != "") {
-				ConnectCSU (csuAddress, csuPort);
+				try {
+					ConnectCSU (csuAddress, csuPort);
+				}
+				catch (Exception e) {
+				}
 			}
 			else {
 				Debug.Log ("CSU gesture input is not specified.");

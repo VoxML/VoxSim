@@ -282,11 +282,19 @@ public class Launcher : FontManager {
 		ioPrefsPath = GUI.TextField (new Rect (bgLeft+100, bgTop + bgHeight - 90, 150, 25*fontSizeModifier), ioPrefsPath);
 
 		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 60, 100, 20), "Export Prefs")) {
+#if UNITY_STANDALONE_OSX
+			ExportPrefs ("../../" + ioPrefsPath);
+#else
 			ExportPrefs (ioPrefsPath);
+#endif
 		}
 
 		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 30, 100, 20), "Import Prefs")) {
+#if UNITY_STANDALONE_OSX
+			ImportPrefs ("../../" + ioPrefsPath);
+#else
 			ImportPrefs (ioPrefsPath);
+#endif
 		}
 
 		if (GUI.Button (new Rect ((Screen.width / 2 - 50) - 125, bgTop + bgHeight - 60, 100, 50), "Revert Prefs")) {
@@ -435,6 +443,7 @@ public class Launcher : FontManager {
 	}
 
 	void ExportPrefs(string path) {
+		SavePrefs ();
 		if ((eventResetCounter == string.Empty) || (eventResetCounter == "0")) {
 			eventResetCounter = "1";
 		}
