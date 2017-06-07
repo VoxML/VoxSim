@@ -6,10 +6,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-
 using Agent;
 using Global;
 using Satisfaction;
+using UI;
 
 public class OutputController : FontManager {
 	public Role role;
@@ -98,6 +98,17 @@ public static class OutputHelper {
 		foreach (OutputController outputController in outputs) {
 			if (outputController.role == role) {
 				outputController.outputString = str;
+
+				// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
+				VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
+				foreach (VoiceController voice in voices) 
+				{
+					if (voice.role == role)
+					{
+						voice.Speak(str);
+					}
+				}
+				
 			}
 		}
 	}
