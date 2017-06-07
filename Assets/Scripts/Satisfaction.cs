@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-
+using Agent;
 using Global;
 using RCC;
 
@@ -327,21 +327,21 @@ namespace Satisfaction {
 										go = GameObject.Find (arg as String);
 										if (go == null) {
 //											Debug.Break ();
-											OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("What is that?", (arg as String)));
+											OutputHelper.PrintOutput (Role.Affector,string.Format("What is that?", (arg as String)));
 											return false;	// abort
 										}
 									}
 									else if (matches.Count == 1) {
 										go = matches[0];
 										if (go == null) {
-											OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format ("What is that?", (arg as String)));
+											OutputHelper.PrintOutput (Role.Affector,string.Format ("What is that?", (arg as String)));
 											return false;	// abort
 										}
 									}
 									else {
 										//if (!em.evalOrig.ContainsKey(command)){
 											Debug.Log (string.Format ("Which {0}?", (arg as String)));
-											OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("Which {0}?", (arg as String)));
+											OutputHelper.PrintOutput (Role.Affector,string.Format("Which {0}?", (arg as String)));
 											return false;	// abort
 										//}
 									}
@@ -366,13 +366,13 @@ namespace Satisfaction {
 					// if so, we might be able to figure this out,
 					if (!File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml",pred))) {
 						// otherwise return error
-						OutputHelper.PrintOutput (OutputController.Role.Affector,"Sorry, what does " + "\"" + pred + "\" mean?");
+						OutputHelper.PrintOutput (Role.Affector,"Sorry, what does " + "\"" + pred + "\" mean?");
 						return false;
 					}
 				}
 			}
 			else {
-				OutputHelper.PrintOutput (OutputController.Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
+				OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
 				return false;
 			}
 

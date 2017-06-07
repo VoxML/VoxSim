@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using Agent;
 using Global;
 
 public class IKTarget : MonoBehaviour {
@@ -40,7 +40,7 @@ public class IKTarget : MonoBehaviour {
 				}
 			}
 			else {	// cannot execute motion
-				OutputHelper.PrintOutput(OutputController.Role.Affector,"I'm sorry, I can't do that.");
+				OutputHelper.PrintOutput(Role.Affector,"I'm sorry, I can't do that.");
 				GameObject.Find ("BehaviorController").GetComponent<EventManager> ().SendMessage("AbortEvent");
 				targetPosition = transform.position;
 			}

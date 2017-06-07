@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using Agent;
 using Global;
 using MajorAxes;
 using Vox;
@@ -177,7 +177,7 @@ public class Voxeme : MonoBehaviour {
 				}
 			}
 			else {	// cannot execute motion
-				OutputHelper.PrintOutput(OutputController.Role.Affector,"I'm sorry, I can't do that.");
+				OutputHelper.PrintOutput(Role.Affector,"I'm sorry, I can't do that.");
 				GameObject.Find ("BehaviorController").GetComponent<EventManager> ().SendMessage("AbortEvent");
 				targetPosition = transform.position;
 			}
@@ -238,7 +238,7 @@ public class Voxeme : MonoBehaviour {
 				}
 			}
 			else {	// cannot execute motion
-				OutputHelper.PrintOutput(OutputController.Role.Affector,"I'm sorry, I can't do that.");
+				OutputHelper.PrintOutput(Role.Affector,"I'm sorry, I can't do that.");
 				GameObject.Find ("BehaviorController").GetComponent<EventManager> ().SendMessage("AbortEvent");
 				targetRotation = transform.eulerAngles;
 			}

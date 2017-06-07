@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Agent;
 
 public class CupsGame : DemoScript {
 	RelationTracker relationTracker;
@@ -48,11 +49,11 @@ public class CupsGame : DemoScript {
 			}
 
 			if (winCondition) {
-				OutputHelper.PrintOutput (OutputController.Role.Planner, "You win!");
+				OutputHelper.PrintOutput (Role.Planner, "You win!");
 				gameOver = true;
 			}
 			else {
-				OutputHelper.PrintOutput (OutputController.Role.Planner, "Ha!  I win!");
+				OutputHelper.PrintOutput (Role.Planner, "Ha!  I win!");
 				foreach (DictionaryEntry pair in relationTracker.relations) {
 					List<GameObject> objs = (pair.Key as List<GameObject>);
 					if (objs [0] == GameObject.Find ("ball")) {

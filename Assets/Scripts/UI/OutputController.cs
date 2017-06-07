@@ -6,15 +6,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using Agent;
 using Global;
 using Satisfaction;
+using UI;
 
 public class OutputController : FontManager {
-	public enum Role {
-		Planner,
-		Affector
-	}
 	public Role role;
 
 	public enum Alignment {
@@ -94,18 +91,29 @@ public class OutputController : FontManager {
 }
 
 public static class OutputHelper {
-	public static void PrintOutput(OutputController.Role role, String str) {
+	public static void PrintOutput(Role role, String str) {
 		OutputController[] outputs;
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
 
 		foreach (OutputController outputController in outputs) {
 			if (outputController.role == role) {
 				outputController.outputString = str;
+
+				// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
+				VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
+				foreach (VoiceController voice in voices) 
+				{
+					if (voice.role == role)
+					{
+						voice.Speak(str);
+					}
+				}
+				
 			}
 		}
 	}
 
-	public static string GetCurrentOutputString(OutputController.Role role) {
+	public static string GetCurrentOutputString(Role role) {
 		string output = string.Empty;
 		OutputController[] outputs;
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();

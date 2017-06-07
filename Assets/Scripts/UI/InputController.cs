@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using Agent;
 using Global;
 
 public class InputEventArgs : EventArgs {
@@ -243,8 +243,8 @@ public class InputController : FontManager {
 				InputEventArgs parseArgs = new InputEventArgs (functionalCommand);
 				OnParseComplete (this, parseArgs);
 
-				OutputHelper.PrintOutput (OutputController.Role.Affector,"OK.");
-				OutputHelper.PrintOutput (OutputController.Role.Planner,"");
+				OutputHelper.PrintOutput (Role.Affector,"OK.");
+				OutputHelper.PrintOutput (Role.Planner,"");
 				commands = functionalCommand.Split (';');
 				foreach (String commandString in commands) {
 					// add to queue
