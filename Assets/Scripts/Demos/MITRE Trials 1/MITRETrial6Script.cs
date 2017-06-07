@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-
+using Agent;
 using Global;
 
 public class MITRETrial6Script : DemoScript {
@@ -1018,7 +1018,7 @@ public class MITRETrial6Script : DemoScript {
 	}
 
 	void PrintAndLogLinguisticOutput(string output) {
-		OutputHelper.PrintOutput (OutputController.Role.Planner, output);
+		OutputHelper.PrintOutput (Role.Planner, output);
 		OnLogEvent (this, new LogEventArgs(MakeLogString("Wilson: S = ", FormatLogUtterance(output))));
 	}
 

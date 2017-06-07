@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Agent;
 
 public class OutputModality : FontManager {
 
@@ -29,7 +30,7 @@ public class OutputModality : FontManager {
 	// Update is called once per frame
 	void Update () {
 		if ((int)(modality & Modality.Linguistic) == 0) {
-			OutputHelper.PrintOutput (OutputController.Role.Planner, "");
+			OutputHelper.PrintOutput (Role.Planner, "");
 		}
 	}
 

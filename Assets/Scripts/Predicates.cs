@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
-
+using Agent;
 using Global;
 using RCC;
 using Satisfaction;
@@ -4442,7 +4442,7 @@ public class Predicates : MonoBehaviour {
 								voxeme.grasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
 							}
 							else {
-								OutputHelper.PrintOutput(OutputController.Role.Affector,"I can't grasp the " + (arg as GameObject).name + ".  I'm not touching it."); 
+								OutputHelper.PrintOutput(Role.Affector,"I can't grasp the " + (arg as GameObject).name + ".  I'm not touching it."); 
 							}
 						}
 					}

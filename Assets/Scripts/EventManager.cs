@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
-
+using Agent;
 using Global;
 using Satisfaction;
 using Vox;
@@ -162,8 +162,8 @@ public class EventManager : MonoBehaviour {
 					ExecuteNextCommand ();
 				}
 				else {
-					if (OutputHelper.GetCurrentOutputString (OutputController.Role.Affector) != "I'm sorry, I can't do that.") {
-						//OutputHelper.PrintOutput (OutputController.Role.Affector, "OK, I did it.");
+					if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
+						//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
 						EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
 						OnEventComplete (this, eventArgs);
 					}
@@ -344,7 +344,7 @@ public class EventManager : MonoBehaviour {
 							if (matches.Count <= 1) {
 								GameObject go = GameObject.Find (arg as String);
 								if (go == null) {
-									OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("What is that?", (arg as String)));
+									OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
 									return;	// abort
 								}
 								objs.Add (go);
@@ -653,7 +653,7 @@ public class EventManager : MonoBehaviour {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 											GameObject go = GameObject.Find (arg as String);
 											if (go == null) {
-												OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("What is that?", (arg as String)));
+												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
 												return false;	// abort
 											}
 											objs.Add (go);
@@ -663,7 +663,7 @@ public class EventManager : MonoBehaviour {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 											GameObject go = matches [0];
 											if (go == null) {
-												OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("What is that?", (arg as String)));
+												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
 												return false;	// abort
 											}
 											objs.Add (go);
@@ -677,7 +677,7 @@ public class EventManager : MonoBehaviour {
 									}
 									else {
 										//Debug.Log (string.Format ("Which {0}?", (arg as String)));
-										//OutputHelper.PrintOutput (OutputController.Role.Affector,string.Format("Which {0}?", (arg as String)));
+										//OutputHelper.PrintOutput (Role.Affector,string.Format("Which {0}?", (arg as String)));
 										//return false;	// abort
 										foreach (GameObject match in matches) {
 											objs.Add (match);
@@ -702,7 +702,7 @@ public class EventManager : MonoBehaviour {
 						methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
 						if (methodToCall == null) {
-							OutputHelper.PrintOutput (OutputController.Role.Affector,"Sorry, what does " + "\"" + pred + "\" mean?");
+							OutputHelper.PrintOutput (Role.Affector,"Sorry, what does " + "\"" + pred + "\" mean?");
 							return false;
 						}
 

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-
+using Agent;
 using Global;
 using Network;
 using QSR;
@@ -261,7 +261,7 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 
 						string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
-						OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
 						objectConfirmation = objVoxemes [0].gameObject;
 					}
 				}
@@ -270,7 +270,7 @@ public class JointGestureDemo : MonoBehaviour {
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
 
-				OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("Should I {0}?", confirmationTexts[actionOptions [0]]));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts[actionOptions [0]]));
 				eventConfirmation = actionOptions [0];
 			}
 		}
@@ -295,7 +295,7 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 
 						string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
-						OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
 
 						ReachFor (objVoxemes [0].gameObject);
 
@@ -307,7 +307,7 @@ public class JointGestureDemo : MonoBehaviour {
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
 
-				OutputHelper.PrintOutput (OutputController.Role.Affector, string.Format ("Should I {0}?", confirmationTexts[actionOptions [0]]));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts[actionOptions [0]]));
 				eventConfirmation = actionOptions [0];
 			}
 		}
@@ -333,7 +333,7 @@ public class JointGestureDemo : MonoBehaviour {
 					Disambiguate (actionOptions);
 				}
 				else {
-					OutputHelper.PrintOutput (OutputController.Role.Affector, "Sorry, I don't know what you mean.");
+					OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 				}
 			}
 			else if (objectConfirmation != null) {
@@ -352,7 +352,7 @@ public class JointGestureDemo : MonoBehaviour {
 					Disambiguate (objectMatches);
 				}
 				else {
-					OutputHelper.PrintOutput (OutputController.Role.Affector, "Sorry, I don't know what you mean.");
+					OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 				}
 			}
 		}
@@ -405,14 +405,14 @@ public class JointGestureDemo : MonoBehaviour {
 				objectMatches.Clear ();
 				confirmationTexts.Clear ();
 
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "OK.");
+				OutputHelper.PrintOutput (Role.Affector, "OK.");
 			}
 			else if (objectConfirmation != null) {
 				indicatedObj = objectConfirmation;
 				objectConfirmation = null;
 				objectMatches.Clear ();
 
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "OK, go on.");
+				OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
 			}
 		}
 	}
@@ -421,10 +421,10 @@ public class JointGestureDemo : MonoBehaviour {
 		if (state == true) {
 			sessionCounter++;
 			if (sessionCounter > 1) {
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "Welcome back!");
+				OutputHelper.PrintOutput (Role.Affector, "Welcome back!");
 			}
 			else {
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "Hello.");
+				OutputHelper.PrintOutput (Role.Affector, "Hello.");
 			}
 
 			objectMatches.Clear ();
@@ -457,7 +457,7 @@ public class JointGestureDemo : MonoBehaviour {
 				graspedObj.GetComponent<Voxeme>().grasperCoord = null;
 			}
 
-			OutputHelper.PrintOutput (OutputController.Role.Affector, "Bye!");
+			OutputHelper.PrintOutput (Role.Affector, "Bye!");
 
 			objectMatches.Clear ();
 			objectConfirmation = null;
@@ -477,7 +477,7 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Deixis(string dir) {
-		OutputHelper.PrintOutput (OutputController.Role.Affector, "");
+		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
 		if (dir == "left") {
@@ -506,7 +506,7 @@ public class JointGestureDemo : MonoBehaviour {
 				ikControl.rightHandObj.position = rightTargetDefault;
 			}
 			else {
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "Sorry, I don't know what you mean.");
+				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 				return;
 			}
 
@@ -559,13 +559,13 @@ public class JointGestureDemo : MonoBehaviour {
 			} 
 			else {	// indicating region
 				indicatedRegion = region;
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "Sorry, I don't know what you're pointing at.");
+				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
 			}
 		}
 	}
 
 	void Grab(bool state) {
-		OutputHelper.PrintOutput (OutputController.Role.Affector, "");
+		OutputHelper.PrintOutput (Role.Affector, "");
 		if (state == true) {
 			if (indicatedObj != null) {
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -581,7 +581,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 			else {
-				OutputHelper.PrintOutput (OutputController.Role.Affector, "Sorry, I don't know what you mean.");
+				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 			}
 		}
 		else {
@@ -610,7 +610,7 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Move(string dir) {
-		OutputHelper.PrintOutput (OutputController.Role.Affector, "");
+		OutputHelper.PrintOutput (Role.Affector, "");
 		if (graspedObj != null) {
 			if (dir == "left") {
 				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
@@ -1189,7 +1189,7 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Push(string dir) {
-		OutputHelper.PrintOutput (OutputController.Role.Affector, "");
+		OutputHelper.PrintOutput (Role.Affector, "");
 		if (indicatedObj != null) {
 			if (dir == "left") {
 				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
@@ -1753,10 +1753,10 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void ConnectionLost(object sender, EventArgs e) {
 		if (sessionCounter >= 1) {
-			OutputHelper.PrintOutput (OutputController.Role.Affector, "Hey, where'd you go?");
+			OutputHelper.PrintOutput (Role.Affector, "Hey, where'd you go?");
 		}
 		else {
-			OutputHelper.PrintOutput (OutputController.Role.Affector, "Anyone there?");
+			OutputHelper.PrintOutput (Role.Affector, "Anyone there?");
 		}
 	}
 }

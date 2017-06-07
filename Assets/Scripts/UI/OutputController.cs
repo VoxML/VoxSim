@@ -7,14 +7,11 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using Agent;
 using Global;
 using Satisfaction;
 
 public class OutputController : FontManager {
-	public enum Role {
-		Planner,
-		Affector
-	}
 	public Role role;
 
 	public enum Alignment {
@@ -94,7 +91,7 @@ public class OutputController : FontManager {
 }
 
 public static class OutputHelper {
-	public static void PrintOutput(OutputController.Role role, String str) {
+	public static void PrintOutput(Role role, String str) {
 		OutputController[] outputs;
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
 
@@ -105,7 +102,7 @@ public static class OutputHelper {
 		}
 	}
 
-	public static string GetCurrentOutputString(OutputController.Role role) {
+	public static string GetCurrentOutputString(Role role) {
 		string output = string.Empty;
 		OutputController[] outputs;
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();

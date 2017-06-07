@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-
+using Agent;
 using Global;
 
 public class PyramidScript : DemoScript {
@@ -140,7 +140,7 @@ public class PyramidScript : DemoScript {
 				LookForward ();
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Let's build a pyramid!");
+					OutputHelper.PrintOutput (Role.Planner, "Let's build a pyramid!");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Let's build a pyramid!\""));
 				}
 			}
@@ -155,7 +155,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block1"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block1")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Take that block");
+					OutputHelper.PrintOutput (Role.Planner, "Take that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Take that block\""));
 				}
 			}
@@ -168,7 +168,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block3"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block3")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And that block");
+					OutputHelper.PrintOutput (Role.Planner, "And that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And that block\""));
 				}
 			}
@@ -195,7 +195,7 @@ public class PyramidScript : DemoScript {
 				PushTogether ();
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format(mostRecentGesture)));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And put them together");
+					OutputHelper.PrintOutput (Role.Planner, "And put them together");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And put them together\""));
 				}
 			} 
@@ -227,7 +227,7 @@ public class PyramidScript : DemoScript {
 							HeadNod ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "Great!");
+								OutputHelper.PrintOutput (Role.Planner, "Great!");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"Great!\""));
 							}
 						}
@@ -240,7 +240,7 @@ public class PyramidScript : DemoScript {
 							HeadShake ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "That's not quite what I had in mind.");
+								OutputHelper.PrintOutput (Role.Planner, "That's not quite what I had in mind.");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"That's not quite what I had in mind.\""));
 								goBack = true;
 							}
@@ -260,7 +260,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block2"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block2")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Take that block");
+					OutputHelper.PrintOutput (Role.Planner, "Take that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Take that block\""));
 				}
 			}
@@ -273,7 +273,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block3"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block3")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And that block");
+					OutputHelper.PrintOutput (Role.Planner, "And that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And that block\""));
 				}
 			}
@@ -300,7 +300,7 @@ public class PyramidScript : DemoScript {
 				PushTogether ();
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And put them together");
+					OutputHelper.PrintOutput (Role.Planner, "And put them together");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And put them together\""));
 				}
 			}
@@ -332,7 +332,7 @@ public class PyramidScript : DemoScript {
 							HeadNod ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "Great!");
+								OutputHelper.PrintOutput (Role.Planner, "Great!");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"Great!\""));
 							}
 						}
@@ -345,7 +345,7 @@ public class PyramidScript : DemoScript {
 							HeadShake ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "That's not quite what I had in mind.");
+								OutputHelper.PrintOutput (Role.Planner, "That's not quite what I had in mind.");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"That's not quite what I had in mind.\""));
 								goBack = true;
 							}
@@ -365,7 +365,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block4"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block4")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Take that block");
+					OutputHelper.PrintOutput (Role.Planner, "Take that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Take that block\""));
 				}
 			}
@@ -378,7 +378,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block3"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block3")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And put it behind that block");
+					OutputHelper.PrintOutput (Role.Planner, "And put it behind that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And put it behind that block\""));
 				}
 			}
@@ -420,7 +420,7 @@ public class PyramidScript : DemoScript {
 							HeadNod ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "Great!");
+								OutputHelper.PrintOutput (Role.Planner, "Great!");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"Great!\""));
 							}
 						}
@@ -433,7 +433,7 @@ public class PyramidScript : DemoScript {
 							HeadShake ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "That's not quite what I had in mind.");
+								OutputHelper.PrintOutput (Role.Planner, "That's not quite what I had in mind.");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"That's not quite what I had in mind.\""));
 								goBack = true;
 							}
@@ -453,7 +453,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block5"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block5")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Take that block");
+					OutputHelper.PrintOutput (Role.Planner, "Take that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Take that block\""));
 				}
 			}
@@ -466,7 +466,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block3"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block3")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And put it in front of that block");
+					OutputHelper.PrintOutput (Role.Planner, "And put it in front of that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And put it in front of that block\""));
 				}
 			}
@@ -508,7 +508,7 @@ public class PyramidScript : DemoScript {
 							HeadNod ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "Great!");
+								OutputHelper.PrintOutput (Role.Planner, "Great!");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"Great!\""));
 							}
 						}
@@ -521,7 +521,7 @@ public class PyramidScript : DemoScript {
 							HeadShake ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "That's not quite what I had in mind.");
+								OutputHelper.PrintOutput (Role.Planner, "That's not quite what I had in mind.");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"That's not quite what I had in mind.\""));
 								goBack = true;
 							}
@@ -541,7 +541,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block6"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block6")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Take that block");
+					OutputHelper.PrintOutput (Role.Planner, "Take that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Take that block\""));
 				}
 			}
@@ -554,7 +554,7 @@ public class PyramidScript : DemoScript {
 				PointAt (GameObject.Find ("block3"));
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture, "block3")));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "And put it on that block");
+					OutputHelper.PrintOutput (Role.Planner, "And put it on that block");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"And put it on that block\""));
 				}
 			}
@@ -596,7 +596,7 @@ public class PyramidScript : DemoScript {
 							HeadNod ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "Great!");
+								OutputHelper.PrintOutput (Role.Planner, "Great!");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"Great!\""));
 							}
 						}
@@ -609,7 +609,7 @@ public class PyramidScript : DemoScript {
 							HeadShake ();
 							OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 							if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-								OutputHelper.PrintOutput (OutputController.Role.Planner, "That's not quite what I had in mind.");
+								OutputHelper.PrintOutput (Role.Planner, "That's not quite what I had in mind.");
 								OnLogEvent (this, new LogEventArgs("Wilson: S = \"That's not quite what I had in mind.\""));
 								goBack = true;
 							}
@@ -625,7 +625,7 @@ public class PyramidScript : DemoScript {
 				wilsonState |= WilsonState.Rest;
 				Rest ();
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "OK, we're done!");
+					OutputHelper.PrintOutput (Role.Planner, "OK, we're done!");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"OK, we're done!\""));
 				}
 				CloseLog ();

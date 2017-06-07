@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-
+using Agent;
 using Global;
 
 public class MITRETrial1Script : DemoScript {
@@ -844,7 +844,7 @@ public class MITRETrial1Script : DemoScript {
 				HeadNod ();
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "Great!");
+					OutputHelper.PrintOutput (Role.Planner, "Great!");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"Great!\""));
 				}
 			}
@@ -857,7 +857,7 @@ public class MITRETrial1Script : DemoScript {
 				HeadShake ();
 				OnLogEvent (this, new LogEventArgs("Wilson: G = " + string.Format (mostRecentGesture)));
 				if ((int)(outputModality.modality & OutputModality.Modality.Linguistic) == 1) {
-					OutputHelper.PrintOutput (OutputController.Role.Planner, "That's not quite what I had in mind.");
+					OutputHelper.PrintOutput (Role.Planner, "That's not quite what I had in mind.");
 					OnLogEvent (this, new LogEventArgs("Wilson: S = \"That's not quite what I had in mind.\""));
 					goBack = true;
 				}
@@ -867,7 +867,7 @@ public class MITRETrial1Script : DemoScript {
 	}
 
 	void PrintAndLogLinguisticOutput(string output) {
-		OutputHelper.PrintOutput (OutputController.Role.Planner, output);
+		OutputHelper.PrintOutput (Role.Planner, output);
 		OnLogEvent (this, new LogEventArgs(MakeLogString("Wilson: S = ", FormatLogUtterance(output))));
 	}
 
