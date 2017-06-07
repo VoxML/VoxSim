@@ -11,6 +11,8 @@ public class Builder : Editor {
 	public string buildName = "VoxSim";
 	List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
 
+	public bool buildMac,buildWindows,buildIOS;
+
 	public override void OnInspectorGUI ()
 	{
 		base.OnInspectorGUI();
@@ -33,11 +35,22 @@ public class Builder : Editor {
 			//Debug.Log(@"Build/mac/VoxSim/Contents".Remove (@"Build/mac/VoxSim/Contents".LastIndexOf('/', @"Build/mac/VoxSim/Contents".LastIndexOf('/') - 1)) + string.Format ("/Data/voxml"));
 			//Debug.Log(@"Build/win/VoxSim_Data".Remove (@"Build/win/VoxSim_Data".LastIndexOf('/') + 1) + string.Format ("Data/voxml"));
 
-			DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
-			DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+			Debug.Log (Data.voxmlDataPath);
 
-			BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/mac/"+buildName,BuildTarget.StandaloneOSXUniversal,BuildOptions.None);
-            BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/win/"+buildName+".exe",BuildTarget.StandaloneWindows,BuildOptions.None);
+			if (buildMac) {
+				DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
+				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSXUniversal, BuildOptions.None);
+			}
+
+			if (buildWindows) {
+				DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
+			}
+
+			//if (buildIOS) {
+				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, BuildOptions.BuildScriptsOnly);
+				DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
+			//}
 			//BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/web/"+buildName,BuildTarget.WebPlayer,BuildOptions.None);
 		}
 	}

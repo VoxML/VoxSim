@@ -11,7 +11,7 @@ namespace Network
 		private StringBuilder _sb;
 		private Queue<string> _messages;
 		// why does \n not work?
-		private const char MessageDelimiter = ';';
+		private const char MessageDelimiter = '\0';
 
 		public CmdServer(bool localhost, int port, int clientLimit)
 			: base(localhost, port, clientLimit)

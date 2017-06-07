@@ -43,14 +43,36 @@ namespace Network
 
 		private IPAddress GetLocalIpAddress()
 		{
+			IPAddress ip = null;
+#if !UNITY_IOS
 			string hostName = _localhost ? "localhost" : Dns.GetHostName();
 			foreach (IPAddress ipAddress in Dns.GetHostEntry(hostName).AddressList)
 			{
 				if (ipAddress.AddressFamily.ToString() == "InterNetwork")
 				{
-					return ipAddress;
+					Debug.Log (ipAddress);
+					ip = ipAddress;
 				}
 			}
+#else
+			foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+			{
+				if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+				{
+					//Debug.Log(ni.Name);
+					foreach (UnicastIPAddressInformation ipInfo in ni.GetIPProperties().UnicastAddresses)
+					{
+						if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+						{
+							Debug.Log (ipInfo.Address.ToString());
+							ip = ipInfo.Address;
+						}
+					}
+				}  
+			}
+#endif
+			Debug.Log (ip);
+			return ip;
 			throw new NetworkInformationException();
 		}
 

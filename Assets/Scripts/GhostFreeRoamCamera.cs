@@ -172,12 +172,22 @@ public class GhostFreeRoamCamera : MonoBehaviour
 		
 		if (allowRotation)
 		{
+#if !UNITY_IOS
 			if (Input.GetMouseButton (0)) {
 				Vector3 eulerAngles = transform.eulerAngles;
 				eulerAngles.x += -Input.GetAxis ("Mouse Y") * 359f * cursorSensitivity;
 				eulerAngles.y += Input.GetAxis ("Mouse X") * 359f * cursorSensitivity;
 				transform.eulerAngles = eulerAngles;
 			}
+#else
+			if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) {
+				Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
+				Vector3 eulerAngles = transform.eulerAngles;
+				eulerAngles.x += -touchDeltaPosition.y * cursorSensitivity;
+				eulerAngles.y += touchDeltaPosition.x * cursorSensitivity;
+				transform.eulerAngles = eulerAngles;
+			}
+#endif
 		}
 		
 		if (cursorToggleAllowed)

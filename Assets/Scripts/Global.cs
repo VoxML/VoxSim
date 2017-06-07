@@ -30,6 +30,8 @@ namespace Global {
 		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
 	#elif UNITY_STANDALONE_WIN
 		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
+	#elif UNITY_IOS
+		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("/VoxML/voxml");
 	#endif
 	}
 
@@ -1324,6 +1326,11 @@ namespace Global {
 
 			PluginImport commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 			commBridge.OpenPortInternal (PlayerPrefs.GetString("Listener Port"));
+
+#if UNITY_IOS
+			Screen.SetResolution(1280,960,true);
+			Debug.Log(Screen.currentResolution);
+#endif
 		}
 	}
 }

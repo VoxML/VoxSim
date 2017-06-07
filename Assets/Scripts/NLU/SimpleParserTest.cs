@@ -1,4 +1,4 @@
-#if !UNITY_EDITOR && !UNITY_STANDALONE
+#if !UNITY_EDITOR && !UNITY_STANDALONE && !UNITY_IOS
 using System;
 using NUnit.Framework;
 

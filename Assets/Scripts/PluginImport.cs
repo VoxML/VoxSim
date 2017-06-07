@@ -122,12 +122,15 @@ public class PluginImport : MonoBehaviour {
 		{
 			// pass true as first param to make the server visible only to 'localhost'
 			// (for testing, for exmaple)
-			_cmdServer = new CmdServer(true, int.Parse(port), 1);
+			_cmdServer = new CmdServer(false, int.Parse(port), 1);
 			OnPortOpened (this, null);
 		}
 		catch (Exception e) {
 			Debug.Log ("Failed to open port " + port);
+			Debug.Log(e.Message);
+			Debug.Log(e.InnerException);
 			Debug.Log(e.StackTrace);
+			Debug.Log(e.Data);
 		}
 	}
 

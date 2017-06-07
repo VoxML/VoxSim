@@ -44,6 +44,8 @@ public class InputController : FontManager {
 
 	float fontSizeModifier;
 
+	TouchScreenKeyboard keyboard;
+
 	public event EventHandler InputReceived;
 
 	public void OnInputReceived(object sender, EventArgs e)
@@ -93,9 +95,11 @@ public class InputController : FontManager {
 	}
 
 	void OnGUI() {
+#if !UNITY_IOS
 		Event e = Event.current;
 		if (e.keyCode == KeyCode.Return) {
 			if (inputString != "") {
+
 				MessageReceived (inputString);
 
 				// warning: switching to TextArea here (and below) seems to cause crash
@@ -121,6 +125,44 @@ public class InputController : FontManager {
 			GUILayout.EndHorizontal ();
 			GUILayout.EndArea();
 		}
+#else
+		if (!TouchScreenKeyboard.visible) {
+			if (inputString != "") {
+				MessageReceived (inputString);
+
+				GUILayout.BeginArea (inputRect);
+				GUILayout.BeginHorizontal();
+				GUILayout.Label(inputLabel+":", labelStyle);
+				inputString = GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+				GUILayout.EndHorizontal ();
+				GUILayout.EndArea();
+			}
+			else {
+				// warning: switching to TextArea here (and below) seems to cause crash
+				GUILayout.BeginArea (inputRect);
+				GUILayout.BeginHorizontal();
+				GUILayout.Label(inputLabel+":", labelStyle);
+				inputString = GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+				GUILayout.EndHorizontal ();
+				GUILayout.EndArea();
+
+				//GUI.Label (inputRect, inputLabel+":");
+				//inputString = GUI.TextField (inputRect, ""); 
+			}
+		}
+		else {
+
+			//GUI.Label (inputRect, inputLabel+":");
+			//inputString = GUI.TextField (inputRect, inputString);
+			GUILayout.BeginArea (inputRect);
+			GUILayout.BeginHorizontal();
+			GUILayout.Label(inputLabel+":", labelStyle);
+			inputString = GUILayout.TextField(inputString, textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+			GUILayout.EndHorizontal ();
+			GUILayout.EndArea();
+		}
+#endif
+
 
 			/* DEBUG BUTTONS */
 
