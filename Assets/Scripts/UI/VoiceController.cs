@@ -65,7 +65,7 @@ namespace UI
             }
 
             // TODO 6/6/2017-23:19 this is jsut for test, delete later
-            _speaker.Speak(new Wrapper(text: "Ta-da, Mic testing", voice: v));
+            //_speaker.Speak(new Wrapper(text: "Ta-da, Mic testing", voice: v));
         }
 
         public void Speak(string text)
