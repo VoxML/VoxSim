@@ -183,8 +183,8 @@ public class GhostFreeRoamCamera : MonoBehaviour
 			if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) {
 				Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
 				Vector3 eulerAngles = transform.eulerAngles;
-				eulerAngles.x += -touchDeltaPosition.y * cursorSensitivity;
-				eulerAngles.y += touchDeltaPosition.x * cursorSensitivity;
+				eulerAngles.x += touchDeltaPosition.y * cursorSensitivity;
+				eulerAngles.y += -touchDeltaPosition.x * cursorSensitivity;
 				transform.eulerAngles = eulerAngles;
 			}
 #endif
