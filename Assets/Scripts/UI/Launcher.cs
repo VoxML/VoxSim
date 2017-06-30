@@ -13,6 +13,8 @@ using VideoCapture;
 public class Launcher : FontManager {
 	public int fontSize = 12;
 
+	string launcherTitle = "VoxSidoodle";
+
 	string ip;
 	string ipContent = "IP";
 	string csuUrl;
@@ -355,8 +357,8 @@ public class Launcher : FontManager {
 			}
 		}
 
-		textDimensions = GUI.skin.label.CalcSize (new GUIContent ("VoxSim"));
-		GUI.Label (new Rect (((2 * bgLeft + bgWidth) / 2) - textDimensions.x / 2, bgTop, textDimensions.x, 25), "VoxSim");
+		textDimensions = GUI.skin.label.CalcSize (new GUIContent (launcherTitle));
+		GUI.Label (new Rect (((2 * bgLeft + bgWidth) / 2) - textDimensions.x / 2, bgTop, textDimensions.x, 25), launcherTitle);
 	}
 
 	void PopUpEULAWindow () {
