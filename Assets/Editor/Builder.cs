@@ -57,8 +57,6 @@ public class Builder : Editor {
 				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
 					BuildOptions.AcceptExternalModificationsToPlayer));
 				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
-				FileInfo scriptFile = new System.IO.FileInfo (@"Assets/Resources/deploy_script.sh");
-				scriptFile.CopyTo(Path.GetFullPath (Data.voxmlDataPath + "/../../Build/ios/" + buildName + "/deploy_script.sh"), true);
 			}
 
 			//if (buildWeb) {
@@ -138,8 +136,6 @@ public static class AutoBuilder {
 		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
 			BuildOptions.AcceptExternalModificationsToPlayer));
 		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
-		FileInfo scriptFile = new System.IO.FileInfo (@"Assets/Resources/deploy_script.sh");
-		scriptFile.CopyTo(Path.GetFullPath (Data.voxmlDataPath + "/../../Build/ios/" + buildName + "/deploy_script.sh"), true);
 	}
 
 	public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
