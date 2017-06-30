@@ -43,6 +43,7 @@ public class Builder : Editor {
 
 			Debug.Log (Data.voxmlDataPath);
 
+			// TODO: Migrate away from this in favor of build scripts
 			if (buildMac || buildAll) {
 				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
 				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSXUniversal, BuildOptions.None);
@@ -135,7 +136,7 @@ public static class AutoBuilder {
 
 		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
 			BuildOptions.AcceptExternalModificationsToPlayer));
-		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
+		//DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
 	}
 
 	public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)

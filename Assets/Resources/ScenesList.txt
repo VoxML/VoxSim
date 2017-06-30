@@ -1,4 +1,0 @@
-CupsGame
-EACLTutorial
-JointCSUDemo
-UnderspecificationTests
