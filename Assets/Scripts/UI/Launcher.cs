@@ -13,7 +13,7 @@ using VideoCapture;
 public class Launcher : FontManager {
 	public int fontSize = 12;
 
-	string launcherTitle = "VoxSidoodle";
+	string launcherTitle = "VoxSim";
 
 	string ip;
 	string ipContent = "IP";
