@@ -76,6 +76,7 @@ public class JointGestureDemo : MonoBehaviour {
 	void Update () {
 		if (csuClient == null) {
 			csuClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
+			//TODO: What if there is no CSUClient address assigned?
 			csuClient.GestureReceived += ReceivedGesture;
 			csuClient.ConnectionLost += ConnectionLost;
 

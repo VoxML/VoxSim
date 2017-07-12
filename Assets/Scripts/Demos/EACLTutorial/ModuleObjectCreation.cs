@@ -294,7 +294,7 @@ public class ModuleObjectCreation : ModalWindow {
 //			foreach (Voxeme vox in objSelector.allVoxemes) {
 //				Debug.Log (vox.gameObject);
 //			}
-			selectedObject = objSelector.allVoxemes.Find (v => v.gameObject.transform.FindChild(go.name) != null).gameObject;
+			selectedObject = objSelector.allVoxemes.Find (v => v.gameObject.transform.Find(go.name) != null).gameObject;
 			selectedObject.GetComponent<Voxeme> ().VoxMLLoaded += VoxMLUpdated;
 
 			surfacePlacementOffset = (Helper.GetObjectWorldSize (selectedObject.gameObject).center.y - Helper.GetObjectWorldSize (selectedObject.gameObject).min.y) +

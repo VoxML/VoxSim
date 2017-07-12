@@ -89,6 +89,7 @@ public class Launcher : FontManager {
 		}
 #endif 
 #if UNITY_STANDALONE || UNITY_IOS || UNITY_WEBPLAYER
+		// What if ScenesList has been deleted?
 		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
 		string[] scenes = scenesList.text.Split ('\n');
 		foreach (string s in scenes) {
