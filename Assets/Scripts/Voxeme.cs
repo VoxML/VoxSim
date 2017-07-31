@@ -629,7 +629,7 @@ public class Voxeme : MonoBehaviour {
 			if (oper == String.Empty) {
 				Transform obj = null;
 				int index = -1;
-				obj = gameObject.transform.FindChild (gameObject.name + "*/" + s [0]);
+				obj = gameObject.transform.Find (gameObject.name + "*/" + s [0]);
 				if (s.Length > 1) {
 					index = Helper.StringToInt (s [1].Remove (s [1].IndexOf (']')));
 				}
@@ -642,7 +642,7 @@ public class Voxeme : MonoBehaviour {
 				}
 			}
 			else if (oper == "+" || oper == "*") {
-				Transform subVox = gameObject.transform.FindChild (gameObject.name + "*/");
+				Transform subVox = gameObject.transform.Find (gameObject.name + "*/");
 				if (subVox != null) {
 					foreach (Transform child in subVox) {
 						if (child.name == s [0]) {

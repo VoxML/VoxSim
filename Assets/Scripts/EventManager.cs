@@ -13,6 +13,8 @@ using Agent;
 using Global;
 using Satisfaction;
 using Vox;
+using RootMotion.Demos;
+using RootMotion.FinalIK;
 
 public class EventManagerArgs : EventArgs {
 
@@ -27,6 +29,10 @@ public class EventManagerArgs : EventArgs {
 }
 
 public class EventManager : MonoBehaviour {
+	public FullBodyBipedIK bodyIk;
+	//public GameObject leftHandTarget;
+	public GameObject rightHandTarget;
+
 	public List<String> events = new List<String>();
 	public OrderedDictionary eventsStatus = new OrderedDictionary();
 	public ObjectSelector objSelector;
@@ -133,7 +139,14 @@ public class EventManager : MonoBehaviour {
 		//eventWaitTimer.Enabled = false;
 		//eventWaitTimer.Elapsed += ExecuteNextEvent;
 	}
-	
+
+
+	float initiatePhaseTime = 0f;
+	bool startInitiatePhase = false;
+
+	float recoverPhaseTime = 1f;
+	bool startRecoverPhase = false;
+
 	// Update is called once per frame
 	void Update () {
 		if (stayExecution) {
@@ -141,36 +154,84 @@ public class EventManager : MonoBehaviour {
 			return;
 		}
 
-		if (events.Count > 0) {
-//			if (!SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-//				return;
-//			}
+		if (startRecoverPhase) {
+			if (recoverPhaseTime > 0) {
+				recoverPhaseTime -= Time.deltaTime * 1f;
 
-			if (SatisfactionTest.IsSatisfied (events [0]) == true) {
-				GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
-				Debug.Log ("Satisfied " + events [0]);
-				for (int i = 0; i < events.Count - 1; i++) {
-					events [i] = events [i + 1];
-					Debug.Log (i);
-					Debug.Log (events [i]);
-				}
-				string completedEvent = events [events.Count - 1];
-				RemoveEvent (events.Count - 1);
-				//Debug.Log (events.Count);
+				bodyIk.solver.rightHandEffector.positionWeight = recoverPhaseTime;
+				bodyIk.solver.rightHandEffector.rotationWeight = recoverPhaseTime;
+				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
+				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+			} else {
+				recoverPhaseTime = 1f;
+				startRecoverPhase = false;
+				Debug.Log ("======= startRecoverPhase false ========");
+			}
+		}
+
+		if (startInitiatePhase) {
+			if (initiatePhaseTime < 1) {
+				initiatePhaseTime += Time.deltaTime * 1f;
+
+				bodyIk.solver.rightHandEffector.positionWeight = initiatePhaseTime;
+				bodyIk.solver.rightHandEffector.rotationWeight = initiatePhaseTime;
+				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
+				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+			} else {
+				initiatePhaseTime = 0f;
+				startInitiatePhase = false;
+				Debug.Log ("======= startInitiatePhase false ========");
+
 
 				if (events.Count > 0) {
-					ExecuteNextCommand ();
-				}
-				else {
-					if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
-						//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-						EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
-						OnEventComplete (this, eventArgs);
+					if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+						ExecuteCommand (events [0]);
+					}
+					else {
+						RemoveEvent (0);
 					}
 				}
 			}
-		}
-		else {
+		} else {
+			if (events.Count > 0) {
+				bool q = SatisfactionTest.IsSatisfied (events [0]);
+				Debug.Log ("q == " + q);
+
+				bodyIk.solver.rightHandEffector.positionWeight = 1f;
+				bodyIk.solver.rightHandEffector.rotationWeight = 1f;
+				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
+				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+
+				if (q) {
+					GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
+					Debug.Log ("Satisfied " + events [0]);
+
+					for (int i = 0; i < events.Count - 1; i++) {
+						events [i] = events [i + 1];
+					}
+					string completedEvent = events [events.Count - 1];
+					RemoveEvent (events.Count - 1);
+
+					// Move hand back to the original posture
+					startRecoverPhase = true;
+					Debug.Log ("======= startRecoverPhase true ========");
+
+					//Debug.Log (events.Count);
+
+					if (events.Count > 0) {
+						ExecuteNextCommand ();
+					}
+					else {
+						if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
+							//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
+							EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
+							OnEventComplete (this, eventArgs);
+						}
+					}
+				}
+			}
+			else {
+			}
 		}
 	}
 
@@ -231,14 +292,11 @@ public class EventManager : MonoBehaviour {
 			return;
 		}
 
-		if (events.Count > 0) {
-			if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-				ExecuteCommand (events [0]);
-			}
-			else {
-				RemoveEvent (0);
-			}
-		}
+		// TUAN
+		// Before Executing event
+		// Move hand to reach the target
+		startInitiatePhase = true;
+		Debug.Log ("======= startInitiatePhase true ========");
 	}
 
 	public bool EvaluateCommand(String command) {
@@ -361,8 +419,10 @@ public class EventManager : MonoBehaviour {
 			objs.Add (true);
 			methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
+
 			if (preds.rdfTriples.Count > 0) {
 				if (methodToCall != null) {
+					Debug.Log("========================== ExecuteCommand ============================");
 					Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
 					object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
 					Debug.Log (evaluatedCommand);
@@ -376,6 +436,8 @@ public class EventManager : MonoBehaviour {
 					}
 				}
 			}
+
+			Debug.Log("========================== FINSH EXECUTING COMMAND============================");
 		}
 	}
 
