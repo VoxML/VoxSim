@@ -30,6 +30,8 @@ public class EventManagerArgs : EventArgs {
 
 public class EventManager : MonoBehaviour {
 	public FullBodyBipedIK bodyIk;
+	public LookAtIK lookAtIk;
+
 	//public GameObject leftHandTarget;
 	public GameObject rightHandTarget;
 
@@ -162,6 +164,9 @@ public class EventManager : MonoBehaviour {
 				bodyIk.solver.rightHandEffector.rotationWeight = recoverPhaseTime;
 				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
 				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+
+				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
+				lookAtIk.solver.IKPositionWeight = recoverPhaseTime;
 			} else {
 				recoverPhaseTime = 1f;
 				startRecoverPhase = false;
@@ -177,6 +182,9 @@ public class EventManager : MonoBehaviour {
 				bodyIk.solver.rightHandEffector.rotationWeight = initiatePhaseTime;
 				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
 				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+
+				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
+				lookAtIk.solver.IKPositionWeight = initiatePhaseTime;
 			} else {
 				initiatePhaseTime = 0f;
 				startInitiatePhase = false;
@@ -201,6 +209,9 @@ public class EventManager : MonoBehaviour {
 				bodyIk.solver.rightHandEffector.rotationWeight = 1f;
 				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
 				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+
+				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
+				lookAtIk.solver.IKPositionWeight = 1f;
 
 				if (q) {
 					GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();

@@ -36,7 +36,6 @@ namespace RootMotion.Demos {
 
 			if (interactionSystem.IsPaused(effectors[0])) {
 				if (GUILayout.Button("Resume Interaction With " + interactionObject.name)) {
-
 					interactionSystem.ResumeAll();
 				}
 			}
