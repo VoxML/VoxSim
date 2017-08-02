@@ -30,10 +30,11 @@ public class EventManagerArgs : EventArgs {
 
 public class EventManager : MonoBehaviour {
 	public FullBodyBipedIK bodyIk;
-	public LookAtIK lookAtIk;
+	public InteractionLookAt lookAt = new InteractionLookAt();
+	public InteractionSystem interactionSystem;
 
 	//public GameObject leftHandTarget;
-	public GameObject rightHandTarget;
+	public InteractionObject rightHandTarget;
 
 	public List<String> events = new List<String>();
 	public OrderedDictionary eventsStatus = new OrderedDictionary();
@@ -144,10 +145,109 @@ public class EventManager : MonoBehaviour {
 
 
 	float initiatePhaseTime = 0f;
-	bool startInitiatePhase = false;
+	bool isInitiatePhase = false;
 
 	float recoverPhaseTime = 1f;
 	bool startRecoverPhase = false;
+
+//	// Update is called once per frame
+//	void Update () {
+//		if (stayExecution) {
+//			stayExecution = false;
+//			return;
+//		}
+//
+//		if (startRecoverPhase) {
+//			if (recoverPhaseTime > 0) {
+//				recoverPhaseTime -= Time.deltaTime * 1f;
+//
+//				bodyIk.solver.rightHandEffector.positionWeight = recoverPhaseTime;
+//				bodyIk.solver.rightHandEffector.rotationWeight = recoverPhaseTime;
+//				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
+//				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+//
+//				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
+//				lookAtIk.solver.IKPositionWeight = recoverPhaseTime;
+//			} else {
+//				recoverPhaseTime = 1f;
+//				startRecoverPhase = false;
+//				Debug.Log ("======= startRecoverPhase false ========");
+//			}
+//		}
+//
+//		if (startInitiatePhase) {
+//			if (initiatePhaseTime < 1) {
+//				initiatePhaseTime += Time.deltaTime * 1f;
+//
+//				bodyIk.solver.rightHandEffector.positionWeight = initiatePhaseTime;
+//				bodyIk.solver.rightHandEffector.rotationWeight = initiatePhaseTime;
+//				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
+//				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+//
+//				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
+//				lookAtIk.solver.IKPositionWeight = initiatePhaseTime;
+//			} else {
+//				initiatePhaseTime = 0f;
+//				startInitiatePhase = false;
+//				Debug.Log ("======= startInitiatePhase false ========");
+//
+//
+//				if (events.Count > 0) {
+//					if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+//						ExecuteCommand (events [0]);
+//					}
+//					else {
+//						RemoveEvent (0);
+//					}
+//				}
+//			}
+//		} else {
+//			if (events.Count > 0) {
+//				bool q = SatisfactionTest.IsSatisfied (events [0]);
+//				Debug.Log ("q == " + q);
+//
+//				bodyIk.solver.rightHandEffector.positionWeight = 1f;
+//				bodyIk.solver.rightHandEffector.rotationWeight = 1f;
+//				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
+//				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
+//
+//				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
+//				lookAtIk.solver.IKPositionWeight = 1f;
+//
+//				if (q) {
+//					GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
+//					Debug.Log ("Satisfied " + events [0]);
+//
+//					for (int i = 0; i < events.Count - 1; i++) {
+//						events [i] = events [i + 1];
+//					}
+//					string completedEvent = events [events.Count - 1];
+//					RemoveEvent (events.Count - 1);
+//
+//					// Move hand back to the original posture
+//					startRecoverPhase = true;
+//					Debug.Log ("======= startRecoverPhase true ========");
+//
+//					//Debug.Log (events.Count);
+//
+//					if (events.Count > 0) {
+//						ExecuteNextCommand ();
+//					}
+//					else {
+//						if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
+//							//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
+//							EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
+//							OnEventComplete (this, eventArgs);
+//						}
+//					}
+//				}
+//			}
+//			else {
+//			}
+//		}
+//	}
+
+	string completedEvent = "";
 
 	// Update is called once per frame
 	void Update () {
@@ -155,94 +255,76 @@ public class EventManager : MonoBehaviour {
 			stayExecution = false;
 			return;
 		}
+			
+		if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+			if (isInitiatePhase) {
+				Debug.Log ("Done interaction, execute command");
+				// Only execute command once
+				isInitiatePhase = false;
 
-		if (startRecoverPhase) {
-			if (recoverPhaseTime > 0) {
-				recoverPhaseTime -= Time.deltaTime * 1f;
-
-				bodyIk.solver.rightHandEffector.positionWeight = recoverPhaseTime;
-				bodyIk.solver.rightHandEffector.rotationWeight = recoverPhaseTime;
-				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
-				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
-
-				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
-				lookAtIk.solver.IKPositionWeight = recoverPhaseTime;
-			} else {
-				recoverPhaseTime = 1f;
-				startRecoverPhase = false;
-				Debug.Log ("======= startRecoverPhase false ========");
-			}
-		}
-
-		if (startInitiatePhase) {
-			if (initiatePhaseTime < 1) {
-				initiatePhaseTime += Time.deltaTime * 1f;
-
-				bodyIk.solver.rightHandEffector.positionWeight = initiatePhaseTime;
-				bodyIk.solver.rightHandEffector.rotationWeight = initiatePhaseTime;
-				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
-				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
-
-				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
-				lookAtIk.solver.IKPositionWeight = initiatePhaseTime;
-			} else {
-				initiatePhaseTime = 0f;
-				startInitiatePhase = false;
-				Debug.Log ("======= startInitiatePhase false ========");
-
+				// These don't work
+//				interactionSystem.manualResumeLookAt ();
+//				// I need to reset the lookAt target because otherwise it would be automatically reset to null
+//				interactionSystem.LookAtInteraction (FullBodyBipedEffector.RightHand, rightHandTarget);
 
 				if (events.Count > 0) {
 					if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
 						ExecuteCommand (events [0]);
-					}
-					else {
+					} else {
 						RemoveEvent (0);
 					}
 				}
+			} else {
+				// Currently in movement
+				lookAt.ik.solver.IKPosition = rightHandTarget.transform.position;
+				lookAt.ik.solver.IKPositionWeight = 1f;
 			}
 		} else {
-			if (events.Count > 0) {
-				bool q = SatisfactionTest.IsSatisfied (events [0]);
-				Debug.Log ("q == " + q);
+			lookAt.ik.solver.IKPosition = rightHandTarget.transform.position;
+			if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) <= 0.5) {
+				lookAt.ik.solver.IKPositionWeight = interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) * 2;
+			} else if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) < 1) {
+				lookAt.ik.solver.IKPositionWeight = (1 - interactionSystem.GetProgress (FullBodyBipedEffector.RightHand)) * 2;
+			} else {
+				lookAt.ik.solver.IKPositionWeight = 0;
+			}
+		}
 
-				bodyIk.solver.rightHandEffector.positionWeight = 1f;
-				bodyIk.solver.rightHandEffector.rotationWeight = 1f;
-				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
-				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
 
-				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
-				lookAtIk.solver.IKPositionWeight = 1f;
 
-				if (q) {
-					GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
-					Debug.Log ("Satisfied " + events [0]);
+//		if (!interactionSystem.IsInInteraction(FullBodyBipedEffector.RightHand) && startRecoverPhase) {
+//			if (events.Count > 0) {
+//				ExecuteNextCommand ();
+//			}
+//			else {
+//				if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
+//					//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
+//					EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
+//					OnEventComplete (this, eventArgs);
+//				}
+//			}
+//		}
 
-					for (int i = 0; i < events.Count - 1; i++) {
-						events [i] = events [i + 1];
-					}
-					string completedEvent = events [events.Count - 1];
-					RemoveEvent (events.Count - 1);
+		if (events.Count > 0) {
+			bool q = SatisfactionTest.IsSatisfied (events [0]);
+			Debug.Log ("q == " + q);
 
-					// Move hand back to the original posture
-					startRecoverPhase = true;
-					Debug.Log ("======= startRecoverPhase true ========");
 
-					//Debug.Log (events.Count);
+			if (q) {
+				GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
+				Debug.Log ("Satisfied " + events [0]);
 
-					if (events.Count > 0) {
-						ExecuteNextCommand ();
-					}
-					else {
-						if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
-							//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-							EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
-							OnEventComplete (this, eventArgs);
-						}
-					}
+				for (int i = 0; i < events.Count - 1; i++) {
+					events [i] = events [i + 1];
 				}
+				completedEvent = events [events.Count - 1];
+				RemoveEvent (events.Count - 1);
+
+				interactionSystem.ResumeAll ();
+				startRecoverPhase = true;
 			}
-			else {
-			}
+		}
+		else {
 		}
 	}
 
@@ -302,12 +384,14 @@ public class EventManager : MonoBehaviour {
 		if (!EvaluateCommand (events [0])) {
 			return;
 		}
+			
+		interactionSystem.StartInteraction(FullBodyBipedEffector.RightHand, rightHandTarget, true);
 
 		// TUAN
 		// Before Executing event
 		// Move hand to reach the target
-		startInitiatePhase = true;
-		Debug.Log ("======= startInitiatePhase true ========");
+		isInitiatePhase = true;
+		Debug.Log ("======= isInitiatePhase true ========");
 	}
 
 	public bool EvaluateCommand(String command) {

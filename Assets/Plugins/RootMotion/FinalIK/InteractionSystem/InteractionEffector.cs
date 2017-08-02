@@ -132,7 +132,6 @@ namespace RootMotion.FinalIK {
 			} else {
 				if (!interrupt) return false;
 			}
-
 			// Get the InteractionTarget
 			target = interactionObject.GetTarget(effectorType, tag);
 			if (target == null) return false;

@@ -627,13 +627,17 @@ namespace RootMotion.FinalIK {
 			lookAt.isPaused = false;
 		}
 
+		public void manualResumeLookAt(){
+			lookAt.isPaused = false;
+		}
+
 		private void InteractionStop(FullBodyBipedEffector effector, InteractionObject interactionObject) {
 			lookAt.isPaused = false;
 		
 		}
 
 		// Called by the delegate
-		private void LookAtInteraction(FullBodyBipedEffector effector, InteractionObject interactionObject) {
+		public void LookAtInteraction(FullBodyBipedEffector effector, InteractionObject interactionObject) {
 			lookAt.Look(interactionObject.lookAtTarget, Time.time + (interactionObject.length * 0.5f));
 		}
 

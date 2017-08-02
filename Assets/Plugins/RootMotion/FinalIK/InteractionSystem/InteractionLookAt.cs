@@ -25,6 +25,12 @@ namespace RootMotion.FinalIK {
 		public float weightSpeed = 1f;
 
 		/// <summary>
+		/// Interpolation speed of the LookAtIK weight.
+		/// </summary>
+		[Tooltip("Whether we should release lookAt target when weigh <= 0.")]
+		public bool releaseLookAt = false;
+
+		/// <summary>
 		/// Look the specified target for the specified time.
 		/// </summary>
 		public void Look(Transform target, float time) {
@@ -51,6 +57,7 @@ namespace RootMotion.FinalIK {
 
 			// Interpolate the weight
 			float add = Time.time < stopLookTime? weightSpeed: -weightSpeed;
+
 			weight = Mathf.Clamp(weight + add * Time.deltaTime, 0f, 1f);
 
 			// Set LookAtIK weight
@@ -61,6 +68,7 @@ namespace RootMotion.FinalIK {
 
 			// Release the LookAtIK for other tasks once we're weighed out
 			if (weight <= 0f) lookAtTarget = null;
+
 
 			firstFBBIKSolve = true;
 		}
