@@ -34,7 +34,7 @@ public class EventManager : MonoBehaviour {
 	public InteractionSystem interactionSystem;
 
 	//public GameObject leftHandTarget;
-	public InteractionObject rightHandTarget;
+	public InteractionObject interactionObject;
 
 	public List<String> events = new List<String>();
 	public OrderedDictionary eventsStatus = new OrderedDictionary();
@@ -255,38 +255,40 @@ public class EventManager : MonoBehaviour {
 			stayExecution = false;
 			return;
 		}
-			
-		if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
-			if (isInitiatePhase) {
-				Debug.Log ("Done interaction, execute command");
-				// Only execute command once
-				isInitiatePhase = false;
 
-				// These don't work
+		if (interactionObject != null) {
+			if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+				if (isInitiatePhase) {
+					Debug.Log ("Done interaction, execute command");
+					// Only execute command once
+					isInitiatePhase = false;
+
+					// These don't work
 //				interactionSystem.manualResumeLookAt ();
 //				// I need to reset the lookAt target because otherwise it would be automatically reset to null
 //				interactionSystem.LookAtInteraction (FullBodyBipedEffector.RightHand, rightHandTarget);
 
-				if (events.Count > 0) {
-					if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-						ExecuteCommand (events [0]);
-					} else {
-						RemoveEvent (0);
+					if (events.Count > 0) {
+						if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+							ExecuteCommand (events [0]);
+						} else {
+							RemoveEvent (0);
+						}
 					}
+				} else {
+					// Currently in movement
+					lookAt.ik.solver.IKPosition = interactionObject.transform.position;
+					lookAt.ik.solver.IKPositionWeight = 1f;
 				}
 			} else {
-				// Currently in movement
-				lookAt.ik.solver.IKPosition = rightHandTarget.transform.position;
-				lookAt.ik.solver.IKPositionWeight = 1f;
-			}
-		} else {
-			lookAt.ik.solver.IKPosition = rightHandTarget.transform.position;
-			if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) <= 0.5) {
-				lookAt.ik.solver.IKPositionWeight = interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) * 2;
-			} else if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) < 1) {
-				lookAt.ik.solver.IKPositionWeight = (1 - interactionSystem.GetProgress (FullBodyBipedEffector.RightHand)) * 2;
-			} else {
-				lookAt.ik.solver.IKPositionWeight = 0;
+				lookAt.ik.solver.IKPosition = interactionObject.transform.position;
+				if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) <= 0.5) {
+					lookAt.ik.solver.IKPositionWeight = interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) * 2;
+				} else if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) < 1) {
+					lookAt.ik.solver.IKPositionWeight = (1 - interactionSystem.GetProgress (FullBodyBipedEffector.RightHand)) * 2;
+				} else {
+					lookAt.ik.solver.IKPositionWeight = 0;
+				}
 			}
 		}
 
@@ -307,8 +309,6 @@ public class EventManager : MonoBehaviour {
 
 		if (events.Count > 0) {
 			bool q = SatisfactionTest.IsSatisfied (events [0]);
-			Debug.Log ("q == " + q);
-
 
 			if (q) {
 				GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
@@ -384,14 +384,39 @@ public class EventManager : MonoBehaviour {
 		if (!EvaluateCommand (events [0])) {
 			return;
 		}
-			
-		interactionSystem.StartInteraction(FullBodyBipedEffector.RightHand, rightHandTarget, true);
 
-		// TUAN
-		// Before Executing event
-		// Move hand to reach the target
-		isInitiatePhase = true;
-		Debug.Log ("======= isInitiatePhase true ========");
+
+		Hashtable predArgs = Helper.ParsePredicate (events [0]);
+		String pred = Helper.GetTopPredicate (events [0]);
+
+		if (predArgs.Count > 0) {
+			try {
+				Debug.Log(" ============== pred ============ " + pred);
+				Debug.Log(" ============== predArg ============ " + (String)predArgs [pred]);
+
+				// Resolve interactionObject
+				var objs = extractObjects (pred, (String)predArgs [pred]);
+				if (objs.Count > 0 && objs[0] is GameObject) {
+					Debug.Log(" ============== obj ============ " + objs[0]);
+					interactionObject = ((GameObject)objs[0]).GetComponentInChildren<InteractionObject>();
+				}
+
+				Debug.Log(" ============== interactionObject ============ " + interactionObject);
+
+				if ( interactionObject != null ) {
+					// Execute interaction	
+					interactionSystem.StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+
+					// TUAN
+					// Before Executing event
+					// Move hand to reach the target
+					isInitiatePhase = true;
+					Debug.Log ("======= isInitiatePhase true ========");
+				}
+			} catch (ArgumentNullException e) {
+				return;
+			}
+		}
 	}
 
 	public bool EvaluateCommand(String command) {
@@ -464,28 +489,28 @@ public class EventManager : MonoBehaviour {
 		return true;
 	}
 
-	public void ExecuteCommand(String evaluatedCommand) {
-		Debug.Log("Execute command: " + evaluatedCommand);
-		Hashtable predArgs = Helper.ParsePredicate (evaluatedCommand);
-		String pred = Helper.GetTopPredicate (evaluatedCommand);
+	List<object> extractObjects (String pred, String predArg)
+	{
+		List<object> objs = new List<object> ();
+		Queue<String> argsStrings = new Queue<String> (predArg.Split (new char[] {
+			','
+		}));
 
-		if (predArgs.Count > 0) {
-			Queue<String> argsStrings = new Queue<String> (((String)predArgs [pred]).Split (new char[] { ',' }));
-			List<object> objs = new List<object> ();
-		
-			while (argsStrings.Count > 0) {
-				object arg = argsStrings.Dequeue ();
-			
-				if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
-					objs.Add (Helper.ParsableToVector ((String)arg));
-				}
-				else if (arg is String) {	// if arg is String
+		while (argsStrings.Count > 0) {
+			object arg = argsStrings.Dequeue ();
+			if (Helper.v.IsMatch ((String)arg)) {
+				// if arg is vector form
+				objs.Add (Helper.ParsableToVector ((String)arg));
+			}
+			else
+				if (arg is String) {
+					// if arg is String
 					if ((arg as String) != string.Empty) {
 						Regex q = new Regex ("[\'\"].*[\'\"]");
 						int i;
-						if ((q.IsMatch (arg as String)) || (int.TryParse(arg as String, out i))) {
+						if ((q.IsMatch (arg as String)) || (int.TryParse (arg as String, out i))) {
 							objs.Add (arg as String);
-						} 
+						}
 						else {
 							List<GameObject> matches = new List<GameObject> ();
 							foreach (Voxeme voxeme in objSelector.allVoxemes) {
@@ -493,15 +518,16 @@ public class EventManager : MonoBehaviour {
 									matches.Add (voxeme.gameObject);
 								}
 							}
-
 							if (matches.Count <= 1) {
 								GameObject go = GameObject.Find (arg as String);
 								if (go == null) {
 									OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-									return;	// abort
+
+								throw new ArgumentNullException ("Couldn't resolve the object");
+									// abort
 								}
 								objs.Add (go);
-							} 
+							}
 							else {
 								//Debug.Log (string.Format ("Which {0}?", (arg as String)));
 								//OutputHelper.PrintOutput (string.Format("Which {0}?", (arg as String)));
@@ -509,30 +535,40 @@ public class EventManager : MonoBehaviour {
 						}
 					}
 				}
-			}
+		}
+		objs.Add (true);
+		methodToCall = preds.GetType ().GetMethod (pred.ToUpper ());
+		return objs;
+	}
 
-			objs.Add (true);
-			methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
+	public void ExecuteCommand(String evaluatedCommand) {
+		Debug.Log("Execute command: " + evaluatedCommand);
+		Hashtable predArgs = Helper.ParsePredicate (evaluatedCommand);
+		String pred = Helper.GetTopPredicate (evaluatedCommand);
 
+		if (predArgs.Count > 0) {
+			try {
+				var objs = extractObjects (pred, (String)predArgs [pred]);
 
-			if (preds.rdfTriples.Count > 0) {
-				if (methodToCall != null) {
-					Debug.Log("========================== ExecuteCommand ============================");
-					Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
-					object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
-					Debug.Log (evaluatedCommand);
-					OnExecuteEvent (this, new EventManagerArgs (evaluatedCommand));
-				}
-				else {
-					if (File.Exists (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
-						using (StreamReader sr = new StreamReader (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
-							preds.ComposeSubevents (VoxML.LoadFromText (sr.ReadToEnd ()), objs.ToArray ());
+				if (preds.rdfTriples.Count > 0) {
+					if (methodToCall != null) {
+						Debug.Log("========================== ExecuteCommand ============================");
+						Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
+						object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
+						Debug.Log (evaluatedCommand);
+						OnExecuteEvent (this, new EventManagerArgs (evaluatedCommand));
+					}
+					else {
+						if (File.Exists (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
+							using (StreamReader sr = new StreamReader (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
+								preds.ComposeSubevents (VoxML.LoadFromText (sr.ReadToEnd ()), objs.ToArray ());
+							}
 						}
 					}
 				}
+			} catch (ArgumentNullException e){
+				return;
 			}
-
-			Debug.Log("========================== FINSH EXECUTING COMMAND============================");
 		}
 	}
 
