@@ -391,17 +391,12 @@ public class EventManager : MonoBehaviour {
 
 		if (predArgs.Count > 0) {
 			try {
-				Debug.Log(" ============== pred ============ " + pred);
-				Debug.Log(" ============== predArg ============ " + (String)predArgs [pred]);
-
 				// Resolve interactionObject
 				var objs = extractObjects (pred, (String)predArgs [pred]);
 				if (objs.Count > 0 && objs[0] is GameObject) {
-					Debug.Log(" ============== obj ============ " + objs[0]);
 					interactionObject = ((GameObject)objs[0]).GetComponentInChildren<InteractionObject>();
 				}
-
-				Debug.Log(" ============== interactionObject ============ " + interactionObject);
+					
 
 				if ( interactionObject != null ) {
 					// Execute interaction	

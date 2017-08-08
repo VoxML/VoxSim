@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
+using AssemblyCSharp;
 using Global;
+using Arc = Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
 
 public class PathNode {
 	public Vector3 position;
@@ -32,7 +33,8 @@ public class AStarSearch : MonoBehaviour {
 	public Vector3 defaultIncrement = Vector3.one;
 	public Vector3 increment;
 	public List<PathNode> nodes = new List<PathNode>();
-	public List<Pair<PathNode,PathNode>> arcs = new List<Pair<PathNode,PathNode>> ();
+	public List<Global.Pair<PathNode,PathNode>> arcs = new List<Global.Pair<PathNode,PathNode>> ();
+	public Dictionary<Vector3, bool> quantizedSpaceToClear = new Dictionary<Vector3, bool>();
 	public List<Vector3> path;
 
 	public Vector3 start = new Vector3();
@@ -79,6 +81,11 @@ public class AStarSearch : MonoBehaviour {
 		debugVisual.Add (cube);
 	}
 
+	/**
+	 * It is unclear why do you need a GameObject here
+	 * 
+	 * We shouldn't quantize the space before hand
+	 */
 	void QuantizeSpace(GameObject obj, Bounds embeddingSpaceBounds, Vector3 increment, params object[] constraints) {
 		// fill the space with boxes!
 		float xStart, yStart, zStart;
@@ -171,7 +178,50 @@ public class AStarSearch : MonoBehaviour {
 		}
 	}
 
-	void PlotArcs(Bounds objBounds) {
+	bool testClear(GameObject obj, Vector3 curPoint){
+		Bounds objBounds = Helper.GetObjectWorldSize (obj);
+		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
+		// get all objects
+		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+
+		bool spaceClear = true;
+		foreach (GameObject o in allObjects) {
+			if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
+				if (testBounds.Intersects (Helper.GetObjectWorldSize(o))) {
+					spaceClear = false;
+					break;
+				}
+			}
+		}
+
+		return spaceClear;
+	}
+
+	List<Vector3> getNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step){
+		// In general 
+		// step * increment = size of object
+		var neighbors = new List<Vector3> ();
+		for (int i = -step; i <= step; i++)
+			for (int j = -step; j <= step; j++)
+				for (int k = -step; k <= step; k++) {
+					// No overlapping between neighbor and curNode
+					// at least one size equal |step|
+					if (i*i == step*step || j*j == step*step || k*k == step*step) {
+						Vector3 newNode = new Vector3 (curPos.x + i * increment.x, curPos.y + j * increment.y, curPos.z + k * increment.z);
+						if (testClear(obj, newNode))
+							neighbors.Add (newNode);
+					}
+				}
+
+		// specialNodes are also neighbors
+		neighbors.AddRange(specialNodes);
+		return neighbors;
+	}
+
+	/*
+	* PlotArcs is not necessary 
+	*/
+	public void PlotArcs(Bounds objBounds) {
 		RaycastHit hitInfo;
 		for (int i = 0; i < nodes.Count-1; i++) {
 			for (int j = i+1; j < nodes.Count; j++) {
@@ -181,30 +231,270 @@ public class AStarSearch : MonoBehaviour {
 				blocked |= Physics.Raycast (nodes [i].position-objBounds.extents, dir.normalized, out hitInfo, dist);
 				blocked |= Physics.Raycast (nodes [i].position+objBounds.extents, dir.normalized, out hitInfo, dist);
 				if (!blocked) {
-					arcs.Add (new Pair<PathNode, PathNode> (nodes [i], nodes [j]));
-
-//					if (debugNodes) {
-//						Debug.DrawRay (nodes [i].position, dir);
-//					}
+					arcs.Add (new Global.Pair<PathNode, PathNode> (nodes [i], nodes [j]));
 				}
-//				else {
-//					if (false) {}
-//					//if (Helper.ContainingObjects (goal).Contains (hitInfo.collider.gameObject)) {
-//					//	arcs.Add (new Pair<Vector3, Vector3> (nodes [i], nodes [j]));
-//					//}
-//				}
 			}
 		}
 	}
 
+	/*
+	 * Check if the path from first to second with objBounds width is blocked
+	 */ 
+	bool isBlock(Bounds objBounds, Vector3 first, Vector3 second) {
+		RaycastHit hitInfo;
+		Vector3 dir = (second - first);
+		float dist = dir.magnitude;
+		bool blocked = Physics.Raycast (first, dir.normalized, out hitInfo, dist);
+		blocked |= Physics.Raycast (first-objBounds.extents, dir.normalized, out hitInfo, dist);
+		blocked |= Physics.Raycast (first+objBounds.extents, dir.normalized, out hitInfo, dist);
+
+		return blocked;
+	}
+
+	Dictionary<Vector3, Vector3> cameFrom;
+	Dictionary<Vector3, float> gScore;
+	Dictionary<Vector3, float> hScore;
+	HashSet<Vector3> specialNodes = new HashSet<Vector3>();
+
+	public class BetterHeuristic : Comparer<Vector3> 
+	{
+		Dictionary<Vector3, float> gScore;
+		Dictionary<Vector3, float> hScore;
+
+		public BetterHeuristic(Dictionary<Vector3, float> gScore, Dictionary<Vector3, float> hScore) {
+			this.gScore = gScore;
+			this.hScore = hScore;
+		}
+
+		// Compares by Length, Height, and Width.
+		public override int Compare(Vector3 x, Vector3 y)
+		{
+			if ( gScore[x] + hScore[x] < gScore[y] + hScore[y]) 
+				return -1;
+			if ( gScore[x] + hScore[x] > gScore[y] + hScore[y]) 
+				return 1;
+			return 0;
+		}
+
+	}
+
+	public class BetterHeuristicOld : Comparer<PathNode> 
+	{
+		
+		// Compares by Length, Height, and Width.
+		public override int Compare(PathNode x, PathNode y)
+		{
+			if ( x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
+				return -1;
+			if ( x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
+				return 1;
+			return 0;
+		}
+
+	}
+
+	/*
+	 * Look for closest point to goalPos that make a quantized distance to obj
+	 */ 
+	Vector3 lookForClosest( Vector3 goalPos, GameObject obj, Vector3 increment) {
+		float dist = Mathf.Infinity;
+		Vector3 closest = goalPos;
+
+		var distance = goalPos - obj.transform.position;
+		var quantizedDistance = new Vector3( distance.x / increment.x, distance.y / increment.y, distance.z / increment.z);
+
+		var quantizedDistanceX = (int)quantizedDistance.x;
+		var quantizedDistanceY = (int)quantizedDistance.y;
+		var quantizedDistanceZ = (int)quantizedDistance.z;
+
+		for (int x = quantizedDistanceX; x <= quantizedDistanceX + 1; x++)
+			for (int y = quantizedDistanceY; y <= quantizedDistanceY + 1; y++)
+				for (int z = quantizedDistanceZ; z <= quantizedDistanceZ + 1; z++) {
+					var candidate = new Vector3 (x * increment.x + obj.transform.position.x, y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
+
+					if (testClear (obj, candidate)) {
+						float temp = (candidate - goalPos).magnitude;
+
+						if (dist > temp) {
+							dist = temp;
+							closest = candidate;
+						}
+					}
+				}
+		
+		return closest;
+	}
+
+	List<Vector3> ReconstructPath2(Vector3 firstNode, Vector3 lastNode) {
+		path = new List<Vector3> ();
+		Vector3 node = lastNode;
+
+		//path.Add (lastNode.position);
+
+		while (node != firstNode) {
+			path.Insert (0, node);
+			node = cameFrom[node];
+		}
+
+		return path;
+	}
+
+	// A plan path that run faster and more smooth
+	public void PlanPath2(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj, params object[] constraints) {
+		Debug.Log ("========== In plan ========= " + goalPos);
+		cameFrom = new Dictionary<Vector3, Vector3> ();
+		gScore = new Dictionary<Vector3, float> ();
+		hScore = new Dictionary<Vector3, float> ();
+		specialNodes = new HashSet<Vector3>();
+
+		// init empty path
+		path = new List<Vector3>();
+
+		MinHeap<Vector3> openSet = new MinHeap<Vector3>(new BetterHeuristic(gScore, hScore));
+		var openSetForCheck = new HashSet<Vector3> ();
+		var closedSet = new HashSet<Vector3> ();
+
+		var objectBound = Helper.GetObjectWorldSize (obj);
+
+		Vector3 size = Helper.GetObjectWorldSize (obj).size;
+
+		Vector3 increment = defaultIncrement;
+		int step = 1;
+
+		Debug.Log (" ======== size.magnitude ====== " + size.magnitude);
+		Debug.Log (" ======== defaultIncrement.magnitude ====== " + defaultIncrement.magnitude);
+
+		if (size.magnitude > defaultIncrement.magnitude) {
+			step = (int) (size.magnitude / defaultIncrement.magnitude) + 1;
+
+			increment = new Vector3 (size.x / step, size.y / step, size.z / step);
+		}
+
+		Debug.Log (" ======== increment ====== " + increment);
+		Debug.Log (" ======== step ====== " + step);
+
+		openSet.Add (startPos);
+		openSetForCheck.Add (startPos);
+
+		Vector3 endPos = new Vector3();
+		// if constraints contain a voxeme
+		Voxeme testTarget = constraints.OfType<Voxeme> ().FirstOrDefault ();
+		if (testTarget != null) {
+			// if that object is concave (e.g. cup)
+			// if goalPos is within the bounds of target (e.g. in cup)
+			if (testTarget.voxml.Type.Concavity.Contains ("Concave") && Helper.GetObjectWorldSize (testTarget.gameObject).Contains (goalPos)) {
+				// This endPos is special, and requires a special handling to avoid path not found
+				var specialPos = new Vector3(goalPos.x, Helper.GetObjectWorldSize (testTarget.gameObject).max.y+size.y, goalPos.z);
+				endPos = specialPos;
+				specialNodes.Add (specialPos);
+			}
+			else {
+				endPos = lookForClosest (goalPos, obj, increment);
+			}
+		}
+		else {
+			endPos = lookForClosest (goalPos, obj, increment);
+		}
+
+		gScore [startPos] = 0;
+		hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
+
+		Debug.Log (" ========= obj.transform.position ======== " + obj.transform.position);
+		Debug.Log (" ======== start ====== " + startPos);
+		Debug.Log (" ======== goal ====== " + goalPos);
+		Debug.Log (" ======== end ====== " + endPos);
+
+		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
+		// using best node found until endNode reached
+
+		int counter = 0;
+
+		Vector3 curPos = new Vector3();
+
+		float bestMagnitude = Mathf.Infinity;
+		Vector3 bestLastPos = new Vector3();
+
+		while (openSet.Count > 0 && counter < 300) {
+			// O(1)
+			curPos = openSet.TakeMin ();
+
+			Debug.Log (counter + " ======== curNode ====== (" + curPos + ") " + gScore [curPos] + " " + hScore [curPos] + " " + (gScore[curPos] + hScore[curPos]) );
+
+			float currentDistance = (curPos - endPos).magnitude;
+			if (currentDistance < bestMagnitude){
+				bestMagnitude = currentDistance;
+				bestLastPos = curPos;
+			}
+
+			// short cut
+			// if reached end node
+			if ((curPos - endPos).magnitude < Constants.EPSILON) {
+				Debug.Log ("=== counter === " + counter);
+				// extend path to goal node (goal position)
+				cameFrom[goalPos] = curPos;
+				path = ReconstructPath2 (startPos, goalPos);
+				Debug.Log ("====== path ===== ");
+				foreach (var point in path) {
+					Debug.Log (point);
+				}
+				return;
+			}
+
+			openSetForCheck.Remove (curPos);
+			closedSet.Add (curPos);
+
+			var neighbors = getNeighborNodes (obj, curPos, increment, step);
+
+			foreach (var neighbor in neighbors) {
+				if (!closedSet.Contains (neighbor) && !isBlock(objectBound, curPos, neighbor) ) {
+					float tentativeGScore = gScore[curPos] + (neighbor - curPos).magnitude;
+
+					if (gScore.ContainsKey (neighbor) && tentativeGScore > gScore [neighbor])
+						continue;
+
+					cameFrom[neighbor] = curPos;
+					gScore[neighbor] = tentativeGScore;
+					hScore[neighbor] = new Vector3 (endPos.x - neighbor.x, endPos.y - neighbor.y, endPos.z - neighbor.z).magnitude;
+					// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
+
+					// If neighbor is not yet in openset 
+					// Add it
+					// Heap is automatically rearranged
+					if (!openSetForCheck.Contains (neighbor)) {
+						openSet.Add (neighbor);
+						openSetForCheck.Add (neighbor);
+					} else {
+						// If neighbor is already there, update the heap
+						openSet.Update (neighbor);
+					}
+				}
+			}
+
+			counter += 1;
+		}
+
+		path = ReconstructPath2 (startPos, bestLastPos);
+		Debug.Log ("====== path ===== ");
+		foreach (var point in path) {
+			Debug.Log (point);
+		}
+	}
+
+
+	// constraints should be the target object!
+	// Plan path uses a heuristic function h(n) of manhattan distance
+	// Just change to the Euclidian distance for better performance
 	public void PlanPath(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj, params object[] constraints) {
+		Debug.Log ("====== startPos ===== " + startPos);
+		Debug.Log ("====== goalPos ===== " + goalPos);
 		// clear nodes
 		nodes.Clear ();
 
 		// init empty path
 		List<PathNode> plannedPath = new List<PathNode>();
 
-		List<PathNode> openSet = new List<PathNode> ();
+		//List<PathNode> openSet = new List<PathNode> ();
+		MinHeap<PathNode> openSet = new MinHeap<PathNode>(new BetterHeuristicOld());
 		List<PathNode> closedSet = new List<PathNode> ();
 
 		PathNode endNode = null;
@@ -212,18 +502,25 @@ public class AStarSearch : MonoBehaviour {
 		path = new List<Vector3>();
 
 		Vector3 size = Helper.GetObjectWorldSize (obj).size;
-		increment = size.magnitude > defaultIncrement.magnitude ? size : defaultIncrement;
+		//increment = size.magnitude/2  > defaultIncrement.magnitude ? new Vector3(size.x/2, size.y/2, size.z/2) : defaultIncrement;
+		increment = size.magnitude  > defaultIncrement.magnitude ? size : defaultIncrement;
 
-		//Debug.Log (increment);
+		var watch = System.Diagnostics.Stopwatch.StartNew ();
 
 		PathNode startNode = new PathNode (startPos);
 		startNode.scoreFromStart = 0;
+
+		// Manhattan distance
 		startNode.heuristicScore = Mathf.Abs(goalPos.x - startNode.position.x) + Mathf.Abs(goalPos.y - startNode.position.y) +
 			Mathf.Abs(goalPos.z - startNode.position.z);
+		// Euclidan distance
+//		startNode.heuristicScore = new Vector3 (goalPos.x - startNode.position.x, goalPos.y - startNode.position.y, goalPos.z - startNode.position.z).magnitude;
 		nodes.Add(startNode);
 		openSet.Add (startNode);
 		QuantizeSpace (obj, embeddingSpaceBounds, increment, constraints);	// set increment to moving object size, clean up after each run
 
+		watch.Stop ();
+		Debug.Log ("========= Time to quantize space " + watch.ElapsedMilliseconds);
 		// find closest node to goal
 		// TODO: if goal is inside concave object (concave voxeme provided as constraint)
 		//	find closest node to goal such that arc from testNode to goal
@@ -260,40 +557,44 @@ public class AStarSearch : MonoBehaviour {
 			}
 		}
 
+		Debug.Log ("========= endNode ========== " + endNode);
+
 		//PathNode endNode = new PathNode(goalPos);
 		//nodes.Add (endNode);
 
+		watch = System.Diagnostics.Stopwatch.StartNew ();
+
 		PlotArcs (Helper.GetObjectWorldSize (obj));
+
+		watch.Stop ();
+
+		Debug.Log ("========= Time to plot arcs " + watch.ElapsedMilliseconds);
 		//return;
 
 		//path.Add(startPos);
 
 		PathNode nextNode = new PathNode(embeddingSpaceBounds.max+Vector3.one);
 
-		// find closest node to start
-//		float dist = (startNode - startPos).magnitude;
-//		foreach (Vector3 node in nodes) {
-//			if ((node - startPos).magnitude < dist) {
-//				dist = (node - startPos).magnitude;
-//				startNode = node;
-//			}
-//		}
-//		path.Add(startNode);
-//		//Debug.Log (startNode);
-
 		plannedPath.Add (new PathNode(startPos));
 
 		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
 		// using best node found until endNode reached
 		while (openSet.Count > 0) {
-			PathNode curNode = null;
-			float testHeuristicScore = Mathf.Infinity;
-			foreach (PathNode node in openSet) {
-				if (node.heuristicScore < testHeuristicScore) {
-					testHeuristicScore = node.heuristicScore;
-					curNode = node;
-				}
-			}
+			Debug.Log (" ======== openSet.Count ====== " + openSet.Count);
+
+			// O(1)
+			PathNode curNode = openSet.TakeMin ();
+
+			// O(n)
+			//			PathNode curNode = null;
+//
+//			float testHeuristicScore = Mathf.Infinity;
+//			foreach (PathNode node in openSet) {
+//				if (node.heuristicScore < testHeuristicScore) {
+//					testHeuristicScore = node.heuristicScore;
+//					curNode = node;
+//				}
+//			}
 
 			//nextNode = embeddingSpaceBounds.max + Vector3.one;
 			//dist = (nextNode - endNode).magnitude;
@@ -305,15 +606,20 @@ public class AStarSearch : MonoBehaviour {
 				PathNode goalNode = new PathNode (goalPos);
 				goalNode.cameFrom = curNode;
 				path = ReconstructPath (startNode, goalNode);
+				Debug.Log ("====== path ===== ");
+				foreach (var point in path) {
+					Debug.Log (point);
+				}
 				break;
 			}
-
-			openSet.Remove (curNode);
+				
 			closedSet.Add (curNode);
 
-			List<Pair<PathNode,PathNode>> arcList = arcs.Where(n => ((n.Item1.position-curNode.position).magnitude < Constants.EPSILON) || 
+
+
+			var arcList = arcs.Where(n => ((n.Item1.position - curNode.position).magnitude < Constants.EPSILON) || 
 				(n.Item2.position-curNode.position).magnitude < Constants.EPSILON).ToList();
-			foreach (Pair<PathNode,PathNode> arc in arcList) {
+			foreach (var arc in arcList) {
 				float testScore;
 				if ((arc.Item1.position - curNode.position).magnitude < Constants.EPSILON) {
 					if (!closedSet.Contains(arc.Item2)) {
@@ -322,18 +628,19 @@ public class AStarSearch : MonoBehaviour {
 							nextNode = arc.Item2;
 							arc.Item2.cameFrom = curNode;
 							arc.Item2.scoreFromStart = testScore;
-							arc.Item2.heuristicScore = arc.Item2.scoreFromStart + 
-								(Mathf.Abs(goalPos.x - arc.Item2.position.x) + Mathf.Abs(goalPos.y - arc.Item2.position.y) +
-									Mathf.Abs(goalPos.z - arc.Item2.position.z));
+							// Manhattan distance
+//							arc.Item2.heuristicScore = arc.Item2.scoreFromStart + 
+//								(Mathf.Abs(goalPos.x - arc.Item2.position.x) + Mathf.Abs(goalPos.y - arc.Item2.position.y) +
+//									Mathf.Abs(goalPos.z - arc.Item2.position.z));
+
+							// Euclidian distance
+							arc.Item2.heuristicScore = arc.Item2.scoreFromStart +
+							new Vector3 (goalPos.x - arc.Item2.position.x, goalPos.y - arc.Item2.position.y, goalPos.z - arc.Item2.position.z).magnitude;
 
 							if (!openSet.Contains (arc.Item2)) {
 								openSet.Add (arc.Item2);
 							}
 						}
-//						if ((arc.Item2.position - endNode.position).magnitude < dist) {	// heuristic here: linear distance
-//							dist = (arc.Item2.position - endNode.position).magnitude;
-//							nextNode = arc.Item2;
-//						}
 					}
 				}
 				else if ((arc.Item2.position - curNode.position).magnitude < Constants.EPSILON) {
@@ -343,61 +650,24 @@ public class AStarSearch : MonoBehaviour {
 							nextNode = arc.Item1;
 							arc.Item1.cameFrom = curNode;
 							arc.Item1.scoreFromStart = testScore;
-							arc.Item1.heuristicScore = arc.Item1.scoreFromStart + 
-								(Mathf.Abs(goalPos.x - arc.Item1.position.x) + Mathf.Abs(goalPos.y - arc.Item1.position.y) +
-									Mathf.Abs(goalPos.z - arc.Item1.position.z));
+
+							// Manhattan distance
+//							arc.Item1.heuristicScore = arc.Item1.scoreFromStart + 
+//								(Mathf.Abs(goalPos.x - arc.Item1.position.x) + Mathf.Abs(goalPos.y - arc.Item1.position.y) +
+//									Mathf.Abs(goalPos.z - arc.Item1.position.z));
+
+							// Euclidian distance
+							arc.Item1.heuristicScore = arc.Item1.scoreFromStart +
+								new Vector3 (goalPos.x - arc.Item1.position.x, goalPos.y - arc.Item1.position.y, goalPos.z - arc.Item1.position.z).magnitude;
 
 							if (!openSet.Contains (arc.Item1)) {
 								openSet.Add (arc.Item1);
 							}
 						}
-//						if ((arc.Item1.position - endNode.position).magnitude < dist) {	// heuristic here: linear distance
-//							dist = (arc.Item1.position - endNode.position).magnitude;
-//							nextNode = arc.Item1;
-//						}
 					}
 				}
 			}
-//			foreach (Vector3 node in nodes) {
-//				//List<Pair<Vector3,Vector3>> arcList = arcs.Where(n => (n.Item1 == curNode)).ToList();
-//				foreach (Pair<Vector3,Vector3> nodePair in arcList) {
-//					if (nodePair.Item1 == path [path.Count - 1]) {
-//						if ((nodePair.Item2 - endNode).magnitude < dist) {	// heuristic here: linear distance
-//							dist = (nodePair.Item2 - endNode).magnitude;
-//							nextNode = nodePair.Item2;
-//						}
-//					}
-//					else if (nodePair.Item2 == path [path.Count - 1]) {
-//						if ((nodePair.Item1 - endNode).magnitude < dist) {	// heuristic here: linear distance
-//							dist = (nodePair.Item1 - endNode).magnitude;
-//							nextNode = nodePair.Item1;
-//						}
-//					}
-////				if (((node - path [path.Count - 1]).x <= increment.x) &&
-////					((node - path [path.Count - 1]).y <= increment.y) &&
-////					((node - path [path.Count - 1]).z <= increment.z)){ // look for nodes $increment units from the current
-//				//if ((node - path [path.Count - 1]).magnitude <= increment.magnitude) { // look for nodes $increment units from the current
-////					if ((Vector3.Dot ((node - path [path.Count - 1]).normalized, Vector3.right) == -1.0f) ||
-////						(Vector3.Dot ((node - path [path.Count - 1]).normalized, Vector3.right) == 0.0f) ||
-////						(Vector3.Dot ((node - path [path.Count - 1]).normalized, Vector3.right) == 1.0f)){	// orthogonal movements only for now
-//						//if (!Physics.Raycast (new Ray (path [path.Count - 1], (node - path [path.Count - 1]).normalized), (node - path [path.Count - 1]).magnitude)) {
-////							if ((node - endNode).magnitude < dist) {	// heuristic here: linear distance
-////								dist = (node - endNode).magnitude;
-////								nextNode = node;
-////							}
-//						//}
-//					//}
-//				}
-//			}
-			//plannedPath.Add (nextNode);
-			//Debug.Log (nextNode);
-			//AddDebugCube (nextNode);
 		} 
-
-		//path.Add(endNode);
-		//Debug.Log (endNode);
-
-		//plannedPath.Add(endNode);
 	}
 
 	List<Vector3> ReconstructPath(PathNode firstNode, PathNode lastNode) {
