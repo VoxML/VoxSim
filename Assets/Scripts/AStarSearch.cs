@@ -5,6 +5,8 @@ using System.Linq;
 using AssemblyCSharp;
 using Global;
 using Arc = Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
+using RootMotion.Demos;
+using RootMotion.FinalIK;
 
 public class PathNode {
 	public Vector3 position;
@@ -39,6 +41,9 @@ public class AStarSearch : MonoBehaviour {
 
 	public Vector3 start = new Vector3();
 	public Vector3 goal = new Vector3();
+
+	public float rigAttrationWeight;
+	public FullBodyBipedIK bodyIk;
 		
 
 	// Use this for initialization
@@ -339,6 +344,27 @@ public class AStarSearch : MonoBehaviour {
 		return path;
 	}
 
+	float getGScore( Vector3 fromPoint, Vector3 explorePoint) {
+		return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
+	}
+
+	float getHScore( Vector3 explorePoint, Vector3 goalPoint) {
+		return (goalPoint - explorePoint).magnitude;
+	}
+
+	float getErgonomicScore( Vector3 point) {
+		return (bodyIk.solver.rightArmChain.nodes[0].transform.position - point).magnitude;
+	}
+
+	float getGScoreErgonomic( Vector3 fromPoint, Vector3 explorePoint) {
+		return gScore[fromPoint] + (explorePoint - fromPoint).magnitude * ( 1 + rigAttrationWeight * (getErgonomicScore(fromPoint) + getErgonomicScore(explorePoint))) ;
+	}
+
+	float getHScoreErgonomic( Vector3 explorePoint, Vector3 goalPoint) {
+		// a discount factor of 2 so that the algorith would be faster
+		return (goalPoint - explorePoint).magnitude * ( 1 + rigAttrationWeight/2 * (getErgonomicScore(goalPoint) + getErgonomicScore(explorePoint)));
+	}
+
 	// A plan path that run faster and more smooth
 	public void PlanPath2(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj, params object[] constraints) {
 		Debug.Log ("========== In plan ========= " + goalPos);
@@ -352,6 +378,8 @@ public class AStarSearch : MonoBehaviour {
 
 		MinHeap<Vector3> openSet = new MinHeap<Vector3>(new BetterHeuristic(gScore, hScore));
 		var openSetForCheck = new HashSet<Vector3> ();
+
+		// Closed set can be used because euclidean distance is monotonic
 		var closedSet = new HashSet<Vector3> ();
 
 		var objectBound = Helper.GetObjectWorldSize (obj);
@@ -364,11 +392,12 @@ public class AStarSearch : MonoBehaviour {
 		Debug.Log (" ======== size.magnitude ====== " + size.magnitude);
 		Debug.Log (" ======== defaultIncrement.magnitude ====== " + defaultIncrement.magnitude);
 
-		if (size.magnitude > defaultIncrement.magnitude) {
-			step = (int) (size.magnitude / defaultIncrement.magnitude) + 1;
 
-			increment = new Vector3 (size.x / step, size.y / step, size.z / step);
-		}
+//		if (size.magnitude > defaultIncrement.magnitude) {
+//			step = (int) (size.magnitude / defaultIncrement.magnitude) + 1;
+//
+//			increment = new Vector3 (size.x / step, size.y / step, size.z / step);
+//		}
 
 		Debug.Log (" ======== increment ====== " + increment);
 		Debug.Log (" ======== step ====== " + step);
@@ -396,8 +425,9 @@ public class AStarSearch : MonoBehaviour {
 			endPos = lookForClosest (goalPos, obj, increment);
 		}
 
-		gScore [startPos] = 0;
-		hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
+		gScore [startPos] = 0 ;
+		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
+		hScore [startPos] = getHScoreErgonomic( startPos, goalPos ) ;
 
 		Debug.Log (" ========= obj.transform.position ======== " + obj.transform.position);
 		Debug.Log (" ======== start ====== " + startPos);
@@ -439,32 +469,32 @@ public class AStarSearch : MonoBehaviour {
 				}
 				return;
 			}
-
-			openSetForCheck.Remove (curPos);
+				
 			closedSet.Add (curPos);
 
 			var neighbors = getNeighborNodes (obj, curPos, increment, step);
 
 			foreach (var neighbor in neighbors) {
 				if (!closedSet.Contains (neighbor) && !isBlock(objectBound, curPos, neighbor) ) {
-					float tentativeGScore = gScore[curPos] + (neighbor - curPos).magnitude;
+					float tentativeGScore = getGScoreErgonomic (curPos, neighbor);
 
 					if (gScore.ContainsKey (neighbor) && tentativeGScore > gScore [neighbor])
 						continue;
 
 					cameFrom[neighbor] = curPos;
 					gScore[neighbor] = tentativeGScore;
-					hScore[neighbor] = new Vector3 (endPos.x - neighbor.x, endPos.y - neighbor.y, endPos.z - neighbor.z).magnitude;
+					hScore[neighbor] = getHScoreErgonomic(neighbor, goalPos);
 					// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
 
 					// If neighbor is not yet in openset 
 					// Add it
 					// Heap is automatically rearranged
-					if (!openSetForCheck.Contains (neighbor)) {
+					if (!openSet.Has (neighbor)) {
+//						Debug.Log ("=== Add candidate === (" + neighbor + ")");
 						openSet.Add (neighbor);
-						openSetForCheck.Add (neighbor);
 					} else {
 						// If neighbor is already there, update the heap
+//						Debug.Log ("=== Update candidate === (" + neighbor + ")");
 						openSet.Update (neighbor);
 					}
 				}

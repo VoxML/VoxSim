@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace AssemblyCSharp
 {
@@ -69,14 +70,25 @@ namespace AssemblyCSharp
 			if (Count == Capacity)
 				Grow();
 
-			_heap[_tail++] = item;
-			quickIndexing[item] = BubbleUp(_tail - 1);
+			_tail++;
+			_heap[_tail - 1] = item;
+
+			quickIndexing [item] = _tail - 1;
+
+			BubbleUp(_tail - 1);
 		}
 
 		public void Update(T item)
 		{
 			if (quickIndexing.ContainsKey (item)) {
 				int index = quickIndexing [item];
+
+//				Debug.Log (" === Update ==== " + item + ", " + index);
+//				String all = "";
+//				for (int j = 0; j < _tail; j++) {
+//					all += _heap [j] + ", " + quickIndexing[_heap[j]] + " ; ";
+//				}
+
 				// Either of these would be not necessary
 				BubbleUp (index);
 				BubbleDown (index);
@@ -86,13 +98,13 @@ namespace AssemblyCSharp
 			}
 		}
 
-		private int BubbleUp(int i)
+		private void BubbleUp(int i)
 		{
 			if (i == 0 || Dominates(_heap[Parent(i)], _heap[i])) 
-				return i; //correct domination (or root)
+				return; //correct domination (or root)
 
 			Swap(i, Parent(i));
-			return BubbleUp(Parent(i));
+			BubbleUp(Parent(i));
 		}
 
 		public T GetMin()
@@ -102,7 +114,7 @@ namespace AssemblyCSharp
 		}
 
 		public T TakeMin()
-		{
+		{	
 			if (Count == 0) throw new InvalidOperationException("Heap is empty");
 			T ret = _heap[0];
 			_tail--;
@@ -111,12 +123,12 @@ namespace AssemblyCSharp
 			return ret;
 		}
 
-		private int BubbleDown(int i)
+		private void BubbleDown(int i)
 		{
 			int dominatingNode = Dominating(i);
-			if (dominatingNode == i) return i;
+			if (dominatingNode == i) return;
 			Swap(i, dominatingNode);
-			return BubbleDown(dominatingNode);
+			BubbleDown(dominatingNode);
 		}
 
 		private int Dominating(int i)
@@ -141,6 +153,9 @@ namespace AssemblyCSharp
 			T tmp = _heap[i];
 			_heap[i] = _heap[j];
 			_heap[j] = tmp;
+
+			quickIndexing [_heap [i]] = i;
+			quickIndexing [_heap [j]] = j;
 		}
 
 		private static int Parent(int i)
@@ -160,6 +175,7 @@ namespace AssemblyCSharp
 
 		private void Grow()
 		{
+//			Debug.Log ("Grow");
 			int newCapacity = _capacity*GrowFactor + MinGrow;
 			var newHeap = new T[newCapacity];
 			Array.Copy(_heap, newHeap, _capacity);

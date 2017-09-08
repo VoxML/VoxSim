@@ -292,21 +292,6 @@ public class EventManager : MonoBehaviour {
 			}
 		}
 
-
-
-//		if (!interactionSystem.IsInInteraction(FullBodyBipedEffector.RightHand) && startRecoverPhase) {
-//			if (events.Count > 0) {
-//				ExecuteNextCommand ();
-//			}
-//			else {
-//				if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
-//					//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-//					EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
-//					OnEventComplete (this, eventArgs);
-//				}
-//			}
-//		}
-
 		if (events.Count > 0) {
 			bool q = SatisfactionTest.IsSatisfied (events [0]);
 
