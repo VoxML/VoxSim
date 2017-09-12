@@ -77,7 +77,7 @@ public class JointGestureDemo : MonoBehaviour {
 		if (csuClient == null) {
 			csuClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
 			//TODO: What if there is no CSUClient address assigned?
-			csuClient.GestureReceived += ReceivedGesture;
+			csuClient.GestureReceived += ReceivedFusion;
 			csuClient.ConnectionLost += ConnectionLost;
 
 			for (int i = 0; i < blocks.Count; i++) {
@@ -134,99 +134,135 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void ReceivedGesture(object sender, EventArgs e) {
-		Debug.Log (((GestureEventArgs)e).Content);
+	void ReceivedFusion(object sender, EventArgs e) {
+		string fusionMessage = ((GestureEventArgs)e).Content;
+		Debug.Log (fusionMessage);
+		
+		
+		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
+		string messageType = splitMessage[0];
+		string messageStr = splitMessage[1];
+		if (messageType == "S")
+		{
+			switch (messageStr.ToLower())
+			{
+				case "yes":
+					messageStr = "posack";
+					break;
+				case "no":
+					messageStr = "negack";
+					break;
+				case "left":
+				case "right":
+					// TODO krim: review this part
+					if (graspedObj == null)
+					{
+						messageStr = "point " + messageStr;
+					}
+					else
+					{
+						messageStr = "push " + messageStr;
+					}
+					break;
+				case "red":
+				case "blue":
+				case "green":
+                    DeixisByColor(messageStr);
+					break;
+                default:
+	                Debug.Log("Cannot recognize the message: " + messageStr);
+	                break;
+			}
+		}
 
-		string gestureStr = ((GestureEventArgs)e).Content.Split (';') [0];
-
-		if (gestureStr.EndsWith ("start")) {	// start as trigger
-			gestureStr = RemoveGestureTriggers (gestureStr);
-			if (gestureStr.StartsWith ("engage")) {
-				if (GetGestureContent (gestureStr, "engage") == "") {
+		if (messageStr.EndsWith ("start")) {	// start as trigger
+			messageStr = RemoveGestureTriggers (messageStr);
+			if (messageStr.StartsWith ("engage")) {
+				if (GetGestureContent (messageStr, "engage") == "") {
 					Engage (true);
 				}
 			}
-			else if (gestureStr.StartsWith ("point")) {
-				if (GetGestureContent (gestureStr, "point") == "left") {
+			else if (messageStr.StartsWith ("point")) {
+				if (GetGestureContent (messageStr, "point") == "left") {
 					Deixis ("left");
 				}
-				else if (GetGestureContent (gestureStr, "point") == "right") {
+				else if (GetGestureContent (messageStr, "point") == "right") {
 					Deixis ("right");
 				}
-				else if (GetGestureContent (gestureStr, "point") == "front") {
+				else if (GetGestureContent (messageStr, "point") == "front") {
 					Deixis ("front");
 				}
-				else if (GetGestureContent (gestureStr, "point") == "down") {
+				else if (GetGestureContent (messageStr, "point") == "down") {
 					Deixis ("down");
 				}
 			}
-			else if (gestureStr.StartsWith ("grab")) {
-				if (GetGestureContent (gestureStr, "grab") == "") {
+			else if (messageStr.StartsWith ("grab")) {
+				if (GetGestureContent (messageStr, "grab") == "") {
 					Grab (true);
 				}
 			}
-			else if (gestureStr.StartsWith ("posack")) {
+			else if (messageStr.StartsWith ("posack")) {
 				Acknowledge (true);
 			}
-			else if (gestureStr.StartsWith ("negack")) {
+			else if (messageStr.StartsWith ("negack")) {
 				Acknowledge (false);
 			}
 		}
-		else if (gestureStr.EndsWith("stop")) {	// stop as trigger
-			gestureStr = RemoveGestureTriggers(gestureStr);
-			if (gestureStr.StartsWith ("engage")) {
-				if (GetGestureContent (gestureStr, "engage") == "") {
+		else if (messageStr.EndsWith("stop")) {	// stop as trigger
+			messageStr = RemoveGestureTriggers(messageStr);
+			if (messageStr.StartsWith ("engage")) {
+				if (GetGestureContent (messageStr, "engage") == "") {
 					Engage (false);
 				}
 			}
-			else if (gestureStr.StartsWith ("push")) {
-				if (GetGestureContent(gestureStr, "push") == "left") {
+			else if (messageStr.StartsWith ("push")) {
+				if (GetGestureContent(messageStr, "push") == "left") {
 					Push ("left");
 				}
-				else if (GetGestureContent(gestureStr, "push") == "right") {
+				else if (GetGestureContent(messageStr, "push") == "right") {
 					Push ("right");
 				}
-				else if (GetGestureContent(gestureStr, "push") == "front") {
+				else if (GetGestureContent(messageStr, "push") == "front") {
 					Push ("front");
 				}
-				else if (GetGestureContent(gestureStr, "push") == "back") {
+				else if (GetGestureContent(messageStr, "push") == "back") {
 					Push ("back");
 				}
 			}
-			else if (gestureStr.StartsWith ("grab move")) {
-				if (GetGestureContent(gestureStr, "grab move") == "left") {
+			else if (messageStr.StartsWith ("grab move")) {
+				if (GetGestureContent(messageStr, "grab move") == "left") {
 					Move ("left");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "right") {
+				else if (GetGestureContent(messageStr, "grab move") == "right") {
 					Move ("right");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "front") {
+				else if (GetGestureContent(messageStr, "grab move") == "front") {
 					Move ("front");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "back") {
+				else if (GetGestureContent(messageStr, "grab move") == "back") {
 					Move ("back");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "left front") {
+				else if (GetGestureContent(messageStr, "grab move") == "left front") {
 					Move ("left front");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "right front") {
+				else if (GetGestureContent(messageStr, "grab move") == "right front") {
 					Move ("right front");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "left back") {
+				else if (GetGestureContent(messageStr, "grab move") == "left back") {
 					Move ("left back");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "right back") {
+				else if (GetGestureContent(messageStr, "grab move") == "right back") {
 					Move ("right back");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "up") {
+				else if (GetGestureContent(messageStr, "grab move") == "up") {
 					Move ("up");
 				}
-				else if (GetGestureContent(gestureStr, "grab move") == "down") {
+				else if (GetGestureContent(messageStr, "grab move") == "down") {
 					Move ("down");
 				}
 			}
-			else if (gestureStr.StartsWith ("grab")) {
-				if (GetGestureContent(gestureStr, "grab") == "") {
+			else if (messageStr.StartsWith ("grab")) {
+				if (GetGestureContent(messageStr, "grab") == "") {
 					Grab (false);
 				}
 			}
@@ -474,6 +510,20 @@ public class JointGestureDemo : MonoBehaviour {
 
 			indicatedObj = null;
 			graspedObj = null;
+		}
+	}
+
+	void DeixisByColor(string color)
+	{
+		OutputHelper.PrintOutput (Role.Affector, "");
+		foreach (GameObject block in blocks)
+		{
+			if (block.activeInHierarchy &&
+			    block.GetComponent<AttributeSet>().attributes.Contains(color))
+			{
+				objectConfirmation = block;
+			}
+				
 		}
 	}
 
