@@ -137,3 +137,7 @@ Assets/Editor\ Default\ Resources*
 Assets/Plugins/Editor*
 # ignore NuGet packages (e.g. Nunit)
 packages*
+
+/Assets/RTVoice
+/Assets/Plugins/RootMotion
+
