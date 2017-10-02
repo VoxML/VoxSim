@@ -134,6 +134,8 @@ Assets/MORPH3D*
 Assets/Plugins/RTVoice*
 # ignore RootMotion/FinalIK
 Assets/RootMotion*
+# ignore ScenesLists file
+Assets/Resources/ScenesList.txt
 Assets/Editor\ Default\ Resources*
 # ignore rider plugin
 Assets/Plugins/Editor*
