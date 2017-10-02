@@ -11,13 +11,19 @@ public class Builder : Editor {
 	public string buildName = "VoxSim";
 	List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
 
-	public bool buildMac,buildWindows,buildIOS;
+	bool buildMac,buildWindows,buildIOS,buildAll;
+	bool build;
 
 	public override void OnInspectorGUI ()
 	{
 		base.OnInspectorGUI();
+		buildMac = GUILayout.Button ("Build Mac", GUILayout.Height (30));
+		buildWindows = GUILayout.Button ("Build Windows", GUILayout.Height (30));
+		buildIOS = GUILayout.Button ("Build iOS", GUILayout.Height (30));
+		buildAll = GUILayout.Button ("Build All", GUILayout.Height (30));
+		build = (buildMac || buildWindows || buildIOS || buildAll);
 
-		if (GUILayout.Button ("Build", GUILayout.Height (30))) {
+		if (build) {
 			using (System.IO.StreamWriter file =
 				new System.IO.StreamWriter(@"Assets/Resources/ScenesList.txt"))
 			{
@@ -37,25 +43,103 @@ public class Builder : Editor {
 
 			Debug.Log (Data.voxmlDataPath);
 
-			if (buildMac) {
-				DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
+			// TODO: Migrate away from this in favor of build scripts
+			if (buildMac || buildAll) {
+				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
 				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSXUniversal, BuildOptions.None);
 			}
 
-			if (buildWindows) {
-				DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+			if (buildWindows || buildAll) {
+				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
 				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
 			}
 
-			//if (buildIOS) {
-				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, BuildOptions.BuildScriptsOnly);
-				DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
+			if (buildIOS || buildAll) {
+				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
+					BuildOptions.AcceptExternalModificationsToPlayer));
+				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
+			}
+
+			//if (buildWeb) {
+			//	BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/web/"+buildName,BuildTarget.WebPlayer,BuildOptions.None);
 			//}
-			//BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/web/"+buildName,BuildTarget.WebPlayer,BuildOptions.None);
 		}
 	}
+}
 
-	private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+public static class AutoBuilder {
+
+	public static void BuildMac() {
+		string buildName = System.Environment.GetCommandLineArgs()[5];
+		Debug.Log (buildName);
+
+		List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+
+		using (System.IO.StreamWriter file =
+		    new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
+			string scenesDirPath = Application.dataPath + "/Scenes/";
+			string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
+			foreach (string s in fileEntries) {
+				string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
+				if (!scenes.Contains (sceneName)) {
+					scenes.Add (sceneName);
+					file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
+				}
+			}
+		}
+			
+		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
+		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSXUniversal, BuildOptions.None);
+	}
+
+	public static void BuildWindows() {
+		string buildName = System.Environment.GetCommandLineArgs()[5];
+		Debug.Log (buildName);
+
+		List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+
+		using (System.IO.StreamWriter file =
+			new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
+			string scenesDirPath = Application.dataPath + "/Scenes/";
+			string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
+			foreach (string s in fileEntries) {
+				string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
+				if (!scenes.Contains (sceneName)) {
+					scenes.Add (sceneName);
+					file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
+				}
+			}
+		}
+
+		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
+	}
+
+	public static void BuildIOS() {
+		string buildName = System.Environment.GetCommandLineArgs()[5];
+		Debug.Log (buildName);
+
+		List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+
+		using (System.IO.StreamWriter file =
+			new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
+			string scenesDirPath = Application.dataPath + "/Scenes/";
+			string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
+			foreach (string s in fileEntries) {
+				string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
+				if (!scenes.Contains (sceneName)) {
+					scenes.Add (sceneName);
+					file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
+				}
+			}
+		}
+
+		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
+			BuildOptions.AcceptExternalModificationsToPlayer));
+		//DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
+	}
+
+	public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
 	{
 		// Get the subdirectories for the specified directory.
 		DirectoryInfo dir = new DirectoryInfo(sourceDirName);

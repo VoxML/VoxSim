@@ -13,6 +13,8 @@ using VideoCapture;
 public class Launcher : FontManager {
 	public int fontSize = 12;
 
+	string launcherTitle = "VoxSim";
+
 	string ip;
 	string ipContent = "IP";
 	string csuUrl;
@@ -87,6 +89,7 @@ public class Launcher : FontManager {
 		}
 #endif 
 #if UNITY_STANDALONE || UNITY_IOS || UNITY_WEBPLAYER
+		// What if ScenesList has been deleted?
 		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
 		string[] scenes = scenesList.text.Split ('\n');
 		foreach (string s in scenes) {
@@ -355,8 +358,8 @@ public class Launcher : FontManager {
 			}
 		}
 
-		textDimensions = GUI.skin.label.CalcSize (new GUIContent ("VoxSim"));
-		GUI.Label (new Rect (((2 * bgLeft + bgWidth) / 2) - textDimensions.x / 2, bgTop, textDimensions.x, 25), "VoxSim");
+		textDimensions = GUI.skin.label.CalcSize (new GUIContent (launcherTitle));
+		GUI.Label (new Rect (((2 * bgLeft + bgWidth) / 2) - textDimensions.x / 2, bgTop, textDimensions.x, 25), launcherTitle);
 	}
 
 	void PopUpEULAWindow () {
