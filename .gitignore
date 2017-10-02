@@ -132,6 +132,8 @@ sysinfo.txt
 Assets/MORPH3D*
 # ignore RT-voice plugin
 Assets/Plugins/RTVoice*
+# ignore RootMotion/FinalIK
+Assets/RootMotion*
 Assets/Editor\ Default\ Resources*
 # ignore rider plugin
 Assets/Plugins/Editor*
