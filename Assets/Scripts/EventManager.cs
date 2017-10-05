@@ -256,38 +256,48 @@ public class EventManager : MonoBehaviour {
 			return;
 		}
 
-		if (interactionObject != null) {
-			if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
-				if (isInitiatePhase) {
-					Debug.Log ("Done interaction, execute command");
-					// Only execute command once
-					isInitiatePhase = false;
+		if (bodyIk != null) {
+			if (interactionObject != null) {
+				if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+					if (isInitiatePhase) {
+						Debug.Log ("Done interaction, execute command");
+						// Only execute command once
+						isInitiatePhase = false;
 
-					// These don't work
+						// These don't work
 //				interactionSystem.manualResumeLookAt ();
 //				// I need to reset the lookAt target because otherwise it would be automatically reset to null
 //				interactionSystem.LookAtInteraction (FullBodyBipedEffector.RightHand, rightHandTarget);
 
-					if (events.Count > 0) {
-						if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-							ExecuteCommand (events [0]);
-						} else {
-							RemoveEvent (0);
+						if (events.Count > 0) {
+							if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+								ExecuteCommand (events [0]);
+							} else {
+								RemoveEvent (0);
+							}
 						}
+					} else {
+						// Currently in movement
+						lookAt.ik.solver.IKPosition = interactionObject.transform.position;
+						lookAt.ik.solver.IKPositionWeight = 1f;
 					}
 				} else {
-					// Currently in movement
 					lookAt.ik.solver.IKPosition = interactionObject.transform.position;
-					lookAt.ik.solver.IKPositionWeight = 1f;
+					if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) <= 0.5) {
+						lookAt.ik.solver.IKPositionWeight = interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) * 2;
+					} else if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) < 1) {
+						lookAt.ik.solver.IKPositionWeight = (1 - interactionSystem.GetProgress (FullBodyBipedEffector.RightHand)) * 2;
+					} else {
+						lookAt.ik.solver.IKPositionWeight = 0;
+					}
 				}
-			} else {
-				lookAt.ik.solver.IKPosition = interactionObject.transform.position;
-				if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) <= 0.5) {
-					lookAt.ik.solver.IKPositionWeight = interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) * 2;
-				} else if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) < 1) {
-					lookAt.ik.solver.IKPositionWeight = (1 - interactionSystem.GetProgress (FullBodyBipedEffector.RightHand)) * 2;
+			}
+		} else {
+			if (events.Count > 0) {
+				if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+					ExecuteCommand (events [0]);
 				} else {
-					lookAt.ik.solver.IKPositionWeight = 0;
+					RemoveEvent (0);
 				}
 			}
 		}
@@ -305,8 +315,10 @@ public class EventManager : MonoBehaviour {
 				completedEvent = events [events.Count - 1];
 				RemoveEvent (events.Count - 1);
 
-				interactionSystem.ResumeAll ();
-				startRecoverPhase = true;
+				if (interactionSystem != null) {
+					interactionSystem.ResumeAll ();
+					startRecoverPhase = true;
+				}
 			}
 		}
 		else {

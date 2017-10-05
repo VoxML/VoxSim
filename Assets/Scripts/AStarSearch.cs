@@ -353,16 +353,26 @@ public class AStarSearch : MonoBehaviour {
 	}
 
 	float getErgonomicScore( Vector3 point) {
-		return (bodyIk.solver.rightArmChain.nodes[0].transform.position - point).magnitude;
+		return (bodyIk.solver.rightArmChain.nodes [0].transform.position - point).magnitude;
 	}
 
 	float getGScoreErgonomic( Vector3 fromPoint, Vector3 explorePoint) {
-		return gScore[fromPoint] + (explorePoint - fromPoint).magnitude * ( 1 + rigAttrationWeight * (getErgonomicScore(fromPoint) + getErgonomicScore(explorePoint))) ;
+		if (bodyIk != null) {
+			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude * (1 + rigAttrationWeight * (getErgonomicScore (fromPoint) + getErgonomicScore (explorePoint)));
+		}
+		else {
+			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude;
+		}
 	}
 
 	float getHScoreErgonomic( Vector3 explorePoint, Vector3 goalPoint) {
 		// a discount factor of 2 so that the algorith would be faster
-		return (goalPoint - explorePoint).magnitude * ( 1 + rigAttrationWeight/2 * (getErgonomicScore(goalPoint) + getErgonomicScore(explorePoint)));
+		if (bodyIk != null) {
+			return (goalPoint - explorePoint).magnitude * (1 + rigAttrationWeight / 2 * (getErgonomicScore (goalPoint) + getErgonomicScore (explorePoint)));
+		}
+		else {
+			return (goalPoint - explorePoint).magnitude;
+		}
 	}
 
 	// A plan path that run faster and more smooth
