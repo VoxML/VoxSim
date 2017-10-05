@@ -1534,6 +1534,7 @@ public class Predicates : MonoBehaviour {
 		if (!eventManager.evalOrig.ContainsKey (adjustedEval)) {
 			eventManager.evalOrig.Add (adjustedEval, eventManager.evalOrig [originalEval]);
 			eventManager.evalOrig.Remove (originalEval);
+			Debug.Log("Swapping " + originalEval + " for " + adjustedEval);
 		}
 
 		// add to events manager

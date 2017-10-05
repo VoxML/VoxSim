@@ -272,7 +272,8 @@ public class EventManager : MonoBehaviour {
 						if (events.Count > 0) {
 							if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
 								ExecuteCommand (events [0]);
-							} else {
+							}
+							else {
 								RemoveEvent (0);
 							}
 						}
@@ -292,15 +293,17 @@ public class EventManager : MonoBehaviour {
 					}
 				}
 			}
-		} else {
-			if (events.Count > 0) {
-				if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-					ExecuteCommand (events [0]);
-				} else {
-					RemoveEvent (0);
-				}
-			}
 		}
+//		else {
+//			if (events.Count > 0) {
+//				if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+//					ExecuteCommand (events [0]);
+//				}
+//				else {
+//					RemoveEvent (0);
+//				}
+//			}
+//		}
 
 		if (events.Count > 0) {
 			bool q = SatisfactionTest.IsSatisfied (events [0]);
@@ -319,6 +322,17 @@ public class EventManager : MonoBehaviour {
 					interactionSystem.ResumeAll ();
 					startRecoverPhase = true;
 				}
+
+				if (events.Count > 0) {
+					ExecuteNextCommand ();
+				}
+				else {
+					if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
+						//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
+						EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
+						OnEventComplete (this, eventArgs);
+					}
+				}
 			}
 		}
 		else {
@@ -326,7 +340,7 @@ public class EventManager : MonoBehaviour {
 	}
 
 	public void RemoveEvent(int index) {
-		Debug.Log (string.Format("Removing event {0}",events[index]));
+		Debug.Log (string.Format("Removing event@{0}: {1}",index,events[index]));
 		events.RemoveAt (index);
 
 		if (events.Count == 0) {
@@ -386,27 +400,37 @@ public class EventManager : MonoBehaviour {
 		Hashtable predArgs = Helper.ParsePredicate (events [0]);
 		String pred = Helper.GetTopPredicate (events [0]);
 
-		if (predArgs.Count > 0) {
-			try {
-				// Resolve interactionObject
-				var objs = extractObjects (pred, (String)predArgs [pred]);
-				if (objs.Count > 0 && objs[0] is GameObject) {
-					interactionObject = ((GameObject)objs[0]).GetComponentInChildren<InteractionObject>();
-				}
+		if (bodyIk != null) {
+			if (predArgs.Count > 0) {
+				try {
+					// Resolve interactionObject
+					var objs = extractObjects (pred, (String)predArgs [pred]);
+					if (objs.Count > 0 && objs [0] is GameObject) {
+						interactionObject = ((GameObject)objs [0]).GetComponentInChildren<InteractionObject> ();
+					}
 					
 
-				if ( interactionObject != null ) {
-					// Execute interaction	
-					interactionSystem.StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+					if (interactionObject != null) {
+						// Execute interaction	
+						interactionSystem.StartInteraction (FullBodyBipedEffector.RightHand, interactionObject, true);
 
-					// TUAN
-					// Before Executing event
-					// Move hand to reach the target
-					isInitiatePhase = true;
-					Debug.Log ("======= isInitiatePhase true ========");
+						// TUAN
+						// Before Executing event
+						// Move hand to reach the target
+						isInitiatePhase = true;
+						Debug.Log ("======= isInitiatePhase true ========");
+					}
+				} catch (ArgumentNullException e) {
+					return;
 				}
-			} catch (ArgumentNullException e) {
-				return;
+			}
+		}
+		else {
+			if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+				ExecuteCommand (events [0]);
+			}
+			else {
+				RemoveEvent (0);
 			}
 		}
 	}
