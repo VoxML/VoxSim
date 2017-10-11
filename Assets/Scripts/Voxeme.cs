@@ -516,7 +516,7 @@ public class Voxeme : MonoBehaviour {
 			float angle = Quaternion.Angle (transform.rotation, Quaternion.Euler (target));
 			float timeToComplete = angle / turnSpeed;
 			float donePercentage = Mathf.Min (1.0f, Time.deltaTime / timeToComplete);
-			Quaternion rot = Quaternion.Slerp (transform.rotation, Quaternion.Euler (target), donePercentage * 100.0f);
+			Quaternion rot = Quaternion.Slerp (transform.rotation, Quaternion.Euler (target), donePercentage); // (donePercentage is normalized to [0, 1], which is what Slerp expects)
 			//Debug.Log (turnSpeed);
 			//Quaternion resolve = Quaternion.identity;
 
