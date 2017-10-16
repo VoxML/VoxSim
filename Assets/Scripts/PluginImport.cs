@@ -144,12 +144,12 @@ public class PluginImport : MonoBehaviour {
 	}
 
 	void OnDestroy () {
-		if (_csuClient != null)
+		if (_cmdServer != null)
 		{
 			_cmdServer.Close();
 		}
 
-		if (_cmdServer == null && _csuClient.IsConnected())
+		if (_csuClient != null && _csuClient.IsConnected())
 		{
 			_csuClient.Close();
 		}
