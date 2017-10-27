@@ -37,10 +37,14 @@ public class JointGestureDemo : MonoBehaviour {
 
 	public Region indicatedRegion = null;
 
+	public float vectorScaleFactor;
+
 	Region leftRegion;
 	Region rightRegion;
 	Region frontRegion;
 	Region backRegion;
+
+	GameObject radiusHighlight;
 
 	GameObject leftRegionHighlight;
 	GameObject rightRegionHighlight;
@@ -163,6 +167,7 @@ public class JointGestureDemo : MonoBehaviour {
 		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
 		string messageType = splitMessage[0];
 		string messageStr = splitMessage[1];
+		string messageTime = splitMessage[2];
 		if (messageType == "S") {	// speech message
 			switch (messageStr.ToLower ()) {
 			case "yes":
@@ -234,26 +239,37 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		} 
 		else if (messageType == "G") {	// gesture message
-			if (messageStr.EndsWith ("start")) {	// start as trigger
+			string[] messageComponents = messageStr.Split ();
+//			foreach (string c in messageComponents) {
+//				Debug.Log (c);
+//			}
+			if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("start")) {	// start as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("engage")) {
 					if (GetGestureContent (messageStr, "engage") == "") {
 						Engage (true);
 					}
 				} 
-				else if (messageStr.StartsWith ("point")) {
-					if (GetGestureContent (messageStr, "point") == "left") {
-						Deixis ("left");
-					} 
-					else if (GetGestureContent (messageStr, "point") == "right") {
-						Deixis ("right");
-					} 
-					else if (GetGestureContent (messageStr, "point") == "front") {
-						Deixis ("front");
-					} 
-					else if (GetGestureContent (messageStr, "point") == "down") {
-						Deixis ("down");
-					}
+				/// old Deixis code
+//				else if (messageStr.StartsWith ("point")) {
+//					if (GetGestureContent (messageStr, "point") == "left") {
+//						Deixis ("left");
+//					} 
+//					else if (GetGestureContent (messageStr, "point") == "right") {
+//						Deixis ("right");
+//					} 
+//					else if (GetGestureContent (messageStr, "point") == "front") {
+//						Deixis ("front");
+//					} 
+//					else if (GetGestureContent (messageStr, "point") == "down") {
+//						Deixis ("down");
+//					}
+//				} 
+				else if (messageStr.Contains ("left point")) {
+					Deixis (GetGestureVector (messageStr, "left point"));
+				} 
+				else if (messageStr.Contains ("right point")) {
+					Deixis (GetGestureVector (messageStr, "right point"));
 				} 
 				else if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
@@ -267,7 +283,7 @@ public class JointGestureDemo : MonoBehaviour {
 					Acknowledge (false);
 				}
 			} 
-			else if (messageStr.EndsWith ("stop")) {	// stop as trigger
+			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("engage")) {
 					if (GetGestureContent (messageStr, "engage") == "") {
@@ -330,11 +346,30 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	string RemoveGestureTriggers(string receivedData) {
-		return receivedData.Replace ("start", "").Replace ("stop", "");
+		return receivedData.Replace ("start", "").Replace ("stop", "").TrimStart(',');
 	}
 
 	string GetGestureContent(string receivedData, string gestureCode) {
 		return receivedData.Replace (gestureCode, "").Split () [1];
+	}
+
+	List<float> GetGestureVector(string receivedData, string gestureCode) {
+//		Debug.Log (receivedData);
+//		Debug.Log (gestureCode);
+		List<float> vector = new List<float> ();
+		List<string> content = receivedData.Replace (gestureCode, "").Split (',').ToList();
+		foreach (string c in content) {
+			if (c.Trim() != string.Empty) {
+//				Debug.Log (c);
+				try {
+					vector.Add (System.Convert.ToSingle (c));
+				}
+				catch (Exception e) {
+				}
+			}
+		}
+
+		return vector;
 	}
 
 	void Disambiguate(object content) {
@@ -722,6 +757,24 @@ public class JointGestureDemo : MonoBehaviour {
 				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
 			}
 		}
+	}
+
+	void Deixis(List<float> vector) {
+		OutputHelper.PrintOutput (Role.Affector, "");
+		Region region = null;
+
+		foreach (float c in vector) {
+			Debug.Log (c);
+		}
+
+		Vector3 highlightCenter = TransformToSurface (vector);
+
+		GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+		cube.transform.position = highlightCenter;
+		cube.transform.localScale = new Vector3 (0.25f,0.25f,0.25f);
+		cube.tag = "UnPhysic";
+		cube.GetComponent<Renderer> ().enabled = true;
+		Destroy (cube.GetComponent<Collider> ());
 	}
 
 	void Grab(bool state) {
@@ -1913,6 +1966,14 @@ public class JointGestureDemo : MonoBehaviour {
 			leftRegion.center.y,obj.transform.position.z))) {
 			ikControl.leftHandObj.transform.position = new Vector3(bounds.center.x,bounds.max.y+0.1f,bounds.min.z)+offset;
 		}
+	}
+
+	Vector3 TransformToSurface(List<float> vector) {
+		Vector3 coord = new Vector3 (vector[0]*vectorScaleFactor,
+			Helper.GetObjectWorldSize(demoSurface).max.y,
+			vector[1]-(.77f*vectorScaleFactor));
+
+		return coord;
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
