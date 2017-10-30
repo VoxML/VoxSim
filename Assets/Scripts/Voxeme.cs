@@ -454,6 +454,7 @@ public class Voxeme : MonoBehaviour {
 	}
 
 	Vector3 MoveToward(Vector3 target) {
+//		Debug.Log (gameObject);
 		if (!isGrasped) {
 			Vector3 offset = transform.position - target;
 			Vector3 normalizedOffset = Vector3.Normalize (offset);
@@ -516,7 +517,7 @@ public class Voxeme : MonoBehaviour {
 			float angle = Quaternion.Angle (transform.rotation, Quaternion.Euler (target));
 			float timeToComplete = angle / turnSpeed;
 			float donePercentage = Mathf.Min (1.0f, Time.deltaTime / timeToComplete);
-			Quaternion rot = Quaternion.Slerp (transform.rotation, Quaternion.Euler (target), donePercentage); // (donePercentage is normalized to [0, 1], which is what Slerp expects)
+			Quaternion rot = Quaternion.Slerp (transform.rotation, Quaternion.Euler (target), donePercentage * 100.0f);
 			//Debug.Log (turnSpeed);
 			//Quaternion resolve = Quaternion.identity;
 

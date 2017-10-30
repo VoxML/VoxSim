@@ -37,13 +37,16 @@ public class JointGestureDemo : MonoBehaviour {
 
 	public Region indicatedRegion = null;
 
+	public Vector2 tableSize;
 	public float vectorScaleFactor;
+	public float vectorConeRadius;
 
 	Region leftRegion;
 	Region rightRegion;
 	Region frontRegion;
 	Region backRegion;
 
+	GameObject regionHighlight;
 	GameObject radiusHighlight;
 
 	GameObject leftRegionHighlight;
@@ -729,28 +732,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 
 			if (objectMatches.Count > 0) {
-				if (objectMatches.Count == 1) {	// single object match
-					if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-						Disambiguate (objectMatches);
-					} 
-					else {
-						indicatedObj = objectMatches [0];
-						objectMatches.Clear ();
-
-						if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
-							ReachFor (indicatedObj);
-						}
-					}
-				} 
-				else {	// multiple objects matches: disambiguate
-					if ((interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) ||
-					   (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation)) {
-						Disambiguate (objectMatches);
-					} 
-					else {	// just pick one
-					
-					}
-				}
+				ResolveIndicatedObject ();
 			} 
 			else {	// indicating region
 				indicatedRegion = region;
@@ -769,12 +751,81 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Vector3 highlightCenter = TransformToSurface (vector);
 
-		GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Sphere);
-		cube.transform.position = highlightCenter;
-		cube.transform.localScale = new Vector3 (0.25f,0.25f,0.25f);
-		cube.tag = "UnPhysic";
-		cube.GetComponent<Renderer> ().enabled = true;
-		Destroy (cube.GetComponent<Collider> ());
+		regionHighlight = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+		regionHighlight.transform.position = highlightCenter;
+		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius,vectorConeRadius,vectorConeRadius);
+		regionHighlight.tag = "UnPhysic";
+		regionHighlight.GetComponent<Renderer> ().enabled = true;
+		Destroy (regionHighlight.GetComponent<Collider> ());
+
+		//TurnForward ();
+		//LookAt (cube.transform.position);
+
+		foreach (GameObject block in blocks) {
+			bool isVisible = true;
+
+			if (synVision != null) {
+				if (synVision.enabled) {
+					isVisible = synVision.IsVisible (block);
+				}
+			}
+
+			if (block.activeInHierarchy) {
+				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
+				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
+				if ((point-highlightCenter).magnitude <= 0.25f) {
+				//if (region.Contains (new Vector3 (block.transform.position.x,
+				//	region.center.y, block.transform.position.z))) {
+					bool surfaceClear = true;
+					foreach (GameObject otherBlock in blocks) {
+						if ((QSR.QSR.Above(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
+							(!QSR.QSR.Left(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
+							(!QSR.QSR.Right(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
+							(RCC8.EC(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
+							surfaceClear = false;
+						}
+					}
+					if ((!objectMatches.Contains (block)) && (surfaceClear) && (isVisible)) {
+						objectMatches.Add (block);
+					}
+				} 
+			}
+		}
+
+
+		if (objectMatches.Count > 0) {
+			ResolveIndicatedObject ();
+		} 
+		else {	// indicating region
+			indicatedRegion = new Region(new Vector3(highlightCenter.x-vectorConeRadius,highlightCenter.y,highlightCenter.z-vectorConeRadius),
+				new Vector3(highlightCenter.x+vectorConeRadius,highlightCenter.y,highlightCenter.z+vectorConeRadius));
+			OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+		}
+	}
+
+	void ResolveIndicatedObject() {
+		if (objectMatches.Count == 1) {	// single object match
+			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+				Disambiguate (objectMatches);
+			} 
+			else {
+				indicatedObj = objectMatches [0];
+				objectMatches.Clear ();
+
+				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
+					ReachFor (indicatedObj);
+				}
+			}
+		} 
+		else {	// multiple objects matches: disambiguate
+			if ((interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) ||
+				(interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation)) {
+				Disambiguate (objectMatches);
+			} 
+			else {	// just pick one
+
+			}
+		}
 	}
 
 	void Grab(bool state) {
@@ -1960,18 +2011,18 @@ public class JointGestureDemo : MonoBehaviour {
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.rightHandObj.transform.position = new Vector3(bounds.center.x,bounds.max.y+0.1f,bounds.min.z)+offset;
+			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
 		}
 		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.leftHandObj.transform.position = new Vector3(bounds.center.x,bounds.max.y+0.1f,bounds.min.z)+offset;
+			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
 		}
 	}
 
 	Vector3 TransformToSurface(List<float> vector) {
 		Vector3 coord = new Vector3 (vector[0]*vectorScaleFactor,
 			Helper.GetObjectWorldSize(demoSurface).max.y,
-			vector[1]-(.77f*vectorScaleFactor));
+			vector[1]-((tableSize.y/2.0f)*vectorScaleFactor));
 
 		return coord;
 	}

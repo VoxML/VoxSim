@@ -24,6 +24,10 @@ namespace Satisfaction {
 
 			bool isMacroEvent = false;
 
+			if (em.isInitiatePhase) {
+				return false;
+			}
+
 			foreach (DictionaryEntry entry in predArgs) {
 				predString = (String)entry.Key;
 				argsStrings = ((String)entry.Value).Split (new char[] {','});

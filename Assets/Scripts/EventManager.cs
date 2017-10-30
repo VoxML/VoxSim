@@ -145,10 +145,10 @@ public class EventManager : MonoBehaviour {
 
 
 	float initiatePhaseTime = 0f;
-	bool isInitiatePhase = false;
+	public bool isInitiatePhase = false;
 
 	float recoverPhaseTime = 1f;
-	bool startRecoverPhase = false;
+	public bool startRecoverPhase = false;
 
 //	// Update is called once per frame
 //	void Update () {
