@@ -80,6 +80,13 @@ public class JointGestureDemo : MonoBehaviour {
 		leftTargetDefault = ikControl.leftHandObj.transform.position;
 		rightTargetDefault = ikControl.rightHandObj.transform.position;
 		headTargetDefault = ikControl.lookObj.transform.position;
+
+		regionHighlight = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+		regionHighlight.transform.position = Vector3.zero;
+		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius,vectorConeRadius,vectorConeRadius);
+		regionHighlight.tag = "UnPhysic";
+		regionHighlight.GetComponent<Renderer> ().enabled = true;
+		Destroy (regionHighlight.GetComponent<Collider> ());
 	}
 	
 	// Update is called once per frame
@@ -100,8 +107,12 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (leftRegion == null) {
-			leftRegion = new Region (new Vector3 (0.0f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.7f),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 0.1f));
+			leftRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			leftRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			leftRegionHighlight.name = "LeftRegionHighlight";
 			leftRegionHighlight.transform.position = leftRegion.center;
@@ -111,8 +122,12 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (rightRegion == null) {
-			rightRegion = new Region (new Vector3 (-0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.7f),
-				new Vector3 (0.0f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 0.1f));
+			rightRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			rightRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			rightRegionHighlight.name = "RightRegionHighlight";
 			rightRegionHighlight.transform.position = rightRegion.center;
@@ -122,8 +137,11 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (frontRegion == null) {
-			frontRegion = new Region (new Vector3 (-0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.7f),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.3f));
+			frontRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 
+					Helper.GetObjectWorldSize(demoSurface).center.z));
 			frontRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			frontRegionHighlight.name = "FrontRegionHighlight";
 			frontRegionHighlight.transform.position = frontRegion.center;
@@ -133,8 +151,11 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (backRegion == null) {
-			backRegion = new Region (new Vector3 (-0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.3f),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 0.1f));
+			backRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).center.z),
+				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			backRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			backRegionHighlight.name = "BackRegionHighlight";
 			backRegionHighlight.transform.position = backRegion.center;
@@ -345,6 +366,14 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 			}
+		}
+		else if (messageType == "P") {	// continuous pointing message
+			if (messageStr.StartsWith ("l")) {
+				Deixis (GetGestureVector (messageStr, "l"));
+			} 
+			else if (messageStr.StartsWith ("r")) {
+				Deixis (GetGestureVector (messageStr, "r"));
+			} 
 		}
 	}
 
@@ -751,12 +780,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Vector3 highlightCenter = TransformToSurface (vector);
 
-		regionHighlight = GameObject.CreatePrimitive (PrimitiveType.Sphere);
 		regionHighlight.transform.position = highlightCenter;
-		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius,vectorConeRadius,vectorConeRadius);
-		regionHighlight.tag = "UnPhysic";
-		regionHighlight.GetComponent<Renderer> ().enabled = true;
-		Destroy (regionHighlight.GetComponent<Collider> ());
 
 		//TurnForward ();
 		//LookAt (cube.transform.position);
@@ -1973,7 +1997,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void LookForward() {
 		if (ikControl != null) {
-			headTarget.targetPosition = headTargetDefault;
+			//TODO: Head tracking
+			//headTarget.targetPosition = headTargetDefault;
 		}
 	}
 
