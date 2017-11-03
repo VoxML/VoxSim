@@ -48,13 +48,13 @@ public class AvatarGestureController : MonoBehaviour {
     public void PerformGesture(string gesture, Action<AvatarGesture> callback = null)
     {
         // Lookup gesture by name
-        if (!AvatarGesture.ALL_GESTURES.ContainsKey(gesture))
+        if (!AvatarGesture.ALL_GESTURES.ContainsKey(gesture.ToLower()))
         {
             Debug.LogError("Gesture \"" + gesture + "\" not found!");
             return;
         }
 
-        AvatarGesture ag = AvatarGesture.ALL_GESTURES[gesture];
+        AvatarGesture ag = AvatarGesture.ALL_GESTURES[gesture.ToLower()];
         PerformGesture(ag, callback);
     }
 
@@ -75,7 +75,7 @@ public class AvatarGestureController : MonoBehaviour {
         string anim_gestureid_name;
         string anim_trigger_name;
 
-        if (gesture.Hand == AvatarGesture.Handedness.Left)
+        if (gesture.BodyPart == AvatarGesture.Body.LeftArm)
         {
             anim_gestureid_name = ANIM_LARM_GESTUREID;
             anim_trigger_name = ANIM_LARM_TRIGGER;

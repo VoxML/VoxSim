@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 
 public class AvatarGesture {
-    public enum Handedness
+    public enum Body
     {
-        NA = -1,
-        Right = 0,
-        Left
+        FullBody = -1,
+        RightArm = 0,
+        LeftArm,
+        Head
     }
 
     public enum Orientation
@@ -19,30 +20,44 @@ public class AvatarGesture {
     }
 
     //
+    //  GESTURES
+    //  TODO Eventually, we can define a gesture as a compound action combining arbitrary arm motions and hand poses.
+    //
+    
+    //
     //  Right arm gestures
     //
 
     // Idle
-    public static AvatarGesture RARM_IDLE         = new AvatarGesture("RARM_IDLE",         0) { Hand = Handedness.NA,    Direction = Orientation.NA    };
+    public static AvatarGesture RARM_IDLE         = new AvatarGesture("RARM_IDLE",         0) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
 
     // Numeric
-    public static AvatarGesture RARM_NUMBER_ONE   = new AvatarGesture("RARM_NUMBER_ONE",   1) { Hand = Handedness.Right, Direction = Orientation.NA    };
-    public static AvatarGesture RARM_NUMBER_TWO   = new AvatarGesture("RARM_NUMBER_TWO",   2) { Hand = Handedness.Right, Direction = Orientation.NA    };
-    public static AvatarGesture RARM_NUMBER_THREE = new AvatarGesture("RARM_NUMBER_THREE", 3) { Hand = Handedness.Right, Direction = Orientation.NA    };
-    public static AvatarGesture RARM_NUMBER_FOUR  = new AvatarGesture("RARM_NUMBER_FOUR",  4) { Hand = Handedness.Right, Direction = Orientation.NA    };
-    public static AvatarGesture RARM_NUMBER_FIVE  = new AvatarGesture("RARM_NUMBER_FIVE",  5) { Hand = Handedness.Right, Direction = Orientation.NA    };
+    public static AvatarGesture RARM_NUMBER_ONE   = new AvatarGesture("RARM_NUMBER_ONE",   1) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+    public static AvatarGesture RARM_NUMBER_TWO   = new AvatarGesture("RARM_NUMBER_TWO",   2) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+    public static AvatarGesture RARM_NUMBER_THREE = new AvatarGesture("RARM_NUMBER_THREE", 3) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+    public static AvatarGesture RARM_NUMBER_FOUR  = new AvatarGesture("RARM_NUMBER_FOUR",  4) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+    public static AvatarGesture RARM_NUMBER_FIVE  = new AvatarGesture("RARM_NUMBER_FIVE",  5) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
 
     // Carry
-    public static AvatarGesture RARM_CARRY_FRONT  = new AvatarGesture("RARM_CARRY_FRONT",  6) { Hand = Handedness.Right, Direction = Orientation.Front };
-    public static AvatarGesture RARM_CARRY_BACK   = new AvatarGesture("RARM_CARRY_BACK",   7) { Hand = Handedness.Right, Direction = Orientation.Back  };
-    public static AvatarGesture RARM_CARRY_LEFT   = new AvatarGesture("RARM_CARRY_LEFT",   8) { Hand = Handedness.Right, Direction = Orientation.Left  };
-    public static AvatarGesture RARM_CARRY_RIGHT  = new AvatarGesture("RARM_CARRY_RIGHT",  9) { Hand = Handedness.Right, Direction = Orientation.Right };
+    public static AvatarGesture RARM_CARRY_FRONT  = new AvatarGesture("RARM_CARRY_FRONT",  6) { BodyPart = Body.RightArm, Direction = Orientation.Front };
+    public static AvatarGesture RARM_CARRY_BACK   = new AvatarGesture("RARM_CARRY_BACK",   7) { BodyPart = Body.RightArm, Direction = Orientation.Back  };
+    public static AvatarGesture RARM_CARRY_LEFT   = new AvatarGesture("RARM_CARRY_LEFT",   8) { BodyPart = Body.RightArm, Direction = Orientation.Left  };
+    public static AvatarGesture RARM_CARRY_RIGHT  = new AvatarGesture("RARM_CARRY_RIGHT",  9) { BodyPart = Body.RightArm, Direction = Orientation.Right };
 
     // Point
-    public static AvatarGesture RARM_POINT_FRONT  = new AvatarGesture("RARM_POINT_FRONT",  6) { Hand = Handedness.Right, Direction = Orientation.Front };
-    public static AvatarGesture RARM_POINT_BACK   = new AvatarGesture("RARM_POINT_BACK",   7) { Hand = Handedness.Right, Direction = Orientation.Back  };
-    public static AvatarGesture RARM_POINT_LEFT   = new AvatarGesture("RARM_POINT_LEFT",   8) { Hand = Handedness.Right, Direction = Orientation.Left  };
-    public static AvatarGesture RARM_POINT_RIGHT  = new AvatarGesture("RARM_POINT_RIGHT",  9) { Hand = Handedness.Right, Direction = Orientation.Right };
+    public static AvatarGesture RARM_POINT_FRONT  = new AvatarGesture("RARM_POINT_FRONT",  6) { BodyPart = Body.RightArm, Direction = Orientation.Front };
+    public static AvatarGesture RARM_POINT_BACK   = new AvatarGesture("RARM_POINT_BACK",   7) { BodyPart = Body.RightArm, Direction = Orientation.Back  };
+    public static AvatarGesture RARM_POINT_LEFT   = new AvatarGesture("RARM_POINT_LEFT",   8) { BodyPart = Body.RightArm, Direction = Orientation.Left  };
+    public static AvatarGesture RARM_POINT_RIGHT  = new AvatarGesture("RARM_POINT_RIGHT",  9) { BodyPart = Body.RightArm, Direction = Orientation.Right };
+
+    //
+    //  Head gestures
+    //
+
+    public static AvatarGesture HEAD_IDLE         = new AvatarGesture("HEAD_IDLE",         0) { BodyPart = Body.Head };
+    public static AvatarGesture HEAD_NOD          = new AvatarGesture("HEAD_NOD",          1) { BodyPart = Body.Head };
+    public static AvatarGesture HEAD_SHAKE        = new AvatarGesture("HEAD_SHAKE",        2) { BodyPart = Body.Head };
+    public static AvatarGesture HEAD_TILT         = new AvatarGesture("HEAD_TILT",         3) { BodyPart = Body.Head };
 
     //
     //  Static helpers
@@ -72,12 +87,17 @@ public class AvatarGesture {
         AddGestureToList(RARM_POINT_FRONT );
         AddGestureToList(RARM_POINT_BACK  );
         AddGestureToList(RARM_POINT_LEFT  );
-        AddGestureToList(RARM_POINT_RIGHT);
+        AddGestureToList(RARM_POINT_RIGHT );
+
+        AddGestureToList(HEAD_IDLE        );
+        AddGestureToList(HEAD_NOD         );
+        AddGestureToList(HEAD_SHAKE       );
+        AddGestureToList(HEAD_TILT        );
     }
 
     private static void AddGestureToList(AvatarGesture gesture)
     {
-        ALL_GESTURES.Add(gesture.Name, gesture);
+        ALL_GESTURES.Add(gesture.Name.ToLower(), gesture);
     }
 
     //
@@ -90,19 +110,19 @@ public class AvatarGesture {
         private set;
     }
 
-    public int Id
+    public int Id // Tells the controller which animation to trigger
     {
         get;
         private set;
     }
 
-    public Handedness Hand
+    public Body BodyPart // Tells the controller which animation layer to use
     {
         get;
         private set;
     }
 
-    public Orientation Direction
+    public Orientation Direction // Unused
     {
         get;
         private set;
