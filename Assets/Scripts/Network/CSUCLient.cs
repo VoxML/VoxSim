@@ -62,7 +62,16 @@ namespace Network
 			while (_client.Connected)
 			{
 				int len = GetMessageLength();
-				_messages.Enqueue(GetMessage(len));
+
+				string msg = GetMessage (len);
+				if (msg.StartsWith ("P")) {
+					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
+						_messages.Enqueue (msg);
+					}
+				}
+				else {
+					_messages.Enqueue (msg);
+				}
 			}
 			_client.Close();
 		}

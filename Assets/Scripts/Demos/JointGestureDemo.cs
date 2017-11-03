@@ -38,8 +38,13 @@ public class JointGestureDemo : MonoBehaviour {
 	public Region indicatedRegion = null;
 
 	public Vector2 tableSize;
-	public float vectorScaleFactor;
+	public Vector2 vectorScaleFactor;
 	public float vectorConeRadius;
+
+	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
+	public float knownScreenWidth = .3646f; //m
+	public float windowScaleFactor;
+	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 
 	Region leftRegion;
 	Region rightRegion;
@@ -66,6 +71,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		windowScaleFactor = (float)Screen.width/(float)Screen.currentResolution.width;
+
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
@@ -85,7 +92,7 @@ public class JointGestureDemo : MonoBehaviour {
 		regionHighlight.transform.position = Vector3.zero;
 		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius,vectorConeRadius,vectorConeRadius);
 		regionHighlight.tag = "UnPhysic";
-		regionHighlight.GetComponent<Renderer> ().enabled = true;
+		regionHighlight.GetComponent<Renderer> ().enabled = false;
 		Destroy (regionHighlight.GetComponent<Collider> ());
 	}
 	
@@ -164,6 +171,36 @@ public class JointGestureDemo : MonoBehaviour {
 			backRegionHighlight.SetActive (false);
 		}
 
+		// Vector pointing scaling
+		if (transformToScreenPointing) {
+			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH/(knownScreenWidth * windowScaleFactor);
+
+			// assume screen more or less directly under Kinect
+
+			/*
+			|```````#```````|
+			|               |
+			|               |
+			|               |
+			|  /------o=o---+--/
+			| /		  o		. /
+			|/	    -/-		./
+			/  /`````````/  /
+			|```````x```````|
+			|				|
+			|				|
+			|				|
+			|				|
+			|				|
+			|				|
+			|,,,,,,,,,,,,,,,|
+					H
+
+				H points @ x (real space directly under Kinect on ["]table["] surface, aka "my" edge of virtual table) -> ~(0.0,0.0)
+				H points @ # (far edge of virtual table) -> ~(0.0,-1.6)
+			 */
+		}
+
 		// Synthetic vision mockup
 		if (synVision != null) {
 			if (synVision.enabled) {
@@ -178,6 +215,20 @@ public class JointGestureDemo : MonoBehaviour {
 							}
 						}
 					}
+				}
+			}
+		}
+
+		// Deixis by click
+		if (Input.GetMouseButtonDown (0)) {
+			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+			RaycastHit hit;
+			// Casts the ray and get the first game object hit
+			Physics.Raycast (ray, out hit);
+
+			if (hit.collider != null) {
+				if (blocks.Contains (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
+					Deixis (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject));
 				}
 			}
 		}
@@ -378,7 +429,7 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	string RemoveGestureTriggers(string receivedData) {
-		return receivedData.Replace ("start", "").Replace ("stop", "").TrimStart(',');
+		return receivedData.Replace ("start", "").Replace ("stop", "").Replace ("high", "").Replace ("low", "").TrimStart(',');
 	}
 
 	string GetGestureContent(string receivedData, string gestureCode) {
@@ -770,17 +821,66 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
+	void Deixis(GameObject obj) {
+		bool isVisible = true;
+
+		if (synVision != null) {
+			if (synVision.enabled) {
+				isVisible = synVision.IsVisible (obj);
+			}
+		}
+
+		if (obj.activeInHierarchy) {
+			bool surfaceClear = true;
+			foreach (GameObject otherBlock in blocks) {
+				if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
+				    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
+				    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
+				    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj)))) {
+					surfaceClear = false;
+				}
+			}
+			if ((!objectMatches.Contains (obj)) && (surfaceClear) && (isVisible)) {
+				objectMatches.Add (obj);
+			}
+		}
+
+		if (objectMatches.Count > 0) {
+			ResolveIndicatedObject ();
+		}
+	}
+
 	void Deixis(List<float> vector) {
 		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
-		foreach (float c in vector) {
-			Debug.Log (c);
-		}
-
 		Vector3 highlightCenter = TransformToSurface (vector);
 
-		regionHighlight.transform.position = highlightCenter;
+		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
+		Debug.Log (highlightCenter);
+
+		Vector3 offset = MoveHighlight (highlightCenter);
+
+		if (offset.sqrMagnitude <= Constants.EPSILON) {
+			regionHighlight.transform.position = highlightCenter;
+		}
+
+		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
+		Ray ray = new Ray(origin,
+				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
+
+		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
+		//float width = height * Screen.width / Screen.height;
+		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
+		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
+			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
+			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
+
+		float distance;
+		if (cameraPlane.Raycast (ray, out distance)) {
+			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
+			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
+		}
 
 		//TurnForward ();
 		//LookAt (cube.transform.position);
@@ -797,7 +897,7 @@ public class JointGestureDemo : MonoBehaviour {
 			if (block.activeInHierarchy) {
 				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
 				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
-				if ((point-highlightCenter).magnitude <= 0.25f) {
+				if ((point-highlightCenter).magnitude <= vectorConeRadius) {
 				//if (region.Contains (new Vector3 (block.transform.position.x,
 				//	region.center.y, block.transform.position.z))) {
 					bool surfaceClear = true;
@@ -825,6 +925,28 @@ public class JointGestureDemo : MonoBehaviour {
 				new Vector3(highlightCenter.x+vectorConeRadius,highlightCenter.y,highlightCenter.z+vectorConeRadius));
 			OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
 		}
+	}
+
+	Vector3 MoveHighlight(Vector3 highlightCenter) {
+		Vector3 offset = regionHighlight.transform.position - highlightCenter;
+		Vector3 normalizedOffset = Vector3.Normalize (offset);
+
+		regionHighlight.transform.position = new Vector3 (regionHighlight.transform.position.x - normalizedOffset.x * Time.deltaTime * 5.0f,
+			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * 5.0f,
+			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * 5.0f);
+		
+		if ((regionHighlight.transform.position.x < -tableSize.x / 2.0f) ||
+			(regionHighlight.transform.position.x > tableSize.x / 2.0f) ||
+			(regionHighlight.transform.position.y < -tableSize.y / 2.0f) ||
+			(regionHighlight.transform.position.y > tableSize.y / 2.0f)) {
+			// hide region highlight
+			regionHighlight.GetComponent<Renderer> ().enabled = false;
+		}
+		else {
+			regionHighlight.GetComponent<Renderer> ().enabled = true;
+		}
+
+		return offset;
 	}
 
 	void ResolveIndicatedObject() {
@@ -2045,9 +2167,22 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	Vector3 TransformToSurface(List<float> vector) {
-		Vector3 coord = new Vector3 (vector[0]*vectorScaleFactor,
+		float zCoord = vector[1];
+
+		if (transformToScreenPointing) {
+			// point at base of Kinect -> 0.0 -> .8 (my edge)
+			// point at far edge of virtual table -> -1.6 -> -.8 (Diana's edge)
+			zCoord = (vector[1] * vectorScaleFactor.y) + (tableSize.y / 2.0f);
+		}
+		else {
+			// point at base of Kinect -> 0.0 -> -.8 (Diana's edge)
+			// point down in front of me -> 1.6 -> .8 (my edge)
+			zCoord = vector[1] - ((tableSize.y / 2.0f) * vectorScaleFactor.y);
+		}
+
+		Vector3 coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
 			Helper.GetObjectWorldSize(demoSurface).max.y,
-			vector[1]-((tableSize.y/2.0f)*vectorScaleFactor));
+			zCoord);
 
 		return coord;
 	}
