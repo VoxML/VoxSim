@@ -37,10 +37,24 @@ public class JointGestureDemo : MonoBehaviour {
 
 	public Region indicatedRegion = null;
 
+	public Vector2 tableSize;
+	public Vector2 vectorScaleFactor;
+	public float vectorConeRadius;
+
+	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
+	public float knownScreenWidth = .3646f; //m
+	public float windowScaleFactor;
+	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
+
+	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
+
 	Region leftRegion;
 	Region rightRegion;
 	Region frontRegion;
 	Region backRegion;
+
+	GameObject regionHighlight;
+	GameObject radiusHighlight;
 
 	GameObject leftRegionHighlight;
 	GameObject rightRegionHighlight;
@@ -59,6 +73,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		windowScaleFactor = (float)Screen.width/(float)Screen.currentResolution.width;
+
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
@@ -73,6 +89,13 @@ public class JointGestureDemo : MonoBehaviour {
 		leftTargetDefault = ikControl.leftHandObj.transform.position;
 		rightTargetDefault = ikControl.rightHandObj.transform.position;
 		headTargetDefault = ikControl.lookObj.transform.position;
+
+		regionHighlight = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+		regionHighlight.transform.position = Vector3.zero;
+		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius,vectorConeRadius,vectorConeRadius);
+		regionHighlight.tag = "UnPhysic";
+		regionHighlight.GetComponent<Renderer> ().enabled = false;
+		Destroy (regionHighlight.GetComponent<Collider> ());
 	}
 	
 	// Update is called once per frame
@@ -93,8 +116,12 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (leftRegion == null) {
-			leftRegion = new Region (new Vector3 (0.0f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.7f),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 0.1f));
+			leftRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			leftRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			leftRegionHighlight.name = "LeftRegionHighlight";
 			leftRegionHighlight.transform.position = leftRegion.center;
@@ -104,8 +131,12 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (rightRegion == null) {
-			rightRegion = new Region (new Vector3 (-0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.7f),
-				new Vector3 (0.0f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 0.1f));
+			rightRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			rightRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			rightRegionHighlight.name = "RightRegionHighlight";
 			rightRegionHighlight.transform.position = rightRegion.center;
@@ -115,8 +146,11 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (frontRegion == null) {
-			frontRegion = new Region (new Vector3 (-0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.7f),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.3f));
+			frontRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 
+					Helper.GetObjectWorldSize(demoSurface).center.z));
 			frontRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			frontRegionHighlight.name = "FrontRegionHighlight";
 			frontRegionHighlight.transform.position = frontRegion.center;
@@ -126,14 +160,47 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (backRegion == null) {
-			backRegion = new Region (new Vector3 (-0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, -0.3f),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 0.1f));
+			backRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).center.z),
+				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			backRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			backRegionHighlight.name = "BackRegionHighlight";
 			backRegionHighlight.transform.position = backRegion.center;
 			backRegionHighlight.transform.localScale = new Vector3 (.1f*(backRegion.max.x - backRegion.min.x),
 				1.0f, .1f*(backRegion.max.z - backRegion.min.z));
 			backRegionHighlight.SetActive (false);
+		}
+
+		// Vector pointing scaling
+		if (transformToScreenPointing) {
+			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH/(knownScreenWidth * windowScaleFactor);
+
+			// assume screen more or less directly under Kinect
+
+			/*
+			|```````#```````|
+			|               |
+			|               |
+			|               |
+			|  /------o=o---+--/
+			| /		  o		. /
+			|/	    -/-		./
+			/  /`````````/  /
+			|```````x```````|
+			|				|
+			|				|
+			|				|
+			|				|
+			|				|
+			|				|
+			|,,,,,,,,,,,,,,,|
+					H
+
+				H points @ x (real space directly under Kinect on ["]table["] surface, aka "my" edge of virtual table) -> ~(0.0,0.0)
+				H points @ # (far edge of virtual table) -> ~(0.0,-1.6)
+			 */
 		}
 
 		// Synthetic vision mockup
@@ -153,6 +220,20 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 		}
+
+		// Deixis by click
+		if (Input.GetMouseButtonDown (0)) {
+			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+			RaycastHit hit;
+			// Casts the ray and get the first game object hit
+			Physics.Raycast (ray, out hit);
+
+			if (hit.collider != null) {
+				if (blocks.Contains (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
+					Deixis (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject));
+				}
+			}
+		}
 	}
 
 	void ReceivedFusion(object sender, EventArgs e) {
@@ -163,6 +244,10 @@ public class JointGestureDemo : MonoBehaviour {
 		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
 		string messageType = splitMessage[0];
 		string messageStr = splitMessage[1];
+		string messageTime = splitMessage[2];
+
+		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
+
 		if (messageType == "S") {	// speech message
 			switch (messageStr.ToLower ()) {
 			case "yes":
@@ -234,28 +319,27 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		} 
 		else if (messageType == "G") {	// gesture message
-			if (messageStr.EndsWith ("start")) {	// start as trigger
+			string[] messageComponents = messageStr.Split ();
+//			foreach (string c in messageComponents) {
+//				Debug.Log (c);
+//			}
+			if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("start")) {	// start as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("engage")) {
 					if (GetGestureContent (messageStr, "engage") == "") {
 						Engage (true);
 					}
 				} 
-				else if (messageStr.StartsWith ("point")) {
-					if (GetGestureContent (messageStr, "point") == "left") {
-						Deixis ("left");
-					} 
-					else if (GetGestureContent (messageStr, "point") == "right") {
-						Deixis ("right");
-					} 
-					else if (GetGestureContent (messageStr, "point") == "front") {
-						Deixis ("front");
-					} 
-					else if (GetGestureContent (messageStr, "point") == "down") {
-						Deixis ("down");
-					}
+				else if (messageStr.Contains ("left point")) {
+					Deixis (GetGestureVector (messageStr, "left point"));
 				} 
-				else if (messageStr.StartsWith ("grab")) {
+				else if (messageStr.Contains ("right point")) {
+					Deixis (GetGestureVector (messageStr, "right point"));
+				} 
+			}
+			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
+				messageStr = RemoveGestureTriggers (messageStr);
+				if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
 						Grab (true);
 					}
@@ -267,7 +351,7 @@ public class JointGestureDemo : MonoBehaviour {
 					Acknowledge (false);
 				}
 			} 
-			else if (messageStr.EndsWith ("stop")) {	// stop as trigger
+			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("engage")) {
 					if (GetGestureContent (messageStr, "engage") == "") {
@@ -327,14 +411,41 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 		}
+		else if (messageType == "P") {	// continuous pointing message
+			if (messageStr.StartsWith ("l")) {
+				Deixis (GetGestureVector (messageStr, "l"));
+			} 
+			else if (messageStr.StartsWith ("r")) {
+				Deixis (GetGestureVector (messageStr, "r"));
+			} 
+		}
 	}
 
 	string RemoveGestureTriggers(string receivedData) {
-		return receivedData.Replace ("start", "").Replace ("stop", "");
+		return receivedData.Replace ("start", "").Replace ("stop", "").Replace ("high", "").Replace ("low", "").TrimStart(',');
 	}
 
 	string GetGestureContent(string receivedData, string gestureCode) {
 		return receivedData.Replace (gestureCode, "").Split () [1];
+	}
+
+	List<float> GetGestureVector(string receivedData, string gestureCode) {
+//		Debug.Log (receivedData);
+//		Debug.Log (gestureCode);
+		List<float> vector = new List<float> ();
+		List<string> content = receivedData.Replace (gestureCode, "").Split (',').ToList();
+		foreach (string c in content) {
+			if (c.Trim() != string.Empty) {
+//				Debug.Log (c);
+				try {
+					vector.Add (System.Convert.ToSingle (c));
+				}
+				catch (Exception e) {
+				}
+			}
+		}
+
+		return vector;
 	}
 
 	void Disambiguate(object content) {
@@ -524,8 +635,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void IndexByColor(string color)
-	{
+	void IndexByColor(string color) {
 		if (indicatedObj == null) {
 			if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
 				foreach (GameObject block in blocks) {
@@ -694,32 +804,164 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 
 			if (objectMatches.Count > 0) {
-				if (objectMatches.Count == 1) {	// single object match
-					if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-						Disambiguate (objectMatches);
-					} 
-					else {
-						indicatedObj = objectMatches [0];
-						objectMatches.Clear ();
-
-						if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
-							ReachFor (indicatedObj);
-						}
-					}
-				} 
-				else {	// multiple objects matches: disambiguate
-					if ((interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) ||
-					   (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation)) {
-						Disambiguate (objectMatches);
-					} 
-					else {	// just pick one
-					
-					}
-				}
+				ResolveIndicatedObject ();
 			} 
 			else {	// indicating region
 				indicatedRegion = region;
 				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+			}
+		}
+	}
+
+	void Deixis(GameObject obj) {
+		bool isVisible = true;
+
+		if (synVision != null) {
+			if (synVision.enabled) {
+				isVisible = synVision.IsVisible (obj);
+			}
+		}
+
+		if (obj.activeInHierarchy) {
+			bool surfaceClear = true;
+			foreach (GameObject otherBlock in blocks) {
+				if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
+				    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
+				    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
+				    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj)))) {
+					surfaceClear = false;
+				}
+			}
+			if ((!objectMatches.Contains (obj)) && (surfaceClear) && (isVisible)) {
+				objectMatches.Add (obj);
+			}
+		}
+
+		if (objectMatches.Count > 0) {
+			ResolveIndicatedObject ();
+		}
+	}
+
+	void Deixis(List<float> vector) {
+		OutputHelper.PrintOutput (Role.Affector, "");
+		Region region = null;
+
+		Vector3 highlightCenter = TransformToSurface (vector);
+
+//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
+		Debug.Log (highlightCenter);
+
+		Vector3 offset = MoveHighlight (highlightCenter);
+
+		if (offset.sqrMagnitude <= Constants.EPSILON) {
+			regionHighlight.transform.position = highlightCenter;
+		}
+
+//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
+//		Ray ray = new Ray(origin,
+//				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
+//
+//		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
+//		//float width = height * Screen.width / Screen.height;
+//		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
+//		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
+//			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
+//			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
+//
+//		float distance;
+//		if (cameraPlane.Raycast (ray, out distance)) {
+//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
+//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
+//		}
+
+		//TurnForward ();
+		//LookAt (cube.transform.position);
+
+		foreach (GameObject block in blocks) {
+			bool isVisible = true;
+
+			if (synVision != null) {
+				if (synVision.enabled) {
+					isVisible = synVision.IsVisible (block);
+				}
+			}
+
+			if (block.activeInHierarchy) {
+				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
+				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
+				if ((point-highlightCenter).magnitude <= vectorConeRadius) {
+				//if (region.Contains (new Vector3 (block.transform.position.x,
+				//	region.center.y, block.transform.position.z))) {
+					bool surfaceClear = true;
+					foreach (GameObject otherBlock in blocks) {
+						if ((QSR.QSR.Above(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
+							(!QSR.QSR.Left(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
+							(!QSR.QSR.Right(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
+							(RCC8.EC(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
+							surfaceClear = false;
+						}
+					}
+					if ((!objectMatches.Contains (block)) && (surfaceClear) && (isVisible)) {
+						objectMatches.Add (block);
+					}
+				} 
+			}
+		}
+
+
+		if (objectMatches.Count > 0) {
+			ResolveIndicatedObject ();
+		} 
+		else {	// indicating region
+			indicatedRegion = new Region(new Vector3(highlightCenter.x-vectorConeRadius,highlightCenter.y,highlightCenter.z-vectorConeRadius),
+				new Vector3(highlightCenter.x+vectorConeRadius,highlightCenter.y,highlightCenter.z+vectorConeRadius));
+			OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+		}
+	}
+
+	Vector3 MoveHighlight(Vector3 highlightCenter) {
+		Vector3 offset = regionHighlight.transform.position - highlightCenter;
+		Vector3 normalizedOffset = Vector3.Normalize (offset);
+
+		regionHighlight.transform.position = new Vector3 (regionHighlight.transform.position.x - normalizedOffset.x * Time.deltaTime * 5.0f,
+			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * 5.0f,
+			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * 5.0f);
+		
+		if ((regionHighlight.transform.position.x < -tableSize.x / 2.0f) ||
+			(regionHighlight.transform.position.x > tableSize.x / 2.0f) ||
+			(regionHighlight.transform.position.y < -tableSize.y / 2.0f) ||
+			(regionHighlight.transform.position.y > tableSize.y / 2.0f)) {
+			// hide region highlight
+			regionHighlight.GetComponent<Renderer> ().enabled = false;
+		}
+		else {
+			regionHighlight.GetComponent<Renderer> ().enabled = true;
+		}
+
+		return offset;
+	}
+
+	void ResolveIndicatedObject() {
+		if (objectMatches.Count == 1) {	// single object match
+			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+				Disambiguate (objectMatches);
+			} 
+			else {
+				indicatedObj = objectMatches [0];
+				objectMatches.Clear ();
+
+				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
+					ReachFor (indicatedObj);
+				}
+			}
+		} 
+		else {	// multiple objects matches: disambiguate
+			if ((interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) ||
+				(interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation)) {
+				Disambiguate (objectMatches);
+			} 
+			else {	// just pick one
+
 			}
 		}
 	}
@@ -1869,7 +2111,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void LookForward() {
 		if (ikControl != null) {
-			headTarget.targetPosition = headTargetDefault;
+			//TODO: Head tracking
+			//headTarget.targetPosition = headTargetDefault;
 		}
 	}
 
@@ -1900,6 +2143,20 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
 	}
 
+	void ReachFor(Vector3 coord) {
+		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
+
+		// which region is obj in?
+		if (leftRegion.Contains(new Vector3(coord.x,
+			leftRegion.center.y,coord.z))) {
+			ikControl.rightHandObj.transform.position = coord+offset;
+		}
+		else if (rightRegion.Contains(new Vector3(coord.x,
+			leftRegion.center.y,coord.z))) {
+			ikControl.leftHandObj.transform.position = coord+offset;
+		}
+	}
+
 	void ReachFor(GameObject obj) {
 		Bounds bounds = Helper.GetObjectWorldSize(obj);
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
@@ -1907,12 +2164,33 @@ public class JointGestureDemo : MonoBehaviour {
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.rightHandObj.transform.position = new Vector3(bounds.center.x,bounds.max.y+0.1f,bounds.min.z)+offset;
+			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
 		}
 		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.leftHandObj.transform.position = new Vector3(bounds.center.x,bounds.max.y+0.1f,bounds.min.z)+offset;
+			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
 		}
+	}
+
+	Vector3 TransformToSurface(List<float> vector) {
+		float zCoord = vector[1];
+
+		if (transformToScreenPointing) {
+			// point at base of Kinect -> 0.0 -> .8 (my edge)
+			// point at far edge of virtual table -> -1.6 -> -.8 (Diana's edge)
+			zCoord = (vector[1] * vectorScaleFactor.y) + (tableSize.y / 2.0f);
+		}
+		else {
+			// point at base of Kinect -> 0.0 -> -.8 (Diana's edge)
+			// point down in front of me -> 1.6 -> .8 (my edge)
+			zCoord = vector[1] - ((tableSize.y / 2.0f) * vectorScaleFactor.y);
+		}
+
+		Vector3 coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
+			Helper.GetObjectWorldSize(demoSurface).max.y,
+			zCoord);
+
+		return coord;
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
