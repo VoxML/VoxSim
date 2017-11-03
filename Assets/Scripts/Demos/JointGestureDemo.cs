@@ -46,6 +46,8 @@ public class JointGestureDemo : MonoBehaviour {
 	public float windowScaleFactor;
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 
+	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
+
 	Region leftRegion;
 	Region rightRegion;
 	Region frontRegion;
@@ -243,6 +245,9 @@ public class JointGestureDemo : MonoBehaviour {
 		string messageType = splitMessage[0];
 		string messageStr = splitMessage[1];
 		string messageTime = splitMessage[2];
+
+		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
+
 		if (messageType == "S") {	// speech message
 			switch (messageStr.ToLower ()) {
 			case "yes":
@@ -325,28 +330,16 @@ public class JointGestureDemo : MonoBehaviour {
 						Engage (true);
 					}
 				} 
-				/// old Deixis code
-//				else if (messageStr.StartsWith ("point")) {
-//					if (GetGestureContent (messageStr, "point") == "left") {
-//						Deixis ("left");
-//					} 
-//					else if (GetGestureContent (messageStr, "point") == "right") {
-//						Deixis ("right");
-//					} 
-//					else if (GetGestureContent (messageStr, "point") == "front") {
-//						Deixis ("front");
-//					} 
-//					else if (GetGestureContent (messageStr, "point") == "down") {
-//						Deixis ("down");
-//					}
-//				} 
 				else if (messageStr.Contains ("left point")) {
 					Deixis (GetGestureVector (messageStr, "left point"));
 				} 
 				else if (messageStr.Contains ("right point")) {
 					Deixis (GetGestureVector (messageStr, "right point"));
 				} 
-				else if (messageStr.StartsWith ("grab")) {
+			}
+			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
+				messageStr = RemoveGestureTriggers (messageStr);
+				if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
 						Grab (true);
 					}
@@ -642,8 +635,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void IndexByColor(string color)
-	{
+	void IndexByColor(string color) {
 		if (indicatedObj == null) {
 			if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
 				foreach (GameObject block in blocks) {
@@ -2149,6 +2141,20 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void TurnForward() {
 		Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+	}
+
+	void ReachFor(Vector3 coord) {
+		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
+
+		// which region is obj in?
+		if (leftRegion.Contains(new Vector3(coord.x,
+			leftRegion.center.y,coord.z))) {
+			ikControl.rightHandObj.transform.position = coord+offset;
+		}
+		else if (rightRegion.Contains(new Vector3(coord.x,
+			leftRegion.center.y,coord.z))) {
+			ikControl.leftHandObj.transform.position = coord+offset;
+		}
 	}
 
 	void ReachFor(GameObject obj) {
