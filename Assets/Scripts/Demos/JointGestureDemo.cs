@@ -413,10 +413,10 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 		else if (messageType == "P") {	// continuous pointing message
 			if (messageStr.StartsWith ("l")) {
-				Deixis (GetGestureVector (messageStr, "l"));
+				TrackPointing (GetGestureVector (messageStr, "l"));
 			} 
 			else if (messageStr.StartsWith ("r")) {
-				Deixis (GetGestureVector (messageStr, "r"));
+				TrackPointing (GetGestureVector (messageStr, "r"));
 			} 
 		}
 	}
@@ -848,31 +848,9 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Vector3 highlightCenter = TransformToSurface (vector);
 
-//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
 		Debug.Log (highlightCenter);
 
-		Vector3 offset = MoveHighlight (highlightCenter);
-
-		if (offset.sqrMagnitude <= Constants.EPSILON) {
-			regionHighlight.transform.position = highlightCenter;
-		}
-
-//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
-//		Ray ray = new Ray(origin,
-//				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
-//
-//		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
-//		//float width = height * Screen.width / Screen.height;
-//		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
-//		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
-//			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
-//			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
-//
-//		float distance;
-//		if (cameraPlane.Raycast (ray, out distance)) {
-//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
-//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
-//		}
+		regionHighlight.transform.position = highlightCenter;
 
 		//TurnForward ();
 		//LookAt (cube.transform.position);
@@ -917,6 +895,42 @@ public class JointGestureDemo : MonoBehaviour {
 				new Vector3(highlightCenter.x+vectorConeRadius,highlightCenter.y,highlightCenter.z+vectorConeRadius));
 			OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
 		}
+	}
+
+	void TrackPointing(List<float> vector) {
+		OutputHelper.PrintOutput (Role.Affector, "");
+		Region region = null;
+
+		Vector3 highlightCenter = TransformToSurface (vector);
+
+		//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
+		Debug.Log (highlightCenter);
+
+		Vector3 offset = MoveHighlight (highlightCenter);
+
+		if (offset.sqrMagnitude <= Constants.EPSILON) {
+			regionHighlight.transform.position = highlightCenter;
+		}
+
+		//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
+		//		Ray ray = new Ray(origin,
+		//				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
+		//
+		//		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
+		//		//float width = height * Screen.width / Screen.height;
+		//		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
+		//		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
+		//			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
+		//			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
+		//
+		//		float distance;
+		//		if (cameraPlane.Raycast (ray, out distance)) {
+		//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
+		//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
+		//		}
+
+		//TurnForward ();
+		//LookAt (cube.transform.position);
 	}
 
 	Vector3 MoveHighlight(Vector3 highlightCenter) {
