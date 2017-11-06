@@ -241,7 +241,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void ReceivedFusion(object sender, EventArgs e) {
 		string fusionMessage = ((GestureEventArgs)e).Content;
-		Debug.Log (fusionMessage);
+		//Debug.Log (fusionMessage);
 		
 		
 		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
@@ -252,6 +252,7 @@ public class JointGestureDemo : MonoBehaviour {
 		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
 		if (messageType == "S") {	// speech message
+			Debug.Log (fusionMessage);
 			switch (messageStr.ToLower ()) {
 			case "yes":
 				Acknowledge (true);
@@ -322,6 +323,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		} 
 		else if (messageType == "G") {	// gesture message
+			Debug.Log (fusionMessage);
 			string[] messageComponents = messageStr.Split ();
 //			foreach (string c in messageComponents) {
 //				Debug.Log (c);
@@ -333,16 +335,16 @@ public class JointGestureDemo : MonoBehaviour {
 						Engage (true);
 					}
 				} 
-				else if (messageStr.Contains ("left point")) {
+			}
+			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
+				messageStr = RemoveGestureTriggers (messageStr);
+				if (messageStr.Contains ("left point")) {
 					Deixis (GetGestureVector (messageStr, "left point"));
 				} 
 				else if (messageStr.Contains ("right point")) {
 					Deixis (GetGestureVector (messageStr, "right point"));
 				} 
-			}
-			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
-				messageStr = RemoveGestureTriggers (messageStr);
-				if (messageStr.StartsWith ("grab")) {
+				else if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
 						Grab (true);
 					}
@@ -356,7 +358,13 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
-				if (messageStr.StartsWith ("grab")) {
+				if (messageStr.Contains ("left point")) {
+					Suggest ("point");
+				} 
+				else if (messageStr.Contains ("right point")) {
+					Suggest ("point");
+				} 
+				else if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
 						Suggest ("grab");
 					}
@@ -958,7 +966,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Vector3 highlightCenter = TransformToSurface (vector);
 
-		Debug.Log (highlightCenter);
+		Debug.Log (string.Format("Deixis: {0}",highlightCenter));
 
 		regionHighlight.transform.position = highlightCenter;
 
@@ -1014,7 +1022,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Vector3 highlightCenter = TransformToSurface (vector);
 
 		//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
-		Debug.Log (highlightCenter);
+		//Debug.Log (highlightCenter);
 
 		Vector3 offset = MoveHighlight (highlightCenter);
 
@@ -1053,8 +1061,8 @@ public class JointGestureDemo : MonoBehaviour {
 		
 		if ((regionHighlight.transform.position.x < -tableSize.x / 2.0f) ||
 			(regionHighlight.transform.position.x > tableSize.x / 2.0f) ||
-			(regionHighlight.transform.position.y < -tableSize.y / 2.0f) ||
-			(regionHighlight.transform.position.y > tableSize.y / 2.0f)) {
+			(regionHighlight.transform.position.z < -(tableSize.y*vectorScaleFactor.y) / 2.0f) ||
+			(regionHighlight.transform.position.z > (tableSize.y*vectorScaleFactor.y) / 2.0f)) {
 			// hide region highlight
 			regionHighlight.GetComponent<Renderer> ().enabled = false;
 		}
