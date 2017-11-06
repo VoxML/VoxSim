@@ -12,6 +12,8 @@ using RCC;
 using Satisfaction;
 using Vox;
 
+using RootMotion.FinalIK;
+
 /// <summary>
 /// Semantics of each predicate should be explicated within the method itself
 /// Could have an issue when it comes to functions for predicates of multiple valencies?
@@ -4310,8 +4312,8 @@ public class Predicates : MonoBehaviour {
 		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
 		if (agent != null) {
 			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = anim.GetBoneTransform (HumanBodyBones.LeftHand).transform.gameObject;
-			GameObject rightGrasper = anim.GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
+			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 			GameObject grasper;
 
 			if (args [args.Length - 1] is bool) {
@@ -4360,8 +4362,8 @@ public class Predicates : MonoBehaviour {
 		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
 		if (agent != null) {
 			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = anim.GetBoneTransform (HumanBodyBones.LeftHand).transform.gameObject;
-			GameObject rightGrasper = anim.GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
+			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 			GameObject grasper;
 			GraspScript graspController = agent.GetComponent<GraspScript> ();
 			Transform leftGrasperCoord = graspController.leftGrasperCoord;
@@ -4428,8 +4430,8 @@ public class Predicates : MonoBehaviour {
 		if (agent != null) {
 			Bounds bounds = Helper.GetObjectWorldSize((args[0] as GameObject));
 			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = anim.GetBoneTransform (HumanBodyBones.LeftHand).transform.gameObject;
-			GameObject rightGrasper = anim.GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
+			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 			GameObject grasper;
 			Transform leftGraspTracker = agent.GetComponent<IKControl> ().leftHandObj;
 			Transform rightGraspTracker = agent.GetComponent<IKControl> ().rightHandObj;
@@ -4492,8 +4494,8 @@ public class Predicates : MonoBehaviour {
 		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
 		if (agent != null) {
 			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = anim.GetBoneTransform (HumanBodyBones.LeftHand).transform.gameObject;
-			GameObject rightGrasper = anim.GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
+			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 			GameObject grasper = null;
 			Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
 			Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
@@ -4540,8 +4542,8 @@ public class Predicates : MonoBehaviour {
 		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
 		if (agent != null) {
 			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = anim.GetBoneTransform (HumanBodyBones.LeftHand).transform.gameObject;
-			GameObject rightGrasper = anim.GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
+			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 			GameObject grasper = null;
 			Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
 			Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;

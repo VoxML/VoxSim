@@ -612,12 +612,6 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void MoveToPerform() {
-		Diana.GetComponent<IKControl> ().leftHandObj.position = Diana.GetComponent<GraspScript> ().leftDefaultPosition;
-		Diana.GetComponent<IKControl> ().rightHandObj.position = Diana.GetComponent<GraspScript> ().rightDefaultPosition;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
-	}
-
 	void Suggest(string gesture) {
 		if (gesture.StartsWith("grab move")) {
 			OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something?"));
@@ -1059,10 +1053,10 @@ public class JointGestureDemo : MonoBehaviour {
 			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * 5.0f,
 			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * 5.0f);
 		
-		if ((regionHighlight.transform.position.x < -tableSize.x / 2.0f) ||
-			(regionHighlight.transform.position.x > tableSize.x / 2.0f) ||
-			(regionHighlight.transform.position.z < -(tableSize.y*vectorScaleFactor.y) / 2.0f) ||
-			(regionHighlight.transform.position.z > (tableSize.y*vectorScaleFactor.y) / 2.0f)) {
+		if ((regionHighlight.transform.position.x < Helper.GetObjectWorldSize(demoSurface).min.x) ||
+			(regionHighlight.transform.position.x > Helper.GetObjectWorldSize(demoSurface).max.x) ||
+			(regionHighlight.transform.position.z < Helper.GetObjectWorldSize(demoSurface).min.z) ||
+			(regionHighlight.transform.position.z > Helper.GetObjectWorldSize(demoSurface).min.z)) {
 			// hide region highlight
 			regionHighlight.GetComponent<Renderer> ().enabled = false;
 		}
@@ -2239,6 +2233,12 @@ public class JointGestureDemo : MonoBehaviour {
 			Vector3 target = new Vector3 (point.x/2.0f, (point.y+headTargetDefault.y)/2.0f, point.z/2.0f);
  			headTarget.targetPosition = target;
 		}
+	}
+
+	void MoveToPerform() {
+		Diana.GetComponent<IKControl> ().leftHandObj.position = Diana.GetComponent<GraspScript> ().leftDefaultPosition;
+		Diana.GetComponent<IKControl> ().rightHandObj.position = Diana.GetComponent<GraspScript> ().rightDefaultPosition;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
 	}
 
 	void LookForward() {
