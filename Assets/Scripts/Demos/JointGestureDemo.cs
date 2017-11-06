@@ -2249,23 +2249,23 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void TurnToAccess(Vector3 point) {
-		GameObject leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand);
-		GameObject rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand);
+		Vector3 leftGrasperCoord = Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).position;
+		Vector3 rightGrasperCoord = Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).position;
 		//Diana.GetComponent<Animator>().GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
-		GameObject grasper = null;
+		Vector3 grasperCoord = Vector3.zero;
 
 		// which hand is closer?
-		float leftToGoalDist = (leftGrasper.transform.position - point).magnitude;
-		float rightToGoalDist = (rightGrasper.transform.position - point).magnitude;
+		float leftToGoalDist = (leftGrasperCoord - point).magnitude;
+		float rightToGoalDist = (rightGrasperCoord - point).magnitude;
 
 		if (leftToGoalDist < rightToGoalDist) {
-			grasper = leftGrasper;
+			grasperCoord = leftGrasperCoord;
 		}
 		else {
-			grasper = rightGrasper;
+			grasperCoord = rightGrasperCoord;
 		}
 
-		Vector3 offset = point - new Vector3 (grasper.transform.position.x, point.y, grasper.transform.position.z);
+		Vector3 offset = point - new Vector3 (grasperCoord.x, point.y, grasperCoord.z);
 		offset = Quaternion.Euler (0.0f,
 			-45.0f*(point.x-Diana.transform.position.x)/Mathf.Abs(point.x-Diana.transform.position.x),
 			0.0f) * offset;
