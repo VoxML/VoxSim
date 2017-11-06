@@ -2249,8 +2249,9 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void TurnToAccess(Vector3 point) {
-		GameObject leftGrasper = Diana.GetComponent<Animator>().GetBoneTransform (HumanBodyBones.LeftHand).transform.gameObject;
-		GameObject rightGrasper = Diana.GetComponent<Animator>().GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
+		GameObject leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand);
+		GameObject rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand);
+		//Diana.GetComponent<Animator>().GetBoneTransform (HumanBodyBones.RightHand).transform.gameObject;
 		GameObject grasper = null;
 
 		// which hand is closer?
