@@ -9,6 +9,8 @@ public class VoxemeInit : MonoBehaviour {
 	Predicates preds;
 	ObjectSelector objSelector;
 
+	public bool usePhysicsRigging;
+
 	// Use this for initialization
 	void Start () {
 		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
@@ -37,7 +39,7 @@ public class VoxemeInit : MonoBehaviour {
 				voxeme = go.GetComponent<Voxeme> ();
 				Rigging rigging = go.GetComponent<Rigging> ();
 				if ((voxeme != null) && (voxeme.enabled) && (rigging == null)) {	// object has Voxeme component and no Rigging
-					GameObject container = new GameObject (go.name, typeof(Rigging), typeof(Voxeme));
+					GameObject container = new GameObject (go.name, typeof(Voxeme), typeof(Rigging));
 
 					if (go.transform.root != go.transform) { // not a top-level object
 						container.transform.parent = go.transform.parent;
@@ -114,6 +116,11 @@ public class VoxemeInit : MonoBehaviour {
 							}
 						}
 					}
+
+					if (!usePhysicsRigging) {
+						container.GetComponent<Rigging> ().ActivatePhysics (false);
+					}
+
 					// add to master voxeme list
 					objSelector.allVoxemes.Add (container.GetComponent<Voxeme> ());
 					Debug.Log (Helper.VectorToParsable (container.transform.position - Helper.GetObjectWorldSize (container).center));

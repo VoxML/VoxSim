@@ -10,6 +10,7 @@ using Global;
 using Network;
 using QSR;
 using RCC;
+using RootMotion.FinalIK;
 
 public class JointGestureDemo : MonoBehaviour {
 
@@ -19,6 +20,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 	GameObject Diana;
 	SyntheticVision synVision;
+	AvatarGestureController gestureController;
 
 	IKControl ikControl;
 	IKTarget leftTarget;
@@ -80,6 +82,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Diana = GameObject.Find ("Diana");
 		synVision = Diana.GetComponent<SyntheticVision> ();
+		gestureController = Diana.GetComponent<AvatarGestureController> ();
 
 		ikControl = Diana.GetComponent<IKControl> ();
 		leftTarget = ikControl.leftHandObj.GetComponent<IKTarget> ();
@@ -343,65 +346,132 @@ public class JointGestureDemo : MonoBehaviour {
 					if (GetGestureContent (messageStr, "grab") == "") {
 						Grab (true);
 					}
-				} 
+				}
 				else if (messageStr.StartsWith ("posack")) {
 					Acknowledge (true);
-				} 
+				}
 				else if (messageStr.StartsWith ("negack")) {
 					Acknowledge (false);
+				}
+			}
+			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
+				messageStr = RemoveGestureTriggers (messageStr);
+				if (messageStr.StartsWith ("grab")) {
+					if (GetGestureContent (messageStr, "grab") == "") {
+						Suggest ("grab");
+					}
+				} 
+				else if (messageStr.StartsWith ("posack")) {
+					Suggest ("posack");
+				} 
+				else if (messageStr.StartsWith ("negack")) {
+					Suggest ("negack");
 				}
 			} 
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
+
+				string startSignal = FindStartSignal (messageStr);
+
 				if (messageStr.StartsWith ("engage")) {
 					if (GetGestureContent (messageStr, "engage") == "") {
 						Engage (false);
 					}
 				} 
 				else if (messageStr.StartsWith ("push")) {
-					if (GetGestureContent (messageStr, "push") == "left") {
-						Push ("left");
+					if (startSignal.EndsWith ("high")) {
+						if (GetGestureContent (messageStr, "push") == "left") {
+							Push ("left");
+						} 
+						else if (GetGestureContent (messageStr, "push") == "right") {
+							Push ("right");
+						} 
+						else if (GetGestureContent (messageStr, "push") == "front") {
+							Push ("front");
+						}
+						else if (GetGestureContent (messageStr, "push") == "back") {
+							Push ("back");
+						}
 					} 
-					else if (GetGestureContent (messageStr, "push") == "right") {
-						Push ("right");
-					} 
-					else if (GetGestureContent (messageStr, "push") == "front") {
-						Push ("front");
-					} 
-					else if (GetGestureContent (messageStr, "push") == "back") {
-						Push ("back");
+					else if (startSignal.EndsWith ("low")) {
+						if (GetGestureContent (messageStr, "push") == "left") {
+							Suggest ("push left");
+						} 
+						else if (GetGestureContent (messageStr, "push") == "right") {
+							Suggest ("push right");
+						} 
+						else if (GetGestureContent (messageStr, "push") == "front") {
+							Suggest ("push front");
+						} 
+						else if (GetGestureContent (messageStr, "push") == "back") {
+							Suggest ("push back");
+						}
 					}
 				} 
 				else if (messageStr.StartsWith ("grab move")) {
-					if (GetGestureContent (messageStr, "grab move") == "left") {
-						Move ("left");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "right") {
-						Move ("right");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "front") {
-						Move ("front");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "back") {
-						Move ("back");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "left front") {
-						Move ("left front");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "right front") {
-						Move ("right front");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "left back") {
-						Move ("left back");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "right back") {
-						Move ("right back");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "up") {
-						Move ("up");
-					} 
-					else if (GetGestureContent (messageStr, "grab move") == "down") {
-						Move ("down");
+					if (startSignal.EndsWith ("high")) {
+						if (GetGestureContent (messageStr, "grab move") == "left") {
+							Move ("left");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "right") {
+							Move ("right");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "front") {
+							Move ("front");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "back") {
+							Move ("back");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "left front") {
+							Move ("left front");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "right front") {
+							Move ("right front");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "left back") {
+							Move ("left back");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "right back") {
+							Move ("right back");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "up") {
+							Move ("up");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "down") {
+							Move ("down");
+						}
+					}
+					else if (startSignal.EndsWith ("low")) {
+						if (GetGestureContent (messageStr, "grab move") == "left") {
+							Suggest ("grab move left");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "right") {
+							Suggest ("grab move right");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "front") {
+							Suggest ("grab move front");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "back") {
+							Suggest ("grab move back");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "left front") {
+							Suggest ("grab move left front");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "right front") {
+							Suggest ("grab move right front");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "left back") {
+							Suggest ("grab move left back");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "right back") {
+							Suggest ("grab move right back");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "up") {
+							Suggest ("grab move up");
+						} 
+						else if (GetGestureContent (messageStr, "grab move") == "down") {
+							Suggest ("grab move down");
+						}
 					}
 				} 
 				else if (messageStr.StartsWith ("grab")) {
@@ -419,6 +489,19 @@ public class JointGestureDemo : MonoBehaviour {
 				TrackPointing (GetGestureVector (messageStr, "r"));
 			} 
 		}
+	}
+
+	string FindStartSignal(string message) {
+		string startSignal = "";
+
+		foreach (Pair<string,string> m in receivedMessages.AsEnumerable().Reverse()) {
+			if ((m.Item2.StartsWith (message)) && (!m.Item2.EndsWith ("stop"))) {
+				startSignal = m.Item2;
+			}
+		}
+
+		Debug.Log (startSignal);
+		return startSignal;
 	}
 
 	string RemoveGestureTriggers(string receivedData) {
@@ -521,6 +604,33 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
+	void MoveToPerform() {
+		Diana.GetComponent<IKControl> ().leftHandObj.position = Diana.GetComponent<GraspScript> ().leftDefaultPosition;
+		Diana.GetComponent<IKControl> ().rightHandObj.position = Diana.GetComponent<GraspScript> ().rightDefaultPosition;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
+	}
+
+	void Suggest(string gesture) {
+		if (gesture.StartsWith("grab move")) {
+			OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something?"));
+			MoveToPerform ();
+			gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+		}
+		else if (gesture.StartsWith("grab")) {
+			OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab something?"));
+			MoveToPerform ();
+			gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+		}
+		else if (gesture.StartsWith("push")) { 
+		}
+		else if (gesture.StartsWith("point")) { 
+		}
+		else if (gesture.StartsWith("posack")) { 
+		}
+		else if (gesture.StartsWith("negack")) { 
+		}
+	}
+	
 	void Acknowledge(bool yes) {
 		LookForward ();
 		if (!yes) {
@@ -2154,7 +2264,9 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void TurnForward() {
-		Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+		gestureController.PerformGesture(AvatarGesture.RARM_IDLE);
+		gestureController.PerformGesture(AvatarGesture.HEAD_IDLE);
 	}
 
 	void ReachFor(Vector3 coord) {
@@ -2164,10 +2276,13 @@ public class JointGestureDemo : MonoBehaviour {
 		if (leftRegion.Contains(new Vector3(coord.x,
 			leftRegion.center.y,coord.z))) {
 			ikControl.rightHandObj.transform.position = coord+offset;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 1.0f;
+
 		}
 		else if (rightRegion.Contains(new Vector3(coord.x,
 			leftRegion.center.y,coord.z))) {
 			ikControl.leftHandObj.transform.position = coord+offset;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 1.0f;
 		}
 	}
 
@@ -2179,10 +2294,14 @@ public class JointGestureDemo : MonoBehaviour {
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
 			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 1.0f;
+
 		}
 		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
 			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 1.0f;
+
 		}
 	}
 

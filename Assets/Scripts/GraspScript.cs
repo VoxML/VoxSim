@@ -10,6 +10,7 @@ public class GraspScript : MonoBehaviour {
 	public Vector3 graspTrackerOffset;// = new Vector3(0.0f,0.0f,0.0f);
 	public Vector3 fingertipOffset;
 	public Vector3 leftDefaultPosition,rightDefaultPosition;
+	public Vector3 leftPerformPosition,rightPerformPosition;
 
 
 	// Use this for initialization
@@ -41,7 +42,7 @@ public class GraspScript : MonoBehaviour {
 			grasper = 0;
 			Debug.Log (grasper);
 		}*/
-		anim.SetInteger ("anim", grasper);
+		//anim.SetInteger ("anim", grasper);
 	}
 
 	void UpdateGraspStatus(int complete) { 

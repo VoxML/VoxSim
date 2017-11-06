@@ -205,9 +205,9 @@ namespace Satisfaction {
 				GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
 				GraspScript graspController = agent.GetComponent<GraspScript> ();
 				//Debug.Log (graspController.isGrasping);
-				if (graspController.isGrasping) {
-					satisfied = true;
-				}
+				//if (graspController.isGrasping) {
+				//	satisfied = true;
+				//}
 				//Debug.Log (string.Format ("Reach {0}", satisfied));
 			}
 			else if (predString == "grasp") {	// satisfy grasp
@@ -639,7 +639,11 @@ namespace Satisfaction {
 				if (obj.enabled) {
 //					Debug.Log(obj.name);
 //					Debug.Break ();
-					obj.gameObject.GetComponent<Rigging> ().ActivatePhysics (true);
+					Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
+					if (rigging != null) {
+						//TODO:reenable
+						//rigging.ActivatePhysics (true);
+					}
 					//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
 				}
 			}

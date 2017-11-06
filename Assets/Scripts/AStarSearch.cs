@@ -50,8 +50,8 @@ public class AStarSearch : MonoBehaviour {
 	void Start () {
 		Renderer r = embeddingSpace.GetComponent<Renderer> ();
 		embeddingSpaceBounds = r.bounds;
-		//Debug.Log (embeddingSpaceBounds.min);
-		//Debug.Log (embeddingSpaceBounds.max);
+		Debug.Log (embeddingSpaceBounds.min);
+		Debug.Log (embeddingSpaceBounds.max);
 	}
 	
 	// Update is called once per frame
@@ -108,17 +108,22 @@ public class AStarSearch : MonoBehaviour {
 		for (zStart = origin.z; zStart > embeddingSpaceBounds.min.z; zStart -= increment.z) {}
 		zEnd = embeddingSpaceBounds.max.z;
 
+//		Debug.Log(string.Format("X: ({0},{1})",xStart,xEnd));
+//		Debug.Log(string.Format("Y: ({0},{1})",yStart,yEnd));
+//		Debug.Log(string.Format("Z: ({0},{1})",zStart,zEnd));
+
 		if (constraints.Length > 0) {
 			foreach (object constraint in constraints) {
+				Debug.Log (constraint);
 				if (constraint is Bounds) {
-					xStart = ((Bounds)constraint).min.x;
-					xEnd = ((Bounds)constraint).max.x;
+					xStart = (((Bounds)constraint).min.x > xStart) ? ((Bounds)constraint).min.x : xStart;
+					xEnd = (((Bounds)constraint).max.x < xEnd) ? ((Bounds)constraint).max.x : xEnd;
 
-					yStart = ((Bounds)constraint).min.y;
-					yEnd = ((Bounds)constraint).max.y;
+					yStart = (((Bounds)constraint).min.y > yStart) ? ((Bounds)constraint).min.y : yStart;
+					yEnd = (((Bounds)constraint).max.y < yEnd) ? ((Bounds)constraint).max.y : yEnd;
 
-					zStart = ((Bounds)constraint).min.z;
-					zEnd = ((Bounds)constraint).max.z;
+					zStart = (((Bounds)constraint).min.z > zStart) ? ((Bounds)constraint).min.z : zStart;
+					zEnd = (((Bounds)constraint).max.z < zEnd) ? ((Bounds)constraint).max.z : zEnd;
 				}
 				else if (constraint is string) {
 					if ((constraint as string).Contains ('X')) {
@@ -138,6 +143,10 @@ public class AStarSearch : MonoBehaviour {
 				}
 			}
 		}
+
+//		Debug.Log(string.Format("X: ({0},{1})",xStart,xEnd));
+//		Debug.Log(string.Format("Y: ({0},{1})",yStart,yEnd));
+//		Debug.Log(string.Format("Z: ({0},{1})",zStart,zEnd));
 			
 		for (float fx = xStart; fx < xEnd; fx += increment.x) {
 			for (float fy = yStart; fy < yEnd; fy += increment.y) {
@@ -166,6 +175,8 @@ public class AStarSearch : MonoBehaviour {
 						//Vector3 node = new Vector3 (fx + (increment.x / 2), fy + (increment.y / 2), fz + (increment.z / 2));
 						Vector3 node = new Vector3 (fx, fy, fz);
 						nodes.Add(new PathNode(node));
+
+						//Debug.Log (node);
 
 						if (debugNodes) {
 							GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Cube);

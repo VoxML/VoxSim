@@ -798,21 +798,21 @@ public class Predicates : MonoBehaviour {
 		// add agent-dependent preconditions
 		if (agent != null) {
 			// add preconditions
-			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-				eventManager.RemoveEvent (3);
-				return;
-			}
-			else {
+//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+//				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
+//				eventManager.RemoveEvent (3);
+//				return;
+//			}
+//			else {
 				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
 					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
 					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
 					eventManager.RemoveEvent (2);
 					return;
 				}
-			}
+//			}
 		}
 
 		// add agent-independent preconditions
@@ -898,7 +898,10 @@ public class Predicates : MonoBehaviour {
 		// override physics rigging
 		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
 		}
 
@@ -1590,7 +1593,10 @@ public class Predicates : MonoBehaviour {
 		// override physics rigging
 		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
 		}
 
@@ -1639,19 +1645,19 @@ public class Predicates : MonoBehaviour {
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 		if (agent != null) {
 			// add preconditions
-			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-				if (args.Length > 2) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-				}
-				else {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0})", (args [0] as GameObject).name)], 1);
-				}
-				eventManager.RemoveEvent (3);
-				return;
-			}
-			else {
+//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+//				if (args.Length > 2) {
+//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
+//				}
+//				else {
+//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0})", (args [0] as GameObject).name)], 1);
+//				}
+//				eventManager.RemoveEvent (3);
+//				return;
+//			}
+//			else {
 				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
 					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
 					if (args.Length > 2) {
@@ -1663,7 +1669,7 @@ public class Predicates : MonoBehaviour {
 					eventManager.RemoveEvent (2);
 					return;
 				}
-			}
+//			}
 
 			// add postconditions
 //			if (args [args.Length - 1] is bool) {
@@ -1676,7 +1682,10 @@ public class Predicates : MonoBehaviour {
 		// override physics rigging
 		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
 		}
 
@@ -1750,19 +1759,19 @@ public class Predicates : MonoBehaviour {
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 		if (agent != null) {
 			// add preconditions
-			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-				if (args.Length > 2) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-				}
-				else {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0})", (args [0] as GameObject).name)], 2);
-				}
-				eventManager.RemoveEvent (3);
-				return;
-			}
-			else {
+//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+//				if (args.Length > 2) {
+//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
+//				}
+//				else {
+//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0})", (args [0] as GameObject).name)], 2);
+//				}
+//				eventManager.RemoveEvent (3);
+//				return;
+//			}
+//			else {
 				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
 					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
 					if (args.Length > 2) {
@@ -1774,7 +1783,7 @@ public class Predicates : MonoBehaviour {
 					eventManager.RemoveEvent (2);
 					return;
 				}
-			}
+			//}
 
 			// add postconditions
 			if (args [args.Length - 1] is bool) {
@@ -2505,7 +2514,10 @@ public class Predicates : MonoBehaviour {
 		// override physics rigging
 		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
 		}
 
@@ -2741,7 +2753,10 @@ public class Predicates : MonoBehaviour {
 		// override physics rigging
 		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
 		}
 
@@ -3139,7 +3154,10 @@ public class Predicates : MonoBehaviour {
 		// override physics rigging
 		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
 		}
 
@@ -3809,7 +3827,11 @@ public class Predicates : MonoBehaviour {
 				foreach (object arg in args) {
 					if (arg is GameObject) {
 						(arg as GameObject).GetComponent<Voxeme>().enabled = false;
-						(arg as GameObject).GetComponent<Rigging>().ActivatePhysics(false);
+
+						Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+						if (rigging != null) {
+							rigging.ActivatePhysics (false);
+						}
 
 						Collider[] colliders = (arg as GameObject).GetComponentsInChildren<Collider> ();
 						foreach (Collider collider in colliders) {
@@ -4230,8 +4252,9 @@ public class Predicates : MonoBehaviour {
 
 			foreach (Transform transform in obj.GetComponentsInChildren<Transform>()) {
 				transform.parent = null;
-				if (transform.gameObject.GetComponent<Rigging> () != null) {
-					transform.gameObject.GetComponent<Rigging> ().ActivatePhysics (true);
+				Rigging rigging = transform.gameObject.GetComponent<Rigging> ().GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (true);
 					transform.gameObject.GetComponent<Voxeme> ().enabled = true;
 				}
 			}
@@ -4367,7 +4390,7 @@ public class Predicates : MonoBehaviour {
 							if (ikControl != null) {
 								Vector3 target;
 								if (grasper == leftGrasper) {
-									agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.LeftClaw;
+									//agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.LeftClaw;
 									if ((grasper.GetComponent<BoxCollider> ().bounds.size.x > bounds.size.x) &&
 									    (grasper.GetComponent<BoxCollider> ().bounds.size.z > bounds.size.z)) {
 										target = new Vector3 (bounds.center.x, bounds.center.y, bounds.center.z);
@@ -4378,7 +4401,7 @@ public class Predicates : MonoBehaviour {
 									ikControl.leftHandObj.transform.position = target+offset;
 								}
 								else {
-									agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.RightClaw;
+									//agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.RightClaw;
 									if ((grasper.GetComponent<BoxCollider> ().bounds.size.x > bounds.size.x) &&
 										(grasper.GetComponent<BoxCollider> ().bounds.size.z > bounds.size.z)) {
 										target = new Vector3 (bounds.center.x, bounds.center.y, bounds.center.z);
@@ -4427,7 +4450,11 @@ public class Predicates : MonoBehaviour {
 							//Debug.Log (rightGrasper.GetComponent<BoxCollider> ().bounds);
 							//Debug.Log (bounds);
 							if (leftGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
-								(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics (false);
+								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+								if (rigging != null) {
+									rigging.ActivatePhysics (false);
+								}
+
 								RiggingHelper.RigTo ((arg as GameObject), leftGrasper);
 								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
 								voxeme.enabled = true;
@@ -4436,7 +4463,11 @@ public class Predicates : MonoBehaviour {
 								voxeme.grasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
 							}
 							else if (rightGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
-								(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics (false);
+								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+								if (rigging != null) {
+									rigging.ActivatePhysics (false);
+								}
+
 								RiggingHelper.RigTo ((arg as GameObject), rightGrasper);
 								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
 								voxeme.enabled = true;
@@ -4533,7 +4564,10 @@ public class Predicates : MonoBehaviour {
 										grasper = rightGrasper;
 									}
 									RiggingHelper.UnRig ((arg as GameObject), grasper);
-									(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics (true);
+									Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+									if (rigging != null) {
+										rigging.ActivatePhysics (true);
+									}
 									graspController.grasper = (int)Gestures.HandPose.Neutral;
 									//agent.GetComponent<GraspScript>().isGrasping = false;
 									//agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
