@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class AvatarGestureController : MonoBehaviour {
 
@@ -54,6 +55,13 @@ public class AvatarGestureController : MonoBehaviour {
     public event AvatarGestureEventHandler GestureEnd;
 
     //
+    //  Unity Events
+    //
+
+    public UnityEvent OnGestureStart;
+    public UnityEvent OnGestureEnd;
+
+    //
     //  Initialization
     //
     
@@ -88,7 +96,7 @@ public class AvatarGestureController : MonoBehaviour {
         larmStateBehavior.AnimationEnd += StateMachineBehavior_AnimationEnd;
 
         // Default to RArm
-        currentStateBehavior = rarmStateBehavior;
+        currentStateBehavior = rarmStateBehavior; // TODO -- could elect to dynamically subscribe/unsubscribe to behaviors as needed instead of checking them each time
     }
 
     void Update () {
@@ -101,7 +109,7 @@ public class AvatarGestureController : MonoBehaviour {
 
     private void StateMachineBehavior_AnimationStart(object sender)
     {
-        // Verify that the expected behavior is sending the event
+        // Verify that the expected behavior is sending the event (only want events from one behavior)
         if (sender != currentStateBehavior)
         {
             return;
@@ -113,11 +121,14 @@ public class AvatarGestureController : MonoBehaviour {
         {
             GestureStart(this, CurrentGesture);
         }
+
+        // Fire Unity events
+        OnGestureStart.Invoke();
     }
     
     private void StateMachineBehavior_AnimationEnd(object sender)
     {
-        // Verify that the expected behavior is sending the event
+        // Verify that the expected behavior is sending the event (only want events from one behavior)
         if (sender != currentStateBehavior)
         {
             return;
@@ -129,6 +140,9 @@ public class AvatarGestureController : MonoBehaviour {
         {
             GestureEnd(this, CurrentGesture);
         }
+
+        // Fire Unity events
+        OnGestureEnd.Invoke();
     }
 
     //
