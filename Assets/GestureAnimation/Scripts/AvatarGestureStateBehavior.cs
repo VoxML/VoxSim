@@ -8,7 +8,7 @@ using UnityEngine;
 public class AvatarGestureStateBehavior : StateMachineBehaviour {
     public string layerName;
 
-    public delegate void StateMachineEventHandler();
+    public delegate void StateMachineEventHandler(object sender);
 
     public event StateMachineEventHandler AnimationStart;
     public event StateMachineEventHandler AnimationEnd;
@@ -25,7 +25,7 @@ public class AvatarGestureStateBehavior : StateMachineBehaviour {
 
         if (AnimationEnd != null)
         {
-            AnimationEnd(); // Entering idle state -- so animation just finished
+            AnimationEnd(this); // Entering idle state -- so animation just finished
         }
     }
 
@@ -42,7 +42,7 @@ public class AvatarGestureStateBehavior : StateMachineBehaviour {
 
         if (AnimationStart != null)
         {
-            AnimationStart(); // Exiting idle state -- so animation is starting
+            AnimationStart(this); // Exiting idle state -- so animation is starting
         }
     }
 
