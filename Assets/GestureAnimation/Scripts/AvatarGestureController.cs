@@ -9,11 +9,16 @@ public class AvatarGestureController : MonoBehaviour {
     public GameObject avatar;
 
     private Animator animator;
-    private AvatarGestureStateBehavior agsBehavior;
+    private AvatarGestureStateBehavior rarmStateBehavior;
+    private AvatarGestureStateBehavior larmStateBehavior;
 
+    private AvatarGestureStateBehavior currentStateBehavior; // Intended behavior to receive events from, based on gesture body parts
+
+    private const string ANIM_RARM_LAYERNAME = "RArm";
     private const string ANIM_RARM_GESTUREID = "RArm_GestureId";
     private const string ANIM_RARM_TRIGGER = "RArm_Trigger";
 
+    private const string ANIM_LARM_LAYERNAME = "LArm";
     private const string ANIM_LARM_GESTUREID = "LArm_GestureId";
     private const string ANIM_LARM_TRIGGER = "LArm_Trigger";
 
@@ -59,12 +64,32 @@ public class AvatarGestureController : MonoBehaviour {
         }
 
         animator = avatar.GetComponent<Animator>();
-        agsBehavior = animator.GetBehaviour<AvatarGestureStateBehavior>(); // TODO: Multiple layers may have different state behaviors!
 
-        // Attach event handlers to state machine behavior (allows us to get animator events)
-        agsBehavior.AnimationStart += StateMachineBehavior_AnimationStart;
-        agsBehavior.AnimationEnd += StateMachineBehavior_AnimationEnd;
-	}
+        // Get animator state machine behaviors (allows us to get animator events)
+        AvatarGestureStateBehavior[] behaviors = animator.GetBehaviours<AvatarGestureStateBehavior>();
+        foreach (var behavior in behaviors)
+        {
+            if (behavior.layerName == ANIM_RARM_LAYERNAME)
+            {
+                rarmStateBehavior = behavior;
+            }
+            else if (behavior.layerName == ANIM_LARM_LAYERNAME)
+            {
+                larmStateBehavior = behavior;
+            }
+        }
+        Debug.Assert(rarmStateBehavior != null && larmStateBehavior != null);
+
+        // Attach event handlers to state machine behavior
+        rarmStateBehavior.AnimationStart += StateMachineBehavior_AnimationStart;
+        rarmStateBehavior.AnimationEnd += StateMachineBehavior_AnimationEnd;
+
+        larmStateBehavior.AnimationStart += StateMachineBehavior_AnimationStart;
+        larmStateBehavior.AnimationEnd += StateMachineBehavior_AnimationEnd;
+
+        // Default to RArm
+        currentStateBehavior = rarmStateBehavior;
+    }
 
     void Update () {
 		
@@ -74,8 +99,15 @@ public class AvatarGestureController : MonoBehaviour {
     //  Event Handlers
     //
 
-    private void StateMachineBehavior_AnimationStart()
+    private void StateMachineBehavior_AnimationStart(object sender)
     {
+        // Verify that the expected behavior is sending the event
+        if (sender != currentStateBehavior)
+        {
+            return;
+        }
+
+        // Set flag and fire event
         IsGesturing = true;
         if (GestureStart != null)
         {
@@ -83,8 +115,15 @@ public class AvatarGestureController : MonoBehaviour {
         }
     }
     
-    private void StateMachineBehavior_AnimationEnd()
+    private void StateMachineBehavior_AnimationEnd(object sender)
     {
+        // Verify that the expected behavior is sending the event
+        if (sender != currentStateBehavior)
+        {
+            return;
+        }
+
+        // Clear flag and fire event
         IsGesturing = false;
         if (GestureEnd != null)
         {
@@ -138,6 +177,7 @@ public class AvatarGestureController : MonoBehaviour {
 
         //////////////////////////////////////////////
         // Get trigger names based on handedness
+
         string anim_gestureid_name;
         string anim_trigger_name;
 
@@ -145,15 +185,20 @@ public class AvatarGestureController : MonoBehaviour {
         {
             anim_gestureid_name = ANIM_LARM_GESTUREID;
             anim_trigger_name = ANIM_LARM_TRIGGER;
+
+            currentStateBehavior = larmStateBehavior;
         }
         else //if (gesture.BodyPart == AvatarGesture.Body.RightArm) // TODO: Right now, just left or right
         {
             anim_gestureid_name = ANIM_RARM_GESTUREID;
             anim_trigger_name = ANIM_RARM_TRIGGER;
+
+            currentStateBehavior = rarmStateBehavior;
         }
 
         //////////////////////////////////////////////
         // Trigger the gesture
+
         animator.SetInteger(anim_gestureid_name, gesture.Id);
         animator.SetTrigger(anim_trigger_name);
 
@@ -161,16 +206,20 @@ public class AvatarGestureController : MonoBehaviour {
 
         //////////////////////////////////////////////
         // Callback upon completion
+
         if (callback != null)
         {
+            // Cache currentStateBehavior
+            AvatarGestureStateBehavior behavior = currentStateBehavior;
+
             // Create a one-shot event handler that calls the callback function
             AvatarGestureStateBehavior.StateMachineEventHandler eventHandler = null;
-            eventHandler = delegate ()
+            eventHandler = delegate (object sender)
             {
-                agsBehavior.AnimationEnd -= eventHandler; // Unsubscribe; one-shot
+                behavior.AnimationEnd -= eventHandler; // Unsubscribe; one-shot
                 callback(gesture);
             };
-            agsBehavior.AnimationEnd += eventHandler; // Subscribe
+            behavior.AnimationEnd += eventHandler; // Subscribe
         }
     }
 }

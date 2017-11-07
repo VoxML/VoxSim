@@ -23,6 +23,8 @@ public class AvatarGesture {
     //  GESTURES
     //  TODO Eventually, we can define a gesture as a compound action combining arbitrary arm motions and hand poses.
     //
+    //  NOTE: When adding new gestures, make sure to add them to the gesture dictionary below!
+    //
     
     //
     //  Right arm gestures
@@ -67,14 +69,14 @@ public class AvatarGesture {
     // Carry
     public static AvatarGesture LARM_CARRY_FRONT  = new AvatarGesture("LARM_CARRY_FRONT",  6) { BodyPart = Body.LeftArm, Direction = Orientation.Front };
     public static AvatarGesture LARM_CARRY_BACK   = new AvatarGesture("LARM_CARRY_BACK",   7) { BodyPart = Body.LeftArm, Direction = Orientation.Back  };
-    public static AvatarGesture LARM_CARRY_RIGHT  = new AvatarGesture("LARM_CARRY_RIGHT",  8) { BodyPart = Body.LeftArm, Direction = Orientation.Right };
-    public static AvatarGesture LARM_CARRY_LEFT   = new AvatarGesture("LARM_CARRY_LEFT",   9) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+    public static AvatarGesture LARM_CARRY_LEFT   = new AvatarGesture("LARM_CARRY_LEFT",   8) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+    public static AvatarGesture LARM_CARRY_RIGHT  = new AvatarGesture("LARM_CARRY_RIGHT",  9) { BodyPart = Body.LeftArm, Direction = Orientation.Right };
 
     // Point
     public static AvatarGesture LARM_POINT_FRONT  = new AvatarGesture("LARM_POINT_FRONT", 10) { BodyPart = Body.LeftArm, Direction = Orientation.Front };
     public static AvatarGesture LARM_POINT_BACK   = new AvatarGesture("LARM_POINT_BACK",  11) { BodyPart = Body.LeftArm, Direction = Orientation.Back  };
-    public static AvatarGesture LARM_POINT_RIGHT  = new AvatarGesture("LARM_POINT_RIGHT", 12) { BodyPart = Body.LeftArm, Direction = Orientation.Right };
-    public static AvatarGesture LARM_POINT_LEFT   = new AvatarGesture("LARM_POINT_LEFT",  13) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+    public static AvatarGesture LARM_POINT_LEFT   = new AvatarGesture("LARM_POINT_LEFT",  12) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+    public static AvatarGesture LARM_POINT_RIGHT  = new AvatarGesture("LARM_POINT_RIGHT", 13) { BodyPart = Body.LeftArm, Direction = Orientation.Right };
 
     //
     //  Head gestures
@@ -114,6 +116,22 @@ public class AvatarGesture {
         AddGestureToList(RARM_POINT_BACK  );
         AddGestureToList(RARM_POINT_LEFT  );
         AddGestureToList(RARM_POINT_RIGHT );
+
+        AddGestureToList(LARM_NUMBER_ONE);
+        AddGestureToList(LARM_NUMBER_TWO);
+        AddGestureToList(LARM_NUMBER_THREE);
+        AddGestureToList(LARM_NUMBER_FOUR);
+        AddGestureToList(LARM_NUMBER_FIVE);
+
+        AddGestureToList(LARM_CARRY_FRONT);
+        AddGestureToList(LARM_CARRY_BACK);
+        AddGestureToList(LARM_CARRY_LEFT);
+        AddGestureToList(LARM_CARRY_RIGHT);
+
+        AddGestureToList(LARM_POINT_FRONT);
+        AddGestureToList(LARM_POINT_BACK);
+        AddGestureToList(LARM_POINT_LEFT);
+        AddGestureToList(LARM_POINT_RIGHT);
 
         AddGestureToList(HEAD_IDLE        );
         AddGestureToList(HEAD_NOD         );
