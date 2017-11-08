@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Global;
+using RootMotion.FinalIK;
 
 public class VoxemeInit : MonoBehaviour {
 	Predicates preds;
@@ -52,6 +53,8 @@ public class VoxemeInit : MonoBehaviour {
 					voxeme.enabled = false;
 					//container.GetComponent<Entity> ().enabled = false;
 
+					container.GetComponent<Voxeme> ().density = voxeme.density;
+
 					// copy attribute set
 					AttributeSet newAttrSet = container.AddComponent<AttributeSet> ();
 					AttributeSet attrSet = go.GetComponent<AttributeSet> ();
@@ -61,6 +64,25 @@ public class VoxemeInit : MonoBehaviour {
 						}
 					}
 					Debug.Log (newAttrSet.attributes.Count);
+
+					// copy interaction object
+					InteractionObject interactionObject = go.GetComponent<InteractionObject>();
+					if (interactionObject != null) {
+						CopyComponent (interactionObject, container);
+					}
+					Destroy (interactionObject);
+
+					// copy interaction target(s)
+					InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
+					foreach (InteractionTarget interactionTarget in interactionTargets) {
+						interactionTarget.gameObject.transform.parent = container.transform;
+					}
+
+					FixHandRotation fixHandRotation = go.GetComponent<FixHandRotation>();
+					if (fixHandRotation != null) {
+						CopyComponent (fixHandRotation, container);
+					}
+					Destroy (fixHandRotation);
 
 					// set up for physics
 					// add box colliders and rigid bodies to all subobjects that have MeshFilters
@@ -84,7 +106,7 @@ public class VoxemeInit : MonoBehaviour {
 									float x = Helper.GetObjectWorldSize (subObj).size.x;
 									float y = Helper.GetObjectWorldSize (subObj).size.y;
 									float z = Helper.GetObjectWorldSize (subObj).size.z;
-									rigidbody.mass = x * y * z;
+									rigidbody.mass = x * y * z * (container.GetComponent<Voxeme> ().density);
 
 									// bunch of crap assumptions to calculate drag:
 									// air density: 1.225 kg/m^3
@@ -171,5 +193,25 @@ public class VoxemeInit : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+	}
+
+	T CopyComponent<T>(T original, GameObject destination) where T : Component
+	{
+		System.Type type = original.GetType();
+		var dst = destination.GetComponent(type) as T;
+		if (!dst) dst = destination.AddComponent(type) as T;
+		var fields = type.GetFields();
+		foreach (var field in fields)
+		{
+			if (field.IsStatic) continue;
+			field.SetValue(dst, field.GetValue(original));
+		}
+		var props = type.GetProperties();
+		foreach (var prop in props)
+		{
+			if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
+			prop.SetValue(dst, prop.GetValue(original, null), null);
+		}
+		return dst as T;
 	}
 }

@@ -4426,65 +4426,95 @@ public class Predicates : MonoBehaviour {
 	public void GRASP(object[] args)
 	{
 		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
+		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 
 		if (agent != null) {
-			Bounds bounds = Helper.GetObjectWorldSize((args[0] as GameObject));
-			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-			GameObject grasper;
-			Transform leftGraspTracker = agent.GetComponent<IKControl> ().leftHandObj;
-			Transform rightGraspTracker = agent.GetComponent<IKControl> ().rightHandObj;
-			Vector3 offset = agent.GetComponent<GraspScript> ().graspTrackerOffset;
-
-			// make sure we're reaching toward the object first
-			if (!bounds.Contains(leftGraspTracker.position-offset) && 
-				!bounds.Contains(rightGraspTracker.position-offset)) {
-				eventManager.InsertEvent (string.Format ("reach({0})", (args[0] as GameObject).name), 0);
-				//eventManager.RemoveEvent (eventManager.events.Count - 1);
-				return;
-			}
-
 			if (args [args.Length - 1] is bool) {
 				if ((bool)args [args.Length - 1] == true) {
 					foreach (object arg in args) {
 						if (arg is GameObject) {
-							//Debug.Log (rightGrasper.GetComponent<BoxCollider> ().bounds);
-							//Debug.Log (bounds);
-							if (leftGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
-								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-								if (rigging != null) {
-									rigging.ActivatePhysics (false);
-								}
+							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
+							if (interactionObject != null) {
+								if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == leftGrasper) {
+									Debug.Log (string.Format ("Starting {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
 
-								RiggingHelper.RigTo ((arg as GameObject), leftGrasper);
-								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
-								voxeme.enabled = true;
-								voxeme.isGrasped = true;
-								voxeme.graspTracker = agent.GetComponent<IKControl>().leftHandObj;
-								voxeme.grasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
-							}
-							else if (rightGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
-								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-								if (rigging != null) {
-									rigging.ActivatePhysics (false);
-								}
+									InteractionHelper.SetLeftHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
+									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.LeftHand, interactionObject, true);
+								} 
+								else if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == rightGrasper) {
+									Debug.Log (string.Format ("Starting {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
 
-								RiggingHelper.RigTo ((arg as GameObject), rightGrasper);
-								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
-								voxeme.enabled = true;
-								voxeme.isGrasped = true;
-								voxeme.graspTracker = agent.GetComponent<IKControl>().rightHandObj;
-								voxeme.grasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
+									InteractionHelper.SetRightHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
+									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.RightHand, interactionObject, true);
+								}
 							}
 							else {
-								OutputHelper.PrintOutput(Role.Affector,"I can't grasp the " + (arg as GameObject).name + ".  I'm not touching it."); 
+								OutputHelper.PrintOutput (Role.Affector, "I can't interact with that object."); 
 							}
 						}
 					}
 				}
 			}
 		}
+
+//			Bounds bounds = Helper.GetObjectWorldSize((args[0] as GameObject));
+//			Animator anim = agent.GetComponentInChildren<Animator> ();
+//			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+//			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+//			GameObject grasper;
+//			Transform leftGraspTracker = agent.GetComponent<IKControl> ().leftHandObj;
+//			Transform rightGraspTracker = agent.GetComponent<IKControl> ().rightHandObj;
+//			Vector3 offset = agent.GetComponent<GraspScript> ().graspTrackerOffset;
+//
+//			// make sure we're reaching toward the object first
+//			if (!bounds.Contains(leftGraspTracker.position-offset) && 
+//				!bounds.Contains(rightGraspTracker.position-offset)) {
+//				eventManager.InsertEvent (string.Format ("reach({0})", (args[0] as GameObject).name), 0);
+//				//eventManager.RemoveEvent (eventManager.events.Count - 1);
+//				return;
+//			}
+//
+//			if (args [args.Length - 1] is bool) {
+//				if ((bool)args [args.Length - 1] == true) {
+//					foreach (object arg in args) {
+//						if (arg is GameObject) {
+//							//Debug.Log (rightGrasper.GetComponent<BoxCollider> ().bounds);
+//							//Debug.Log (bounds);
+//							if (leftGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
+//								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+//								if (rigging != null) {
+//									rigging.ActivatePhysics (false);
+//								}
+//
+//								RiggingHelper.RigTo ((arg as GameObject), leftGrasper);
+//								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
+//								voxeme.enabled = true;
+//								voxeme.isGrasped = true;
+//								voxeme.graspTracker = agent.GetComponent<IKControl>().leftHandObj;
+//								voxeme.grasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
+//							}
+//							else if (rightGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
+//								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+//								if (rigging != null) {
+//									rigging.ActivatePhysics (false);
+//								}
+//
+//								RiggingHelper.RigTo ((arg as GameObject), rightGrasper);
+//								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
+//								voxeme.enabled = true;
+//								voxeme.isGrasped = true;
+//								voxeme.graspTracker = agent.GetComponent<IKControl>().rightHandObj;
+//								voxeme.grasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
+//							}
+//							else {
+//								OutputHelper.PrintOutput(Role.Affector,"I can't grasp the " + (arg as GameObject).name + ".  I'm not touching it."); 
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 	}
 
 	// IN: Objects
@@ -4492,47 +4522,95 @@ public class Predicates : MonoBehaviour {
 	public void UNGRASP(object[] args)
 	{
 		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
-		if (agent != null) {
-			Animator anim = agent.GetComponentInChildren<Animator> ();
-			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-			GameObject grasper = null;
-			Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
-			Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
-			GraspScript graspController = agent.GetComponent<GraspScript> ();
 
+		FullBodyBipedIK ik = agent.GetComponent<FullBodyBipedIK> ();
+		InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem> ();
+		IKControl ikControl = agent.GetComponent<IKControl> ();
+
+		GameObject leftGrasper = ik.references.leftHand.gameObject;
+		GameObject rightGrasper = ik.references.rightHand.gameObject;
+
+		if (agent != null) {
 			if (args [args.Length - 1] is bool) {
 				if ((bool)args [args.Length - 1] == true) {
 					foreach (object arg in args) {
 						if (arg is GameObject) {
-							Voxeme voxComponent = (arg as GameObject).GetComponent<Voxeme> ();
-							if (voxComponent != null) {
-								if (voxComponent.isGrasped) {
-									//voxComponent.transform.position = voxComponent.transform.position + 
-									//	(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
+							if (interactionObject != null) {
+								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) {
+									Debug.Log (string.Format ("Ending {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
 
-									if (voxComponent.grasperCoord == leftGrasperCoord) {
-										grasper = leftGrasper;
-									}
-									else if (voxComponent.grasperCoord == rightGrasperCoord) {
-										grasper = rightGrasper;
-									}
-									RiggingHelper.UnRig ((arg as GameObject), grasper);
-									graspController.grasper = (int)Gestures.HandPose.Neutral;
-									//agent.GetComponent<GraspScript>().isGrasping = false;
-									agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
-									agent.GetComponent<IKControl> ().rightHandObj.position = graspController.rightDefaultPosition;
+									//InteractionHelper.SetLeftHandTarget (agent, null);
 
-									voxComponent.isGrasped = false;
-									voxComponent.graspTracker = null;
-									voxComponent.grasperCoord = null;
+									//InteractionHelper.SetLeftHandTarget (agent, ikControl.leftHandObj);
+									InteractionHelper.SetLeftHandTarget (agent, null);
+									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 1.0f, 0.0f);
+									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
 								}
+								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand)) {
+									Debug.Log (string.Format ("Ending {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
+
+									//InteractionHelper.SetRightHandTarget (agent, null);
+
+									//InteractionHelper.SetRightHandTarget (agent, ikControl.rightHandObj);
+									InteractionHelper.SetRightHandTarget (agent, null);
+									ik.solver.SetEffectorWeights (FullBodyBipedEffector.RightHand, 0.0f, 0.0f);
+									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.RightHand);
+
+//									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight);
+//									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight);
+								}
+							}
+							else {
+								OutputHelper.PrintOutput (Role.Affector, "I can't interact with that object."); 
 							}
 						}
 					}
 				}
 			}
 		}
+//		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
+//		if (agent != null) {
+//			Animator anim = agent.GetComponentInChildren<Animator> ();
+//			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+//			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+//			GameObject grasper = null;
+//			Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
+//			Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
+//			GraspScript graspController = agent.GetComponent<GraspScript> ();
+//
+//			if (args [args.Length - 1] is bool) {
+//				if ((bool)args [args.Length - 1] == true) {
+//					foreach (object arg in args) {
+//						if (arg is GameObject) {
+//							Voxeme voxComponent = (arg as GameObject).GetComponent<Voxeme> ();
+//							if (voxComponent != null) {
+//								if (voxComponent.isGrasped) {
+//									//voxComponent.transform.position = voxComponent.transform.position + 
+//									//	(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+//
+//									if (voxComponent.grasperCoord == leftGrasperCoord) {
+//										grasper = leftGrasper;
+//									}
+//									else if (voxComponent.grasperCoord == rightGrasperCoord) {
+//										grasper = rightGrasper;
+//									}
+//									RiggingHelper.UnRig ((arg as GameObject), grasper);
+//									graspController.grasper = (int)Gestures.HandPose.Neutral;
+//									//agent.GetComponent<GraspScript>().isGrasping = false;
+//									agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
+//									agent.GetComponent<IKControl> ().rightHandObj.position = graspController.rightDefaultPosition;
+//
+//									voxComponent.isGrasped = false;
+//									voxComponent.graspTracker = null;
+//									voxComponent.grasperCoord = null;
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 	}
 
 	// IN: Objects
