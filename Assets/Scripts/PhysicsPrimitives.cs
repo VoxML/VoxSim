@@ -36,7 +36,7 @@ public class PhysicsPrimitives : MonoBehaviour {
 		//if (Input.GetKeyDown (KeyCode.R)) {
 			if (resolveDiscrepancies) {
 				//Debug.Log ("resolving");
-				PhysicsHelper.ResolveAllPhysicsDiscepancies (macroEventSatisfied);
+				PhysicsHelper.ResolveAllPhysicsDiscrepancies (macroEventSatisfied);
 				//Debug.Break ();
 				if (eventManager.events.Count > 0) {
 					catchupTimer.Interval = 1;

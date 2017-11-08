@@ -17,6 +17,8 @@ public class Voxeme : MonoBehaviour {
 
 	public OperationalVox opVox;
 
+	public float density;
+
 	// rotation information for each subobject's rigidbody
 	// (physics-resultant changes between the completion of one event and the start of the next must be brought into line)
 	//public Dictionary<string,Vector3> startEventRotations = new Dictionary<string, Vector3> ();
