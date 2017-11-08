@@ -389,7 +389,7 @@ public class EventManager : MonoBehaviour {
 	}
 
 	public void ExecuteNextCommand() {
-		PhysicsHelper.ResolveAllPhysicsDiscepancies (false);
+		//PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
 		Debug.Log ("Next Command: " + events [0]);
 
 		if (!EvaluateCommand (events [0])) {

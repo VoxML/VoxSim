@@ -628,15 +628,98 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Suggest(string gesture) {
+		AvatarGesture performGesture = null;
 		if (gesture.StartsWith("grab move")) {
-			OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something?"));
-			MoveToPerform ();
-			gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+			string dir = GetGestureContent (gesture, "grab move");
+			if (indicatedObj == null) {
+				if (graspedObj == null) {
+					if (dir == "left") {
+						performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+					}
+					else if (dir == "right") {
+						performGesture = AvatarGesture.RARM_CARRY_LEFT;
+					}
+					else if (dir == "front") {
+						performGesture = AvatarGesture.RARM_CARRY_FRONT;
+					}
+					else if (dir == "back") {
+						performGesture = AvatarGesture.RARM_CARRY_BACK;
+					}
+					else if (dir == "up") {
+						//performGesture = AvatarGesture.RARM_CARRY_UP;
+					}
+					else if (dir == "down") {
+						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
+					}
+
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something?"));
+					MoveToPerform ();
+					gestureController.PerformGesture (performGesture);
+				}
+				else {
+					if (dir == "left") {
+						performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+					}
+					else if (dir == "right") {
+						performGesture = AvatarGesture.RARM_CARRY_LEFT;
+					}
+					else if (dir == "front") {
+						performGesture = AvatarGesture.RARM_CARRY_FRONT;
+					}
+					else if (dir == "back") {
+						performGesture = AvatarGesture.RARM_CARRY_BACK;
+					}
+					else if (dir == "up") {
+						//performGesture = AvatarGesture.RARM_CARRY_UP;
+					}
+					else if (dir == "down") {
+						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
+					}
+
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this?"));
+					gestureController.PerformGesture (performGesture);
+				}
+			}
+			else {
+				if (dir == "left") {
+					performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+				}
+				else if (dir == "right") {
+					performGesture = AvatarGesture.RARM_CARRY_LEFT;
+				}
+				else if (dir == "front") {
+					performGesture = AvatarGesture.RARM_CARRY_FRONT;
+				}
+				else if (dir == "back") {
+					performGesture = AvatarGesture.RARM_CARRY_BACK;
+				}
+				else if (dir == "up") {
+					//performGesture = AvatarGesture.RARM_CARRY_UP;
+				}
+				else if (dir == "down") {
+					//performGesture = AvatarGesture.RARM_CARRY_DOWN;
+				}
+
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (performGesture);
+			}
 		}
 		else if (gesture.StartsWith("grab")) {
-			OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab something?"));
-			MoveToPerform ();
-			gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+			if (indicatedObj == null) {
+				if (graspedObj == null) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab something?"));
+					MoveToPerform ();
+					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+				}
+				else {
+				}
+			}
+			else {
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+			}
 		}
 		else if (gesture.StartsWith("push")) { 
 		}
@@ -1033,6 +1116,10 @@ public class JointGestureDemo : MonoBehaviour {
 		//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
 		//Debug.Log (highlightCenter);
 
+		if (regionHighlight.transform.position.sqrMagnitude <= Constants.EPSILON) {
+			regionHighlight.transform.position = highlightCenter;
+		}
+
 		Vector3 offset = MoveHighlight (highlightCenter);
 
 		if (offset.sqrMagnitude <= Constants.EPSILON) {
@@ -1159,31 +1246,44 @@ public class JointGestureDemo : MonoBehaviour {
 	void Move(string dir) {
 		OutputHelper.PrintOutput (Role.Affector, "");
 		if (graspedObj != null) {
-			if (dir == "left") {
-				indicatedRegion = leftRegion;
-				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    frontRegion.center.y, graspedObj.transform.position.z))) {
+			Bounds graspedObjBounds = Helper.GetObjectWorldSize (graspedObj);
+			if (dir == "left") {	// going this direction
+				if (frontRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
-									    frontRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the left of the grasped block
+									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
+
+//				indicatedRegion = leftRegion;
+//				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
+//					    frontRegion.center.y, graspedObj.transform.position.z))) {
+//					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
+//						if (block.activeInHierarchy) {
+//							bool surfaceClear = true;
+//							foreach (GameObject otherBlock in blocks) {
+//								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
+//								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
+//								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
+//								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
+//									surfaceClear = false;
+//								}
+//							}
+//
+//							if ((block != indicatedObj) && (surfaceClear)) {
+//								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
+//								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
+//									    frontRegion.center.y, block.transform.position.z)))) {
+//									if (!objectMatches.Contains (block)) {
+//										objectMatches.Add (block);
+//									}
+//								}
+//							} 
 						}
 					}
 				} 
@@ -2354,6 +2454,31 @@ public class JointGestureDemo : MonoBehaviour {
 			zCoord);
 
 		return coord;
+	}
+
+	bool SurfaceClear(GameObject block) {
+		Debug.Log (block);
+		bool surfaceClear = true;
+		List<GameObject> excludeChildren = block.GetComponentsInChildren<Renderer>().Where(
+			o => Helper.GetMostImmediateParentVoxeme(o.gameObject) != block).Select(o => o.gameObject).ToList();
+		foreach (GameObject go in excludeChildren) {
+			Debug.Log (go);
+		}
+		Bounds blockBounds = Helper.GetObjectWorldSize (block, excludeChildren);
+		Debug.Log (blockBounds);
+		foreach (GameObject otherBlock in blocks) {
+			Bounds otherBounds = Helper.GetObjectWorldSize (otherBlock);
+			Debug.Log (otherBlock);
+			Debug.Log (otherBounds);
+			if ((QSR.QSR.Above (otherBounds, blockBounds)) && (!QSR.QSR.Left (otherBounds, blockBounds)) &&
+				(!QSR.QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
+				surfaceClear = false;
+				break;
+			}
+		}
+
+		Debug.Log (surfaceClear);
+		return surfaceClear;
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {

@@ -659,7 +659,7 @@ namespace Satisfaction {
 					Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
 					if (rigging != null) {
 						//TODO:reenable
-						//rigging.ActivatePhysics (true);
+						rigging.ActivatePhysics (true);
 					}
 					//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
 				}

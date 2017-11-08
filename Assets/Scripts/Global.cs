@@ -74,6 +74,11 @@ namespace Global {
 				(point.y >= min.y) && (point.y <= max.y) &&
 				(point.z >= min.z) && (point.z <= max.z));
 		}
+
+		public bool Contains(GameObject obj) {
+			return ((obj.transform.position.x >= min.x) && (obj.transform.position.x <= max.x) &&
+				(obj.transform.position.z >= min.z) && (obj.transform.position.z <= max.z));
+		}
 	}
 
 	/// <summary>
@@ -978,22 +983,22 @@ namespace Global {
 	/// Physics helper.
 	/// </summary>
 	public static class PhysicsHelper {
-		public static void ResolveAllPhysicsDiscepancies(bool macroEventSatisfied) {
+		public static void ResolveAllPhysicsDiscrepancies(bool macroEventSatisfied) {
 			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
-				ResolvePhysicsDiscepancies (voxeme.gameObject, macroEventSatisfied);
+				ResolvePhysicsDiscrepancies (voxeme.gameObject, macroEventSatisfied);
 			}
 		}
 
-		public static void ResolvePhysicsDiscepancies(GameObject obj, bool macroEventSatisfied) {
+		public static void ResolvePhysicsDiscrepancies(GameObject obj, bool macroEventSatisfied) {
 			// check and see if rigidbody orientations and main body orientations are getting out of sync
 			// due to physics effects
-			ResolvePhysicsPositionDiscepancies(obj, macroEventSatisfied);
-			ResolvePhysicsRotationDiscepancies(obj, macroEventSatisfied);
+			ResolvePhysicsPositionDiscrepancies(obj, macroEventSatisfied);
+			ResolvePhysicsRotationDiscrepancies(obj, macroEventSatisfied);
 //			ResolvePhysicsPositionDiscepancies(obj);
 		}
 
-		public static void ResolvePhysicsRotationDiscepancies(GameObject obj, bool macroEventSatisfied) {
+		public static void ResolvePhysicsRotationDiscrepancies(GameObject obj, bool macroEventSatisfied) {
 			Voxeme voxComponent = obj.GetComponent<Voxeme> ();
 
 			// find the smallest displacement angle between an axis on the main body and an axis on this rigidbody
@@ -1119,7 +1124,7 @@ namespace Global {
 			}
 		}
 
-		public static void ResolvePhysicsPositionDiscepancies(GameObject obj, bool macroEventSatisfied) {
+		public static void ResolvePhysicsPositionDiscrepancies(GameObject obj, bool macroEventSatisfied) {
 			Voxeme voxComponent = obj.GetComponent<Voxeme> ();
 			//Debug.Break ();
 			// find the displacement between the main body and this rigidbody
@@ -1127,16 +1132,16 @@ namespace Global {
 			Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody> ();
 			//Debug.Log (obj.name);
 			foreach (Rigidbody rigidbody in rigidbodies) {
-				//if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
+				if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
 				//	if (rigidbody.transform.localPosition.magnitude > voxComponent.displacement [rigidbody.gameObject].magnitude+Constants.EPSILON) {
-				if (rigidbody.transform.localPosition.magnitude < displacement) {
-//					Debug.Log (rigidbody.name);
-//					Debug.Log (Helper.VectorToParsable (obj.transform.position));
-//					Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
-					displacement = rigidbody.transform.localPosition.magnitude;
-				}
+					if (rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude < displacement) {
+	//					Debug.Log (rigidbody.name);
+	//					Debug.Log (Helper.VectorToParsable (obj.transform.position));
+	//					Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
+						displacement = rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude;
+					}
 				//	}
-				//}
+				}
 			}
 
 			if (displacement == float.MaxValue) {
@@ -1144,8 +1149,8 @@ namespace Global {
 			}
 
 			if (displacement > Constants.EPSILON) {
-				//Debug.Log (obj.name);
-				//Debug.Log (displacement);
+//				Debug.Log (obj.name);
+//				Debug.Log (displacement);
 				if (voxComponent != null) {
 					if (rigidbodies.Length > 0) {
 //						Debug.Log (rigidbodies [0].name);

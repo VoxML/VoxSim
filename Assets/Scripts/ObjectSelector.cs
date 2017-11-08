@@ -138,7 +138,7 @@ public class ObjectSelector : MonoBehaviour {
 
 	public void ResetScene() {
 		relationTracker.relations.Clear ();
-		PhysicsHelper.ResolveAllPhysicsDiscepancies (false);
+		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
 		foreach (Voxeme voxeme in allVoxemes) {
 			voxeme.Reset ();
 		}

@@ -53,6 +53,8 @@ public class VoxemeInit : MonoBehaviour {
 					voxeme.enabled = false;
 					//container.GetComponent<Entity> ().enabled = false;
 
+					container.GetComponent<Voxeme> ().density = voxeme.density;
+
 					// copy attribute set
 					AttributeSet newAttrSet = container.AddComponent<AttributeSet> ();
 					AttributeSet attrSet = go.GetComponent<AttributeSet> ();
@@ -104,7 +106,7 @@ public class VoxemeInit : MonoBehaviour {
 									float x = Helper.GetObjectWorldSize (subObj).size.x;
 									float y = Helper.GetObjectWorldSize (subObj).size.y;
 									float z = Helper.GetObjectWorldSize (subObj).size.z;
-									rigidbody.mass = x * y * z;
+									rigidbody.mass = x * y * z * (container.GetComponent<Voxeme> ().density);
 
 									// bunch of crap assumptions to calculate drag:
 									// air density: 1.225 kg/m^3
