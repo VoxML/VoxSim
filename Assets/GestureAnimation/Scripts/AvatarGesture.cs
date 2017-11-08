@@ -108,7 +108,7 @@ public class AvatarGesture {
     // Push
     public static AvatarGesture LARM_PUSH_FRONT   = new AvatarGesture("LARM_PUSH_FRONT",  14) { BodyPart = Body.LeftArm, Direction = Orientation.Front };
     public static AvatarGesture LARM_PUSH_BACK    = new AvatarGesture("LARM_PUSH_BACK",   15) { BodyPart = Body.LeftArm, Direction = Orientation.Back  };
-    public static AvatarGesture LARM_PUSH_LEFT    = new AvatarGesture("LARM_PUSH_RIGHT",  16) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+    public static AvatarGesture LARM_PUSH_RIGHT   = new AvatarGesture("LARM_PUSH_RIGHT",  16) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
 
     // Thumbs
     public static AvatarGesture LARM_THUMBS_UP    = new AvatarGesture("LARM_THUMBS_UP",   17) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
