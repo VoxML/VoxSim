@@ -23,9 +23,27 @@ public class AvatarGesture {
     //  GESTURES
     //  TODO Eventually, we can define a gesture as a compound action combining arbitrary arm motions and hand poses.
     //
-    //  NOTE: When adding new gestures, make sure to add them to the gesture dictionary below!
-    //
     
+    // Dictionary lookup of gesture name to AvatarGesture
+    private static Dictionary<string, AvatarGesture> sGestureList = new Dictionary<string, AvatarGesture>();
+    public static Dictionary<string, AvatarGesture> AllGestures
+    {
+        get
+        {
+            if (sGestureList == null)
+            {
+                sGestureList = new Dictionary<string, AvatarGesture>(); // Just in case it is not initialized
+            }
+
+            return sGestureList;
+        }
+    }
+
+    private static void AddGestureToList(AvatarGesture gesture)
+    {
+        AllGestures.Add(gesture.Name.ToLower(), gesture);
+    }
+
     //
     //  Right arm gestures
     //
@@ -51,6 +69,15 @@ public class AvatarGesture {
     public static AvatarGesture RARM_POINT_BACK   = new AvatarGesture("RARM_POINT_BACK",  11) { BodyPart = Body.RightArm, Direction = Orientation.Back  };
     public static AvatarGesture RARM_POINT_LEFT   = new AvatarGesture("RARM_POINT_LEFT",  12) { BodyPart = Body.RightArm, Direction = Orientation.Left  };
     public static AvatarGesture RARM_POINT_RIGHT  = new AvatarGesture("RARM_POINT_RIGHT", 13) { BodyPart = Body.RightArm, Direction = Orientation.Right };
+
+    // Push
+    public static AvatarGesture RARM_PUSH_FRONT   = new AvatarGesture("RARM_PUSH_FRONT",  14) { BodyPart = Body.RightArm, Direction = Orientation.Front };
+    public static AvatarGesture RARM_PUSH_BACK    = new AvatarGesture("RARM_PUSH_BACK",   15) { BodyPart = Body.RightArm, Direction = Orientation.Back  };
+    public static AvatarGesture RARM_PUSH_LEFT    = new AvatarGesture("RARM_PUSH_LEFT",   16) { BodyPart = Body.RightArm, Direction = Orientation.Left  };
+
+    // Thumbs
+    public static AvatarGesture RARM_THUMBS_UP    = new AvatarGesture("RARM_THUMBS_UP",   17) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+    public static AvatarGesture RARM_THUMBS_DOWN  = new AvatarGesture("RARM_THUMBS_DOWN", 18) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
 
     //
     //  Left arm gestures
@@ -78,6 +105,15 @@ public class AvatarGesture {
     public static AvatarGesture LARM_POINT_LEFT   = new AvatarGesture("LARM_POINT_LEFT",  12) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
     public static AvatarGesture LARM_POINT_RIGHT  = new AvatarGesture("LARM_POINT_RIGHT", 13) { BodyPart = Body.LeftArm, Direction = Orientation.Right };
 
+    // Push
+    public static AvatarGesture LARM_PUSH_FRONT   = new AvatarGesture("LARM_PUSH_FRONT",  14) { BodyPart = Body.LeftArm, Direction = Orientation.Front };
+    public static AvatarGesture LARM_PUSH_BACK    = new AvatarGesture("LARM_PUSH_BACK",   15) { BodyPart = Body.LeftArm, Direction = Orientation.Back  };
+    public static AvatarGesture LARM_PUSH_LEFT    = new AvatarGesture("LARM_PUSH_RIGHT",  16) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+
+    // Thumbs
+    public static AvatarGesture LARM_THUMBS_UP    = new AvatarGesture("LARM_THUMBS_UP",   17) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
+    public static AvatarGesture LARM_THUMBS_DOWN  = new AvatarGesture("LARM_THUMBS_DOWN", 18) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
+
     //
     //  Head gestures
     //
@@ -86,64 +122,7 @@ public class AvatarGesture {
     public static AvatarGesture HEAD_NOD          = new AvatarGesture("HEAD_NOD",          1) { BodyPart = Body.Head };
     public static AvatarGesture HEAD_SHAKE        = new AvatarGesture("HEAD_SHAKE",        2) { BodyPart = Body.Head };
     public static AvatarGesture HEAD_TILT         = new AvatarGesture("HEAD_TILT",         3) { BodyPart = Body.Head };
-
-    //
-    //  Static helpers
-    //
-
-    // Dictionary lookup of gesture name to AvatarGesture
-    public static Dictionary<string, AvatarGesture> ALL_GESTURES = new Dictionary<string, AvatarGesture>();
-
-    static AvatarGesture()
-    {
-        // Init string -> gesture dictionary mapping
-        // NOTE: When adding new gestures, add them here too!
-
-        AddGestureToList(RARM_IDLE        );
-
-        AddGestureToList(RARM_NUMBER_ONE  );
-        AddGestureToList(RARM_NUMBER_TWO  );
-        AddGestureToList(RARM_NUMBER_THREE);
-        AddGestureToList(RARM_NUMBER_FOUR );
-        AddGestureToList(RARM_NUMBER_FIVE );
-
-        AddGestureToList(RARM_CARRY_FRONT );
-        AddGestureToList(RARM_CARRY_BACK  );
-        AddGestureToList(RARM_CARRY_LEFT  );
-        AddGestureToList(RARM_CARRY_RIGHT );
-
-        AddGestureToList(RARM_POINT_FRONT );
-        AddGestureToList(RARM_POINT_BACK  );
-        AddGestureToList(RARM_POINT_LEFT  );
-        AddGestureToList(RARM_POINT_RIGHT );
-
-        AddGestureToList(LARM_NUMBER_ONE);
-        AddGestureToList(LARM_NUMBER_TWO);
-        AddGestureToList(LARM_NUMBER_THREE);
-        AddGestureToList(LARM_NUMBER_FOUR);
-        AddGestureToList(LARM_NUMBER_FIVE);
-
-        AddGestureToList(LARM_CARRY_FRONT);
-        AddGestureToList(LARM_CARRY_BACK);
-        AddGestureToList(LARM_CARRY_LEFT);
-        AddGestureToList(LARM_CARRY_RIGHT);
-
-        AddGestureToList(LARM_POINT_FRONT);
-        AddGestureToList(LARM_POINT_BACK);
-        AddGestureToList(LARM_POINT_LEFT);
-        AddGestureToList(LARM_POINT_RIGHT);
-
-        AddGestureToList(HEAD_IDLE        );
-        AddGestureToList(HEAD_NOD         );
-        AddGestureToList(HEAD_SHAKE       );
-        AddGestureToList(HEAD_TILT        );
-    }
-
-    private static void AddGestureToList(AvatarGesture gesture)
-    {
-        ALL_GESTURES.Add(gesture.Name.ToLower(), gesture);
-    }
-
+    
     //
     //  Properties
     //
@@ -154,6 +133,7 @@ public class AvatarGesture {
         private set;
     }
 
+    // TODO May be better to create a separate named trigger for each animation added... then won't need IDs
     public int Id // Tells the controller which animation to trigger
     {
         get;
@@ -176,6 +156,7 @@ public class AvatarGesture {
     //  Constructors
     //
 
+    // Allows for the creation of arbitrary gestures assuming you know the animation id
     public AvatarGesture(int id)
     {
         Id = id;
@@ -186,5 +167,8 @@ public class AvatarGesture {
     {
         Name = name;
         Id = id;
+
+        // Add self to master list
+        AddGestureToList(this);
     }
 }

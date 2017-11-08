@@ -166,13 +166,13 @@ public class AvatarGestureController : MonoBehaviour {
     public void PerformGesture(string gesture, Action<AvatarGesture> callback = null)
     {
         // Lookup gesture by name
-        if (!AvatarGesture.ALL_GESTURES.ContainsKey(gesture.ToLower()))
+        if (!AvatarGesture.AllGestures.ContainsKey(gesture.ToLower()))
         {
             Debug.LogError("Gesture \"" + gesture + "\" not found!");
             return;
         }
 
-        AvatarGesture ag = AvatarGesture.ALL_GESTURES[gesture.ToLower()];
+        AvatarGesture ag = AvatarGesture.AllGestures[gesture.ToLower()];
         PerformGesture(ag, callback);
     }
 
