@@ -6,9 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+
 using Agent;
 using Global;
 using RCC;
+using RootMotion.FinalIK;
 
 namespace Satisfaction {
 	public static class SatisfactionTest {
@@ -24,9 +26,9 @@ namespace Satisfaction {
 
 			bool isMacroEvent = false;
 
-			if (em.isInitiatePhase) {
-				return false;
-			}
+//			if (em.isInitiatePhase) {
+//				return false;
+//			}
 
 			foreach (DictionaryEntry entry in predArgs) {
 				predString = (String)entry.Key;
@@ -213,13 +215,19 @@ namespace Satisfaction {
 			else if (predString == "grasp") {	// satisfy grasp
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
 				GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
-				if (theme != null) {
-					if (agent != null) {
-						if (theme.transform.IsChildOf (agent.transform)) {
-							satisfied = true;
-						}
-					}
+
+				if ((agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.LeftHand)) ||
+					(agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.RightHand))) {
+					satisfied = true;
 				}
+//				if (theme != null) {
+//					if (agent != null) {
+//						if (theme.transform.IsChildOf (agent.transform)) {
+//							satisfied = true;
+//						}
+//					}
+//				}
+
 			}
 			else if (predString == "hold") {	// satisfy hold
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
@@ -235,18 +243,27 @@ namespace Satisfaction {
 			else if (predString == "ungrasp") {	// satisfy ungrasp
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
 				GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
-				GraspScript graspController = agent.GetComponent<GraspScript> ();
-				if (theme != null) {
-					if (agent != null) {
-						if (!theme.transform.IsChildOf (agent.transform)) {
-							if (!theme.GetComponent<Voxeme>().isGrasped) {
-								//Debug.Break ();
-								satisfied = true;
-								ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
-							}
-						}
-					}
+
+				if ((!agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.LeftHand)) ||
+					(!agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.RightHand))) {
+					satisfied = true;
+					ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 				}
+
+//				GameObject theme = GameObject.Find (argsStrings [0] as String);
+//				GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
+//				GraspScript graspController = agent.GetComponent<GraspScript> ();
+//				if (theme != null) {
+//					if (agent != null) {
+//						if (!theme.transform.IsChildOf (agent.transform)) {
+//							if (!theme.GetComponent<Voxeme>().isGrasped) {
+//								//Debug.Break ();
+//								satisfied = true;
+//								ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//							}
+//						}
+//					}
+//				}
 			}
 #pragma mark MacroEvents
 			else if (predString == "lean") {

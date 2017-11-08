@@ -19,8 +19,13 @@ public class JointGestureDemo : MonoBehaviour {
 	InteractionPrefsModalWindow interactionPrefs;
 
 	GameObject Diana;
+	GameObject leftGrasper;
+	GameObject rightGrasper;
+
 	SyntheticVision synVision;
 	AvatarGestureController gestureController;
+	FullBodyBipedIK ik;
+	InteractionSystem interactionSystem;
 
 	IKControl ikControl;
 	IKTarget leftTarget;
@@ -78,16 +83,26 @@ public class JointGestureDemo : MonoBehaviour {
 		windowScaleFactor = (float)Screen.width/(float)Screen.currentResolution.width;
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
+		eventManager.EventComplete += ReturnToRest;
+
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
 		Diana = GameObject.Find ("Diana");
+		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
+		rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.rightHand.gameObject;
+
 		synVision = Diana.GetComponent<SyntheticVision> ();
 		gestureController = Diana.GetComponent<AvatarGestureController> ();
+		ik = Diana.GetComponent<FullBodyBipedIK> ();
+		interactionSystem = Diana.GetComponent<InteractionSystem> ();
 
 		ikControl = Diana.GetComponent<IKControl> ();
 		leftTarget = ikControl.leftHandObj.GetComponent<IKTarget> ();
 		rightTarget = ikControl.rightHandObj.GetComponent<IKTarget> ();
 		headTarget = ikControl.lookObj.GetComponent<IKTarget> ();
+
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 		leftTargetDefault = ikControl.leftHandObj.transform.position;
 		rightTargetDefault = ikControl.rightHandObj.transform.position;
@@ -1134,6 +1149,7 @@ public class JointGestureDemo : MonoBehaviour {
 						actionOptions.Clear ();
 						confirmationTexts.Clear ();
 						graspedObj = null;
+						//TurnForward ();
 					}
 				}
 			}
@@ -2276,6 +2292,12 @@ public class JointGestureDemo : MonoBehaviour {
 		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
 		gestureController.PerformGesture(AvatarGesture.RARM_IDLE);
 		gestureController.PerformGesture(AvatarGesture.HEAD_IDLE);
+
+		ikControl.leftHandObj.position = leftTargetDefault;
+		ikControl.rightHandObj.position = rightTargetDefault;
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+		Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).target);
 	}
 
 	void ReachFor(Vector3 coord) {
@@ -2285,13 +2307,13 @@ public class JointGestureDemo : MonoBehaviour {
 		if (leftRegion.Contains(new Vector3(coord.x,
 			leftRegion.center.y,coord.z))) {
 			ikControl.rightHandObj.transform.position = coord+offset;
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 1.0f;
+			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 		}
 		else if (rightRegion.Contains(new Vector3(coord.x,
 			leftRegion.center.y,coord.z))) {
 			ikControl.leftHandObj.transform.position = coord+offset;
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 1.0f;
+			InteractionHelper.SetRightHandTarget (Diana, ikControl.leftHandObj);
 		}
 	}
 
@@ -2303,14 +2325,13 @@ public class JointGestureDemo : MonoBehaviour {
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
 			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 1.0f;
+			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 		}
 		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
 			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 1.0f;
-
+			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 	}
 
@@ -2333,6 +2354,13 @@ public class JointGestureDemo : MonoBehaviour {
 			zCoord);
 
 		return coord;
+	}
+
+	void ReturnToRest(object sender, EventArgs e) {
+		if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
+		    !interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+			TurnForward ();
+		}
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {

@@ -256,7 +256,7 @@ public class EventManager : MonoBehaviour {
 			return;
 		}
 
-		if (bodyIk != null) {
+		/*if (bodyIk != null) {
 			if (interactionObject != null) {
 				if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 					if (isInitiatePhase) {
@@ -293,7 +293,7 @@ public class EventManager : MonoBehaviour {
 					}
 				}
 			}
-		}
+		}*/
 //		else {
 //			if (events.Count > 0) {
 //				if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
@@ -318,10 +318,10 @@ public class EventManager : MonoBehaviour {
 				completedEvent = events [events.Count - 1];
 				RemoveEvent (events.Count - 1);
 
-				if (interactionSystem != null) {
-					interactionSystem.ResumeAll ();
-					startRecoverPhase = true;
-				}
+				//if (interactionSystem != null) {
+					//interactionSystem.ResumeAll ();
+					//startRecoverPhase = true;
+				//}
 
 				if (events.Count > 0) {
 					ExecuteNextCommand ();
@@ -400,39 +400,41 @@ public class EventManager : MonoBehaviour {
 		Hashtable predArgs = Helper.ParsePredicate (events [0]);
 		String pred = Helper.GetTopPredicate (events [0]);
 
-		if (bodyIk != null) {
-			if (predArgs.Count > 0) {
-				try {
-					// Resolve interactionObject
-					var objs = extractObjects (pred, (String)predArgs [pred]);
-					if (objs.Count > 0 && objs [0] is GameObject) {
-						interactionObject = ((GameObject)objs [0]).GetComponentInChildren<InteractionObject> ();
-					}
-					
-
-					if (interactionObject != null) {
-						// Execute interaction	
-						interactionSystem.StartInteraction (FullBodyBipedEffector.RightHand, interactionObject, true);
-
-						// TUAN
-						// Before Executing event
-						// Move hand to reach the target
-						isInitiatePhase = true;
-						Debug.Log ("======= isInitiatePhase true ========");
-					}
-				} catch (ArgumentNullException e) {
-					return;
-				}
-			}
-		}
-		else {
+//		if (bodyIk != null) {
+//			if (predArgs.Count > 0) {
+//				try {
+//					// Resolve interactionObject
+//					var objs = extractObjects (pred, (String)predArgs [pred]);
+//					if (objs.Count > 0 && objs [0] is GameObject) {
+//						interactionObject = ((GameObject)objs [0]).GetComponentInChildren<InteractionObject> ();
+//					}
+//					
+//
+////					if (interactionObject != null) {
+////						// Execute interaction	
+////						interactionSystem.StartInteraction (FullBodyBipedEffector.RightHand, interactionObject, true);
+////
+////						// TUAN
+////						// Before Executing event
+////						// Move hand to reach the target
+////						isInitiatePhase = true;
+////						Debug.Log ("======= isInitiatePhase true ========");
+////					}
+//				} catch (ArgumentNullException e) {
+//					return;
+//				}
+//			}
+//		}
+//		else {
+		/// NIKHIL: Instead of having isInitiatePhase here, all events w/ agent should insert a "grasp" precondition
+		/// This should be handled automatically in a VoxML interpreter
 			if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
 				ExecuteCommand (events [0]);
 			}
 			else {
 				RemoveEvent (0);
 			}
-		}
+//		}
 	}
 
 	public bool EvaluateCommand(String command) {
