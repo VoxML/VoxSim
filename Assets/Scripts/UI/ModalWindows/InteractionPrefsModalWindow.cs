@@ -73,7 +73,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 	protected override void OnGUI () {
 
-		if (GUI.Button (new Rect (Screen.width - (15 + (int)(110 * fontSizeModifier / 3)) + 38 * fontSizeModifier - (GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10),
+		if (GUI.Button (new Rect (Screen.width - (10 + (int)(110 * fontSizeModifier / 3)) + 38 * fontSizeModifier - (GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10),
 			10, GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
 			actionButtonText, buttonStyle)) {
 			render = true;

@@ -652,7 +652,7 @@ public class JointGestureDemo : MonoBehaviour {
 						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
 					}
 
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something?"));
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
 				}
@@ -676,7 +676,7 @@ public class JointGestureDemo : MonoBehaviour {
 						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
 					}
 
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this?"));
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this this way?"));
 					gestureController.PerformGesture (performGesture);
 				}
 			}
@@ -700,7 +700,7 @@ public class JointGestureDemo : MonoBehaviour {
 					//performGesture = AvatarGesture.RARM_CARRY_DOWN;
 				}
 
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this this way?"));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
@@ -719,9 +719,57 @@ public class JointGestureDemo : MonoBehaviour {
 				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
 				MoveToPerform ();
 				gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+				// actionOptions.Add("grasp");
 			}
 		}
-		else if (gesture.StartsWith("push")) { 
+		else if (gesture.StartsWith("push")) {
+			string dir = GetGestureContent (gesture, "push");
+			if ((indicatedObj == null) && (graspedObj == null)) {
+				if (dir == "left") {
+					performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+				}
+				else if (dir == "right") {
+					performGesture = AvatarGesture.RARM_PUSH_LEFT;
+				}
+				else if (dir == "front") {
+					performGesture = AvatarGesture.RARM_PUSH_FRONT;
+				}
+				else if (dir == "back") {
+					performGesture = AvatarGesture.RARM_PUSH_BACK;
+				}
+
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (performGesture);
+			}
+			else {
+				if (dir == "left") {
+					performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+				}
+				else if (dir == "right") {
+					performGesture = AvatarGesture.RARM_PUSH_LEFT;
+				}
+				else if (dir == "front") {
+					if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
+						performGesture = AvatarGesture.LARM_PUSH_FRONT;
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+						performGesture = AvatarGesture.RARM_PUSH_FRONT;
+					}
+				}
+				else if (dir == "back") {
+					if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
+						performGesture = AvatarGesture.LARM_PUSH_BACK;
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+						performGesture = AvatarGesture.RARM_PUSH_BACK;
+					}
+				}
+
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (performGesture);
+			}
 		}
 		else if (gesture.StartsWith("point")) { 
 		}
@@ -995,18 +1043,8 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (block.activeInHierarchy) {
-					if (region.Contains (new Vector3 (block.transform.position.x,
-						   region.center.y, block.transform.position.z))) {
-						bool surfaceClear = true;
-						foreach (GameObject otherBlock in blocks) {
-							if ((QSR.QSR.Above(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								(!QSR.QSR.Left(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
-								(!QSR.QSR.Right(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
-								(RCC8.EC(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-								surfaceClear = false;
-							}
-						}
-						if ((!objectMatches.Contains (block)) && (surfaceClear) && (isVisible)) {
+					if (region.Contains (block)) {
+						if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
 							objectMatches.Add (block);
 						}
 					} 
@@ -1033,16 +1071,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (obj.activeInHierarchy) {
-			bool surfaceClear = true;
-			foreach (GameObject otherBlock in blocks) {
-				if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
-				    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
-				    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj))) &&
-				    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (obj)))) {
-					surfaceClear = false;
-				}
-			}
-			if ((!objectMatches.Contains (obj)) && (surfaceClear) && (isVisible)) {
+			if ((!objectMatches.Contains (obj)) && (SurfaceClear(obj)) && (isVisible)) {
 				objectMatches.Add (obj);
 			}
 		}
@@ -1080,16 +1109,7 @@ public class JointGestureDemo : MonoBehaviour {
 				if ((point-highlightCenter).magnitude <= vectorConeRadius) {
 				//if (region.Contains (new Vector3 (block.transform.position.x,
 				//	region.center.y, block.transform.position.z))) {
-					bool surfaceClear = true;
-					foreach (GameObject otherBlock in blocks) {
-						if ((QSR.QSR.Above(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-							(!QSR.QSR.Left(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
-							(!QSR.QSR.Right(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) && 
-							(RCC8.EC(Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-							surfaceClear = false;
-						}
-					}
-					if ((!objectMatches.Contains (block)) && (surfaceClear) && (isVisible)) {
+					if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
 						objectMatches.Add (block);
 					}
 				} 
@@ -1259,57 +1279,20 @@ public class JointGestureDemo : MonoBehaviour {
 									}
 								}
 							}
-
-//				indicatedRegion = leftRegion;
-//				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-//					    frontRegion.center.y, graspedObj.transform.position.z))) {
-//					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-//						if (block.activeInHierarchy) {
-//							bool surfaceClear = true;
-//							foreach (GameObject otherBlock in blocks) {
-//								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-//								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-//								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-//								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-//									surfaceClear = false;
-//								}
-//							}
-//
-//							if ((block != indicatedObj) && (surfaceClear)) {
-//								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-//								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
-//									    frontRegion.center.y, block.transform.position.z)))) {
-//									if (!objectMatches.Contains (block)) {
-//										objectMatches.Add (block);
-//									}
-//								}
-//							} 
 						}
 					}
 				} 
-				else if (backRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         backRegion.center.y, graspedObj.transform.position.z))) {
+				else if (backRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (backRegion.Contains (new Vector3 (block.transform.position.x,
-									    backRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the left of the grasped block
+								    (backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				}
@@ -1333,21 +1316,20 @@ public class JointGestureDemo : MonoBehaviour {
 						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
 				}
 
-				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    frontRegion.center.y, graspedObj.transform.position.z))) {
+				// not moving on top of another object
+				if (frontRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front left part", graspedAttr));
+						string.Format ("put the {0} block in the table's front {1} part", graspedAttr, dir));
 				}
-				else if (backRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         backRegion.center.y, graspedObj.transform.position.z))) {
+				else if (backRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back left part", graspedAttr));
+						string.Format ("put the {0} block in the table's back {1} part", graspedAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1360,7 +1342,7 @@ public class JointGestureDemo : MonoBehaviour {
 					else {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
+						//TurnToAccess (target);
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1368,74 +1350,48 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						    frontRegion.center.y, graspedObj.transform.position.z))) {
+					if (frontRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
-					} else if (backRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						         backRegion.center.y, graspedObj.transform.position.z))) {
+					}
+					else if (backRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					TurnToAccess (target);
+					//TurnToAccess (target);
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "right") {
-				indicatedRegion = rightRegion;
-				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    frontRegion.center.y, graspedObj.transform.position.z))) {
+				if (frontRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
-									    frontRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the right of the grasped block
+									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				} 
-				else if (backRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         backRegion.center.y, graspedObj.transform.position.z))) {
+				else if (backRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (backRegion.Contains (new Vector3 (block.transform.position.x,
-									    backRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the right of the grasped block
+									(backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				}
@@ -1459,21 +1415,20 @@ public class JointGestureDemo : MonoBehaviour {
 						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
 				}
 
-				if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    frontRegion.center.y, graspedObj.transform.position.z))) {
+				// not moving on top of another object
+				if (frontRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front right part", graspedAttr));
-				} 
-				else if (backRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         backRegion.center.y, graspedObj.transform.position.z))) {
+						string.Format ("put the {0} block in the table's front {1} part", graspedAttr, dir));
+				}
+				else if (backRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back right part", graspedAttr));
+						string.Format ("put the {0} block in the table's back {1} part", graspedAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1486,7 +1441,7 @@ public class JointGestureDemo : MonoBehaviour {
 					else {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
+						//TurnToAccess (target);
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1494,74 +1449,48 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						    frontRegion.center.y, graspedObj.transform.position.z))) {
+					if (frontRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
-					} 
-					else if (backRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						         backRegion.center.y, graspedObj.transform.position.z))) {
+					}
+					else if (backRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					TurnToAccess (target);
+					//TurnToAccess (target);
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "front") {
-				if (leftRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    leftRegion.center.y, graspedObj.transform.position.z))) {
+				if (leftRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (leftRegion.Contains (new Vector3 (block.transform.position.x,
-									    leftRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the front of the grasped block
+									(leftRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				} 
-				else if (rightRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         rightRegion.center.y, graspedObj.transform.position.z))) {
+				else if (rightRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (rightRegion.Contains (new Vector3 (block.transform.position.x,
-									    rightRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the front of the grasped block
+									(rightRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				}
@@ -1585,21 +1514,20 @@ public class JointGestureDemo : MonoBehaviour {
 						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
 				}
 
-				if (leftRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    leftRegion.center.y, graspedObj.transform.position.z))) {
+				// not moving on top of another object
+				if (leftRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
-						Helper.VectorToParsable (Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, graspedObj).center)));
+						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front left part", graspedAttr));
-				} 
-				else if (rightRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         rightRegion.center.y, graspedObj.transform.position.z))) {
+						string.Format ("put the {0} block in the table's {1} left part", graspedAttr, dir));
+				}
+				else if (rightRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
-						Helper.VectorToParsable (Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, graspedObj).center)));
+						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front right part", graspedAttr));
+						string.Format ("put the {0} block in the table's {1} right part", graspedAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1608,10 +1536,11 @@ public class JointGestureDemo : MonoBehaviour {
 				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
 					if (actionOptions.Count > 1) {
 						Disambiguate (actionOptions);
-					} else {
+					} 
+					else {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
+						//TurnToAccess (target);
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1619,74 +1548,48 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						    leftRegion.center.y, graspedObj.transform.position.z))) {
+					if (leftRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
-					} else if (rightRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						         rightRegion.center.y, graspedObj.transform.position.z))) {
+					}
+					else if (rightRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					TurnToAccess (target);
+					//TurnToAccess (target);
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "back") {
-				if (leftRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    leftRegion.center.y, graspedObj.transform.position.z))) {
+				if (leftRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (leftRegion.Contains (new Vector3 (block.transform.position.x,
-									    leftRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the back of the grasped block
+									(leftRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				} 
-				else if (rightRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         rightRegion.center.y, graspedObj.transform.position.z))) {
+				else if (rightRegion.Contains(graspedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool surfaceClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Above (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Left (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (!QSR.QSR.Right (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block))) &&
-								    (RCC8.EC (Helper.GetObjectWorldSize (otherBlock), Helper.GetObjectWorldSize (block)))) {
-									Debug.Log (otherBlock);
-									surfaceClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (surfaceClear)) {
-								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (graspedObj))) &&
-								    (rightRegion.Contains (new Vector3 (block.transform.position.x,
-									    rightRegion.center.y, block.transform.position.z)))) {
+							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the back of the grasped block
+									(rightRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				}
@@ -1703,28 +1606,27 @@ public class JointGestureDemo : MonoBehaviour {
 					if (obj.GetComponent<Voxeme> () != null) {
 						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
-					Debug.Log (string.Format ("put({0},(on({1}))", graspedObj.name, obj.name));
+					Debug.Log (string.Format ("put({0},(on{1}))", graspedObj.name, obj.name));
 					target = obj.transform.position;
 					actionOptions.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name));
 					confirmationTexts.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name),
 						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
 				}
 
-				if (leftRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					    leftRegion.center.y, graspedObj.transform.position.z))) {
+				// not moving on top of another object
+				if (leftRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back left part", graspedAttr));
-				} 
-				else if (rightRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-					         rightRegion.center.y, graspedObj.transform.position.z))) {
+						string.Format ("put the {0} block in the table's {1} left part", graspedAttr, dir));
+				}
+				else if (rightRegion.Contains (graspedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, graspedObj).center;
 					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back right part", graspedAttr));
+						string.Format ("put the {0} block in the table's {1} right part", graspedAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1737,26 +1639,25 @@ public class JointGestureDemo : MonoBehaviour {
 					else {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
+						//TurnToAccess (target);
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
 					}
-				}
+				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						    leftRegion.center.y, graspedObj.transform.position.z))) {
+					if (leftRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
-					} else if (rightRegion.Contains (new Vector3 (graspedObj.transform.position.x,
-						         rightRegion.center.y, graspedObj.transform.position.z))) {
+					}
+					else if (rightRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, graspedObj).center;
 						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					TurnToAccess (target);
+					//TurnToAccess (target);
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
@@ -1837,60 +1738,40 @@ public class JointGestureDemo : MonoBehaviour {
 	void Push(string dir) {
 		OutputHelper.PrintOutput (Role.Affector, "");
 		if (indicatedObj != null) {
+			Bounds indicatedObjBounds = Helper.GetObjectWorldSize (indicatedObj);
 			if (dir == "left") {
-				indicatedRegion = leftRegion;
-				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					frontRegion.center.y, indicatedObj.transform.position.z))) {
+				if (frontRegion.Contains(indicatedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Left(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
-									    frontRegion.center.y, block.transform.position.z)))) {
+							if ((block != indicatedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), indicatedObjBounds)) &&	// if it's to the left of the grasped block
+									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
-				}
-				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					backRegion.center.y, indicatedObj.transform.position.z))) {
+				} 
+				else if (backRegion.Contains(indicatedObj)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Left(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (backRegion.Contains (new Vector3 (block.transform.position.x,
-									    backRegion.center.y, block.transform.position.z)))) {
+							if ((block != indicatedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), indicatedObjBounds)) &&	// if it's to the left of the grasped block
+									(backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
 										objectMatches.Add (block);
 									}
 								}
-							} 
+							}
 						}
 					}
 				}
 
-				string indAttr = string.Empty;
+				string indicatedAttr = string.Empty;
 				if (indicatedObj.GetComponent<Voxeme> () != null) {
-					indAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
+					indicatedAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 				}
 
 				Vector3 target = Vector3.zero;
@@ -1898,66 +1779,184 @@ public class JointGestureDemo : MonoBehaviour {
 				foreach (GameObject obj in objectMatches) {
 					string objAttr = string.Empty;
 					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
+						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
+					Debug.Log (string.Format ("slide({0},(left{1}))", indicatedObj.name, obj.name));
 					target = obj.transform.position;
 					actionOptions.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name));
 					confirmationTexts.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name),
-						string.Format ("push the {0} block to the right of the {1} block", indAttr, objAttr));
+						string.Format ("push the {0} block to the left of the {1} block", indicatedAttr, objAttr));
 				}
 
-				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					frontRegion.center.y, indicatedObj.transform.position.z))) {
+				// not moving on top of another object
+				if (frontRegion.Contains (indicatedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
 					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the front left of the table", indAttr));
+						string.Format ("push the {0} block to the table's front {1} part", indicatedAttr, dir));
 				}
-				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					backRegion.center.y, indicatedObj.transform.position.z))) {
+				else if (backRegion.Contains (indicatedObj)) {	// stay in this region
 					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
 					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
 						Helper.VectorToParsable (target)));
 					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the back left of the table", indAttr));
+						string.Format ("push the {0} block to the table's back {1} part", indicatedAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 					Disambiguate (actionOptions);
-				}
+				} 
 				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
 					if (actionOptions.Count > 1) {
 						Disambiguate (actionOptions);
-					}
+					} 
 					else {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
+						//TurnToAccess (target);
 						indicatedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
 					}
-				}
+				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						frontRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
+					if (frontRegion.Contains (indicatedObj)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
+						eventManager.InsertEvent (string.Format ("push({0},{1})", indicatedObj.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						backRegion.center.y, indicatedObj.transform.position.z))) {
+					else if (backRegion.Contains (graspedObj)) {
 						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
+						eventManager.InsertEvent (string.Format ("push({0},{1})", indicatedObj.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					TurnToAccess (target);
+					//TurnToAccess (target);
 					indicatedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
+//				indicatedRegion = leftRegion;
+//				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
+//					frontRegion.center.y, indicatedObj.transform.position.z))) {
+//					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
+//						if (block.activeInHierarchy) {
+//							bool sideClear = true;
+//							foreach (GameObject otherBlock in blocks) {
+//								if ((QSR.QSR.Left(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
+//									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
+//									sideClear = false;
+//								}
+//							}
+//
+//							if ((block != indicatedObj) && (sideClear)) {
+//								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
+//								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
+//									    frontRegion.center.y, block.transform.position.z)))) {
+//									if (!objectMatches.Contains (block)) {
+//										objectMatches.Add (block);
+//									}
+//								}
+//							} 
+//						}
+//					}
+//				}
+//				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
+//					backRegion.center.y, indicatedObj.transform.position.z))) {
+//					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
+//						if (block.activeInHierarchy) {
+//							bool sideClear = true;
+//							foreach (GameObject otherBlock in blocks) {
+//								if ((QSR.QSR.Left(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
+//									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
+//									sideClear = false;
+//								}
+//							}
+//
+//							if ((block != indicatedObj) && (sideClear)) {
+//								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
+//								    (backRegion.Contains (new Vector3 (block.transform.position.x,
+//									    backRegion.center.y, block.transform.position.z)))) {
+//									if (!objectMatches.Contains (block)) {
+//										objectMatches.Add (block);
+//									}
+//								}
+//							} 
+//						}
+//					}
+//				}
+//
+//				string indAttr = string.Empty;
+//				if (indicatedObj.GetComponent<Voxeme> () != null) {
+//					indAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
+//				}
+//
+//				Vector3 target = Vector3.zero;
+//
+//				foreach (GameObject obj in objectMatches) {
+//					string objAttr = string.Empty;
+//					if (obj.GetComponent<Voxeme> () != null) {
+//						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
+//					}
+//					target = obj.transform.position;
+//					actionOptions.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name));
+//					confirmationTexts.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name),
+//						string.Format ("push the {0} block to the right of the {1} block", indAttr, objAttr));
+//				}
+//
+//				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
+//					frontRegion.center.y, indicatedObj.transform.position.z))) {
+//					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
+//					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
+//						Helper.VectorToParsable (target)));
+//					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
+//						string.Format ("push the {0} block to the front left of the table", indAttr));
+//				}
+//				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
+//					backRegion.center.y, indicatedObj.transform.position.z))) {
+//					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
+//					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
+//						Helper.VectorToParsable (target)));
+//					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
+//						string.Format ("push the {0} block to the back left of the table", indAttr));
+//				}
+//
+//				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+//					Disambiguate (actionOptions);
+//				}
+//				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
+//					if (actionOptions.Count > 1) {
+//						Disambiguate (actionOptions);
+//					}
+//					else {
+//						eventManager.InsertEvent ("", 0);
+//						eventManager.InsertEvent (actionOptions [0], 1);
+//						TurnToAccess (target);
+//						indicatedObj = null;
+//						actionOptions.Clear ();
+//						objectMatches.Clear ();
+//					}
+//				}
+//				else {
+//					eventManager.InsertEvent ("", 0);
+//					if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
+//						frontRegion.center.y, indicatedObj.transform.position.z))) {
+//						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
+//						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
+//							Helper.VectorToParsable (target)), 1);
+//					}
+//					else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
+//						backRegion.center.y, indicatedObj.transform.position.z))) {
+//						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
+//						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
+//							Helper.VectorToParsable (target)), 1);
+//					}
+//					TurnToAccess (target);
+//					indicatedObj = null;
+//					actionOptions.Clear ();
+//					objectMatches.Clear ();
+//				}
 			}
 			else if (dir == "right") {
 				indicatedRegion = rightRegion;

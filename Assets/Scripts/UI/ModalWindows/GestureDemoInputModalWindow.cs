@@ -51,7 +51,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 
 	protected override void OnGUI () {
 
-		if (GUI.Button (new Rect (15, 10, GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
+		if (GUI.Button (new Rect (10, 10, GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
 			actionButtonText, buttonStyle)) {
 			render = true;
 		}
