@@ -520,6 +520,7 @@ public class JointGestureDemo : MonoBehaviour {
 		foreach (Pair<string,string> m in receivedMessages.AsEnumerable().Reverse()) {
 			if ((m.Item2.StartsWith (message)) && (!m.Item2.EndsWith ("stop"))) {
 				startSignal = m.Item2;
+				break;
 			}
 		}
 
