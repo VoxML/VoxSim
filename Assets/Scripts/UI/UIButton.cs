@@ -23,7 +23,7 @@ public class UIButton : FontManager
 	}
 
 	public UIButtonPosition position;
-	public int verticalOffset;
+	public Vector2 offset, dimensions;
 
 	protected UIButtonManager buttonManager;
 
@@ -42,22 +42,20 @@ public class UIButton : FontManager
 		}
 
 		if (position == UIButtonPosition.TopLeft) {
-			int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.TopLeft);
-			buttonRect = new Rect (10, (20 * FontSizeModifier) * (count + 1) + verticalOffset, 100 * FontSizeModifier, 20 * FontSizeModifier);
+			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.TopLeft);
+			buttonRect = new Rect (10 + offset.x, 10 + offset.y, dimensions.x, dimensions.y);
 		} 
 		else if (position == UIButtonPosition.TopRight) {
-			int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.TopRight);
-			buttonRect = new Rect (Screen.width - 10 - 100 * FontSizeModifier, (20 * FontSizeModifier) * (count + 1) + verticalOffset, 
-				100 * FontSizeModifier, 20 * FontSizeModifier);
+			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.TopRight);
+			buttonRect = new Rect (Screen.width - (10 + offset.x + dimensions.x), 10 + offset.y, dimensions.x, dimensions.y);
 		}
 		else if (position == UIButtonPosition.BottomLeft) {
-			int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomLeft);
-			buttonRect = new Rect (10, Screen.height - ((20 * FontSizeModifier) * (count + 1) + verticalOffset), 100 * FontSizeModifier, 20 * FontSizeModifier);
+			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomLeft);
+			buttonRect = new Rect (10 + offset.x, Screen.height - (10 + offset.y + dimensions.y), dimensions.x, dimensions.y);
 		}
 		else if (position == UIButtonPosition.BottomRight) {
-			int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomRight);
-			buttonRect = new Rect (Screen.width - 10 - 100 * FontSizeModifier, 
-				Screen.height - ((20 * FontSizeModifier) * (count + 1) + verticalOffset), 100 * FontSizeModifier, 20 * FontSizeModifier);
+			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomRight);
+			buttonRect = new Rect (Screen.width - (10 + offset.x + dimensions.x), Screen.height - (10 + offset.y + dimensions.y), dimensions.x, dimensions.y);
 		}
 	}
 
