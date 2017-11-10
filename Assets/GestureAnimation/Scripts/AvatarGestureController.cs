@@ -12,6 +12,7 @@ public class AvatarGestureController : MonoBehaviour {
     private Animator animator;
     private AvatarGestureStateBehavior rarmStateBehavior;
     private AvatarGestureStateBehavior larmStateBehavior;
+    private AvatarGestureStateBehavior headStateBehavior;
 
     private AvatarGestureStateBehavior currentStateBehavior; // Intended behavior to receive events from, based on gesture body parts
 
@@ -22,6 +23,12 @@ public class AvatarGestureController : MonoBehaviour {
     private const string ANIM_LARM_LAYERNAME = "LArm";
     private const string ANIM_LARM_GESTUREID = "LArm_GestureId";
     private const string ANIM_LARM_TRIGGER = "LArm_Trigger";
+
+    private const string ANIM_HEAD_LAYERNAME = "Head";
+    private const string ANIM_HEAD_GESTUREID = "Head_GestureId";
+    private const string ANIM_HEAD_TRIGGER = "Head_Trigger";
+
+    // TODO Maybe make structs for these
 
     //
     //  Properties
@@ -65,7 +72,7 @@ public class AvatarGestureController : MonoBehaviour {
     //  Initialization
     //
     
-    void Start () {
+    void Awake () {
 		if (!avatar)
         {
             avatar = gameObject;
@@ -85,6 +92,10 @@ public class AvatarGestureController : MonoBehaviour {
             {
                 larmStateBehavior = behavior;
             }
+            else if (behavior.layerName == ANIM_HEAD_LAYERNAME)
+            {
+                headStateBehavior = behavior;
+            }
         }
         Debug.Assert(rarmStateBehavior != null && larmStateBehavior != null);
 
@@ -94,6 +105,9 @@ public class AvatarGestureController : MonoBehaviour {
 
         larmStateBehavior.AnimationStart += StateMachineBehavior_AnimationStart;
         larmStateBehavior.AnimationEnd += StateMachineBehavior_AnimationEnd;
+
+        headStateBehavior.AnimationStart += StateMachineBehavior_AnimationStart;
+        headStateBehavior.AnimationEnd += StateMachineBehavior_AnimationEnd;
 
         // Default to RArm
         currentStateBehavior = rarmStateBehavior; // TODO -- could elect to dynamically subscribe/unsubscribe to behaviors as needed instead of checking them each time
@@ -202,12 +216,19 @@ public class AvatarGestureController : MonoBehaviour {
 
             currentStateBehavior = larmStateBehavior;
         }
-        else //if (gesture.BodyPart == AvatarGesture.Body.RightArm) // TODO: Right now, just left or right
+        else if (gesture.BodyPart == AvatarGesture.Body.RightArm)
         {
             anim_gestureid_name = ANIM_RARM_GESTUREID;
             anim_trigger_name = ANIM_RARM_TRIGGER;
 
             currentStateBehavior = rarmStateBehavior;
+        }
+        else
+        {
+            anim_gestureid_name = ANIM_HEAD_GESTUREID;
+            anim_trigger_name = ANIM_HEAD_TRIGGER;
+
+            currentStateBehavior = headStateBehavior;
         }
 
         //////////////////////////////////////////////
