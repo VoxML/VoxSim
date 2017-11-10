@@ -38,9 +38,9 @@ public class InputController : FontManager {
 
 	GUIStyle textAreaStyle = new GUIStyle();
 
-	GUIStyle labelStyle = new GUIStyle ("Label");
-	GUIStyle textFieldStyle = new GUIStyle ("TextField");
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle labelStyle;
+	GUIStyle textFieldStyle;
+	GUIStyle buttonStyle;
 
 	float fontSizeModifier;
 
@@ -95,6 +95,9 @@ public class InputController : FontManager {
 	}
 
 	void OnGUI() {
+		labelStyle = new GUIStyle ("Label");
+		textFieldStyle = new GUIStyle ("TextField");
+		buttonStyle = new GUIStyle ("Button");
 #if !UNITY_IOS
 		Event e = Event.current;
 		if (e.keyCode == KeyCode.Return) {

@@ -12,7 +12,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle buttonStyle;
 
 	float fontSizeModifier;	
 	public float FontSizeModifier {
@@ -58,10 +58,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		windowTitle = "Gesture Interaction Prefs";
 		persistent = true;
 
-		buttonStyle = new GUIStyle ("Button");
-
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
 
 		windowRect = new Rect (Screen.width - 215, 15 + (int)(20 * fontSizeModifier), 200, 200);
 	}
@@ -72,8 +69,10 @@ public class InteractionPrefsModalWindow : ModalWindow {
 	}	
 
 	protected override void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
 
-		if (GUI.Button (new Rect (Screen.width - (15 + (int)(110 * fontSizeModifier / 3)) + 38 * fontSizeModifier - (GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10),
+		if (GUI.Button (new Rect (Screen.width - (10 + (int)(110 * fontSizeModifier / 3)) + 38 * fontSizeModifier - (GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10),
 			10, GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
 			actionButtonText, buttonStyle)) {
 			render = true;

@@ -101,29 +101,31 @@ public class VoxemeInit : MonoBehaviour {
 								Debug.Log (subObj.name);
 								if (subObj.GetComponent<Rigidbody> () == null) {	// may already have one -- goddamn overachieving scene artists
 									Rigidbody rigidbody = subObj.AddComponent<Rigidbody> ();
-									// assume mass is a volume of uniform density
-									// assumption: all objects have the same density
-									float x = Helper.GetObjectWorldSize (subObj).size.x;
-									float y = Helper.GetObjectWorldSize (subObj).size.y;
-									float z = Helper.GetObjectWorldSize (subObj).size.z;
-									rigidbody.mass = x * y * z * (container.GetComponent<Voxeme> ().density);
+									if (rigidbody != null) {
+										// assume mass is a volume of uniform density
+										// assumption: all objects have the same density
+										float x = Helper.GetObjectWorldSize (subObj).size.x;
+										float y = Helper.GetObjectWorldSize (subObj).size.y;
+										float z = Helper.GetObjectWorldSize (subObj).size.z;
+										rigidbody.mass = x * y * z * (container.GetComponent<Voxeme> ().density);
 
-									// bunch of crap assumptions to calculate drag:
-									// air density: 1.225 kg/m^3
-									// flow velocity = parent voxeme moveSpeed
-									// use box collider surface area for reference area
-									// use Reynolds number for drag coefficient - assume 1
-									// https://en.wikipedia.org/wiki/Drag_coefficient
-									rigidbody.drag = 1.225f * voxeme.moveSpeed * ((2 * x * y) + (2 * y * z) + (2 * x * z)) * 1.0f;
-									//rigidbody.drag = 0f;
-									//rigidbody.angularDrag = 0f;
+										// bunch of crap assumptions to calculate drag:
+										// air density: 1.225 kg/m^3
+										// flow velocity = parent voxeme moveSpeed
+										// use box collider surface area for reference area
+										// use Reynolds number for drag coefficient - assume 1
+										// https://en.wikipedia.org/wiki/Drag_coefficient
+										rigidbody.drag = 1.225f * voxeme.moveSpeed * ((2 * x * y) + (2 * y * z) + (2 * x * z)) * 1.0f;
+										//rigidbody.drag = 0f;
+										//rigidbody.angularDrag = 0f;
 
-									//rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+										//rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
 
-									// get subobject initial rotations
-									//Debug.Log(rigidbody.name);
-									//Debug.Log(rigidbody.rotation.eulerAngles);
-									//container.GetComponent<Voxeme> ().startEventRotations.Add(rigidbody.name,rigidbody.rotation.eulerAngles);
+										// get subobject initial rotations
+										//Debug.Log(rigidbody.name);
+										//Debug.Log(rigidbody.rotation.eulerAngles);
+										//container.GetComponent<Voxeme> ().startEventRotations.Add(rigidbody.name,rigidbody.rotation.eulerAngles);
+									}
 
 									// log the orientational displacement of each rigidbody relative to the main body
 									// relativeDisplacement = rotation to get from main body rotation to rigidbody rotation

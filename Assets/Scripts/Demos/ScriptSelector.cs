@@ -66,8 +66,7 @@ public class ScriptSelector : Reset {
 	}
 
 	protected override void OnGUI () {
-		if (GUI.Button (new Rect (10, Screen.height - ((10 + (int)(20 * exitToMenu.FontSizeModifier)) + (5 + (int)(20 * FontSizeModifier))),
-			    100 * FontSizeModifier, 20 * FontSizeModifier), "Load...", buttonStyle)) {
+		if (GUI.Button (buttonRect, "Load...", buttonStyle)) {
 			ChooseScene = true;
 		}
 
@@ -79,7 +78,7 @@ public class ScriptSelector : Reset {
 				}
 			}
 
-			rect = new Rect (120*FontSizeModifier,Screen.height - ((10 + (int)(20 * exitToMenu.FontSizeModifier)) + (20 + (int)(80 * FontSizeModifier))),
+			rect = new Rect (120*FontSizeModifier, buttonRect.y - (5 + (int)(20 * FontSizeModifier)) + (20 + (int)(80 * FontSizeModifier)),
 				width+60,120 * FontSizeModifier);
 			GUILayout.BeginArea (rect, GUI.skin.window);
 			scrollPosition = GUILayout.BeginScrollView (scrollPosition, false, false);

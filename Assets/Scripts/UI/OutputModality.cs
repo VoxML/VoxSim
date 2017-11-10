@@ -12,7 +12,7 @@ public class OutputModality : FontManager {
 
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle buttonStyle;
 
 	float fontSizeModifier;
 
@@ -20,9 +20,7 @@ public class OutputModality : FontManager {
 
 	// Use this for initialization
 	void Start () {
-		buttonStyle = new GUIStyle ("Button");
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
 
 		help = GameObject.Find ("Help").GetComponent<HelpModalWindow> ();
 	}
@@ -35,6 +33,9 @@ public class OutputModality : FontManager {
 	}
 
 	protected void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
+
 		string buttonText = ((int)(modality & Modality.Linguistic) == 1) ? "Language Off" : "Language On";
 
 		float buttonWidth = buttonStyle.CalcSize(new GUIContent (buttonText)).x + (14*fontSizeModifier);

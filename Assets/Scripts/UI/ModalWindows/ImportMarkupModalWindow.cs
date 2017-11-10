@@ -21,7 +21,7 @@ public class ImportMarkupEventArgs : EventArgs {
 public class ImportMarkupModalWindow : ModalWindow {
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle buttonStyle;
 
 	public int selected = -1;
 
@@ -48,11 +48,7 @@ public class ImportMarkupModalWindow : ModalWindow {
 
 	void Start () {
 		//persistent = true;
-
-		buttonStyle = new GUIStyle ("Button");
-
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
 	
 		base.Start ();
 	}
@@ -62,6 +58,9 @@ public class ImportMarkupModalWindow : ModalWindow {
 	}	
 
 	protected override void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
+
 		base.OnGUI ();
 	}
 
