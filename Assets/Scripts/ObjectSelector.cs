@@ -20,8 +20,6 @@ public class ObjectSelector : MonoBehaviour {
 
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
-
 	float fontSizeModifier;	
 	public float FontSizeModifier {
 		get { return fontSizeModifier; }

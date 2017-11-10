@@ -36,21 +36,16 @@ public class OutputController : FontManager {
 	public int outputMargin;
 	public Rect outputRect = new Rect();
 
-	GUIStyle labelStyle = new GUIStyle ("Label");
-	GUIStyle textFieldStyle = new GUIStyle ("TextField");
+	GUIStyle labelStyle;
+	GUIStyle textFieldStyle;
 
 	float fontSizeModifier;
 
 	void Start() {
-		labelStyle = new GUIStyle ("Label");
-		textFieldStyle = new GUIStyle ("TextField");
 		fontSizeModifier = (float)((float)fontSize / (float)defaultFontSize);
 
 		outputWidth = System.Convert.ToInt32(Screen.width - outputMargin);
 		outputHeight = System.Convert.ToInt32(20.0f * (float)fontSizeModifier);
-
-		labelStyle.fontSize = fontSize;
-		textFieldStyle.fontSize = fontSize;
 
 		if (alignment == Alignment.Left) {
 			if (placement == Placement.Top) {
@@ -84,6 +79,12 @@ public class OutputController : FontManager {
 	}
 
 	void OnGUI() {
+		labelStyle = new GUIStyle ("Label");
+		textFieldStyle = new GUIStyle ("TextField");
+
+		labelStyle.fontSize = fontSize;
+		textFieldStyle.fontSize = fontSize;
+			
 		GUILayout.BeginArea (outputRect);
 		GUILayout.BeginHorizontal();
 

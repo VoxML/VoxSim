@@ -47,6 +47,8 @@ public class JointGestureDemo : MonoBehaviour {
 	public Vector2 tableSize;
 	public Vector2 vectorScaleFactor;
 	public float vectorConeRadius;
+	public float highlightMoveSpeed;
+	public float highlightQuantum;
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
 	public float knownScreenWidth = .3646f; //m
@@ -97,13 +99,14 @@ public class JointGestureDemo : MonoBehaviour {
 		interactionSystem = Diana.GetComponent<InteractionSystem> ();
 
 		ikControl = Diana.GetComponent<IKControl> ();
-		leftTarget = ikControl.leftHandObj.GetComponent<IKTarget> ();
-		rightTarget = ikControl.rightHandObj.GetComponent<IKTarget> ();
-		headTarget = ikControl.lookObj.GetComponent<IKTarget> ();
+//		leftTarget = ikControl.leftHandObj.GetComponent<IKTarget> ();
+//		rightTarget = ikControl.rightHandObj.GetComponent<IKTarget> ();
+//		headTarget = ikControl.lookObj.GetComponent<IKTarget> ();
 
 		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
+		// store default positions at start
 		leftTargetDefault = ikControl.leftHandObj.transform.position;
 		rightTargetDefault = ikControl.rightHandObj.transform.position;
 		headTargetDefault = ikControl.lookObj.transform.position;
@@ -576,8 +579,11 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 
 						string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
-						objectConfirmation = objVoxemes [0].gameObject;
+
+						if (eventManager.events.Count == 0) {
+							OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
+							objectConfirmation = objVoxemes [0].gameObject;
+						}
 					}
 				}
 			}
@@ -585,8 +591,10 @@ public class JointGestureDemo : MonoBehaviour {
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
 
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts[actionOptions [0]]));
-				eventConfirmation = actionOptions [0];
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
+					eventConfirmation = actionOptions [0];
+				}
 			}
 		}
 		else if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
@@ -610,11 +618,12 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 
 						//string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
-						OutputHelper.PrintOutput (Role.Affector, "Which block?");
 
-						ReachFor (objVoxemes [0].gameObject);
-
-						objectConfirmation = null;//objVoxemes [0].gameObject;
+						if (eventManager.events.Count == 0) {
+							OutputHelper.PrintOutput (Role.Affector, "Which block?");
+							ReachFor (objVoxemes [0].gameObject);
+							objectConfirmation = null;
+						}
 					}
 				}
 			}
@@ -622,8 +631,10 @@ public class JointGestureDemo : MonoBehaviour {
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
 
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts[actionOptions [0]]));
-				eventConfirmation = actionOptions [0];
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
+					eventConfirmation = actionOptions [0];
+				}
 			}
 		}
 	}
@@ -653,9 +664,11 @@ public class JointGestureDemo : MonoBehaviour {
 						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
 					}
 
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move something this way?"));
-					MoveToPerform ();
-					gestureController.PerformGesture (performGesture);
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move something this way?"));
+						MoveToPerform ();
+						gestureController.PerformGesture (performGesture);
+					}
 				}
 				else {
 					if (dir == "left") {
@@ -677,8 +690,10 @@ public class JointGestureDemo : MonoBehaviour {
 						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
 					}
 
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this this way?"));
-					gestureController.PerformGesture (performGesture);
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
+						gestureController.PerformGesture (performGesture);
+					}
 				}
 			}
 			else {
@@ -701,26 +716,32 @@ public class JointGestureDemo : MonoBehaviour {
 					//performGesture = AvatarGesture.RARM_CARRY_DOWN;
 				}
 
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to move this this way?"));
-				MoveToPerform ();
-				gestureController.PerformGesture (performGesture);
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
+					MoveToPerform ();
+					gestureController.PerformGesture (performGesture);
+				}
 			}
 		}
 		else if (gesture.StartsWith("grab")) {
 			if (indicatedObj == null) {
 				if (graspedObj == null) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab something?"));
-					MoveToPerform ();
-					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to grab something?"));
+						MoveToPerform ();
+						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+					}
 				}
 				else {
 				}
 			}
 			else {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
-				MoveToPerform ();
-				gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
-				// actionOptions.Add("grasp");
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
+					MoveToPerform ();
+					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+					// actionOptions.Add("grasp");
+				}
 			}
 		}
 		else if (gesture.StartsWith("push")) {
@@ -739,9 +760,11 @@ public class JointGestureDemo : MonoBehaviour {
 					performGesture = AvatarGesture.RARM_PUSH_BACK;
 				}
 
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
-				MoveToPerform ();
-				gestureController.PerformGesture (performGesture);
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+					MoveToPerform ();
+					gestureController.PerformGesture (performGesture);
+				}
 			}
 			else {
 				if (dir == "left") {
@@ -767,9 +790,11 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
-				MoveToPerform ();
-				gestureController.PerformGesture (performGesture);
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+					MoveToPerform ();
+					gestureController.PerformGesture (performGesture);
+				}
 			}
 		}
 		else if (gesture.StartsWith("point")) { 
@@ -800,7 +825,9 @@ public class JointGestureDemo : MonoBehaviour {
 					Disambiguate (actionOptions);
 				}
 				else {
-					OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+					}
 				}
 			}
 			else if (objectConfirmation != null) {
@@ -819,7 +846,9 @@ public class JointGestureDemo : MonoBehaviour {
 					Disambiguate (objectMatches);
 				}
 				else {
-					OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+					}
 				}
 			}
 //			else {
@@ -872,21 +901,23 @@ public class JointGestureDemo : MonoBehaviour {
 					indicatedRegion = null;
 				}
 
-				eventManager.InsertEvent ("", 0);
-				eventManager.InsertEvent (eventConfirmation, 1);
-				eventConfirmation = "";
-				actionOptions.Clear ();
-				objectMatches.Clear ();
-				confirmationTexts.Clear ();
-
-				OutputHelper.PrintOutput (Role.Affector, "OK.");
+				if (eventManager.events.Count == 0) {
+					eventManager.InsertEvent ("", 0);
+					eventManager.InsertEvent (eventConfirmation, 1);
+					eventConfirmation = "";
+					actionOptions.Clear ();
+					objectMatches.Clear ();
+					confirmationTexts.Clear ();
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+				}
 			}
 			else if (objectConfirmation != null) {
-				indicatedObj = objectConfirmation;
-				objectConfirmation = null;
-				objectMatches.Clear ();
-
-				OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+					indicatedObj = objectConfirmation;
+					objectConfirmation = null;
+					objectMatches.Clear ();
+				}
 			}
 //			else {
 //				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
@@ -900,14 +931,14 @@ public class JointGestureDemo : MonoBehaviour {
 				foreach (GameObject block in blocks) {
 					if (block.activeInHierarchy &&
 					    block.GetComponent<AttributeSet> ().attributes.Contains (color)) {
-						indicatedObj = block;
-						objectConfirmation = null;
-						objectMatches.Clear ();
-
-						ReachFor (indicatedObj);
-
-						OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-						break;
+						if (eventManager.events.Count == 0) {
+							OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+							indicatedObj = block;
+							objectConfirmation = null;
+							objectMatches.Clear ();
+							ReachFor (indicatedObj);
+							break;
+						}
 					}
 				}
 			}
@@ -915,25 +946,29 @@ public class JointGestureDemo : MonoBehaviour {
 				foreach (GameObject match in objectMatches) {
 					if (match.activeInHierarchy &&
 						match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower())) {
-						indicatedObj = match;
-						objectConfirmation = null;
-						objectMatches.Clear ();
-
-						ReachFor (indicatedObj);
-
-						OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-						break;
+						if (eventManager.events.Count == 0) {
+							OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+							indicatedObj = match;
+							objectConfirmation = null;
+							objectMatches.Clear ();
+							ReachFor (indicatedObj);
+							break;
+						}
 					}
 				}
 
 				if (indicatedObj == null) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks on this side is {0}.", color.ToLower()));
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
+					}
 				}
 			}
 		}
 		else {	// received color with object already indicated
-			LookAt(indicatedObj.transform.position);
-			OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
+				LookAt (indicatedObj.transform.position);
+			}
 		}
 	}
 
@@ -941,10 +976,14 @@ public class JointGestureDemo : MonoBehaviour {
 		if (state == true) {
 			sessionCounter++;
 			if (sessionCounter > 1) {
-				OutputHelper.PrintOutput (Role.Affector, "Welcome back!");
-			}
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "Welcome back!");
+				}
+			} 
 			else {
-				OutputHelper.PrintOutput (Role.Affector, "Hello.");
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "Hello.");
+				}
 			}
 
 			objectMatches.Clear ();
@@ -977,26 +1016,32 @@ public class JointGestureDemo : MonoBehaviour {
 				graspedObj.GetComponent<Voxeme>().grasperCoord = null;
 			}
 
-			OutputHelper.PrintOutput (Role.Affector, "Bye!");
+			if (eventManager.events.Count == 0) {	// TODO: what if we disengage while Diana is performing an action?
+				OutputHelper.PrintOutput (Role.Affector, "Bye!");
 
-			objectMatches.Clear ();
-			objectConfirmation = null;
+				objectMatches.Clear ();
+				objectConfirmation = null;
 
-			actionOptions.Clear ();
-			eventConfirmation = "";
+				actionOptions.Clear ();
+				eventConfirmation = "";
 
-			ikControl.leftHandObj.position = leftTargetDefault;
-			ikControl.rightHandObj.position = rightTargetDefault;
+				ikControl.leftHandObj.position = leftTargetDefault;
+				ikControl.rightHandObj.position = rightTargetDefault;
 
-			LookForward ();
-			TurnForward ();
+				LookForward ();
+				TurnForward ();
 
-			indicatedObj = null;
-			graspedObj = null;
+				indicatedObj = null;
+				graspedObj = null;
+			}
 		}
 	}
 
 	void Deixis(string dir) {
+		if (eventManager.events.Count > 0) {
+			return;
+		}
+
 		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
@@ -1083,6 +1128,10 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Deixis(List<float> vector) {
+		if (eventManager.events.Count > 0) {
+			return;
+		}
+
 		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
@@ -1129,6 +1178,10 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void TrackPointing(List<float> vector) {
+		if (eventManager.events.Count > 0) {
+			return;
+		}
+
 		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
@@ -1141,10 +1194,12 @@ public class JointGestureDemo : MonoBehaviour {
 			regionHighlight.transform.position = highlightCenter;
 		}
 
-		Vector3 offset = MoveHighlight (highlightCenter);
+		if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
+			Vector3 offset = MoveHighlight (highlightCenter);
 
-		if (offset.sqrMagnitude <= Constants.EPSILON) {
-			regionHighlight.transform.position = highlightCenter;
+			if (offset.sqrMagnitude <= Constants.EPSILON) {
+				regionHighlight.transform.position = highlightCenter;
+			}
 		}
 
 		//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
@@ -1172,14 +1227,14 @@ public class JointGestureDemo : MonoBehaviour {
 		Vector3 offset = regionHighlight.transform.position - highlightCenter;
 		Vector3 normalizedOffset = Vector3.Normalize (offset);
 
-		regionHighlight.transform.position = new Vector3 (regionHighlight.transform.position.x - normalizedOffset.x * Time.deltaTime * 5.0f,
-			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * 5.0f,
-			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * 5.0f);
+		regionHighlight.transform.position = new Vector3 (regionHighlight.transform.position.x - normalizedOffset.x * Time.deltaTime * highlightMoveSpeed,
+			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * highlightMoveSpeed,
+			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * highlightMoveSpeed);
 		
 		if ((regionHighlight.transform.position.x < Helper.GetObjectWorldSize(demoSurface).min.x) ||
 			(regionHighlight.transform.position.x > Helper.GetObjectWorldSize(demoSurface).max.x) ||
 			(regionHighlight.transform.position.z < Helper.GetObjectWorldSize(demoSurface).min.z) ||
-			(regionHighlight.transform.position.z > Helper.GetObjectWorldSize(demoSurface).min.z)) {
+			(regionHighlight.transform.position.z > Helper.GetObjectWorldSize(demoSurface).max.z)) {
 			// hide region highlight
 			regionHighlight.GetComponent<Renderer> ().enabled = false;
 		}
@@ -1216,6 +1271,10 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Grab(bool state) {
+		if (eventManager.events.Count > 0) {
+			return;
+		}
+
 		OutputHelper.PrintOutput (Role.Affector, "");
 		if (state == true) {
 			if (indicatedObj != null) {
@@ -1265,14 +1324,26 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Move(string dir) {
+		if (eventManager.events.Count > 0) {
+			return;
+		}
+
 		OutputHelper.PrintOutput (Role.Affector, "");
-		if (graspedObj != null) {
-			Bounds graspedObjBounds = Helper.GetObjectWorldSize (graspedObj);
+		GameObject theme = null;
+		if (indicatedObj != null) {
+			theme = indicatedObj;
+		}
+		else if (graspedObj != null) {
+			theme = graspedObj;
+		}
+
+		if (theme != null) {
+			Bounds graspedObjBounds = Helper.GetObjectWorldSize (theme);
 			if (dir == "left") {	// going this direction
-				if (frontRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				if (frontRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the left of the grasped block
 									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1283,10 +1354,10 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 					}
 				} 
-				else if (backRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				else if (backRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the left of the grasped block
 								    (backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1298,9 +1369,9 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 
-				string graspedAttr = string.Empty;
-				if (graspedObj.GetComponent<Voxeme> () != null) {
-					graspedAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+				string themeAttr = string.Empty;
+				if (theme.GetComponent<Voxeme> () != null) {
+					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 				}
 
 				Vector3 target = Vector3.zero;
@@ -1310,27 +1381,27 @@ public class JointGestureDemo : MonoBehaviour {
 					if (obj.GetComponent<Voxeme> () != null) {
 						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
-					Debug.Log (string.Format ("put({0},(on{1}))", graspedObj.name, obj.name));
+					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
 					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
+					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
 				}
 
 				// not moving on top of another object
-				if (frontRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				if (frontRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front {1} part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's front {1} part", themeAttr, dir));
 				}
-				else if (backRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				else if (backRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back {1} part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's back {1} part", themeAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1344,6 +1415,7 @@ public class JointGestureDemo : MonoBehaviour {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
 						//TurnToAccess (target);
+						indicatedObj = null;
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1351,27 +1423,28 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					if (frontRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					else if (backRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					else if (backRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
 					//TurnToAccess (target);
+					indicatedObj = null;
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "right") {
-				if (frontRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				if (frontRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the right of the grasped block
 									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1382,10 +1455,10 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 					}
 				} 
-				else if (backRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				else if (backRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the right of the grasped block
 									(backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1397,9 +1470,9 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 
-				string graspedAttr = string.Empty;
-				if (graspedObj.GetComponent<Voxeme> () != null) {
-					graspedAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+				string themeAttr = string.Empty;
+				if (theme.GetComponent<Voxeme> () != null) {
+					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 				}
 
 				Vector3 target = Vector3.zero;
@@ -1409,27 +1482,27 @@ public class JointGestureDemo : MonoBehaviour {
 					if (obj.GetComponent<Voxeme> () != null) {
 						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
-					Debug.Log (string.Format ("put({0},(on{1}))", graspedObj.name, obj.name));
+					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
 					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
+					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
 				}
 
 				// not moving on top of another object
-				if (frontRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				if (frontRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front {1} part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's front {1} part", themeAttr, dir));
 				}
-				else if (backRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				else if (backRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back {1} part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's back {1} part", themeAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1443,6 +1516,7 @@ public class JointGestureDemo : MonoBehaviour {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
 						//TurnToAccess (target);
+						indicatedObj = null;
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1450,27 +1524,28 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					if (frontRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					else if (backRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					else if (backRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
 					//TurnToAccess (target);
+					indicatedObj = null;
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "front") {
-				if (leftRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				if (leftRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the front of the grasped block
 									(leftRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1481,10 +1556,10 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 					}
 				} 
-				else if (rightRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				else if (rightRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the front of the grasped block
 									(rightRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1496,9 +1571,9 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 
-				string graspedAttr = string.Empty;
-				if (graspedObj.GetComponent<Voxeme> () != null) {
-					graspedAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+				string themeAttr = string.Empty;
+				if (theme.GetComponent<Voxeme> () != null) {
+					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 				}
 
 				Vector3 target = Vector3.zero;
@@ -1508,27 +1583,27 @@ public class JointGestureDemo : MonoBehaviour {
 					if (obj.GetComponent<Voxeme> () != null) {
 						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
-					Debug.Log (string.Format ("put({0},(on{1}))", graspedObj.name, obj.name));
+					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
 					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
+					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
 				}
 
 				// not moving on top of another object
-				if (leftRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				if (leftRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} left part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's {1} left part", themeAttr, dir));
 				}
-				else if (rightRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				else if (rightRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} right part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's {1} right part", themeAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1542,6 +1617,7 @@ public class JointGestureDemo : MonoBehaviour {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
 						//TurnToAccess (target);
+						indicatedObj = null;
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1549,27 +1625,28 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					if (leftRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					else if (rightRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					else if (rightRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
 					//TurnToAccess (target);
+					indicatedObj = null;
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "back") {
-				if (leftRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				if (leftRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the back of the grasped block
 									(leftRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1580,10 +1657,10 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 					}
 				} 
-				else if (rightRegion.Contains(graspedObj)) {	// if the grasped block is in this region
+				else if (rightRegion.Contains(theme)) {	// if the grasped block is in this region
 					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 						if (block.activeInHierarchy) {
-							if ((block != graspedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the back of the grasped block
 									(rightRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 									if (!objectMatches.Contains (block)) {
@@ -1595,9 +1672,9 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 
-				string graspedAttr = string.Empty;
-				if (graspedObj.GetComponent<Voxeme> () != null) {
-					graspedAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+				string themeAttr = string.Empty;
+				if (theme.GetComponent<Voxeme> () != null) {
+					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 				}
 
 				Vector3 target = Vector3.zero;
@@ -1607,27 +1684,27 @@ public class JointGestureDemo : MonoBehaviour {
 					if (obj.GetComponent<Voxeme> () != null) {
 						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
-					Debug.Log (string.Format ("put({0},(on{1}))", graspedObj.name, obj.name));
+					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
 					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", graspedObj.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", graspedAttr, objAttr));
+					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
 				}
 
 				// not moving on top of another object
-				if (leftRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				if (leftRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} left part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's {1} left part", themeAttr, dir));
 				}
-				else if (rightRegion.Contains (graspedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, graspedObj).center;
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+				else if (rightRegion.Contains (theme)) {	// stay in this region
+					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, theme).center;
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} right part", graspedAttr, dir));
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+						string.Format ("put the {0} block in the table's {1} right part", themeAttr, dir));
 				}
 
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1641,6 +1718,7 @@ public class JointGestureDemo : MonoBehaviour {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (actionOptions [0], 1);
 						//TurnToAccess (target);
+						indicatedObj = null;
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -1648,17 +1726,18 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					if (leftRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
-					else if (rightRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, graspedObj).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
+					else if (rightRegion.Contains (theme)) {
+						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, theme).center;
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), 1);
 					}
 					//TurnToAccess (target);
+					indicatedObj = null;
 					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
@@ -1666,12 +1745,12 @@ public class JointGestureDemo : MonoBehaviour {
 			} 
 			else if (dir == "up") {
 				string objAttr = string.Empty;
-				if (graspedObj.GetComponent<Voxeme> () != null) {
-					objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+				if (theme.GetComponent<Voxeme> () != null) {
+					objAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 				}
 
-				actionOptions.Add (string.Format ("lift({0})", graspedObj.name));
-				confirmationTexts.Add (string.Format ("lift({0})", graspedObj.name), string.Format ("lift the {0} block ", objAttr));
+				actionOptions.Add (string.Format ("lift({0})", theme.name));
+				confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block ", objAttr));
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 					Disambiguate (actionOptions);
 				} 
@@ -1688,23 +1767,23 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (string.Format ("lift({0})", graspedObj.name), 1);
+					eventManager.InsertEvent (string.Format ("lift({0})", theme.name), 1);
 					objectMatches.Clear ();
 				}
 			} 
 			else if (dir == "down") {
 				if (eventConfirmation == "") {
 					string objAttr = string.Empty;
-					if (graspedObj.GetComponent<Voxeme> () != null) {
+					if (theme.GetComponent<Voxeme> () != null) {
 						objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
 					
-					Vector3 target = new Vector3 (graspedObj.transform.position.x,
+					Vector3 target = new Vector3 (theme.transform.position.x,
 						                Helper.GetObjectWorldSize (demoSurface).max.y,
-						                graspedObj.transform.position.z);
-					actionOptions.Add (string.Format ("put({0},{1})", graspedObj.name,
+										theme.transform.position.z);
+					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", graspedObj.name,
+					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)), string.Format ("put the {0} block down", objAttr));
 					if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 						Disambiguate (actionOptions);
@@ -1716,6 +1795,7 @@ public class JointGestureDemo : MonoBehaviour {
 						else {
 							eventManager.InsertEvent ("", 0);
 							eventManager.InsertEvent (actionOptions [0], 1);
+							indicatedObj = null;
 							graspedObj = null;
 							actionOptions.Clear ();
 							objectMatches.Clear ();
@@ -1723,10 +1803,11 @@ public class JointGestureDemo : MonoBehaviour {
 					} 
 					else {
 						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (string.Format ("put({0},{1})", graspedObj.name,
-							Helper.VectorToParsable (new Vector3 (graspedObj.transform.position.x,
+						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (new Vector3 (theme.transform.position.x,
 								Helper.GetObjectWorldSize (demoSurface).max.y,
-								graspedObj.transform.position.z))), 1);
+								theme.transform.position.z))), 1);
+						indicatedObj = null;
 						graspedObj = null;
 						actionOptions.Clear ();
 						objectMatches.Clear ();
@@ -2326,42 +2407,44 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void LookAt(Vector3 point) {
-		//GameObject grasper;
-
-		//Bounds bounds = Helper.GetObjectWorldSize (obj);
-
-		// which hand is closer?
-//		float leftToGoalDist = (leftGrasper.transform.position - bounds.ClosestPoint (leftGrasper.transform.position)).magnitude;
-//		float rightToGoalDist = (rightGrasper.transform.position - bounds.ClosestPoint (rightGrasper.transform.position)).magnitude;
-//
-//		if (leftToGoalDist < rightToGoalDist) {
-//			grasper = leftGrasper;
-//			graspController.grasper = (int)Gestures.HandPose.LeftPoint;
-//		}
-//		else {
-//			grasper = rightGrasper;
-//			graspController.grasper = (int)Gestures.HandPose.RightPoint;
-//		}
-
-		//IKControl ikControl = Wilson.GetComponent<IKControl> ();
-		if (ikControl != null) {
-			Vector3 target = new Vector3 (point.x/2.0f, (point.y+headTargetDefault.y)/2.0f, point.z/2.0f);
- 			headTarget.targetPosition = target;
-		}
-	}
-
 	void MoveToPerform() {
-		Diana.GetComponent<IKControl> ().leftHandObj.position = Diana.GetComponent<GraspScript> ().leftDefaultPosition;
-		Diana.GetComponent<IKControl> ().rightHandObj.position = Diana.GetComponent<GraspScript> ().rightDefaultPosition;
+//		Diana.GetComponent<IKControl> ().leftHandObj.position = leftTargetDefault;
+//		Diana.GetComponent<IKControl> ().rightHandObj.position = rightTargetDefault;
+//		Diana.GetComponent<IKControl> ().lookObj.position = headTargetDefault;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).target.position = leftTargetDefault;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).target.position = leftTargetDefault;
 		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
+		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
+		LookForward ();
 	}
 
 	void LookForward() {
-		if (ikControl != null) {
-			//TODO: Head tracking
-			//headTarget.targetPosition = headTargetDefault;
-		}
+		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+	}
+
+	void LookAt(GameObject obj) {
+		Vector3 target = new Vector3 (obj.transform.position.x/2.0f,
+			(obj.transform.position.y+headTargetDefault.y)/2.0f, obj.transform.position.z/2.0f);
+		Diana.GetComponent<LookAtIK> ().solver.target.position = obj.transform.position;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+	}
+
+	void LookAt(Vector3 point) {
+		Vector3 target = new Vector3 (point.x/2.0f, (point.y+headTargetDefault.y)/2.0f, point.z/2.0f);
+		Diana.GetComponent<LookAtIK> ().solver.target.position = target;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+	}
+
+	void TurnForward() {
+		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+
+		ikControl.leftHandObj.position = leftTargetDefault;
+		ikControl.rightHandObj.position = rightTargetDefault;
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 	}
 
 	void TurnToAccess(Vector3 point) {
@@ -2388,18 +2471,6 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<IKControl>().targetRotation = Quaternion.LookRotation (offset,Vector3.up).eulerAngles;
 	}
 
-	void TurnForward() {
-		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
-		gestureController.PerformGesture(AvatarGesture.RARM_IDLE);
-		gestureController.PerformGesture(AvatarGesture.HEAD_IDLE);
-
-		ikControl.leftHandObj.position = leftTargetDefault;
-		ikControl.rightHandObj.position = rightTargetDefault;
-		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-		Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).target);
-	}
-
 	void ReachFor(Vector3 coord) {
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
 
@@ -2415,6 +2486,8 @@ public class JointGestureDemo : MonoBehaviour {
 			ikControl.leftHandObj.transform.position = coord+offset;
 			InteractionHelper.SetRightHandTarget (Diana, ikControl.leftHandObj);
 		}
+
+		LookAt (coord);
 	}
 
 	void ReachFor(GameObject obj) {
@@ -2433,6 +2506,8 @@ public class JointGestureDemo : MonoBehaviour {
 			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
 			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
+
+		LookAt (obj);
 	}
 
 	Vector3 TransformToSurface(List<float> vector) {
@@ -2490,10 +2565,14 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void ConnectionLost(object sender, EventArgs e) {
 		if (sessionCounter >= 1) {
-			OutputHelper.PrintOutput (Role.Affector, "Hey, where'd you go?");
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, "Hey, where'd you go?");
+			}
 		}
 		else {
-			OutputHelper.PrintOutput (Role.Affector, "Anyone there?");
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, "Anyone there?");
+			}
 		}
 	}
 }

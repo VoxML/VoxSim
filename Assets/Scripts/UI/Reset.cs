@@ -7,13 +7,13 @@ public class Reset : UIButton {
 
 	public int fontSize = 12;
 
-	protected GUIStyle buttonStyle = new GUIStyle ("Button");
+	protected GUIStyle buttonStyle;
 
 	// Use this for initialization
 	protected void Start () {
-		buttonStyle = new GUIStyle ("Button");
+		//buttonStyle = new GUIStyle ("Button");
 		FontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
+		//buttonStyle.fontSize = fontSize;
 
 		base.Start ();
 	}
@@ -24,6 +24,9 @@ public class Reset : UIButton {
 	}	
 
 	protected virtual void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
+
 		if (GUI.Button (buttonRect, buttonText, buttonStyle)) {
 			StartCoroutine(SceneHelper.LoadScene (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name));
 			return;

@@ -14,7 +14,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle buttonStyle;
 
 	float fontSizeModifier;	
 	public float FontSizeModifier {
@@ -33,10 +33,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 		windowTitle = "Gesture Input Log";
 		persistent = true;
 
-		buttonStyle = new GUIStyle ("Button");
-
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
 
 		windowRect = new Rect (15, 15 + (int)(20 * fontSizeModifier), 200, 200);
 	}
@@ -50,6 +47,8 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	}	
 
 	protected override void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
 
 		if (GUI.Button (new Rect (10, 10, GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
 			actionButtonText, buttonStyle)) {

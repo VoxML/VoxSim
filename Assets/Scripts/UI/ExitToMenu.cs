@@ -7,13 +7,11 @@ public class ExitToMenu : UIButton {
 
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle buttonStyle;
 
 	// Use this for initialization
 	void Start () {
-		buttonStyle = new GUIStyle ("Button");
 		FontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
 
 		base.Start ();
 	}
@@ -24,6 +22,9 @@ public class ExitToMenu : UIButton {
 	}
 		
 	protected override void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
+
 		if (GUI.Button (buttonRect, buttonText, buttonStyle)) {
 			StartCoroutine(SceneHelper.LoadScene ("VoxSimMenu"));
 			return;

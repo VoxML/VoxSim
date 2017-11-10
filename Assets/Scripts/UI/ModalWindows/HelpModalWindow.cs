@@ -34,10 +34,7 @@ public class HelpModalWindow : ModalWindow {
 		windowTitle = "Help";
 		persistent = true;
 
-		buttonStyle = new GUIStyle ("Button");
-
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
-		buttonStyle.fontSize = fontSize;
 	}
 	
 	// Update is called once per frame
@@ -45,6 +42,9 @@ public class HelpModalWindow : ModalWindow {
 	}	
 
 	protected override void OnGUI () {
+		buttonStyle = new GUIStyle ("Button");
+		buttonStyle.fontSize = fontSize;
+
 		if (GUI.Button (new Rect (Screen.width-(15 + (int)(110*fontSizeModifier/3)),
 			Screen.height-(10 + (int)(20*fontSizeModifier)), 38*fontSizeModifier, 20*fontSizeModifier), "Help", buttonStyle))
 			render = true;

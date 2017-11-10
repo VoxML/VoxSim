@@ -55,7 +55,7 @@ public class UIButton : FontManager
 		}
 		else if (position == UIButtonPosition.BottomRight) {
 			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomRight);
-			buttonRect = new Rect (Screen.width - (10 + offset.x + dimensions.x), Screen.height - (10 + offset.y + dimensions.y), dimensions.x, dimensions.y);
+			buttonRect = new Rect (Screen.width - (10 + offset.x + dimensions.x), Screen.height - (10 + offset.y +	 dimensions.y), dimensions.x, dimensions.y);
 		}
 	}
 
