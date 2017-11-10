@@ -47,8 +47,17 @@ public class JointGestureDemo : MonoBehaviour {
 	public Vector2 tableSize;
 	public Vector2 vectorScaleFactor;
 	public float vectorConeRadius;
+	public Vector3 highlightCenter;
 	public float highlightMoveSpeed;
+	public float highlightTurnSpeed;
 	public float highlightQuantum;
+	public Material highlightMaterial;
+
+	// highlight oscillation speed factor, upper limit scale, and lower limit scale
+	public float highlightOscSpeed;
+	public float highlightOscUpper;
+	public float highlightOscLower;
+	int highlightOscillateDirection = 1;
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
 	public float knownScreenWidth = .3646f; //m
@@ -111,10 +120,12 @@ public class JointGestureDemo : MonoBehaviour {
 		rightTargetDefault = ikControl.rightHandObj.transform.position;
 		headTargetDefault = ikControl.lookObj.transform.position;
 
-		regionHighlight = GameObject.CreatePrimitive (PrimitiveType.Sphere);
+		regionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
+		regionHighlight.name = "Highlight";
 		regionHighlight.transform.position = Vector3.zero;
-		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius,vectorConeRadius,vectorConeRadius);
+		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius*.2f,vectorConeRadius*.2f,vectorConeRadius*.2f);
 		regionHighlight.tag = "UnPhysic";
+		regionHighlight.GetComponent<Renderer> ().material = highlightMaterial;
 		regionHighlight.GetComponent<Renderer> ().enabled = false;
 		Destroy (regionHighlight.GetComponent<Collider> ());
 	}
@@ -222,6 +233,28 @@ public class JointGestureDemo : MonoBehaviour {
 				H points @ x (real space directly under Kinect on ["]table["] surface, aka "my" edge of virtual table) -> ~(0.0,0.0)
 				H points @ # (far edge of virtual table) -> ~(0.0,-1.6)
 			 */
+		}
+
+		if (regionHighlight.GetComponent<Renderer> ().enabled) {
+			regionHighlight.transform.eulerAngles = new Vector3 (regionHighlight.transform.eulerAngles.x,
+				regionHighlight.transform.eulerAngles.y + Time.deltaTime * highlightTurnSpeed, regionHighlight.transform.eulerAngles.z);
+
+			if (highlightOscillateDirection == 1) { // grow
+				regionHighlight.transform.localScale = new Vector3 (regionHighlight.transform.localScale.x + Time.deltaTime * highlightOscSpeed,
+					regionHighlight.transform.localScale.y, regionHighlight.transform.localScale.z + Time.deltaTime * highlightOscSpeed);
+					
+				if (regionHighlight.transform.localScale.x >= (vectorConeRadius * .2f) * highlightOscUpper) {
+					highlightOscillateDirection *= -1;	
+				}
+			}
+			else if (highlightOscillateDirection == -1) { // shrink
+				regionHighlight.transform.localScale = new Vector3 (regionHighlight.transform.localScale.x - Time.deltaTime * highlightOscSpeed,
+					regionHighlight.transform.localScale.y, regionHighlight.transform.localScale.z - Time.deltaTime * highlightOscSpeed);
+
+				if (regionHighlight.transform.localScale.x <= (vectorConeRadius * .2f) * highlightOscLower) {
+					highlightOscillateDirection *= -1;	
+				}
+			}
 		}
 
 		// Synthetic vision mockup
@@ -356,10 +389,10 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
-				if (messageStr.Contains ("left point")) {
+				if (messageStr.StartsWith ("left point")) {
 					Deixis (GetGestureVector (messageStr, "left point"));
 				} 
-				else if (messageStr.Contains ("right point")) {
+				else if (messageStr.StartsWith ("right point")) {
 					Deixis (GetGestureVector (messageStr, "right point"));
 				} 
 				else if (messageStr.StartsWith ("grab")) {
@@ -376,10 +409,10 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
-				if (messageStr.Contains ("left point")) {
+				if (messageStr.StartsWith ("left point")) {
 					Suggest ("point");
 				} 
-				else if (messageStr.Contains ("right point")) {
+				else if (messageStr.StartsWith ("right point")) {
 					Suggest ("point");
 				} 
 				else if (messageStr.StartsWith ("grab")) {
@@ -397,6 +430,15 @@ public class JointGestureDemo : MonoBehaviour {
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 
+				// stop pointing -> turn off highlight
+				if (messageStr.StartsWith ("left point")) {
+					regionHighlight.GetComponent<Renderer> ().enabled = false;
+				} 
+				else if (messageStr.StartsWith ("right point")) {
+					regionHighlight.GetComponent<Renderer> ().enabled = false;
+				}
+
+				// otherwise process gesture over interval
 				string startSignal = FindStartSignal (messageStr);
 
 				if (messageStr.StartsWith ("engage")) {
@@ -658,10 +700,10 @@ public class JointGestureDemo : MonoBehaviour {
 						performGesture = AvatarGesture.RARM_CARRY_BACK;
 					}
 					else if (dir == "up") {
-						//performGesture = AvatarGesture.RARM_CARRY_UP;
+						performGesture = AvatarGesture.RARM_CARRY_UP;
 					}
 					else if (dir == "down") {
-						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
+						performGesture = AvatarGesture.RARM_CARRY_DOWN;
 					}
 
 					if (eventManager.events.Count == 0) {
@@ -684,10 +726,10 @@ public class JointGestureDemo : MonoBehaviour {
 						performGesture = AvatarGesture.RARM_CARRY_BACK;
 					}
 					else if (dir == "up") {
-						//performGesture = AvatarGesture.RARM_CARRY_UP;
+						performGesture = AvatarGesture.RARM_CARRY_UP;
 					}
 					else if (dir == "down") {
-						//performGesture = AvatarGesture.RARM_CARRY_DOWN;
+						performGesture = AvatarGesture.RARM_CARRY_DOWN;
 					}
 
 					if (eventManager.events.Count == 0) {
@@ -710,10 +752,10 @@ public class JointGestureDemo : MonoBehaviour {
 					performGesture = AvatarGesture.RARM_CARRY_BACK;
 				}
 				else if (dir == "up") {
-					//performGesture = AvatarGesture.RARM_CARRY_UP;
+					performGesture = AvatarGesture.RARM_CARRY_UP;
 				}
 				else if (dir == "down") {
-					//performGesture = AvatarGesture.RARM_CARRY_DOWN;
+					performGesture = AvatarGesture.RARM_CARRY_DOWN;
 				}
 
 				if (eventManager.events.Count == 0) {
@@ -729,7 +771,7 @@ public class JointGestureDemo : MonoBehaviour {
 					if (eventManager.events.Count == 0) {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to grab something?"));
 						MoveToPerform ();
-						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 					}
 				}
 				else {
@@ -739,7 +781,7 @@ public class JointGestureDemo : MonoBehaviour {
 				if (eventManager.events.Count == 0) {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
 					MoveToPerform ();
-					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_FRONT);
+					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 					// actionOptions.Add("grasp");
 				}
 			}
@@ -797,11 +839,63 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 		}
-		else if (gesture.StartsWith("point")) { 
+		else if (gesture.StartsWith("left point")) { 
+			string dir = GetGestureContent (gesture, "left point");
+			if (dir == "left") {
+				performGesture = AvatarGesture.LARM_POINT_RIGHT;
+			}
+			else if (dir == "right") {
+				performGesture = AvatarGesture.LARM_POINT_LEFT;
+			}
+			else if (dir == "front") {
+				performGesture = AvatarGesture.LARM_POINT_FRONT;
+			}
+			else if (dir == "back") {
+				performGesture = AvatarGesture.LARM_POINT_BACK;
+			}
+
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (performGesture);
+			}
 		}
-		else if (gesture.StartsWith("posack")) { 
+		else if (gesture.StartsWith("right point")) { 
+			string dir = GetGestureContent (gesture, "right point");
+			if (dir == "left") {
+				performGesture = AvatarGesture.RARM_POINT_RIGHT;
+			}
+			else if (dir == "right") {
+				performGesture = AvatarGesture.RARM_POINT_LEFT;
+			}
+			else if (dir == "front") {
+				performGesture = AvatarGesture.RARM_POINT_FRONT;
+			}
+			else if (dir == "back") {
+				performGesture = AvatarGesture.RARM_POINT_BACK;
+			}
+
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (performGesture);
+			}
+		}
+		else if (gesture.StartsWith("posack")) {
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Was that a yes?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_UP);
+				gestureController.PerformGesture (AvatarGesture.HEAD_NOD);
+			}
 		}
 		else if (gesture.StartsWith("negack")) { 
+			if (eventManager.events.Count == 0) {
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Was that a no?"));
+				MoveToPerform ();
+				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_DOWN);
+				gestureController.PerformGesture (AvatarGesture.HEAD_SHAKE);
+			}
 		}
 	}
 	
@@ -1185,12 +1279,14 @@ public class JointGestureDemo : MonoBehaviour {
 		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
-		Vector3 highlightCenter = TransformToSurface (vector);
+		highlightCenter = TransformToSurface (vector);
 
 		//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
 		//Debug.Log (highlightCenter);
 
+		// jump from origin on first update
 		if (regionHighlight.transform.position.sqrMagnitude <= Constants.EPSILON) {
+			MoveHighlight (highlightCenter);
 			regionHighlight.transform.position = highlightCenter;
 		}
 
@@ -1231,10 +1327,10 @@ public class JointGestureDemo : MonoBehaviour {
 			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * highlightMoveSpeed,
 			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * highlightMoveSpeed);
 		
-		if ((regionHighlight.transform.position.x < Helper.GetObjectWorldSize(demoSurface).min.x) ||
-			(regionHighlight.transform.position.x > Helper.GetObjectWorldSize(demoSurface).max.x) ||
-			(regionHighlight.transform.position.z < Helper.GetObjectWorldSize(demoSurface).min.z) ||
-			(regionHighlight.transform.position.z > Helper.GetObjectWorldSize(demoSurface).max.z)) {
+		if ((regionHighlight.transform.position.x+vectorConeRadius < Helper.GetObjectWorldSize(demoSurface).min.x) ||
+			(regionHighlight.transform.position.x-vectorConeRadius > Helper.GetObjectWorldSize(demoSurface).max.x) ||
+			(regionHighlight.transform.position.z+vectorConeRadius < Helper.GetObjectWorldSize(demoSurface).min.z) ||
+			(regionHighlight.transform.position.z-vectorConeRadius > Helper.GetObjectWorldSize(demoSurface).max.z)) {
 			// hide region highlight
 			regionHighlight.GetComponent<Renderer> ().enabled = false;
 		}
@@ -2422,7 +2518,9 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void LookForward() {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
-		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
+
 	}
 
 	void LookAt(GameObject obj) {
@@ -2436,6 +2534,24 @@ public class JointGestureDemo : MonoBehaviour {
 		Vector3 target = new Vector3 (point.x/2.0f, (point.y+headTargetDefault.y)/2.0f, point.z/2.0f);
 		Diana.GetComponent<LookAtIK> ().solver.target.position = target;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+	}
+
+	void TurnToward(GameObject obj) {
+		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+
+		ikControl.leftHandObj.position = leftTargetDefault;
+		ikControl.rightHandObj.position = rightTargetDefault;
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+	}
+
+	void TurnToward(Vector3 point) {
+		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+
+		ikControl.leftHandObj.position = leftTargetDefault;
+		ikControl.rightHandObj.position = rightTargetDefault;
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 	}
 
 	void TurnForward() {
@@ -2473,6 +2589,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void ReachFor(Vector3 coord) {
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(coord.x,
@@ -2493,6 +2611,8 @@ public class JointGestureDemo : MonoBehaviour {
 	void ReachFor(GameObject obj) {
 		Bounds bounds = Helper.GetObjectWorldSize(obj);
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
@@ -2521,11 +2641,11 @@ public class JointGestureDemo : MonoBehaviour {
 		else {
 			// point at base of Kinect -> 0.0 -> -.8 (Diana's edge)
 			// point down in front of me -> 1.6 -> .8 (my edge)
-			zCoord = vector[1] - ((tableSize.y / 2.0f) * vectorScaleFactor.y);
+			zCoord = (vector[1] - (tableSize.y / 2.0f)) * vectorScaleFactor.y;
 		}
 
 		Vector3 coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
-			Helper.GetObjectWorldSize(demoSurface).max.y,
+			Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 			zCoord);
 
 		return coord;
