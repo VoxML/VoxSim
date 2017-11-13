@@ -32,9 +32,9 @@ public class JointGestureDemo : MonoBehaviour {
 	IKTarget rightTarget;
 	IKTarget headTarget;
 
-	Vector3 leftTargetDefault;
-	Vector3 rightTargetDefault;
-	Vector3 headTargetDefault;
+	Vector3 leftTargetDefault,leftTargetStored;
+	Vector3 rightTargetDefault,rightTargetStored;
+	Vector3 headTargetDefault,headTargetStored;
 
 	public GameObject demoSurface;
 	public List<GameObject> blocks;
@@ -364,8 +364,13 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 				break;
 			case "red":
-			case "blue":
 			case "green":
+			case "yellow":
+			case "orange":
+			case "black":
+			case "purple":
+			case "white":
+			case "pink":
 				IndexByColor (messageStr);
 				break;
 			default:
@@ -663,7 +668,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 						if (eventManager.events.Count == 0) {
 							OutputHelper.PrintOutput (Role.Affector, "Which block?");
-							ReachFor (objVoxemes [0].gameObject);
+							//ReachFor (objVoxemes [0].gameObject);
 							objectConfirmation = null;
 						}
 					}
@@ -672,6 +677,8 @@ public class JointGestureDemo : MonoBehaviour {
 			else if ((content is IList) && (content.GetType().IsGenericType) && 
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
+
+				//if (actionOptions.Count 
 
 				if (eventManager.events.Count == 0) {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
@@ -734,6 +741,9 @@ public class JointGestureDemo : MonoBehaviour {
 
 					if (eventManager.events.Count == 0) {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
+						eventManager.InsertEvent ("", 0);
+						eventManager.InsertEvent (string.Format("ungrasp({0})",graspedObj.name), 1);
+						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
 					}
 				}
@@ -772,6 +782,8 @@ public class JointGestureDemo : MonoBehaviour {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to grab something?"));
 						MoveToPerform ();
 						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
+						actionOptions.Add("grasp({0})");
+						Disambiguate (actionOptions);
 					}
 				}
 				else {
@@ -782,7 +794,7 @@ public class JointGestureDemo : MonoBehaviour {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
-					// actionOptions.Add("grasp");
+					actionOptions.Add(string.Format("grasp({0})",indicatedObj));
 				}
 			}
 		}
@@ -1233,6 +1245,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Debug.Log (string.Format("Deixis: {0}",highlightCenter));
 
+		MoveHighlight (highlightCenter);
 		regionHighlight.transform.position = highlightCenter;
 
 		//TurnForward ();
@@ -1250,7 +1263,7 @@ public class JointGestureDemo : MonoBehaviour {
 			if (block.activeInHierarchy) {
 				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
 				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
-				if ((point-highlightCenter).magnitude <= vectorConeRadius) {
+				if ((point-highlightCenter).magnitude <= vectorConeRadius*highlightOscUpper) {
 				//if (region.Contains (new Vector3 (block.transform.position.x,
 				//	region.center.y, block.transform.position.z))) {
 					if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
@@ -1262,6 +1275,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 
 		if (objectMatches.Count > 0) {
+			ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
+				highlightCenter.z));
 			ResolveIndicatedObject ();
 		} 
 		else {	// indicating region
@@ -1382,6 +1397,7 @@ public class JointGestureDemo : MonoBehaviour {
 				else {
 					eventManager.InsertEvent ("", 0);
 					eventManager.InsertEvent (string.Format ("grasp({0})", indicatedObj.name), 1);
+					LookAt (indicatedObj);
 					graspedObj = indicatedObj;
 					indicatedObj = null;
 					indicatedRegion = null;
@@ -1409,6 +1425,7 @@ public class JointGestureDemo : MonoBehaviour {
 					if (graspedObj != null) {
 						eventManager.InsertEvent ("", 0);
 						eventManager.InsertEvent (string.Format ("ungrasp({0})", graspedObj.name), 1);
+						LookForward ();
 						actionOptions.Clear ();
 						confirmationTexts.Clear ();
 						graspedObj = null;
@@ -2507,10 +2524,10 @@ public class JointGestureDemo : MonoBehaviour {
 //		Diana.GetComponent<IKControl> ().leftHandObj.position = leftTargetDefault;
 //		Diana.GetComponent<IKControl> ().rightHandObj.position = rightTargetDefault;
 //		Diana.GetComponent<IKControl> ().lookObj.position = headTargetDefault;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).target.position = leftTargetDefault;
+		//Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).target.position = leftTargetDefault;
 		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
 		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).target.position = leftTargetDefault;
+		//Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).target.position = rightTargetDefault;
 		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
 		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
 		LookForward ();
@@ -2518,7 +2535,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void LookForward() {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
-		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
 
 	}
@@ -2528,12 +2545,14 @@ public class JointGestureDemo : MonoBehaviour {
 			(obj.transform.position.y+headTargetDefault.y)/2.0f, obj.transform.position.z/2.0f);
 		Diana.GetComponent<LookAtIK> ().solver.target.position = obj.transform.position;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 	}
 
 	void LookAt(Vector3 point) {
 		Vector3 target = new Vector3 (point.x/2.0f, (point.y+headTargetDefault.y)/2.0f, point.z/2.0f);
 		Diana.GetComponent<LookAtIK> ().solver.target.position = target;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 	}
 
 	void TurnToward(GameObject obj) {
@@ -2589,9 +2608,9 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void ReachFor(Vector3 coord) {
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
-		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
-		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
-
+		//Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		//Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+	
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(coord.x,
 			leftRegion.center.y,coord.z))) {
@@ -2605,14 +2624,14 @@ public class JointGestureDemo : MonoBehaviour {
 			InteractionHelper.SetRightHandTarget (Diana, ikControl.leftHandObj);
 		}
 
-		LookAt (coord);
+		LookForward ();
 	}
 
 	void ReachFor(GameObject obj) {
 		Bounds bounds = Helper.GetObjectWorldSize(obj);
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
-		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
-		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+//		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+//		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
@@ -2674,6 +2693,25 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Debug.Log (surfaceClear);
 		return surfaceClear;
+	}
+
+	public void StorePose() {
+		Debug.Log (string.Format("Storing pose {0} {1} {2}",
+			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+		leftTargetStored = ikControl.leftHandObj.transform.position;
+		rightTargetStored = ikControl.rightHandObj.transform.position;
+		headTargetStored = ikControl.lookObj.transform.position;
+	}
+
+	public void ReturnToPose() {
+		ikControl.leftHandObj.transform.position = leftTargetStored;
+		ikControl.rightHandObj.transform.position = rightTargetStored;
+		ikControl.lookObj.transform.position = headTargetStored;
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+		InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
+		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
+			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {

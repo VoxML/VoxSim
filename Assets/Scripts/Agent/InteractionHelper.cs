@@ -54,6 +54,17 @@ namespace Agent
 				ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
 			}
 		}
+
+		public static void SetHeadTarget(GameObject agent, Transform target) {
+			LookAtIK ik = agent.GetComponent<LookAtIK> ();
+			if (target != null) {
+				ik.solver.target.position = target.position;
+				ik.solver.IKPositionWeight = 1.0f;
+			}
+			else {
+				ik.solver.IKPositionWeight = 0.0f;
+			}
+		}
 	}
 }
 
