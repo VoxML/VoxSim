@@ -27,8 +27,17 @@ namespace Episteme
 			{
 				_concepts.Add(concept.Mode, new List<Concept>());
 			}
-			_concepts[concept.Mode].Add(concept);
+			if (!_concepts[concept.Mode].Contains(concept))
+			{
+				_concepts[concept.Mode].Add(concept);
+			}
 			return _concepts[concept.Mode].Count;
+		}
+
+		public Concept GetConcept(string name, ConceptMode mode)
+		{
+			var found = _concepts[mode].First(c => c.Name == name);
+			return found;
 		}
 
 		public int GetIndex(Concept concept)
@@ -48,6 +57,20 @@ namespace Episteme
 			c2.Relate(c1);
 			var relation = new Relation(c1, c2) {Bidirectional = true};
 			_relations.Add(relation);
+		}
+
+		public Relation GetRelation(Concept ori, Concept dest)
+		{
+			foreach (var relation in _relations)
+			{
+				if (
+					(Equals(relation.Origin, ori) && Equals(relation.Destination, dest)) || 
+					(Equals(relation.Origin, dest) && Equals(relation.Destination, ori) && relation.Bidirectional))
+				{
+					return relation;
+				}
+			}
+			return null;
 		}
 		
 		public List<Relation> GetRelations()

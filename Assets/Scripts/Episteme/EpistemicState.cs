@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using Network;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 namespace Episteme
 {
 	public class EpistemicState 
 	{
 		private Dictionary<ConceptType, Concepts> _episteme;
-		private RestClient _restClient;
+		private GameObject _restClient;
 		private string _episimUrl;
 
-		private static readonly string EpisimInitRouth = "init";
-		private static readonly string EpisimUpdateRouth = "aware";
+		private static readonly string EpisimInitRoute = "init";
+		private static readonly string EpisimUpdateRoute = "aware";
 		
 		public EpistemicState()
 		{
@@ -22,10 +23,43 @@ namespace Episteme
 			{
 				_episteme.Add(type, new Concepts(type));
 			}
-			var obj = new GameObject();
-			_restClient = obj.AddComponent<RestClient>();
 		}
 
+		public Concept GetConcept(Concept c)
+		{
+			return _episteme[c.Type].GetConcept(c.Name, c.Mode);
+		}
+
+		public Concept GetConcept(string name, ConceptType type, ConceptMode mode)
+		{
+			return _episteme[type].GetConcept(name, mode);
+		}
+
+		public Relation GetRelation(Concept origin, Concept destination)
+		{
+			return _episteme[origin.Type].GetRelation(origin, destination);
+		}
+		
+		public void AddConcept(Concept c)
+		{
+			_episteme[c.Type].Add(c);
+		}
+
+		public void AddRelation(Concept origin, Concept destination, bool bidirectional)
+		{
+			if (origin.Type == destination.Type)
+			{
+				if (bidirectional)
+				{
+					_episteme[origin.Type].MutualLink(origin, destination);
+				}
+				else
+				{
+					_episteme[origin.Type].Link(origin, destination);
+				}
+			}
+		}
+		
 		public List<Concepts> GetAllConcepts()
 		{
 			return _episteme.Values.ToList();
@@ -42,7 +76,12 @@ namespace Episteme
 		}
 
 		public void SetEpisimUrl(string url)
-		{
+		{	
+			if (_restClient == null)
+			{
+				_restClient = new GameObject();
+				_restClient.AddComponent<RestClient>();
+			}
 			if (!url.EndsWith("/"))
 			{
 				url += "/";
@@ -52,12 +91,12 @@ namespace Episteme
 		
 		public void InitiateEpisim()
 		{
-			_restClient.Post(_episimUrl + EpisimInitRouth, Jsonifier.JsonifyEpistemicState(this),"okay", "error");
+			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimInitRoute, Jsonifier.JsonifyEpistemicState(this),"okay", "error");
 		}
 
 		public void UpdateEpisim(Concept[] updatedConcepts, Relation[] updatedRelations)
 		{
-			_restClient.Post(_episimUrl + EpisimUpdateRouth, Jsonifier.JsonifyUpdates(this, updatedConcepts, updatedRelations),"okay", "error");
+			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimUpdateRoute, Jsonifier.JsonifyUpdates(this, updatedConcepts, updatedRelations),"okay", "error");
 		}
 	}
 }
