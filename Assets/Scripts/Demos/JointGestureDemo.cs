@@ -104,6 +104,11 @@ public class JointGestureDemo : MonoBehaviour {
 
 	int sessionCounter = 0;
 
+	enum CertaintyMode {
+		Suggest,
+		Act
+	};
+
 	// Use this for initialization
 	void Start () {
 		windowScaleFactor = (float)Screen.width/(float)Screen.currentResolution.width;
@@ -460,7 +465,7 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 					}
 					else {
-						if ((graspedObj != null) ||  (indicatedObj != null)) {
+						if ((graspedObj != null) || (indicatedObj != null)) {
 							string prevInstruction = FindPreviousMatch ("grab");
 
 							if (prevInstruction.StartsWith("grab move")) {
@@ -811,8 +816,6 @@ public class JointGestureDemo : MonoBehaviour {
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
 
-				//if (actionOptions.Count 
-
 				if (eventManager.events.Count == 0) {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
 					eventConfirmation = actionOptions [0];
@@ -905,7 +908,7 @@ public class JointGestureDemo : MonoBehaviour {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
-					suggestedActions.Add(string.Format("put({0},{1})",indicatedObj.name,dir));
+					PopulateMoveOptions (indicatedObj, dir, CertaintyMode.Suggest);
 				}
 			}
 		}
@@ -951,6 +954,7 @@ public class JointGestureDemo : MonoBehaviour {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
+					//suggestedActions.Add("push({0})");
 				}
 			}
 			else {
@@ -961,16 +965,26 @@ public class JointGestureDemo : MonoBehaviour {
 					performGesture = AvatarGesture.RARM_PUSH_LEFT;
 				}
 				else if (dir == "front") {
-					if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
-						performGesture = AvatarGesture.LARM_PUSH_FRONT;
+					if (indicatedObj != null) {
+						if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_FRONT;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_FRONT;
+						}
 					}
 					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
 						performGesture = AvatarGesture.RARM_PUSH_FRONT;
 					}
 				}
 				else if (dir == "back") {
-					if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
-						performGesture = AvatarGesture.LARM_PUSH_BACK;
+					if (indicatedObj != null) {
+						if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_BACK;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_BACK;
+						}
 					}
 					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
 						performGesture = AvatarGesture.RARM_PUSH_BACK;
@@ -978,9 +992,10 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push this this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
+					PopulatePushOptions (indicatedObj, dir, CertaintyMode.Suggest);
 				}
 			}
 		}
@@ -1047,7 +1062,7 @@ public class JointGestureDemo : MonoBehaviour {
 	void Acknowledge(bool yes) {
 		LookForward ();
 		if (!yes) {
-			if (eventConfirmation != "") {
+			if (eventConfirmation != "") { //click green - G;push right low - G;push right stop - S;NO : suggestedActions not decreased b/c eventConfirmation is empty there
 				if (actionOptions.Contains (eventConfirmation)) {
 					actionOptions.Remove (eventConfirmation);
 					confirmationTexts.Remove (eventConfirmation);
@@ -1058,19 +1073,21 @@ public class JointGestureDemo : MonoBehaviour {
 					ikControl.rightHandObj.position = rightTargetDefault;
 				}
 
-				suggestedActions.Clear();
+				if (suggestedActions.Count > 0) {
+					suggestedActions.Remove (suggestedActions [0]);
+				}
 
 				eventConfirmation = "";
 
 				if (actionOptions.Count > 0) {
 					Disambiguate (actionOptions);
-				}
+				} 
 				else {
 					if (eventManager.events.Count == 0) {
 						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
-			}
+			} 
 			else if (objectConfirmation != null) {
 				if (objectMatches.Contains (objectConfirmation)) {
 					objectMatches.Remove (objectConfirmation);
@@ -1085,17 +1102,25 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (objectMatches.Count > 0) {
 					Disambiguate (objectMatches);
-				}
+				} 
 				else {
 					if (eventManager.events.Count == 0) {
 						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
 			}
-//			else {
+			else {
+				if (suggestedActions.Count > 0) {
+					eventConfirmation = "";
+					suggestedActions.Clear ();
+					actionOptions.Clear ();
+					objectMatches.Clear ();
+					confirmationTexts.Clear ();
+					TurnForward ();
+				}
 //				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-//			}
-		}
+			}
+		} 
 		else {
 			if (suggestedActions.Count > 0) {
 				if (suggestedActions [0].Contains ("{0}")) {
@@ -1104,11 +1129,14 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				} 
 				else {
-					eventConfirmation = suggestedActions [0];
+					//eventConfirmation = suggestedActions [0];
+					actionOptions = new List<string>(suggestedActions);
+					suggestedActions.Clear ();
+					Disambiguate (actionOptions);
 				}
-			}
-
-			if (eventConfirmation != "") {
+			} 
+			else {
+				if (eventConfirmation != "") {
 //				Hashtable predArgs = Helper.ParsePredicate (eventConfirmation);
 //				String pred = Helper.GetTopPredicate (eventConfirmation);
 //
@@ -1135,45 +1163,47 @@ public class JointGestureDemo : MonoBehaviour {
 //					}
 //				}
 
-				if (eventConfirmation.StartsWith ("grasp")) {
-					graspedObj = indicatedObj;
-					indicatedObj = null;
-					indicatedRegion = null;
-				}
-				else if (eventConfirmation.StartsWith ("put")) {
-					graspedObj = null;
-					indicatedRegion = null;
-				}
-				else if (eventConfirmation.StartsWith ("slide")) {
-					indicatedObj = null;
-					indicatedRegion = null;
-				}
-				else if (eventConfirmation.StartsWith ("ungrasp")) {
-					graspedObj = null;
-					indicatedRegion = null;
-				}
+					if (eventConfirmation.StartsWith ("grasp")) {
+						graspedObj = indicatedObj;
+						indicatedObj = null;
+						indicatedRegion = null;
+					} 
+					else if (eventConfirmation.StartsWith ("put")) {
+						graspedObj = null;
+						indicatedRegion = null;
+					} 
+					else if (eventConfirmation.StartsWith ("slide")) {
+						indicatedObj = null;
+						indicatedRegion = null;
+					} 
+					else if (eventConfirmation.StartsWith ("ungrasp")) {
+						graspedObj = null;
+						indicatedRegion = null;
+					}
 
-				if (eventManager.events.Count == 0) {
-					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (eventConfirmation, 1);
-					eventConfirmation = "";
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-					confirmationTexts.Clear ();
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					if (eventManager.events.Count == 0) {
+						eventManager.InsertEvent ("", 0);
+						eventManager.InsertEvent (eventConfirmation, 1);
+						eventConfirmation = "";
+						suggestedActions.Clear ();
+						actionOptions.Clear ();
+						objectMatches.Clear ();
+						confirmationTexts.Clear ();
+						OutputHelper.PrintOutput (Role.Affector, "OK.");
+					}
+				} 
+				else if (objectConfirmation != null) {
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+						indicatedObj = objectConfirmation;
+						objectConfirmation = null;
+						objectMatches.Clear ();
+					}
 				}
-			}
-			else if (objectConfirmation != null) {
-				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-					indicatedObj = objectConfirmation;
-					objectConfirmation = null;
-					objectMatches.Clear ();
-				}
-			}
 //			else {
 //				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 //			}
+			}
 		}
 	}
 
@@ -1556,7 +1586,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		} 
 		else {
-			if (eventConfirmation == "") {
+			if ((eventConfirmation == "") && (eventManager.events.Count == 0)) {
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 					if (graspedObj != null) {
 						if (graspedObj.GetComponent<Voxeme> ().isGrasped) {
@@ -1584,6 +1614,97 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
+	void PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
+		List<object> placementOptions = FindPlacementOptions (theme, dir);
+
+		List<Region> orthogonalRegions = new List<Region> ();
+		if (dir == "left") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "right") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "front") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+		else if (dir == "back") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+
+		string themeAttr = string.Empty;
+		if (theme.GetComponent<Voxeme> () != null) {
+			themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		}
+
+		foreach (object option in placementOptions) {
+			if (option is GameObject) {
+				GameObject obj = (option as GameObject);
+				if (SurfaceClear (obj)) {
+					string objAttr = string.Empty;
+					if (obj.GetComponent<Voxeme> () != null) {
+						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					if (certainty == CertaintyMode.Act) {
+						if (!actionOptions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+							actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+							confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+								string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+						}
+					}
+					else if (certainty == CertaintyMode.Suggest) {
+						if (!suggestedActions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+							suggestedActions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+							confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+								string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+						}
+					}
+				}
+			}
+			else if (option is Vector3) {
+				Vector3 target = (Vector3)option;
+
+				if (certainty == CertaintyMode.Act) {
+					if (!actionOptions.Contains (string.Format ("put({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						actionOptions.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+					}
+
+					foreach (Region region in orthogonalRegions) {
+						if (region.Contains (target)) {
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
+								confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("put the {0} block in the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+							}
+						}
+					}
+				}
+				else if (certainty == CertaintyMode.Suggest) {
+					if (!suggestedActions.Contains (string.Format ("put({0},{1})", theme.name,
+						Helper.VectorToParsable (target)))) {
+						suggestedActions.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+					}
+
+					foreach (Region region in orthogonalRegions) {
+						if (region.Contains (target)) {
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
+								confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("put the {0} block in the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+							}
+						}
+					}
+				}
+					
+			}
+		}
+	}
+
 	void Move(string dir) {
 		if (eventManager.events.Count > 0) {
 			return;
@@ -1599,55 +1720,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (theme != null) {
-			List<object> placementOptions = FindPlacementOptions (theme, dir);
-
-			List<Region> orthogonalRegions = new List<Region> ();
-			if (dir == "left") {
-				orthogonalRegions.Add (frontRegion);
-				orthogonalRegions.Add (backRegion);
-			}
-			else if (dir == "right") {
-				orthogonalRegions.Add (frontRegion);
-				orthogonalRegions.Add (backRegion);
-			}
-			else if (dir == "front") {
-				orthogonalRegions.Add (leftRegion);
-				orthogonalRegions.Add (rightRegion);
-			}
-			else if (dir == "back") {
-				orthogonalRegions.Add (leftRegion);
-				orthogonalRegions.Add (rightRegion);
-			}
-
-			string themeAttr = string.Empty;
-			if (theme.GetComponent<Voxeme> () != null) {
-				themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-			}
-
-			foreach (object option in placementOptions) {
-				if (option is GameObject) {
-					GameObject obj = (option as GameObject);
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
-				}
-				else if (option is Vector3) {
-					Vector3 target = (Vector3)option;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-
-					foreach (Region region in orthogonalRegions) {
-						if (region.Contains (target)) {
-							confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-								string.Format ("put the {0} block in the table's {1} {2} part", themeAttr, regionLabels[region], dir));
-						}
-					}
-				}
-			}
+			PopulateMoveOptions (theme, dir);
 
 			if (dir == "up") {
 				string objAttr = string.Empty;
@@ -2179,6 +2252,92 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
+	void PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
+		List<object> placementOptions = FindPlacementOptions (theme, dir);
+
+		List<Region> orthogonalRegions = new List<Region> ();
+		if (dir == "left") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "right") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "front") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+		else if (dir == "back") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+
+		string themeAttr = string.Empty;
+		if (theme.GetComponent<Voxeme> () != null) {
+			themeAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		}
+
+		foreach (object option in placementOptions) {
+			if (option is GameObject) {
+				GameObject obj = (option as GameObject);
+				if (FitsTouching (theme, obj, directionPreds [relativeDir [dir]])) {
+					string objAttr = string.Empty;
+					if (obj.GetComponent<Voxeme> () != null) {
+						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					if (certainty == CertaintyMode.Act) {
+						if (!actionOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+							actionOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
+								string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+						}
+					} 
+					else if (certainty == CertaintyMode.Suggest) {
+						if (!suggestedActions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+							suggestedActions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
+								string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+						}
+					}
+				}
+			} 
+			else if (option is Vector3) {
+				Vector3 target = (Vector3)option;
+
+				if (certainty == CertaintyMode.Act) {
+					if (!actionOptions.Contains (string.Format ("slide({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						actionOptions.Add (string.Format ("slide({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+
+						foreach (Region region in orthogonalRegions) {
+							if (region.Contains (target)) {
+								confirmationTexts.Add (string.Format ("slide({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+							}
+						}
+					}
+				} 
+				else if (certainty == CertaintyMode.Suggest) {
+					if (!suggestedActions.Contains (string.Format ("slide({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						suggestedActions.Add (string.Format ("slide({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+
+						foreach (Region region in orthogonalRegions) {
+							if (region.Contains (target)) {
+								confirmationTexts.Add (string.Format ("slide({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	void Push(string dir) {
 		if (eventManager.events.Count > 0) {
 			return;
@@ -2187,56 +2346,7 @@ public class JointGestureDemo : MonoBehaviour {
 		OutputHelper.PrintOutput (Role.Affector, "");
 
 		if (indicatedObj != null) {
-			List<object> placementOptions = FindPlacementOptions (indicatedObj, dir);
-
-			List<Region> orthogonalRegions = new List<Region> ();
-			if (dir == "left") {
-				orthogonalRegions.Add (frontRegion);
-				orthogonalRegions.Add (backRegion);
-			}
-			else if (dir == "right") {
-				orthogonalRegions.Add (frontRegion);
-				orthogonalRegions.Add (backRegion);
-			}
-			else if (dir == "front") {
-				orthogonalRegions.Add (leftRegion);
-				orthogonalRegions.Add (rightRegion);
-			}
-			else if (dir == "back") {
-				orthogonalRegions.Add (leftRegion);
-				orthogonalRegions.Add (rightRegion);
-			}
-
-			string themeAttr = string.Empty;
-			if (indicatedObj.GetComponent<Voxeme> () != null) {
-				themeAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-			}
-
-			foreach (object option in placementOptions) {
-				if (option is GameObject) {
-					GameObject obj = (option as GameObject);
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-
-					actionOptions.Add (string.Format ("slide({0},{1}({2}))", indicatedObj.name, directionPreds[relativeDir[dir]], obj.name));
-					confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", indicatedObj.name, directionPreds[relativeDir[dir]], obj.name),
-						string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels[oppositeDir[relativeDir[dir]]], objAttr));
-				}
-				else if (option is Vector3) {
-					Vector3 target = (Vector3)option;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-
-					foreach (Region region in orthogonalRegions) {
-						if (region.Contains (target)) {
-							confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-								string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels[region], dir));
-						}
-					}
-				}
-			}
+			PopulatePushOptions (indicatedObj, dir);
 
 			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 				Disambiguate (actionOptions);
@@ -2262,6 +2372,7 @@ public class JointGestureDemo : MonoBehaviour {
 				actionOptions.Clear ();
 				objectMatches.Clear ();
 			}
+		}
 
 //		OutputHelper.PrintOutput (Role.Affector, "");
 //		if (indicatedObj != null) {
@@ -2849,7 +2960,7 @@ public class JointGestureDemo : MonoBehaviour {
 //					objectMatches.Clear ();
 //				}
 //			}
-		}
+//		}
 	}
 
 	List<object> FindPlacementOptions(GameObject theme, string dir) {
@@ -3094,6 +3205,8 @@ public class JointGestureDemo : MonoBehaviour {
 //		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 //		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 
+		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
+
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
@@ -3156,6 +3269,52 @@ public class JointGestureDemo : MonoBehaviour {
 		return surfaceClear;
 	}
 
+	bool FitsTouching (GameObject theme, GameObject obj, string dir) { 
+		bool fits = true;
+
+		Bounds themeBounds = Helper.GetObjectWorldSize (theme);
+		Bounds objBounds = Helper.GetObjectWorldSize (obj);
+
+		foreach (GameObject test in blocks) {
+			if ((test != theme) && (test != obj)) {
+				if (dir == "left") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.min.x - themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
+						themeBounds.size);
+					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+				else if (dir == "right") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.max.x + themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
+						themeBounds.size);
+					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+				else if (dir == "in_front") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.center.x, objBounds.center.y, objBounds.min.z - themeBounds.extents.z),
+						themeBounds.size);
+					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+				else if (dir == "behind") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.center.x, objBounds.center.y, objBounds.max.z + themeBounds.extents.z),
+						themeBounds.size);
+					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+			}
+		}
+
+		return fits;
+	}
+
 	public void StorePose() {
 		Debug.Log (string.Format("Storing pose {0} {1} {2}",
 			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
@@ -3196,9 +3355,9 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void DisableHighlight(object sender, ElapsedEventArgs e) {
-		highlightTimeoutTimer.Enabled = false;
-		highlightTimeoutTimer.Interval = highlightTimeoutTime;
-
-		regionHighlight.GetComponent<Renderer> ().enabled = false;
+//		highlightTimeoutTimer.Enabled = false;
+//		highlightTimeoutTimer.Interval = highlightTimeoutTime;
+//
+//		regionHighlight.GetComponent<Renderer> ().enabled = false;
 	}
 }
