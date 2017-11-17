@@ -36,7 +36,8 @@ namespace Network
             webRequest.uploadHandler = upload;
             webRequest.downloadHandler = new DownloadHandlerBuffer();
             webRequest.SetRequestHeader("Content-Type", "application/json");
-            yield return webRequest.SendWebRequest();
+            //yield return webRequest.SendWebRequest();	// 2017.2
+			yield return webRequest.Send();
 
             if(webRequest.isNetworkError) {
                 gameObject.BroadcastMessage(error, webRequest.error);

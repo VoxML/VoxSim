@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Timers;
 
 using Agent;
+using Episteme;
 using Global;
 using Network;
 using QSR;
@@ -45,6 +46,12 @@ public class JointGestureDemo : MonoBehaviour {
 	public GameObject graspedObj = null;
 
 	public Region indicatedRegion = null;
+
+	EpistemicModel epistemicModel;
+	enum CertaintyMode {
+		Suggest,
+		Act
+	};
 
 	public Vector2 tableSize;
 	public Vector2 vectorScaleFactor;
@@ -107,11 +114,6 @@ public class JointGestureDemo : MonoBehaviour {
 
 	int sessionCounter = 0;
 
-	enum CertaintyMode {
-		Suggest,
-		Act
-	};
-
 	// Use this for initialization
 	void Start () {
 		windowScaleFactor = (float)Screen.width/(float)Screen.currentResolution.width;
@@ -127,7 +129,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana = GameObject.Find ("Diana");
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.rightHand.gameObject;
-
+		epistemicModel = gameObject.GetComponent<EpistemicModel> ();
 		synVision = Diana.GetComponent<SyntheticVision> ();
 		gestureController = Diana.GetComponent<AvatarGestureController> ();
 		ik = Diana.GetComponent<FullBodyBipedIK> ();
@@ -373,6 +375,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		if (messageType == "S") {	// speech message
 			Debug.Log (fusionMessage);
+			logger.OnLogEvent (this, new LoggerArgs (fusionMessage));
 			switch (messageStr.ToLower ()) {
 			case "yes":
 				Acknowledge (true);
@@ -816,6 +819,10 @@ public class JointGestureDemo : MonoBehaviour {
 						MoveToPerform ();
 						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 						suggestedActions.Add("grasp({0})");
+
+						Concept concept = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
+						concept.Certainty = 0.5;
+						epistemicModel.state.UpdateEpisim(new Concept[] {concept}, new Relation[] {});
 					}
 				}
 				else {
