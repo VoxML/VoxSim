@@ -63,6 +63,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 	Timer highlightTimeoutTimer;
 	public double highlightTimeoutTime;
+	bool disableHighlight = false;
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
 	public float knownScreenWidth = .3646f; //m
@@ -70,6 +71,8 @@ public class JointGestureDemo : MonoBehaviour {
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 
 	public bool allowDeixisByClick = false;
+
+	GenericLogger logger;
 
 	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
 
@@ -117,6 +120,9 @@ public class JointGestureDemo : MonoBehaviour {
 		eventManager.EventComplete += ReturnToRest;
 
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
+
+		logger = GetComponent<GenericLogger> ();
+		logger.OpenLog ("");
 
 		Diana = GameObject.Find ("Diana");
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
@@ -291,6 +297,11 @@ public class JointGestureDemo : MonoBehaviour {
 			 */
 		}
 
+		if (disableHighlight) {
+			regionHighlight.GetComponent<Renderer> ().enabled = false;
+			disableHighlight = false;
+		}
+
 		if (regionHighlight.GetComponent<Renderer> ().enabled) {
 			regionHighlight.transform.eulerAngles = new Vector3 (regionHighlight.transform.eulerAngles.x,
 				regionHighlight.transform.eulerAngles.y + Time.deltaTime * highlightTurnSpeed, regionHighlight.transform.eulerAngles.z);
@@ -421,6 +432,12 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 				break;
+			case "this":
+			case "that":
+				if (regionHighlight.GetComponent<Renderer> ().enabled) {
+					Deixis (highlightCenter);
+				}
+				break;
 			case "red":
 			case "green":
 			case "yellow":
@@ -438,6 +455,7 @@ public class JointGestureDemo : MonoBehaviour {
 		} 
 		else if (messageType == "G") {	// gesture message
 			Debug.Log (fusionMessage);
+			logger.OnLogEvent (this, new LoggerArgs (fusionMessage));
 			string[] messageComponents = messageStr.Split ();
 //			foreach (string c in messageComponents) {
 //				Debug.Log (c);
@@ -453,10 +471,10 @@ public class JointGestureDemo : MonoBehaviour {
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("left point")) {
-					Deixis (GetGestureVector (messageStr, "left point"));
+					Deixis (TransformToSurface (GetGestureVector (messageStr, "left point")));
 				} 
 				else if (messageStr.StartsWith ("right point")) {
-					Deixis (GetGestureVector (messageStr, "right point"));
+					Deixis (TransformToSurface (GetGestureVector (messageStr, "right point")));
 				} 
 				else if (messageStr.StartsWith ("grab")) {
 					if (graspedObj == null) {
@@ -469,70 +487,7 @@ public class JointGestureDemo : MonoBehaviour {
 							string prevInstruction = FindPreviousMatch ("grab");
 
 							if (prevInstruction.StartsWith("grab move")) {
-								if (prevInstruction.EndsWith ("high")) {
-									if (GetGestureContent (prevInstruction, "grab move") == "left") {
-										Move ("left");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "right") {
-										Move ("right");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "front") {
-										Move ("front");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "back") {
-										Move ("back");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "left front") {
-										Move ("left front");
-									} 
-									else if (GetGestureContent (prevInstruction, "grab move") == "right front") {
-										Move ("right front");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "left back") {
-										Move ("left back");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "right back") {
-										Move ("right back");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "up") {
-										Move ("up");
-									} 
-									else if (GetGestureContent (prevInstruction, "grab move") == "down") {
-										Move ("down");
-									}
-								} 
-								else if (prevInstruction.EndsWith ("low")) {
-									if (GetGestureContent (prevInstruction, "grab move") == "left") {
-										Suggest ("grab move left");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "right") {
-										Suggest ("grab move right");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "front") {
-										Suggest ("grab move front");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "back") {
-										Suggest ("grab move back");
-									} 
-									else if (GetGestureContent (prevInstruction, "grab move") == "left front") {
-										Suggest ("grab move left front");
-									} 
-									else if (GetGestureContent (prevInstruction, "grab move") == "right front") {
-										Suggest ("grab move right front");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "left back") {
-										Suggest ("grab move left back");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "right back") {
-										Suggest ("grab move right back");
-									}
-									else if (GetGestureContent (prevInstruction, "grab move") == "up") {
-										Suggest ("grab move up");
-									} 
-									else if (GetGestureContent (prevInstruction, "grab move") == "down") {
-										Suggest ("grab move down");
-									}
-								}
+								HandleMoveInterval (prevInstruction);
 							}
 						}
 					}
@@ -603,75 +558,16 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 					}
 				} 
-				/*else if (messageStr.StartsWith ("grab move")) {
-					if (startSignal.EndsWith ("high")) {
-						if (GetGestureContent (messageStr, "grab move") == "left") {
-							Move ("left");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right") {
-							Move ("right");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "front") {
-							Move ("front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "back") {
-							Move ("back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left front") {
-							Move ("left front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right front") {
-							Move ("right front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left back") {
-							Move ("left back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right back") {
-							Move ("right back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "up") {
-							Move ("up");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "down") {
-							Move ("down");
-						}
-					}
-					else if (startSignal.EndsWith ("low")) {
-						if (GetGestureContent (messageStr, "grab move") == "left") {
-							Suggest ("grab move left");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right") {
-							Suggest ("grab move right");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "front") {
-							Suggest ("grab move front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "back") {
-							Suggest ("grab move back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left front") {
-							Suggest ("grab move left front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right front") {
-							Suggest ("grab move right front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left back") {
-							Suggest ("grab move left back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right back") {
-							Suggest ("grab move right back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "up") {
-							Suggest ("grab move up");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "down") {
-							Suggest ("grab move down");
-						}
-					}
-				} */
 				else if (messageStr.StartsWith ("grab")) {
-					if (GetGestureContent (messageStr, "grab") == "") {
-						Grab (false);
+					if (graspedObj != null) {
+						string prevInstruction = FindPreviousMatch ("grab");
+
+						if (prevInstruction.StartsWith("grab move")) {
+							HandleMoveInterval (prevInstruction);
+						}
+						else if (GetGestureContent (messageStr, "grab") == "") {
+							Grab (false);
+						}
 					}
 				}
 			}
@@ -944,17 +840,17 @@ public class JointGestureDemo : MonoBehaviour {
 					performGesture = AvatarGesture.RARM_PUSH_LEFT;
 				}
 				else if (dir == "front") {
-					performGesture = AvatarGesture.RARM_PUSH_FRONT;
+					performGesture = AvatarGesture.RARM_PUSH_BACK;
 				}
 				else if (dir == "back") {
-					performGesture = AvatarGesture.RARM_PUSH_BACK;
+					performGesture = AvatarGesture.RARM_PUSH_FRONT;
 				}
 
 				if (eventManager.events.Count == 0) {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
-					//suggestedActions.Add("push({0})");
+					suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
 				}
 			}
 			else {
@@ -967,19 +863,6 @@ public class JointGestureDemo : MonoBehaviour {
 				else if (dir == "front") {
 					if (indicatedObj != null) {
 						if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
-							performGesture = AvatarGesture.LARM_PUSH_FRONT;
-						}
-						else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
-							performGesture = AvatarGesture.RARM_PUSH_FRONT;
-						}
-					}
-					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
-						performGesture = AvatarGesture.RARM_PUSH_FRONT;
-					}
-				}
-				else if (dir == "back") {
-					if (indicatedObj != null) {
-						if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
 							performGesture = AvatarGesture.LARM_PUSH_BACK;
 						}
 						else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
@@ -988,6 +871,19 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
 						performGesture = AvatarGesture.RARM_PUSH_BACK;
+					}
+				}
+				else if (dir == "back") {
+					if (indicatedObj != null) {
+						if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_FRONT;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_FRONT;
+						}
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+						performGesture = AvatarGesture.RARM_PUSH_FRONT;
 					}
 				}
 
@@ -1062,7 +958,16 @@ public class JointGestureDemo : MonoBehaviour {
 	void Acknowledge(bool yes) {
 		LookForward ();
 		if (!yes) {
-			if (eventConfirmation != "") { //click green - G;push right low - G;push right stop - S;NO : suggestedActions not decreased b/c eventConfirmation is empty there
+			if (eventConfirmation == "forget") {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					eventConfirmation = "";
+					if (indicatedObj != null) {
+						ReachFor (indicatedObj);
+					}
+				}
+			}
+			else if (eventConfirmation != "") {
 				if (actionOptions.Contains (eventConfirmation)) {
 					actionOptions.Remove (eventConfirmation);
 					confirmationTexts.Remove (eventConfirmation);
@@ -1122,7 +1027,16 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		} 
 		else {
-			if (suggestedActions.Count > 0) {
+			if (eventConfirmation == "forget") {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					eventConfirmation = "";
+					indicatedObj = null;
+					TurnForward ();
+					LookForward ();
+				}
+			}
+			else if (suggestedActions.Count > 0) {
 				if (suggestedActions [0].Contains ("{0}")) {
 					if (eventManager.events.Count == 0) {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
@@ -1250,6 +1164,7 @@ public class JointGestureDemo : MonoBehaviour {
 			if (eventManager.events.Count == 0) {
 				OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
 				LookAt (indicatedObj.transform.position);
+				eventConfirmation = "forget";
 			}
 		}
 	}
@@ -1384,7 +1299,7 @@ public class JointGestureDemo : MonoBehaviour {
 			} 
 			else {	// indicating region
 				indicatedRegion = region;
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 			}
 		}
 	}
@@ -1409,15 +1324,17 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void Deixis(List<float> vector) {
+	void Deixis(Vector3 coord) {
 		if (eventManager.events.Count > 0) {
 			return;
 		}
 
+		highlightTimeoutTimer.Enabled = true;
+
 		OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
-		Vector3 highlightCenter = TransformToSurface (vector);
+		Vector3 highlightCenter = coord;
 
 		Debug.Log (string.Format("Deixis: {0}",highlightCenter));
 
@@ -1439,26 +1356,44 @@ public class JointGestureDemo : MonoBehaviour {
 			if (block.activeInHierarchy) {
 				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
 				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
-				if ((point-highlightCenter).magnitude <= vectorConeRadius*highlightOscUpper) {
-				//if (region.Contains (new Vector3 (block.transform.position.x,
-				//	region.center.y, block.transform.position.z))) {
-					if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
+				if ((point - highlightCenter).magnitude <= vectorConeRadius * highlightOscUpper) {
+					//if (region.Contains (new Vector3 (block.transform.position.x,
+					//	region.center.y, block.transform.position.z))) {
+					if ((!objectMatches.Contains (block)) && (SurfaceClear (block)) && (isVisible)) {
 						objectMatches.Add (block);
 					}
-				} 
+				}
+				else {
+					if ((objectMatches.Contains (block)) && (isVisible)) {
+						objectMatches.Remove (block);
+					}
+				}
 			}
 		}
 
 
-		if (objectMatches.Count > 0) {
-			ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
-				highlightCenter.z));
-			ResolveIndicatedObject ();
-		} 
-		else {	// indicating region
-			indicatedRegion = new Region(new Vector3(highlightCenter.x-vectorConeRadius,highlightCenter.y,highlightCenter.z-vectorConeRadius),
-				new Vector3(highlightCenter.x+vectorConeRadius,highlightCenter.y,highlightCenter.z+vectorConeRadius));
-			OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+		if (indicatedObj == null) {
+			if (objectMatches.Count > 0) {
+				TurnForward ();
+				ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
+					highlightCenter.z));
+				ResolveIndicatedObject ();
+			}
+			else {	// indicating region
+				indicatedRegion = new Region (new Vector3 (highlightCenter.x - vectorConeRadius, highlightCenter.y, highlightCenter.z - vectorConeRadius),
+					new Vector3 (highlightCenter.x + vectorConeRadius, highlightCenter.y, highlightCenter.z + vectorConeRadius));
+				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+			}
+		}
+		else {	// already indicated another object
+			if (objectMatches.Count > 0) {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
+					TurnForward ();
+					LookAt (indicatedObj.transform.position);
+					eventConfirmation = "forget";
+				}
+			}
 		}
 	}
 
@@ -1557,14 +1492,71 @@ public class JointGestureDemo : MonoBehaviour {
 
 			}
 		}
+
+		if (suggestedActions.Count > 0) {
+			if (suggestedActions [0].Contains ("{0}")) {
+				if (indicatedObj != null) {
+					suggestedActions [0] = string.Format (suggestedActions [0], indicatedObj.name);
+					PopulateOptions (suggestedActions [0].Split ('(')[0], indicatedObj,
+						suggestedActions [0].Contains(',') ? suggestedActions [0].Split (',')[1].Replace(")","") : "");
+					//actionOptions = new List<string> (suggestedActions);
+					suggestedActions.Clear ();
+					Disambiguate (actionOptions);
+				}
+			}
+		}
+	}
+		
+	void PopulateOptions(string program, GameObject theme, string dir) {
+		switch (program) {
+		case "grasp":
+			PopulateGrabOptions (theme);
+			break;
+
+		case "put":
+			PopulateMoveOptions (theme, dir);
+			break;
+
+		case "slide":
+			PopulatePushOptions (theme, dir);
+			break;
+
+		default:
+			break;
+		}
 	}
 
+	void PopulateGrabOptions(GameObject theme, CertaintyMode certainty = CertaintyMode.Act) {
+		string themeAttr = string.Empty;
+		if (theme.GetComponent<Voxeme> () != null) {
+			themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		}
+
+		if (certainty == CertaintyMode.Act) {
+			if (!actionOptions.Contains (string.Format ("grasp({0})", theme.name))) {
+				actionOptions.Add (string.Format ("grasp({0})", theme.name));
+				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
+					string.Format ("grab the {0} block", themeAttr));
+			}
+		}
+		else if (certainty == CertaintyMode.Suggest) {
+			if (!suggestedActions.Contains (string.Format ("grasp({0})", theme.name))) {
+				suggestedActions.Add (string.Format ("grasp({0})", theme.name));
+				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
+					string.Format ("grab the {0} block", themeAttr));
+			}
+		}
+	}
+		
 	void Grab(bool state) {
 		if (eventManager.events.Count > 0) {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		if (state == true) {
 			if (indicatedObj != null) {
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1586,7 +1578,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		} 
 		else {
-			if ((eventConfirmation == "") && (eventManager.events.Count == 0)) {
+			if (eventConfirmation == "") {
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 					if (graspedObj != null) {
 						if (graspedObj.GetComponent<Voxeme> ().isGrasped) {
@@ -1610,6 +1602,73 @@ public class JointGestureDemo : MonoBehaviour {
 						//TurnForward ();
 					}
 				}
+			}
+		}
+	}
+
+	void HandleMoveInterval(string instruction) {
+		if (instruction.EndsWith ("high")) {
+			if (GetGestureContent (instruction, "grab move") == "left") {
+				Move ("left");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right") {
+				Move ("right");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "front") {
+				Move ("front");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "back") {
+				Move ("back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "left front") {
+				Move ("left front");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "right front") {
+				Move ("right front");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "left back") {
+				Move ("left back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right back") {
+				Move ("right back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "up") {
+				Move ("up");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "down") {
+				Move ("down");
+			}
+		} 
+		else if (instruction.EndsWith ("low")) {
+			if (GetGestureContent (instruction, "grab move") == "left") {
+				Suggest ("grab move left");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right") {
+				Suggest ("grab move right");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "front") {
+				Suggest ("grab move front");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "back") {
+				Suggest ("grab move back");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "left front") {
+				Suggest ("grab move left front");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "right front") {
+				Suggest ("grab move right front");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "left back") {
+				Suggest ("grab move left back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right back") {
+				Suggest ("grab move right back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "up") {
+				Suggest ("grab move up");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "down") {
+				Suggest ("grab move down");
 			}
 		}
 	}
@@ -3191,9 +3250,9 @@ public class JointGestureDemo : MonoBehaviour {
 
 		}
 		else if (rightRegion.Contains(new Vector3(coord.x,
-			leftRegion.center.y,coord.z))) {
+			rightRegion.center.y,coord.z))) {
 			ikControl.leftHandObj.transform.position = coord+offset;
-			InteractionHelper.SetRightHandTarget (Diana, ikControl.leftHandObj);
+			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
 		LookForward ();
@@ -3333,6 +3392,10 @@ public class JointGestureDemo : MonoBehaviour {
 		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
 			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
 	}
+		
+	bool CanPrompt() {
+		return ((eventManager.events.Count == 0) && (suggestedActions.Count == 0));
+	}
 
 	void ReturnToRest(object sender, EventArgs e) {
 		if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
@@ -3355,9 +3418,13 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void DisableHighlight(object sender, ElapsedEventArgs e) {
-//		highlightTimeoutTimer.Enabled = false;
-//		highlightTimeoutTimer.Interval = highlightTimeoutTime;
-//
-//		regionHighlight.GetComponent<Renderer> ().enabled = false;
+		highlightTimeoutTimer.Enabled = false;
+		highlightTimeoutTimer.Interval = highlightTimeoutTime;
+
+		disableHighlight = true;
+	}
+
+	void OnApplicationQuit() {
+		logger.CloseLog ();
 	}
 }
