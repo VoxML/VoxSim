@@ -482,7 +482,12 @@ public class JointGestureDemo : MonoBehaviour {
 				else if (messageStr.StartsWith ("grab")) {
 					if (graspedObj == null) {
 						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
-							Grab (true);
+							if (epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G).Certainty < 1.0) {
+								Suggest ("grab");
+							}
+							else {
+								Grab (true);
+							}
 						}
 					}
 					else {
@@ -490,7 +495,7 @@ public class JointGestureDemo : MonoBehaviour {
 							string prevInstruction = FindPreviousMatch ("grab");
 
 							if (prevInstruction.StartsWith("grab move")) {
-								HandleMoveInterval (prevInstruction);
+								HandleMoveSegment (prevInstruction);
 							}
 						}
 					}
@@ -534,16 +539,36 @@ public class JointGestureDemo : MonoBehaviour {
 				else if (messageStr.StartsWith ("push")) {
 					if (startSignal.EndsWith ("high")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
-							Push ("left");
+							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 1.0) {
+								Suggest ("push left");
+							}
+							else {
+								Push ("left");
+							}
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
-							Push ("right");
+							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 1.0) {
+								Suggest ("push right");
+							}
+							else {
+								Push ("right");
+							}
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
-							Push ("front");
+							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 1.0) {
+								Suggest ("push front");
+							}
+							else {
+								Push ("front");
+							}
 						}
 						else if (GetGestureContent (messageStr, "push") == "back") {
-							Push ("back");
+							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 1.0) {
+								Suggest ("push back");
+							}
+							else {
+								Push ("back");
+							}
 						}
 					} 
 					else if (startSignal.EndsWith ("low")) {
@@ -566,7 +591,7 @@ public class JointGestureDemo : MonoBehaviour {
 						string prevInstruction = FindPreviousMatch ("grab");
 
 						if (prevInstruction.StartsWith("grab move")) {
-							HandleMoveInterval (prevInstruction);
+							HandleMoveSegment (prevInstruction);
 						}
 						else if (GetGestureContent (messageStr, "grab") == "") {
 							Grab (false);
@@ -833,7 +858,7 @@ public class JointGestureDemo : MonoBehaviour {
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
-					suggestedActions.Add(string.Format("grasp({0})",indicatedObj.name));
+					PopulateGrabOptions (indicatedObj, CertaintyMode.Suggest);
 				}
 			}
 		}
@@ -946,7 +971,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 		else if (gesture.StartsWith("posack")) {
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Was that a yes?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Yes?"));
 				MoveToPerform ();
 				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_UP);
 				gestureController.PerformGesture (AvatarGesture.HEAD_NOD);
@@ -954,7 +979,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 		else if (gesture.StartsWith("negack")) { 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Was that a no?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("No?"));
 				MoveToPerform ();
 				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_DOWN);
 				gestureController.PerformGesture (AvatarGesture.HEAD_SHAKE);
@@ -1622,9 +1647,15 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void HandleMoveInterval(string instruction) {
+	void HandleMoveSegment(string instruction) {
 		if (instruction.EndsWith ("high")) {
 			if (GetGestureContent (instruction, "grab move") == "left") {
+//				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 1.0) {
+//					Suggest ("grab move left");
+//				}
+//				else {
+//					Move ("left");
+//				}
 				Move ("left");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right") {
