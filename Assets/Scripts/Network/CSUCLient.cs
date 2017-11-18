@@ -86,17 +86,17 @@ namespace Network
 				byte[] byteBuffer = new byte[IntSize];
 				stream.Read(byteBuffer, 0, IntSize);
 
-//				if (BitConverter.IsLittleEndian)
+//				if (!BitConverter.IsLittleEndian)
 //				{
 //					Array.Reverse(byteBuffer);
 //				}
 				int len = BitConverter.ToInt32(byteBuffer, 0);
 
-				Debug.Log (len);
+//				Debug.Log (len);
 
 				byteBuffer = new byte[len];
 				int numBytesRead = stream.Read(byteBuffer, 0, len);
-				Debug.Log (numBytesRead);
+//				Debug.Log (numBytesRead);
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
 				_messages.Enqueue (message);

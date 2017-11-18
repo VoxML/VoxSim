@@ -996,6 +996,8 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					if (eventManager.events.Count == 0) {
+						indicatedObj = null;
+						objectMatches.Clear ();
 						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
@@ -1129,35 +1131,37 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void IndexByColor(string color) {
-		if (indicatedObj == null) {
-			if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
-				foreach (GameObject block in blocks) {
-					if (block.activeInHierarchy &&
-					    block.GetComponent<AttributeSet> ().attributes.Contains (color)) {
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-							indicatedObj = block;
-							objectConfirmation = null;
-							objectMatches.Clear ();
-							ReachFor (indicatedObj);
-							break;
+		if (eventManager.events.Count == 0) {
+			if (indicatedObj == null) {
+				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
+					foreach (GameObject block in blocks) {
+						if (block.activeInHierarchy &&
+						    block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) {
+							if (!objectMatches.Contains (block)) {
+								objectMatches.Add (block);
+							}
+							ResolveIndicatedObject ();
 						}
 					}
 				}
-			}
-			else {	// choose from restricted options based on color
-				foreach (GameObject match in objectMatches) {
-					if (match.activeInHierarchy &&
-						match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower())) {
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-							indicatedObj = match;
-							objectConfirmation = null;
-							objectMatches.Clear ();
-							ReachFor (indicatedObj);
-							break;
+				else {	// choose from restricted options based on color
+					List<GameObject> toRemove = new List<GameObject>();
+					foreach (GameObject match in objectMatches) {
+						if (match.activeInHierarchy &&
+						    !match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) {
+							if (eventManager.events.Count == 0) {
+								if (objectMatches.Contains (match)) {
+									toRemove.Add (match);
+								}
+							}
 						}
 					}
+
+					foreach (GameObject item in toRemove) {
+						objectMatches.Remove (item);
+					}
+					ResolveIndicatedObject ();
+
 				}
 
 				if (indicatedObj == null) {
@@ -1165,8 +1169,13 @@ public class JointGestureDemo : MonoBehaviour {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
 					}
 				}
+				else {
+					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("OK, go on."));
+					}
+				}
 			}
-		}
+		} 
 		else {	// received color with object already indicated
 			if (eventManager.events.Count == 0) {
 				OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
@@ -1386,7 +1395,7 @@ public class JointGestureDemo : MonoBehaviour {
 					highlightCenter.z));
 				ResolveIndicatedObject ();
 			}
-			else {	// indicating region
+			else if (graspedObj == null) {	// indicating region
 				indicatedRegion = new Region (new Vector3 (highlightCenter.x - vectorConeRadius, highlightCenter.y, highlightCenter.z - vectorConeRadius),
 					new Vector3 (highlightCenter.x + vectorConeRadius, highlightCenter.y, highlightCenter.z + vectorConeRadius));
 				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
@@ -2341,7 +2350,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		string themeAttr = string.Empty;
 		if (theme.GetComponent<Voxeme> () != null) {
-			themeAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+			themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 		}
 
 		foreach (object option in placementOptions) {
@@ -2410,9 +2419,16 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		OutputHelper.PrintOutput (Role.Affector, "");
-
+		GameObject theme = null;
 		if (indicatedObj != null) {
-			PopulatePushOptions (indicatedObj, dir);
+			theme = indicatedObj;
+		}
+		else if (graspedObj != null) {
+			theme = graspedObj;
+		}
+
+		if (theme != null) {
+			PopulatePushOptions (theme, dir);
 
 			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 				Disambiguate (actionOptions);

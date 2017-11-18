@@ -4437,12 +4437,30 @@ public class Predicates : MonoBehaviour {
 							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
 							if (interactionObject != null) {
 								if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == leftGrasper) {
+									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponentsInChildren<InteractionTarget>()) {
+										if (interactionTarget.gameObject.name == "lHand") {
+											interactionTarget.gameObject.SetActive (true);
+										}
+										else if (interactionTarget.gameObject.name == "rHand") {
+											interactionTarget.gameObject.SetActive (false);
+										}
+									}
+
 									Debug.Log (string.Format ("Starting {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
 
 									InteractionHelper.SetLeftHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
 									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.LeftHand, interactionObject, true);
 								} 
 								else if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == rightGrasper) {
+									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponentsInChildren<InteractionTarget>()) {
+										if (interactionTarget.gameObject.name == "lHand") {
+											interactionTarget.gameObject.SetActive (false);
+										}
+										else if (interactionTarget.gameObject.name == "rHand") {
+											interactionTarget.gameObject.SetActive (true);
+										}
+									}
+
 									Debug.Log (string.Format ("Starting {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
 
 									InteractionHelper.SetRightHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
