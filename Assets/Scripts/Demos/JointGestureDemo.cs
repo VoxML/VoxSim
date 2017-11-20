@@ -1709,7 +1709,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if ((indicatedObj == null) && (graspedObj == null)) {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		Region region = null;
 
 		highlightCenter = TransformToSurface (vector);
@@ -1915,6 +1918,9 @@ public class JointGestureDemo : MonoBehaviour {
 	void HandleMoveSegment(string instruction) {
 		Concept conceptG = null;
 		Concept conceptL = null;
+
+		actionOptions.Clear ();
+		suggestedActions.Clear ();
 
 		if (instruction.EndsWith ("high")) {
 			if (GetGestureContent (instruction, "grab move") == "left") {
