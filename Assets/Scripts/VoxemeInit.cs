@@ -76,6 +76,7 @@ public class VoxemeInit : MonoBehaviour {
 					InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
 					foreach (InteractionTarget interactionTarget in interactionTargets) {
 						interactionTarget.gameObject.transform.parent = container.transform;
+						container.GetComponent<Voxeme> ().interactionTargets.Add (interactionTarget);
 					}
 
 					FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();

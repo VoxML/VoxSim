@@ -16,6 +16,8 @@ namespace Agent {
 			// available types: ACTION, OBJECT, PROPERTY
 			// available modes: L, G
 			Concept pointG = new Concept ("point", ConceptType.ACTION, ConceptMode.G);
+			Concept deixis_thisL = new Concept("THIS", ConceptType.ACTION, ConceptMode.L);
+			Concept deixis_thatL = new Concept("THAT", ConceptType.ACTION, ConceptMode.L);
 			Concept grabG = new Concept ("grab", ConceptType.ACTION, ConceptMode.G);
 			Concept moveG = new Concept ("move", ConceptType.ACTION, ConceptMode.G);
 			Concept pushG = new Concept ("push", ConceptType.ACTION, ConceptMode.G);
@@ -27,6 +29,11 @@ namespace Agent {
 
 			// add concepts to the epistemic model
 			state.AddConcept(pointG);
+			state.AddConcept(deixis_thisL);
+			state.AddConcept(deixis_thatL);
+			state.AddRelation(pointG, deixis_thisL, true);
+			state.AddRelation(pointG, deixis_thatL, true);
+
 			state.AddConcept(grabG);
 			state.AddConcept(moveG);
 			state.AddConcept(pushG);

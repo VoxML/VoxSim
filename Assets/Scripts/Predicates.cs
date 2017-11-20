@@ -4452,7 +4452,7 @@ public class Predicates : MonoBehaviour {
 									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.LeftHand, interactionObject, true);
 								} 
 								else if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == rightGrasper) {
-									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponentsInChildren<InteractionTarget>()) {
+									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponent<Voxeme>().interactionTargets) {
 										if (interactionTarget.gameObject.name == "lHand") {
 											interactionTarget.gameObject.SetActive (false);
 										}
@@ -4562,7 +4562,7 @@ public class Predicates : MonoBehaviour {
 
 									//InteractionHelper.SetLeftHandTarget (agent, ikControl.leftHandObj);
 									InteractionHelper.SetLeftHandTarget (agent, null);
-									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 1.0f, 0.0f);
+									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 0.0f, 0.0f);
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
 								}
 								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand)) {
@@ -4577,6 +4577,10 @@ public class Predicates : MonoBehaviour {
 
 //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight);
 //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight);
+								}
+
+								foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponent<Voxeme>().interactionTargets) {
+									interactionTarget.gameObject.SetActive (true);
 								}
 							}
 							else {
