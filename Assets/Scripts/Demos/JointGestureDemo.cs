@@ -905,12 +905,12 @@ public class JointGestureDemo : MonoBehaviour {
 							}
 						}
 
-						//string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
+						string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
 						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "Which block?");
-							//ReachFor (objVoxemes [0].gameObject);
-							objectConfirmation = null;
+							OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
+							ReachFor (objVoxemes [0].gameObject);
+							objectConfirmation = objVoxemes[0].gameObject;
 						}
 					}
 				}
@@ -1275,7 +1275,20 @@ public class JointGestureDemo : MonoBehaviour {
 					indicatedObj = null;
 					objectMatches.Clear ();
 					suggestedActions.Clear ();
-					eventConfirmation = "";
+
+					confirmationTexts.Remove (actionOptions[0]);
+					actionOptions.RemoveAt (0);
+
+					if (actionOptions.Count > 0) {
+						Disambiguate (actionOptions);
+					}
+					else {
+						if (eventManager.events.Count == 0) {
+							indicatedObj = null;
+							objectMatches.Clear ();
+							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+						}
+					}
 				}
 			}
 			else if (suggestedActions.Count > 0) {
@@ -1358,7 +1371,20 @@ public class JointGestureDemo : MonoBehaviour {
 					indicatedObj = null;
 					objectMatches.Clear ();
 					suggestedActions.Clear ();
-					eventConfirmation = "";
+
+					confirmationTexts.Remove (actionOptions[0]);
+					actionOptions.RemoveAt (0);
+
+					if (actionOptions.Count > 0) {
+						Disambiguate (actionOptions);
+					}
+					else {
+						if (eventManager.events.Count == 0) {
+							indicatedObj = null;
+							objectMatches.Clear ();
+							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+						}
+					}
 				}
 			}
 			else if (suggestedActions.Count > 0) {
@@ -1849,7 +1875,9 @@ public class JointGestureDemo : MonoBehaviour {
 	void PopulateOptions(string program, GameObject theme, string dir) {
 		switch (program) {
 		case "grasp":
-			PopulateGrabOptions (theme);
+			if (graspedObj == null) {
+				PopulateGrabOptions (theme);
+			}
 			break;
 
 		case "put":
@@ -1874,6 +1902,9 @@ public class JointGestureDemo : MonoBehaviour {
 		if (certainty == CertaintyMode.Act) {
 			if (!actionOptions.Contains (string.Format ("grasp({0})", theme.name))) {
 				actionOptions.Add (string.Format ("grasp({0})", theme.name));
+			}
+
+			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
 				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
 					string.Format ("grab the {0} block", themeAttr));
 			}
@@ -1881,6 +1912,9 @@ public class JointGestureDemo : MonoBehaviour {
 		else if (certainty == CertaintyMode.Suggest) {
 			if (!suggestedActions.Contains (string.Format ("grasp({0})", theme.name))) {
 				suggestedActions.Add (string.Format ("grasp({0})", theme.name));
+			}
+
+			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
 				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
 					string.Format ("grab the {0} block", themeAttr));
 			}
