@@ -112,6 +112,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 	Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
 
+	bool engaged = false;
 	int sessionCounter = 0;
 
 	// Use this for initialization
@@ -327,18 +328,34 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		// Synthetic vision mockup
-		if (synVision != null) {
-			if (synVision.enabled) {
-				foreach (GameObject block in blocks) {	// limit to blocks only for now
-					Voxeme blockVox = block.GetComponent<Voxeme> ();
-					if (blockVox != null) {
-						if (synVision.IsVisible (block)) {
-							if (!synVision.visibleObjects.Contains (blockVox)) {
-								synVision.visibleObjects.Add (blockVox);
-								Debug.Log (string.Format ("JointGestureDemo.Start:{0}:{1}", block.name, synVision.IsVisible (block).ToString ()));
-								synVision.NewInformation ();
-							}
-						}
+//		if (synVision != null) {
+//			if (synVision.enabled) {
+//				foreach (GameObject block in blocks) {	// limit to blocks only for now
+//					Voxeme blockVox = block.GetComponent<Voxeme> ();
+//					if (blockVox != null) {
+//						if (synVision.IsVisible (block)) {
+//							if (!synVision.visibleObjects.Contains (blockVox)) {
+//								synVision.visibleObjects.Add (blockVox);
+//								Debug.Log (string.Format ("JointGestureDemo.Start:{0}:{1}", block.name, synVision.IsVisible (block).ToString ()));
+//								//synVision.NewInformation ();
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+
+		if (engaged) {
+			foreach (GameObject block in blocks) {	// limit to blocks only for now
+				Voxeme blockVox = block.GetComponent<Voxeme> ();
+				if (blockVox != null) {
+					if (synVision.visibleObjects.Contains (blockVox)) {
+						string color = string.Empty;
+						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+
+//						Concept blockConcept = epistemicModel.state.GetConcept (string.Format ("{0}_block", color), ConceptType.OBJECT, ConceptMode.L);
+//						blockConcept.Certainty = 1.0;
+//						epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
 					}
 				}
 			}
@@ -354,7 +371,14 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (hit.collider != null) {
 					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-						Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+						if (synVision != null) {
+							if (synVision.enabled) {
+								Debug.Log(string.Format("SyntheticVision.IsVisible({0}):{1}",hit.collider.gameObject,synVision.IsVisible (hit.collider.gameObject)));
+								if (synVision.IsVisible (hit.collider.gameObject)) {
+									Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+								}
+							}
+						}
 					}
 				}
 			}
@@ -604,22 +628,26 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				} 
 				else if (messageStr.StartsWith ("posack")) {
-					if (epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-						conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
-						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					}
+					if (eventConfirmation != "") {
+						if (epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
+							conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
 
-					Suggest ("posack");
+						Suggest ("posack");
+					}
 				} 
 				else if (messageStr.StartsWith ("negack")) {
-					if (epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-						conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
-						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					}
+					if (eventConfirmation != "") {
+						if (epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
+							conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
 
-					Suggest ("negack");
+						Suggest ("negack");
+					}
 				}
 			} 
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
@@ -1054,10 +1082,6 @@ public class JointGestureDemo : MonoBehaviour {
 						MoveToPerform ();
 						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 						suggestedActions.Add("grasp({0})");
-
-						Concept concept = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
-						concept.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim(new Concept[] {concept}, new Relation[] {});
 					}
 				}	// already grasping something
 				else {
@@ -1167,43 +1191,47 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		}
 		else if (gesture.StartsWith("left point")) { 
-			string dir = GetGestureContent (gesture, "left point");
-			if (dir == "left") {
-				performGesture = AvatarGesture.LARM_POINT_RIGHT;
-			}
-			else if (dir == "right") {
-				performGesture = AvatarGesture.LARM_POINT_LEFT;
-			}
-			else if (dir == "front") {
-				performGesture = AvatarGesture.LARM_POINT_FRONT;
-			}
-			else if (dir == "back") {
-				performGesture = AvatarGesture.LARM_POINT_BACK;
-			}
+			//string dir = GetGestureContent (gesture, "left point");
+//			if (dir == "left") {
+//				performGesture = AvatarGesture.LARM_POINT_RIGHT;
+//			}
+//			else if (dir == "right") {
+//				performGesture = AvatarGesture.LARM_POINT_LEFT;
+//			}
+//			else if (dir == "front") {
+//				performGesture = AvatarGesture.LARM_POINT_FRONT;
+//			}
+//			else if (dir == "back") {
+//				performGesture = AvatarGesture.LARM_POINT_BACK;
+//			}
+
+			performGesture = AvatarGesture.LARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
 		}
 		else if (gesture.StartsWith("right point")) { 
-			string dir = GetGestureContent (gesture, "right point");
-			if (dir == "left") {
-				performGesture = AvatarGesture.RARM_POINT_RIGHT;
-			}
-			else if (dir == "right") {
-				performGesture = AvatarGesture.RARM_POINT_LEFT;
-			}
-			else if (dir == "front") {
-				performGesture = AvatarGesture.RARM_POINT_FRONT;
-			}
-			else if (dir == "back") {
-				performGesture = AvatarGesture.RARM_POINT_BACK;
-			}
+//			string dir = GetGestureContent (gesture, "right point");
+//			if (dir == "left") {
+//				performGesture = AvatarGesture.RARM_POINT_RIGHT;
+//			}
+//			else if (dir == "right") {
+//				performGesture = AvatarGesture.RARM_POINT_LEFT;
+//			}
+//			else if (dir == "front") {
+//				performGesture = AvatarGesture.RARM_POINT_FRONT;
+//			}
+//			else if (dir == "back") {
+//				performGesture = AvatarGesture.RARM_POINT_BACK;
+//			}
+
+			performGesture = AvatarGesture.RARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
@@ -1535,6 +1563,8 @@ public class JointGestureDemo : MonoBehaviour {
 				graspedObj = null;
 			}
 		}
+
+		engaged = state;
 	}
 
 	void Deixis(string dir) {
@@ -1687,7 +1717,7 @@ public class JointGestureDemo : MonoBehaviour {
 			else if (graspedObj == null) {	// indicating region
 				indicatedRegion = new Region (new Vector3 (highlightCenter.x - vectorConeRadius, highlightCenter.y, highlightCenter.z - vectorConeRadius),
 					new Vector3 (highlightCenter.x + vectorConeRadius, highlightCenter.y, highlightCenter.z + vectorConeRadius));
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
 			}
 		}
 		else {	// already indicated another object
@@ -1709,9 +1739,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		if ((indicatedObj == null) && (graspedObj == null)) {
-			OutputHelper.PrintOutput (Role.Affector, "");
-		}
+		// TODO: output timeout timer
+//		if ((indicatedObj == null) && (graspedObj == null)) {
+//			OutputHelper.PrintOutput (Role.Affector, "");
+//		}
 
 		Region region = null;
 
@@ -1916,169 +1947,132 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void HandleMoveSegment(string instruction) {
-		Concept conceptG = null;
-		Concept conceptL = null;
+		Concept moveConcept = null;
+		Concept grabConcept = null;
 
 		actionOptions.Clear ();
 		suggestedActions.Clear ();
 
+		moveConcept = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
+		grabConcept = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
+
 		if (instruction.EndsWith ("high")) {
 			if (GetGestureContent (instruction, "grab move") == "left") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move left");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("left");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move right");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("right");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "front") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move front");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("front");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "back") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move back");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("back");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left front") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move left front");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("left front");
 				}
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "right front") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move right front");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("right front");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left back") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move left back");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("left back");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right back") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move right back");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("right back");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "up") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move up");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("up");
 				}
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "down") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move down");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("down");
 				}
@@ -2087,95 +2081,78 @@ public class JointGestureDemo : MonoBehaviour {
 		else if (instruction.EndsWith ("low")) {
 			if (GetGestureContent (instruction, "grab move") == "left") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move left");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move right");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "front") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move front");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "back") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move back");
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "left front") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move left front");
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "right front") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move right front");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left back") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move left back");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right back") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move right back");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "up") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move up");
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "down") {
 				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move down");
 			}
 		}
+
+		grabConcept.Certainty = 1.0;
+		epistemicModel.state.UpdateEpisim(new Concept[] {moveConcept,grabConcept}, new Relation[] {});
 	}
 
 	void PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
@@ -2216,6 +2193,9 @@ public class JointGestureDemo : MonoBehaviour {
 					if (certainty == CertaintyMode.Act) {
 						if (!actionOptions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
 							actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+						}
+
+						if (!confirmationTexts.ContainsKey (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
 							confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
 								string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
 						}
@@ -2223,6 +2203,9 @@ public class JointGestureDemo : MonoBehaviour {
 					else if (certainty == CertaintyMode.Suggest) {
 						if (!suggestedActions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
 							suggestedActions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+						}
+
+						if (!confirmationTexts.ContainsKey (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
 							confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
 								string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
 						}
@@ -2906,13 +2889,19 @@ public class JointGestureDemo : MonoBehaviour {
 					if (certainty == CertaintyMode.Act) {
 						if (!actionOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
 							actionOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+						}
+
+						if (!confirmationTexts.ContainsKey(string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
 							confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
 								string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
 						}
-					} 
+					}
 					else if (certainty == CertaintyMode.Suggest) {
 						if (!suggestedActions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
 							suggestedActions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+						}
+						
+						if (!confirmationTexts.ContainsKey(string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
 							confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
 								string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
 						}
