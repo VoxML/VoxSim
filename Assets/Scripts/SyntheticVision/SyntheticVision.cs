@@ -55,7 +55,7 @@ namespace Agent
 		// Update is called once per frame
 		void Update () {
 			//if (objSelector == null) {
-				objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 				//Debug.Log (objSelector);
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
 				//Debug.Log (voxeme);
@@ -63,6 +63,12 @@ namespace Agent
 					if (!visibleObjects.Contains (voxeme)) {
 						visibleObjects.Add (voxeme);
 						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
+					}
+
+					if (gameObject.GetComponent<EpistemicModel> ().engaged) {
+						if (!knownObjects.Contains (voxeme)) {
+							knownObjects.Add (voxeme);
+						}
 					}
 				}
 				else {
