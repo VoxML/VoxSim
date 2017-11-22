@@ -351,13 +351,16 @@ public class JointGestureDemo : MonoBehaviour {
 			foreach (GameObject block in blocks) {	// limit to blocks only for now
 				Voxeme blockVox = block.GetComponent<Voxeme> ();
 				if (blockVox != null) {
-					if (synVision.visibleObjects.Contains (blockVox)) {
+					if (synVision.knownObjects.Contains (blockVox)) {
 						string color = string.Empty;
 						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 
-//						Concept blockConcept = epistemicModel.state.GetConcept (string.Format ("{0}_block", color), ConceptType.OBJECT, ConceptMode.L);
-//						blockConcept.Certainty = 1.0;
-//						epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
+						Concept blockConcept = epistemicModel.state.GetConcept (string.Format ("{0}_block", color), ConceptType.OBJECT, ConceptMode.L);
+
+						if (blockConcept.Certainty < 1.0) {
+							blockConcept.Certainty = 1.0;
+							epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
+						}
 					}
 				}
 			}

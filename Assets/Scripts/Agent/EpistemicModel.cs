@@ -24,9 +24,9 @@ namespace Agent {
 			Concept grabG = new Concept ("grab", ConceptType.ACTION, ConceptMode.G);
 			Concept grabL = new Concept ("GRAB", ConceptType.ACTION, ConceptMode.L);
 			Concept moveG = new Concept ("move", ConceptType.ACTION, ConceptMode.G);
-			Concept moveL = new Concept ("PUT", ConceptType.ACTION, ConceptMode.G);
+//			Concept moveL = new Concept ("PUT", ConceptType.ACTION, ConceptMode.G);
 			Concept pushG = new Concept ("push", ConceptType.ACTION, ConceptMode.G);
-			Concept pushL = new Concept ("PUSH", ConceptType.ACTION, ConceptMode.L);
+//			Concept pushL = new Concept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 
 			Concept posackG = new Concept("posack", ConceptType.ACTION, ConceptMode.G);
 			Concept posackL = new Concept("YES", ConceptType.ACTION, ConceptMode.L);
@@ -44,11 +44,11 @@ namespace Agent {
 			state.AddConcept(grabL);
 			state.AddRelation(grabG, grabL, true);
 			state.AddConcept(moveG);
-			state.AddConcept(moveL);
-			state.AddRelation(moveG, moveL, true);
+//			state.AddConcept(moveL);
+//			state.AddRelation(moveG, moveL, true);
 			state.AddConcept(pushG);
-			state.AddConcept(pushL);
-			state.AddRelation(pushG, pushL, true);
+//			state.AddConcept(pushL);
+//			state.AddRelation(pushG, pushL, true);
 
 			state.AddConcept(posackG);
 			state.AddConcept(posackL);
@@ -89,7 +89,9 @@ namespace Agent {
 			state.AddConcept(purpleBlock);
 			state.AddConcept(whiteBlock);
 
-			state.SetEpisimUrl(PlayerPrefs.GetString("EpiSimURL"));
+			string url = PlayerPrefs.GetString ("EpiSim URL");
+			url = !url.StartsWith ("http://") ? "http://" + url : url;
+			state.SetEpisimUrl(url);
 
 			state.InitiateEpisim();
 		}
