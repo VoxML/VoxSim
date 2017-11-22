@@ -106,7 +106,7 @@ public static class OutputHelper {
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
 
 		foreach (OutputController outputController in outputs) {
-			if (outputController.role == role) {
+			if ((outputController.role == role) && (GetCurrentOutputString(role) != str)) {
 				outputController.outputString = str;
 
 				// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"

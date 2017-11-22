@@ -2342,6 +2342,17 @@ public class JointGestureDemo : MonoBehaviour {
 	void PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
+		List<GameObject> objectPlacements = placementOptions.OfType<GameObject>().ToList();
+
+		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
+			ThenBy(o => (o.transform.position - theme.transform.position).magnitude).ToList();
+
+		for (int i = 0; i < placementOptions.Count; i++) {
+			if (placementOptions [i] is GameObject) {
+				placementOptions [i] = objectPlacements [i];
+			}
+		}
+
 		List<Region> orthogonalRegions = new List<Region> ();
 		if (dir == "left") {
 			orthogonalRegions.Add (frontRegion);
@@ -3039,6 +3050,16 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
+
+		List<GameObject> objectPlacements = placementOptions.OfType<GameObject>().ToList();
+
+		objectPlacements = objectPlacements.OrderBy (o => (o.transform.position - theme.transform.position).magnitude).ToList();
+
+		for (int i = 0; i < placementOptions.Count; i++) {
+			if (placementOptions [i] is GameObject) {
+				placementOptions [i] = objectPlacements [i];
+			}
+		}
 
 		List<Region> orthogonalRegions = new List<Region> ();
 		if (dir == "left") {
@@ -3815,7 +3836,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 		}
-
+			
 //		if (frontRegion.Contains(theme)) {	// if the grasped block is in this region
 //			foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 //				if (block.activeInHierarchy) {
