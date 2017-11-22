@@ -931,9 +931,9 @@ public class JointGestureDemo : MonoBehaviour {
 					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
 					if (eventManager.events.Count == 0) {
-						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
 						objectConfirmation = objVoxemes [0].gameObject;
+						LookAt(objectConfirmation);
 					}
 				}
 			}
@@ -973,10 +973,10 @@ public class JointGestureDemo : MonoBehaviour {
 					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
 					if (eventManager.events.Count == 0) {
-						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
 						ReachFor (objVoxemes [0].gameObject);
 						objectConfirmation = objVoxemes[0].gameObject;
+						LookAt(objectConfirmation);
 					}
 				}
 			}
@@ -1211,10 +1211,10 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 					else {
 						if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-							performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+							performGesture = AvatarGesture.RARM_PUSH_RIGHT;
 						}
 						else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-							performGesture = AvatarGesture.LARM_CARRY_RIGHT;
+							performGesture = AvatarGesture.LARM_PUSH_RIGHT;
 						}
 					}
 				}
@@ -1224,10 +1224,10 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 					else {
 						if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-							performGesture = AvatarGesture.RARM_CARRY_LEFT;
+							performGesture = AvatarGesture.RARM_PUSH_LEFT;
 						}
 						else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-							performGesture = AvatarGesture.LARM_CARRY_LEFT;
+							performGesture = AvatarGesture.LARM_PUSH_LEFT;
 						}
 					}
 				}
@@ -1318,7 +1318,18 @@ public class JointGestureDemo : MonoBehaviour {
 				OutputHelper.PrintOutput (Role.Affector, string.Format ("Yes?"));
 				MoveToPerform ();
 				AllowHeadMotion ();
-				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_UP);
+
+				if (graspedObj == null) {
+					gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_UP);
+				}
+				else {
+					if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+						gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_UP);
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+						gestureController.PerformGesture(AvatarGesture.LARM_THUMBS_UP);
+					}
+				}
 				gestureController.PerformGesture (AvatarGesture.HEAD_NOD);
 			}
 		}
@@ -1327,7 +1338,18 @@ public class JointGestureDemo : MonoBehaviour {
 				OutputHelper.PrintOutput (Role.Affector, string.Format ("No?"));
 				MoveToPerform ();
 				AllowHeadMotion ();
-				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_DOWN);
+
+				if (graspedObj == null) {
+					gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_DOWN);
+				}
+				else {
+					if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+						gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_DOWN);
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+						gestureController.PerformGesture(AvatarGesture.LARM_THUMBS_DOWN);
+					}
+				}
 				gestureController.PerformGesture (AvatarGesture.HEAD_SHAKE);
 				eventConfirmation = "negack";
 			}
@@ -3950,7 +3972,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
-
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 0.0f;
 	}
 
 	void AllowHeadMotion() {
@@ -3964,6 +3986,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = obj.transform.position;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 	}
 
 	void LookAt(Vector3 point) {
@@ -3971,6 +3994,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = target;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 	}
 
 	void TurnToward(GameObject obj) {
@@ -4066,7 +4090,7 @@ public class JointGestureDemo : MonoBehaviour {
 			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
-		LookAt (obj);
+		//LookAt (obj);
 	}
 
 	Vector3 TransformToSurface(List<float> vector) {
