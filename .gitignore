@@ -137,7 +137,7 @@ Assets/Plugins/RTVoice*
 # ignore RootMotion/FinalIK
 Assets/RootMotion*
 # ignore FlashbackRecorder
-Assets/FlashbackRecorder
+Assets/FlashbackRecorder*
 # ignore ScenesLists file
 Assets/Resources/ScenesList.txt
 Assets/Editor\ Default\ Resources*
