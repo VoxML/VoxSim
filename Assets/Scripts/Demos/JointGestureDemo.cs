@@ -110,6 +110,8 @@ public class JointGestureDemo : MonoBehaviour {
 	public List<GameObject> objectMatches = new List<GameObject> ();
 	public GameObject objectConfirmation = null;
 
+	public bool useOrderingHeuristics;
+
 	Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
 
 	int sessionCounter = 0;
@@ -1803,7 +1805,9 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 
-			objectMatches = objectMatches.OrderBy (o => (o.transform.position - Diana.transform.position).magnitude).ToList ();
+			if (useOrderingHeuristics) {
+				objectMatches = objectMatches.OrderBy (o => (o.transform.position - Diana.transform.position).magnitude).ToList ();
+			}
 
 			if (objectMatches.Count > 0) {
 				ResolveIndicatedObject ();
@@ -2369,14 +2373,16 @@ public class JointGestureDemo : MonoBehaviour {
 	void PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
-		List<GameObject> objectPlacements = placementOptions.OfType<GameObject>().ToList();
+		if (useOrderingHeuristics) {
+			List<GameObject> objectPlacements = placementOptions.OfType<GameObject> ().ToList ();
 
-		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
-			ThenBy(o => (o.transform.position - theme.transform.position).magnitude).ToList();
+			objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
+			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
 
-		for (int i = 0; i < placementOptions.Count; i++) {
-			if (placementOptions [i] is GameObject) {
-				placementOptions [i] = objectPlacements [i];
+			for (int i = 0; i < placementOptions.Count; i++) {
+				if (placementOptions [i] is GameObject) {
+					placementOptions [i] = objectPlacements [i];
+				}
 			}
 		}
 
@@ -2604,13 +2610,15 @@ public class JointGestureDemo : MonoBehaviour {
 	void PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
-		List<GameObject> objectPlacements = placementOptions.OfType<GameObject>().ToList();
+		if (useOrderingHeuristics) {
+			List<GameObject> objectPlacements = placementOptions.OfType<GameObject> ().ToList ();
 
-		objectPlacements = objectPlacements.OrderBy (o => (o.transform.position - theme.transform.position).magnitude).ToList();
+			objectPlacements = objectPlacements.OrderBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
 
-		for (int i = 0; i < placementOptions.Count; i++) {
-			if (placementOptions [i] is GameObject) {
-				placementOptions [i] = objectPlacements [i];
+			for (int i = 0; i < placementOptions.Count; i++) {
+				if (placementOptions [i] is GameObject) {
+					placementOptions [i] = objectPlacements [i];
+				}
 			}
 		}
 
