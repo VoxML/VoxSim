@@ -106,6 +106,9 @@ public static class OutputHelper {
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
 
 		foreach (OutputController outputController in outputs) {
+			Debug.Log (str);
+			Debug.Log (GetCurrentOutputString (role));
+			Debug.Log (outputController.outputString);
 			if ((outputController.role == role) && (GetCurrentOutputString(role) != str)) {
 				outputController.outputString = str;
 

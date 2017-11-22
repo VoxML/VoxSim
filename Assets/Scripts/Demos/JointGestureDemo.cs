@@ -2506,7 +2506,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		GameObject theme = null;
 		if (indicatedObj != null) {
 			theme = indicatedObj;
@@ -3158,7 +3161,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		GameObject theme = null;
 		if (indicatedObj != null) {
 			theme = indicatedObj;
