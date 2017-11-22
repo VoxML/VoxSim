@@ -4,7 +4,7 @@ namespace Episteme
 {
 	public enum ConceptMode { L, G };
 	
-	public enum ConceptType { ACTION, OBJECT, PROPERTY };
+	public enum ConceptType { ACTION, PROPERTY, OBJECT };
 	
 	public class Concept
 	{
@@ -29,7 +29,7 @@ namespace Episteme
 			set { _certainty = value; }
 		}
 
-		private List<Concept> Related
+		public List<Concept> Related
 		{
 			get { return _related; }
 			set { _related = value; }

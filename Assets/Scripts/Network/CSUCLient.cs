@@ -99,7 +99,15 @@ namespace Network
 //				Debug.Log (numBytesRead);
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
-				_messages.Enqueue (message);
+				if (message.StartsWith ("P")) {
+					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
+						_messages.Enqueue (message);
+					}
+				}
+				else {
+					_messages.Enqueue (message);
+				}
+				//_messages.Enqueue (message);
 //				Debug.Log (stream.DataAvailable);
 
 			}

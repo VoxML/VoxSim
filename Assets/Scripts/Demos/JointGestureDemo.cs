@@ -124,12 +124,15 @@ public class JointGestureDemo : MonoBehaviour {
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
 		logger = GetComponent<GenericLogger> ();
-		logger.OpenLog ("");
+
+		if (PlayerPrefs.GetInt ("Make Logs") == 1) {
+			logger.OpenLog (PlayerPrefs.GetString ("Logs Prefix"));
+		}
 
 		Diana = GameObject.Find ("Diana");
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.rightHand.gameObject;
-		epistemicModel = gameObject.GetComponent<EpistemicModel> ();
+		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		synVision = Diana.GetComponent<SyntheticVision> ();
 		gestureController = Diana.GetComponent<AvatarGestureController> ();
 		ik = Diana.GetComponent<FullBodyBipedIK> ();
@@ -327,18 +330,34 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		// Synthetic vision mockup
-		if (synVision != null) {
-			if (synVision.enabled) {
-				foreach (GameObject block in blocks) {	// limit to blocks only for now
-					Voxeme blockVox = block.GetComponent<Voxeme> ();
-					if (blockVox != null) {
-						if (synVision.IsVisible (block)) {
-							if (!synVision.visibleObjects.Contains (blockVox)) {
-								synVision.visibleObjects.Add (blockVox);
-								Debug.Log (string.Format ("JointGestureDemo.Start:{0}:{1}", block.name, synVision.IsVisible (block).ToString ()));
-								synVision.NewInformation ();
-							}
-						}
+//		if (synVision != null) {
+//			if (synVision.enabled) {
+//				foreach (GameObject block in blocks) {	// limit to blocks only for now
+//					Voxeme blockVox = block.GetComponent<Voxeme> ();
+//					if (blockVox != null) {
+//						if (synVision.IsVisible (block)) {
+//							if (!synVision.visibleObjects.Contains (blockVox)) {
+//								synVision.visibleObjects.Add (blockVox);
+//								Debug.Log (string.Format ("JointGestureDemo.Start:{0}:{1}", block.name, synVision.IsVisible (block).ToString ()));
+//								//synVision.NewInformation ();
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+
+		if (epistemicModel.engaged) {
+			foreach (GameObject block in blocks) {	// limit to blocks only for now
+				Voxeme blockVox = block.GetComponent<Voxeme> ();
+				if (blockVox != null) {
+					if (synVision.visibleObjects.Contains (blockVox)) {
+						string color = string.Empty;
+						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+
+//						Concept blockConcept = epistemicModel.state.GetConcept (string.Format ("{0}_block", color), ConceptType.OBJECT, ConceptMode.L);
+//						blockConcept.Certainty = 1.0;
+//						epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
 					}
 				}
 			}
@@ -354,7 +373,14 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (hit.collider != null) {
 					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-						Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+						if (synVision != null) {
+							if (synVision.enabled) {
+								Debug.Log(string.Format("SyntheticVision.IsVisible({0}):{1}",hit.collider.gameObject,synVision.IsVisible (hit.collider.gameObject)));
+								if (synVision.IsVisible (hit.collider.gameObject)) {
+									Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+								}
+							}
+						}
 					}
 				}
 			}
@@ -364,6 +390,7 @@ public class JointGestureDemo : MonoBehaviour {
 	void ReceivedFusion(object sender, EventArgs e) {
 		string fusionMessage = ((GestureEventArgs)e).Content;
 		//Debug.Log (fusionMessage);
+		logger.OnLogEvent (this, new LoggerArgs (fusionMessage));
 
 		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
 		string messageType = splitMessage[0];
@@ -372,27 +399,77 @@ public class JointGestureDemo : MonoBehaviour {
 
 		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
+		if (!epistemicModel.engaged) {
+			epistemicModel.engaged = true;
+		}
+
 		Concept conceptL = null;
 		Concept conceptG = null;
 		Relation relation = null;
 
 		if (messageType == "S") {	// speech message
 			Debug.Log (fusionMessage);
-			logger.OnLogEvent (this, new LoggerArgs (fusionMessage));
 			switch (messageStr.ToLower ()) {
 			case "yes":
-				conceptL = epistemicModel.state.GetConcept("YES", ConceptType.ACTION, ConceptMode.L);
+				conceptL = epistemicModel.state.GetConcept ("YES", ConceptType.ACTION, ConceptMode.L);
+				conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
+				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+
 				conceptL.Certainty = 1.0;
-				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
+
+				if (conceptG.Certainty > 0.0) {
+					relation.Certainty = 1.0;
+				}
+
+				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
 
 				Acknowledge (true);
 				break;
 			case "no":
 				conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
+				conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
+				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+
 				conceptL.Certainty = 1.0;
-				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
+
+				if (conceptG.Certainty > 0.0) {
+					relation.Certainty = 1.0;
+				}
+
+				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
 
 				Acknowledge (false);
+				break;
+			case "grab":
+				conceptL = epistemicModel.state.GetConcept ("GRAB", ConceptType.ACTION, ConceptMode.L);
+				conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+
+				if (indicatedObj == null) {
+					if (EpistemicCertainty (conceptL) < 0.5) {
+						conceptG.Certainty = 0.5;
+					}
+					else {
+						relation.Certainty = 1.0;
+					}
+
+					Suggest ("grab");
+				}
+				else {
+					if (EpistemicCertainty(conceptL) < 0.5) {
+						conceptG.Certainty = 0.5;
+
+						Suggest ("grab");
+					}
+					else {
+						relation.Certainty = 1.0;
+
+						Grab (true);
+					}
+				}
+
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptG, conceptL }, new Relation[] { relation });
 				break;
 			case "left":
 				if ((indicatedObj == null) && (graspedObj == null)) {
@@ -403,22 +480,22 @@ public class JointGestureDemo : MonoBehaviour {
 						Deixis("right");
 					}
 				}
-				else if (graspedObj == null) {
-					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
-						//Push ("left");
-					}
-					else {
-						Push ("right");
-					}
-				}
-				else if (indicatedObj == null) {
-					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
-						//Move ("left");
-					}
-					else {
-						Move ("right");
-					}
-				}
+//				else if (graspedObj == null) {
+//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
+//						//Push ("left");
+//					}
+//					else {
+//						Push ("right");
+//					}
+//				}
+//				else if (indicatedObj == null) {
+//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
+//						//Move ("left");
+//					}
+//					else {
+//						Move ("right");
+//					}
+//				}
 				break;
 			case "right":
 				if ((indicatedObj == null) && (graspedObj == null)) {
@@ -429,22 +506,22 @@ public class JointGestureDemo : MonoBehaviour {
 						Deixis("left");
 					}
 				}
-				else if (graspedObj == null) {
-					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
-						//Push ("right");
-					}
-					else {
-						Push ("left");
-					}
-				}
-				else if (indicatedObj == null) {
-					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
-						//Move ("right");
-					}
-					else {
-						Move ("left");
-					}
-				}
+//				else if (graspedObj == null) {
+//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
+//						//Push ("right");
+//					}
+//					else {
+//						Push ("left");
+//					}
+//				}
+//				else if (indicatedObj == null) {
+//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
+//						//Move ("right");
+//					}
+//					else {
+//						Move ("left");
+//					}
+//				}
 				break;
 			case "this":
 			case "that":
@@ -481,7 +558,6 @@ public class JointGestureDemo : MonoBehaviour {
 		} 
 		else if (messageType == "G") {	// gesture message
 			Debug.Log (fusionMessage);
-			logger.OnLogEvent (this, new LoggerArgs (fusionMessage));
 			string[] messageComponents = messageStr.Split ();
 //			foreach (string c in messageComponents) {
 //				Debug.Log (c);
@@ -511,17 +587,17 @@ public class JointGestureDemo : MonoBehaviour {
 					Deixis (TransformToSurface (GetGestureVector (messageStr, "right point")));
 				} 
 				else if (messageStr.StartsWith ("grab")) {
-					if (graspedObj == null) {
+					if ((graspedObj == null) && (eventConfirmation == "")) {
 						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
-							if (epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+							Debug.Log (EpistemicCertainty (conceptG));
+							if (EpistemicCertainty (conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
 								Suggest ("grab");
 							}
 							else {
-								conceptG = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
 								conceptG.Certainty = 1.0;
 								epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
 
@@ -540,43 +616,56 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 				else if (messageStr.StartsWith ("posack")) {
-					if (epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-						conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
+					conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
+					conceptL = epistemicModel.state.GetConcept("YES", ConceptType.ACTION, ConceptMode.L);
+					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+
+					if (EpistemicCertainty(conceptG) < 0.5) {
 						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
 
 						Suggest ("posack");
 					}
 					else {
-						conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
 						conceptG.Certainty = 1.0;
-						epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+
+						if (conceptL.Certainty > 0.0) {
+							relation.Certainty = 1.0;
+						}
 
 						Acknowledge (true);
 					}
+
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
+
 				}
 				else if (messageStr.StartsWith ("negack")) {
-					if (epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-						conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
+					conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
+					conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
+					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+
+					if (EpistemicCertainty(conceptG) < 0.5) {
 						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
 
 						Suggest ("negack");
 					}
 					else {
-						conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
 						conceptG.Certainty = 1.0;
-						epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+
+						if (conceptL.Certainty > 0.0) {
+							relation.Certainty = 1.0;
+						}
 
 						Acknowledge (false);
 					}
+
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
 				}
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("left point")) {
-					if (epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-						conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+					if (EpistemicCertainty(conceptG) < 0.5) {
 						conceptG.Certainty = 0.5;
 						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 					}
@@ -584,8 +673,8 @@ public class JointGestureDemo : MonoBehaviour {
 					Suggest ("point");
 				} 
 				else if (messageStr.StartsWith ("right point")) {
-					if (epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-						conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+					if (EpistemicCertainty(conceptG) < 0.5) {
 						conceptG.Certainty = 0.5;
 						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 					}
@@ -594,8 +683,8 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
-						if (epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+						conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+						if (EpistemicCertainty(conceptG) < 0.5) {
 							conceptG.Certainty = 0.5;
 							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 						}
@@ -604,22 +693,26 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				} 
 				else if (messageStr.StartsWith ("posack")) {
-					if (epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
+					if (eventConfirmation != "") {
 						conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
-						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					}
+						if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
 
-					Suggest ("posack");
+						Suggest ("posack");
+					}
 				} 
 				else if (messageStr.StartsWith ("negack")) {
-					if (epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
+					if (eventConfirmation != "") {
 						conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
-						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					}
+						if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
 
-					Suggest ("negack");
+						Suggest ("negack");
+					}
 				}
 			} 
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
@@ -634,15 +727,14 @@ public class JointGestureDemo : MonoBehaviour {
 				else if (messageStr.StartsWith ("push")) {
 					if (startSignal.EndsWith ("high")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 								
 								Suggest ("push left");
 							}
 							else {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
 								conceptG.Certainty = 1.0;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
@@ -650,15 +742,14 @@ public class JointGestureDemo : MonoBehaviour {
 							}
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
 								Suggest ("push right");
 							}
 							else {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
 								conceptG.Certainty = 1.0;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
@@ -666,15 +757,14 @@ public class JointGestureDemo : MonoBehaviour {
 							}
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
 								Suggest ("push front");
 							}
 							else {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
 								conceptG.Certainty = 1.0;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
@@ -682,15 +772,14 @@ public class JointGestureDemo : MonoBehaviour {
 							}
 						}
 						else if (GetGestureContent (messageStr, "push") == "back") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
 								Suggest ("push back");
 							}
 							else {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
 								conceptG.Certainty = 1.0;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
@@ -700,8 +789,8 @@ public class JointGestureDemo : MonoBehaviour {
 					} 
 					else if (startSignal.EndsWith ("low")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 							}
@@ -709,8 +798,8 @@ public class JointGestureDemo : MonoBehaviour {
 							Suggest ("push left");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 							}
@@ -718,8 +807,8 @@ public class JointGestureDemo : MonoBehaviour {
 							Suggest ("push right");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 							}
@@ -727,8 +816,8 @@ public class JointGestureDemo : MonoBehaviour {
 							Suggest ("push front");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "back") {
-							if (epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-								conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							if (EpistemicCertainty(conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
 								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 							}
@@ -829,21 +918,22 @@ public class JointGestureDemo : MonoBehaviour {
 						if (option.GetComponent<Voxeme> () != null) {
 							objVoxemes.Add (option.GetComponent<Voxeme> ());
 						}
+					}
 
-						List<object> uniqueAttrs = new List<object> ();
-						for (int i = 0; i < objVoxemes.Count; i++) {
-							List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
-							foreach (object attr in newAttrs) {
-								uniqueAttrs.Add (attr);
-							}
+					List<object> uniqueAttrs = new List<object> ();
+					for (int i = 0; i < objVoxemes.Count; i++) {
+						List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
+						foreach (object attr in newAttrs) {
+							uniqueAttrs.Add (attr);
 						}
+					}
 
-						string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
+					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
-							objectConfirmation = objVoxemes [0].gameObject;
-						}
+					if (eventManager.events.Count == 0) {
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+						objectConfirmation = objVoxemes [0].gameObject;
 					}
 				}
 			}
@@ -852,6 +942,7 @@ public class JointGestureDemo : MonoBehaviour {
 				actionOptions = (List<string>)content;
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
 					eventConfirmation = actionOptions [0];
 				}
@@ -868,22 +959,24 @@ public class JointGestureDemo : MonoBehaviour {
 						if (option.GetComponent<Voxeme> () != null) {
 							objVoxemes.Add (option.GetComponent<Voxeme> ());
 						}
+					}
 
-						List<object> uniqueAttrs = new List<object> ();
-						for (int i = 0; i < objVoxemes.Count; i++) {
-							List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
-							foreach (object attr in newAttrs) {
-								uniqueAttrs.Add (attr);
-							}
+					List<object> uniqueAttrs = new List<object> ();
+					for (int i = 0; i < objVoxemes.Count; i++) {
+						List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
+						foreach (object attr in newAttrs) {
+							Debug.Log(string.Format("{0}:{1}",objVoxemes[i].name,((Vox.VoxAttributesAttr)attr).Value.ToString ()));
+							uniqueAttrs.Add (attr);
 						}
+					}
 
-						//string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
+					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "Which block?");
-							//ReachFor (objVoxemes [0].gameObject);
-							objectConfirmation = null;
-						}
+					if (eventManager.events.Count == 0) {
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+						ReachFor (objVoxemes [0].gameObject);
+						objectConfirmation = objVoxemes[0].gameObject;
 					}
 				}
 			}
@@ -892,6 +985,7 @@ public class JointGestureDemo : MonoBehaviour {
 				actionOptions = (List<string>)content;
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
 					eventConfirmation = actionOptions [0];
 				}
@@ -900,6 +994,10 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Suggest(string gesture) {
+		if ((eventConfirmation != "") && (gesture != "posack") && (gesture != "negack")) {
+			return;
+		}
+
 		AvatarGesture performGesture = null;
 		if (gesture.StartsWith("grab move")) {
 			string dir = GetGestureContent (gesture, "grab move");
@@ -925,6 +1023,7 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 
 					if (eventManager.events.Count == 0) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move something this way?"));
 						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
@@ -1011,6 +1110,7 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 
 					if (eventManager.events.Count == 0) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
 						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
@@ -1039,6 +1139,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
@@ -1050,14 +1151,11 @@ public class JointGestureDemo : MonoBehaviour {
 			if (indicatedObj == null) {	// not indicating anything
 				if (graspedObj == null) {	// not grasping anything
 					if (eventManager.events.Count == 0) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to grab something?"));
 						MoveToPerform ();
 						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 						suggestedActions.Add("grasp({0})");
-
-						Concept concept = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
-						concept.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim(new Concept[] {concept}, new Relation[] {});
 					}
 				}	// already grasping something
 				else {
@@ -1066,6 +1164,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 			else {	// indicating something
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
@@ -1090,6 +1189,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
@@ -1159,6 +1259,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push this this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
@@ -1167,43 +1268,47 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		}
 		else if (gesture.StartsWith("left point")) { 
-			string dir = GetGestureContent (gesture, "left point");
-			if (dir == "left") {
-				performGesture = AvatarGesture.LARM_POINT_RIGHT;
-			}
-			else if (dir == "right") {
-				performGesture = AvatarGesture.LARM_POINT_LEFT;
-			}
-			else if (dir == "front") {
-				performGesture = AvatarGesture.LARM_POINT_FRONT;
-			}
-			else if (dir == "back") {
-				performGesture = AvatarGesture.LARM_POINT_BACK;
-			}
+			//string dir = GetGestureContent (gesture, "left point");
+//			if (dir == "left") {
+//				performGesture = AvatarGesture.LARM_POINT_RIGHT;
+//			}
+//			else if (dir == "right") {
+//				performGesture = AvatarGesture.LARM_POINT_LEFT;
+//			}
+//			else if (dir == "front") {
+//				performGesture = AvatarGesture.LARM_POINT_FRONT;
+//			}
+//			else if (dir == "back") {
+//				performGesture = AvatarGesture.LARM_POINT_BACK;
+//			}
+
+			performGesture = AvatarGesture.LARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
 		}
 		else if (gesture.StartsWith("right point")) { 
-			string dir = GetGestureContent (gesture, "right point");
-			if (dir == "left") {
-				performGesture = AvatarGesture.RARM_POINT_RIGHT;
-			}
-			else if (dir == "right") {
-				performGesture = AvatarGesture.RARM_POINT_LEFT;
-			}
-			else if (dir == "front") {
-				performGesture = AvatarGesture.RARM_POINT_FRONT;
-			}
-			else if (dir == "back") {
-				performGesture = AvatarGesture.RARM_POINT_BACK;
-			}
+//			string dir = GetGestureContent (gesture, "right point");
+//			if (dir == "left") {
+//				performGesture = AvatarGesture.RARM_POINT_RIGHT;
+//			}
+//			else if (dir == "right") {
+//				performGesture = AvatarGesture.RARM_POINT_LEFT;
+//			}
+//			else if (dir == "front") {
+//				performGesture = AvatarGesture.RARM_POINT_FRONT;
+//			}
+//			else if (dir == "back") {
+//				performGesture = AvatarGesture.RARM_POINT_BACK;
+//			}
+
+			performGesture = AvatarGesture.RARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
@@ -1234,6 +1339,7 @@ public class JointGestureDemo : MonoBehaviour {
 		if (!yes) {
 			if (eventConfirmation == "forget") {	// forget about previously indicated block? no
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, "OK.");
 					eventConfirmation = "";
 					if (indicatedObj != null) {
@@ -1245,16 +1351,37 @@ public class JointGestureDemo : MonoBehaviour {
 				if (eventManager.events.Count == 0) {
 					OutputHelper.PrintOutput (Role.Affector, "OK.");
 					indicatedObj = null;
-					objectMatches.Clear ();
-					suggestedActions.Clear ();
 					eventConfirmation = "";
-				}
-			}
-			else if (suggestedActions.Count > 0) {
-				suggestedActions.Remove (suggestedActions [0]);
 
-				if (suggestedActions.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					if ((graspedObj == null) && (eventConfirmation == "")) {
+						TurnForward ();
+					}
+					//objectMatches.Clear ();
+					suggestedActions.Clear ();
+
+					if (actionOptions.Count > 0) {
+						confirmationTexts.Remove (actionOptions [0]);
+						actionOptions.RemoveAt (0);
+						Disambiguate (actionOptions);
+					}
+					else if (objectConfirmation != null) {
+						if (objectMatches.Contains (objectConfirmation)) {
+							objectMatches.Remove (objectConfirmation);
+						}
+
+						objectConfirmation = null;
+
+						if (objectMatches.Count > 0) {
+							Disambiguate (objectMatches);
+						} 
+					}
+						
+//						if (eventManager.events.Count == 0) {
+//							indicatedObj = null;
+//							objectMatches.Clear ();
+//							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+//						}
+//					}
 				}
 			}
 			else if (eventConfirmation != "") {
@@ -1266,6 +1393,8 @@ public class JointGestureDemo : MonoBehaviour {
 				if (graspedObj == null) {
 					ikControl.leftHandObj.position = leftTargetDefault;
 					ikControl.rightHandObj.position = rightTargetDefault;
+					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 				}
 
 				eventConfirmation = "";
@@ -1277,7 +1406,9 @@ public class JointGestureDemo : MonoBehaviour {
 					if (eventManager.events.Count == 0) {
 						indicatedObj = null;
 						objectMatches.Clear ();
-						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, "OK.");
+						//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
 			} 
@@ -1289,6 +1420,8 @@ public class JointGestureDemo : MonoBehaviour {
 				if (graspedObj == null) {
 					ikControl.leftHandObj.position = leftTargetDefault;
 					ikControl.rightHandObj.position = rightTargetDefault;
+					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 				}
 
 				objectConfirmation = null;
@@ -1302,16 +1435,29 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 				}
 			}
-			else {
-				if (suggestedActions.Count > 0) {
-					eventConfirmation = "";
-					suggestedActions.Clear ();
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-					confirmationTexts.Clear ();
-					TurnForward ();
+			else if (suggestedActions.Count > 0) {
+				suggestedActions.Remove (suggestedActions [0]);
+
+				if (suggestedActions.Count == 0) {
+					LookForward();
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
 				}
-//				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+
+				//				eventConfirmation = "";
+				//				suggestedActions.Clear ();
+				//				actionOptions.Clear ();
+				//				objectMatches.Clear ();
+				//				confirmationTexts.Clear ();
+				//				TurnForward ();
+			}
+			else if (indicatedObj != null) {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					eventConfirmation = "";
+					indicatedObj = null;
+					TurnForward ();
+					LookForward ();
+				}
 			}
 		} 
 		else {
@@ -1326,53 +1472,40 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 			else if (eventConfirmation == "negack") {	// no? yes 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, "OK.");
 					indicatedObj = null;
-					objectMatches.Clear ();
-					suggestedActions.Clear ();
 					eventConfirmation = "";
+					//objectMatches.Clear ();
+					suggestedActions.Clear ();
+
+					confirmationTexts.Remove (actionOptions [0]);
+					actionOptions.RemoveAt (0);
+
+					if (actionOptions.Count > 0) {
+						Disambiguate (actionOptions);
+					} 
+					else if (objectConfirmation != null) {
+						if (objectMatches.Contains (objectConfirmation)) {
+							objectMatches.Remove (objectConfirmation);
+						}
+
+						objectConfirmation = null;
+
+						if (objectMatches.Count > 0) {
+							Disambiguate (objectMatches);
+						} 
+					}
+					else {
+						if (eventManager.events.Count == 0) {
+							indicatedObj = null;
+							objectMatches.Clear ();
+							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+						}
+					}
 				}
 			}
-			else if (suggestedActions.Count > 0) {
-				if (suggestedActions [0].Contains ("{0}")) {
-					if (eventManager.events.Count == 0) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
-					}
-				} 
-				else {
-					//eventConfirmation = suggestedActions [0];
-					actionOptions = new List<string>(suggestedActions);
-					suggestedActions.Clear ();
-					Disambiguate (actionOptions);
-				}
-			} 
 			else if (eventConfirmation != "") {
-//				Hashtable predArgs = Helper.ParsePredicate (eventConfirmation);
-//				String pred = Helper.GetTopPredicate (eventConfirmation);
-//
-//				if (predArgs.Count > 0) {
-//					Queue<String> argsStrings = new Queue<String> (((String)predArgs [pred]).Split (new char[] { ',' }));
-//
-//					while (argsStrings.Count > 0) {
-//						object arg = argsStrings.Dequeue ();
-//
-//						if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
-//							Vector3 target = Helper.ParsableToVector ((String)arg);
-//							//TurnToAccess (target);
-//							break;
-//						}
-//						else if (arg is String) {	// if arg is String
-//							if (indicatedObj != null) {
-//								//TurnToAccess (indicatedObj.transform.position);
-//							}
-//							else if (graspedObj != null) {
-//								//TurnToAccess (graspedObj.transform.position);
-//							}
-//							break;
-//						}
-//					}
-//				}
-
 				if (eventConfirmation.StartsWith ("grasp")) {
 					graspedObj = indicatedObj;
 					indicatedObj = null;
@@ -1400,17 +1533,36 @@ public class JointGestureDemo : MonoBehaviour {
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 					confirmationTexts.Clear ();
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, "OK.");
 				}
 			} 
 			else if (objectConfirmation != null) {
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
 					indicatedObj = objectConfirmation;
+					ReachFor (indicatedObj);
 					objectConfirmation = null;
 					objectMatches.Clear ();
 				}
 			}
+			else if (suggestedActions.Count > 0) {
+				if (suggestedActions [0].Contains ("{0}")) {
+					if (eventManager.events.Count == 0) {
+						if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
+							LookForward();
+							OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
+						}
+					}
+				} 
+				else {
+					//eventConfirmation = suggestedActions [0];
+					actionOptions = new List<string>(suggestedActions);
+					suggestedActions.Clear ();
+					Disambiguate (actionOptions);
+				}
+			} 
 //			else {
 //				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 //			}
@@ -1422,20 +1574,38 @@ public class JointGestureDemo : MonoBehaviour {
 			if (indicatedObj == null) {
 				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
 					foreach (GameObject block in blocks) {
-						if (block.activeInHierarchy &&
-						    block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) {
+						bool isVisible = true;
+
+						if (synVision != null) {
+							if (synVision.enabled) {
+								isVisible = synVision.IsVisible (block);
+							}
+						}
+
+						if ((block.activeInHierarchy) &&
+							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
+							(isVisible)) {
 							if (!objectMatches.Contains (block)) {
 								objectMatches.Add (block);
 							}
-							ResolveIndicatedObject ();
 						}
 					}
+					ResolveIndicatedObject ();
 				}
 				else {	// choose from restricted options based on color
 					List<GameObject> toRemove = new List<GameObject>();
 					foreach (GameObject match in objectMatches) {
-						if (match.activeInHierarchy &&
-						    !match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) {
+						bool isVisible = true;
+
+						if (synVision != null) {
+							if (synVision.enabled) {
+								isVisible = synVision.IsVisible (match);
+							}
+						}
+
+						if ((match.activeInHierarchy) &&
+							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
+							(isVisible)) {
 							if (eventManager.events.Count == 0) {
 								if (objectMatches.Contains (match)) {
 									toRemove.Add (match);
@@ -1452,24 +1622,33 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (indicatedObj == null) {
-					if (eventManager.events.Count == 0) {
+					if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
 					}
 				}
 				else {
 					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("OK, go on."));
 					}
 				}
 			}
-		} 
-		else {	// received color with object already indicated
-			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
-				LookAt (indicatedObj.transform.position);
-				eventConfirmation = "forget";
+			else {	// received color with object already indicated
+				if (eventManager.events.Count == 0) {
+					string attr = string.Empty;
+					if (indicatedObj.GetComponent<Voxeme> () != null) {
+						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					if (color != attr) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", attr));
+						TurnForward ();
+						LookAt (indicatedObj.transform.position);
+						eventConfirmation = "forget";
+					}
+				}
 			}
-		}
+		} 
 	}
 
 	void Engage(bool state) {
@@ -1535,6 +1714,8 @@ public class JointGestureDemo : MonoBehaviour {
 				graspedObj = null;
 			}
 		}
+
+		epistemicModel.engaged = state;
 	}
 
 	void Deixis(string dir) {
@@ -1636,7 +1817,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		highlightTimeoutTimer.Enabled = true;
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		//OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
 		Vector3 highlightCenter = coord;
@@ -1687,16 +1868,28 @@ public class JointGestureDemo : MonoBehaviour {
 			else if (graspedObj == null) {	// indicating region
 				indicatedRegion = new Region (new Vector3 (highlightCenter.x - vectorConeRadius, highlightCenter.y, highlightCenter.z - vectorConeRadius),
 					new Vector3 (highlightCenter.x + vectorConeRadius, highlightCenter.y, highlightCenter.z + vectorConeRadius));
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
 			}
 		}
 		else {	// already indicated another object
 			if (objectMatches.Count > 0) {
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
-					TurnForward ();
-					LookAt (indicatedObj.transform.position);
-					eventConfirmation = "forget";
+					string themeAttr = string.Empty;
+					if (indicatedObj.GetComponent<Voxeme> () != null) {
+						themeAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					string otherAttr = string.Empty;
+					if (objectMatches[0].GetComponent<Voxeme> () != null) {
+						otherAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					if (themeAttr != otherAttr) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", themeAttr));
+						TurnForward ();
+						LookAt (indicatedObj.transform.position);
+						eventConfirmation = "forget";
+					}
 				}
 			}
 		}
@@ -1709,9 +1902,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		if ((indicatedObj == null) && (graspedObj == null)) {
-			OutputHelper.PrintOutput (Role.Affector, "");
-		}
+		// TODO: output timeout timer
+//		if ((indicatedObj == null) && (graspedObj == null)) {
+//			OutputHelper.PrintOutput (Role.Affector, "");
+//		}
 
 		Region region = null;
 
@@ -1778,6 +1972,7 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void ResolveIndicatedObject() {
+		Debug.Log (string.Format("Object matches: {0}",objectMatches.Count));
 		if (objectMatches.Count == 1) {	// single object match
 			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 				Disambiguate (objectMatches);
@@ -1788,6 +1983,8 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
 					ReachFor (indicatedObj);
+					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+					LookForward();
 				}
 			}
 		} 
@@ -1818,7 +2015,9 @@ public class JointGestureDemo : MonoBehaviour {
 	void PopulateOptions(string program, GameObject theme, string dir) {
 		switch (program) {
 		case "grasp":
-			PopulateGrabOptions (theme);
+			if (graspedObj == null) {
+				PopulateGrabOptions (theme);
+			}
 			break;
 
 		case "put":
@@ -1843,6 +2042,9 @@ public class JointGestureDemo : MonoBehaviour {
 		if (certainty == CertaintyMode.Act) {
 			if (!actionOptions.Contains (string.Format ("grasp({0})", theme.name))) {
 				actionOptions.Add (string.Format ("grasp({0})", theme.name));
+			}
+
+			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
 				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
 					string.Format ("grab the {0} block", themeAttr));
 			}
@@ -1850,6 +2052,9 @@ public class JointGestureDemo : MonoBehaviour {
 		else if (certainty == CertaintyMode.Suggest) {
 			if (!suggestedActions.Contains (string.Format ("grasp({0})", theme.name))) {
 				suggestedActions.Add (string.Format ("grasp({0})", theme.name));
+			}
+
+			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
 				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
 					string.Format ("grab the {0} block", themeAttr));
 			}
@@ -1875,15 +2080,25 @@ public class JointGestureDemo : MonoBehaviour {
 				else {
 					eventManager.InsertEvent ("", 0);
 					eventManager.InsertEvent (string.Format ("grasp({0})", indicatedObj.name), 1);
-					LookAt (indicatedObj);
+					LookForward();
 					graspedObj = indicatedObj;
 					indicatedObj = null;
 					indicatedRegion = null;
+					suggestedActions.Clear ();
+					actionOptions.Clear ();
+					eventConfirmation = "";
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("OK."));
 				}
 			} 
-			else {
+			else if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
 				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-				Suggest("grab");
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to grab?"));
+					LookForward();
+					if (!suggestedActions.Contains ("grasp({0})")) {
+						suggestedActions.Add ("grasp({0})");
+					}
+				}
 			}
 		} 
 		else {
@@ -1916,169 +2131,132 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void HandleMoveSegment(string instruction) {
-		Concept conceptG = null;
-		Concept conceptL = null;
+		Concept moveConcept = null;
+		Concept grabConcept = null;
 
 		actionOptions.Clear ();
 		suggestedActions.Clear ();
 
+		moveConcept = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
+		grabConcept = epistemicModel.state.GetConcept("grab", ConceptType.ACTION, ConceptMode.G);
+
 		if (instruction.EndsWith ("high")) {
 			if (GetGestureContent (instruction, "grab move") == "left") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move left");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("left");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move right");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("right");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "front") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move front");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("front");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "back") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move back");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("back");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left front") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move left front");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("left front");
 				}
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "right front") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move right front");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("right front");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left back") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move left back");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("left back");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right back") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move right back");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("right back");
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "up") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move up");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("up");
 				}
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "down") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 
 					Suggest ("grab move down");
 				}
 				else {
-					conceptG = epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+					moveConcept.Certainty = 1.0;
 
 					Move ("down");
 				}
@@ -2086,100 +2264,94 @@ public class JointGestureDemo : MonoBehaviour {
 		} 
 		else if (instruction.EndsWith ("low")) {
 			if (GetGestureContent (instruction, "grab move") == "left") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move left");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move right");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "front") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move front");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "back") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move back");
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "left front") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move left front");
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "right front") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move right front");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left back") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move left back");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "right back") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move right back");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "up") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move up");
 			} 
 			else if (GetGestureContent (instruction, "grab move") == "down") {
-				if (epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G).Certainty < 0.5) {
-					conceptG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 0.5;
-					epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				if (EpistemicCertainty(moveConcept) < 0.5) {
+					moveConcept.Certainty = 0.5;
 				}
 
 				Suggest ("grab move down");
 			}
 		}
+
+		grabConcept.Certainty = 1.0;
+		epistemicModel.state.UpdateEpisim(new Concept[] {moveConcept,grabConcept}, new Relation[] {});
 	}
 
 	void PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
+
+		List<GameObject> objectPlacements = placementOptions.OfType<GameObject>().ToList();
+
+		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
+			ThenBy(o => (o.transform.position - theme.transform.position).magnitude).ToList();
+
+		for (int i = 0; i < placementOptions.Count; i++) {
+			if (placementOptions [i] is GameObject) {
+				placementOptions [i] = objectPlacements [i];
+			}
+		}
 
 		List<Region> orthogonalRegions = new List<Region> ();
 		if (dir == "left") {
@@ -2207,24 +2379,32 @@ public class JointGestureDemo : MonoBehaviour {
 		foreach (object option in placementOptions) {
 			if (option is GameObject) {
 				GameObject obj = (option as GameObject);
-				if (SurfaceClear (obj)) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-
-					if (certainty == CertaintyMode.Act) {
-						if (!actionOptions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
-							actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-							confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-								string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+				if (theme != obj) {
+					if (SurfaceClear (obj)) {
+						string objAttr = string.Empty;
+						if (obj.GetComponent<Voxeme> () != null) {
+							objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 						}
-					}
-					else if (certainty == CertaintyMode.Suggest) {
-						if (!suggestedActions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
-							suggestedActions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-							confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-								string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+
+						if (certainty == CertaintyMode.Act) {
+							if (!actionOptions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+							}
+
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+									string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+							}
+						}
+						else if (certainty == CertaintyMode.Suggest) {
+							if (!suggestedActions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								suggestedActions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+							}
+
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+									string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+							}
 						}
 					}
 				}
@@ -2326,7 +2506,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		GameObject theme = null;
 		if (indicatedObj != null) {
 			theme = indicatedObj;
@@ -2871,6 +3054,16 @@ public class JointGestureDemo : MonoBehaviour {
 	void PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
+		List<GameObject> objectPlacements = placementOptions.OfType<GameObject>().ToList();
+
+		objectPlacements = objectPlacements.OrderBy (o => (o.transform.position - theme.transform.position).magnitude).ToList();
+
+		for (int i = 0; i < placementOptions.Count; i++) {
+			if (placementOptions [i] is GameObject) {
+				placementOptions [i] = objectPlacements [i];
+			}
+		}
+
 		List<Region> orthogonalRegions = new List<Region> ();
 		if (dir == "left") {
 			orthogonalRegions.Add (frontRegion);
@@ -2897,24 +3090,33 @@ public class JointGestureDemo : MonoBehaviour {
 		foreach (object option in placementOptions) {
 			if (option is GameObject) {
 				GameObject obj = (option as GameObject);
-				if (FitsTouching (theme, obj, directionPreds [relativeDir [dir]])) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-
-					if (certainty == CertaintyMode.Act) {
-						if (!actionOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
-							actionOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
-							confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
-								string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+				if (theme != obj) {
+					if (FitsTouching (theme, obj, directionPreds [relativeDir [dir]]) &&
+					   (Helper.GetObjectWorldSize (theme).min.y >= Helper.GetObjectWorldSize (obj).min.y)) {	// must fit in target destination and be on the same surface
+						string objAttr = string.Empty;
+						if (obj.GetComponent<Voxeme> () != null) {
+							objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 						}
-					} 
-					else if (certainty == CertaintyMode.Suggest) {
-						if (!suggestedActions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
-							suggestedActions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
-							confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
-								string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+
+						if (certainty == CertaintyMode.Act) {
+							if (!actionOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								actionOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							}
+
+							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
+									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+							}
+						}
+						else if (certainty == CertaintyMode.Suggest) {
+							if (!suggestedActions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								suggestedActions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							}
+						
+							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
+									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+							}
 						}
 					}
 				}
@@ -2959,7 +3161,10 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		GameObject theme = null;
 		if (indicatedObj != null) {
 			theme = indicatedObj;
@@ -3637,7 +3842,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 		}
-
+			
 //		if (frontRegion.Contains(theme)) {	// if the grasped block is in this region
 //			foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 //				if (block.activeInHierarchy) {
@@ -3922,7 +4127,8 @@ public class JointGestureDemo : MonoBehaviour {
 					Bounds projectedBounds = new Bounds (
 						new Vector3 (objBounds.min.x - themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
 						themeBounds.size);
-					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
 						fits = false;
 					}
 				}
@@ -3930,7 +4136,8 @@ public class JointGestureDemo : MonoBehaviour {
 					Bounds projectedBounds = new Bounds (
 						new Vector3 (objBounds.max.x + themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
 						themeBounds.size);
-					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
 						fits = false;
 					}
 				}
@@ -3938,7 +4145,8 @@ public class JointGestureDemo : MonoBehaviour {
 					Bounds projectedBounds = new Bounds (
 						new Vector3 (objBounds.center.x, objBounds.center.y, objBounds.min.z - themeBounds.extents.z),
 						themeBounds.size);
-					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
 						fits = false;
 					}
 				}
@@ -3946,7 +4154,8 @@ public class JointGestureDemo : MonoBehaviour {
 					Bounds projectedBounds = new Bounds (
 						new Vector3 (objBounds.center.x, objBounds.center.y, objBounds.max.z + themeBounds.extents.z),
 						themeBounds.size);
-					if (projectedBounds.Intersects (Helper.GetObjectWorldSize (test))) {
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
 						fits = false;
 					}
 				}
@@ -4018,6 +4227,18 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 		
+	double EpistemicCertainty (Concept concept) {
+		double certainty = concept.Certainty;
+
+		foreach (Concept related in concept.Related) {
+			if (related.Certainty > certainty) {
+				certainty = related.Certainty;
+			}
+		}
+
+		return certainty;
+	}
+
 	bool CanPrompt() {
 		return ((eventManager.events.Count == 0) && (suggestedActions.Count == 0));
 	}
@@ -4030,6 +4251,8 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
+		LookForward();
+
 		if (sessionCounter >= 1) {
 			if (eventManager.events.Count == 0) {
 				OutputHelper.PrintOutput (Role.Affector, "Hey, where'd you go?");

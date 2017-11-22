@@ -9,8 +9,11 @@ namespace Agent {
 
 		public EpistemicState state;
 
+		public bool engaged;
+
 		// Use this for initialization
 		void Start () {
+			engaged = false;
 			state = new EpistemicState();
 			// creating Concept instances (actions)
 			// available types: ACTION, OBJECT, PROPERTY
@@ -19,8 +22,11 @@ namespace Agent {
 			Concept deixis_thisL = new Concept("THIS", ConceptType.ACTION, ConceptMode.L);
 			Concept deixis_thatL = new Concept("THAT", ConceptType.ACTION, ConceptMode.L);
 			Concept grabG = new Concept ("grab", ConceptType.ACTION, ConceptMode.G);
+			Concept grabL = new Concept ("GRAB", ConceptType.ACTION, ConceptMode.L);
 			Concept moveG = new Concept ("move", ConceptType.ACTION, ConceptMode.G);
+			//Concept moveL = new Concept ("PUT", ConceptType.ACTION, ConceptMode.G);
 			Concept pushG = new Concept ("push", ConceptType.ACTION, ConceptMode.G);
+			//Concept pushL = new Concept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 
 			Concept posackG = new Concept("posack", ConceptType.ACTION, ConceptMode.G);
 			Concept posackL = new Concept("YES", ConceptType.ACTION, ConceptMode.L);
@@ -35,6 +41,8 @@ namespace Agent {
 			state.AddRelation(pointG, deixis_thatL, true);
 
 			state.AddConcept(grabG);
+			state.AddConcept(grabL);
+			state.AddRelation(grabG, grabL, true);
 			state.AddConcept(moveG);
 			state.AddConcept(pushG);
 
@@ -54,7 +62,6 @@ namespace Agent {
 			Concept blackBlock = new Concept("black_block", ConceptType.OBJECT, ConceptMode.L);
 			Concept purpleBlock = new Concept("purple_block", ConceptType.OBJECT, ConceptMode.L);
 			Concept whiteBlock = new Concept("white_block", ConceptType.OBJECT, ConceptMode.L);
-			Concept pinkBlock = new Concept("pink_block", ConceptType.OBJECT, ConceptMode.L);
 			state.AddConcept(redBlock);
 			state.AddConcept(greenBlock);
 			state.AddConcept(yellowBlock);
@@ -62,7 +69,6 @@ namespace Agent {
 			state.AddConcept(blackBlock);
 			state.AddConcept(purpleBlock);
 			state.AddConcept(whiteBlock);
-			state.AddConcept(pinkBlock);
 
 			Concept red = new Concept("RED", ConceptType.PROPERTY, ConceptMode.L);
 			Concept green = new Concept("GREEN", ConceptType.PROPERTY, ConceptMode.L);
@@ -71,7 +77,6 @@ namespace Agent {
 			Concept black = new Concept("BLACK", ConceptType.PROPERTY, ConceptMode.L);
 			Concept purple = new Concept("PURPLE", ConceptType.PROPERTY, ConceptMode.L);
 			Concept white = new Concept("WHITE", ConceptType.PROPERTY, ConceptMode.L);
-			Concept pink = new Concept("PINK", ConceptType.PROPERTY, ConceptMode.L);
 			state.AddConcept(red);
 			state.AddConcept(green);
 			state.AddConcept(yellow);
@@ -79,7 +84,6 @@ namespace Agent {
 			state.AddConcept(black);
 			state.AddConcept(purple);
 			state.AddConcept(white);
-			state.AddConcept(pink);
 
 			state.SetEpisimUrl("http://localhost:5000");
 

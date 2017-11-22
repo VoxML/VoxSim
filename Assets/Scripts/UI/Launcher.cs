@@ -22,6 +22,7 @@ public class Launcher : FontManager {
 	string inPort;
 	string sriUrl;
 	bool makeLogs;
+	string logsPrefix;
 	bool captureVideo;
 	VideoCaptureMode videoCaptureMode;
 	VideoCaptureFilenameType prevVideoCaptureFilenameType;
@@ -168,7 +169,12 @@ public class Launcher : FontManager {
 
 #if !UNITY_IOS
 		GUI.Label (new Rect (bgLeft + 10, bgTop + 95, 90*fontSizeModifier, 25*fontSizeModifier), "Make Logs");
-		makeLogs = GUI.Toggle (new Rect (bgLeft+100, bgTop+95, 150, 25*fontSizeModifier), makeLogs, string.Empty);
+		makeLogs = GUI.Toggle (new Rect (bgLeft+100, bgTop+95, 25, 25*fontSizeModifier), makeLogs, string.Empty);
+
+		if (makeLogs) {
+			GUI.Label (new Rect (bgLeft + 135, bgTop + 95, 90*fontSizeModifier, 25*fontSizeModifier), "Prefix");
+			logsPrefix = GUI.TextField (new Rect (bgLeft+180, bgTop+95, 70, 25*fontSizeModifier), logsPrefix);
+		}
 #endif
 
 		GUI.Label (new Rect (bgLeft + 10, bgTop + 125, 90*fontSizeModifier, 40*fontSizeModifier), "Parser URL");
@@ -381,6 +387,7 @@ public class Launcher : FontManager {
 		parserUrl = PlayerPrefs.GetString("Parser URL");
 		csuUrl = PlayerPrefs.GetString("CSU URL");
 		makeLogs = (PlayerPrefs.GetInt("Make Logs") == 1);
+		logsPrefix = PlayerPrefs.GetString("Logs Prefix");
 		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
 		captureParams = (PlayerPrefs.GetInt("Capture Params") == 1);
 		videoCaptureMode = (VideoCaptureMode)PlayerPrefs.GetInt("Video Capture Mode");
@@ -420,6 +427,10 @@ public class Launcher : FontManager {
 				
 				case "Make Logs":
 					makeLogs = System.Convert.ToBoolean(line.Split (',') [1].Trim());
+					break;
+
+				case "Logs Prefix":
+					logsPrefix = line.Split (',') [1].Trim();
 					break;
 				
 				case "Capture Video":
@@ -497,6 +508,7 @@ public class Launcher : FontManager {
 		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
 		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
 		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
+		prefsDict.Add ("Logs Prefix", PlayerPrefs.GetString ("Logs Prefix"));
 		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
 		prefsDict.Add ("Capture Params", (PlayerPrefs.GetInt ("Capture Params") == 1));
 		prefsDict.Add ("Video Capture Mode", PlayerPrefs.GetInt ("Video Capture Mode"));
@@ -532,6 +544,7 @@ public class Launcher : FontManager {
 		PlayerPrefs.SetString("CSU URL", csuUrl);
 		PlayerPrefs.SetString("Parser URL", parserUrl);
 		PlayerPrefs.SetInt("Make Logs", System.Convert.ToInt32(makeLogs));
+		PlayerPrefs.SetString("Logs Prefix", logsPrefix);
 		PlayerPrefs.SetInt("Capture Video", System.Convert.ToInt32(captureVideo));
 		PlayerPrefs.SetInt("Capture Params", System.Convert.ToInt32(captureParams));
 		PlayerPrefs.SetInt("Video Capture Mode", System.Convert.ToInt32(videoCaptureMode));

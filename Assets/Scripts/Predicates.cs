@@ -1724,7 +1724,7 @@ public class Predicates : MonoBehaviour {
 				}
 				else {
 					targetPosition = new Vector3 (obj.transform.position.x,
-						obj.transform.position.y+bounds.size.y+UnityEngine.Random.value,
+						obj.transform.position.y+bounds.size.y+RandomHelper.RandomFloat (0.0f, 0.5f, (int)RandomHelper.RangeFlags.MaxInclusive),
 						obj.transform.position.z);
 				}
 
