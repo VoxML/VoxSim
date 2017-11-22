@@ -1609,7 +1609,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 						if ((block.activeInHierarchy) &&
 							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
-							(isVisible)) {
+							(isVisible) && (SurfaceClear(block))) {
 							if (!objectMatches.Contains (block)) {
 								objectMatches.Add (block);
 							}
@@ -1802,6 +1802,8 @@ public class JointGestureDemo : MonoBehaviour {
 					} 
 				}
 			}
+
+			objectMatches = objectMatches.OrderBy (o => (o.transform.position - Diana.transform.position).magnitude).ToList ();
 
 			if (objectMatches.Count > 0) {
 				ResolveIndicatedObject ();

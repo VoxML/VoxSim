@@ -92,11 +92,11 @@ namespace Network
 //				}
 				int len = BitConverter.ToInt32(byteBuffer, 0);
 
-//				Debug.Log (len);
+				//Debug.Log (len);
 
 				byteBuffer = new byte[len];
 				int numBytesRead = stream.Read(byteBuffer, 0, len);
-//				Debug.Log (numBytesRead);
+				//Debug.Log (numBytesRead);
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
 				if (message.StartsWith ("P")) {
