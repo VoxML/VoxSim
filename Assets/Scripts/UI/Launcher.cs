@@ -18,6 +18,7 @@ public class Launcher : FontManager {
 	string ip;
 	string ipContent = "IP";
 	string csuUrl;
+	string epiSimUrl;
 	string parserUrl;
 	string inPort;
 	string sriUrl;
@@ -51,7 +52,8 @@ public class Launcher : FontManager {
 	
 	Vector2 masterScrollPosition;
 	Vector2 sceneBoxScrollPosition;
-	
+	Vector2 urlBoxScrollPosition;
+
 	string[] listItems;
 	
 	List<string> availableScenes = new List<string>();
@@ -164,25 +166,56 @@ public class Launcher : FontManager {
 		}
 #endif
 
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 65, 90*fontSizeModifier, 25*fontSizeModifier), "SRI URL");
-		sriUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+65, 150, 25*fontSizeModifier), sriUrl);
-
 #if !UNITY_IOS
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 95, 90*fontSizeModifier, 25*fontSizeModifier), "Make Logs");
-		makeLogs = GUI.Toggle (new Rect (bgLeft+100, bgTop+95, 25, 25*fontSizeModifier), makeLogs, string.Empty);
+		GUI.Label (new Rect (bgLeft + 10, bgTop + 65, 90*fontSizeModifier, 25*fontSizeModifier), "Make Logs");
+		makeLogs = GUI.Toggle (new Rect (bgLeft+100, bgTop+65, 25, 25*fontSizeModifier), makeLogs, string.Empty);
 
 		if (makeLogs) {
-			GUI.Label (new Rect (bgLeft + 135, bgTop + 95, 90*fontSizeModifier, 25*fontSizeModifier), "Prefix");
-			logsPrefix = GUI.TextField (new Rect (bgLeft+180, bgTop+95, 70, 25*fontSizeModifier), logsPrefix);
+			GUI.Label (new Rect (bgLeft + 135, bgTop + 65, 90*fontSizeModifier, 25*fontSizeModifier), "Prefix");
+			logsPrefix = GUI.TextField (new Rect (bgLeft+180, bgTop+65, 70, 25*fontSizeModifier), logsPrefix);
 		}
 #endif
 
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 125, 90*fontSizeModifier, 40*fontSizeModifier), "Parser URL");
-		parserUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+125, 150, 25*fontSizeModifier), parserUrl);
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 150, 300, 50), "(Leave empty to use simple regex parser)");
+		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 95, 240*fontSizeModifier, 115*fontSizeModifier),GUI.skin.box);
+		urlBoxScrollPosition = GUILayout.BeginScrollView(urlBoxScrollPosition, false, false); 
+		GUILayout.BeginVertical(GUI.skin.box);
 
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 180, 90*fontSizeModifier, 25*fontSizeModifier), "CSU URL");
-		csuUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+180, 150, 25*fontSizeModifier), csuUrl);
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		GUILayout.Label ("CSU URL",GUILayout.Width(80*fontSizeModifier));
+		csuUrl = GUILayout.TextField(csuUrl,GUILayout.Width(140*fontSizeModifier));
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		GUILayout.Label ("EpiSim URL",GUILayout.Width(80*fontSizeModifier));
+		epiSimUrl = GUILayout.TextField(epiSimUrl,GUILayout.Width(140*fontSizeModifier));
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		GUILayout.Label ("SRI URL",GUILayout.Width(80*fontSizeModifier));
+		sriUrl = GUILayout.TextField(sriUrl,GUILayout.Width(140*fontSizeModifier));
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		GUILayout.Label ("Parser URL",GUILayout.Width(80*fontSizeModifier));
+		parserUrl = GUILayout.TextField(parserUrl,GUILayout.Width(140*fontSizeModifier));
+		GUILayout.EndHorizontal();
+
+		GUILayout.EndVertical();
+		GUILayout.EndScrollView();
+		GUILayout.EndArea();
+
+//		GUI.Label (new Rect (bgLeft + 10, bgTop + 95, 90*fontSizeModifier, 25*fontSizeModifier), "CSU URL");
+//		csuUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+95, 150, 25*fontSizeModifier), csuUrl);
+//
+//		GUI.Label (new Rect (bgLeft + 10, bgTop + 125, 90*fontSizeModifier, 25*fontSizeModifier), "SRI URL");
+//		sriUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+125, 150, 25*fontSizeModifier), sriUrl);
+//
+//		GUI.Label (new Rect (bgLeft + 10, bgTop + 155, 90*fontSizeModifier, 25*fontSizeModifier), "Parser URL");
+//		parserUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+155, 150, 25*fontSizeModifier), parserUrl);
+//		GUI.Label (new Rect (bgLeft + 10, bgTop + 180, 300, 25*fontSizeModifier), "(Leave empty to use simple regex parser)");
+
+//		GUI.Label (new Rect (bgLeft + 10, bgTop + 210, 90*fontSizeModifier, 25*fontSizeModifier), "EpiSim URL");
+//		epiSimUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+210, 150, 25*fontSizeModifier), epiSimUrl);
 
 #if !UNITY_IOS
 		GUI.Label (new Rect (bgLeft + 10, bgTop + 210, 90*fontSizeModifier, 25*fontSizeModifier), "Capture Video");
@@ -326,7 +359,7 @@ public class Launcher : FontManager {
 		GUI.Label (new Rect (bgLeft + 10, bgTop + bgHeight - 90, 90*fontSizeModifier, 25*fontSizeModifier), "External Prefs");
 		ioPrefsPath = GUI.TextField (new Rect (bgLeft+100, bgTop + bgHeight - 90, 150, 25*fontSizeModifier), ioPrefsPath);
 
-		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 60, 100, 20), "Export Prefs")) {
+		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 60, 90*fontSizeModifier, 20*fontSizeModifier), "Export Prefs")) {
 #if UNITY_STANDALONE_OSX
 			ExportPrefs ("../../" + ioPrefsPath);
 #else
@@ -334,7 +367,7 @@ public class Launcher : FontManager {
 #endif
 		}
 
-		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 30, 100, 20), "Import Prefs")) {
+		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 30, 90*fontSizeModifier, 20*fontSizeModifier), "Import Prefs")) {
 #if UNITY_STANDALONE_OSX
 			ImportPrefs ("../../" + ioPrefsPath);
 #else
@@ -342,15 +375,15 @@ public class Launcher : FontManager {
 #endif
 		}
 
-		if (GUI.Button (new Rect ((Screen.width / 2 - 50) - 125, bgTop + bgHeight - 60, 100, 50), "Revert Prefs")) {
+		if (GUI.Button (new Rect ((Screen.width / 2 - 50) - 125, bgTop + bgHeight - 60, 100*fontSizeModifier, 50*fontSizeModifier), "Revert Prefs")) {
 			LoadPrefs ();
 		}
 
-		if (GUI.Button (new Rect (Screen.width / 2 - 50, bgTop + bgHeight - 60, 100, 50), "Save Prefs")) {
+		if (GUI.Button (new Rect (Screen.width / 2 - 50, bgTop + bgHeight - 60, 100*fontSizeModifier, 50*fontSizeModifier), "Save Prefs")) {
 			SavePrefs ();
 		}
 
-		if (GUI.Button (new Rect ((Screen.width / 2 - 50) + 125, bgTop + bgHeight - 60, 100, 50), "Save & Launch")) {
+		if (GUI.Button (new Rect ((Screen.width / 2 - 50) + 125, bgTop + bgHeight - 60, 100*fontSizeModifier, 50*fontSizeModifier), "Save & Launch")) {
 			if (sceneSelected != "") {
 				SavePrefs ();
 
@@ -383,11 +416,12 @@ public class Launcher : FontManager {
 
 	void LoadPrefs() {
 		inPort = PlayerPrefs.GetString("Listener Port");
-		sriUrl = PlayerPrefs.GetString("SRI URL");
-		parserUrl = PlayerPrefs.GetString("Parser URL");
-		csuUrl = PlayerPrefs.GetString("CSU URL");
 		makeLogs = (PlayerPrefs.GetInt("Make Logs") == 1);
 		logsPrefix = PlayerPrefs.GetString("Logs Prefix");
+		csuUrl = PlayerPrefs.GetString("CSU URL");
+		epiSimUrl = PlayerPrefs.GetString("EpiSim URL");
+		sriUrl = PlayerPrefs.GetString("SRI URL");
+		parserUrl = PlayerPrefs.GetString("Parser URL");
 		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
 		captureParams = (PlayerPrefs.GetInt("Capture Params") == 1);
 		videoCaptureMode = (VideoCaptureMode)PlayerPrefs.GetInt("Video Capture Mode");
@@ -412,25 +446,29 @@ public class Launcher : FontManager {
 				case "Listener Port":
 					inPort = line.Split (',') [1].Trim();
 					break;
-				
-				case "SRI URL":
-					sriUrl = line.Split (',') [1].Trim();
-					break;
-				
-				case "CSU URL":
-					csuUrl = line.Split (',') [1].Trim();
-					break;
 
-				case "Parser URL":
-					parserUrl = line.Split (',') [1].Trim();
-					break;
-				
 				case "Make Logs":
 					makeLogs = System.Convert.ToBoolean(line.Split (',') [1].Trim());
 					break;
 
 				case "Logs Prefix":
 					logsPrefix = line.Split (',') [1].Trim();
+					break;
+				
+				case "CSU URL":
+					csuUrl = line.Split (',') [1].Trim();
+					break;
+
+				case "EpiSIm URL":
+					epiSimUrl = line.Split (',') [1].Trim();
+					break;
+
+				case "SRI URL":
+					sriUrl = line.Split (',') [1].Trim();
+					break;
+
+				case "Parser URL":
+					parserUrl = line.Split (',') [1].Trim();
 					break;
 				
 				case "Capture Video":
@@ -504,11 +542,12 @@ public class Launcher : FontManager {
 
 		Dictionary<string, object> prefsDict = new Dictionary<string, object> ();
 		prefsDict.Add ("Listener Port", PlayerPrefs.GetString ("Listener Port"));
-		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
-		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
-		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
 		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
 		prefsDict.Add ("Logs Prefix", PlayerPrefs.GetString ("Logs Prefix"));
+		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
+		prefsDict.Add ("EpiSim URL", PlayerPrefs.GetString ("EpiSim URL"));
+		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
+		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
 		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
 		prefsDict.Add ("Capture Params", (PlayerPrefs.GetInt ("Capture Params") == 1));
 		prefsDict.Add ("Video Capture Mode", PlayerPrefs.GetInt ("Video Capture Mode"));
@@ -540,11 +579,12 @@ public class Launcher : FontManager {
 		}
 
 		PlayerPrefs.SetString("Listener Port", inPort);
-		PlayerPrefs.SetString("SRI URL", sriUrl);
-		PlayerPrefs.SetString("CSU URL", csuUrl);
-		PlayerPrefs.SetString("Parser URL", parserUrl);
 		PlayerPrefs.SetInt("Make Logs", System.Convert.ToInt32(makeLogs));
-		PlayerPrefs.SetString("Logs Prefix", logsPrefix);
+		PlayerPrefs.SetString("Logs Prefix", logsPrefix);		
+		PlayerPrefs.SetString("CSU URL", csuUrl);
+		PlayerPrefs.SetString("EpiSim URL", epiSimUrl);
+		PlayerPrefs.SetString("SRI URL", sriUrl);
+		PlayerPrefs.SetString("Parser URL", parserUrl);
 		PlayerPrefs.SetInt("Capture Video", System.Convert.ToInt32(captureVideo));
 		PlayerPrefs.SetInt("Capture Params", System.Convert.ToInt32(captureParams));
 		PlayerPrefs.SetInt("Video Capture Mode", System.Convert.ToInt32(videoCaptureMode));
