@@ -83,5 +83,9 @@ namespace Episteme
 			}
 		}
 
+		public override string ToString()
+		{
+			return _type + "::" + _name + "::" + _mode + "::" + _certainty;
+		}
 	}
 }
