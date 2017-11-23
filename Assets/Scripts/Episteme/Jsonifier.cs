@@ -63,15 +63,20 @@ namespace Episteme
 		public static string JsonifyUpdatedConcepts(EpistemicState state, params Concept[] concepts)
 		{
 			if (concepts.Length <= 0) return "[]";
-			var collection = state.GetConcepts(concepts[0].Type);
-			return string.Format("[{0}]", string.Join(", ", concepts.Select(concept =>
-				string.Format("\"{0}-{1}-{2}{4}{3:0.00}\"",
-					(int)concept.Type,
-					(int)concept.Mode,
-					collection.GetIndex(concept),
-					concept.Certainty,
-					CertaintySep
-				)).ToArray()));
+			var updatedConceptIndices = new string[concepts.Length];
+			for (int i = 0; i < concepts.Length; i++)
+			{
+				var concept = concepts[i];
+                var collection = state.GetConcepts(concept.Type);
+				updatedConceptIndices[i] = 
+					string.Format("\"{0}-{1}-{2}{4}{3:0.00}\"",
+						(int)concept.Type,
+						(int)concept.Mode,
+						collection.GetIndex(concept),
+						concept.Certainty,
+						CertaintySep);
+			}
+			return string.Format("[{0}]", string.Join(", ", updatedConceptIndices));
 		}
 		
 		public static string JsonifyUpdatedRelations(EpistemicState state, params Relation[] relations)

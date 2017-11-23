@@ -1,4 +1,5 @@
-﻿using Episteme;
+﻿using System.Linq;
+using Episteme;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -16,7 +17,7 @@ public class EpisemeClientTest : MonoBehaviour
 		Concept yesG = new Concept("POSACK", ConceptType.ACTION, ConceptMode.G);
 		Concept noL = new Concept("negack", ConceptType.ACTION, ConceptMode.L);
 		Concept noG = new Concept("NEGACK", ConceptType.ACTION, ConceptMode.G);
-		
+
 		// add concepts to the epistemic model
 		model.AddConcept(yesL);
 		model.AddConcept(yesG);
@@ -25,7 +26,7 @@ public class EpisemeClientTest : MonoBehaviour
 		// add relations between them, third boolean param is bidirectional
 		model.AddRelation(yesG, yesL, true);
 		model.AddRelation(noG, noL, true);
-		
+
 		// now add more concepts (objects)
 		Concept redBlock = new Concept("RED", ConceptType.OBJECT, ConceptMode.L);
 		Concept blueBlock = new Concept("BLUE", ConceptType.OBJECT, ConceptMode.L);
@@ -33,11 +34,49 @@ public class EpisemeClientTest : MonoBehaviour
 		model.AddConcept(redBlock);
 		model.AddConcept(blueBlock);
 		model.AddConcept(greenBlock);
-			
+
+		model.SetEpisimUrl("http://localhost:5000");
+	}
+
+	private void second_mock()
+	{
+		model = new EpistemicState();
+		// creating Concept instances (actions)
+		// available types: ACTION, OBJECT, PROPERTY
+		// available modes: L, G
+		Concept pushG = new Concept("push", ConceptType.ACTION, ConceptMode.G);
+		Concept rightL = new Concept("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+		model.AddConcept(pushG);
+		model.AddConcept(rightL);
+
+		// now add more concepts (objects)
+
 		model.SetEpisimUrl("http://localhost:5000");
 	}
 
 	[Test]
+	public void TestUpdate2()
+	{
+		second_mock();
+		model.InitiateEpisim();
+		var json = Jsonifier.JsonifyEpistemicState(model);
+		Debug.Log(json);
+		
+		var conceptG = model.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+		Debug.Log(conceptG);
+		var conceptL = model.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+		Debug.Log(conceptL);
+		if (conceptG.Certainty < 0.5 || conceptL.Certainty < 0.5)
+		{
+			conceptG.Certainty = 0.5;
+			conceptL.Certainty = 0.5;
+            json = Jsonifier.JsonifyUpdates(model, new[] {conceptG, conceptL}, new Relation[] {});
+            Debug.Log(json);
+			model.UpdateEpisim(new[] {conceptG, conceptL}, new Relation[] { });
+		}
+	}
+
+    [Test]
 	public void TestInit()
 	{
 		mock();
