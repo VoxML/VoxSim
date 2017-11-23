@@ -4,6 +4,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
+using UnityEngine;
+
 namespace Network
 {
 	public class GestureEventArgs : EventArgs {
@@ -57,21 +59,57 @@ namespace Network
 			_t.Start();
 		}
 
+//		private void Loop()
+//		{
+//			while (_client.Connected)
+//			{
+//				int len = GetMessageLength();
+//
+//				string msg = GetMessage (len);
+////				if (msg.StartsWith ("P")) {
+////					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
+////						_messages.Enqueue (msg);
+////					}
+////				}
+////				else {
+//					_messages.Enqueue (msg);
+////				}
+//			}
+//			_client.Close();
+//		}
+
 		private void Loop()
 		{
 			while (_client.Connected)
 			{
-				int len = GetMessageLength();
+				NetworkStream stream = _client.GetStream();
+				byte[] byteBuffer = new byte[IntSize];
+				stream.Read(byteBuffer, 0, IntSize);
 
-				string msg = GetMessage (len);
-//				if (msg.StartsWith ("P")) {
-//					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
-//						_messages.Enqueue (msg);
-//					}
+//				if (!BitConverter.IsLittleEndian)
+//				{
+//					Array.Reverse(byteBuffer);
 //				}
-//				else {
-					_messages.Enqueue (msg);
-//				}
+				int len = BitConverter.ToInt32(byteBuffer, 0);
+
+				//Debug.Log (len);
+
+				byteBuffer = new byte[len];
+				int numBytesRead = stream.Read(byteBuffer, 0, len);
+				//Debug.Log (numBytesRead);
+
+				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
+				if (message.StartsWith ("P")) {
+					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
+						_messages.Enqueue (message);
+					}
+				}
+				else {
+					_messages.Enqueue (message);
+				}
+				//_messages.Enqueue (message);
+//				Debug.Log (stream.DataAvailable);
+
 			}
 			_client.Close();
 		}
@@ -88,8 +126,9 @@ namespace Network
 			NetworkStream stream = _client.GetStream();
 //		    stream.ReadTimeout = 4000;
             int numBytesRead = stream.Read(byteBuffer, 0, len);
-            string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
-			stream.Write(_ok, 0, 1);
+//			string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
+			string message = Encoding.UTF8.GetString(byteBuffer, 0, numBytesRead);
+			//stream.Write(_ok, 0, 1);
 			return message;
 		}
 

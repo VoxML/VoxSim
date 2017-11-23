@@ -10,67 +10,76 @@
  *        The hand direction is specified either as the local X-axis direction, or specified
  *        manually with localDirection. (For Diana, this needs to be overriden with the default
  *        localDirection.)
- */  
+ *        
+ *        This script operates on a single InteractionTarget. To support two hands, add this
+ *        component twice on the InteractionObject, one script with references to the left hand
+ *        and shoulder, and the other with references to the right hand and shoulder.
+ */
 
 using RootMotion.FinalIK;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FixHandRotation : MonoBehaviour {
-    [Tooltip("Required. Reference to the FinalIK interaction system.")]
+public class FixHandRotation : MonoBehaviour
+{
+    [Tooltip("Required. Reference to the FinalIK interaction system (the Avatar).")]
     public InteractionSystem interactionSystem;
 
-	[Tooltip("Required. Reference to the avatar's right shoulder joint.")]
-	public GameObject leftRootJoint;
+    [Tooltip("Required. Reference to the avatar's shoulder joint. Set this to the left shoulder for the left hand, and the right shoulder for the right hand.")]
+    public GameObject rootJoint;
+    
+    public FullBodyBipedEffector effectorType = FullBodyBipedEffector.LeftHand;
 
-	[Tooltip("Required. Reference to the avatar's right shoulder joint.")]
-    public GameObject rightRootJoint;
+    [Tooltip("(Optional) Set this to override the interaction target for either the left or right hand.")]
+    public InteractionTarget handTarget; // Child InteractionTarget representing the desired hand pose
 
     [Tooltip("If set to true, will use the specified local direction vector instead of (transform.right).")]
     public bool overrideDirection;
 
-    [Tooltip("Specifies the local direction vector of the left hand.")]
-    public Vector3 leftLocalDirection = new Vector3(-0.8660254f, 0f, 0.5f); // Set to default for hand
-
-	[Tooltip("Specifies the local direction vector of the right hand.")]
-	public Vector3 rightLocalDirection = new Vector3(0.8660254f, 0f, 0.5f); // Set to default for hand
+    [Tooltip("Specifies the local direction vector of the hand.")]
+    public Vector3 localDirection = new Vector3(0.8660254f, 0f, 0.5f); // Set to default for hand
 
     private InteractionObject interactionObject; // FinalIK InteractionObject component for this object
-    private InteractionTarget handTarget; // Child InteractionTarget representing the desired hand pose
-    private FullBodyBipedEffector effectorType; // Effector type from hand target (could be left or right hand)
+    //private FullBodyBipedEffector effectorType; // Effector type from hand target
 
     private bool needObjectRotationReset; // When set to true, will reset the object rotation once released from grasp
     private Vector3 initialObjectRotation; // Cached rotation from before interaction
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         // Get FinalIK components
         interactionObject = GetComponent<InteractionObject>();
-        handTarget = GetComponentInChildren<InteractionTarget>();
-        if (handTarget)
+        //handTarget = GetComponentInChildren<InteractionTarget>();
+
+        if (!handTarget)
         {
+            // Get the left or right hand
+            foreach (var target in GetComponentsInChildren<InteractionTarget>())
+            {
+                if (target.effectorType == effectorType)
+                {
+                    handTarget = target;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Get the type from the selected target
             effectorType = handTarget.effectorType;
         }
     }
-	
-	// Update is called once per frame
-	void Update () {
-		if (handTarget)
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (handTarget)
         {
             // Calculate rotation needed to keep the hand natural
             Vector3 handDirection = GetHandDirection().normalized;
-			Vector3 objectDirection = Vector3.zero;
-
-			if (transform.position.x < interactionSystem.gameObject.transform.position.x)
-			{
-				objectDirection = (transform.position - leftRootJoint.transform.position).normalized;
-			}
-			else if (transform.position.x > interactionSystem.gameObject.transform.position.x)
-			{
-				objectDirection = (transform.position - rightRootJoint.transform.position).normalized;
-			}
-
+            Vector3 objectDirection = (transform.position - rootJoint.transform.position).normalized;
             float delta = GetAngleBetween(Flatten(handDirection), Flatten(objectDirection));
 
             // Rotate the object if grabbing, else rotate the hand alone
@@ -99,7 +108,7 @@ public class FixHandRotation : MonoBehaviour {
                 handTarget.transform.RotateAround(transform.position, Vector3.up, delta);
             }
         }
-	}
+    }
 
     /// <summary>
     /// Returns the direction vector of the hand. By default, uses transform.right unless a local direction is specified.
@@ -107,21 +116,12 @@ public class FixHandRotation : MonoBehaviour {
     /// <returns>A vector representing the hand direction.</returns>
     private Vector3 GetHandDirection()
     {
-		float invert = 1.0f;   
-		if (transform.position.x < interactionSystem.gameObject.transform.position.x) {
-			if (overrideDirection) {
-				return handTarget.transform.TransformDirection (leftLocalDirection);
-			}
-			invert = -1.0f;
-		} 
-		else if (transform.position.x > interactionSystem.gameObject.transform.position.x) {
-			if (overrideDirection) {
-				return handTarget.transform.TransformDirection (rightLocalDirection);
-			}
-			invert = 1.0f;
-		}
+        if (overrideDirection)
+        {
+            return handTarget.transform.TransformDirection(localDirection);
+        }
 
-		return new Vector3(handTarget.transform.right.x * invert, handTarget.transform.right.y, handTarget.transform.right.z);
+        return handTarget.transform.right;
     }
 
     /// <summary>

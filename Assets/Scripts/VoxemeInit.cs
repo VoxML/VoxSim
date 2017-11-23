@@ -76,13 +76,16 @@ public class VoxemeInit : MonoBehaviour {
 					InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
 					foreach (InteractionTarget interactionTarget in interactionTargets) {
 						interactionTarget.gameObject.transform.parent = container.transform;
+						container.GetComponent<Voxeme> ().interactionTargets.Add (interactionTarget);
 					}
 
-					FixHandRotation fixHandRotation = go.GetComponent<FixHandRotation>();
-					if (fixHandRotation != null) {
+					FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();
+					foreach (FixHandRotation fixHandRotation in fixHandRotations) {
+//						Debug.Log (fixHandRotation);
+//						Debug.Log (fixHandRotation.rootJoint);
 						CopyComponent (fixHandRotation, container);
+						Destroy (fixHandRotation);
 					}
-					Destroy (fixHandRotation);
 
 					// set up for physics
 					// add box colliders and rigid bodies to all subobjects that have MeshFilters
@@ -197,20 +200,21 @@ public class VoxemeInit : MonoBehaviour {
 	void Update () {
 	}
 
-	T CopyComponent<T>(T original, GameObject destination) where T : Component
-	{
+	T CopyComponent<T>(T original, GameObject destination) where T : Component {
 		System.Type type = original.GetType();
-		var dst = destination.GetComponent(type) as T;
-		if (!dst) dst = destination.AddComponent(type) as T;
+		//var dst = destination.GetComponent(type) as T;
+		//if (!dst) {
+		var dst = destination.AddComponent (type) as T;
+		//}
+
 		var fields = type.GetFields();
-		foreach (var field in fields)
-		{
+		foreach (var field in fields) {
 			if (field.IsStatic) continue;
 			field.SetValue(dst, field.GetValue(original));
 		}
+
 		var props = type.GetProperties();
-		foreach (var prop in props)
-		{
+		foreach (var prop in props) {
 			if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
 			prop.SetValue(dst, prop.GetValue(original, null), null);
 		}

@@ -131,18 +131,28 @@ sysinfo.txt
 ## ignore 3rd-party libraries/large externals (devs should keep local copies)
 # ignore large external library
 Assets/MORPH3D*
+
 # ignore RT-voice plugin
 Assets/crosstales*
 Assets/Plugins/RTVoice*
+
 # ignore RootMotion/FinalIK
 Assets/RootMotion*
+
 # ignore FlashbackRecorder
-Assets/FlashbackRecorder
+Assets/FlashbackRecorder*
+
 # ignore ScenesLists file
 Assets/Resources/ScenesList.txt
+
+# ignore Logs folder
+Logs*
+
 Assets/Editor\ Default\ Resources*
+
 # ignore rider plugin
 Assets/Plugins/Editor*
+
 # ignore NuGet packages (e.g. Nunit)
 packages*
 

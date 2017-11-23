@@ -665,6 +665,54 @@ public class Predicates : MonoBehaviour {
 		return objName;
 	}
 
+	public String BIG(object[] args) {
+		String objName = "";
+		GameObject obj = null;
+
+		if (args [0] is GameObject) {	// assume all inputs are of same type
+			List<GameObject> objs = args.Cast<GameObject>().ToList();
+			obj = objs [0];
+
+			foreach (GameObject o in objs) {
+				if ((Helper.GetObjectWorldSize (o).size.x *
+				    Helper.GetObjectWorldSize (o).size.y *
+				    Helper.GetObjectWorldSize (o).size.z) >
+				    (Helper.GetObjectWorldSize (obj).size.x *
+				    Helper.GetObjectWorldSize (obj).size.y *
+				    Helper.GetObjectWorldSize (obj).size.z)) {
+					obj = o;
+				}
+			}
+		}
+
+		objName = obj.name;
+		return objName;
+	}
+
+	public String SMALL(object[] args) {
+		String objName = "";
+		GameObject obj = null;
+
+		if (args [0] is GameObject) {	// assume all inputs are of same type
+			List<GameObject> objs = args.Cast<GameObject>().ToList();
+			obj = objs [0];
+
+			foreach (GameObject o in objs) {
+				if ((Helper.GetObjectWorldSize (o).size.x *
+					Helper.GetObjectWorldSize (o).size.y *
+					Helper.GetObjectWorldSize (o).size.z) <
+					(Helper.GetObjectWorldSize (obj).size.x *
+						Helper.GetObjectWorldSize (obj).size.y *
+						Helper.GetObjectWorldSize (obj).size.z)) {
+					obj = o;
+				}
+			}
+		}
+
+		objName = obj.name;
+		return objName;
+	}
+
 	// IN: Objects
 	// OUT: String
 	public String THE(object[] args)
@@ -1724,7 +1772,7 @@ public class Predicates : MonoBehaviour {
 				}
 				else {
 					targetPosition = new Vector3 (obj.transform.position.x,
-						obj.transform.position.y+bounds.size.y+UnityEngine.Random.value,
+						obj.transform.position.y+bounds.size.y+RandomHelper.RandomFloat (0.0f, 0.5f, (int)RandomHelper.RangeFlags.MaxInclusive),
 						obj.transform.position.z);
 				}
 
@@ -4437,12 +4485,30 @@ public class Predicates : MonoBehaviour {
 							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
 							if (interactionObject != null) {
 								if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == leftGrasper) {
+									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponentsInChildren<InteractionTarget>()) {
+										if (interactionTarget.gameObject.name == "lHand") {
+											interactionTarget.gameObject.SetActive (true);
+										}
+										else if (interactionTarget.gameObject.name == "rHand") {
+											interactionTarget.gameObject.SetActive (false);
+										}
+									}
+
 									Debug.Log (string.Format ("Starting {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
 
 									InteractionHelper.SetLeftHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
 									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.LeftHand, interactionObject, true);
 								} 
 								else if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == rightGrasper) {
+									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponent<Voxeme>().interactionTargets) {
+										if (interactionTarget.gameObject.name == "lHand") {
+											interactionTarget.gameObject.SetActive (false);
+										}
+										else if (interactionTarget.gameObject.name == "rHand") {
+											interactionTarget.gameObject.SetActive (true);
+										}
+									}
+
 									Debug.Log (string.Format ("Starting {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
 
 									InteractionHelper.SetRightHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
@@ -4544,7 +4610,7 @@ public class Predicates : MonoBehaviour {
 
 									//InteractionHelper.SetLeftHandTarget (agent, ikControl.leftHandObj);
 									InteractionHelper.SetLeftHandTarget (agent, null);
-									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 1.0f, 0.0f);
+									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 0.0f, 0.0f);
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
 								}
 								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand)) {
@@ -4559,6 +4625,10 @@ public class Predicates : MonoBehaviour {
 
 //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight);
 //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight);
+								}
+
+								foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponent<Voxeme>().interactionTargets) {
+									interactionTarget.gameObject.SetActive (true);
 								}
 							}
 							else {
