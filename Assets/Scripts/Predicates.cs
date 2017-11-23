@@ -665,6 +665,54 @@ public class Predicates : MonoBehaviour {
 		return objName;
 	}
 
+	public String BIG(object[] args) {
+		String objName = "";
+		GameObject obj = null;
+
+		if (args [0] is GameObject) {	// assume all inputs are of same type
+			List<GameObject> objs = args.Cast<GameObject>().ToList();
+			obj = objs [0];
+
+			foreach (GameObject o in objs) {
+				if ((Helper.GetObjectWorldSize (o).size.x *
+				    Helper.GetObjectWorldSize (o).size.y *
+				    Helper.GetObjectWorldSize (o).size.z) >
+				    (Helper.GetObjectWorldSize (obj).size.x *
+				    Helper.GetObjectWorldSize (obj).size.y *
+				    Helper.GetObjectWorldSize (obj).size.z)) {
+					obj = o;
+				}
+			}
+		}
+
+		objName = obj.name;
+		return objName;
+	}
+
+	public String SMALL(object[] args) {
+		String objName = "";
+		GameObject obj = null;
+
+		if (args [0] is GameObject) {	// assume all inputs are of same type
+			List<GameObject> objs = args.Cast<GameObject>().ToList();
+			obj = objs [0];
+
+			foreach (GameObject o in objs) {
+				if ((Helper.GetObjectWorldSize (o).size.x *
+					Helper.GetObjectWorldSize (o).size.y *
+					Helper.GetObjectWorldSize (o).size.z) <
+					(Helper.GetObjectWorldSize (obj).size.x *
+						Helper.GetObjectWorldSize (obj).size.y *
+						Helper.GetObjectWorldSize (obj).size.z)) {
+					obj = o;
+				}
+			}
+		}
+
+		objName = obj.name;
+		return objName;
+	}
+
 	// IN: Objects
 	// OUT: String
 	public String THE(object[] args)

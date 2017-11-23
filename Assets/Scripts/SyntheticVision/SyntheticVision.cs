@@ -114,6 +114,10 @@ namespace Agent
 			return (numHits < 2);
 		}
 
+		public bool IsKnown(GameObject obj) {
+			return knownObjects.Contains (obj.GetComponent<Voxeme>());
+		}
+
 		public void NewInformation() {
 			OutputHelper.PrintOutput (Role.Affector, "Wow, I didn't see that before!");
 		}

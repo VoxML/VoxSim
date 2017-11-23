@@ -331,24 +331,6 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		}
 
-		// Synthetic vision mockup
-//		if (synVision != null) {
-//			if (synVision.enabled) {
-//				foreach (GameObject block in blocks) {	// limit to blocks only for now
-//					Voxeme blockVox = block.GetComponent<Voxeme> ();
-//					if (blockVox != null) {
-//						if (synVision.IsVisible (block)) {
-//							if (!synVision.visibleObjects.Contains (blockVox)) {
-//								synVision.visibleObjects.Add (blockVox);
-//								Debug.Log (string.Format ("JointGestureDemo.Start:{0}:{1}", block.name, synVision.IsVisible (block).ToString ()));
-//								//synVision.NewInformation ();
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-
 		if (epistemicModel.engaged) {
 			foreach (GameObject block in blocks) {	// limit to blocks only for now
 				Voxeme blockVox = block.GetComponent<Voxeme> ();
@@ -357,7 +339,7 @@ public class JointGestureDemo : MonoBehaviour {
 						string color = string.Empty;
 						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 
-						Concept blockConcept = epistemicModel.state.GetConcept (string.Format ("{0}_block", color), ConceptType.OBJECT, ConceptMode.L);
+						Concept blockConcept = epistemicModel.state.GetConcept (string.Format (block.name, color), ConceptType.OBJECT, ConceptMode.L);
 
 						if (blockConcept.Certainty < 1.0) {
 							blockConcept.Certainty = 1.0;
@@ -378,10 +360,11 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (hit.collider != null) {
 					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
+						epistemicModel.engaged = true;
 						if (synVision != null) {
 							if (synVision.enabled) {
 								Debug.Log(string.Format("SyntheticVision.IsVisible({0}):{1}",hit.collider.gameObject,synVision.IsVisible (hit.collider.gameObject)));
-								if (synVision.IsVisible (hit.collider.gameObject)) {
+								if (synVision.IsKnown (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
 									Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
 								}
 							}
@@ -477,6 +460,8 @@ public class JointGestureDemo : MonoBehaviour {
 				epistemicModel.state.UpdateEpisim (new Concept[] { conceptG, conceptL }, new Relation[] { relation });
 				break;
 			case "left":
+				conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+
 				if ((indicatedObj == null) && (graspedObj == null)) {
 					if (indicatedRegion == leftRegion) {	// if ensemble with leftward point
 						Deixis ("left");
@@ -501,8 +486,12 @@ public class JointGestureDemo : MonoBehaviour {
 //						Move ("right");
 //					}
 //				}
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "right":
+				conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+
 				if ((indicatedObj == null) && (graspedObj == null)) {
 					if (indicatedRegion == rightRegion) {	// if ensemble with righttward point
 						Deixis ("right");
@@ -527,6 +516,8 @@ public class JointGestureDemo : MonoBehaviour {
 //						Move ("left");
 //					}
 //				}
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "this":
 			case "that":
@@ -555,6 +546,28 @@ public class JointGestureDemo : MonoBehaviour {
 				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
 
 				IndexByColor (messageStr);
+				break;
+			case "big":
+				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				conceptL = epistemicModel.state.GetConcept ("SMALL", ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 0.5;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				IndexBySize (messageStr);
+				break;
+			case "small":
+				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				conceptL = epistemicModel.state.GetConcept ("BIG", ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 0.5;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				IndexBySize (messageStr);
 				break;
 			default:
 				Debug.Log ("Cannot recognize the message: " + messageStr);
@@ -733,10 +746,12 @@ public class JointGestureDemo : MonoBehaviour {
 					if (startSignal.EndsWith ("high")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-								
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+
 								Suggest ("push left");
 							}
 							else {
@@ -748,9 +763,11 @@ public class JointGestureDemo : MonoBehaviour {
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 
 								Suggest ("push right");
 							}
@@ -763,9 +780,11 @@ public class JointGestureDemo : MonoBehaviour {
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
 
 								Suggest ("push front");
 							}
@@ -778,9 +797,11 @@ public class JointGestureDemo : MonoBehaviour {
 						}
 						else if (GetGestureContent (messageStr, "push") == "back") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
 
 								Suggest ("push back");
 							}
@@ -795,36 +816,44 @@ public class JointGestureDemo : MonoBehaviour {
 					else if (startSignal.EndsWith ("low")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
 							}
 
 							Suggest ("push left");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
 							}
 
 							Suggest ("push right");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
 							}
 
 							Suggest ("push front");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "back") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+								conceptL.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
 							}
 
 							Suggest ("push back");
@@ -958,6 +987,7 @@ public class JointGestureDemo : MonoBehaviour {
 			if ((content is IList) && (content.GetType().IsGenericType) && 
 				content.GetType().IsAssignableFrom(typeof(List<GameObject>))) {	// disambiguate objects
 				if (((List<GameObject>)content).Equals (objectMatches)) {
+					bool duplicateNominal = false;
 					List<Voxeme> objVoxemes = new List<Voxeme> ();
 
 					foreach (GameObject option in objectMatches) {
@@ -968,20 +998,35 @@ public class JointGestureDemo : MonoBehaviour {
 
 					List<object> uniqueAttrs = new List<object> ();
 					for (int i = 0; i < objVoxemes.Count; i++) {
-						List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
-						foreach (object attr in newAttrs) {
-							Debug.Log(string.Format("{0}:{1}",objVoxemes[i].name,((Vox.VoxAttributesAttr)attr).Value.ToString ()));
-							uniqueAttrs.Add (attr);
+						List<object> newAttrs = Helper.DiffLists (
+							                        uniqueAttrs.Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList (),
+							                        objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ().Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList ());
+
+						if (newAttrs.Count > 0) {
+							foreach (object attr in newAttrs) {
+								Debug.Log (string.Format ("{0}:{1}", objVoxemes [i].name, attr.ToString ()));
+								Vox.VoxAttributesAttr attrToAdd = new Vox.VoxAttributesAttr ();
+								attrToAdd.Value = attr.ToString ();
+
+								if (uniqueAttrs.Where (x => ((Vox.VoxAttributesAttr)x).Value == attrToAdd.Value).ToList ().Count == 0) {
+									uniqueAttrs.Add (attrToAdd);
+								}
+							}
+						}
+						else {
+							duplicateNominal = true;
 						}
 					}
 
 					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
 					if (eventManager.events.Count == 0) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
-						ReachFor (objVoxemes [0].gameObject);
-						objectConfirmation = objVoxemes[0].gameObject;
-						LookAt(objectConfirmation);
+						if (!duplicateNominal) {
+							OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+							ReachFor (objVoxemes [0].gameObject);
+							objectConfirmation = objVoxemes [0].gameObject;
+							LookAt (objectConfirmation);
+						}
 					}
 				}
 			}
@@ -991,8 +1036,15 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
-					eventConfirmation = actionOptions [0];
+
+					if (confirmationTexts.ContainsKey (actionOptions [0])) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
+						eventConfirmation = actionOptions [0];
+					}
+					else {
+						actionOptions.RemoveAt (0);
+						Disambiguate (actionOptions);
+					}
 				}
 			}
 		}
@@ -1411,7 +1463,7 @@ public class JointGestureDemo : MonoBehaviour {
 //					}
 				}
 			}
-			else if (eventConfirmation != "") {
+			else if ((eventConfirmation != "") || (indicatedObj != null)) {
 				if (actionOptions.Contains (eventConfirmation)) {
 					actionOptions.Remove (eventConfirmation);
 					confirmationTexts.Remove (eventConfirmation);
@@ -1458,6 +1510,8 @@ public class JointGestureDemo : MonoBehaviour {
 				} 
 				else {
 					if (eventManager.events.Count == 0) {
+						indicatedObj = null;
+						indicatedRegion = null;
 						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
@@ -1601,17 +1655,17 @@ public class JointGestureDemo : MonoBehaviour {
 			if (indicatedObj == null) {
 				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
 					foreach (GameObject block in blocks) {
-						bool isVisible = true;
+						bool isKnown = true;
 
 						if (synVision != null) {
 							if (synVision.enabled) {
-								isVisible = synVision.IsVisible (block);
+								isKnown = synVision.IsKnown (block);
 							}
 						}
-
+							
 						if ((block.activeInHierarchy) &&
 							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
-							(isVisible) && (SurfaceClear(block))) {
+							(isKnown) && (SurfaceClear(block))) {
 							if (!objectMatches.Contains (block)) {
 								objectMatches.Add (block);
 							}
@@ -1622,17 +1676,17 @@ public class JointGestureDemo : MonoBehaviour {
 				else {	// choose from restricted options based on color
 					List<GameObject> toRemove = new List<GameObject>();
 					foreach (GameObject match in objectMatches) {
-						bool isVisible = true;
+						bool isKnown = true;
 
 						if (synVision != null) {
 							if (synVision.enabled) {
-								isVisible = synVision.IsVisible (match);
+								isKnown = synVision.IsKnown (match);
 							}
 						}
 
 						if ((match.activeInHierarchy) &&
 							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
-							(isVisible)) {
+							(isKnown)) {
 							if (eventManager.events.Count == 0) {
 								if (objectMatches.Contains (match)) {
 									toRemove.Add (match);
@@ -1649,7 +1703,12 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (indicatedObj == null) {
-					if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
+					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Which {0} block?", color.ToLower ()));
+					}
+					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
 					}
 				}
@@ -1676,6 +1735,43 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 		} 
+	}
+
+	void IndexBySize(string size) {
+		if (eventManager.events.Count == 0) {
+			if (objectMatches.Count > 0) {
+				GameObject obj = objectMatches[0];
+				if (size.ToLower() == "big") {
+					foreach (GameObject match in objectMatches) {
+						Debug.Log (match);
+						if ((Helper.GetObjectWorldSize (match).size.x *
+							Helper.GetObjectWorldSize (match).size.y *
+							Helper.GetObjectWorldSize (match).size.z) >
+							(Helper.GetObjectWorldSize (obj).size.x *
+							Helper.GetObjectWorldSize (obj).size.y *
+							Helper.GetObjectWorldSize (obj).size.z)) {
+							obj = match;
+						}
+					}
+				}
+				else if (size.ToLower() == "small") {
+					foreach (GameObject match in objectMatches) {
+						if ((Helper.GetObjectWorldSize (match).size.x *
+							Helper.GetObjectWorldSize (match).size.y *
+							Helper.GetObjectWorldSize (match).size.z) <
+							(Helper.GetObjectWorldSize (obj).size.x *
+							Helper.GetObjectWorldSize (obj).size.y *
+							Helper.GetObjectWorldSize (obj).size.z)) {
+							obj = match;
+						}
+					}
+				}
+
+				objectMatches.Clear ();
+				objectMatches.Add (obj);
+				ResolveIndicatedObject ();
+			}
+		}
 	}
 
 	void Engage(bool state) {
@@ -1788,17 +1884,17 @@ public class JointGestureDemo : MonoBehaviour {
 			LookAt (region.center);
 
 			foreach (GameObject block in blocks) {
-				bool isVisible = true;
+				bool isKnown = true;
 
 				if (synVision != null) {
 					if (synVision.enabled) {
-						isVisible = synVision.IsVisible (block);
+						isKnown = synVision.IsKnown (block);
 					}
 				}
 
 				if (block.activeInHierarchy) {
 					if (region.Contains (block)) {
-						if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
+						if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isKnown)) {
 							objectMatches.Add (block);
 						}
 					} 
@@ -1820,18 +1916,18 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Deixis(GameObject obj) {
-		bool isVisible = true;
+		bool isKnown = true;
 
 		if (synVision != null) {
 			if (synVision.enabled) {
-				isVisible = synVision.IsVisible (obj);
+				isKnown = synVision.IsKnown (obj);
 			}
 		}
 
 		objectMatches.Clear ();
 
 		if (obj.activeInHierarchy) {
-			if ((!objectMatches.Contains (obj)) && (SurfaceClear(obj)) && (isVisible)) {
+			if ((!objectMatches.Contains (obj)) && (SurfaceClear(obj)) && (isKnown)) {
 				objectMatches.Add (obj);
 			}
 		}
@@ -1862,11 +1958,11 @@ public class JointGestureDemo : MonoBehaviour {
 		//LookAt (cube.transform.position);
 
 		foreach (GameObject block in blocks) {
-			bool isVisible = true;
+			bool isKnown = true;
 
 			if (synVision != null) {
 				if (synVision.enabled) {
-					isVisible = synVision.IsVisible (block);
+					isKnown = synVision.IsKnown (block);
 				}
 			}
 
@@ -1876,12 +1972,12 @@ public class JointGestureDemo : MonoBehaviour {
 				if ((point - highlightCenter).magnitude <= vectorConeRadius * highlightOscUpper) {
 					//if (region.Contains (new Vector3 (block.transform.position.x,
 					//	region.center.y, block.transform.position.z))) {
-					if ((!objectMatches.Contains (block)) && (SurfaceClear (block)) && (isVisible)) {
+					if ((!objectMatches.Contains (block)) && (SurfaceClear (block)) && (isKnown)) {
 						objectMatches.Add (block);
 					}
 				}
 				else {
-					if ((objectMatches.Contains (block)) && (isVisible)) {
+					if ((objectMatches.Contains (block)) && (isKnown)) {
 						objectMatches.Remove (block);
 					}
 				}
@@ -2013,9 +2109,9 @@ public class JointGestureDemo : MonoBehaviour {
 				objectMatches.Clear ();
 
 				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
+					TurnForward();
 					ReachFor (indicatedObj);
 					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-					LookForward();
 				}
 			}
 		} 
@@ -2736,11 +2832,11 @@ public class JointGestureDemo : MonoBehaviour {
 
 			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 				Disambiguate (actionOptions);
-			} 
+			}
 			else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
 				if (actionOptions.Count > 1) {
 					Disambiguate (actionOptions);
-				} 
+				}
 				else {
 					eventManager.InsertEvent ("", 0);
 					eventManager.InsertEvent (actionOptions [0], 1);
@@ -2749,7 +2845,7 @@ public class JointGestureDemo : MonoBehaviour {
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
-			} 
+			}
 			else {
 				eventManager.InsertEvent ("", 0);
 				eventManager.InsertEvent (actionOptions [0], 1);
@@ -2757,6 +2853,17 @@ public class JointGestureDemo : MonoBehaviour {
 				graspedObj = null;
 				actionOptions.Clear ();
 				objectMatches.Clear ();
+			}
+		}
+		else {
+			if (objectConfirmation == null) {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to push?"));
+					LookForward();
+					if (!suggestedActions.Contains("slide({0}"+string.Format(",{0})",dir))) {
+						suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
+					}
+				}
 			}
 		}
 	}
