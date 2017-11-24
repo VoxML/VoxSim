@@ -15,35 +15,86 @@ public class Launcher : FontManager {
 
 	string launcherTitle = "VoxSim";
 
-	string ip;
-	string ipContent = "IP";
-	string csuUrl;
-	string epiSimUrl;
-	string parserUrl;
-	string inPort;
-	string sriUrl;
-	bool makeLogs;
-	string logsPrefix;
-	bool captureVideo;
-	VideoCaptureMode videoCaptureMode;
-	VideoCaptureFilenameType prevVideoCaptureFilenameType;
-	VideoCaptureFilenameType videoCaptureFilenameType;
-	string customVideoFilenamePrefix;
-	bool sortByEventString;
-	bool captureParams;
-	bool resetScene;
-	string eventResetCounter;
-	string autoEventsList;
-	string startIndex;
-	string captureDB;
-	string videoOutputDir;
-	bool editableVoxemes;
-	bool eulaAccepted;
+	[HideInInspector]
+	public string ip;
 
+	[HideInInspector]
+	public string ipContent = "IP";
+
+	[HideInInspector]
+	public string csuUrl;
+
+	[HideInInspector]
+	public string epiSimUrl;
+
+	[HideInInspector]
+	public string parserUrl;
+
+	[HideInInspector]
+	public string inPort;
+
+	[HideInInspector]
+	public string sriUrl;
+
+	[HideInInspector]
+	public bool makeLogs;
+
+	[HideInInspector]
+	public string logsPrefix;
+
+	[HideInInspector]
+	public bool captureVideo;
+
+	[HideInInspector]
+	public VideoCaptureMode videoCaptureMode;
+
+	[HideInInspector]
+	public VideoCaptureFilenameType prevVideoCaptureFilenameType;
+
+	[HideInInspector]
+	public VideoCaptureFilenameType videoCaptureFilenameType;
+
+	[HideInInspector]
+	public string customVideoFilenamePrefix;
+
+	[HideInInspector]
+	public bool sortByEventString;
+
+	[HideInInspector]
+	public bool captureParams;
+
+	[HideInInspector]
+	public bool resetScene;
+
+	[HideInInspector]
+	public string eventResetCounter;
+
+	[HideInInspector]
+	public string autoEventsList;
+
+	[HideInInspector]
+	public string startIndex;
+
+	[HideInInspector]
+	public string captureDB;
+
+	[HideInInspector]
+	public string videoOutputDir;
+
+	[HideInInspector]
+	public bool editableVoxemes;
+
+	[HideInInspector]
+	public bool eulaAccepted;
+
+	ModalWindowManager windowManager;
 	EULAModalWindow eulaWindow;
-	ExportPrefsUIButton exportPrefsButton;
 
-	string ioPrefsPath = "";
+	UIButtonManager buttonManager;
+	ExportPrefsUIButton exportPrefsButton;
+	ImportPrefsUIButton importPrefsButton;
+
+	List<UIButton> uiButtons = new List<UIButton> ();
 
 	int bgLeft = Screen.width/6;
 	int bgTop = Screen.height/12;
@@ -71,17 +122,43 @@ public class Launcher : FontManager {
 	private GUIStyle buttonStyle;
 
 	float fontSizeModifier;
+
+	public bool Draw {
+		get { return draw; }
+		set { draw = value;
+			foreach (UIButton button in uiButtons) {
+				button.Draw = value;
+			}
+		}
+	}
+	bool draw;
 	
-	// Use this for initialization
-	void Start () {
+	void Awake () {
+		Draw = true;
+
 #if UNITY_IOS
 		Screen.SetResolution(1280,960,true);
 		Debug.Log(Screen.currentResolution);
 #endif
 
 		fontSizeModifier = (fontSize / defaultFontSize);
+
+		windowManager = GameObject.Find("BlocksWorld").GetComponent<ModalWindowManager> ();
+		buttonManager = GameObject.Find("BlocksWorld").GetComponent<UIButtonManager> ();
+		buttonManager.windowPort = new Rect (bgLeft, bgTop, bgWidth, bgHeight);
+	}
+
+	// Use this for initialization
+	void Start () {
 		LoadPrefs ();
-		
+
+		exportPrefsButton = gameObject.GetComponent<ExportPrefsUIButton>();
+		importPrefsButton = gameObject.GetComponent<ImportPrefsUIButton>();
+
+		uiButtons.Add (exportPrefsButton);
+		uiButtons.Add (importPrefsButton);
+
+
 #if UNITY_EDITOR
 		string scenesDirPath = Application.dataPath + "/Scenes/";
 		string [] fileEntries = Directory.GetFiles(Application.dataPath+"/Scenes/","*.unity");
@@ -129,10 +206,14 @@ public class Launcher : FontManager {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		Draw = (GameObject.Find ("FileBrowser") == null);
 	}
 	
 	void OnGUI () {
+		if (!Draw) {
+			return;
+		}
+
 		labelStyle = new GUIStyle ("Label");
 		textFieldStyle = new GUIStyle ("TextField");
 		buttonStyle = new GUIStyle ("Button");
@@ -141,7 +222,7 @@ public class Launcher : FontManager {
 		bgWidth = 4*Screen.width/6;
 		bgHeight = 10*Screen.height/12;
 		margin = 0;
-		
+
 		GUI.Box (new Rect (bgLeft, bgTop, bgWidth, bgHeight), "");
 
 		masterScrollPosition = GUI.BeginScrollView (new Rect(bgLeft + 5, bgTop + 5, bgWidth - 10, bgHeight - 70), masterScrollPosition,
@@ -344,29 +425,6 @@ public class Launcher : FontManager {
 		GUI.Label (new Rect (2*Screen.width/3 - textDimensions.x/2, bgTop + 35, textDimensions.x, 25), "Scenes");
 		GUI.EndScrollView ();
 
-		GUI.Label (new Rect (bgLeft + 10, bgTop + bgHeight - 90, 90*fontSizeModifier, 25*fontSizeModifier), "External Prefs");
-		ioPrefsPath = GUI.TextField (new Rect (bgLeft+100, bgTop + bgHeight - 90, 150, 25*fontSizeModifier), ioPrefsPath);
-
-		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 60, 90*fontSizeModifier, 20*fontSizeModifier), "Export Prefs")) {
-#if UNITY_STANDALONE_OSX
-			ExportPrefs ("../../" + ioPrefsPath);
-#else
-			ExportPrefs (ioPrefsPath);
-#endif
-		}
-
-//		exportPrefsButton = new ExportPrefsUIButton ();
-//		exportPrefsButton.buttonRect = new Rect (bgLeft + 10, bgTop + bgHeight - 60, 90 * fontSizeModifier, 20 * fontSizeModifier);
-//		exportPrefsButton.buttonText = "Export Prefs";
-
-		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 30, 90*fontSizeModifier, 20*fontSizeModifier), "Import Prefs")) {
-#if UNITY_STANDALONE_OSX
-			ImportPrefs ("../../" + ioPrefsPath);
-#else
-			ImportPrefs (ioPrefsPath);
-#endif
-		}
-
 		if (GUI.Button (new Rect ((Screen.width / 2 - 50) - 125, bgTop + bgHeight - 60, 100*fontSizeModifier, 50*fontSizeModifier), "Revert Prefs")) {
 			LoadPrefs ();
 		}
@@ -561,7 +619,7 @@ public class Launcher : FontManager {
 		}
 	}
 	
-	void SavePrefs() {
+	public void SavePrefs() {
 		if ((eventResetCounter == string.Empty) || (eventResetCounter == "0")) {
 			eventResetCounter = "1";
 		}
