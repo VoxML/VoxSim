@@ -41,6 +41,7 @@ public class Launcher : FontManager {
 	bool eulaAccepted;
 
 	EULAModalWindow eulaWindow;
+	ExportPrefsUIButton exportPrefsButton;
 
 	string ioPrefsPath = "";
 
@@ -204,19 +205,6 @@ public class Launcher : FontManager {
 		GUILayout.EndScrollView();
 		GUILayout.EndArea();
 
-//		GUI.Label (new Rect (bgLeft + 10, bgTop + 95, 90*fontSizeModifier, 25*fontSizeModifier), "CSU URL");
-//		csuUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+95, 150, 25*fontSizeModifier), csuUrl);
-//
-//		GUI.Label (new Rect (bgLeft + 10, bgTop + 125, 90*fontSizeModifier, 25*fontSizeModifier), "SRI URL");
-//		sriUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+125, 150, 25*fontSizeModifier), sriUrl);
-//
-//		GUI.Label (new Rect (bgLeft + 10, bgTop + 155, 90*fontSizeModifier, 25*fontSizeModifier), "Parser URL");
-//		parserUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+155, 150, 25*fontSizeModifier), parserUrl);
-//		GUI.Label (new Rect (bgLeft + 10, bgTop + 180, 300, 25*fontSizeModifier), "(Leave empty to use simple regex parser)");
-
-//		GUI.Label (new Rect (bgLeft + 10, bgTop + 210, 90*fontSizeModifier, 25*fontSizeModifier), "EpiSim URL");
-//		epiSimUrl = GUI.TextField (new Rect (bgLeft+100, bgTop+210, 150, 25*fontSizeModifier), epiSimUrl);
-
 #if !UNITY_IOS
 		GUI.Label (new Rect (bgLeft + 10, bgTop + 210, 90*fontSizeModifier, 25*fontSizeModifier), "Capture Video");
 		captureVideo = GUI.Toggle (new Rect (bgLeft+100, bgTop+210, 20, 25*fontSizeModifier), captureVideo, string.Empty);
@@ -366,6 +354,10 @@ public class Launcher : FontManager {
 			ExportPrefs (ioPrefsPath);
 #endif
 		}
+
+//		exportPrefsButton = new ExportPrefsUIButton ();
+//		exportPrefsButton.buttonRect = new Rect (bgLeft + 10, bgTop + bgHeight - 60, 90 * fontSizeModifier, 20 * fontSizeModifier);
+//		exportPrefsButton.buttonText = "Export Prefs";
 
 		if (GUI.Button (new Rect (bgLeft + 10, bgTop + bgHeight - 30, 90*fontSizeModifier, 20*fontSizeModifier), "Import Prefs")) {
 #if UNITY_STANDALONE_OSX
