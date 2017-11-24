@@ -143,7 +143,7 @@ Assets/RootMotion*
 Assets/FlashbackRecorder*
 
 # ignore SimpleFileBrowser
-Assers/SimpleFileBrowser*
+Assets/SimpleFileBrowser*
 
 # ignore ScenesLists file
 Assets/Resources/ScenesList.txt
