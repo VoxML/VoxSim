@@ -3,35 +3,39 @@ using System.Collections;
 
 using Global;
 
-public class Reset : UIButton {
+public class ExitToMenuUIButton : UIButton {
 
 	public int fontSize = 12;
 
-	protected GUIStyle buttonStyle;
+	GUIStyle buttonStyle;
 
 	// Use this for initialization
-	protected void Start () {
-		//buttonStyle = new GUIStyle ("Button");
+	void Start () {
 		FontSizeModifier = (int)(fontSize / defaultFontSize);
-		//buttonStyle.fontSize = fontSize;
 
 		base.Start ();
 	}
-
+	
 	// Update is called once per frame
 	void Update () {
 
-	}	
-
-	protected virtual void OnGUI () {
+	}
+		
+	protected override void OnGUI () {
 		buttonStyle = new GUIStyle ("Button");
 		buttonStyle.fontSize = fontSize;
 
 		if (GUI.Button (buttonRect, buttonText, buttonStyle)) {
-			StartCoroutine(SceneHelper.LoadScene (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name));
+			StartCoroutine(SceneHelper.LoadScene ("VoxSimMenu"));
 			return;
 		}
 
 		base.OnGUI ();
 	}
+
+	public override void DoUIButton(int buttonID){
+
+		base.DoUIButton (buttonID);
+	}
+
 }

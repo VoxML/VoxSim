@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using Global;
 
-public class ScriptSelector : Reset {
+public class ScriptSelector : ResetUIButton {
 	List<string> availableScripts = new List<string>();
 
 	bool chooseScene;
