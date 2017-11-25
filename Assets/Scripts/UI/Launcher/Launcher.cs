@@ -105,6 +105,8 @@ public class Launcher : FontManager {
 	Vector2 masterScrollPosition;
 	Vector2 sceneBoxScrollPosition;
 	Vector2 urlBoxScrollPosition;
+	Vector2 videoPrefsBoxScrollPosition;
+	Vector2 paramPrefsBoxScrollPosition;
 
 	string[] listItems;
 	
@@ -158,6 +160,8 @@ public class Launcher : FontManager {
 		uiButtons.Add (exportPrefsButton);
 		uiButtons.Add (importPrefsButton);
 
+		Debug.Log ("UIButtons loaded");
+
 
 #if UNITY_EDITOR
 		string scenesDirPath = Application.dataPath + "/Scenes/";
@@ -171,6 +175,8 @@ public class Launcher : FontManager {
 #elif UNITY_STANDALONE || UNITY_IOS || UNITY_WEBPLAYER
 		// What if ScenesList has been deleted?
 		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
+		Debug.Log (scenesList);
+
 		string[] scenes = scenesList.text.Split ('\n');
 		foreach (string s in scenes) {
 			if (s.Length > 0) {
@@ -258,7 +264,7 @@ public class Launcher : FontManager {
 		}
 #endif
 
-		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 95, 240*fontSizeModifier, 115*fontSizeModifier),GUI.skin.box);
+		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 95, 290*fontSizeModifier, 115*fontSizeModifier),GUI.skin.box);
 		urlBoxScrollPosition = GUILayout.BeginScrollView(urlBoxScrollPosition, false, false); 
 		GUILayout.BeginVertical(GUI.skin.box);
 
@@ -302,48 +308,29 @@ public class Launcher : FontManager {
 		}
 
 		if (captureVideo) {
-			string warningText = "Enabling this option may affect performance";
-			GUI.TextArea (new Rect (bgLeft + 10, bgTop + 235, GUI.skin.label.CalcSize (new GUIContent (warningText)).x + 10, 20 * fontSizeModifier),
-				warningText);
+			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 235, 
+				(((13*Screen.width/24)-20*fontSizeModifier)-bgLeft < 395*fontSizeModifier) ? ((13*Screen.width/24)-20*fontSizeModifier)-(bgLeft) : 395*fontSizeModifier,
+				(bgTop + bgHeight - 60)-(bgTop + 245) < 210*fontSizeModifier ? (bgTop + bgHeight - 60)-(bgTop + 245) : 210*fontSizeModifier), GUI.skin.box);
+			videoPrefsBoxScrollPosition = GUILayout.BeginScrollView(videoPrefsBoxScrollPosition, false, false, GUILayout.ExpandWidth(true), GUILayout.MaxWidth((13*Screen.width/24)-20*fontSizeModifier)); 
+			GUILayout.BeginVertical(GUI.skin.box);
 
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 260, GUI.skin.label.CalcSize (new GUIContent ("Video Capture Mode")).x + 10, 20 * fontSizeModifier),
-				"Video Capture Mode");
+			string warningText = "Enabling this option may affect performance";
+			GUILayout.TextArea(warningText, GUILayout.Width(GUI.skin.label.CalcSize (new GUIContent (warningText)).x + 10),GUILayout.Height(20 * fontSizeModifier));
+
+			GUILayout.BeginHorizontal();
+			GUILayout.BeginVertical();
+			GUILayout.Label("Video Capture Mode", GUILayout.Width(GUI.skin.label.CalcSize (new GUIContent ("Video Capture Mode")).x + 10));
 
 			string[] videoCaptureModeLabels = new string[]{ "Manual", "Full-Time", "Per Event" };
-			videoCaptureMode = (VideoCaptureMode)GUI.SelectionGrid (
-				new Rect (bgLeft + 15, bgTop + 280, 150, 20 * fontSizeModifier * videoCaptureModeLabels.Length),
-				(int)videoCaptureMode, videoCaptureModeLabels, 1, "toggle");
+			videoCaptureMode = (VideoCaptureMode)GUILayout.SelectionGrid((int)videoCaptureMode, videoCaptureModeLabels, 1, "toggle",
+				GUILayout.Width(150 * fontSizeModifier));
+			GUILayout.EndVertical();
 
-			if (videoCaptureMode == VideoCaptureMode.PerEvent) {
-				GUI.Label (new Rect (bgLeft + 40, bgTop + 340, 130 * fontSizeModifier, 20 * fontSizeModifier), "Reset Scene Between");
-				GUI.Label (new Rect (bgLeft + 40, bgTop + 355, 130 * fontSizeModifier, 20 * fontSizeModifier), "Every");
-				resetScene = GUI.Toggle (new Rect (bgLeft + 25, bgTop + 347, 20, 25 * fontSizeModifier), resetScene, string.Empty);
-				if (resetScene) {
-					eventResetCounter = Regex.Replace (GUI.TextField (new Rect (bgLeft + 15 + 62 * fontSizeModifier, bgTop + 355, 25, 20 * fontSizeModifier),
-						eventResetCounter), @"[^0-9]", "");
-				}
-				else {
-					eventResetCounter = Regex.Replace (GUI.TextField (new Rect (bgLeft + 15 + 62 * fontSizeModifier, bgTop + 355, 25, 20 * fontSizeModifier),
-						eventResetCounter), @"[^0-9]", "");
-				}
-				GUI.Label (new Rect (bgLeft + 15 + 90 * fontSizeModifier, bgTop + 355, 130 * fontSizeModifier, 20 * fontSizeModifier), "Events");
+			GUILayout.BeginVertical();
+			GUILayout.Label("Capture Filename Type", GUILayout.Width(GUI.skin.label.CalcSize (new GUIContent ("Capture Filename Type")).x + 10));
 
-				GUI.Label (new Rect (bgLeft + 15, bgTop + 380, 130 * fontSizeModifier, 25 * fontSizeModifier), "Auto-Input Script");
-				autoEventsList = GUI.TextField (new Rect (bgLeft + 140 * fontSizeModifier, bgTop + 380, 150, 25 * fontSizeModifier), autoEventsList);
-				GUI.Label (new Rect (bgLeft + 290 * fontSizeModifier, bgTop + 380, 30 * fontSizeModifier, 25 * fontSizeModifier), ".py : ");
-				startIndex = Regex.Replace (GUI.TextField (new Rect (bgLeft + 320 * fontSizeModifier, bgTop + 380, 40, 20 * fontSizeModifier),
-					startIndex), @"[^0-9]", "");
-				GUI.Label (new Rect (bgLeft + 15, bgTop + 405, 300, 50), "(Leave empty to input events manually)");
-			}
-
-			GUI.Label (new Rect (bgLeft + 15 + 160 * fontSizeModifier, bgTop + 260, GUI.skin.label.CalcSize (new GUIContent ("Capture Filename Type")).x + 10, 20 * fontSizeModifier),
-				"Capture Filename Type");
-
-			//prevVideoCaptureFilenameType = videoCaptureFilenameType;
 			string[] videoCaptureFilenameTypeLabels = new string[]{ "Flashback Default", "Event String", "Custom" };
-			videoCaptureFilenameType = (VideoCaptureFilenameType)GUI.SelectionGrid (
-				new Rect (bgLeft + 15 + 160 * fontSizeModifier, bgTop + 280, 150, 20 * fontSizeModifier * videoCaptureFilenameTypeLabels.Length),
-				(int)videoCaptureFilenameType, videoCaptureFilenameTypeLabels, 1, "toggle");
+			videoCaptureFilenameType = (VideoCaptureFilenameType)GUILayout.SelectionGrid ((int)videoCaptureFilenameType, videoCaptureFilenameTypeLabels, 1, "toggle");
 
 			// EventString can only be used with PerEvent
 			if (videoCaptureMode != VideoCaptureMode.PerEvent) {
@@ -353,47 +340,105 @@ public class Launcher : FontManager {
 			}
 
 			if (videoCaptureFilenameType == VideoCaptureFilenameType.EventString) {
-				GUI.Label (new Rect (bgLeft + 30 + 170 * fontSizeModifier, bgTop + 340, 120 * fontSizeModifier, 40 * fontSizeModifier), "Sort Videos By Event String");
-				sortByEventString = GUI.Toggle (new Rect (bgLeft + 15 + 170 * fontSizeModifier, bgTop + 347, 150, 25 * fontSizeModifier), sortByEventString, string.Empty);
+				GUILayout.BeginHorizontal();				
+				sortByEventString = GUILayout.Toggle (sortByEventString, string.Empty, GUILayout.Width(20 * fontSizeModifier));
+				GUILayout.Label ("Sort Videos By Event String", GUILayout.Width(120 * fontSizeModifier));
+				GUILayout.EndHorizontal();				
 			}
 			else if (videoCaptureFilenameType == VideoCaptureFilenameType.Custom) {
-				customVideoFilenamePrefix = GUI.TextArea (new Rect (bgLeft + 15 + 170 * fontSizeModifier, bgTop + 345, 150, 25 * fontSizeModifier),
-					customVideoFilenamePrefix);
+				customVideoFilenamePrefix = GUILayout.TextField (customVideoFilenamePrefix, GUILayout.Width(150 * fontSizeModifier));
 			}
 
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 380 + (60 * System.Convert.ToSingle ((videoCaptureMode == VideoCaptureMode.PerEvent))), 120 * fontSizeModifier, 25 * fontSizeModifier), "Video Output Folder");
-			videoOutputDir = GUI.TextField (new Rect (bgLeft + 140 * fontSizeModifier, bgTop + 380 + (60 * System.Convert.ToSingle ((videoCaptureMode == VideoCaptureMode.PerEvent))), 150, 25 * fontSizeModifier), videoOutputDir);
+			GUILayout.EndVertical();
+			GUILayout.EndHorizontal();
 
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 410 + (60 * System.Convert.ToSingle ((videoCaptureMode == VideoCaptureMode.PerEvent))), 120 * fontSizeModifier, 25 * fontSizeModifier), "Video Database File");
-			captureDB = GUI.TextField (new Rect (bgLeft + 140 * fontSizeModifier, bgTop + 410 + (60 * System.Convert.ToSingle ((videoCaptureMode == VideoCaptureMode.PerEvent))), 150, 25 * fontSizeModifier), captureDB);
-			GUI.Label (new Rect (bgLeft + 290 * fontSizeModifier, bgTop + 410 + (60 * System.Convert.ToSingle ((videoCaptureMode == VideoCaptureMode.PerEvent))), 25 * fontSizeModifier, 25 * fontSizeModifier), ".db");
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 435 + (60 * System.Convert.ToSingle ((videoCaptureMode == VideoCaptureMode.PerEvent))), 300, 50), "(Leave empty to omit video info from database)");
+			if (videoCaptureMode == VideoCaptureMode.PerEvent) {
+				GUILayout.BeginVertical();
+				GUILayout.BeginHorizontal();
+				resetScene = GUILayout.Toggle (resetScene, string.Empty, GUILayout.Width(20 * fontSizeModifier));
+				GUILayout.BeginVertical();
+				GUILayout.Label ("Reset Scene Between", GUILayout.Width(130 * fontSizeModifier));
+				GUILayout.BeginHorizontal();
+				GUILayout.Label ("Every", GUILayout.Width(35 * fontSizeModifier));
+				eventResetCounter = Regex.Replace (GUILayout.TextField (eventResetCounter, GUILayout.Width(25 * fontSizeModifier)), @"[^0-9]", "");
+				GUILayout.Label ("Events");
+				GUILayout.EndHorizontal();
+				GUILayout.EndVertical();
+				GUILayout.EndHorizontal();
+				GUILayout.EndVertical();
+
+				GUILayout.BeginVertical();
+				GUILayout.BeginHorizontal();
+				GUILayout.Label ("Auto-Input Script", GUILayout.Width(120 * fontSizeModifier));
+				autoEventsList = GUILayout.TextField (autoEventsList, GUILayout.Width(150 * fontSizeModifier));
+				GUILayout.Label (".py : ", GUILayout.Width(30*fontSizeModifier));
+				startIndex = Regex.Replace (GUILayout.TextField (startIndex, GUILayout.Width(40 * fontSizeModifier)), @"[^0-9]", "");
+				GUILayout.EndHorizontal();
+				GUILayout.Label ("(Leave empty to input events manually)");
+				GUILayout.EndVertical();
+			}
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label ("Video Output Folder", GUILayout.Width(120 * fontSizeModifier));
+			videoOutputDir = GUILayout.TextField (videoOutputDir, GUILayout.Width(150 * fontSizeModifier));
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginVertical();
+			GUILayout.BeginHorizontal();
+			GUILayout.Label ("Video Database File", GUILayout.Width(120 * fontSizeModifier));
+			captureDB = GUILayout.TextField (captureDB, GUILayout.Width(150 * fontSizeModifier));
+			GUILayout.Label (".db", GUILayout.Width(25 * fontSizeModifier));
+			GUILayout.EndHorizontal();
+			GUILayout.Label ("(Leave empty to omit video info from database)", GUILayout.Width(300 * fontSizeModifier));
+			GUILayout.EndVertical();
+
+			GUILayout.EndVertical();
+			GUILayout.EndScrollView();
+			GUILayout.EndArea();
 		}
 		else if (captureParams) {
-			GUI.Label (new Rect (bgLeft + 30, bgTop + 235, 130 * fontSizeModifier, 20 * fontSizeModifier), "Reset Scene Between");
-			GUI.Label (new Rect (bgLeft + 30, bgTop + 250, 130 * fontSizeModifier, 20 * fontSizeModifier), "Every");
-			resetScene = GUI.Toggle (new Rect (bgLeft + 15, bgTop + 242, 20, 25 * fontSizeModifier), resetScene, string.Empty);
-			if (resetScene) {
-				eventResetCounter = Regex.Replace (GUI.TextField (new Rect (bgLeft + 15 + 52 * fontSizeModifier, bgTop + 250, 25, 20 * fontSizeModifier),
-					eventResetCounter), @"[^0-9]", "");
-			}
-			else {
-				eventResetCounter = Regex.Replace (GUI.TextField (new Rect (bgLeft + 15 + 52 * fontSizeModifier, bgTop + 250, 25, 20 * fontSizeModifier),
-					eventResetCounter), @"[^0-9]", "");
-			}
-			GUI.Label (new Rect (bgLeft + 15 + 90 * fontSizeModifier, bgTop + 250, 130 * fontSizeModifier, 20 * fontSizeModifier), "Events");
+			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 235, 
+				(((13*Screen.width/24)-20*fontSizeModifier)-bgLeft < 380*fontSizeModifier) ? ((13*Screen.width/24)-20*fontSizeModifier)-(bgLeft) : 380*fontSizeModifier,
+				(bgTop + bgHeight - 60)-(bgTop + 245) < 190*fontSizeModifier ? (bgTop + bgHeight - 60)-(bgTop + 245) : 190*fontSizeModifier), GUI.skin.box);
+			paramPrefsBoxScrollPosition = GUILayout.BeginScrollView(paramPrefsBoxScrollPosition, false, false); 
+			GUILayout.BeginVertical(GUI.skin.box);
 
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 275, 130 * fontSizeModifier, 25 * fontSizeModifier), "Auto-Input Script");
-			autoEventsList = GUI.TextField (new Rect (bgLeft + 140 * fontSizeModifier, bgTop + 275, 150, 25 * fontSizeModifier), autoEventsList);
-			GUI.Label (new Rect (bgLeft + 290 * fontSizeModifier, bgTop + 275, 30 * fontSizeModifier, 25 * fontSizeModifier), ".py : ");
-			startIndex = Regex.Replace (GUI.TextField (new Rect (bgLeft + 320 * fontSizeModifier, bgTop + 275, 40, 20 * fontSizeModifier),
-				startIndex), @"[^0-9]", "");
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 300, 300, 50), "(Leave empty to input events manually)");
+			GUILayout.BeginVertical();
+			GUILayout.BeginHorizontal();
+			resetScene = GUILayout.Toggle (resetScene, string.Empty, GUILayout.Width(20 * fontSizeModifier));
+			GUILayout.BeginVertical();
+			GUILayout.Label ("Reset Scene Between", GUILayout.Width(130 * fontSizeModifier));
+			GUILayout.BeginHorizontal();
+			GUILayout.Label ("Every", GUILayout.Width(35 * fontSizeModifier));
+			eventResetCounter = Regex.Replace (GUILayout.TextField (eventResetCounter, GUILayout.Width(25 * fontSizeModifier)), @"[^0-9]", "");
+			GUILayout.Label ("Events");
+			GUILayout.EndHorizontal();
+			GUILayout.EndVertical();
+			GUILayout.EndHorizontal();
+			GUILayout.EndVertical();
 
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 335, 120 * fontSizeModifier, 25 * fontSizeModifier), "Capture Database");
-			captureDB = GUI.TextField (new Rect (bgLeft + 140 * fontSizeModifier, bgTop + 335 , 150, 25 * fontSizeModifier), captureDB);
-			GUI.Label (new Rect (bgLeft + 290 * fontSizeModifier, bgTop + 335, 25 * fontSizeModifier, 25 * fontSizeModifier), ".db");
-			GUI.Label (new Rect (bgLeft + 15, bgTop + 360, 300, 50), "(Leave empty to omit param info from database)");
+			GUILayout.BeginVertical();
+			GUILayout.BeginHorizontal();
+			GUILayout.Label ("Auto-Input Script", GUILayout.Width(120 * fontSizeModifier));
+			autoEventsList = GUILayout.TextField (autoEventsList, GUILayout.Width(150 * fontSizeModifier));
+			GUILayout.Label (".py : ", GUILayout.Width(30*fontSizeModifier));
+			startIndex = Regex.Replace (GUILayout.TextField (startIndex, GUILayout.Width(40 * fontSizeModifier)), @"[^0-9]", "");
+			GUILayout.EndHorizontal();
+			GUILayout.Label ("(Leave empty to input events manually)");
+			GUILayout.EndVertical();
+
+			GUILayout.BeginVertical();
+			GUILayout.BeginHorizontal();
+			GUILayout.Label ("Capture Database", GUILayout.Width(120 * fontSizeModifier));
+			captureDB = GUILayout.TextField (captureDB, GUILayout.Width(150 * fontSizeModifier));
+			GUILayout.Label (".db", GUILayout.Width(25 * fontSizeModifier));
+			GUILayout.EndHorizontal();
+			GUILayout.Label ("(Leave empty to omit param info from database)", GUILayout.Width(300 * fontSizeModifier));
+			GUILayout.EndVertical();
+
+			GUILayout.EndVertical();
+			GUILayout.EndScrollView();
+			GUILayout.EndArea();
 		}
 #endif
 
