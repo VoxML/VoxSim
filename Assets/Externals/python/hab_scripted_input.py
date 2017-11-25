@@ -15,6 +15,8 @@ def generate_line():
    if f is not None:
        line = f.readline()
        if re.match(r"^\d+.*\t",line):
+           if index_time == 0:
+               index_time = float(re.match(r"^\d+.*\t",line).group(0).rstrip())-2
 	   wait_time = float(re.match(r"^\d+.*\t",line).group(0).rstrip())-index_time
 	   index_time += wait_time
            #print (index_time,wait_time)
