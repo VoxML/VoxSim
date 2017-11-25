@@ -3370,6 +3370,10 @@ public class JointGestureDemo : MonoBehaviour {
 		disableHighlight = true;
 	}
 
+	void OnDestroy() {
+		logger.CloseLog ();
+	}
+
 	void OnApplicationQuit() {
 		logger.CloseLog ();
 	}
