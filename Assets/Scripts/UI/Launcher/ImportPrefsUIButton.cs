@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -160,6 +161,16 @@ public class ImportPrefsUIButton : UIButton {
 
 		GameObject uiObject = GameObject.Find (fileBrowserObject.name + "UI");
 		uiObject.GetComponent<RectTransform> ().transform.localScale = new Vector3 (0.6f, 0.6f, 1.0f);
+
+		GameObject directoryPanel = GameObject.Find (uiObject.name + "/FileBrowserPanel/DirectoryPanel");
+		foreach (Text text in directoryPanel.GetComponentsInChildren<Text>()) {
+			text.fontSize = 20;
+		}
+
+		GameObject filePanel = GameObject.Find (uiObject.name + "/FileBrowserPanel/FilePanel");
+		foreach (Text text in filePanel.GetComponentsInChildren<Text>()) {
+			text.fontSize = 20;
+		}
 	}
 
 	// Loads a file using a path

@@ -154,14 +154,13 @@ public class Launcher : FontManager {
 	void Start () {
 		LoadPrefs ();
 
+#if !UNITY_IOS
 		exportPrefsButton = gameObject.GetComponent<ExportPrefsUIButton>();
 		importPrefsButton = gameObject.GetComponent<ImportPrefsUIButton>();
 
 		uiButtons.Add (exportPrefsButton);
 		uiButtons.Add (importPrefsButton);
-
-		Debug.Log ("UIButtons loaded");
-
+#endif
 
 #if UNITY_EDITOR
 		string scenesDirPath = Application.dataPath + "/Scenes/";
