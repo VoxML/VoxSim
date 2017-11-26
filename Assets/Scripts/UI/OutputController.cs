@@ -32,6 +32,7 @@ public class OutputController : FontManager {
 	public String outputLabel;
 	public String outputString;
 	public int outputWidth;
+	public int outputMaxWidth;
 	public int outputHeight;
 	public int outputMargin;
 	public Rect outputRect = new Rect();
@@ -44,7 +45,7 @@ public class OutputController : FontManager {
 	void Start() {
 		fontSizeModifier = (float)((float)fontSize / (float)defaultFontSize);
 
-		outputWidth = System.Convert.ToInt32(Screen.width - outputMargin);
+		outputWidth = (System.Convert.ToInt32(Screen.width - outputMargin) > outputMaxWidth) ? outputMaxWidth : System.Convert.ToInt32(Screen.width - outputMargin);
 		outputHeight = System.Convert.ToInt32(20.0f * (float)fontSizeModifier);
 
 		if (alignment == Alignment.Left) {
