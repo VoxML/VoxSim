@@ -8,12 +8,20 @@ namespace Episteme
 		private ConceptType _type;
 		private Dictionary<ConceptMode, List<Concept>> _concepts;
 		private List<Relation> _relations;
+		private List<PropertyGroup> _subgroups;
 
 		public Concepts(ConceptType type)
 		{
 			_type = type;
 			_concepts = new Dictionary<ConceptMode, List<Concept>>();
 			_relations = new List<Relation>();
+			_subgroups = new List<PropertyGroup>();
+			
+		}
+
+		public List<PropertyGroup> Subgroups
+		{
+			get { return _subgroups; }
 		}
 
 		public ConceptType Type()
@@ -32,6 +40,15 @@ namespace Episteme
 				_concepts[concept.Mode].Add(concept);
 			}
 			return _concepts[concept.Mode].Count;
+		}
+
+		public void AddSubgroup(PropertyGroup group)
+		{
+			_subgroups.Add(group);
+		}
+		public void AddSubgroup(string name, PropertyType type)
+		{
+			AddSubgroup(new PropertyGroup(name, type));
 		}
 
 		public Concept GetConcept(string name, ConceptMode mode)

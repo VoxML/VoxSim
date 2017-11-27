@@ -8,23 +8,34 @@ namespace Episteme
 		private static readonly string CertaintySep = "::";
 		private static readonly string ConceptIdSep = ":";
 		private static readonly string JsonRelationSuffix = "-relations";
+		private static readonly string JsonSubgroupSuffix = "-subgroups";
 		private static readonly string JsonRelationConnector = "-";
 
 		public static string JsonifyConcepts(Concepts collection)
 		{
-
 			var relationStrings = new List<string>();
 			var conceptStrings = new List<string>();
 			var concepts = collection.GetConcepts();
 			foreach (var mode in concepts.Keys)
 			{
-				conceptStrings.AddRange(concepts[mode].Select(c =>
-					string.Format("{{\"name\":\"{0}\", \"modality\": \"{1}\"}}",
+				foreach (var c in concepts[mode])
+				{
+					var subgroupString = "";
+                    if (collection.Type() == ConceptType.PROPERTY && !string.IsNullOrEmpty(c.SubgroupName))
+					{
+						subgroupString = string.Format(", \"subgroup\": \"{0}\"", c.SubgroupName);
+					}
+					var conceptString = string.Format("{{\"name\":\"{0}\", \"modality\": \"{1}\"{2}}}",
 						c.Name,
-						c.Mode.ToString())));
+						c.Mode.ToString(),
+						subgroupString);
+					
+				
+					conceptStrings.Add(conceptString);
+				}
 				foreach (var r in collection.GetRelations())
 				{
-					
+
 					relationStrings.Add(string.Format("\"{0}{4}{1}{5}{2}{4}{3}\"",
 						r.Origin.Mode.ToString(),
 						collection.GetIndex(r.Origin),
@@ -44,13 +55,25 @@ namespace Episteme
 					}
 				}
 			}
-			return string.Format("\"{0}\":[{1}], \"{0}{3}\": [{2}]",
+			var jsonString = string.Format("\"{0}\":[{1}], \"{0}{3}\": [{2}]",
 				collection.Type(),
 				string.Join(", ", conceptStrings.ToArray()),
 				string.Join(", ", relationStrings.ToArray()),
 				JsonRelationSuffix
 			);
-
+			if (collection.Type() == ConceptType.PROPERTY)
+			{
+				var subgroupStrings = new List<string>();
+				subgroupStrings.AddRange(collection.Subgroups.Select(g =>
+					string.Format("{{\"name\":\"{0}\", \"type\": \"{1}\"}}",
+						g.Name,
+						g.Type.ToString())));
+				jsonString += ", " + string.Format("\"{0}{1}\":[{2}]",
+								  collection.Type(),
+								  JsonSubgroupSuffix,
+								  string.Join(", ", subgroupStrings.ToArray()));
+			}
+			return jsonString;
 		}
 
 		public static string JsonifyEpistemicState(EpistemicState collections)
@@ -67,7 +90,7 @@ namespace Episteme
 			for (int i = 0; i < concepts.Length; i++)
 			{
 				var concept = concepts[i];
-                var collection = state.GetConcepts(concept.Type);
+				var collection = state.GetConcepts(concept.Type);
 				updatedConceptIndices[i] = 
 					string.Format("\"{0}-{1}-{2}{4}{3:0.00}\"",
 						(int)concept.Type,
