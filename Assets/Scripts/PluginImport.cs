@@ -49,6 +49,7 @@ public class PluginImport : MonoBehaviour {
 					ConnectCSU (csuAddress, csuPort);
 				}
 				catch (Exception e) {
+					Debug.Log (e.Message);
 				}
 			}
 			else {
@@ -112,6 +113,7 @@ public class PluginImport : MonoBehaviour {
 
 	public void ConnectCSU(string address, int port)
 	{
+		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
 		_csuClient = new CSUClient();
 		_csuClient.Connect(address, port);
 		Debug.Log(string.Format("{2} :: Connected to CSU recognizer @ {0}:{1}", address, port, _csuClient.IsConnected()));

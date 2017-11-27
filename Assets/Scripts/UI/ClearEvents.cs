@@ -9,7 +9,7 @@ public class ClearEvents : FontManager {
 
 	protected GUIStyle buttonStyle = new GUIStyle ("Button");
 
-	protected ExitToMenu exitToMenu;
+	protected ExitToMenuUIButton exitToMenu;
 
 	EventManager eventManager;
 
@@ -21,7 +21,7 @@ public class ClearEvents : FontManager {
 
 	// Use this for initialization
 	protected void Start () {
-		exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenu> ();
+		exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenuUIButton> ();
 
 		buttonStyle = new GUIStyle ("Button");
 

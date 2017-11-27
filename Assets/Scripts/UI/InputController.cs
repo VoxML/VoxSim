@@ -32,7 +32,7 @@ public class InputController : FontManager {
 
 	PluginImport commBridge;
 	ObjectSelector objSelector;
-	ExitToMenu exitToMenu;
+	ExitToMenuUIButton exitToMenu;
 
 	String disableEnable;
 
@@ -72,7 +72,7 @@ public class InputController : FontManager {
 		macros = bc.GetComponent<Macros> ();
 
 		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
-		exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenu> ();
+		exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenuUIButton> ();
 
 		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 
@@ -86,7 +86,7 @@ public class InputController : FontManager {
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
 
 		//inputRect = new Rect (5, 5, 50, 25);
-		inputHeight = (int)(25*fontSizeModifier);
+		inputHeight = (int)(20*fontSizeModifier);
 
 		inputRect = new Rect (5, 5, (int)(365*fontSizeModifier), inputHeight);
 	}
