@@ -332,6 +332,18 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (epistemicModel.engaged) {
+			Concept putConcept = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
+			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
+			putConcept.Certainty = -1.0;
+			Concept pushConcept = epistemicModel.state.GetConcept ("PUSH", ConceptType.ACTION, ConceptMode.L);
+			Concept pushG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+			pushConcept.Certainty = -1.0;
+			var putRelation = epistemicModel.state.GetRelation (putConcept, putG);
+			var pushRelation = epistemicModel.state.GetRelation (pushConcept, pushG);
+			putRelation.Certainty = -1.0;
+			pushRelation.Certainty = -1.0;
+			epistemicModel.state.UpdateEpisim (new Concept[] { putConcept, pushConcept }, new Relation[]{ pushRelation, putRelation });
+
 			foreach (GameObject block in blocks) {	// limit to blocks only for now
 				Voxeme blockVox = block.GetComponent<Voxeme> ();
 				if (blockVox != null) {
@@ -339,7 +351,7 @@ public class JointGestureDemo : MonoBehaviour {
 						string color = string.Empty;
 						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 
-						Concept blockConcept = epistemicModel.state.GetConcept (string.Format (block.name, color), ConceptType.OBJECT, ConceptMode.L);
+						Concept blockConcept = epistemicModel.state.GetConcept (block.name, ConceptType.OBJECT, ConceptMode.G);
 
 						if (blockConcept.Certainty < 1.0) {
 							blockConcept.Certainty = 1.0;
@@ -521,17 +533,22 @@ public class JointGestureDemo : MonoBehaviour {
 				break;
 			case "this":
 			case "that":
+				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.ACTION, ConceptMode.L);
+				conceptL.Certainty = 1.0;
+
 				if (regionHighlight.GetComponent<Renderer> ().enabled) {
-					conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.ACTION, ConceptMode.L);
-					conceptL.Certainty = 1.0;
 					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
 					conceptG.Certainty = 1.0;
 					relation = epistemicModel.state.GetRelation (conceptG, conceptL);
 					relation.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {relation});
 
 					Deixis (highlightCenter);
 				}
+
+				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
+
+
 				break;
 			case "red":
 			case "green":
@@ -780,7 +797,7 @@ public class JointGestureDemo : MonoBehaviour {
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
 							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
 								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
@@ -838,7 +855,7 @@ public class JointGestureDemo : MonoBehaviour {
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
 							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
 							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
 								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
 								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
@@ -2297,7 +2314,7 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "front") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConcept = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
 				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
 					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
 					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
@@ -2363,8 +2380,8 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 			}
 			else if (GetGestureContent (instruction, "grab move") == "left back") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("left", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("back", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
 				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
 					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
 					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
@@ -2451,7 +2468,7 @@ public class JointGestureDemo : MonoBehaviour {
 				Suggest ("grab move right");
 			}
 			else if (GetGestureContent (instruction, "grab move") == "front") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConcept = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
 				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
 					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
 					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;

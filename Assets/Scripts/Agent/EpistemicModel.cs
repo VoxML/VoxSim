@@ -89,33 +89,41 @@ namespace Agent {
 			state.AddConcept(big);
 
 			state.AddPropertyGroup(new PropertyGroup("DIRECTION", PropertyType.Nominal));
-			Concept left = new Concept("left", ConceptType.PROPERTY, ConceptMode.G);
-			Concept right = new Concept("right", ConceptType.PROPERTY, ConceptMode.G);
-			Concept back = new Concept("back", ConceptType.PROPERTY, ConceptMode.G);
-			Concept forward = new Concept("forward", ConceptType.PROPERTY, ConceptMode.G);
+			Concept left = new Concept("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+			Concept right = new Concept("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+			Concept back = new Concept("BACK", ConceptType.PROPERTY, ConceptMode.L);
+			Concept forward = new Concept("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+			Concept up = new Concept("UP", ConceptType.PROPERTY, ConceptMode.L);
+			Concept down = new Concept("DOWN", ConceptType.PROPERTY, ConceptMode.L);
 			left.SubgroupName = "DIRECTION";
 			right.SubgroupName = "DIRECTION";
 			back.SubgroupName = "DIRECTION";
 			forward.SubgroupName = "DIRECTION";
+			up.SubgroupName = "DIRECTION";
+			down.SubgroupName = "DIRECTION";
 			state.AddConcept(left);
 			state.AddConcept(right);
 			state.AddConcept(back);
 			state.AddConcept(forward);
-			
+			state.AddConcept(up);
+			state.AddConcept(down);
+
 			// now add more concepts (objects)
-			Concept redBlock = new Concept("red_block", ConceptType.OBJECT, ConceptMode.G);
-			Concept greenBlock = new Concept("green_block", ConceptType.OBJECT, ConceptMode.G);
-			Concept yellowBlock = new Concept("yellow_block", ConceptType.OBJECT, ConceptMode.G);
-			Concept orangeBlock = new Concept("orange_block", ConceptType.OBJECT, ConceptMode.G);
-			Concept blackBlock = new Concept("black_block", ConceptType.OBJECT, ConceptMode.G);
-			Concept purpleBlock = new Concept("purple_block", ConceptType.OBJECT, ConceptMode.G);
-			Concept whiteBlock = new Concept("white_block", ConceptType.OBJECT, ConceptMode.G);
-			state.AddConcept(redBlock);
-			state.AddConcept(greenBlock);
+			Concept yellowBlock = new Concept("block1", ConceptType.OBJECT, ConceptMode.G);
+			Concept smPurpleBlock = new Concept("block2", ConceptType.OBJECT, ConceptMode.G);
+			Concept blackBlock = new Concept("block3", ConceptType.OBJECT, ConceptMode.G);
+			Concept greenBlock = new Concept("block4", ConceptType.OBJECT, ConceptMode.G);
+			Concept orangeBlock = new Concept("block5", ConceptType.OBJECT, ConceptMode.G);
+			Concept lgPurpleBlock = new Concept("block7", ConceptType.OBJECT, ConceptMode.G);
+			Concept redBlock = new Concept("block6", ConceptType.OBJECT, ConceptMode.G);
+			Concept whiteBlock = new Concept("block8", ConceptType.OBJECT, ConceptMode.G);
 			state.AddConcept(yellowBlock);
-			state.AddConcept(orangeBlock);
+			state.AddConcept(smPurpleBlock);
 			state.AddConcept(blackBlock);
-			state.AddConcept(purpleBlock);
+			state.AddConcept(greenBlock);
+			state.AddConcept(orangeBlock);
+			state.AddConcept(redBlock);
+			state.AddConcept(lgPurpleBlock);
 			state.AddConcept(whiteBlock);
 
 			return state;
