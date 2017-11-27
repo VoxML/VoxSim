@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Agent;
 using Episteme;
 using NUnit.Framework;
 using UnityEngine;
@@ -54,28 +55,6 @@ public class EpisemeClientTest : MonoBehaviour
 		model.SetEpisimUrl("http://localhost:5000");
 	}
 
-	[Test]
-	public void TestUpdate2()
-	{
-		second_mock();
-		model.InitiateEpisim();
-		var json = Jsonifier.JsonifyEpistemicState(model);
-		Debug.Log(json);
-		
-		var conceptG = model.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-		Debug.Log(conceptG);
-		var conceptL = model.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-		Debug.Log(conceptL);
-		if (conceptG.Certainty < 0.5 || conceptL.Certainty < 0.5)
-		{
-			conceptG.Certainty = 0.5;
-			conceptL.Certainty = 0.5;
-            json = Jsonifier.JsonifyUpdates(model, new[] {conceptG, conceptL}, new Relation[] {});
-            Debug.Log(json);
-			model.UpdateEpisim(new[] {conceptG, conceptL}, new Relation[] { });
-		}
-	}
-
     [Test]
 	public void TestInit()
 	{
@@ -113,6 +92,71 @@ public class EpisemeClientTest : MonoBehaviour
 		
 		// this would do the actual http request: need to pass two arrays for each 
 		model.UpdateEpisim(new[] {yesL}, new[] {r});
+	}
+
+	[Test]
+	public void TestUpdate2()
+	{
+		second_mock();
+		model.InitiateEpisim();
+		var json = Jsonifier.JsonifyEpistemicState(model);
+		Debug.Log(json);
+		
+		var conceptG = model.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+		Debug.Log(conceptG);
+		var conceptL = model.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+		Debug.Log(conceptL);
+		if (conceptG.Certainty < 0.5 || conceptL.Certainty < 0.5)
+		{
+			conceptG.Certainty = 0.5;
+			conceptL.Certainty = 0.5;
+            json = Jsonifier.JsonifyUpdates(model, new[] {conceptG, conceptL}, new Relation[] {});
+            Debug.Log(json);
+			model.UpdateEpisim(new[] {conceptG, conceptL}, new Relation[] { });
+		}
+	}
+
+	[Test]
+	public void TestSubgroup()
+	{
+		mock();
+		model.AddPropertyGroup(new PropertyGroup("SIZE", PropertyType.Ordinal));
+		model.AddPropertyGroup(new PropertyGroup("COLOR", PropertyType.Nominal));
+		Concept round = new Concept("round", ConceptType.PROPERTY, ConceptMode.L);
+		Concept big = new Concept("big", ConceptType.PROPERTY, ConceptMode.L);
+		big.SubgroupName = "SIZE";
+		Concept small = new Concept("small", ConceptType.PROPERTY, ConceptMode.L);
+		small.SubgroupName = "SIZE";
+		Concept blue = new Concept("blue", ConceptType.PROPERTY, ConceptMode.L);
+		blue.SubgroupName = "COLOR";
+		Concept red = new Concept("red", ConceptType.PROPERTY, ConceptMode.L);
+		red.SubgroupName = "COLOR";
+		model.AddConcept(round);
+		model.AddConcept(big);
+		model.AddConcept(small);
+		model.AddConcept(blue);
+		model.AddConcept(red);
+		var json = Jsonifier.JsonifyEpistemicState(model);
+		Debug.Log(json);
+		model.InitiateEpisim();
+	}
+
+	[Test]
+	public void TestActualModel()
+	{
+		model = EpistemicModel.initModel();
+		model.SetEpisimUrl("http://localhost:5000");
+//		var json = Jsonifier.JsonifyEpistemicState(model);
+//		Debug.Log(json);
+		model.InitiateEpisim();
+		var moveL = model.GetConcept("PUT", ConceptType.ACTION, ConceptMode.L);
+		var pushL = model.GetConcept("PUSH", ConceptType.ACTION, ConceptMode.L);
+		moveL.Certainty = -1;
+		pushL.Certainty = -1;
+		var json = Jsonifier.JsonifyEpistemicState(model);
+		Debug.Log(json);
+        model.UpdateEpisim(new[] {moveL, pushL}, new Relation[] { });
+
 	}
 
 }
