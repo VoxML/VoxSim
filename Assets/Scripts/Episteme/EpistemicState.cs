@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Network;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 
 namespace Episteme
 {
@@ -23,6 +22,11 @@ namespace Episteme
 			{
 				_episteme.Add(type, new Concepts(type));
 			}
+		}
+
+		public void AddPropertyGroup(PropertyGroup group)
+		{
+			_episteme[ConceptType.PROPERTY].AddSubgroup(group);
 		}
 
 		public Concept GetConcept(Concept c)

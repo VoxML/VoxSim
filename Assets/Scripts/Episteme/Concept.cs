@@ -13,6 +13,7 @@ namespace Episteme
 		private ConceptMode _mode;
 		private List<Concept> _related;
 		private double _certainty;
+		private string _subgroupNameName;
 
 		public Concept(string name, ConceptType type, ConceptMode mode)
 		{
@@ -21,6 +22,13 @@ namespace Episteme
 			_mode = mode;
 			_related = new List<Concept>();
 			_certainty = 0;
+			_subgroupNameName = null;
+		}
+
+		public string SubgroupName
+		{
+			get { return _subgroupNameName; }
+			set { _subgroupNameName = value; }
 		}
 
 		public double Certainty
