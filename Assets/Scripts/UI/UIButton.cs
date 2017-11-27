@@ -15,6 +15,12 @@ public class UIButton : FontManager
 	public string buttonText;
 	public int id;
 
+	public bool Draw {
+		get { return draw; }
+		set { draw = value; }
+	}
+	bool draw;
+
 	float fontSizeModifier;
 	[HideInInspector]
 	public float FontSizeModifier {
@@ -33,6 +39,8 @@ public class UIButton : FontManager
 
 		id = buttonManager.buttonManager.Count;
 
+		draw = true;
+
 		if (!buttonManager.buttonManager.ContainsKey (id)) {
 			buttonManager.RegisterButton (this);
 		}
@@ -43,19 +51,23 @@ public class UIButton : FontManager
 
 		if (position == UIButtonPosition.TopLeft) {
 			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.TopLeft);
-			buttonRect = new Rect (10 + offset.x, 10 + offset.y, dimensions.x, dimensions.y);
+			buttonRect = new Rect (buttonManager.windowPort.x + 10 + offset.x,
+				buttonManager.windowPort.y + 10 + offset.y, dimensions.x, dimensions.y);
 		} 
 		else if (position == UIButtonPosition.TopRight) {
 			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.TopRight);
-			buttonRect = new Rect (Screen.width - (10 + offset.x + dimensions.x), 10 + offset.y, dimensions.x, dimensions.y);
+			buttonRect = new Rect ((buttonManager.windowPort.x + buttonManager.windowPort.width) - (10 + offset.x + dimensions.x),
+				buttonManager.windowPort.y + 10 + offset.y, dimensions.x, dimensions.y);
 		}
 		else if (position == UIButtonPosition.BottomLeft) {
 			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomLeft);
-			buttonRect = new Rect (10 + offset.x, Screen.height - (10 + offset.y + dimensions.y), dimensions.x, dimensions.y);
+			buttonRect = new Rect (buttonManager.windowPort.x + 10 + offset.x,
+				(buttonManager.windowPort.y + buttonManager.windowPort.height) - (10 + offset.y + dimensions.y), dimensions.x, dimensions.y);
 		}
 		else if (position == UIButtonPosition.BottomRight) {
 			//int count = buttonManager.CountButtonsAtPosition (UIButtonPosition.BottomRight);
-			buttonRect = new Rect (Screen.width - (10 + offset.x + dimensions.x), Screen.height - (10 + offset.y +	 dimensions.y), dimensions.x, dimensions.y);
+			buttonRect = new Rect ((buttonManager.windowPort.x + buttonManager.windowPort.width) -  (10 + offset.x + dimensions.x),
+				(buttonManager.windowPort.y + buttonManager.windowPort.height) - (10 + offset.y + dimensions.y), dimensions.x, dimensions.y);
 		}
 	}
 
@@ -64,6 +76,9 @@ public class UIButton : FontManager
 	}
 
 	protected virtual void OnGUI() {
+		if (!draw) {
+			return;
+		}
 		//GUILayout automatically lays out the GUI window to contain all the text
 		//GUI.Button(buttonRect, buttonText);
 	}

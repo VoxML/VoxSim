@@ -3,9 +3,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Timers;
 
 using Agent;
+using Episteme;
 using Global;
 using Network;
 using QSR;
@@ -44,6 +47,12 @@ public class JointGestureDemo : MonoBehaviour {
 
 	public Region indicatedRegion = null;
 
+	EpistemicModel epistemicModel;
+	enum CertaintyMode {
+		Suggest,
+		Act
+	};
+
 	public Vector2 tableSize;
 	public Vector2 vectorScaleFactor;
 	public float vectorConeRadius;
@@ -59,10 +68,18 @@ public class JointGestureDemo : MonoBehaviour {
 	public float highlightOscLower;
 	int highlightOscillateDirection = 1;
 
+	Timer highlightTimeoutTimer;
+	public double highlightTimeoutTime;
+	bool disableHighlight = false;
+
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
 	public float knownScreenWidth = .3646f; //m
 	public float windowScaleFactor;
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
+
+	public bool allowDeixisByClick = false;
+
+	GenericLogger logger;
 
 	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
 
@@ -70,6 +87,12 @@ public class JointGestureDemo : MonoBehaviour {
 	Region rightRegion;
 	Region frontRegion;
 	Region backRegion;
+
+	Dictionary<Region,string> regionLabels = new Dictionary<Region, string> ();
+	Dictionary<string,string> directionPreds = new Dictionary<string, string> ();
+	Dictionary<string,string> directionLabels = new Dictionary<string, string> ();
+	Dictionary<string,string> oppositeDir = new Dictionary<string, string> ();
+	Dictionary<string,string> relativeDir = new Dictionary<string, string> ();
 
 	GameObject regionHighlight;
 	GameObject radiusHighlight;
@@ -82,8 +105,12 @@ public class JointGestureDemo : MonoBehaviour {
 	public List<string> actionOptions = new List<string> ();
 	public string eventConfirmation = "";
 
+	public List<string> suggestedActions = new List<string> ();
+
 	public List<GameObject> objectMatches = new List<GameObject> ();
 	public GameObject objectConfirmation = null;
+
+	public bool useOrderingHeuristics;
 
 	Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
 
@@ -98,10 +125,16 @@ public class JointGestureDemo : MonoBehaviour {
 
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
+		logger = GetComponent<GenericLogger> ();
+
+		if (PlayerPrefs.GetInt ("Make Logs") == 1) {
+			logger.OpenLog (PlayerPrefs.GetString ("Logs Prefix"));
+		}
+
 		Diana = GameObject.Find ("Diana");
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.rightHand.gameObject;
-
+		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		synVision = Diana.GetComponent<SyntheticVision> ();
 		gestureController = Diana.GetComponent<AvatarGestureController> ();
 		ik = Diana.GetComponent<FullBodyBipedIK> ();
@@ -128,6 +161,34 @@ public class JointGestureDemo : MonoBehaviour {
 		regionHighlight.GetComponent<Renderer> ().material = highlightMaterial;
 		regionHighlight.GetComponent<Renderer> ().enabled = false;
 		Destroy (regionHighlight.GetComponent<Collider> ());
+
+		highlightTimeoutTimer = new Timer (highlightTimeoutTime);
+		highlightTimeoutTimer.Enabled = false;
+		highlightTimeoutTimer.Elapsed += DisableHighlight;
+
+		relativeDir.Add ("left", "left");
+		relativeDir.Add ("right", "right");
+		relativeDir.Add ("front", "back");
+		relativeDir.Add ("back", "front");
+		relativeDir.Add ("up", "up");
+		relativeDir.Add ("down", "down");
+
+		oppositeDir.Add ("left", "right");
+		oppositeDir.Add ("right", "left");
+		oppositeDir.Add ("front", "back");
+		oppositeDir.Add ("back", "front");
+		oppositeDir.Add ("up", "down");
+		oppositeDir.Add ("down", "up");
+
+		directionPreds.Add ("left", "left");
+		directionPreds.Add ("right", "right");
+		directionPreds.Add ("front", "in_front");
+		directionPreds.Add ("back", "behind");
+
+		directionLabels.Add ("left", "left of");
+		directionLabels.Add ("right", "right of");
+		directionLabels.Add ("front", "in front of");
+		directionLabels.Add ("back", "behind");
 	}
 	
 	// Update is called once per frame
@@ -160,6 +221,8 @@ public class JointGestureDemo : MonoBehaviour {
 			leftRegionHighlight.transform.localScale = new Vector3 (.1f*(leftRegion.max.x - leftRegion.min.x),
 				1.0f, .1f*(leftRegion.max.z - leftRegion.min.z));
 			leftRegionHighlight.SetActive (false);
+
+			regionLabels.Add (leftRegion, "left");
 		}
 
 		if (rightRegion == null) {
@@ -175,6 +238,8 @@ public class JointGestureDemo : MonoBehaviour {
 			rightRegionHighlight.transform.localScale = new Vector3 (.1f*(rightRegion.max.x - rightRegion.min.x),
 				1.0f, .1f*(rightRegion.max.z - rightRegion.min.z));
 			rightRegionHighlight.SetActive (false);
+
+			regionLabels.Add (rightRegion, "right");
 		}
 
 		if (frontRegion == null) {
@@ -189,6 +254,8 @@ public class JointGestureDemo : MonoBehaviour {
 			frontRegionHighlight.transform.localScale = new Vector3 (.1f*(frontRegion.max.x - frontRegion.min.x),
 				1.0f, .1f*(frontRegion.max.z - frontRegion.min.z));
 			frontRegionHighlight.SetActive (false);
+
+			regionLabels.Add (frontRegion, "front");
 		}
 
 		if (backRegion == null) {
@@ -203,6 +270,8 @@ public class JointGestureDemo : MonoBehaviour {
 			backRegionHighlight.transform.localScale = new Vector3 (.1f*(backRegion.max.x - backRegion.min.x),
 				1.0f, .1f*(backRegion.max.z - backRegion.min.z));
 			backRegionHighlight.SetActive (false);
+
+			regionLabels.Add (backRegion, "back");
 		}
 
 		// Vector pointing scaling
@@ -235,6 +304,11 @@ public class JointGestureDemo : MonoBehaviour {
 			 */
 		}
 
+		if (disableHighlight) {
+			regionHighlight.GetComponent<Renderer> ().enabled = false;
+			disableHighlight = false;
+		}
+
 		if (regionHighlight.GetComponent<Renderer> ().enabled) {
 			regionHighlight.transform.eulerAngles = new Vector3 (regionHighlight.transform.eulerAngles.x,
 				regionHighlight.transform.eulerAngles.y + Time.deltaTime * highlightTurnSpeed, regionHighlight.transform.eulerAngles.z);
@@ -257,18 +331,19 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 		}
 
-		// Synthetic vision mockup
-		if (synVision != null) {
-			if (synVision.enabled) {
-				foreach (GameObject block in blocks) {	// limit to blocks only for now
-					Voxeme blockVox = block.GetComponent<Voxeme> ();
-					if (blockVox != null) {
-						if (synVision.IsVisible (block)) {
-							if (!synVision.visibleObjects.Contains (blockVox)) {
-								synVision.visibleObjects.Add (blockVox);
-								Debug.Log (string.Format ("JointGestureDemo.Start:{0}:{1}", block.name, synVision.IsVisible (block).ToString ()));
-								synVision.NewInformation ();
-							}
+		if (epistemicModel.engaged) {
+			foreach (GameObject block in blocks) {	// limit to blocks only for now
+				Voxeme blockVox = block.GetComponent<Voxeme> ();
+				if (blockVox != null) {
+					if (synVision.knownObjects.Contains (blockVox)) {
+						string color = string.Empty;
+						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+
+						Concept blockConcept = epistemicModel.state.GetConcept (string.Format (block.name, color), ConceptType.OBJECT, ConceptMode.L);
+
+						if (blockConcept.Certainty < 1.0) {
+							blockConcept.Certainty = 1.0;
+							epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
 						}
 					}
 				}
@@ -276,15 +351,25 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		// Deixis by click
-		if (Input.GetMouseButtonDown (0)) {
-			Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-			RaycastHit hit;
-			// Casts the ray and get the first game object hit
-			Physics.Raycast (ray, out hit);
+		if (allowDeixisByClick) {
+			if (Input.GetMouseButtonDown (0)) {
+				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+				RaycastHit hit;
+				// Casts the ray and get the first game object hit
+				Physics.Raycast (ray, out hit);
 
-			if (hit.collider != null) {
-				if (blocks.Contains (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
-					Deixis (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject));
+				if (hit.collider != null) {
+					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
+						epistemicModel.engaged = true;
+						if (synVision != null) {
+							if (synVision.enabled) {
+								Debug.Log(string.Format("SyntheticVision.IsVisible({0}):{1}",hit.collider.gameObject,synVision.IsVisible (hit.collider.gameObject)));
+								if (synVision.IsKnown (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
+									Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -293,8 +378,8 @@ public class JointGestureDemo : MonoBehaviour {
 	void ReceivedFusion(object sender, EventArgs e) {
 		string fusionMessage = ((GestureEventArgs)e).Content;
 		//Debug.Log (fusionMessage);
-		
-		
+		logger.OnLogEvent (this, new LoggerArgs (fusionMessage));
+
 		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
 		string messageType = splitMessage[0];
 		string messageStr = splitMessage[1];
@@ -302,16 +387,81 @@ public class JointGestureDemo : MonoBehaviour {
 
 		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
+		if (!epistemicModel.engaged) {
+			epistemicModel.engaged = true;
+		}
+
+		Concept conceptL = null;
+		Concept conceptG = null;
+		Relation relation = null;
+
 		if (messageType == "S") {	// speech message
 			Debug.Log (fusionMessage);
 			switch (messageStr.ToLower ()) {
 			case "yes":
+				conceptL = epistemicModel.state.GetConcept ("YES", ConceptType.ACTION, ConceptMode.L);
+				conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
+				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+
+				conceptL.Certainty = 1.0;
+
+				if (conceptG.Certainty > 0.0) {
+					relation.Certainty = 1.0;
+				}
+
+				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
+
 				Acknowledge (true);
 				break;
 			case "no":
+				conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
+				conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
+				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+
+				conceptL.Certainty = 1.0;
+
+				if (conceptG.Certainty > 0.0) {
+					relation.Certainty = 1.0;
+				}
+
+				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
+
 				Acknowledge (false);
 				break;
+			case "grab":
+				conceptL = epistemicModel.state.GetConcept ("GRAB", ConceptType.ACTION, ConceptMode.L);
+				conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+
+				if (indicatedObj == null) {
+					if (EpistemicCertainty (conceptL) < 0.5) {
+						conceptG.Certainty = 0.5;
+					}
+					else {
+						relation.Certainty = 1.0;
+					}
+
+					Suggest ("grab");
+				}
+				else {
+					if (EpistemicCertainty(conceptL) < 0.5) {
+						conceptG.Certainty = 0.5;
+
+						Suggest ("grab");
+					}
+					else {
+						relation.Certainty = 1.0;
+
+						Grab (true);
+					}
+				}
+
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptG, conceptL }, new Relation[] { relation });
+				break;
 			case "left":
+				conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+
 				if ((indicatedObj == null) && (graspedObj == null)) {
 					if (indicatedRegion == leftRegion) {	// if ensemble with leftward point
 						Deixis ("left");
@@ -320,24 +470,28 @@ public class JointGestureDemo : MonoBehaviour {
 						Deixis("right");
 					}
 				}
-				else if (graspedObj == null) {
-					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
-						//Push ("left");
-					}
-					else {
-						Push ("right");
-					}
-				}
-				else if (indicatedObj == null) {
-					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
-						//Move ("left");
-					}
-					else {
-						Move ("right");
-					}
-				}
+//				else if (graspedObj == null) {
+//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
+//						//Push ("left");
+//					}
+//					else {
+//						Push ("right");
+//					}
+//				}
+//				else if (indicatedObj == null) {
+//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
+//						//Move ("left");
+//					}
+//					else {
+//						Move ("right");
+//					}
+//				}
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "right":
+				conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+
 				if ((indicatedObj == null) && (graspedObj == null)) {
 					if (indicatedRegion == rightRegion) {	// if ensemble with righttward point
 						Deixis ("right");
@@ -346,21 +500,37 @@ public class JointGestureDemo : MonoBehaviour {
 						Deixis("left");
 					}
 				}
-				else if (graspedObj == null) {
-					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
-						//Push ("right");
-					}
-					else {
-						Push ("left");
-					}
-				}
-				else if (indicatedObj == null) {
-					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
-						//Move ("right");
-					}
-					else {
-						Move ("left");
-					}
+//				else if (graspedObj == null) {
+//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
+//						//Push ("right");
+//					}
+//					else {
+//						Push ("left");
+//					}
+//				}
+//				else if (indicatedObj == null) {
+//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
+//						//Move ("right");
+//					}
+//					else {
+//						Move ("left");
+//					}
+//				}
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+				break;
+			case "this":
+			case "that":
+				if (regionHighlight.GetComponent<Renderer> ().enabled) {
+					conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.ACTION, ConceptMode.L);
+					conceptL.Certainty = 1.0;
+					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
+					conceptG.Certainty = 1.0;
+					relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+					relation.Certainty = 1.0;
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
+
+					Deixis (highlightCenter);
 				}
 				break;
 			case "red":
@@ -371,7 +541,33 @@ public class JointGestureDemo : MonoBehaviour {
 			case "purple":
 			case "white":
 			case "pink":
+				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
+
 				IndexByColor (messageStr);
+				break;
+			case "big":
+				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				conceptL = epistemicModel.state.GetConcept ("SMALL", ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 0.5;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				IndexBySize (messageStr);
+				break;
+			case "small":
+				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 1.0;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				conceptL = epistemicModel.state.GetConcept ("BIG", ConceptType.PROPERTY, ConceptMode.L);
+				conceptL.Certainty = 0.5;
+				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+
+				IndexBySize (messageStr);
 				break;
 			default:
 				Debug.Log ("Cannot recognize the message: " + messageStr);
@@ -395,55 +591,150 @@ public class JointGestureDemo : MonoBehaviour {
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("left point")) {
-					Deixis (GetGestureVector (messageStr, "left point"));
+					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
+					conceptG.Certainty = 1.0;
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+
+					Deixis (TransformToSurface (GetGestureVector (messageStr, "left point")));
 				} 
 				else if (messageStr.StartsWith ("right point")) {
-					Deixis (GetGestureVector (messageStr, "right point"));
+					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
+					conceptG.Certainty = 1.0;
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+
+					Deixis (TransformToSurface (GetGestureVector (messageStr, "right point")));
 				} 
 				else if (messageStr.StartsWith ("grab")) {
-					if (GetGestureContent (messageStr, "grab") == "") {
-						Grab (true);
+					if ((graspedObj == null) && (eventConfirmation == "")) {
+						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
+							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+							Debug.Log (EpistemicCertainty (conceptG));
+							if (EpistemicCertainty (conceptG) < 0.5) {
+								conceptG.Certainty = 0.5;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+
+								Suggest ("grab");
+							}
+							else {
+								conceptG.Certainty = 1.0;
+								epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+
+								Grab (true);
+							}
+						}
+					}
+					else {
+						if ((graspedObj != null) || (indicatedObj != null)) {
+							string prevInstruction = FindPreviousMatch ("grab");
+
+							if (prevInstruction.StartsWith("grab move")) {
+								HandleMoveSegment (prevInstruction);
+							}
+						}
 					}
 				}
 				else if (messageStr.StartsWith ("posack")) {
-					Acknowledge (true);
+					conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
+					conceptL = epistemicModel.state.GetConcept("YES", ConceptType.ACTION, ConceptMode.L);
+					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+
+					if (EpistemicCertainty(conceptG) < 0.5) {
+						conceptG.Certainty = 0.5;
+
+						Suggest ("posack");
+					}
+					else {
+						conceptG.Certainty = 1.0;
+
+						if (conceptL.Certainty > 0.0) {
+							relation.Certainty = 1.0;
+						}
+
+						Acknowledge (true);
+					}
+
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
+
 				}
 				else if (messageStr.StartsWith ("negack")) {
-					Acknowledge (false);
+					conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
+					conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
+					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+
+					if (EpistemicCertainty(conceptG) < 0.5) {
+						conceptG.Certainty = 0.5;
+
+						Suggest ("negack");
+					}
+					else {
+						conceptG.Certainty = 1.0;
+
+						if (conceptL.Certainty > 0.0) {
+							relation.Certainty = 1.0;
+						}
+
+						Acknowledge (false);
+					}
+
+					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
 				}
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
 				if (messageStr.StartsWith ("left point")) {
+					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+					if (EpistemicCertainty(conceptG) < 0.5) {
+						conceptG.Certainty = 0.5;
+						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					}
+
 					Suggest ("point");
 				} 
 				else if (messageStr.StartsWith ("right point")) {
+					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+					if (EpistemicCertainty(conceptG) < 0.5) {
+						conceptG.Certainty = 0.5;
+						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					}
+
 					Suggest ("point");
 				} 
 				else if (messageStr.StartsWith ("grab")) {
 					if (GetGestureContent (messageStr, "grab") == "") {
+						conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+						if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
+
 						Suggest ("grab");
 					}
 				} 
 				else if (messageStr.StartsWith ("posack")) {
-					Suggest ("posack");
+					if (eventConfirmation != "") {
+						conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
+						if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
+
+						Suggest ("posack");
+					}
 				} 
 				else if (messageStr.StartsWith ("negack")) {
-					Suggest ("negack");
+					if (eventConfirmation != "") {
+						conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
+						if (EpistemicCertainty(conceptG) < 0.5) {
+							conceptG.Certainty = 0.5;
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+						}
+
+						Suggest ("negack");
+					}
 				}
 			} 
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = RemoveGestureTriggers (messageStr);
-
-				// stop pointing -> turn off highlight
-				if (messageStr.StartsWith ("left point")) {
-					regionHighlight.GetComponent<Renderer> ().enabled = false;
-				} 
-				else if (messageStr.StartsWith ("right point")) {
-					regionHighlight.GetComponent<Renderer> ().enabled = false;
-				}
-
-				// otherwise process gesture over interval
 				string startSignal = FindStartSignal (messageStr);
 
 				if (messageStr.StartsWith ("engage")) {
@@ -454,102 +745,131 @@ public class JointGestureDemo : MonoBehaviour {
 				else if (messageStr.StartsWith ("push")) {
 					if (startSignal.EndsWith ("high")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
-							Push ("left");
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+
+								Suggest ("push left");
+							}
+							else {
+								conceptG.Certainty = 1.0;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+
+								Push ("left");
+							}
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
-							Push ("right");
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+
+								Suggest ("push right");
+							}
+							else {
+								conceptG.Certainty = 1.0;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+
+								Push ("right");
+							}
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
-							Push ("front");
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+
+								Suggest ("push front");
+							}
+							else {
+								conceptG.Certainty = 1.0;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+
+								Push ("front");
+							}
 						}
 						else if (GetGestureContent (messageStr, "push") == "back") {
-							Push ("back");
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+
+								Suggest ("push back");
+							}
+							else {
+								conceptG.Certainty = 1.0;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+
+								Push ("back");
+							}
 						}
 					} 
 					else if (startSignal.EndsWith ("low")) {
 						if (GetGestureContent (messageStr, "push") == "left") {
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+							}
+
 							Suggest ("push left");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "right") {
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+							}
+
 							Suggest ("push right");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "front") {
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+							}
+
 							Suggest ("push front");
 						} 
 						else if (GetGestureContent (messageStr, "push") == "back") {
+							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+							}
+
 							Suggest ("push back");
 						}
 					}
 				} 
-				else if (messageStr.StartsWith ("grab move")) {
-					if (startSignal.EndsWith ("high")) {
-						if (GetGestureContent (messageStr, "grab move") == "left") {
-							Move ("left");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right") {
-							Move ("right");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "front") {
-							Move ("front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "back") {
-							Move ("back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left front") {
-							Move ("left front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right front") {
-							Move ("right front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left back") {
-							Move ("left back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right back") {
-							Move ("right back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "up") {
-							Move ("up");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "down") {
-							Move ("down");
-						}
-					}
-					else if (startSignal.EndsWith ("low")) {
-						if (GetGestureContent (messageStr, "grab move") == "left") {
-							Suggest ("grab move left");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right") {
-							Suggest ("grab move right");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "front") {
-							Suggest ("grab move front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "back") {
-							Suggest ("grab move back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left front") {
-							Suggest ("grab move left front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right front") {
-							Suggest ("grab move right front");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "left back") {
-							Suggest ("grab move left back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "right back") {
-							Suggest ("grab move right back");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "up") {
-							Suggest ("grab move up");
-						} 
-						else if (GetGestureContent (messageStr, "grab move") == "down") {
-							Suggest ("grab move down");
-						}
-					}
-				} 
 				else if (messageStr.StartsWith ("grab")) {
-					if (GetGestureContent (messageStr, "grab") == "") {
-						Grab (false);
+					if (graspedObj != null) {
+						string prevInstruction = FindPreviousMatch ("grab");
+
+						if (prevInstruction.StartsWith("grab move")) {
+							HandleMoveSegment (prevInstruction);
+						}
+						else if (GetGestureContent (messageStr, "grab") == "") {
+							Grab (false);
+						}
 					}
 				}
 			}
@@ -576,6 +896,22 @@ public class JointGestureDemo : MonoBehaviour {
 
 		Debug.Log (startSignal);
 		return startSignal;
+	}
+
+	string FindPreviousMatch(string message) {
+		string prevMessage = "";
+		List<Pair<string,string>> previousMessages = receivedMessages.AsEnumerable ().Reverse ().ToList ();
+		previousMessages.RemoveAt (0);
+
+		foreach (Pair<string,string> m in previousMessages) {
+			if (m.Item2.Contains (message)) {
+				prevMessage = m.Item2;
+				break;
+			}
+		}
+
+		Debug.Log (prevMessage);
+		return prevMessage;
 	}
 
 	string RemoveGestureTriggers(string receivedData) {
@@ -616,21 +952,22 @@ public class JointGestureDemo : MonoBehaviour {
 						if (option.GetComponent<Voxeme> () != null) {
 							objVoxemes.Add (option.GetComponent<Voxeme> ());
 						}
+					}
 
-						List<object> uniqueAttrs = new List<object> ();
-						for (int i = 0; i < objVoxemes.Count; i++) {
-							List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
-							foreach (object attr in newAttrs) {
-								uniqueAttrs.Add (attr);
-							}
+					List<object> uniqueAttrs = new List<object> ();
+					for (int i = 0; i < objVoxemes.Count; i++) {
+						List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
+						foreach (object attr in newAttrs) {
+							uniqueAttrs.Add (attr);
 						}
+					}
 
-						string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
+					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to the {0} block?", attribute));
-							objectConfirmation = objVoxemes [0].gameObject;
-						}
+					if (eventManager.events.Count == 0) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+						objectConfirmation = objVoxemes [0].gameObject;
+						LookAt(objectConfirmation);
 					}
 				}
 			}
@@ -639,6 +976,7 @@ public class JointGestureDemo : MonoBehaviour {
 				actionOptions = (List<string>)content;
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
 					eventConfirmation = actionOptions [0];
 				}
@@ -649,27 +987,45 @@ public class JointGestureDemo : MonoBehaviour {
 			if ((content is IList) && (content.GetType().IsGenericType) && 
 				content.GetType().IsAssignableFrom(typeof(List<GameObject>))) {	// disambiguate objects
 				if (((List<GameObject>)content).Equals (objectMatches)) {
+					bool duplicateNominal = false;
 					List<Voxeme> objVoxemes = new List<Voxeme> ();
 
 					foreach (GameObject option in objectMatches) {
 						if (option.GetComponent<Voxeme> () != null) {
 							objVoxemes.Add (option.GetComponent<Voxeme> ());
 						}
+					}
 
-						List<object> uniqueAttrs = new List<object> ();
-						for (int i = 0; i < objVoxemes.Count; i++) {
-							List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
+					List<object> uniqueAttrs = new List<object> ();
+					for (int i = 0; i < objVoxemes.Count; i++) {
+						List<object> newAttrs = Helper.DiffLists (
+							                        uniqueAttrs.Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList (),
+							                        objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ().Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList ());
+
+						if (newAttrs.Count > 0) {
 							foreach (object attr in newAttrs) {
-								uniqueAttrs.Add (attr);
+								Debug.Log (string.Format ("{0}:{1}", objVoxemes [i].name, attr.ToString ()));
+								Vox.VoxAttributesAttr attrToAdd = new Vox.VoxAttributesAttr ();
+								attrToAdd.Value = attr.ToString ();
+
+								if (uniqueAttrs.Where (x => ((Vox.VoxAttributesAttr)x).Value == attrToAdd.Value).ToList ().Count == 0) {
+									uniqueAttrs.Add (attrToAdd);
+								}
 							}
 						}
+						else {
+							duplicateNominal = true;
+						}
+					}
 
-						//string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
+					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "Which block?");
-							//ReachFor (objVoxemes [0].gameObject);
-							objectConfirmation = null;
+					if (eventManager.events.Count == 0) {
+						if (!duplicateNominal) {
+							OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+							ReachFor (objVoxemes [0].gameObject);
+							objectConfirmation = objVoxemes [0].gameObject;
+							LookAt (objectConfirmation);
 						}
 					}
 				}
@@ -678,22 +1034,32 @@ public class JointGestureDemo : MonoBehaviour {
 				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
 				actionOptions = (List<string>)content;
 
-				//if (actionOptions.Count 
-
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
-					eventConfirmation = actionOptions [0];
+					LookForward();
+
+					if (confirmationTexts.ContainsKey (actionOptions [0])) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
+						eventConfirmation = actionOptions [0];
+					}
+					else {
+						actionOptions.RemoveAt (0);
+						Disambiguate (actionOptions);
+					}
 				}
 			}
 		}
 	}
 
 	void Suggest(string gesture) {
+		if ((eventConfirmation != "") && (gesture != "posack") && (gesture != "negack")) {
+			return;
+		}
+
 		AvatarGesture performGesture = null;
 		if (gesture.StartsWith("grab move")) {
 			string dir = GetGestureContent (gesture, "grab move");
-			if (indicatedObj == null) {
-				if (graspedObj == null) {
+			if (indicatedObj == null) {	// not indicating anything
+				if (graspedObj == null) {	// not grasping anything
 					if (dir == "left") {
 						performGesture = AvatarGesture.RARM_CARRY_RIGHT;
 					}
@@ -701,10 +1067,10 @@ public class JointGestureDemo : MonoBehaviour {
 						performGesture = AvatarGesture.RARM_CARRY_LEFT;
 					}
 					else if (dir == "front") {
-						performGesture = AvatarGesture.RARM_CARRY_FRONT;
+						performGesture = AvatarGesture.RARM_CARRY_BACK;
 					}
 					else if (dir == "back") {
-						performGesture = AvatarGesture.RARM_CARRY_BACK;
+						performGesture = AvatarGesture.RARM_CARRY_FRONT;
 					}
 					else if (dir == "up") {
 						performGesture = AvatarGesture.RARM_CARRY_UP;
@@ -714,41 +1080,102 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 
 					if (eventManager.events.Count == 0) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move something this way?"));
 						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
 					}
 				}
-				else {
+				else {	// grasping something
 					if (dir == "left") {
-						performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+						if (graspedObj == null) {
+							performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+						}
+						else {
+							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+							}
+							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_CARRY_RIGHT;
+							}
+						}
 					}
 					else if (dir == "right") {
-						performGesture = AvatarGesture.RARM_CARRY_LEFT;
+						if (graspedObj == null) {
+							performGesture = AvatarGesture.RARM_CARRY_LEFT;
+						}
+						else {
+							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_CARRY_LEFT;
+							}
+							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_CARRY_LEFT;
+							}
+						}
 					}
 					else if (dir == "front") {
-						performGesture = AvatarGesture.RARM_CARRY_FRONT;
+						if (graspedObj == null) {
+							performGesture = AvatarGesture.RARM_CARRY_BACK;
+						}
+						else {
+							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_CARRY_BACK;
+							}
+							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_CARRY_BACK;
+							}
+						}
 					}
 					else if (dir == "back") {
-						performGesture = AvatarGesture.RARM_CARRY_BACK;
+						if (graspedObj == null) {
+							performGesture = AvatarGesture.RARM_CARRY_FRONT;
+						}
+						else {
+							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_CARRY_FRONT;
+							}
+							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_CARRY_FRONT;
+							}
+						}
 					}
 					else if (dir == "up") {
-						performGesture = AvatarGesture.RARM_CARRY_UP;
+						if (graspedObj == null) {
+							performGesture = AvatarGesture.RARM_CARRY_UP;
+						}
+						else {
+							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_CARRY_UP;
+							}
+							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_CARRY_UP;
+							}
+						}
 					}
 					else if (dir == "down") {
-						performGesture = AvatarGesture.RARM_CARRY_DOWN;
+						if (graspedObj == null) {
+							performGesture = AvatarGesture.RARM_CARRY_DOWN;
+						}
+						else {
+							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_CARRY_DOWN;
+							}
+							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_CARRY_DOWN;
+							}
+						}
 					}
 
 					if (eventManager.events.Count == 0) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (string.Format("ungrasp({0})",graspedObj.name), 1);
 						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
+						PopulateMoveOptions (graspedObj, dir, CertaintyMode.Suggest);
 					}
 				}
 			}
-			else {
+			else {	// indicating something
 				if (dir == "left") {
 					performGesture = AvatarGesture.RARM_CARRY_RIGHT;
 				}
@@ -756,10 +1183,10 @@ public class JointGestureDemo : MonoBehaviour {
 					performGesture = AvatarGesture.RARM_CARRY_LEFT;
 				}
 				else if (dir == "front") {
-					performGesture = AvatarGesture.RARM_CARRY_FRONT;
+					performGesture = AvatarGesture.RARM_CARRY_BACK;
 				}
 				else if (dir == "back") {
-					performGesture = AvatarGesture.RARM_CARRY_BACK;
+					performGesture = AvatarGesture.RARM_CARRY_FRONT;
 				}
 				else if (dir == "up") {
 					performGesture = AvatarGesture.RARM_CARRY_UP;
@@ -769,38 +1196,42 @@ public class JointGestureDemo : MonoBehaviour {
 				}
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
+					PopulateMoveOptions (indicatedObj, dir, CertaintyMode.Suggest);
 				}
 			}
 		}
 		else if (gesture.StartsWith("grab")) {
-			if (indicatedObj == null) {
-				if (graspedObj == null) {
+			if (indicatedObj == null) {	// not indicating anything
+				if (graspedObj == null) {	// not grasping anything
 					if (eventManager.events.Count == 0) {
+						LookForward();
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to grab something?"));
 						MoveToPerform ();
 						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
-						actionOptions.Add("grasp({0})");
-						Disambiguate (actionOptions);
+						suggestedActions.Add("grasp({0})");
 					}
-				}
+				}	// already grasping something
 				else {
+					// ignore this
 				}
 			}
-			else {
+			else {	// indicating something
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
-					actionOptions.Add(string.Format("grasp({0})",indicatedObj));
+					PopulateGrabOptions (indicatedObj, CertaintyMode.Suggest);
 				}
 			}
 		}
 		else if (gesture.StartsWith("push")) {
 			string dir = GetGestureContent (gesture, "push");
-			if ((indicatedObj == null) && (graspedObj == null)) {
+			if ((indicatedObj == null) && (graspedObj == null)) {	// not indicating or grasping anything
 				if (dir == "left") {
 					performGesture = AvatarGesture.LARM_PUSH_RIGHT;
 				}
@@ -808,105 +1239,176 @@ public class JointGestureDemo : MonoBehaviour {
 					performGesture = AvatarGesture.RARM_PUSH_LEFT;
 				}
 				else if (dir == "front") {
-					performGesture = AvatarGesture.RARM_PUSH_FRONT;
+					performGesture = AvatarGesture.RARM_PUSH_BACK;
 				}
 				else if (dir == "back") {
-					performGesture = AvatarGesture.RARM_PUSH_BACK;
+					performGesture = AvatarGesture.RARM_PUSH_FRONT;
 				}
 
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
+					suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
 				}
 			}
-			else {
+			else {	// something indicated or grasped
+				GameObject theme = null;
+				if (indicatedObj != null) {
+					theme = indicatedObj;
+				}
+				else if (graspedObj != null) {
+					theme = graspedObj;
+				}
+
 				if (dir == "left") {
-					performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+					if (graspedObj == null) {
+						performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+					}
+					else {
+						if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_RIGHT;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+						}
+					}
 				}
 				else if (dir == "right") {
-					performGesture = AvatarGesture.RARM_PUSH_LEFT;
+					if (graspedObj == null) {
+						performGesture = AvatarGesture.RARM_PUSH_LEFT;
+					}
+					else {
+						if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_LEFT;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_LEFT;
+						}
+					}
 				}
 				else if (dir == "front") {
-					if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
-						performGesture = AvatarGesture.LARM_PUSH_FRONT;
+					if (theme != null) {
+						if (InteractionHelper.GetCloserHand (Diana, theme) == leftGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_BACK;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_BACK;
+						}
 					}
-					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
-						performGesture = AvatarGesture.RARM_PUSH_FRONT;
-					}
-				}
-				else if (dir == "back") {
-					if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == leftGrasper) {
-						performGesture = AvatarGesture.LARM_PUSH_BACK;
-					}
-					else if (InteractionHelper.GetCloserHand (Diana, indicatedObj) == rightGrasper) {
+					else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
 						performGesture = AvatarGesture.RARM_PUSH_BACK;
 					}
 				}
+				else if (dir == "back") {
+					if (theme != null) {
+						if (InteractionHelper.GetCloserHand (Diana, theme) == leftGrasper) {
+							performGesture = AvatarGesture.LARM_PUSH_FRONT;
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
+							performGesture = AvatarGesture.RARM_PUSH_FRONT;
+						}
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
+						performGesture = AvatarGesture.RARM_PUSH_FRONT;
+					}
+				}
 
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+					LookForward();
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push this this way?"));
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
+					PopulatePushOptions (theme, dir, CertaintyMode.Suggest);
 				}
 			}
 		}
 		else if (gesture.StartsWith("left point")) { 
-			string dir = GetGestureContent (gesture, "left point");
-			if (dir == "left") {
-				performGesture = AvatarGesture.LARM_POINT_RIGHT;
-			}
-			else if (dir == "right") {
-				performGesture = AvatarGesture.LARM_POINT_LEFT;
-			}
-			else if (dir == "front") {
-				performGesture = AvatarGesture.LARM_POINT_FRONT;
-			}
-			else if (dir == "back") {
-				performGesture = AvatarGesture.LARM_POINT_BACK;
-			}
+			//string dir = GetGestureContent (gesture, "left point");
+//			if (dir == "left") {
+//				performGesture = AvatarGesture.LARM_POINT_RIGHT;
+//			}
+//			else if (dir == "right") {
+//				performGesture = AvatarGesture.LARM_POINT_LEFT;
+//			}
+//			else if (dir == "front") {
+//				performGesture = AvatarGesture.LARM_POINT_FRONT;
+//			}
+//			else if (dir == "back") {
+//				performGesture = AvatarGesture.LARM_POINT_BACK;
+//			}
+
+			performGesture = AvatarGesture.LARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
 		}
 		else if (gesture.StartsWith("right point")) { 
-			string dir = GetGestureContent (gesture, "right point");
-			if (dir == "left") {
-				performGesture = AvatarGesture.RARM_POINT_RIGHT;
-			}
-			else if (dir == "right") {
-				performGesture = AvatarGesture.RARM_POINT_LEFT;
-			}
-			else if (dir == "front") {
-				performGesture = AvatarGesture.RARM_POINT_FRONT;
-			}
-			else if (dir == "back") {
-				performGesture = AvatarGesture.RARM_POINT_BACK;
-			}
+//			string dir = GetGestureContent (gesture, "right point");
+//			if (dir == "left") {
+//				performGesture = AvatarGesture.RARM_POINT_RIGHT;
+//			}
+//			else if (dir == "right") {
+//				performGesture = AvatarGesture.RARM_POINT_LEFT;
+//			}
+//			else if (dir == "front") {
+//				performGesture = AvatarGesture.RARM_POINT_FRONT;
+//			}
+//			else if (dir == "back") {
+//				performGesture = AvatarGesture.RARM_POINT_BACK;
+//			}
+
+			performGesture = AvatarGesture.RARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you pointing to something over here?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
 		}
 		else if (gesture.StartsWith("posack")) {
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Was that a yes?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("Yes?"));
 				MoveToPerform ();
-				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_UP);
+				AllowHeadMotion ();
+
+				if (graspedObj == null) {
+					gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_UP);
+				}
+				else {
+					if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+						gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_UP);
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+						gestureController.PerformGesture(AvatarGesture.LARM_THUMBS_UP);
+					}
+				}
 				gestureController.PerformGesture (AvatarGesture.HEAD_NOD);
 			}
 		}
 		else if (gesture.StartsWith("negack")) { 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Was that a no?"));
+				OutputHelper.PrintOutput (Role.Affector, string.Format ("No?"));
 				MoveToPerform ();
-				gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_DOWN);
+				AllowHeadMotion ();
+
+				if (graspedObj == null) {
+					gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_DOWN);
+				}
+				else {
+					if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+						gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_DOWN);
+					}
+					else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+						gestureController.PerformGesture(AvatarGesture.LARM_THUMBS_DOWN);
+					}
+				}
 				gestureController.PerformGesture (AvatarGesture.HEAD_SHAKE);
+				eventConfirmation = "negack";
 			}
 		}
 	}
@@ -914,7 +1416,54 @@ public class JointGestureDemo : MonoBehaviour {
 	void Acknowledge(bool yes) {
 		LookForward ();
 		if (!yes) {
-			if (eventConfirmation != "") {
+			if (eventConfirmation == "forget") {	// forget about previously indicated block? no
+				if (eventManager.events.Count == 0) {
+					LookForward();
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					eventConfirmation = "";
+					if (indicatedObj != null) {
+						ReachFor (indicatedObj);
+					}
+				}
+			} 
+			else if (eventConfirmation == "negack") {	// no? no 
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					indicatedObj = null;
+					eventConfirmation = "";
+
+					if ((graspedObj == null) && (eventConfirmation == "")) {
+						TurnForward ();
+					}
+					//objectMatches.Clear ();
+					suggestedActions.Clear ();
+
+					if (actionOptions.Count > 0) {
+						confirmationTexts.Remove (actionOptions [0]);
+						actionOptions.RemoveAt (0);
+						Disambiguate (actionOptions);
+					}
+					else if (objectConfirmation != null) {
+						if (objectMatches.Contains (objectConfirmation)) {
+							objectMatches.Remove (objectConfirmation);
+						}
+
+						objectConfirmation = null;
+
+						if (objectMatches.Count > 0) {
+							Disambiguate (objectMatches);
+						} 
+					}
+						
+//						if (eventManager.events.Count == 0) {
+//							indicatedObj = null;
+//							objectMatches.Clear ();
+//							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+//						}
+//					}
+				}
+			}
+			else if ((eventConfirmation != "") || (indicatedObj != null)) {
 				if (actionOptions.Contains (eventConfirmation)) {
 					actionOptions.Remove (eventConfirmation);
 					confirmationTexts.Remove (eventConfirmation);
@@ -923,19 +1472,25 @@ public class JointGestureDemo : MonoBehaviour {
 				if (graspedObj == null) {
 					ikControl.leftHandObj.position = leftTargetDefault;
 					ikControl.rightHandObj.position = rightTargetDefault;
+					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 				}
 
 				eventConfirmation = "";
 
 				if (actionOptions.Count > 0) {
 					Disambiguate (actionOptions);
-				}
+				} 
 				else {
 					if (eventManager.events.Count == 0) {
-						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+						indicatedObj = null;
+						objectMatches.Clear ();
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, "OK.");
+						//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
-			}
+			} 
 			else if (objectConfirmation != null) {
 				if (objectMatches.Contains (objectConfirmation)) {
 					objectMatches.Remove (objectConfirmation);
@@ -944,64 +1499,108 @@ public class JointGestureDemo : MonoBehaviour {
 				if (graspedObj == null) {
 					ikControl.leftHandObj.position = leftTargetDefault;
 					ikControl.rightHandObj.position = rightTargetDefault;
+					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 				}
 
 				objectConfirmation = null;
 
 				if (objectMatches.Count > 0) {
 					Disambiguate (objectMatches);
-				}
+				} 
 				else {
 					if (eventManager.events.Count == 0) {
+						indicatedObj = null;
+						indicatedRegion = null;
 						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
 			}
-//			else {
-//				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-//			}
-		}
+			else if (suggestedActions.Count > 0) {
+				suggestedActions.Remove (suggestedActions [0]);
+
+				if (suggestedActions.Count == 0) {
+					LookForward();
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+				}
+
+				//				eventConfirmation = "";
+				//				suggestedActions.Clear ();
+				//				actionOptions.Clear ();
+				//				objectMatches.Clear ();
+				//				confirmationTexts.Clear ();
+				//				TurnForward ();
+			}
+			else if (indicatedObj != null) {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					eventConfirmation = "";
+					indicatedObj = null;
+					TurnForward ();
+					LookForward ();
+				}
+			}
+		} 
 		else {
-			if (eventConfirmation != "") {
-				Hashtable predArgs = Helper.ParsePredicate (eventConfirmation);
-				String pred = Helper.GetTopPredicate (eventConfirmation);
+			if (eventConfirmation == "forget") {	// forget about previously indicated block? yes
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					eventConfirmation = "";
+					indicatedObj = null;
+					TurnForward ();
+					LookForward ();
+				}
+			}
+			else if (eventConfirmation == "negack") {	// no? yes 
+				if (eventManager.events.Count == 0) {
+					LookForward();
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					indicatedObj = null;
+					eventConfirmation = "";
+					//objectMatches.Clear ();
+					suggestedActions.Clear ();
 
-				if (predArgs.Count > 0) {
-					Queue<String> argsStrings = new Queue<String> (((String)predArgs [pred]).Split (new char[] { ',' }));
+					confirmationTexts.Remove (actionOptions [0]);
+					actionOptions.RemoveAt (0);
 
-					while (argsStrings.Count > 0) {
-						object arg = argsStrings.Dequeue ();
-
-						if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
-							Vector3 target = Helper.ParsableToVector ((String)arg);
-							TurnToAccess (target);
-							break;
+					if (actionOptions.Count > 0) {
+						Disambiguate (actionOptions);
+					} 
+					else if (objectConfirmation != null) {
+						if (objectMatches.Contains (objectConfirmation)) {
+							objectMatches.Remove (objectConfirmation);
 						}
-						else if (arg is String) {	// if arg is String
-							if (indicatedObj != null) {
-								TurnToAccess (indicatedObj.transform.position);
-							}
-							else if (graspedObj != null) {
-								TurnToAccess (graspedObj.transform.position);
-							}
-							break;
+
+						objectConfirmation = null;
+
+						if (objectMatches.Count > 0) {
+							Disambiguate (objectMatches);
+						} 
+					}
+					else {
+						if (eventManager.events.Count == 0) {
+							indicatedObj = null;
+							objectMatches.Clear ();
+							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 						}
 					}
 				}
-
+			}
+			else if (eventConfirmation != "") {
 				if (eventConfirmation.StartsWith ("grasp")) {
 					graspedObj = indicatedObj;
 					indicatedObj = null;
 					indicatedRegion = null;
-				}
+				} 
 				else if (eventConfirmation.StartsWith ("put")) {
 					graspedObj = null;
 					indicatedRegion = null;
-				}
+				} 
 				else if (eventConfirmation.StartsWith ("slide")) {
 					indicatedObj = null;
+					graspedObj = null;
 					indicatedRegion = null;
-				}
+				} 
 				else if (eventConfirmation.StartsWith ("ungrasp")) {
 					graspedObj = null;
 					indicatedRegion = null;
@@ -1011,20 +1610,40 @@ public class JointGestureDemo : MonoBehaviour {
 					eventManager.InsertEvent ("", 0);
 					eventManager.InsertEvent (eventConfirmation, 1);
 					eventConfirmation = "";
+					suggestedActions.Clear ();
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 					confirmationTexts.Clear ();
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, "OK.");
 				}
-			}
+			} 
 			else if (objectConfirmation != null) {
 				if (eventManager.events.Count == 0) {
+					LookForward();
 					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
 					indicatedObj = objectConfirmation;
+					ReachFor (indicatedObj);
 					objectConfirmation = null;
 					objectMatches.Clear ();
 				}
 			}
+			else if (suggestedActions.Count > 0) {
+				if (suggestedActions [0].Contains ("{0}")) {
+					if (eventManager.events.Count == 0) {
+						if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
+							LookForward();
+							OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
+						}
+					}
+				} 
+				else {
+					//eventConfirmation = suggestedActions [0];
+					actionOptions = new List<string>(suggestedActions);
+					suggestedActions.Clear ();
+					Disambiguate (actionOptions);
+				}
+			} 
 //			else {
 //				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 //			}
@@ -1032,48 +1651,125 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void IndexByColor(string color) {
-		if (indicatedObj == null) {
-			if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
-				foreach (GameObject block in blocks) {
-					if (block.activeInHierarchy &&
-					    block.GetComponent<AttributeSet> ().attributes.Contains (color)) {
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-							indicatedObj = block;
-							objectConfirmation = null;
-							objectMatches.Clear ();
-							ReachFor (indicatedObj);
-							break;
+		if (eventManager.events.Count == 0) {
+			if (indicatedObj == null) {
+				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
+					foreach (GameObject block in blocks) {
+						bool isKnown = true;
+
+						if (synVision != null) {
+							if (synVision.enabled) {
+								isKnown = synVision.IsKnown (block);
+							}
 						}
+							
+						if ((block.activeInHierarchy) &&
+							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
+							(isKnown) && (SurfaceClear(block))) {
+							if (!objectMatches.Contains (block)) {
+								objectMatches.Add (block);
+							}
+						}
+					}
+					ResolveIndicatedObject ();
+				}
+				else {	// choose from restricted options based on color
+					List<GameObject> toRemove = new List<GameObject>();
+					foreach (GameObject match in objectMatches) {
+						bool isKnown = true;
+
+						if (synVision != null) {
+							if (synVision.enabled) {
+								isKnown = synVision.IsKnown (match);
+							}
+						}
+
+						if ((match.activeInHierarchy) &&
+							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
+							(isKnown)) {
+							if (eventManager.events.Count == 0) {
+								if (objectMatches.Contains (match)) {
+									toRemove.Add (match);
+								}
+							}
+						}
+					}
+
+					foreach (GameObject item in toRemove) {
+						objectMatches.Remove (item);
+					}
+					ResolveIndicatedObject ();
+
+				}
+
+				if (indicatedObj == null) {
+					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Which {0} block?", color.ToLower ()));
+					}
+					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
+					}
+				}
+				else {
+					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
+						LookForward();
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("OK, go on."));
 					}
 				}
 			}
-			else {	// choose from restricted options based on color
-				foreach (GameObject match in objectMatches) {
-					if (match.activeInHierarchy &&
-						match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower())) {
-						if (eventManager.events.Count == 0) {
-							OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
-							indicatedObj = match;
-							objectConfirmation = null;
-							objectMatches.Clear ();
-							ReachFor (indicatedObj);
-							break;
+			else {	// received color with object already indicated
+				if (eventManager.events.Count == 0) {
+					string attr = string.Empty;
+					if (indicatedObj.GetComponent<Voxeme> () != null) {
+						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					if (color != attr) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", attr));
+						TurnForward ();
+						LookAt (indicatedObj.transform.position);
+						eventConfirmation = "forget";
+					}
+				}
+			}
+		} 
+	}
+
+	void IndexBySize(string size) {
+		if (eventManager.events.Count == 0) {
+			if (objectMatches.Count > 0) {
+				GameObject obj = objectMatches[0];
+				if (size.ToLower() == "big") {
+					foreach (GameObject match in objectMatches) {
+						Debug.Log (match);
+						if ((Helper.GetObjectWorldSize (match).size.x *
+							Helper.GetObjectWorldSize (match).size.y *
+							Helper.GetObjectWorldSize (match).size.z) >
+							(Helper.GetObjectWorldSize (obj).size.x *
+							Helper.GetObjectWorldSize (obj).size.y *
+							Helper.GetObjectWorldSize (obj).size.z)) {
+							obj = match;
+						}
+					}
+				}
+				else if (size.ToLower() == "small") {
+					foreach (GameObject match in objectMatches) {
+						if ((Helper.GetObjectWorldSize (match).size.x *
+							Helper.GetObjectWorldSize (match).size.y *
+							Helper.GetObjectWorldSize (match).size.z) <
+							(Helper.GetObjectWorldSize (obj).size.x *
+							Helper.GetObjectWorldSize (obj).size.y *
+							Helper.GetObjectWorldSize (obj).size.z)) {
+							obj = match;
 						}
 					}
 				}
 
-				if (indicatedObj == null) {
-					if (eventManager.events.Count == 0) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
-					}
-				}
-			}
-		}
-		else {	// received color with object already indicated
-			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, "Should I forget about this other block?");
-				LookAt (indicatedObj.transform.position);
+				objectMatches.Clear ();
+				objectMatches.Add (obj);
+				ResolveIndicatedObject ();
 			}
 		}
 	}
@@ -1141,6 +1837,8 @@ public class JointGestureDemo : MonoBehaviour {
 				graspedObj = null;
 			}
 		}
+
+		epistemicModel.engaged = state;
 	}
 
 	void Deixis(string dir) {
@@ -1186,21 +1884,25 @@ public class JointGestureDemo : MonoBehaviour {
 			LookAt (region.center);
 
 			foreach (GameObject block in blocks) {
-				bool isVisible = true;
+				bool isKnown = true;
 
 				if (synVision != null) {
 					if (synVision.enabled) {
-						isVisible = synVision.IsVisible (block);
+						isKnown = synVision.IsKnown (block);
 					}
 				}
 
 				if (block.activeInHierarchy) {
 					if (region.Contains (block)) {
-						if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
+						if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isKnown)) {
 							objectMatches.Add (block);
 						}
 					} 
 				}
+			}
+
+			if (useOrderingHeuristics) {
+				objectMatches = objectMatches.OrderBy (o => (o.transform.position - Diana.transform.position).magnitude).ToList ();
 			}
 
 			if (objectMatches.Count > 0) {
@@ -1208,22 +1910,24 @@ public class JointGestureDemo : MonoBehaviour {
 			} 
 			else {	// indicating region
 				indicatedRegion = region;
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 			}
 		}
 	}
 
 	void Deixis(GameObject obj) {
-		bool isVisible = true;
+		bool isKnown = true;
 
 		if (synVision != null) {
 			if (synVision.enabled) {
-				isVisible = synVision.IsVisible (obj);
+				isKnown = synVision.IsKnown (obj);
 			}
 		}
 
+		objectMatches.Clear ();
+
 		if (obj.activeInHierarchy) {
-			if ((!objectMatches.Contains (obj)) && (SurfaceClear(obj)) && (isVisible)) {
+			if ((!objectMatches.Contains (obj)) && (SurfaceClear(obj)) && (isKnown)) {
 				objectMatches.Add (obj);
 			}
 		}
@@ -1233,15 +1937,17 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
-	void Deixis(List<float> vector) {
+	void Deixis(Vector3 coord) {
 		if (eventManager.events.Count > 0) {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		highlightTimeoutTimer.Enabled = true;
+
+		//OutputHelper.PrintOutput (Role.Affector, "");
 		Region region = null;
 
-		Vector3 highlightCenter = TransformToSurface (vector);
+		Vector3 highlightCenter = coord;
 
 		Debug.Log (string.Format("Deixis: {0}",highlightCenter));
 
@@ -1252,46 +1958,82 @@ public class JointGestureDemo : MonoBehaviour {
 		//LookAt (cube.transform.position);
 
 		foreach (GameObject block in blocks) {
-			bool isVisible = true;
+			bool isKnown = true;
 
 			if (synVision != null) {
 				if (synVision.enabled) {
-					isVisible = synVision.IsVisible (block);
+					isKnown = synVision.IsKnown (block);
 				}
 			}
 
 			if (block.activeInHierarchy) {
 				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
 				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
-				if ((point-highlightCenter).magnitude <= vectorConeRadius*highlightOscUpper) {
-				//if (region.Contains (new Vector3 (block.transform.position.x,
-				//	region.center.y, block.transform.position.z))) {
-					if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isVisible)) {
+				if ((point - highlightCenter).magnitude <= vectorConeRadius * highlightOscUpper) {
+					//if (region.Contains (new Vector3 (block.transform.position.x,
+					//	region.center.y, block.transform.position.z))) {
+					if ((!objectMatches.Contains (block)) && (SurfaceClear (block)) && (isKnown)) {
 						objectMatches.Add (block);
 					}
-				} 
+				}
+				else {
+					if ((objectMatches.Contains (block)) && (isKnown)) {
+						objectMatches.Remove (block);
+					}
+				}
 			}
 		}
 
 
-		if (objectMatches.Count > 0) {
-			ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
-				highlightCenter.z));
-			ResolveIndicatedObject ();
-		} 
-		else {	// indicating region
-			indicatedRegion = new Region(new Vector3(highlightCenter.x-vectorConeRadius,highlightCenter.y,highlightCenter.z-vectorConeRadius),
-				new Vector3(highlightCenter.x+vectorConeRadius,highlightCenter.y,highlightCenter.z+vectorConeRadius));
-			OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+		if (indicatedObj == null) {
+			if (objectMatches.Count > 0) {
+				TurnForward ();
+				ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
+					highlightCenter.z));
+				ResolveIndicatedObject ();
+			}
+			else if (graspedObj == null) {	// indicating region
+				indicatedRegion = new Region (new Vector3 (highlightCenter.x - vectorConeRadius, highlightCenter.y, highlightCenter.z - vectorConeRadius),
+					new Vector3 (highlightCenter.x + vectorConeRadius, highlightCenter.y, highlightCenter.z + vectorConeRadius));
+				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
+			}
+		}
+		else {	// already indicated another object
+			if (objectMatches.Count > 0) {
+				if (eventManager.events.Count == 0) {
+					string themeAttr = string.Empty;
+					if (indicatedObj.GetComponent<Voxeme> () != null) {
+						themeAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					string otherAttr = string.Empty;
+					if (objectMatches[0].GetComponent<Voxeme> () != null) {
+						otherAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+					}
+
+					if (themeAttr != otherAttr) {
+						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", themeAttr));
+						TurnForward ();
+						LookAt (indicatedObj.transform.position);
+						eventConfirmation = "forget";
+					}
+				}
+			}
 		}
 	}
 
 	void TrackPointing(List<float> vector) {
+		highlightTimeoutTimer.Enabled = true;
+
 		if (eventManager.events.Count > 0) {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		// TODO: output timeout timer
+//		if ((indicatedObj == null) && (graspedObj == null)) {
+//			OutputHelper.PrintOutput (Role.Affector, "");
+//		}
+
 		Region region = null;
 
 		highlightCenter = TransformToSurface (vector);
@@ -1357,6 +2099,7 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void ResolveIndicatedObject() {
+		Debug.Log (string.Format("Object matches: {0}",objectMatches.Count));
 		if (objectMatches.Count == 1) {	// single object match
 			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 				Disambiguate (objectMatches);
@@ -1366,7 +2109,9 @@ public class JointGestureDemo : MonoBehaviour {
 				objectMatches.Clear ();
 
 				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
+					TurnForward();
 					ReachFor (indicatedObj);
+					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
 				}
 			}
 		} 
@@ -1379,14 +2124,79 @@ public class JointGestureDemo : MonoBehaviour {
 
 			}
 		}
+
+		if (suggestedActions.Count > 0) {
+			if (suggestedActions [0].Contains ("{0}")) {
+				if (indicatedObj != null) {
+					suggestedActions [0] = string.Format (suggestedActions [0], indicatedObj.name);
+					PopulateOptions (suggestedActions [0].Split ('(')[0], indicatedObj,
+						suggestedActions [0].Contains(',') ? suggestedActions [0].Split (',')[1].Replace(")","") : "");
+					//actionOptions = new List<string> (suggestedActions);
+					suggestedActions.Clear ();
+					Disambiguate (actionOptions);
+				}
+			}
+		}
+	}
+		
+	void PopulateOptions(string program, GameObject theme, string dir) {
+		switch (program) {
+		case "grasp":
+			if (graspedObj == null) {
+				PopulateGrabOptions (theme);
+			}
+			break;
+
+		case "put":
+			PopulateMoveOptions (theme, dir);
+			break;
+
+		case "slide":
+			PopulatePushOptions (theme, dir);
+			break;
+
+		default:
+			break;
+		}
 	}
 
+	void PopulateGrabOptions(GameObject theme, CertaintyMode certainty = CertaintyMode.Act) {
+		string themeAttr = string.Empty;
+		if (theme.GetComponent<Voxeme> () != null) {
+			themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		}
+
+		if (certainty == CertaintyMode.Act) {
+			if (!actionOptions.Contains (string.Format ("grasp({0})", theme.name))) {
+				actionOptions.Add (string.Format ("grasp({0})", theme.name));
+			}
+
+			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
+				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
+					string.Format ("grab the {0} block", themeAttr));
+			}
+		}
+		else if (certainty == CertaintyMode.Suggest) {
+			if (!suggestedActions.Contains (string.Format ("grasp({0})", theme.name))) {
+				suggestedActions.Add (string.Format ("grasp({0})", theme.name));
+			}
+
+			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
+				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
+					string.Format ("grab the {0} block", themeAttr));
+			}
+		}
+	}
+		
 	void Grab(bool state) {
 		if (eventManager.events.Count > 0) {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		if (state == true) {
 			if (indicatedObj != null) {
 				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
@@ -1397,14 +2207,25 @@ public class JointGestureDemo : MonoBehaviour {
 				else {
 					eventManager.InsertEvent ("", 0);
 					eventManager.InsertEvent (string.Format ("grasp({0})", indicatedObj.name), 1);
-					LookAt (indicatedObj);
+					LookForward();
 					graspedObj = indicatedObj;
 					indicatedObj = null;
 					indicatedRegion = null;
+					suggestedActions.Clear ();
+					actionOptions.Clear ();
+					eventConfirmation = "";
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("OK."));
 				}
 			} 
-			else {
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+			else if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
+				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to grab?"));
+					LookForward();
+					if (!suggestedActions.Contains ("grasp({0})")) {
+						suggestedActions.Add ("grasp({0})");
+					}
+				}
 			}
 		} 
 		else {
@@ -1436,12 +2257,466 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 	}
 
+	void HandleMoveSegment(string instruction) {
+		actionOptions.Clear ();
+		suggestedActions.Clear ();
+
+		Concept moveConcept = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
+		Concept grabConcept = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+
+		if (instruction.EndsWith ("high")) {
+			if (GetGestureContent (instruction, "grab move") == "left") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
+					//moveConcept.Certainty = (moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty;
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+
+					Suggest ("grab move left");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("left");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+
+					Suggest ("grab move right");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("right");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "front") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+
+					Suggest ("grab move front");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("front");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "back") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+
+					Suggest ("grab move back");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("back");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "left front") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
+					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+
+					Suggest ("grab move left front");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("left front");
+				}
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "right front") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
+					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+
+					Suggest ("grab move right front");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("right front");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "left back") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("left", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("back", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
+					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+
+					Suggest ("grab move left back");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("left back");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right back") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
+					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+
+					Suggest ("grab move right back");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("right back");
+				}
+			}
+			else if (GetGestureContent (instruction, "grab move") == "up") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("UP", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+
+					Suggest ("grab move up");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("up");
+				}
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "down") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("DOWN", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+
+					Suggest ("grab move down");
+				}
+				else {
+					moveConcept.Certainty = 1.0;
+
+					Move ("down");
+				}
+			}
+		} 
+		else if (instruction.EndsWith ("low")) {
+			if (GetGestureContent (instruction, "grab move") == "left") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+				}
+
+				Suggest ("grab move left");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+				}
+
+				Suggest ("grab move right");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "front") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("FORWARD", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+				}
+
+				Suggest ("grab move front");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "back") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+				}
+
+				Suggest ("grab move back");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "left front") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
+					(EpistemicCertainty (dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+				}
+
+				Suggest ("grab move left front");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "right front") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
+					(EpistemicCertainty (dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+				}
+
+				Suggest ("grab move right front");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "left back") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
+					(EpistemicCertainty (dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+				}
+
+				Suggest ("grab move left back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "right back") {
+				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
+					(EpistemicCertainty (dirConceptZ) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
+				}
+
+				Suggest ("grab move right back");
+			}
+			else if (GetGestureContent (instruction, "grab move") == "up") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("UP", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+				}
+
+				Suggest ("grab move up");
+			} 
+			else if (GetGestureContent (instruction, "grab move") == "down") {
+				Concept dirConcept = epistemicModel.state.GetConcept ("DOWN", ConceptType.PROPERTY, ConceptMode.L);
+				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
+					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
+					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
+					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
+				}
+
+				Suggest ("grab move down");
+			}
+		}
+
+		grabConcept.Certainty = 1.0;
+		epistemicModel.state.UpdateEpisim(new Concept[] {moveConcept,grabConcept}, new Relation[] {});
+	}
+
+	void PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
+		List<object> placementOptions = FindPlacementOptions (theme, dir);
+
+		if (useOrderingHeuristics) {
+			List<GameObject> objectPlacements = placementOptions.OfType<GameObject> ().ToList ();
+
+			objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
+			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
+
+			for (int i = 0; i < placementOptions.Count; i++) {
+				if (placementOptions [i] is GameObject) {
+					placementOptions [i] = objectPlacements [i];
+				}
+			}
+		}
+
+		List<Region> orthogonalRegions = new List<Region> ();
+		if (dir == "left") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "right") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "front") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+		else if (dir == "back") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+
+		string themeAttr = string.Empty;
+		if (theme.GetComponent<Voxeme> () != null) {
+			themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		}
+
+		foreach (object option in placementOptions) {
+			if (option is GameObject) {
+				GameObject obj = (option as GameObject);
+				if (theme != obj) {
+					if (SurfaceClear (obj)) {
+						string objAttr = string.Empty;
+						if (obj.GetComponent<Voxeme> () != null) {
+							objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+						}
+
+						if (certainty == CertaintyMode.Act) {
+							if (!actionOptions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+							}
+
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+									string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+							}
+						}
+						else if (certainty == CertaintyMode.Suggest) {
+							if (!suggestedActions.Contains (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								suggestedActions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
+							}
+
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},on({1}))", theme.name, obj.name))) {
+								confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
+									string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
+							}
+						}
+					}
+				}
+			}
+			else if (option is Vector3) {
+				Vector3 target = (Vector3)option;
+
+				if (certainty == CertaintyMode.Act) {
+					if (!actionOptions.Contains (string.Format ("put({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						actionOptions.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+					}
+
+					foreach (Region region in orthogonalRegions) {
+						if (region.Contains (target)) {
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
+								confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("put the {0} block in the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+							}
+						}
+					}
+				}
+				else if (certainty == CertaintyMode.Suggest) {
+					if (!suggestedActions.Contains (string.Format ("put({0},{1})", theme.name,
+						Helper.VectorToParsable (target)))) {
+						suggestedActions.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+					}
+
+					foreach (Region region in orthogonalRegions) {
+						if (region.Contains (target)) {
+							if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
+								confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("put the {0} block in the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (dir == "up") {
+			if (certainty == CertaintyMode.Act) {
+				if (!actionOptions.Contains (string.Format ("lift({0})", theme.name))) {
+					actionOptions.Add (string.Format ("lift({0})", theme.name));
+				}
+
+				if (!confirmationTexts.ContainsKey (string.Format ("lift({0})", theme.name))) {
+					confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block", themeAttr));
+				}
+			}
+			else if (certainty == CertaintyMode.Suggest) {
+				if (!suggestedActions.Contains (string.Format ("lift({0})", theme.name))) {
+					suggestedActions.Add (string.Format ("lift({0})", theme.name));
+				}
+
+				if (!confirmationTexts.ContainsKey (string.Format ("lift({0})", theme.name))) {
+					confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block", themeAttr));
+				}
+			}
+		} 
+		else if (dir == "down") {
+			if (eventConfirmation == "") {
+				Vector3 target = new Vector3 (theme.transform.position.x,
+					Helper.GetObjectWorldSize (demoSurface).max.y,
+					theme.transform.position.z);
+				
+				if (certainty == CertaintyMode.Act) {
+					if (!actionOptions.Contains (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
+						actionOptions.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+					}
+
+					if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)), string.Format ("put the {0} block down", themeAttr));
+					}
+				}
+				else if (certainty == CertaintyMode.Suggest) {
+					if (!suggestedActions.Contains (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
+						suggestedActions.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+					}
+
+					if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)))) {
+						confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
+							Helper.VectorToParsable (target)), string.Format ("put the {0} block down", themeAttr));
+					}
+				}
+			}
+		}
+	}
+
 	void Move(string dir) {
 		if (eventManager.events.Count > 0) {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
 		GameObject theme = null;
 		if (indicatedObj != null) {
 			theme = indicatedObj;
@@ -1451,479 +2726,162 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (theme != null) {
-			Bounds graspedObjBounds = Helper.GetObjectWorldSize (theme);
-			if (dir == "left") {	// going this direction
-				if (frontRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the left of the grasped block
-									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				} 
-				else if (backRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the left of the grasped block
-								    (backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				}
+			PopulateMoveOptions (theme, dir);
 
-				string themeAttr = string.Empty;
-				if (theme.GetComponent<Voxeme> () != null) {
-					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-				}
+//			if (dir == "up") {
+//				string objAttr = string.Empty;
+//				if (theme.GetComponent<Voxeme> () != null) {
+//					objAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+//				}
+//
+//				actionOptions.Add (string.Format ("lift({0})", theme.name));
+//				confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block ", objAttr));
+//			} 
+//			else if (dir == "down") {
+//				if (eventConfirmation == "") {
+//					string objAttr = string.Empty;
+//					if (theme.GetComponent<Voxeme> () != null) {
+//						objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+//					}
+//
+//					Vector3 target = new Vector3 (theme.transform.position.x,
+//						                 Helper.GetObjectWorldSize (demoSurface).max.y,
+//						                 theme.transform.position.z);
+//					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
+//						Helper.VectorToParsable (target)));
+//					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
+//						Helper.VectorToParsable (target)), string.Format ("put the {0} block down", objAttr));
+//				}
+//			}
 
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
-				}
-
-				// not moving on top of another object
-				if (frontRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front {1} part", themeAttr, dir));
-				}
-				else if (backRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back {1} part", themeAttr, dir));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+				Disambiguate (actionOptions);
+			} 
+			else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
+				if (actionOptions.Count > 1) {
 					Disambiguate (actionOptions);
-				} 
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						//TurnToAccess (target);
-						indicatedObj = null;
-						graspedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
 				} 
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (backRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					//TurnToAccess (target);
+					eventManager.InsertEvent (actionOptions [0], 1);
 					indicatedObj = null;
-					graspedObj = null;
+					//graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			} 
-			else if (dir == "right") {
-				if (frontRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the right of the grasped block
-									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
+			else {
+				eventManager.InsertEvent ("", 0);
+				eventManager.InsertEvent (actionOptions [0], 1);
+				indicatedObj = null;
+				//graspedObj = null;
+				actionOptions.Clear ();
+				objectMatches.Clear ();
+			}
+		}
+	}
+
+	void PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
+		List<object> placementOptions = FindPlacementOptions (theme, dir);
+
+		if (useOrderingHeuristics) {
+			List<GameObject> objectPlacements = placementOptions.OfType<GameObject> ().ToList ();
+
+			objectPlacements = objectPlacements.OrderBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
+
+			for (int i = 0; i < placementOptions.Count; i++) {
+				if (placementOptions [i] is GameObject) {
+					placementOptions [i] = objectPlacements [i];
+				}
+			}
+		}
+
+		List<Region> orthogonalRegions = new List<Region> ();
+		if (dir == "left") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "right") {
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+		}
+		else if (dir == "front") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+		else if (dir == "back") {
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+		}
+
+		string themeAttr = string.Empty;
+		if (theme.GetComponent<Voxeme> () != null) {
+			themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		}
+
+		foreach (object option in placementOptions) {
+			if (option is GameObject) {
+				GameObject obj = (option as GameObject);
+				if (theme != obj) {
+					if (FitsTouching (theme, obj, directionPreds [relativeDir [dir]]) &&
+					   (Helper.GetObjectWorldSize (theme).min.y >= Helper.GetObjectWorldSize (obj).min.y)) {	// must fit in target destination and be on the same surface
+						string objAttr = string.Empty;
+						if (obj.GetComponent<Voxeme> () != null) {
+							objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+						}
+
+						if (certainty == CertaintyMode.Act) {
+							if (!actionOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								actionOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							}
+
+							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
+									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+							}
+						}
+						else if (certainty == CertaintyMode.Suggest) {
+							if (!suggestedActions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								suggestedActions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							}
+						
+							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
+									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
 							}
 						}
 					}
-				} 
-				else if (backRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the right of the grasped block
-									(backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				}
-
-				string themeAttr = string.Empty;
-				if (theme.GetComponent<Voxeme> () != null) {
-					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-				}
-
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
-				}
-
-				// not moving on top of another object
-				if (frontRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's front {1} part", themeAttr, dir));
-				}
-				else if (backRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's back {1} part", themeAttr, dir));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				} 
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						//TurnToAccess (target);
-						indicatedObj = null;
-						graspedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (backRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					//TurnToAccess (target);
-					indicatedObj = null;
-					graspedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
 				}
 			} 
-			else if (dir == "front") {
-				if (leftRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the front of the grasped block
-									(leftRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
+			else if (option is Vector3) {
+				Vector3 target = (Vector3)option;
+
+				if (certainty == CertaintyMode.Act) {
+					if (!actionOptions.Contains (string.Format ("slide({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						actionOptions.Add (string.Format ("slide({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+
+						foreach (Region region in orthogonalRegions) {
+							if (region.Contains (target)) {
+								confirmationTexts.Add (string.Format ("slide({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels [region], dir));
 							}
 						}
 					}
 				} 
-				else if (rightRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the front of the grasped block
-									(rightRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
+				else if (certainty == CertaintyMode.Suggest) {
+					if (!suggestedActions.Contains (string.Format ("slide({0},{1})", theme.name,
+						    Helper.VectorToParsable (target)))) {
+						suggestedActions.Add (string.Format ("slide({0},{1})", theme.name,
+							Helper.VectorToParsable (target)));
+
+						foreach (Region region in orthogonalRegions) {
+							if (region.Contains (target)) {
+								confirmationTexts.Add (string.Format ("slide({0},{1})", theme.name, Helper.VectorToParsable (target)),
+									string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels [region], dir));
 							}
 						}
-					}
-				}
-
-				string themeAttr = string.Empty;
-				if (theme.GetComponent<Voxeme> () != null) {
-					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-				}
-
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
-				}
-
-				// not moving on top of another object
-				if (leftRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} left part", themeAttr, dir));
-				}
-				else if (rightRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} right part", themeAttr, dir));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				} 
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						//TurnToAccess (target);
-						indicatedObj = null;
-						graspedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, leftRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (rightRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					//TurnToAccess (target);
-					indicatedObj = null;
-					graspedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-				}
-			} 
-			else if (dir == "back") {
-				if (leftRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the back of the grasped block
-									(leftRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				} 
-				else if (rightRegion.Contains(theme)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != theme) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), graspedObjBounds)) &&	// if it's to the back of the grasped block
-									(rightRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				}
-
-				string themeAttr = string.Empty;
-				if (theme.GetComponent<Voxeme> () != null) {
-					themeAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-				}
-
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					Debug.Log (string.Format ("put({0},(on{1}))", theme.name, obj.name));
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("put({0},on({1}))", theme.name, obj.name));
-					confirmationTexts.Add (string.Format ("put({0},on({1}))", theme.name, obj.name),
-						string.Format ("put the {0} block on the {1} block", themeAttr, objAttr));
-				}
-
-				// not moving on top of another object
-				if (leftRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} left part", themeAttr, dir));
-				}
-				else if (rightRegion.Contains (theme)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, theme).center;
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)),
-						string.Format ("put the {0} block in the table's {1} right part", themeAttr, dir));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				} 
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						//TurnToAccess (target);
-						indicatedObj = null;
-						graspedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (rightRegion.Contains (theme)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, theme).center;
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					//TurnToAccess (target);
-					indicatedObj = null;
-					graspedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-				}
-			} 
-			else if (dir == "up") {
-				string objAttr = string.Empty;
-				if (theme.GetComponent<Voxeme> () != null) {
-					objAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-				}
-
-				actionOptions.Add (string.Format ("lift({0})", theme.name));
-				confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block ", objAttr));
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				} 
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (string.Format ("lift({0})", theme.name), 1);
-					objectMatches.Clear ();
-				}
-			} 
-			else if (dir == "down") {
-				if (eventConfirmation == "") {
-					string objAttr = string.Empty;
-					if (theme.GetComponent<Voxeme> () != null) {
-						objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					
-					Vector3 target = new Vector3 (theme.transform.position.x,
-						                Helper.GetObjectWorldSize (demoSurface).max.y,
-										theme.transform.position.z);
-					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
-						Helper.VectorToParsable (target)), string.Format ("put the {0} block down", objAttr));
-					if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-						Disambiguate (actionOptions);
-					} 
-					else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-						if (actionOptions.Count > 1) {
-							Disambiguate (actionOptions);
-						} 
-						else {
-							eventManager.InsertEvent ("", 0);
-							eventManager.InsertEvent (actionOptions [0], 1);
-							indicatedObj = null;
-							graspedObj = null;
-							actionOptions.Clear ();
-							objectMatches.Clear ();
-						}
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (new Vector3 (theme.transform.position.x,
-								Helper.GetObjectWorldSize (demoSurface).max.y,
-								theme.transform.position.z))), 1);
-						indicatedObj = null;
-						graspedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
 					}
 				}
 			}
@@ -1931,605 +2889,156 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void Push(string dir) {
-		OutputHelper.PrintOutput (Role.Affector, "");
+		if (eventManager.events.Count > 0) {
+			return;
+		}
+
+		if (eventConfirmation == "") {
+			OutputHelper.PrintOutput (Role.Affector, "");
+		}
+
+		GameObject theme = null;
 		if (indicatedObj != null) {
-			Bounds indicatedObjBounds = Helper.GetObjectWorldSize (indicatedObj);
-			if (dir == "left") {
-				if (frontRegion.Contains(indicatedObj)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != indicatedObj) && (SurfaceClear(block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), indicatedObjBounds)) &&	// if it's to the left of the grasped block
-									(frontRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				} 
-				else if (backRegion.Contains(indicatedObj)) {	// if the grasped block is in this region
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							if ((block != indicatedObj) && (SurfaceClear (block))) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), indicatedObjBounds)) &&	// if it's to the left of the grasped block
-									(backRegion.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							}
-						}
-					}
-				}
+			theme = indicatedObj;
+		}
+		else if (graspedObj != null) {
+			theme = graspedObj;
+		}
 
-				string indicatedAttr = string.Empty;
-				if (indicatedObj.GetComponent<Voxeme> () != null) {
-					indicatedAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-				}
+		if (theme != null) {
+			PopulatePushOptions (theme, dir);
 
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-					Debug.Log (string.Format ("slide({0},(left{1}))", indicatedObj.name, obj.name));
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name),
-						string.Format ("push the {0} block to the left of the {1} block", indicatedAttr, objAttr));
-				}
-
-				// not moving on top of another object
-				if (frontRegion.Contains (indicatedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the table's front {1} part", indicatedAttr, dir));
-				}
-				else if (backRegion.Contains (indicatedObj)) {	// stay in this region
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the table's back {1} part", indicatedAttr, dir));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				} 
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					} 
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						//TurnToAccess (target);
-						indicatedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (indicatedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("push({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (backRegion.Contains (graspedObj)) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("push({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					//TurnToAccess (target);
-					indicatedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-				}
-//				indicatedRegion = leftRegion;
-//				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-//					frontRegion.center.y, indicatedObj.transform.position.z))) {
-//					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-//						if (block.activeInHierarchy) {
-//							bool sideClear = true;
-//							foreach (GameObject otherBlock in blocks) {
-//								if ((QSR.QSR.Left(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-//									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-//									sideClear = false;
-//								}
-//							}
-//
-//							if ((block != indicatedObj) && (sideClear)) {
-//								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-//								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
-//									    frontRegion.center.y, block.transform.position.z)))) {
-//									if (!objectMatches.Contains (block)) {
-//										objectMatches.Add (block);
-//									}
-//								}
-//							} 
-//						}
-//					}
-//				}
-//				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-//					backRegion.center.y, indicatedObj.transform.position.z))) {
-//					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-//						if (block.activeInHierarchy) {
-//							bool sideClear = true;
-//							foreach (GameObject otherBlock in blocks) {
-//								if ((QSR.QSR.Left(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-//									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-//									sideClear = false;
-//								}
-//							}
-//
-//							if ((block != indicatedObj) && (sideClear)) {
-//								if ((QSR.QSR.Left (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-//								    (backRegion.Contains (new Vector3 (block.transform.position.x,
-//									    backRegion.center.y, block.transform.position.z)))) {
-//									if (!objectMatches.Contains (block)) {
-//										objectMatches.Add (block);
-//									}
-//								}
-//							} 
-//						}
-//					}
-//				}
-//
-//				string indAttr = string.Empty;
-//				if (indicatedObj.GetComponent<Voxeme> () != null) {
-//					indAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-//				}
-//
-//				Vector3 target = Vector3.zero;
-//
-//				foreach (GameObject obj in objectMatches) {
-//					string objAttr = string.Empty;
-//					if (obj.GetComponent<Voxeme> () != null) {
-//						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-//					}
-//					target = obj.transform.position;
-//					actionOptions.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name));
-//					confirmationTexts.Add (string.Format ("slide({0},left({1}))", indicatedObj.name, obj.name),
-//						string.Format ("push the {0} block to the right of the {1} block", indAttr, objAttr));
-//				}
-//
-//				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-//					frontRegion.center.y, indicatedObj.transform.position.z))) {
-//					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
-//					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-//						Helper.VectorToParsable (target)));
-//					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-//						string.Format ("push the {0} block to the front left of the table", indAttr));
-//				}
-//				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-//					backRegion.center.y, indicatedObj.transform.position.z))) {
-//					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-//					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-//						Helper.VectorToParsable (target)));
-//					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-//						string.Format ("push the {0} block to the back left of the table", indAttr));
-//				}
-//
-//				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-//					Disambiguate (actionOptions);
-//				}
-//				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-//					if (actionOptions.Count > 1) {
-//						Disambiguate (actionOptions);
-//					}
-//					else {
-//						eventManager.InsertEvent ("", 0);
-//						eventManager.InsertEvent (actionOptions [0], 1);
-//						TurnToAccess (target);
-//						indicatedObj = null;
-//						actionOptions.Clear ();
-//						objectMatches.Clear ();
-//					}
-//				}
-//				else {
-//					eventManager.InsertEvent ("", 0);
-//					if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-//						frontRegion.center.y, indicatedObj.transform.position.z))) {
-//						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-//						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-//							Helper.VectorToParsable (target)), 1);
-//					}
-//					else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-//						backRegion.center.y, indicatedObj.transform.position.z))) {
-//						target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, backRegion }, indicatedObj).center;
-//						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-//							Helper.VectorToParsable (target)), 1);
-//					}
-//					TurnToAccess (target);
-//					indicatedObj = null;
-//					actionOptions.Clear ();
-//					objectMatches.Clear ();
-//				}
+			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+				Disambiguate (actionOptions);
 			}
-			else if (dir == "right") {
-				indicatedRegion = rightRegion;
-				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					frontRegion.center.y, indicatedObj.transform.position.z))) {
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Right(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (frontRegion.Contains (new Vector3 (block.transform.position.x,
-									    frontRegion.center.y, block.transform.position.z)))) {
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							} 
-						}
-					}
-				}
-				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					backRegion.center.y, indicatedObj.transform.position.z))) {
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Right(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.Right (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (backRegion.Contains (new Vector3 (block.transform.position.x,
-									    backRegion.center.y, block.transform.position.z)))) {
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							} 
-						}
-					}
-				}
-
-				string indAttr = string.Empty;
-				if (indicatedObj.GetComponent<Voxeme> () != null) {
-					indAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-				}
-
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-					}
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("slide({0},right({1}))", indicatedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("slide({0},right({1}))", indicatedObj.name, obj.name),
-						string.Format ("push the {0} block to the left of the {1} block", indAttr, objAttr));
-				}
-
-				if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					frontRegion.center.y, indicatedObj.transform.position.z))) {
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the front right of the table", indAttr));
-				}
-				else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					backRegion.center.y, indicatedObj.transform.position.z))) {
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the back right of the table", indAttr));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
+			else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
+				if (actionOptions.Count > 1) {
 					Disambiguate (actionOptions);
-				}
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					}
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
-						indicatedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
 				}
 				else {
 					eventManager.InsertEvent ("", 0);
-					if (frontRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						frontRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (backRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						backRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, backRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					TurnToAccess (target);
+					eventManager.InsertEvent (actionOptions [0], 1);
 					indicatedObj = null;
+					graspedObj = null;
 					actionOptions.Clear ();
 					objectMatches.Clear ();
 				}
 			}
-			else if (dir == "front") {
-				if (leftRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					leftRegion.center.y, indicatedObj.transform.position.z))) {
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.InFront(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (leftRegion.Contains (new Vector3 (block.transform.position.x,
-									    leftRegion.center.y, block.transform.position.z)))) {
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							} 
-						}
-					}
-				}
-				else if (rightRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					rightRegion.center.y, indicatedObj.transform.position.z))) {
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.InFront(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.InFront (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (rightRegion.Contains (new Vector3 (block.transform.position.x,
-									    rightRegion.center.y, block.transform.position.z)))) {
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							} 
-						}
-					}
-				}
-
-				string indAttr = string.Empty;
-				if (indicatedObj.GetComponent<Voxeme> () != null) {
-					indAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-				}
-
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-					}
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("slide({0},behind({1}))", indicatedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("slide({0},behind({1}))", indicatedObj.name, obj.name),
-						string.Format ("push the {0} block in front of the {1} block", indAttr, objAttr));
-				}
-
-				if (leftRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					leftRegion.center.y, indicatedObj.transform.position.z))) {
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ leftRegion, frontRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the front left of the table", indAttr));
-				}
-				else if (rightRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					rightRegion.center.y, indicatedObj.transform.position.z))) {
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ rightRegion, frontRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the front right of the table", indAttr));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				}
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					}
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
-						indicatedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				}
-				else {
-					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						leftRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (rightRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						rightRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ frontRegion, rightRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					TurnToAccess (target);
-					indicatedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-				}
+			else {
+				eventManager.InsertEvent ("", 0);
+				eventManager.InsertEvent (actionOptions [0], 1);
+				indicatedObj = null;
+				graspedObj = null;
+				actionOptions.Clear ();
+				objectMatches.Clear ();
 			}
-			else if (dir == "back") {
-				if (leftRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					leftRegion.center.y, indicatedObj.transform.position.z))) {
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Behind(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (leftRegion.Contains (new Vector3 (block.transform.position.x,
-									    leftRegion.center.y, block.transform.position.z)))) {
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							} 
-						}
+		}
+		else {
+			if (objectConfirmation == null) {
+				if (eventManager.events.Count == 0) {
+					OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to push?"));
+					LookForward();
+					if (!suggestedActions.Contains("slide({0}"+string.Format(",{0})",dir))) {
+						suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
 					}
-				}
-				else if (rightRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					rightRegion.center.y, indicatedObj.transform.position.z))) {
-					foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
-						if (block.activeInHierarchy) {
-							bool sideClear = true;
-							foreach (GameObject otherBlock in blocks) {
-								if ((QSR.QSR.Behind(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock))) &&
-									(RCC8.EC(Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (otherBlock)))) {
-									sideClear = false;
-								}
-							}
-
-							if ((block != indicatedObj) && (sideClear)) {
-								if ((QSR.QSR.Behind (Helper.GetObjectWorldSize (block), Helper.GetObjectWorldSize (indicatedObj))) &&
-								    (rightRegion.Contains (new Vector3 (block.transform.position.x,
-									    rightRegion.center.y, block.transform.position.z)))) {
-									if (!objectMatches.Contains (block)) {
-										objectMatches.Add (block);
-									}
-								}
-							} 
-						}
-					}
-				}
-
-				string indAttr = string.Empty;
-				if (indicatedObj.GetComponent<Voxeme> () != null) {
-					indAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-				}
-
-				Vector3 target = Vector3.zero;
-
-				foreach (GameObject obj in objectMatches) {
-					string objAttr = string.Empty;
-					if (obj.GetComponent<Voxeme> () != null) {
-						objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;	// just grab the first one for now
-					}
-					target = obj.transform.position;
-					actionOptions.Add (string.Format ("slide({0},in_front({1}))", indicatedObj.name, obj.name));
-					confirmationTexts.Add (string.Format ("slide({0},in_front({1}))", indicatedObj.name, obj.name),
-						string.Format ("push the {0} block behind the {1} block", indAttr, objAttr));
-				}
-
-				if (leftRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					leftRegion.center.y, indicatedObj.transform.position.z))) {
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the back left of the table", indAttr));
-				}
-				else if (rightRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-					rightRegion.center.y, indicatedObj.transform.position.z))) {
-					target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, indicatedObj).center;
-					actionOptions.Add (string.Format ("slide({0},{1})", indicatedObj.name,
-						Helper.VectorToParsable (target)));
-					confirmationTexts.Add (string.Format ("slide({0},{1})", indicatedObj.name, Helper.VectorToParsable (target)),
-						string.Format ("push the {0} block to the back right of the table", indAttr));
-				}
-
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					Disambiguate (actionOptions);
-				}
-				else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-					if (actionOptions.Count > 1) {
-						Disambiguate (actionOptions);
-					}
-					else {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (actionOptions [0], 1);
-						TurnToAccess (target);
-						indicatedObj = null;
-						actionOptions.Clear ();
-						objectMatches.Clear ();
-					}
-				}
-				else {
-					eventManager.InsertEvent ("", 0);
-					if (leftRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						leftRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, leftRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					else if (rightRegion.Contains (new Vector3 (indicatedObj.transform.position.x,
-						rightRegion.center.y, indicatedObj.transform.position.z))) {
-						target = Helper.FindClearRegion (demoSurface, new Region[]{ backRegion, rightRegion }, indicatedObj).center;
-						eventManager.InsertEvent (string.Format ("slide({0},{1})", indicatedObj.name,
-							Helper.VectorToParsable (target)), 1);
-					}
-					TurnToAccess (target);
-					indicatedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
 				}
 			}
 		}
 	}
 
+	List<object> FindPlacementOptions(GameObject theme, string dir) {
+		// returns objects theme can be placed relative to, or region
+
+		// populate regions and get QSR function label
+		Region thisRegion = null;
+		List<Region> orthogonalRegions = new List<Region> ();
+		string qsr = "";
+		if (dir == "left") {
+			thisRegion = (leftRegion);
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+			qsr = "Left";
+		}
+		else if (dir == "right") {
+			thisRegion = (rightRegion);
+			orthogonalRegions.Add (frontRegion);
+			orthogonalRegions.Add (backRegion);
+			qsr = "Right";
+		}
+		else if (dir == "front") {
+			thisRegion = (frontRegion);
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+			qsr = "InFront";
+		}
+		else if (dir == "back") {
+			thisRegion = (backRegion);
+			orthogonalRegions.Add (leftRegion);
+			orthogonalRegions.Add (rightRegion);
+			qsr = "Behind";
+		}
+
+		//object qsrClassInstance = Activator.CreateInstance (QSR.QSR);
+		List<object> placementOptions = new List<object>();
+		Bounds themeBounds = Helper.GetObjectWorldSize (theme);
+		foreach (Region region in orthogonalRegions) {
+			if (region.Contains(theme)) {
+				foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
+					if (block.activeInHierarchy) {
+						if (block != theme) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
+							if ((bool)(Type.GetType("QSR.QSR").GetMethod(qsr).Invoke(null, new object[]{ Helper.GetObjectWorldSize (block), themeBounds })) &&	// if it's to the left of the grasped block
+								(region.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
+								if (!objectMatches.Contains (block)) {
+									objectMatches.Add (block);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		Vector3 target = Vector3.zero;
+
+		foreach (GameObject obj in objectMatches) {
+			target = obj.transform.position;
+			placementOptions.Add (obj);
+		}
+
+		// not moving on top of another object
+		foreach (Region region in orthogonalRegions) {
+			if (region.Contains (theme)) {	// stay in this region
+				target = Helper.FindClearRegion (demoSurface, new Region[]{ thisRegion, region }, theme).center;
+				placementOptions.Add (target);
+			}
+		}
+
+		return placementOptions;
+	}
+
 	void MoveToPerform() {
-//		Diana.GetComponent<IKControl> ().leftHandObj.position = leftTargetDefault;
-//		Diana.GetComponent<IKControl> ().rightHandObj.position = rightTargetDefault;
-//		Diana.GetComponent<IKControl> ().lookObj.position = headTargetDefault;
-		//Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).target.position = leftTargetDefault;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
-		//Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).target.position = rightTargetDefault;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
-		Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
+		bool leftGrasping = false;
+		bool rightGrasping = false;
+
+		if (graspedObj != null) {
+			if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+				leftGrasping = true;
+			}
+			else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+				rightGrasping = true;
+			}
+		}
+
+		if (!leftGrasping) {
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
+		}
+
+		if (!rightGrasping) {
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
+		}
+			
 		LookForward ();
 	}
 
@@ -2537,7 +3046,12 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 0.0f;
+	}
 
+	void AllowHeadMotion() {
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
 	}
 
 	void LookAt(GameObject obj) {
@@ -2546,6 +3060,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = obj.transform.position;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 	}
 
 	void LookAt(Vector3 point) {
@@ -2553,6 +3068,7 @@ public class JointGestureDemo : MonoBehaviour {
 		Diana.GetComponent<LookAtIK> ().solver.target.position = target;
 		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 	}
 
 	void TurnToward(GameObject obj) {
@@ -2619,9 +3135,9 @@ public class JointGestureDemo : MonoBehaviour {
 
 		}
 		else if (rightRegion.Contains(new Vector3(coord.x,
-			leftRegion.center.y,coord.z))) {
+			rightRegion.center.y,coord.z))) {
 			ikControl.leftHandObj.transform.position = coord+offset;
-			InteractionHelper.SetRightHandTarget (Diana, ikControl.leftHandObj);
+			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
 		LookForward ();
@@ -2632,6 +3148,8 @@ public class JointGestureDemo : MonoBehaviour {
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
 //		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 //		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+
+		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
 
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
@@ -2646,7 +3164,7 @@ public class JointGestureDemo : MonoBehaviour {
 			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
-		LookAt (obj);
+		//LookAt (obj);
 	}
 
 	Vector3 TransformToSurface(List<float> vector) {
@@ -2695,23 +3213,132 @@ public class JointGestureDemo : MonoBehaviour {
 		return surfaceClear;
 	}
 
+	bool FitsTouching (GameObject theme, GameObject obj, string dir) { 
+		bool fits = true;
+
+		Bounds themeBounds = Helper.GetObjectWorldSize (theme);
+		Bounds objBounds = Helper.GetObjectWorldSize (obj);
+
+		foreach (GameObject test in blocks) {
+			if ((test != theme) && (test != obj)) {
+				if (dir == "left") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.min.x - themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
+						themeBounds.size);
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+				else if (dir == "right") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.max.x + themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
+						themeBounds.size);
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+				else if (dir == "in_front") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.center.x, objBounds.center.y, objBounds.min.z - themeBounds.extents.z),
+						themeBounds.size);
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+				else if (dir == "behind") {
+					Bounds projectedBounds = new Bounds (
+						new Vector3 (objBounds.center.x, objBounds.center.y, objBounds.max.z + themeBounds.extents.z),
+						themeBounds.size);
+					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize (test)) && 
+						!RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize (test))) {
+						fits = false;
+					}
+				}
+			}
+		}
+
+		return fits;
+	}
+
 	public void StorePose() {
-		Debug.Log (string.Format("Storing pose {0} {1} {2}",
-			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
-		leftTargetStored = ikControl.leftHandObj.transform.position;
-		rightTargetStored = ikControl.rightHandObj.transform.position;
+//		Debug.Log (string.Format("Storing pose {0} {1} {2}",
+//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+		bool leftGrasping = false;
+		bool rightGrasping = false;
+
+		if (graspedObj != null) {
+			if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+				leftGrasping = true;
+			}
+			else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+				rightGrasping = true;
+			}
+		}
+
+		if (!leftGrasping) {
+			leftTargetStored = ikControl.leftHandObj.transform.position;
+		}
+		else {
+			leftTargetStored = new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue);
+		}
+
+		if (!rightGrasping) {
+			rightTargetStored = ikControl.rightHandObj.transform.position;
+		}
+		else {
+			rightTargetStored = new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue);
+		}
+
 		headTargetStored = ikControl.lookObj.transform.position;
 	}
 
 	public void ReturnToPose() {
-		ikControl.leftHandObj.transform.position = leftTargetStored;
-		ikControl.rightHandObj.transform.position = rightTargetStored;
-		ikControl.lookObj.transform.position = headTargetStored;
-		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-		InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
-		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
-			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+		bool animPlaying = false;
+		for (int i = 0; i < Diana.GetComponent<Animator> ().layerCount; i++) {
+			if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo(i)[0].clip != null) {
+				animPlaying = true;
+			}
+		}
+
+//		if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo() != null) {
+//			animPlaying = true;
+//		}
+
+		if (!animPlaying) {
+			if (leftTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
+				ikControl.leftHandObj.transform.position = leftTargetStored;
+				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+			}
+
+			if (rightTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
+				ikControl.rightHandObj.transform.position = rightTargetStored;
+				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+			}
+
+			ikControl.lookObj.transform.position = headTargetStored;
+			InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
+	//		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
+	//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+		}
+	}
+		
+	double EpistemicCertainty (Concept concept) {
+		double certainty = concept.Certainty;
+
+		foreach (Concept related in concept.Related) {
+			if (related.Certainty > certainty) {
+				certainty = related.Certainty;
+			}
+		}
+
+		return certainty;
+	}
+
+	bool CanPrompt() {
+		return ((eventManager.events.Count == 0) && (suggestedActions.Count == 0));
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {
@@ -2722,6 +3349,8 @@ public class JointGestureDemo : MonoBehaviour {
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
+		LookForward();
+
 		if (sessionCounter >= 1) {
 			if (eventManager.events.Count == 0) {
 				OutputHelper.PrintOutput (Role.Affector, "Hey, where'd you go?");
@@ -2732,5 +3361,20 @@ public class JointGestureDemo : MonoBehaviour {
 				OutputHelper.PrintOutput (Role.Affector, "Anyone there?");
 			}
 		}
+	}
+
+	void DisableHighlight(object sender, ElapsedEventArgs e) {
+		highlightTimeoutTimer.Enabled = false;
+		highlightTimeoutTimer.Interval = highlightTimeoutTime;
+
+		disableHighlight = true;
+	}
+
+	void OnDestroy() {
+		logger.CloseLog ();
+	}
+
+	void OnApplicationQuit() {
+		logger.CloseLog ();
 	}
 }

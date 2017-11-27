@@ -10,19 +10,29 @@
  *        The hand direction is specified either as the local X-axis direction, or specified
  *        manually with localDirection. (For Diana, this needs to be overriden with the default
  *        localDirection.)
- */  
+ *        
+ *        This script operates on a single InteractionTarget. To support two hands, add this
+ *        component twice on the InteractionObject, one script with references to the left hand
+ *        and shoulder, and the other with references to the right hand and shoulder.
+ */
 
 using RootMotion.FinalIK;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FixHandRotation : MonoBehaviour {
-    [Tooltip("Required. Reference to the FinalIK interaction system.")]
+public class FixHandRotation : MonoBehaviour
+{
+    [Tooltip("Required. Reference to the FinalIK interaction system (the Avatar).")]
     public InteractionSystem interactionSystem;
 
-    [Tooltip("Required. Reference to the avatar's shoulder joint.")]
+    [Tooltip("Required. Reference to the avatar's shoulder joint. Set this to the left shoulder for the left hand, and the right shoulder for the right hand.")]
     public GameObject rootJoint;
+    
+    public FullBodyBipedEffector effectorType = FullBodyBipedEffector.LeftHand;
+
+    [Tooltip("(Optional) Set this to override the interaction target for either the left or right hand.")]
+    public InteractionTarget handTarget; // Child InteractionTarget representing the desired hand pose
 
     [Tooltip("If set to true, will use the specified local direction vector instead of (transform.right).")]
     public bool overrideDirection;
@@ -31,26 +41,41 @@ public class FixHandRotation : MonoBehaviour {
     public Vector3 localDirection = new Vector3(0.8660254f, 0f, 0.5f); // Set to default for hand
 
     private InteractionObject interactionObject; // FinalIK InteractionObject component for this object
-    private InteractionTarget handTarget; // Child InteractionTarget representing the desired hand pose
-    private FullBodyBipedEffector effectorType; // Effector type from hand target (could be left or right hand)
+    //private FullBodyBipedEffector effectorType; // Effector type from hand target
 
     private bool needObjectRotationReset; // When set to true, will reset the object rotation once released from grasp
     private Vector3 initialObjectRotation; // Cached rotation from before interaction
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         // Get FinalIK components
         interactionObject = GetComponent<InteractionObject>();
-        handTarget = GetComponentInChildren<InteractionTarget>();
-        if (handTarget)
+        //handTarget = GetComponentInChildren<InteractionTarget>();
+
+        if (!handTarget)
         {
+            // Get the left or right hand
+            foreach (var target in GetComponentsInChildren<InteractionTarget>())
+            {
+                if (target.effectorType == effectorType)
+                {
+                    handTarget = target;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Get the type from the selected target
             effectorType = handTarget.effectorType;
         }
     }
-	
-	// Update is called once per frame
-	void Update () {
-		if (handTarget)
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (handTarget)
         {
             // Calculate rotation needed to keep the hand natural
             Vector3 handDirection = GetHandDirection().normalized;
@@ -83,7 +108,7 @@ public class FixHandRotation : MonoBehaviour {
                 handTarget.transform.RotateAround(transform.position, Vector3.up, delta);
             }
         }
-	}
+    }
 
     /// <summary>
     /// Returns the direction vector of the hand. By default, uses transform.right unless a local direction is specified.

@@ -75,6 +75,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	void ReceivedGesture(object sender, EventArgs e) {
 		string msg = ((GestureEventArgs)e).Content;
 		if (!msg.StartsWith ("P")) {
+			Debug.Log (msg);
 			inputs.Add (string.Format ("{0} {1}", msg.Split (';') [0], msg.Split (';') [1]));
 		}
 		scrollPosition.y = Mathf.Infinity;	// scroll to bottom

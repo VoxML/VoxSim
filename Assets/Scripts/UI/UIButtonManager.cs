@@ -18,6 +18,8 @@ public class UIButtonEventArgs : EventArgs {
 
 public class UIButtonManager : MonoBehaviour {
 
+	public Rect windowPort;
+
 	public Dictionary<int, UIButton> buttonManager = new Dictionary<int, UIButton>();
 
 	public event EventHandler NewUIButton;
@@ -30,9 +32,12 @@ public class UIButtonManager : MonoBehaviour {
 		}
 	}
 
+	void Awake () {
+		windowPort = new Rect (0, 0, Screen.width, Screen.height);
+	}
+
 	// Use this for initialization
 	void Start () {
-
 	}
 
 	// Update is called once per frame

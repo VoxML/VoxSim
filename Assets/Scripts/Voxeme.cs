@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 using Agent;
 using Global;
 using MajorAxes;
+using RootMotion.FinalIK;
 using Vox;
 
 public class Voxeme : MonoBehaviour {
@@ -27,6 +29,8 @@ public class Voxeme : MonoBehaviour {
 	public Dictionary<GameObject,Vector3> rotationalDisplacement = new Dictionary<GameObject, Vector3> ();
 
 	Rigging rigging;
+
+	public List<InteractionTarget> interactionTargets = new List<InteractionTarget> ();
 
 	public Queue<Vector3> interTargetPositions = new Queue<Vector3> ();
 	public Vector3 targetPosition;

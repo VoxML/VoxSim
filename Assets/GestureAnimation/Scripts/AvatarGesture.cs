@@ -65,9 +65,6 @@ public class AvatarGesture {
     public static AvatarGesture RARM_CARRY_BACK   = new AvatarGesture("RARM_CARRY_BACK",   7) { BodyPart = Body.RightArm, Direction = Orientation.Back  };
     public static AvatarGesture RARM_CARRY_LEFT   = new AvatarGesture("RARM_CARRY_LEFT",   8) { BodyPart = Body.RightArm, Direction = Orientation.Left  };
     public static AvatarGesture RARM_CARRY_RIGHT  = new AvatarGesture("RARM_CARRY_RIGHT",  9) { BodyPart = Body.RightArm, Direction = Orientation.Right };
-    public static AvatarGesture RARM_CARRY_UP     = new AvatarGesture("RARM_CARRY_UP",    19) { BodyPart = Body.RightArm, Direction = Orientation.Up    };
-    public static AvatarGesture RARM_CARRY_DOWN   = new AvatarGesture("RARM_CARRY_DOWN",  20) { BodyPart = Body.RightArm, Direction = Orientation.Down  };
-    public static AvatarGesture RARM_CARRY_STILL  = new AvatarGesture("RARM_CARRY_STILL", 21) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
 
     // Point
     public static AvatarGesture RARM_POINT_FRONT  = new AvatarGesture("RARM_POINT_FRONT", 10) { BodyPart = Body.RightArm, Direction = Orientation.Front };
@@ -83,6 +80,14 @@ public class AvatarGesture {
     // Thumbs
     public static AvatarGesture RARM_THUMBS_UP    = new AvatarGesture("RARM_THUMBS_UP",   17) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
     public static AvatarGesture RARM_THUMBS_DOWN  = new AvatarGesture("RARM_THUMBS_DOWN", 18) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+
+    // Carry (updated)
+    public static AvatarGesture RARM_CARRY_UP     = new AvatarGesture("RARM_CARRY_UP",    19) { BodyPart = Body.RightArm, Direction = Orientation.Up    };
+    public static AvatarGesture RARM_CARRY_DOWN   = new AvatarGesture("RARM_CARRY_DOWN",  20) { BodyPart = Body.RightArm, Direction = Orientation.Down  };
+    public static AvatarGesture RARM_CARRY_STILL  = new AvatarGesture("RARM_CARRY_STILL", 21) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+
+    // Push (updated)
+    public static AvatarGesture RARM_PUSH_RIGHT   = new AvatarGesture("RARM_PUSH_RIGHT",  22) { BodyPart = Body.RightArm, Direction = Orientation.Right };
 
     //
     //  Left arm gestures
@@ -103,9 +108,6 @@ public class AvatarGesture {
     public static AvatarGesture LARM_CARRY_BACK   = new AvatarGesture("LARM_CARRY_BACK",   7) { BodyPart = Body.LeftArm, Direction = Orientation.Back  };
     public static AvatarGesture LARM_CARRY_LEFT   = new AvatarGesture("LARM_CARRY_LEFT",   8) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
     public static AvatarGesture LARM_CARRY_RIGHT  = new AvatarGesture("LARM_CARRY_RIGHT",  9) { BodyPart = Body.LeftArm, Direction = Orientation.Right };
-    public static AvatarGesture LARM_CARRY_UP     = new AvatarGesture("LARM_CARRY_UP",    19) { BodyPart = Body.LeftArm, Direction = Orientation.Up    };
-    public static AvatarGesture LARM_CARRY_DOWN   = new AvatarGesture("LARM_CARRY_DOWN",  20) { BodyPart = Body.LeftArm, Direction = Orientation.Down  };
-    public static AvatarGesture LARM_CARRY_STILL  = new AvatarGesture("LARM_CARRY_STILL", 21) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
 
     // Point
     public static AvatarGesture LARM_POINT_FRONT  = new AvatarGesture("LARM_POINT_FRONT", 10) { BodyPart = Body.LeftArm, Direction = Orientation.Front };
@@ -121,6 +123,14 @@ public class AvatarGesture {
     // Thumbs
     public static AvatarGesture LARM_THUMBS_UP    = new AvatarGesture("LARM_THUMBS_UP",   17) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
     public static AvatarGesture LARM_THUMBS_DOWN  = new AvatarGesture("LARM_THUMBS_DOWN", 18) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
+
+    // Carry (updated)
+    public static AvatarGesture LARM_CARRY_UP     = new AvatarGesture("LARM_CARRY_UP",    19) { BodyPart = Body.LeftArm, Direction = Orientation.Up    };
+    public static AvatarGesture LARM_CARRY_DOWN   = new AvatarGesture("LARM_CARRY_DOWN",  20) { BodyPart = Body.LeftArm, Direction = Orientation.Down  };
+    public static AvatarGesture LARM_CARRY_STILL  = new AvatarGesture("LARM_CARRY_STILL", 21) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
+
+    // Push (updated)
+    public static AvatarGesture LARM_PUSH_LEFT    = new AvatarGesture("LARM_PUSH_LEFT",   22) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
 
     //
     //  Head gestures
