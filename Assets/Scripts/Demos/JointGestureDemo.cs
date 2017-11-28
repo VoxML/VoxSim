@@ -985,6 +985,10 @@ public class JointGestureDemo : MonoBehaviour {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
 						objectConfirmation = objVoxemes [0].gameObject;
 						LookAt(objectConfirmation);
+
+						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 					}
 				}
 			}
@@ -1043,6 +1047,10 @@ public class JointGestureDemo : MonoBehaviour {
 							ReachFor (objVoxemes [0].gameObject);
 							objectConfirmation = objVoxemes [0].gameObject;
 							LookAt (objectConfirmation);
+
+							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 						}
 					}
 				}
@@ -1669,7 +1677,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 	void IndexByColor(string color) {
 		if (eventManager.events.Count == 0) {
-			if (indicatedObj == null) {
+			if ((indicatedObj == null) && (graspedObj == null)) {
 				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
 					foreach (GameObject block in blocks) {
 						bool isKnown = true;
@@ -1743,7 +1751,7 @@ public class JointGestureDemo : MonoBehaviour {
 						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 					}
 
-					if (color != attr) {
+					if (color.ToLower() != attr) {
 						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", attr));
 						TurnForward ();
 						LookAt (indicatedObj.transform.position);
@@ -2002,7 +2010,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 
-		if (indicatedObj == null) {
+		if ((indicatedObj == null) && (graspedObj == null)) {
 			if (objectMatches.Count > 0) {
 				TurnForward ();
 				ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
