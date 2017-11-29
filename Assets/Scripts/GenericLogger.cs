@@ -122,7 +122,11 @@ public class GenericLogger : MonoBehaviour {
 //			return;
 //		}
 
-		logFile.Close ();
+		try {
+			logFile.Close ();
+		}
+		catch (Exception e) {
+		}
 	}
 
 	void LogEventReceived(object sender, EventArgs e) {

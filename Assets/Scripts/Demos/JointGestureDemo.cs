@@ -306,6 +306,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 		if (disableHighlight) {
 			regionHighlight.GetComponent<Renderer> ().enabled = false;
+			regionHighlight.transform.position = Vector3.zero;
 			disableHighlight = false;
 		}
 
@@ -625,19 +626,25 @@ public class JointGestureDemo : MonoBehaviour {
 					if ((graspedObj == null) && (eventConfirmation == "")) {
 						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
 							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-							Debug.Log (EpistemicCertainty (conceptG));
+							conceptL = epistemicModel.state.GetConcept("GRAB", ConceptType.ACTION, ConceptMode.L);
+							relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+
 							if (EpistemicCertainty (conceptG) < 0.5) {
 								conceptG.Certainty = 0.5;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
 
 								Suggest ("grab");
 							}
 							else {
 								conceptG.Certainty = 1.0;
-								epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+
+								if (conceptL.Certainty > 0.0) {
+									relation.Certainty = 1.0;
+								}
 
 								Grab (true);
 							}
+
+							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { relation });
 						}
 					}
 					else {
@@ -982,13 +989,13 @@ public class JointGestureDemo : MonoBehaviour {
 					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
 
 					if (eventManager.events.Count == 0) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+						RespondAndUpdate(string.Format ("The {0} block?", attribute));
 						objectConfirmation = objVoxemes [0].gameObject;
 						LookAt(objectConfirmation);
 
-						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
+//						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+//						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+//						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 					}
 				}
 			}
@@ -998,7 +1005,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
+					RespondAndUpdate(string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
 					eventConfirmation = actionOptions [0];
 				}
 			}
@@ -1043,14 +1050,14 @@ public class JointGestureDemo : MonoBehaviour {
 
 					if (eventManager.events.Count == 0) {
 						if (!duplicateNominal) {
-							OutputHelper.PrintOutput (Role.Affector, string.Format ("The {0} block?", attribute));
+							RespondAndUpdate(string.Format ("The {0} block?", attribute));
 							ReachFor (objVoxemes [0].gameObject);
 							objectConfirmation = objVoxemes [0].gameObject;
 							LookAt (objectConfirmation);
 
-							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
+//							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+//							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+//							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 						}
 					}
 				}
@@ -1063,7 +1070,7 @@ public class JointGestureDemo : MonoBehaviour {
 					LookForward();
 
 					if (confirmationTexts.ContainsKey (actionOptions [0])) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
+						RespondAndUpdate(string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
 						eventConfirmation = actionOptions [0];
 					}
 					else {
@@ -1106,7 +1113,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 					if (eventManager.events.Count == 0) {
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move something this way?"));
+						RespondAndUpdate("Do you want me to move something this way?");
 						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
 					}
@@ -1193,7 +1200,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 					if (eventManager.events.Count == 0) {
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
+						RespondAndUpdate("Do you want me to move this this way?");
 						MoveToPerform ();
 						gestureController.PerformGesture (performGesture);
 						PopulateMoveOptions (graspedObj, dir, CertaintyMode.Suggest);
@@ -1222,7 +1229,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to move this this way?"));
+					RespondAndUpdate("Do you want me to move this this way?");
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
 					PopulateMoveOptions (indicatedObj, dir, CertaintyMode.Suggest);
@@ -1234,7 +1241,7 @@ public class JointGestureDemo : MonoBehaviour {
 				if (graspedObj == null) {	// not grasping anything
 					if (eventManager.events.Count == 0) {
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Do you want me to grab something?"));
+						RespondAndUpdate("Do you want me to grab something?");
 						MoveToPerform ();
 						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 						suggestedActions.Add("grasp({0})");
@@ -1247,7 +1254,7 @@ public class JointGestureDemo : MonoBehaviour {
 			else {	// indicating something
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to grab this?"));
+					RespondAndUpdate("Are you asking me to grab this?");
 					MoveToPerform ();
 					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
 					PopulateGrabOptions (indicatedObj, CertaintyMode.Suggest);
@@ -1272,7 +1279,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push something this way?"));
+					RespondAndUpdate("Are you asking me to push something this way?");
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
 					suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
@@ -1342,7 +1349,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("Are you asking me to push this this way?"));
+					RespondAndUpdate("Are you asking me to push this this way?");
 					MoveToPerform ();
 					gestureController.PerformGesture (performGesture);
 					PopulatePushOptions (theme, dir, CertaintyMode.Suggest);
@@ -1367,7 +1374,7 @@ public class JointGestureDemo : MonoBehaviour {
 			performGesture = AvatarGesture.LARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
+				RespondAndUpdate("It looks like you're pointing to something.");
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
@@ -1390,14 +1397,14 @@ public class JointGestureDemo : MonoBehaviour {
 			performGesture = AvatarGesture.RARM_POINT_FRONT;
 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("It looks like you're pointing to something."));
+				RespondAndUpdate("It looks like you're pointing to something.");
 				MoveToPerform ();
 				gestureController.PerformGesture (performGesture);
 			}
 		}
 		else if (gesture.StartsWith("posack")) {
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Yes?"));
+				RespondAndUpdate("Yes?");
 				MoveToPerform ();
 				AllowHeadMotion ();
 
@@ -1417,7 +1424,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 		else if (gesture.StartsWith("negack")) { 
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("No?"));
+				RespondAndUpdate("No?");
 				MoveToPerform ();
 				AllowHeadMotion ();
 
@@ -1444,7 +1451,7 @@ public class JointGestureDemo : MonoBehaviour {
 			if (eventConfirmation == "forget") {	// forget about previously indicated block? no
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 					eventConfirmation = "";
 					if (indicatedObj != null) {
 						ReachFor (indicatedObj);
@@ -1453,7 +1460,7 @@ public class JointGestureDemo : MonoBehaviour {
 			} 
 			else if (eventConfirmation == "negack") {	// no? no 
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 					indicatedObj = null;
 					eventConfirmation = "";
 
@@ -1511,7 +1518,7 @@ public class JointGestureDemo : MonoBehaviour {
 						indicatedObj = null;
 						objectMatches.Clear ();
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, "OK.");
+						RespondAndUpdate("OK.");
 						//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 					}
 				}
@@ -1537,7 +1544,7 @@ public class JointGestureDemo : MonoBehaviour {
 					if (eventManager.events.Count == 0) {
 						indicatedObj = null;
 						indicatedRegion = null;
-						OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+						RespondAndUpdate("Sorry, I don't know what you mean.");
 					}
 				}
 			}
@@ -1546,7 +1553,7 @@ public class JointGestureDemo : MonoBehaviour {
 
 				if (suggestedActions.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 				}
 
 				//				eventConfirmation = "";
@@ -1558,7 +1565,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 			else if (indicatedObj != null) {
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 					eventConfirmation = "";
 					indicatedObj = null;
 					TurnForward ();
@@ -1569,7 +1576,7 @@ public class JointGestureDemo : MonoBehaviour {
 		else {
 			if (eventConfirmation == "forget") {	// forget about previously indicated block? yes
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 					eventConfirmation = "";
 					indicatedObj = null;
 					TurnForward ();
@@ -1579,7 +1586,7 @@ public class JointGestureDemo : MonoBehaviour {
 			else if (eventConfirmation == "negack") {	// no? yes 
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 					indicatedObj = null;
 					eventConfirmation = "";
 					//objectMatches.Clear ();
@@ -1606,7 +1613,7 @@ public class JointGestureDemo : MonoBehaviour {
 						if (eventManager.events.Count == 0) {
 							indicatedObj = null;
 							objectMatches.Clear ();
-							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+							RespondAndUpdate("Sorry, I don't know what you mean.");
 						}
 					}
 				}
@@ -1640,13 +1647,13 @@ public class JointGestureDemo : MonoBehaviour {
 					objectMatches.Clear ();
 					confirmationTexts.Clear ();
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					RespondAndUpdate("OK.");
 				}
 			} 
 			else if (objectConfirmation != null) {
 				if (eventManager.events.Count == 0) {
 					LookForward();
-					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+					RespondAndUpdate("OK, go on.");
 					indicatedObj = objectConfirmation;
 					ReachFor (indicatedObj);
 					objectConfirmation = null;
@@ -1658,7 +1665,7 @@ public class JointGestureDemo : MonoBehaviour {
 					if (eventManager.events.Count == 0) {
 						if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
 							LookForward();
-							OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
+							RespondAndUpdate(string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
 						}
 					}
 				} 
@@ -1730,17 +1737,17 @@ public class JointGestureDemo : MonoBehaviour {
 				if (indicatedObj == null) {
 					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Which {0} block?", color.ToLower ()));
+						RespondAndUpdate(string.Format ("Which {0} block?", color.ToLower ()));
 					}
 					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
+						RespondAndUpdate(string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
 					}
 				}
 				else {
 					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
 						LookForward();
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("OK, go on."));
+						RespondAndUpdate("OK, go on.");
 					}
 				}
 			}
@@ -1752,7 +1759,7 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 
 					if (color.ToLower() != attr) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", attr));
+						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", attr));
 						TurnForward ();
 						LookAt (indicatedObj.transform.position);
 						eventConfirmation = "forget";
@@ -1804,12 +1811,12 @@ public class JointGestureDemo : MonoBehaviour {
 			sessionCounter++;
 			if (sessionCounter > 1) {
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "Welcome back!");
+					RespondAndUpdate("Hi again!");
 				}
 			} 
 			else {
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, "Hello.");
+					RespondAndUpdate("Hello.");
 				}
 			}
 
@@ -1844,7 +1851,7 @@ public class JointGestureDemo : MonoBehaviour {
 			}
 
 			if (eventManager.events.Count == 0) {	// TODO: what if we disengage while Diana is performing an action?
-				OutputHelper.PrintOutput (Role.Affector, "Bye!");
+				RespondAndUpdate("Bye!");
 
 				objectMatches.Clear ();
 				objectConfirmation = null;
@@ -1871,7 +1878,7 @@ public class JointGestureDemo : MonoBehaviour {
 			return;
 		}
 
-		OutputHelper.PrintOutput (Role.Affector, "");
+		RespondAndUpdate("");
 		Region region = null;
 
 		if (dir == "left") {
@@ -1901,7 +1908,7 @@ public class JointGestureDemo : MonoBehaviour {
 				ikControl.rightHandObj.position = rightTargetDefault;
 			}
 			else {
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+				RespondAndUpdate("Sorry, I don't know what you mean.");
 				return;
 			}
 
@@ -1935,7 +1942,7 @@ public class JointGestureDemo : MonoBehaviour {
 			} 
 			else {	// indicating region
 				indicatedRegion = region;
-				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+				RespondAndUpdate("Sorry, I don't know what you mean.");
 			}
 		}
 	}
@@ -2037,7 +2044,7 @@ public class JointGestureDemo : MonoBehaviour {
 					}
 
 					if (themeAttr != otherAttr) {
-						OutputHelper.PrintOutput (Role.Affector, string.Format ("Should I forget about this {0} block?", themeAttr));
+						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", themeAttr));
 						TurnForward ();
 						LookAt (indicatedObj.transform.position);
 						eventConfirmation = "forget";
@@ -2136,7 +2143,7 @@ public class JointGestureDemo : MonoBehaviour {
 				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
 					TurnForward();
 					ReachFor (indicatedObj);
-					OutputHelper.PrintOutput (Role.Affector, "OK, go on.");
+					RespondAndUpdate("OK, go on.");
 				}
 			}
 		} 
@@ -2219,7 +2226,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (eventConfirmation == "") {
-			OutputHelper.PrintOutput (Role.Affector, "");
+			RespondAndUpdate("");
 		}
 
 		if (state == true) {
@@ -2239,13 +2246,13 @@ public class JointGestureDemo : MonoBehaviour {
 					suggestedActions.Clear ();
 					actionOptions.Clear ();
 					eventConfirmation = "";
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("OK."));
+					RespondAndUpdate("OK.");
 				}
 			} 
 			else if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
 				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to grab?"));
+					RespondAndUpdate("What do you want me to grab?");
 					LookForward();
 					if (!suggestedActions.Contains ("grasp({0})")) {
 						suggestedActions.Add ("grasp({0})");
@@ -2739,7 +2746,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (eventConfirmation == "") {
-			OutputHelper.PrintOutput (Role.Affector, "");
+			RespondAndUpdate("");
 		}
 
 		GameObject theme = null;
@@ -2919,7 +2926,7 @@ public class JointGestureDemo : MonoBehaviour {
 		}
 
 		if (eventConfirmation == "") {
-			OutputHelper.PrintOutput (Role.Affector, "");
+			RespondAndUpdate("");
 		}
 
 		GameObject theme = null;
@@ -2961,7 +2968,7 @@ public class JointGestureDemo : MonoBehaviour {
 		else {
 			if (objectConfirmation == null) {
 				if (eventManager.events.Count == 0) {
-					OutputHelper.PrintOutput (Role.Affector, string.Format ("What do you want me to push?"));
+					RespondAndUpdate("What do you want me to push?");
 					LookForward();
 					if (!suggestedActions.Contains("slide({0}"+string.Format(",{0})",dir))) {
 						suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
@@ -3362,8 +3369,24 @@ public class JointGestureDemo : MonoBehaviour {
 		return certainty;
 	}
 
-	bool CanPrompt() {
-		return ((eventManager.events.Count == 0) && (suggestedActions.Count == 0));
+	void RespondAndUpdate(string utterance) {
+		OutputHelper.PrintOutput (Role.Affector, utterance);
+
+		// get all linguistic concepts
+		List<Concepts> conceptsList = epistemicModel.state.GetAllConcepts();
+		foreach (Concepts concepts in conceptsList) {
+			if (concepts.GetConcepts ().ContainsKey (ConceptMode.L)) {
+				List<Concept> linguisticConcepts = concepts.GetConcepts () [ConceptMode.L];
+
+				// if mentioned, introduce if not used already
+				foreach (Concept concept in linguisticConcepts) {
+					if (utterance.ToLower().Contains (concept.Name.ToLower ())) {
+						concept.Certainty = ((concept.Certainty < 0.5) && (concept.Certainty >= 0.0)) ? 0.5 : concept.Certainty;
+						epistemicModel.state.UpdateEpisim (new Concept[]{ concept }, new Relation[]{ });
+					}
+				}
+			}
+		}
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {
@@ -3378,12 +3401,12 @@ public class JointGestureDemo : MonoBehaviour {
 
 		if (sessionCounter >= 1) {
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, "Hey, where'd you go?");
+				RespondAndUpdate("Hey, where'd you go?");
 			}
 		}
 		else {
 			if (eventManager.events.Count == 0) {
-				OutputHelper.PrintOutput (Role.Affector, "Anyone there?");
+				RespondAndUpdate("Anyone there?");
 			}
 		}
 	}
