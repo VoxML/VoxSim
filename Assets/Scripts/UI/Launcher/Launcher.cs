@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
@@ -21,20 +22,31 @@ public class Launcher : FontManager {
 	[HideInInspector]
 	public string ipContent = "IP";
 
-	[HideInInspector]
-	public string csuUrl;
-
-	[HideInInspector]
-	public string epiSimUrl;
-
-	[HideInInspector]
-	public string parserUrl;
+//	[HideInInspector]
+//	public string csuUrl;
+//
+//	[HideInInspector]
+//	public string epiSimUrl;
+//
+//	[HideInInspector]
+//	public string parserUrl;
 
 	[HideInInspector]
 	public string inPort;
 
+//	[HideInInspector]
+//	public string sriUrl;
+
 	[HideInInspector]
-	public string sriUrl;
+	public int numUrls = 0;
+	int addUrl = -1;
+	List<int> removeUrl = new List<int>();
+
+	[HideInInspector]
+	public List<string> urlLabels = new List<string>();
+
+	[HideInInspector]
+	public List<string> urls = new List<string>();
 
 	[HideInInspector]
 	public bool makeLogs;
@@ -267,25 +279,54 @@ public class Launcher : FontManager {
 		urlBoxScrollPosition = GUILayout.BeginScrollView(urlBoxScrollPosition, false, false); 
 		GUILayout.BeginVertical(GUI.skin.box);
 
-		GUILayout.BeginHorizontal(GUI.skin.box);
-		GUILayout.Label ("CSU URL",GUILayout.Width(80*fontSizeModifier));
-		csuUrl = GUILayout.TextField(csuUrl,GUILayout.Width(140*fontSizeModifier));
-		GUILayout.EndHorizontal();
+//		GUILayout.BeginHorizontal(GUI.skin.box);
+//		GUILayout.Label ("CSU URL",GUILayout.Width(80*fontSizeModifier));
+//		csuUrl = GUILayout.TextField(csuUrl,GUILayout.Width(140*fontSizeModifier));
+//		GUILayout.EndHorizontal();
+//
+//		GUILayout.BeginHorizontal(GUI.skin.box);
+//		GUILayout.Label ("EpiSim URL",GUILayout.Width(80*fontSizeModifier));
+//		epiSimUrl = GUILayout.TextField(epiSimUrl,GUILayout.Width(140*fontSizeModifier));
+//		GUILayout.EndHorizontal();
+//
+//		GUILayout.BeginHorizontal(GUI.skin.box);
+//		GUILayout.Label ("SRI URL",GUILayout.Width(80*fontSizeModifier));
+//		sriUrl = GUILayout.TextField(sriUrl,GUILayout.Width(140*fontSizeModifier));
+//		GUILayout.EndHorizontal();
+//
+//		GUILayout.BeginHorizontal(GUI.skin.box);
+//		GUILayout.Label ("Parser URL",GUILayout.Width(80*fontSizeModifier));
+//		parserUrl = GUILayout.TextField(parserUrl,GUILayout.Width(140*fontSizeModifier));
+//		GUILayout.EndHorizontal();
 
-		GUILayout.BeginHorizontal(GUI.skin.box);
-		GUILayout.Label ("EpiSim URL",GUILayout.Width(80*fontSizeModifier));
-		epiSimUrl = GUILayout.TextField(epiSimUrl,GUILayout.Width(140*fontSizeModifier));
-		GUILayout.EndHorizontal();
+		for (int i = 0; i < urls.Count; i++) {
+			GUILayout.BeginHorizontal(GUI.skin.box);
+			urlLabels[i] =  GUILayout.TextField (urlLabels[i],GUILayout.Width(80*fontSizeModifier));
+			urls[i] = GUILayout.TextField(urls[i],GUILayout.Width(140*fontSizeModifier));
+			removeUrl.Add (-1);
+			removeUrl [i] = GUILayout.SelectionGrid (removeUrl [i], new string[]{ "-" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+			GUILayout.EndHorizontal();
 
-		GUILayout.BeginHorizontal(GUI.skin.box);
-		GUILayout.Label ("SRI URL",GUILayout.Width(80*fontSizeModifier));
-		sriUrl = GUILayout.TextField(sriUrl,GUILayout.Width(140*fontSizeModifier));
-		GUILayout.EndHorizontal();
+			if (removeUrl [i] == 0) {
+				removeUrl [i] = -1;
+				urlLabels.RemoveAt(i);
+				urls.RemoveAt(i);
+				numUrls--;
+			}
+		}
 
-		GUILayout.BeginHorizontal(GUI.skin.box);
-		GUILayout.Label ("Parser URL",GUILayout.Width(80*fontSizeModifier));
-		parserUrl = GUILayout.TextField(parserUrl,GUILayout.Width(140*fontSizeModifier));
-		GUILayout.EndHorizontal();
+		addUrl = GUILayout.SelectionGrid (addUrl, new string[]{ "+" }, 1, GUI.skin.button, GUILayout.ExpandWidth (true));
+		if (addUrl == 0) {	// add new url
+			numUrls++;
+			for (int j = 1; j <= urls.Count+1; j++) {
+				if (!urlLabels.Contains (string.Format ("URL {0}", j))) {
+					urlLabels.Add (string.Format ("URL {0}", j));
+					urls.Add ("");
+					break;
+				}
+			}
+			addUrl = -1;
+		}
 
 		GUILayout.EndVertical();
 		GUILayout.EndScrollView();
@@ -512,10 +553,21 @@ public class Launcher : FontManager {
 		inPort = PlayerPrefs.GetString("Listener Port");
 		makeLogs = (PlayerPrefs.GetInt("Make Logs") == 1);
 		logsPrefix = PlayerPrefs.GetString("Logs Prefix");
-		csuUrl = PlayerPrefs.GetString("CSU URL");
-		epiSimUrl = PlayerPrefs.GetString("EpiSim URL");
-		sriUrl = PlayerPrefs.GetString("SRI URL");
-		parserUrl = PlayerPrefs.GetString("Parser URL");
+
+		numUrls = 0;
+		string urlsString = PlayerPrefs.GetString("URLs");
+		foreach (string urlString in urlsString.Split(';')) {
+			if (urlString.Contains ("=")) {
+				urlLabels.Add (urlString.Split ('=') [0]);
+				urls.Add (urlString.Split ('=') [1]);
+				numUrls++;
+			}
+		}
+
+//		csuUrl = PlayerPrefs.GetString("CSU URL");
+//		epiSimUrl = PlayerPrefs.GetString("EpiSim URL");
+//		sriUrl = PlayerPrefs.GetString("SRI URL");
+//		parserUrl = PlayerPrefs.GetString("Parser URL");
 		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
 		captureParams = (PlayerPrefs.GetInt("Capture Params") == 1);
 		videoCaptureMode = (VideoCaptureMode)PlayerPrefs.GetInt("Video Capture Mode");
@@ -531,137 +583,6 @@ public class Launcher : FontManager {
 		editableVoxemes = (PlayerPrefs.GetInt("Make Voxemes Editable") == 1);
 		eulaAccepted = (PlayerPrefs.GetInt("EULA Accepted") == 1);
 	}
-
-	void ImportPrefs(string path) {
-		string line;
-		using (StreamReader inputFile = new StreamReader (Path.GetFullPath (Application.dataPath + "/" + path))) {
-			while ((line = inputFile.ReadLine ()) != null) { 
-				switch (line.Split (',') [0]) {
-				case "Listener Port":
-					inPort = line.Split (',') [1].Trim();
-					break;
-
-				case "Make Logs":
-					makeLogs = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-					break;
-
-				case "Logs Prefix":
-					logsPrefix = line.Split (',') [1].Trim();
-					break;
-				
-				case "CSU URL":
-					csuUrl = line.Split (',') [1].Trim();
-					break;
-
-				case "EpiSIm URL":
-					epiSimUrl = line.Split (',') [1].Trim();
-					break;
-
-				case "SRI URL":
-					sriUrl = line.Split (',') [1].Trim();
-					break;
-
-				case "Parser URL":
-					parserUrl = line.Split (',') [1].Trim();
-					break;
-				
-				case "Capture Video":
-					captureVideo = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-					break;
-
-				case "Capture Params":
-					captureParams = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-					break;
-				
-				case "Video Capture Mode":
-					videoCaptureMode = (VideoCaptureMode)System.Convert.ToInt32(line.Split (',') [1].Trim());
-					break;
-				
-				case "Reset Between Events":
-					resetScene = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-					break;
-				
-				case "Event Reset Counter":
-					eventResetCounter = line.Split (',') [1].Trim();
-					break;
-				
-				case "Video Capture Filename Type":
-					videoCaptureFilenameType = (VideoCaptureFilenameType)System.Convert.ToInt32(line.Split (',') [1].Trim());
-					break;
-				
-				case "Sort By Event String":
-					sortByEventString = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-					break;
-				
-				case "Custom Video Filename Prefix":
-					customVideoFilenamePrefix = line.Split (',') [1].Trim();
-					break;
-				
-				case "Auto Events List":
-					autoEventsList = line.Split (',') [1].Trim();
-					break;
-				
-				case "Start Index":
-					startIndex = line.Split (',') [1].Trim();
-					break;
-				
-				case "Video Capture DB":
-					captureDB = line.Split (',') [1].Trim();
-					break;
-				
-				case "Video Output Directory":
-					videoOutputDir = line.Split (',') [1].Trim();
-					break;
-
-				case "Make Voxemes Editable":
-					editableVoxemes = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-					break;
-
-				default:
-					break;
-				}
-			}
-		}
-	}
-
-	void ExportPrefs(string path) {
-		SavePrefs ();
-		if ((eventResetCounter == string.Empty) || (eventResetCounter == "0")) {
-			eventResetCounter = "1";
-		}
-
-		if (startIndex == string.Empty) {
-			startIndex = "0";
-		}
-
-		Dictionary<string, object> prefsDict = new Dictionary<string, object> ();
-		prefsDict.Add ("Listener Port", PlayerPrefs.GetString ("Listener Port"));
-		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
-		prefsDict.Add ("Logs Prefix", PlayerPrefs.GetString ("Logs Prefix"));
-		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
-		prefsDict.Add ("EpiSim URL", PlayerPrefs.GetString ("EpiSim URL"));
-		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
-		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
-		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
-		prefsDict.Add ("Capture Params", (PlayerPrefs.GetInt ("Capture Params") == 1));
-		prefsDict.Add ("Video Capture Mode", PlayerPrefs.GetInt ("Video Capture Mode"));
-		prefsDict.Add ("Reset Between Events", (PlayerPrefs.GetInt ("Reset Between Events") == 1));
-		prefsDict.Add ("Event Reset Counter", PlayerPrefs.GetInt ("Event Reset Counter").ToString ());
-		prefsDict.Add ("Video Capture Filename Type", PlayerPrefs.GetInt ("Video Capture Filename Type"));
-		prefsDict.Add ("Sort By Event String", (PlayerPrefs.GetInt ("Sort By Event String") == 1));
-		prefsDict.Add ("Custom Video Filename Prefix", PlayerPrefs.GetString ("Custom Video Filename Prefix"));
-		prefsDict.Add ("Auto Events List", PlayerPrefs.GetString ("Auto Events List"));
-		prefsDict.Add ("Start Index", PlayerPrefs.GetInt ("Start Index").ToString ());
-		prefsDict.Add ("Video Capture DB", PlayerPrefs.GetString("Video Capture DB"));
-		prefsDict.Add ("Video Output Directory", PlayerPrefs.GetString("Video Output Directory"));
-		prefsDict.Add ("Make Voxemes Editable", (PlayerPrefs.GetInt("Make Voxemes Editable") == 1));
-
-		using (StreamWriter outputFile = new StreamWriter (Path.GetFullPath (Application.dataPath + "/" + path))) {
-			foreach (var entry in prefsDict) {
-				outputFile.WriteLine (string.Format("{0},{1}",entry.Key,entry.Value));
-			}
-		}
-	}
 	
 	public void SavePrefs() {
 		if ((eventResetCounter == string.Empty) || (eventResetCounter == "0")) {
@@ -674,11 +595,18 @@ public class Launcher : FontManager {
 
 		PlayerPrefs.SetString("Listener Port", inPort);
 		PlayerPrefs.SetInt("Make Logs", System.Convert.ToInt32(makeLogs));
-		PlayerPrefs.SetString("Logs Prefix", logsPrefix);		
-		PlayerPrefs.SetString("CSU URL", csuUrl);
-		PlayerPrefs.SetString("EpiSim URL", epiSimUrl);
-		PlayerPrefs.SetString("SRI URL", sriUrl);
-		PlayerPrefs.SetString("Parser URL", parserUrl);
+		PlayerPrefs.SetString("Logs Prefix", logsPrefix);	
+
+		string urlsString = string.Empty;
+		for (int i = 0; i < numUrls; i++) {
+			urlsString += string.Format ("{0}={1};", urlLabels[i], urls[i]);
+		}
+		PlayerPrefs.SetString("URLs", urlsString);
+
+		//		PlayerPrefs.SetString("CSU URL", csuUrl);
+//		PlayerPrefs.SetString("EpiSim URL", epiSimUrl);
+//		PlayerPrefs.SetString("SRI URL", sriUrl);
+//		PlayerPrefs.SetString("Parser URL", parserUrl);
 		PlayerPrefs.SetInt("Capture Video", System.Convert.ToInt32(captureVideo));
 		PlayerPrefs.SetInt("Capture Params", System.Convert.ToInt32(captureParams));
 		PlayerPrefs.SetInt("Video Capture Mode", System.Convert.ToInt32(videoCaptureMode));

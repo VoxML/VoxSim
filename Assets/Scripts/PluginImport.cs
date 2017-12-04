@@ -40,7 +40,9 @@ public class PluginImport : MonoBehaviour {
 			Debug.Log ("No listener port specified. Skipping interface startup.");
 		}
 
-		if (PlayerPrefs.GetString ("CSU URL") != string.Empty) {
+
+
+		if (PlayerPrefs.HasKey ("CSU URL")) {
 			string[] csuUrl = PlayerPrefs.GetString ("CSU URL").Split (':');
 			string csuAddress = csuUrl [0];
 			int csuPort = Convert.ToInt32 (csuUrl [1]);
@@ -149,11 +151,13 @@ public class PluginImport : MonoBehaviour {
 		if (_cmdServer != null)
 		{
 			_cmdServer.Close();
+			_cmdServer = null;
 		}
 
 		if (_csuClient != null && _csuClient.IsConnected())
 		{
 			_csuClient.Close();
+			_csuClient = null;
 		}
 	}
 

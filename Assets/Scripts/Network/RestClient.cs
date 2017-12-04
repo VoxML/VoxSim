@@ -40,10 +40,10 @@ namespace Network
 			yield return webRequest.Send();
 
             if(webRequest.isNetworkError) {
-                gameObject.BroadcastMessage(error, webRequest.error);
+				gameObject.BroadcastMessage(error, webRequest.error, SendMessageOptions.DontRequireReceiver);
             }
             else if(webRequest.responseCode < 200 || webRequest.responseCode >= 400) {
-                gameObject.BroadcastMessage(error, webRequest.downloadHandler.text);
+				gameObject.BroadcastMessage(error, webRequest.downloadHandler.text, SendMessageOptions.DontRequireReceiver);
             } 
             else
             {

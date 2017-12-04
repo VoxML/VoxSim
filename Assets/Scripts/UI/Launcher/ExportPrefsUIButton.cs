@@ -72,10 +72,17 @@ public class ExportPrefsUIButton : UIButton {
 		prefsDict.Add ("Listener Port", PlayerPrefs.GetString ("Listener Port"));
 		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
 		prefsDict.Add ("Logs Prefix", PlayerPrefs.GetString ("Logs Prefix"));
-		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
-		prefsDict.Add ("EpiSim URL", PlayerPrefs.GetString ("EpiSim URL"));
-		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
-		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
+
+		string urlsString = string.Empty;
+		for (int i = 0; i < launcher.numUrls; i++) {
+			urlsString += string.Format ("{0}={1};", launcher.urlLabels[i], launcher.urls[i]);
+		}
+		prefsDict.Add ("URLs", urlsString);
+
+//		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
+//		prefsDict.Add ("EpiSim URL", PlayerPrefs.GetString ("EpiSim URL"));
+//		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
+//		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
 		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
 		prefsDict.Add ("Capture Params", (PlayerPrefs.GetInt ("Capture Params") == 1));
 		prefsDict.Add ("Video Capture Mode", PlayerPrefs.GetInt ("Video Capture Mode"));

@@ -44,16 +44,16 @@ public class GhostFreeRoamCamera : MonoBehaviour
 	HelpModalWindow help;
 	InputController inputController;
 	OutputController outputController;
-	VoxemeInspector inspector;
 	ModalWindowManager windowManager;
+	UIButtonManager buttonManager;
 
 	private void OnEnable()
 	{
 		help = GameObject.Find ("Help").GetComponent<HelpModalWindow> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 		outputController = GameObject.Find ("IOController").GetComponent<OutputController> ();
-		inspector = GameObject.Find ("BlocksWorld").GetComponent<VoxemeInspector> ();
 		windowManager = GameObject.Find ("BlocksWorld").GetComponent<ModalWindowManager> ();
+		buttonManager = GameObject.Find ("BlocksWorld").GetComponent<UIButtonManager> ();
 
 		if (cursorToggleAllowed)
 		{
@@ -87,19 +87,24 @@ public class GhostFreeRoamCamera : MonoBehaviour
 			}
 		}
 
-		if (inspector != null) {
-			if (!Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
-				new Rect[]{ inspector.InspectorRect }) && (inspector.DrawInspector)) {
-				return;
-			}
-		}
-
-		bool masked = false;	// assume mouse not masked by some open modal window
+		bool masked = false;	// assume mouse not masked by some open modal window or some button
 		for (int i = 0; i < windowManager.windowManager.Count; i++) {
 			if (windowManager.windowManager.ContainsKey (i)) {
 				if (windowManager.windowManager [i] != null) {
 					if (!Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
 						   new Rect[]{ windowManager.windowManager [i].windowRect }) && (windowManager.windowManager [i].Render)) {
+						masked = true;
+						break;
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < buttonManager.buttonManager.Count; i++) {
+			if (buttonManager.buttonManager.ContainsKey (i)) {
+				if (buttonManager.buttonManager [i] != null) {
+					if (!Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
+						new Rect[]{ buttonManager.buttonManager [i].buttonRect })) {
 						masked = true;
 						break;
 					}

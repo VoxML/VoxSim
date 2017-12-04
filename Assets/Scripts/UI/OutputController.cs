@@ -37,6 +37,8 @@ public class OutputController : FontManager {
 	public int outputMargin;
 	public Rect outputRect = new Rect();
 
+	public bool textField = true;
+
 	GUIStyle labelStyle;
 	GUIStyle textFieldStyle;
 
@@ -80,6 +82,10 @@ public class OutputController : FontManager {
 	}
 
 	void OnGUI() {
+		if (!textField) {
+			return;
+		}
+
 		labelStyle = new GUIStyle ("Label");
 		textFieldStyle = new GUIStyle ("TextField");
 

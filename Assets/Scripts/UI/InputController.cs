@@ -18,12 +18,30 @@ public class InputEventArgs : EventArgs {
 }
 
 public class InputController : FontManager {
+	public enum Alignment {
+		Left,
+		Center,
+		Right
+	}
+	public Alignment alignment;
+
+	public enum Placement {
+		Top,
+		Bottom
+	}
+	public Placement placement;
+
+	public int fontSize = 12;
+
 	public String inputLabel;
 	public String inputString;
-	public int fontSize = 12;
-	public int inputHeight = 50;
-	public Rect inputRect;
+	public int inputWidth;
+	public int inputMaxWidth;
+	public int inputHeight;
+	public int inputMargin;
+	public Rect inputRect = new Rect();
 
+	public bool textField = true;
 	public bool allowToggleAgent = true;
 
 	String[] commands;
@@ -32,7 +50,7 @@ public class InputController : FontManager {
 
 	PluginImport commBridge;
 	ObjectSelector objSelector;
-	ExitToMenuUIButton exitToMenu;
+	//ExitToMenuUIButton exitToMenu;
 
 	String disableEnable;
 
@@ -72,7 +90,7 @@ public class InputController : FontManager {
 		macros = bc.GetComponent<Macros> ();
 
 		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
-		exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenuUIButton> ();
+		//exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenuUIButton> ();
 
 		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 
@@ -85,16 +103,50 @@ public class InputController : FontManager {
 
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
 
-		//inputRect = new Rect (5, 5, 50, 25);
-		inputHeight = (int)(20*fontSizeModifier);
+		inputWidth = (System.Convert.ToInt32(Screen.width - inputMargin) > inputMaxWidth) ? inputMaxWidth : System.Convert.ToInt32(Screen.width - inputMargin);
+		inputHeight = System.Convert.ToInt32(20.0f * (float)fontSizeModifier);
 
-		inputRect = new Rect (5, 5, (int)(365*fontSizeModifier), inputHeight);
+		if (alignment == Alignment.Left) {
+			if (placement == Placement.Top) {
+				inputRect = new Rect (5, 5, inputWidth, inputHeight);
+			}
+			else if (placement == Placement.Bottom) {
+				inputRect = new Rect (5, Screen.height - inputHeight - 5, inputWidth, inputHeight);
+			}
+		}
+		else if (alignment == Alignment.Center) {
+			if (placement == Placement.Top) {
+				inputRect = new Rect ((int)((Screen.width / 2) - (inputWidth / 2)), 5, inputWidth, inputHeight);
+			}
+			else if (placement == Placement.Bottom) {
+				inputRect = new Rect ((int)((Screen.width / 2) - (inputWidth / 2)), 
+					Screen.height - inputHeight - 5, inputWidth, inputHeight);
+			}
+		}
+		else if (alignment == Alignment.Right) {
+			if (placement == Placement.Top) {
+				inputRect = new Rect (Screen.width - (5 + inputWidth), 5, inputWidth, inputHeight);
+			}
+			else if (placement == Placement.Bottom) {
+				inputRect = new Rect (Screen.width - (5 + inputWidth),
+					Screen.height - inputHeight - 5, inputWidth, inputHeight);
+			}
+		}
+
+		//inputRect = new Rect (5, 5, 50, 25);
+//		inputHeight = (int)(20*fontSizeModifier);
+//
+//		inputRect = new Rect (5, 5, (int)(365*fontSizeModifier), inputHeight);
 	}
 
 	void Update() {
 	}
 
 	void OnGUI() {
+		if (!textField) {
+			return;
+		}
+
 		labelStyle = new GUIStyle ("Label");
 		textFieldStyle = new GUIStyle ("TextField");
 		buttonStyle = new GUIStyle ("Button");
@@ -175,24 +227,24 @@ public class InputController : FontManager {
 //			return;
 //		}
 
-		if (GameObject.FindGameObjectWithTag ("Agent") != null) {
-			if (allowToggleAgent) {
-				disableEnable = (objSelector.disabledObjects.FirstOrDefault (t => t.tag == "Agent") == null) ? "Disable Agent" : "Enable Agent";
-				if (GUI.Button (new Rect (10, Screen.height - ((10 + (int)(20 * exitToMenu.FontSizeModifier)) + (10 + (int)(40 * fontSizeModifier))),
-					   100 * fontSizeModifier, 20 * fontSizeModifier), disableEnable, buttonStyle)) {
-					GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
-					if (agent != null) {
-						if (agent.activeInHierarchy) {
-							eventManager.preds.DISABLE (new object[]{ agent });
-						}
-					} else {
-						agent = objSelector.disabledObjects.First (t => t.tag == "Agent");
-						eventManager.preds.ENABLE (new object[]{ agent });
-					}
-					return;
-				}
-			}
-		}
+//		if (GameObject.FindGameObjectWithTag ("Agent") != null) {
+//			if (allowToggleAgent) {
+//				disableEnable = (objSelector.disabledObjects.FirstOrDefault (t => t.tag == "Agent") == null) ? "Disable Agent" : "Enable Agent";
+//				if (GUI.Button (new Rect (10, Screen.height - ((10 + (int)(20 * exitToMenu.FontSizeModifier)) + (10 + (int)(40 * fontSizeModifier))),
+//					   100 * fontSizeModifier, 20 * fontSizeModifier), disableEnable, buttonStyle)) {
+//					GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
+//					if (agent != null) {
+//						if (agent.activeInHierarchy) {
+//							eventManager.preds.DISABLE (new object[]{ agent });
+//						}
+//					} else {
+//						agent = objSelector.disabledObjects.First (t => t.tag == "Agent");
+//						eventManager.preds.ENABLE (new object[]{ agent });
+//					}
+//					return;
+//				}
+//			}
+//		}
 	}
 
 	public void MessageReceived(String inputString) {
@@ -236,10 +288,12 @@ public class InputController : FontManager {
 
 			if (functionalCommand.Count (x => x == '(') == functionalCommand.Count (x => x == ')')) {
 				//eventManager.ClearEvents ();
-				foreach (KeyValuePair<String,String> kv in macros.commandMacros) {	// if input is a macro
-					if (functionalCommand == kv.Key) {									// sub in value
-						functionalCommand = kv.Value;
-						break;
+				if (macros != null) {
+					foreach (KeyValuePair<String,String> kv in macros.commandMacros) {	// if input is a macro
+						if (functionalCommand == kv.Key) {									// sub in value
+							functionalCommand = kv.Value;
+							break;
+						}
 					}
 				}
 				Debug.Log ("Parsed as: " + functionalCommand);

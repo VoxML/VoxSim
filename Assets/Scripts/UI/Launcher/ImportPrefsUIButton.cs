@@ -73,21 +73,33 @@ public class ImportPrefsUIButton : UIButton {
 				launcher.logsPrefix = line.Split (',') [1].Trim();
 				break;
 
-			case "CSU URL":
-				launcher.csuUrl = line.Split (',') [1].Trim();
+			case "URLs":
+				launcher.numUrls = 0;
+				string urlsString = PlayerPrefs.GetString("URLs");
+				foreach (string urlString in line.Split (',') [1].Trim().Split(';')) {
+					if (urlString.Contains ("=")) {
+						launcher.urlLabels.Add (urlString.Split ('=') [0]);
+						launcher.urls.Add (urlString.Split ('=') [1]);
+						launcher.numUrls++;
+					}
+				}
 				break;
 
-			case "EpiSIm URL":
-				launcher.epiSimUrl = line.Split (',') [1].Trim();
-				break;
-
-			case "SRI URL":
-				launcher.sriUrl = line.Split (',') [1].Trim();
-				break;
-
-			case "Parser URL":
-				launcher.parserUrl = line.Split (',') [1].Trim();
-				break;
+//			case "CSU URL":
+//				launcher.csuUrl = line.Split (',') [1].Trim();
+//				break;
+//
+//			case "EpiSim URL":
+//				launcher.epiSimUrl = line.Split (',') [1].Trim();
+//				break;
+//
+//			case "SRI URL":
+//				launcher.sriUrl = line.Split (',') [1].Trim();
+//				break;
+//
+//			case "Parser URL":
+//				launcher.parserUrl = line.Split (',') [1].Trim();
+//				break;
 
 			case "Capture Video":
 				launcher.captureVideo = System.Convert.ToBoolean(line.Split (',') [1].Trim());

@@ -14,7 +14,7 @@ public class ObjectSelector : MonoBehaviour {
 	//public List<GameObject> toDisable = new List<GameObject> ();
 	public List<GameObject> disabledObjects = new List<GameObject>();
 	
-	VoxemeInspector inspector;
+	//VoxemeInspector inspector;
 	RelationTracker relationTracker;
 	ModalWindowManager windowManager;
 
@@ -30,7 +30,7 @@ public class ObjectSelector : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
-		inspector = gameObject.GetComponent ("VoxemeInspector") as VoxemeInspector;
+		//inspector = gameObject.GetComponent ("VoxemeInspector") as VoxemeInspector;
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker> ();
 		windowManager = gameObject.GetComponent<ModalWindowManager> ();
 
@@ -41,20 +41,20 @@ public class ObjectSelector : MonoBehaviour {
 	void Update () {
 		if (Input.GetMouseButtonDown (0)) {
 			if (Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
-			                                           new Rect[]{inspector.InspectorRect})) {
+				windowManager.windowManager.Values.Select(v => v.windowRect).ToArray())) {
 				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 				RaycastHit hit;
 				// Casts the ray and get the first game object hit
 				Physics.Raycast (ray, out hit);
 				if (hit.collider == null) {
-					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+					//if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
 						//inspector.InspectorObject = null;
 						selectedObjects.Clear ();
-					}
+					//}
 
-					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
-						inspector.DrawInspector = false;
-					}
+//					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+//						inspector.DrawInspector = false;
+//					}
 				}
 				else {
 					selectedObjects.Clear ();
@@ -63,15 +63,15 @@ public class ObjectSelector : MonoBehaviour {
 					//Debug.Log (selectedObjects.Count);
 				}
 				
-				if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
-					inspector.DrawInspector = false;
-				}
+//				if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+//					inspector.DrawInspector = false;
+//				}
 			}
 		}
 		else
 		if (Input.GetMouseButtonDown (1)) {
 			if (Helper.PointOutsideMaskedAreas (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), 
-			                                           new Rect[]{inspector.InspectorRect})) {
+					windowManager.windowManager.Values.Select(v => v.windowRect).ToArray())) {
 				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
 				RaycastHit hit;
 				// Casts the ray and get the first game object hit

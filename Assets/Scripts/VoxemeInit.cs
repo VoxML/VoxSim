@@ -102,6 +102,11 @@ public class VoxemeInit : MonoBehaviour {
 
 							if ((go.tag != "UnPhysic") && (go.tag != "Ground")) {	// Non-physics objects are either scene markers or, like the ground, cognitively immobile
 								Debug.Log (subObj.name);
+
+								if (container.GetComponent<Voxeme> ().density == 0) {
+									container.GetComponent<Voxeme> ().density = 1;
+								}
+
 								if (subObj.GetComponent<Rigidbody> () == null) {	// may already have one -- goddamn overachieving scene artists
 									Rigidbody rigidbody = subObj.AddComponent<Rigidbody> ();
 									if (rigidbody != null) {
