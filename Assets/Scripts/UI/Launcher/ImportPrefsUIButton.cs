@@ -74,6 +74,8 @@ public class ImportPrefsUIButton : UIButton {
 				break;
 
 			case "URLs":
+				launcher.urlLabels.Clear ();
+				launcher.urls.Clear ();
 				launcher.numUrls = 0;
 				string urlsString = PlayerPrefs.GetString("URLs");
 				foreach (string urlString in line.Split (',') [1].Trim().Split(';')) {

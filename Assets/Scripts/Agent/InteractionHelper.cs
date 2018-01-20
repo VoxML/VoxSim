@@ -26,6 +26,7 @@ namespace Agent
 				grasper = rightGrasper;
 			}
 
+//			Debug.Log (grasper);
 			return grasper;
 		}
 

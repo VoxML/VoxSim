@@ -42,8 +42,17 @@ public class PluginImport : MonoBehaviour {
 
 
 
-		if (PlayerPrefs.HasKey ("CSU URL")) {
-			string[] csuUrl = PlayerPrefs.GetString ("CSU URL").Split (':');
+		if (PlayerPrefs.HasKey ("URLs")) {
+
+			string csuUrlString = string.Empty;
+			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
+				if (url.Split ('=') [0] == "CSU URL") {
+					csuUrlString = url.Split ('=') [1];
+					break;
+				}
+			}
+
+			string[] csuUrl = csuUrlString.Split(':');
 			string csuAddress = csuUrl [0];
 			int csuPort = Convert.ToInt32 (csuUrl [1]);
 			if (csuAddress != "") {

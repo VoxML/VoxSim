@@ -38,7 +38,7 @@ namespace Global {
 	/// <summary>
 	/// Region class
 	/// </summary>
-	public class Region {
+	public class Region{
 		Vector3 _min,_max,_center;
 
 		public Vector3 min {
@@ -64,9 +64,20 @@ namespace Global {
 			max = Vector3.zero;
 		}
 
+		public Region(Region clone) {
+			min = clone.min;
+			max = clone.max;
+		}
+
 		public Region(Vector3 minimum, Vector3 maximum) {
 			min = minimum;
 			max = maximum;
+		}
+
+		public Region(Vector3 center, float sideLength) {
+			// creates a square region centered on center with side length sideLength
+			min = center-new Vector3(sideLength/2.0f,0.0f,sideLength/2.0f);
+			max = center+new Vector3(sideLength/2.0f,0.0f,sideLength/2.0f);
 		}
 
 		public bool Contains(Vector3 point) {
@@ -420,6 +431,20 @@ namespace Global {
 //			Debug.Break ();
 
 			return json;
+		}
+
+		public static bool CheckAllObjectsOfType(object[] array, Type type) {
+			bool consistent = true;
+
+			if (array != null) {
+				foreach (object element in array) {
+					if (element != null) {
+						consistent &= (element.GetType () == type);
+					}
+				}
+			}
+
+			return consistent;
 		}
 
 		// VECTOR METHODS
@@ -907,6 +932,30 @@ namespace Global {
 			region.max = testPoint + testBounds.extents;
 
 			return region;
+		}
+
+		public static string RegionToString(Region region) {
+			if (region == null) {
+				return "null";	
+			}
+			else {
+				return string.Format ("Region(min:{0}, max:{1})", region.min.ToString (), region.max.ToString ());
+			}
+		}
+
+		public static bool RegionsEqual (Region r1, Region r2) {
+			if (r1 == null && r2 == null) {
+				return true;	
+			}
+			else if (r1 == null || r2 == null) {
+				return false;
+			}
+			else if (Helper.CloseEnough (r1.min, r2.min) && Helper.CloseEnough (r1.max, r2.max)) {
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 
 		// two vectors are within epsilon

@@ -5,6 +5,12 @@ using UnityEngine;
 using Episteme;
 
 namespace Agent {
+	public enum EpistemicCertaintyOperation
+	{
+		Increase,
+		Decrease
+	}
+
 	public class EpistemicModel : MonoBehaviour {
 
 		public EpistemicState state;
