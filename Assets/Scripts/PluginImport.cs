@@ -9,9 +9,14 @@ public class PluginImport : MonoBehaviour {
 	private INLParser _parser;
 	private CmdServer _cmdServer;
 	private CSUClient _csuClient;
+	private EventLearningClient _eventLearningClient;
 
 	public CSUClient CSUClient {
 		get { return _csuClient; }
+	}
+
+	public EventLearningClient EventLearningClient {
+		get { return _eventLearningClient; }
 	}
 
 	// Make our calls from the Plugin
@@ -43,11 +48,18 @@ public class PluginImport : MonoBehaviour {
 
 
 		if (PlayerPrefs.HasKey ("URLs")) {
-
 			string csuUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
 				if (url.Split ('=') [0] == "CSU URL") {
 					csuUrlString = url.Split ('=') [1];
+					break;
+				}
+			}
+
+			string eventLearnerUrlString = string.Empty;
+			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
+				if (url.Split ('=') [0] == "Event Learner URL") {
+					eventLearnerUrlString = url.Split ('=') [1];
 					break;
 				}
 			}
@@ -66,9 +78,24 @@ public class PluginImport : MonoBehaviour {
 			else {
 				Debug.Log ("CSU gesture input is not specified.");
 			}
+
+			string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
+			string eventLearnerAddress = eventLearnerUrl [0];
+			int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
+			if (eventLearnerAddress != "") {
+				try {
+					ConnectSocket (eventLearnerAddress, eventLearnerPort, ref _eventLearningClient);
+				}
+				catch (Exception e) {
+					Debug.Log (e.Message);
+				}
+			}
+			else {
+				Debug.Log ("CSU gesture input is not specified.");
+			}
 		}
 		else {
-			Debug.Log ("CSU gesture input is not specified.");
+			Debug.Log ("No input URLs specified.");
 		}
 
 		InitParser();
@@ -128,6 +155,14 @@ public class PluginImport : MonoBehaviour {
 		_csuClient = new CSUClient();
 		_csuClient.Connect(address, port);
 		Debug.Log(string.Format("{2} :: Connected to CSU recognizer @ {0}:{1}", address, port, _csuClient.IsConnected()));
+	}
+
+	public void ConnectSocket(string address, int port, ref EventLearningClient client)
+	{ // TODO: Abstract EventLearningClient and CSUClient to generic type inheritance
+		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
+		client = new EventLearningClient();
+		client.Connect(address, port);
+		Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1}", address, port, client.IsConnected()));
 	}
 
 	public void OpenPortInternal(string port) {
