@@ -71,25 +71,25 @@ namespace Agent
 				return false;
 			else {
 				StackSymbolContent tuple = (StackSymbolContent)obj;
-//				Debug.Log(string.Format("{0} == {1}:{2}",
-//					(GameObject)IndicatedObj,(GameObject)tuple.IndicatedObj,(GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj));
-//				Debug.Log(string.Format("{0} == {1}:{2}",
-//					(GameObject)GraspedObj,(GameObject)tuple.GraspedObj,(GameObject)GraspedObj == (GameObject)tuple.GraspedObj));
-//				Debug.Log(string.Format("{0} == {1}:{2}",
-//					(Region)IndicatedRegion,(Region)tuple.IndicatedRegion,Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion)));
-//				Debug.Log(string.Format("{0} == {1}:{2}",
-//					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)ObjectOptions).Select (o => o.name).ToArray ())),
-//					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)tuple.ObjectOptions).Select (o => o.name).ToArray ())),
-//					((List<GameObject>)ObjectOptions).SequenceEqual((List<GameObject>)tuple.ObjectOptions)));
-//				Debug.Log(string.Format("{0} == {1}:{2}",
-//					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionOptions).ToArray ())),
-//					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionOptions).ToArray ())),
-//					((List<string>)ActionOptions).SequenceEqual((List<string>)tuple.ActionOptions)));
-//				Debug.Log(string.Format("{0} == {1}:{2}",
-//					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionSuggestions).ToArray ())),
-//					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionSuggestions).ToArray ())),
-//					((List<string>)ActionSuggestions).SequenceEqual((List<string>)tuple.ActionSuggestions)));
-									
+				//				Debug.Log(string.Format("{0} == {1}:{2}",
+				//					(GameObject)IndicatedObj,(GameObject)tuple.IndicatedObj,(GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj));
+				//				Debug.Log(string.Format("{0} == {1}:{2}",
+				//					(GameObject)GraspedObj,(GameObject)tuple.GraspedObj,(GameObject)GraspedObj == (GameObject)tuple.GraspedObj));
+				//				Debug.Log(string.Format("{0} == {1}:{2}",
+				//					(Region)IndicatedRegion,(Region)tuple.IndicatedRegion,Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion)));
+				//				Debug.Log(string.Format("{0} == {1}:{2}",
+				//					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)ObjectOptions).Select (o => o.name).ToArray ())),
+				//					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)tuple.ObjectOptions).Select (o => o.name).ToArray ())),
+				//					((List<GameObject>)ObjectOptions).SequenceEqual((List<GameObject>)tuple.ObjectOptions)));
+				//				Debug.Log(string.Format("{0} == {1}:{2}",
+				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionOptions).ToArray ())),
+				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionOptions).ToArray ())),
+				//					((List<string>)ActionOptions).SequenceEqual((List<string>)tuple.ActionOptions)));
+				//				Debug.Log(string.Format("{0} == {1}:{2}",
+				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionSuggestions).ToArray ())),
+				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionSuggestions).ToArray ())),
+				//					((List<string>)ActionSuggestions).SequenceEqual((List<string>)tuple.ActionSuggestions)));
+
 				return (GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj &&
 					(GameObject)GraspedObj == (GameObject)tuple.GraspedObj &&
 					Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion) &&
@@ -178,24 +178,24 @@ namespace Agent
 			else {				
 				StackSymbolConditions tuple = (StackSymbolConditions)obj;
 
-//				Debug.Log (string.Format ("{0} == {1}?",
-//					IndicatedObjCondition == null ? "Null" : System.Convert.ToString(IndicatedObjCondition),
-//					tuple.IndicatedObjCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedObjCondition)));
-//				Debug.Log (string.Format ("{0} == {1}?",
-//					GraspedObjCondition == null ? "Null" : System.Convert.ToString(GraspedObjCondition),
-//					tuple.GraspedObjCondition == null ? "Null" : System.Convert.ToString(tuple.GraspedObjCondition)));
-//				Debug.Log (string.Format ("{0} == {1}?",
-//					IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(IndicatedRegionCondition),
-//					tuple.IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedRegionCondition)));
-//				Debug.Log (string.Format ("{0} == {1}?",
-//					ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(ObjectOptionsCondition),
-//					tuple.ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ObjectOptionsCondition)));
-//				Debug.Log (string.Format ("{0} == {1}?",
-//					ActionOptionsCondition == null ? "Null" : System.Convert.ToString(ActionOptionsCondition),
-//					tuple.ActionOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionOptionsCondition)));
-//				Debug.Log (string.Format ("{0} == {1}?",
-//					ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(ActionSuggestionsCondition),
-//					tuple.ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionSuggestionsCondition)));
+				//				Debug.Log (string.Format ("{0} == {1}?",
+				//					IndicatedObjCondition == null ? "Null" : System.Convert.ToString(IndicatedObjCondition),
+				//					tuple.IndicatedObjCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedObjCondition)));
+				//				Debug.Log (string.Format ("{0} == {1}?",
+				//					GraspedObjCondition == null ? "Null" : System.Convert.ToString(GraspedObjCondition),
+				//					tuple.GraspedObjCondition == null ? "Null" : System.Convert.ToString(tuple.GraspedObjCondition)));
+				//				Debug.Log (string.Format ("{0} == {1}?",
+				//					IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(IndicatedRegionCondition),
+				//					tuple.IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedRegionCondition)));
+				//				Debug.Log (string.Format ("{0} == {1}?",
+				//					ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(ObjectOptionsCondition),
+				//					tuple.ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ObjectOptionsCondition)));
+				//				Debug.Log (string.Format ("{0} == {1}?",
+				//					ActionOptionsCondition == null ? "Null" : System.Convert.ToString(ActionOptionsCondition),
+				//					tuple.ActionOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionOptionsCondition)));
+				//				Debug.Log (string.Format ("{0} == {1}?",
+				//					ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(ActionSuggestionsCondition),
+				//					tuple.ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionSuggestionsCondition)));
 
 				bool equal = true;
 
@@ -239,7 +239,7 @@ namespace Agent
 				}
 				else {
 					equal &= System.Convert.ToString(IndicatedRegionCondition) == System.Convert.ToString(tuple.IndicatedRegionCondition);
-//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedRegionCondition, tuple.IndicatedRegionCondition)).Compile()();
+					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedRegionCondition, tuple.IndicatedRegionCondition)).Compile()();
 				}
 
 				if ((ObjectOptionsCondition == null) && (tuple.ObjectOptionsCondition == null)) {
@@ -253,7 +253,7 @@ namespace Agent
 				}
 				else {
 					equal &= System.Convert.ToString(ObjectOptionsCondition) == System.Convert.ToString(tuple.ObjectOptionsCondition);
-//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ObjectOptionsCondition, tuple.ObjectOptionsCondition)).Compile()();
+					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ObjectOptionsCondition, tuple.ObjectOptionsCondition)).Compile()();
 				}
 
 				if ((ActionOptionsCondition == null) && (tuple.ActionOptionsCondition == null)) {
@@ -267,7 +267,7 @@ namespace Agent
 				}
 				else {
 					equal &= System.Convert.ToString(ActionOptionsCondition) == System.Convert.ToString(tuple.ActionOptionsCondition);
-//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionOptionsCondition, tuple.ActionOptionsCondition)).Compile()();
+					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionOptionsCondition, tuple.ActionOptionsCondition)).Compile()();
 				}
 
 				if ((ActionSuggestionsCondition == null) && (tuple.ActionSuggestionsCondition == null)) {
@@ -281,7 +281,7 @@ namespace Agent
 				}
 				else {
 					equal &= System.Convert.ToString(ActionSuggestionsCondition) == System.Convert.ToString(tuple.ActionSuggestionsCondition);
-//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionSuggestionsCondition, tuple.ActionSuggestionsCondition)).Compile()();
+					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionSuggestionsCondition, tuple.ActionSuggestionsCondition)).Compile()();
 				}
 
 				Debug.Log (equal);
@@ -345,7 +345,7 @@ namespace Agent
 		public AgentInteraction interactionController;
 
 		[CustomEditor(typeof(DianaInteractionLogic))]
-		public class StackPreview : Editor {
+		public class DebugPreview : Editor {
 			public override void OnInspectorGUI() {
 
 				var bold = new GUIStyle(); 
@@ -367,6 +367,14 @@ namespace Agent
 						GUILayout.Label (((DianaInteractionLogic)target).StackSymbolToString (item)); 
 					}
 				}
+
+				GUILayout.Label("State History", bold);
+				if (((DianaInteractionLogic)target).StateHistory != null) {
+					foreach (PDAState item in ((DianaInteractionLogic)target).StateHistory) {
+						GUILayout.Label (item.Name); 
+					}
+				}
+
 			}
 		}
 
@@ -379,11 +387,11 @@ namespace Agent
 		Dictionary<PDASymbol,List<Concept>> symbolConceptMap;
 
 		//?
-//		Dictionary<Region,string> regionLabels = new Dictionary<Region, string> ();
-//		Dictionary<string,string> directionPreds = new Dictionary<string, string> ();
-//		Dictionary<string,string> directionLabels = new Dictionary<string, string> ();
-//		Dictionary<string,string> oppositeDir = new Dictionary<string, string> ();
-//		Dictionary<string,string> relativeDir = new Dictionary<string, string> ();
+		//		Dictionary<Region,string> regionLabels = new Dictionary<Region, string> ();
+		//		Dictionary<string,string> directionPreds = new Dictionary<string, string> ();
+		//		Dictionary<string,string> directionLabels = new Dictionary<string, string> ();
+		//		Dictionary<string,string> oppositeDir = new Dictionary<string, string> ();
+		//		Dictionary<string,string> relativeDir = new Dictionary<string, string> ();
 
 		//?
 		//Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
@@ -412,8 +420,25 @@ namespace Agent
 			return ActionSuggestions;
 		}
 
+		protected string GetMostRecentInputSymbolName(object arg) {
+			return GetLastInputSymbol ().Name;
+		}
+
+		protected List<string> GetMostRecentInputSymbolNameAsList(object arg) {
+			return new List<string>(new string[]{GetLastInputSymbol ().Name});
+		}
+
 		public object NullObject(object arg) {
 			return null;
+		}
+
+		public List<string> GetActionOptionsIfNull(object arg) {
+			if (ActionSuggestions.Count == 0) {
+				return ActionOptions;
+			}
+			else {
+				return null;
+			}
 		}
 
 		public List<PDASymbol> PushObjectOptions (object arg) {
@@ -424,7 +449,7 @@ namespace Agent
 					null, null,
 					(IndicatedRegion == null) ? ObjectOptions.GetRange(0,s+1) : ObjectOptions.OrderByDescending(
 						m => (m.transform.position - IndicatedRegion.center).magnitude).ToList().GetRange(0,s+1),
-					null, new List<string>())).ToList ();
+					null, null)).ToList ();
 
 			return symbolList;
 		}
@@ -442,7 +467,7 @@ namespace Agent
 
 			return symbolList;
 		}
-						
+
 		public List<string> GenerateGraspCommand (object arg) {
 			List<string> actionList = new List<string> (
 				new string[]{ "grasp({0})" });
@@ -457,29 +482,64 @@ namespace Agent
 			return actionList;
 		}
 
+		public List<string> GenerateDirectedPutCommand (object arg) {
+			List<string> actionList = new List<string> (
+				new string[]{ "put({0}" + string.Format (",{0})", 
+					GetGestureContent (
+						RemoveInputSymbolType (
+							RemoveGestureTrigger (
+								ActionSuggestions[0], GetGestureTrigger (ActionSuggestions[0])),
+							GetInputSymbolType (ActionSuggestions[0])),
+						"grab move").ToLower()) });
+
+			return actionList;
+		}
+
+		public List<string> GenerateDirectedSlideCommand (object arg) {
+			List<string> actionList = (ActionSuggestions.Count > 0) ? 
+				new List<string> (
+					new string[]{ "slide({0}" + string.Format (",{0})", 
+						GetGestureContent (
+							RemoveInputSymbolType (
+								RemoveGestureTrigger (
+									ActionSuggestions[0], GetGestureTrigger (ActionSuggestions[0])),
+								GetInputSymbolType (ActionSuggestions[0])),
+							"push").ToLower()) }) :
+				new List<string> (
+					new string[]{ "slide({0}" + string.Format (",{0})", 
+						GetGestureContent (
+							RemoveInputSymbolType (
+								RemoveGestureTrigger (
+									ActionOptions[0], GetGestureTrigger (ActionOptions[0])),
+								GetInputSymbolType (ActionOptions[0])),
+							"push").ToLower()) });
+
+			return actionList;
+		}
+
 		public override void Start() {
 			// define the grammar
 			/*
 			  	// O: define the object
-			 	// A: define the action
-				// D: disambiguate
-				// d: deixis (G)
-				// v: direction (S)
-				// c: color (S)
-				// s: size (S,G)
-				// y: posack (S,G)
-				// n: negack (S,G)
-				// a: action (S,G)
-			 	S ::= OA|AO
-			 	O ::= d|dD|v|vD|c|cD|s|sD
+			// A: define the action
+			// D: disambiguate
+			// d: deixis (G)
+			// v: direction (S)
+			// c: color (S)
+			// s: size (S,G)
+			// y: posack (S,G)
+			// n: negack (S,G)
+			// a: action (S,G)
+			S ::= OA|AO
+				O ::= d|dD|v|vD|c|cD|s|sD
 				A ::= a|aD|v|vD
 				D ::= d|dD|v|vD|c|cD|s|sD|y|yD|n|nD
-			 */
+				*/
 
-			// input symbols: received messages
-			// stack symbols: array of state variables
+				// input symbols: received messages
+				// stack symbols: array of state variables
 
-			base.Start ();
+				base.Start ();
 
 			States.Add(new PDAState("StartState",null));
 			States.Add(new PDAState("BeginInteraction",null));
@@ -497,6 +557,7 @@ namespace Agent
 					GetState("Suggest"),
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null))));
 
+			States.Add(new PDAState("TrackPointing",null));
 			States.Add(new PDAState("SituateDeixis",
 				new TransitionGate(
 					new FunctionDelegate(EpistemicallyCertain),
@@ -533,15 +594,24 @@ namespace Agent
 					GetState("Suggest"),
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 						new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptions))))));
-			
+
 			States.Add(new PDAState("StopGrab",null));
+			States.Add(new PDAState("StartPush",null));
+			States.Add(new PDAState("StopPush",
+				new TransitionGate(
+					new FunctionDelegate(EpistemicallyCertain),
+					GetState("Suggest"),
+					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+						new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptions))))));
+
 			States.Add(new PDAState("ConfirmObject",null));
 			States.Add(new PDAState("RequestObject",
 				new TransitionGate(
 					new FunctionDelegate(EpistemicallyCertain),
 					GetState("Suggest"),
-					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null))));
-			
+					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+						new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptionsIfNull))))));
+
 			States.Add(new PDAState("PlaceInRegion",null));
 			States.Add(new PDAState("RequestAction",null));
 			States.Add(new PDAState("ComposeObjectAndAction",null));
@@ -553,19 +623,45 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G engage start"));
 			InputSymbols.Add(new PDASymbol("G left point high"));
 			InputSymbols.Add(new PDASymbol("G right point high"));
+			InputSymbols.Add(new PDASymbol("G left point low"));
+			InputSymbols.Add(new PDASymbol("G right point low"));
 			InputSymbols.Add(new PDASymbol("G posack high"));
 			InputSymbols.Add(new PDASymbol("G negack high"));
+			InputSymbols.Add(new PDASymbol("G posack low"));
+			InputSymbols.Add(new PDASymbol("G negack low"));
 			InputSymbols.Add(new PDASymbol("G grab high"));
+			InputSymbols.Add(new PDASymbol("G grab low"));
 			InputSymbols.Add(new PDASymbol("G grab move left high"));
 			InputSymbols.Add(new PDASymbol("G grab move right high"));
 			InputSymbols.Add(new PDASymbol("G grab move front high"));
 			InputSymbols.Add(new PDASymbol("G grab move back high"));
 			InputSymbols.Add(new PDASymbol("G grab move up high"));
 			InputSymbols.Add(new PDASymbol("G grab move down high"));
+			InputSymbols.Add(new PDASymbol("G grab move left low"));
+			InputSymbols.Add(new PDASymbol("G grab move right low"));
+			InputSymbols.Add(new PDASymbol("G grab move front low"));
+			InputSymbols.Add(new PDASymbol("G grab move back low"));
+			InputSymbols.Add(new PDASymbol("G grab move up low"));
+			InputSymbols.Add(new PDASymbol("G grab move down low"));
 			InputSymbols.Add(new PDASymbol("G grab stop"));
+			InputSymbols.Add(new PDASymbol("G push left high"));
+			InputSymbols.Add(new PDASymbol("G push left low"));
+			InputSymbols.Add(new PDASymbol("G push left stop"));
+			InputSymbols.Add(new PDASymbol("G push right high"));
+			InputSymbols.Add(new PDASymbol("G push right low"));
+			InputSymbols.Add(new PDASymbol("G push right stop"));
+			InputSymbols.Add(new PDASymbol("G push front high"));
+			InputSymbols.Add(new PDASymbol("G push front low"));
+			InputSymbols.Add(new PDASymbol("G push front stop"));
+			InputSymbols.Add(new PDASymbol("G push back high"));
+			InputSymbols.Add(new PDASymbol("G push back low"));
+			InputSymbols.Add(new PDASymbol("G push back stop"));
 			InputSymbols.Add(new PDASymbol("G engage stop"));
 			InputSymbols.Add(new PDASymbol("S YES"));
 			InputSymbols.Add(new PDASymbol("S NO"));
+			InputSymbols.Add(new PDASymbol("S THIS"));
+			InputSymbols.Add(new PDASymbol("S THAT"));
+			InputSymbols.Add(new PDASymbol("S THERE"));
 			InputSymbols.Add(new PDASymbol("S GRAB"));
 			InputSymbols.Add(new PDASymbol("S PUT"));
 			InputSymbols.Add(new PDASymbol("S PUSH"));
@@ -584,6 +680,8 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("S BACK"));
 			InputSymbols.Add(new PDASymbol("S UP"));
 			InputSymbols.Add(new PDASymbol("S DOWN"));
+			InputSymbols.Add(new PDASymbol("P l"));
+			InputSymbols.Add(new PDASymbol("P r"));
 
 			List<PDASymbol> colors = GetInputSymbolsByName (
 				"S RED",
@@ -612,7 +710,8 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(											// instruction operated by input signal
 				GetStates("Wait"),																// in this state
-				GetInputSymbolsByName("G left point high","G right point high"),				// when we get this message
+				GetInputSymbolsByName("G left point high","G right point high",
+					"S THIS","S THAT","S THERE"),												// when we get this message
 				GenerateStackSymbol(null, null, null, null, null, null),						// and this is the top of the stack
 				GetState("SituateDeixis"),														// go to this state
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,				// and do this to the stack
@@ -620,9 +719,21 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G left point high","G right point high"),
+				GetInputSymbolsByName("G left point high","G right point high",
+					"S THIS","S THAT","S THERE"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, null, null, null, null
+				),
+				GetState("SituateDeixis"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, new Region(), null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("G left point high","G right point high",
+					"S THIS","S THAT","S THERE"),
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, null, null, null, null
 				),
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -693,11 +804,78 @@ namespace Agent
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S LEFT","S RIGHT","S FRONT","S BACK"),
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, 
+					null, null, null, null
+				),	
+				GetState("StopGrabMove"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, 
+						new FunctionDelegate(GetMostRecentInputSymbolNameAsList), null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("G push left high",
+					"G push right high",
+					"G push front high",
+					"G push back high"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("StartPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S LEFT","S RIGHT","S FRONT","S BACK"),
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, 
+					null, null, null, null
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, 
+						new FunctionDelegate(GetMostRecentInputSymbolNameAsList), null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("G left point low","G right point low"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+				GetState("Suggest"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null,null,null,null,null,null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("G grab low","G grab move left low", "G grab move right low",
+					"G grab move front low","G grab move back low","G grab move up low",
+					"G grab move down low","G push left low","G push right low",
+					"G push front low","G push back low"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+				GetState("Suggest"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptions)))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("P l","P r"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+				GetState("TrackPointing"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("TrackPointing"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+				GetState("Wait"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
 				GetInputSymbolsByName("S YES","G posack high"),
 				GenerateStackSymbolFromConditions(											// condition set
 					null, null, null,
-					null, null, (s) => s.Count > 0											// condition: # suggestions > 0
+					null, null, (s) => s.Count > 0														// condition: # suggestions > 0
 				),	
 				GetState("Confirm"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
@@ -731,7 +909,7 @@ namespace Agent
 				),	
 				GetState("RegionAsGoal"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
-			
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
 				GetInputSymbolsByName("S NO","G negack high"),
@@ -788,6 +966,118 @@ namespace Agent
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null, null, null, null, null, null))));
 
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, null,
+					null, (a) => a.Count == 0,
+					(s) => s[0].Contains("grab move")
+				),	
+				GetState("StopGrabMove"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, null,
+					null, (a) => (a.Count > 0) && (a[0].Contains("grab move")),
+					(s) => s[0].Contains("grab move")
+				),	
+				GetState("RequestObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null,
+						new FunctionDelegate(GetActionSuggestions), null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, null,
+					null, (a) => a.Count == 0,
+					(s) => s[0].Contains("grab move")
+				),	
+				GetState("RequestObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null,
+						new FunctionDelegate(GetActionSuggestions), null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, null,
+					null, (a) => (a.Count > 0) && (a[0].Contains("push")),
+					(s) => s[0].Contains("push")
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, null,
+					null, (a) => (a.Count > 0) && (a[0].Contains("push")),
+					(s) => s[0].Contains("push")
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, null,
+					null, (a) => a.Count == 0,
+					(s) => s[0].Contains("push")
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, null,
+					null, (a) => a.Count == 0,
+					(s) => s[0].Contains("push")
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, null,
+					null, (a) => (a.Count > 0) && (a[0].Contains("push")),
+					(s) => s[0].Contains("push")
+				),	
+				GetState("RequestObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, 
+						new FunctionDelegate(GenerateDirectedSlideCommand), null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Confirm"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, null,
+					null, (a) => a.Count == 0,
+					(s) => s[0].Contains("push")
+				),	
+				GetState("RequestObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null, 
+						new FunctionDelegate(GetActionSuggestions), null))));
+
 			TransitionRelation.Add(new PDAInstruction(										// instruction operated by stack rewrite
 				GetStates("SituateDeixis"),
 				null,																		// no input symbol
@@ -797,6 +1087,17 @@ namespace Agent
 					null, null, null
 				),	
 				GetState("InterpretDeixis"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));	
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("SituateDeixis"),
+				null,								
+				GenerateStackSymbolFromConditions(	
+					null, null,
+					(r) => r == null,
+					null, null, null
+				),	
+				GetState("RequestObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));	
 
 			TransitionRelation.Add(new PDAInstruction(
@@ -898,10 +1199,35 @@ namespace Agent
 				GetStates("RegionAsGoal"),
 				GetInputSymbolsByName("G posack high","S YES"),
 				GenerateStackSymbolFromConditions(
-					null, null, (r) => r != null && r.max != r.min,
+					(o) => o == null, (g) => g == null,
+					(r) => r != null && r.max != r.min,
 					null, null, null
 				),	
 				GetState("RequestObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, new List<GameObject>(), 
+						new FunctionDelegate(GeneratePutAtRegionCommand), new List<string>()))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RegionAsGoal"),
+				GetInputSymbolsByName("G posack high","S YES"),
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, (r) => r != null && r.max != r.min,
+					null, null, null
+				),	
+				GetState("ComposeObjectAndAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, new List<GameObject>(), 
+						new FunctionDelegate(GeneratePutAtRegionCommand), new List<string>()))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RegionAsGoal"),
+				GetInputSymbolsByName("G posack high","S YES"),
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, (r) => r != null && r.max != r.min,
+					null, null, null
+				),	
+				GetState("ComposeObjectAndAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null, null, null, new List<GameObject>(), 
 						new FunctionDelegate(GeneratePutAtRegionCommand), new List<string>()))));
@@ -941,25 +1267,18 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
+				GetInputSymbolsByName("P l","P r"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+				GetState("TrackPointing"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RequestObject"),
 				GetInputSymbolsByName("G left point high","G right point high"),
-				GenerateStackSymbolFromConditions(
-					null, null, (r) => r != null && r.max != r.min,
-					null, null, null
-				),	
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null,null,new Region(),null,null,null))));
-
-//			TransitionRelation.Add(new PDAInstruction(
-//				GetStates("RequestObject"),
-//				GetInputSymbolsByName("G left point high","G right point high"),
-//				GenerateStackSymbolFromConditions(
-//					null, null, null,
-//					null, (a) => a.Count > 0, null
-//				),	
-//				GetState("SituateDeixis"),
-//				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-//					new StackSymbolContent(null,null,new Region(),null,null,null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
@@ -1013,15 +1332,50 @@ namespace Agent
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ConfirmObject"),
+				null,
+				GenerateStackSymbolFromConditions((o) => o != null, null,
+					(r) => r == null, null, null,
+					(s) => ((s.Count > 0) && (s[0].Contains("grab move")))
+				),	
+				GetState("StopGrabMove"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ComposeObjectAndAction"),
 				null,
 				GenerateStackSymbolFromConditions((o) => o != null, null,
 					null, null,
 					(a) => ((a.Count > 0) &&
-						(a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0),
+						(a.Where(aa => aa.Contains("{0}") || 
+							aa.Contains("slide"))).ToList().Count == 0),
 					null),	
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ComposeObjectAndAction"),
+				null,
+				GenerateStackSymbolFromConditions(null, (g) => g != null,
+					null, null,
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("{0}") || 
+							aa.Contains("slide"))).ToList().Count == 0),
+					null),	
+				GetState("ConfirmEvent"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ComposeObjectAndAction"),
+				null,
+				GenerateStackSymbolFromConditions((o) => o != null, null,
+					null, null,
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("slide"))).ToList().Count > 0),
+					null),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null,null,null,null,null,new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmObject"),
@@ -1074,22 +1428,66 @@ namespace Agent
 					null, null, null, null
 				),	
 				GetState("StopGrabMove"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrabMove"),
-				GetInputSymbolsByName("G grab move left high",
-					"G grab move right high",
-					"G grab move front high",
-					"G grab move back high",
-					"G grab move up high",
-					"G grab move down high"),
+				GetInputSymbolsByName("G grab move left high","G grab move left low",
+					"G grab move right high","G grab move right low",
+					"G grab move front high","G grab move front low",
+					"G grab move back high","G grab move back low",
+					"G grab move up high","G grab move up low",
+					"G grab move down high","G grab move down low"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
 				),	
 				GetState("StartGrabMove"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("StartPush"),
+				GetInputSymbolsByName("G push left stop",
+					"G push right stop",
+					"G push front stop",
+					"G push back stop"),
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, 
+					null, null, null, null
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("StartPush"),
+				GetInputSymbolsByName("G push left stop",
+					"G push right stop",
+					"G push front stop",
+					"G push back stop"),
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, 
+					null, null, null, null
+				),	
+				GetState("StopPush"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("StartPush"),
+				GetInputSymbolsByName("G push left stop",
+					"G push right stop",
+					"G push front stop",
+					"G push back stop"),
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, 
+					null, null, null, null
+				),	
+				GetState("RequestObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, 
+						new FunctionDelegate(GenerateDirectedSlideCommand), null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StopGrab"),
@@ -1105,17 +1503,45 @@ namespace Agent
 				GetStates("StopGrabMove"),
 				null,
 				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, 
-					null, null, (a) => a.Count > 0, null
+					null, null, null, null, (a) => a.Count > 1, null
 				),	
 				GetState("DisambiguateEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
+				GetStates("StopGrabMove"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, (a) => a.Count == 1, null
+				),	
+				GetState("ConfirmEvent"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null,null,null,null,null,null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("StopPush"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, (a) => a.Count > 1, null
+				),	
+				GetState("DisambiguateEvent"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("StopPush"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, (a) => a.Count == 1, null
+				),	
+				GetState("ConfirmEvent"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null,null,null,null,null,null))));
+
+			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
 				GetInputSymbolsByName("G posack high","S YES"),
 				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, null,
+					null, null, null,
 					null, (a) => a.Count > 0, null
 				),	
 				GetState("ConfirmEvent"),
@@ -1126,7 +1552,7 @@ namespace Agent
 				GetStates("DisambiguateEvent"),
 				GetInputSymbolsByName("G negack high","S NO"),
 				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, null,
+					null, null, null,
 					null, (a) => a.Count > 1, null
 				),	
 				GetState("DisambiguateEvent"),
@@ -1136,18 +1562,19 @@ namespace Agent
 				GetStates("DisambiguateEvent"),
 				GetInputSymbolsByName("G negack high","S NO"),
 				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, null,
+					null, null, null,
 					null, (a) => a.Count == 1, null
 				),	
 				GetState("Confusion"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
-			
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Confusion"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("Wait"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
+					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
 			TransitionRelation.Add (new PDAInstruction(
 				GetStates("EndState"),
@@ -1167,34 +1594,34 @@ namespace Agent
 			foreach (PDAInstruction instruction in TransitionRelation) {
 				if (instruction.ToState.Content != null) {
 					if (instruction.ToState.Content.GetType () == typeof(TransitionGate)) {
-//						Debug.Log (((TransitionGate)instruction.ToState.Content).RejectState.Name);
-//						Debug.Log (instruction.FromState.Name);
-//						Debug.Log (TransitionRelation.Where (i => (i.FromState == ((TransitionGate)instruction.ToState.Content).RejectState) &&
-//							(i.ToState == instruction.FromState)).ToList ().Count);
+						//						Debug.Log (((TransitionGate)instruction.ToState.Content).RejectState.Name);
+						//						Debug.Log (instruction.FromState.Name);
+						//						Debug.Log (TransitionRelation.Where (i => (i.FromState == ((TransitionGate)instruction.ToState.Content).RejectState) &&
+						//							(i.ToState == instruction.FromState)).ToList ().Count);
 						if (instruction.InputSymbols != null) {
-//							Debug.Log (gateInstructions.Where (i => ((i.FromState == instruction.FromState) &&
-//							(i.InputSymbols == null) &&
-//							((i.StackSymbol.Content.GetType() == typeof(StackSymbolContent) && 
-//								(((StackSymbolContent)i.StackSymbol.Content).Equals ((StackSymbolContent)instruction.StackSymbol.Content))) ||
-//							(i.StackSymbol.Content.GetType() == typeof(StackSymbolConditions) && 
-//								(((StackSymbolConditions)i.StackSymbol.Content).Equals ((StackSymbolConditions)instruction.StackSymbol.Content)))) &&
-//							(i.ToState == ((TransitionGate)instruction.ToState.Content).RejectState) &&
-//							(i.StackOperation.Type == PDAStackOperation.PDAStackOperationType.None) &&
-//							(i.StackOperation.Content == null))).ToList ().Count);
+							//							Debug.Log (gateInstructions.Where (i => ((i.FromState == instruction.FromState) &&
+							//							(i.InputSymbols == null) &&
+							//							((i.StackSymbol.Content.GetType() == typeof(StackSymbolContent) && 
+							//								(((StackSymbolContent)i.StackSymbol.Content).Equals ((StackSymbolContent)instruction.StackSymbol.Content))) ||
+							//							(i.StackSymbol.Content.GetType() == typeof(StackSymbolConditions) && 
+							//								(((StackSymbolConditions)i.StackSymbol.Content).Equals ((StackSymbolConditions)instruction.StackSymbol.Content)))) &&
+							//							(i.ToState == ((TransitionGate)instruction.ToState.Content).RejectState) &&
+							//							(i.StackOperation.Type == PDAStackOperation.PDAStackOperationType.None) &&
+							//							(i.StackOperation.Content == null))).ToList ().Count);
 							if (gateInstructions.Where (i => ((i.FromStates == instruction.FromStates) &&
-							    (i.InputSymbols == null) &&
+								(i.InputSymbols == null) &&
 								((i.StackSymbol.Content.GetType() == typeof(StackSymbolContent) && 
 									(((StackSymbolContent)i.StackSymbol.Content).Equals ((StackSymbolContent)instruction.StackSymbol.Content))) ||
-								(i.StackSymbol.Content.GetType() == typeof(StackSymbolConditions) && 
-									(((StackSymbolConditions)i.StackSymbol.Content).Equals ((StackSymbolConditions)instruction.StackSymbol.Content)))) &&
-							    (i.ToState == ((TransitionGate)instruction.ToState.Content).RejectState) &&
-							    (i.StackOperation.Type == PDAStackOperation.PDAStackOperationType.None) &&
-							    (i.StackOperation.Content == null))).ToList ().Count == 0) {
+									(i.StackSymbol.Content.GetType() == typeof(StackSymbolConditions) && 
+										(((StackSymbolConditions)i.StackSymbol.Content).Equals ((StackSymbolConditions)instruction.StackSymbol.Content)))) &&
+								(i.ToState == ((TransitionGate)instruction.ToState.Content).RejectState) &&
+								(i.StackOperation.Type == PDAStackOperation.PDAStackOperationType.None) &&
+								(i.StackOperation.Content == null))).ToList ().Count == 0) {
 								PDAInstruction newInstruction = new PDAInstruction (instruction.FromStates,
 									instruction.InputSymbols,
-	                                instruction.StackSymbol,
-	                                ((TransitionGate)instruction.ToState.Content).RejectState,
-	                                new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null));
+									instruction.StackSymbol,
+									((TransitionGate)instruction.ToState.Content).RejectState,
+									new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null));
 								gateInstructions.Add (newInstruction);
 								Debug.Log (string.Format ("Adding gate instruction {0} because {1} ToState {2} has TransitionGate to RejectState {3}",
 									string.Format ("{0},{1},{2},{3},{4}",
@@ -1258,29 +1685,29 @@ namespace Agent
 			StackSymbolContent symbolContent =
 				new StackSymbolContent (
 					indicatedObj == null ? (GameObject)GetIndicatedObj (null) :
-						indicatedObj.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)indicatedObj).Function : indicatedObj.GetType () == typeof(FunctionDelegate) ?
-						(GameObject)((FunctionDelegate)indicatedObj).Invoke (null) : (GameObject)indicatedObj,
+					indicatedObj.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)indicatedObj).Function : indicatedObj.GetType () == typeof(FunctionDelegate) ?
+					(GameObject)((FunctionDelegate)indicatedObj).Invoke (null) : (GameObject)indicatedObj,
 					graspedObj == null ? (GameObject)GetGraspedObj (null) :
-						graspedObj.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)graspedObj).Function : graspedObj.GetType () == typeof(FunctionDelegate) ?
-						(GameObject)((FunctionDelegate)graspedObj).Invoke (null) : (GameObject)graspedObj,
+					graspedObj.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)graspedObj).Function : graspedObj.GetType () == typeof(FunctionDelegate) ?
+					(GameObject)((FunctionDelegate)graspedObj).Invoke (null) : (GameObject)graspedObj,
 					indicatedRegion == null ? (Region)GetIndicatedRegion (null) :
-						indicatedRegion.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)indicatedRegion).Function : indicatedRegion.GetType () == typeof(FunctionDelegate) ?
-						(Region)((FunctionDelegate)indicatedRegion).Invoke (null) : (Region)indicatedRegion,
+					indicatedRegion.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)indicatedRegion).Function : indicatedRegion.GetType () == typeof(FunctionDelegate) ?
+					(Region)((FunctionDelegate)indicatedRegion).Invoke (null) : (Region)indicatedRegion,
 					objectOptions == null ? GetObjectOptions (null) :
-						objectOptions.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)objectOptions).Function : objectOptions.GetType () == typeof(FunctionDelegate) ?
-						(List<GameObject>)((FunctionDelegate)objectOptions).Invoke (null) : (List<GameObject>)objectOptions,
+					objectOptions.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)objectOptions).Function : objectOptions.GetType () == typeof(FunctionDelegate) ?
+					(List<GameObject>)((FunctionDelegate)objectOptions).Invoke (null) : (List<GameObject>)objectOptions,
 					actionOptions == null ? GetActionOptions (null) :
-						actionOptions.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)actionOptions).Function : actionOptions.GetType () == typeof(FunctionDelegate) ?
-						(List<string>)((FunctionDelegate)actionOptions).Invoke (null) : (List<string>)actionOptions,
+					actionOptions.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)actionOptions).Function : actionOptions.GetType () == typeof(FunctionDelegate) ?
+					(List<string>)((FunctionDelegate)actionOptions).Invoke (null) : (List<string>)actionOptions,
 					actionSuggestions == null ? GetActionSuggestions (null) :
-						actionSuggestions.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)actionSuggestions).Function : actionSuggestions.GetType () == typeof(FunctionDelegate) ?
-						(List<string>)((FunctionDelegate)actionSuggestions).Invoke (null) : (List<string>)actionSuggestions
+					actionSuggestions.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)actionSuggestions).Function : actionSuggestions.GetType () == typeof(FunctionDelegate) ?
+					(List<string>)((FunctionDelegate)actionSuggestions).Invoke (null) : (List<string>)actionSuggestions
 				);
 
 			PDASymbol symbol = new PDASymbol (symbolContent);
@@ -1293,29 +1720,29 @@ namespace Agent
 			StackSymbolContent symbolContent =
 				new StackSymbolContent (
 					content.IndicatedObj == null ? (GameObject)GetIndicatedObj (null) :
-						content.IndicatedObj.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)content.IndicatedObj).Function : content.IndicatedObj.GetType () == typeof(FunctionDelegate) ?
-						(GameObject)((FunctionDelegate)content.IndicatedObj).Invoke (null) : (GameObject)content.IndicatedObj,
+					content.IndicatedObj.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)content.IndicatedObj).Function : content.IndicatedObj.GetType () == typeof(FunctionDelegate) ?
+					(GameObject)((FunctionDelegate)content.IndicatedObj).Invoke (null) : (GameObject)content.IndicatedObj,
 					content.GraspedObj == null ? (GameObject)GetGraspedObj (null) :
-						content.GraspedObj.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)content.GraspedObj).Function : content.GraspedObj.GetType () == typeof(FunctionDelegate) ?
-						(GameObject)((FunctionDelegate)content.GraspedObj).Invoke (null) : (GameObject)content.GraspedObj,
+					content.GraspedObj.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)content.GraspedObj).Function : content.GraspedObj.GetType () == typeof(FunctionDelegate) ?
+					(GameObject)((FunctionDelegate)content.GraspedObj).Invoke (null) : (GameObject)content.GraspedObj,
 					content.IndicatedRegion == null ? (Region)GetIndicatedRegion (null) :
-						content.IndicatedRegion.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)content.IndicatedRegion).Function : content.IndicatedRegion.GetType () == typeof(FunctionDelegate) ?
-						(Region)((FunctionDelegate)content.IndicatedRegion).Invoke (null) : (Region)content.IndicatedRegion,
+					content.IndicatedRegion.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)content.IndicatedRegion).Function : content.IndicatedRegion.GetType () == typeof(FunctionDelegate) ?
+					(Region)((FunctionDelegate)content.IndicatedRegion).Invoke (null) : (Region)content.IndicatedRegion,
 					content.ObjectOptions == null ? GetObjectOptions (null) :
-						content.ObjectOptions.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)content.ObjectOptions).Function : content.ObjectOptions.GetType () == typeof(FunctionDelegate) ?
-						(List<GameObject>)((FunctionDelegate)content.ObjectOptions).Invoke (null) : (List<GameObject>)content.ObjectOptions,
+					content.ObjectOptions.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)content.ObjectOptions).Function : content.ObjectOptions.GetType () == typeof(FunctionDelegate) ?
+					(List<GameObject>)((FunctionDelegate)content.ObjectOptions).Invoke (null) : (List<GameObject>)content.ObjectOptions,
 					content.ActionOptions == null ? GetActionOptions (null) :
-						content.ActionOptions.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)content.ActionOptions).Function : content.ActionOptions.GetType () == typeof(FunctionDelegate) ?
-						(List<string>)((FunctionDelegate)content.ActionOptions).Invoke (null) : (List<string>)content.ActionOptions,
+					content.ActionOptions.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)content.ActionOptions).Function : content.ActionOptions.GetType () == typeof(FunctionDelegate) ?
+					(List<string>)((FunctionDelegate)content.ActionOptions).Invoke (null) : (List<string>)content.ActionOptions,
 					content.ActionSuggestions == null ? GetActionSuggestions (null) :
-						content.ActionSuggestions.GetType () == typeof(DelegateFactory) ? 
-						((DelegateFactory)content.ActionSuggestions).Function : content.ActionSuggestions.GetType () == typeof(FunctionDelegate) ?
-						(List<string>)((FunctionDelegate)content.ActionSuggestions).Invoke (null) : (List<string>)content.ActionSuggestions
+					content.ActionSuggestions.GetType () == typeof(DelegateFactory) ? 
+					((DelegateFactory)content.ActionSuggestions).Function : content.ActionSuggestions.GetType () == typeof(FunctionDelegate) ?
+					(List<string>)((FunctionDelegate)content.ActionSuggestions).Invoke (null) : (List<string>)content.ActionSuggestions
 				);
 
 			PDASymbol symbol = new PDASymbol (symbolContent);
@@ -1359,29 +1786,29 @@ namespace Agent
 
 					return string.Format ("[{0},{1},{2},{3},{4},{5}]",
 						content.IndicatedObj == null ? "Null" : 
-							content.IndicatedObj.GetType() == typeof(FunctionDelegate) ? 
-							((FunctionDelegate)content.IndicatedObj).ToString() :
-							System.Convert.ToString (((GameObject)content.IndicatedObj).name),
+						content.IndicatedObj.GetType() == typeof(FunctionDelegate) ? 
+						((FunctionDelegate)content.IndicatedObj).ToString() :
+						System.Convert.ToString (((GameObject)content.IndicatedObj).name),
 						content.GraspedObj == null ? "Null" : 
-							content.GraspedObj.GetType() == typeof(FunctionDelegate) ? 
-							((FunctionDelegate)content.GraspedObj).ToString() :
-							System.Convert.ToString (((GameObject)content.GraspedObj).name),
+						content.GraspedObj.GetType() == typeof(FunctionDelegate) ? 
+						((FunctionDelegate)content.GraspedObj).ToString() :
+						System.Convert.ToString (((GameObject)content.GraspedObj).name),
 						content.IndicatedRegion == null ? "Null" : 
-							content.IndicatedRegion.GetType() == typeof(FunctionDelegate) ? 
-							((FunctionDelegate)content.IndicatedRegion).ToString() :
-							Helper.RegionToString ((Region)content.IndicatedRegion),
+						content.IndicatedRegion.GetType() == typeof(FunctionDelegate) ? 
+						((FunctionDelegate)content.IndicatedRegion).ToString() :
+						Helper.RegionToString ((Region)content.IndicatedRegion),
 						content.ObjectOptions == null ? "Null" : 
-							content.ObjectOptions.GetType() == typeof(FunctionDelegate) ? 
-							((FunctionDelegate)content.ObjectOptions).ToString() :
-							string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)content.ObjectOptions).Select (o => o.name).ToArray ())),
+						content.ObjectOptions.GetType() == typeof(FunctionDelegate) ? 
+						((FunctionDelegate)content.ObjectOptions).ToString() :
+						string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)content.ObjectOptions).Select (o => o.name).ToArray ())),
 						content.ActionOptions == null ? "Null" : 
-							content.ActionOptions.GetType() == typeof(FunctionDelegate) ? 
-							((FunctionDelegate)content.ActionOptions).ToString() :
-							string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionOptions).ToArray ())),
+						content.ActionOptions.GetType() == typeof(FunctionDelegate) ? 
+						((FunctionDelegate)content.ActionOptions).ToString() :
+						string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionOptions).ToArray ())),
 						content.ActionSuggestions == null ? "Null" : 
-							content.ActionSuggestions.GetType() == typeof(FunctionDelegate) ? 
-							((FunctionDelegate)content.ActionSuggestions).ToString() :
-							string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionSuggestions).ToArray ())));
+						content.ActionSuggestions.GetType() == typeof(FunctionDelegate) ? 
+						((FunctionDelegate)content.ActionSuggestions).ToString() :
+						string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionSuggestions).ToArray ())));
 				} 
 				else if (symbol.Content.GetType () == typeof(StackSymbolConditions)) {
 					StackSymbolConditions content = (StackSymbolConditions)symbol.Content;
@@ -1400,29 +1827,29 @@ namespace Agent
 
 				return string.Format ("[{0},{1},{2},{3},{4},{5}]",
 					content.IndicatedObj == null ? "Null" : 
-						content.IndicatedObj.GetType() == typeof(FunctionDelegate) ? 
-						((FunctionDelegate)content.IndicatedObj).ToString() :
-						System.Convert.ToString (((GameObject)content.IndicatedObj).name),
+					content.IndicatedObj.GetType() == typeof(FunctionDelegate) ? 
+					((FunctionDelegate)content.IndicatedObj).ToString() :
+					System.Convert.ToString (((GameObject)content.IndicatedObj).name),
 					content.GraspedObj == null ? "Null" : 
-						content.GraspedObj.GetType() == typeof(FunctionDelegate) ? 
-						((FunctionDelegate)content.GraspedObj).ToString() :
-						System.Convert.ToString (((GameObject)content.GraspedObj).name),
+					content.GraspedObj.GetType() == typeof(FunctionDelegate) ? 
+					((FunctionDelegate)content.GraspedObj).ToString() :
+					System.Convert.ToString (((GameObject)content.GraspedObj).name),
 					content.IndicatedRegion == null ? "Null" : 
-						content.IndicatedRegion.GetType() == typeof(FunctionDelegate) ? 
-						((FunctionDelegate)content.IndicatedRegion).ToString() :
-						Helper.RegionToString ((Region)content.IndicatedRegion),
+					content.IndicatedRegion.GetType() == typeof(FunctionDelegate) ? 
+					((FunctionDelegate)content.IndicatedRegion).ToString() :
+					Helper.RegionToString ((Region)content.IndicatedRegion),
 					content.ObjectOptions == null ? "Null" : 
-						content.ObjectOptions.GetType() == typeof(FunctionDelegate) ? 
-						((FunctionDelegate)content.ObjectOptions).ToString() :
-						string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)content.ObjectOptions).Select (o => o.name).ToArray ())),
+					content.ObjectOptions.GetType() == typeof(FunctionDelegate) ? 
+					((FunctionDelegate)content.ObjectOptions).ToString() :
+					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)content.ObjectOptions).Select (o => o.name).ToArray ())),
 					content.ActionOptions == null ? "Null" : 
-						content.ActionOptions.GetType() == typeof(FunctionDelegate) ? 
-						((FunctionDelegate)content.ActionOptions).ToString() :
-						string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionOptions).ToArray ())),
+					content.ActionOptions.GetType() == typeof(FunctionDelegate) ? 
+					((FunctionDelegate)content.ActionOptions).ToString() :
+					string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionOptions).ToArray ())),
 					content.ActionSuggestions == null ? "Null" : 
-						content.ActionSuggestions.GetType() == typeof(FunctionDelegate) ? 
-						((FunctionDelegate)content.ActionSuggestions).ToString() :
-						string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionSuggestions).ToArray ())));
+					content.ActionSuggestions.GetType() == typeof(FunctionDelegate) ? 
+					((FunctionDelegate)content.ActionSuggestions).ToString() :
+					string.Format ("[{0}]", String.Join (", ", ((List<string>)content.ActionSuggestions).ToArray ())));
 			}
 			else if (stackSymbol.GetType () == typeof(FunctionDelegate)) {
 				return string.Format(":{0}",((FunctionDelegate)stackSymbol).Method.Name);
@@ -1516,14 +1943,16 @@ namespace Agent
 		public string GetGestureContent(string receivedData, string gestureCode) {
 			return receivedData.Replace (gestureCode, "").Split () [1];
 		}
-			
+
 		string RemoveInputSymbolContent(string inputSymbol) {
 			return inputSymbol.Split (',') [0];
 		}
-			
+
 		void ReadInputSymbol (object sender, EventArgs e) {
 			Debug.Log (((CharacterLogicEventArgs)e).InputSymbolName);
 			Debug.Log (((CharacterLogicEventArgs)e).InputSymbolContent);
+
+			LastInputSymbol = GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName);
 
 			// update epistemic model
 			UpdateEpistemicModel(((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
@@ -1573,8 +2002,8 @@ namespace Agent
 			}
 
 			if (instruction != null) {
-//				Debug.Log (instruction.ToState);
-//				Debug.Log (instruction.ToState.Content);
+				//				Debug.Log (instruction.ToState);
+				//				Debug.Log (instruction.ToState.Content);
 				if (instruction.ToState.Content != null) {
 					object stateContent = instruction.ToState.Content;
 
@@ -1583,8 +2012,8 @@ namespace Agent
 						object result = ((ActionOptions.Count == 0) || (GetInputSymbolByName(ActionOptions[0]) == null)) ? 
 							evaluateCondition (((CharacterLogicEventArgs)e).InputSymbolName) :
 							evaluateCondition (ActionOptions[0]);
-//						Debug.Log (result.GetType ());
-//						Debug.Log (result);
+						//						Debug.Log (result.GetType ());
+						//						Debug.Log (result);
 
 						if (!(bool)result) {
 							MoveToState (((TransitionGate)stateContent).RejectState);
@@ -1600,7 +2029,7 @@ namespace Agent
 					MoveToState (instruction.ToState);
 					PerformStackOperation (instruction.StackOperation);
 				}
-					
+
 				ExecuteStateContent (((CharacterLogicEventArgs)e).InputSymbolContent);
 			}
 		}
@@ -1636,6 +2065,18 @@ namespace Agent
 			mapping.Add(GetInputSymbolByName("G grab move down high"),
 				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
 					epistemicModel.state.GetConcept("DOWN", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push left high"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("LEFT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push right high"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push front high"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("FRONT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push back high"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
 
 			mapping.Add(GetInputSymbolByName("S YES"),
 				new Concept[]{epistemicModel.state.GetConcept("YES",ConceptType.ACTION, ConceptMode.L)}.ToList());
@@ -1690,7 +2131,7 @@ namespace Agent
 					Stack.Push (GenerateStackSymbol ((StackSymbolContent)((PDASymbol)operation.Content).Content));
 				} 
 				else if ((operation.Content is IList) && (operation.Content.GetType ().IsGenericType) &&
-				         (operation.Content.GetType ().IsAssignableFrom (typeof(List<PDASymbol>)))) {
+					(operation.Content.GetType ().IsAssignableFrom (typeof(List<PDASymbol>)))) {
 					foreach (PDASymbol symbol in (List<PDASymbol>)operation.Content) {
 						Stack.Push (GenerateStackSymbol ((StackSymbolContent)((PDASymbol)symbol).Content));
 					}
@@ -1711,10 +2152,19 @@ namespace Agent
 				break;
 
 			case PDAStackOperation.PDAStackOperationType.Flush:
-				StackSymbolContent persistentContent = new StackSymbolContent(
-					null, GraspedObj, null, null, null, null);	// keep GraspedObj because it is a physical state, not a mental one
-				Stack.Clear ();
-				Stack.Push (GenerateStackSymbol(persistentContent));
+				if (operation.Content != null) {
+					if (operation.Content.GetType () == typeof(StackSymbolContent)) {
+						Stack.Clear ();
+						Stack.Push (GenerateStackSymbol ((StackSymbolContent)operation.Content));
+					}
+				}
+				else {
+					StackSymbolContent persistentContent = new StackSymbolContent (
+						null, GraspedObj, null, null, null, null);	// keep GraspedObj because it is a physical state, not a mental one
+					Stack.Clear ();
+					Stack.Push (GenerateStackSymbol (persistentContent));
+				}
+
 				break;
 
 			default:
@@ -1737,7 +2187,7 @@ namespace Agent
 			instructions = instructions.Where (i =>
 				(i.InputSymbols == null && inputSymbol == null) || (i.InputSymbols != null && i.InputSymbols.Contains(inputSymbol))).ToList();
 
-//			Debug.Log (instructions.Count);
+			Debug.Log (instructions.Count);
 
 			if (stackSymbol.GetType () == typeof(StackSymbolContent)) {
 				//instructions = instructions.Where (i => (i.StackSymbol.Content.GetType() == typeof(StackSymbolContent))).ToList();
@@ -1752,12 +2202,12 @@ namespace Agent
 			instructions = instructions.Where(i => !(instructions.Where (j => ((j.ToState.Content != null) &&
 				(j.ToState.Content.GetType() == typeof(TransitionGate)))).Select(j => 
 					((TransitionGate)j.ToState.Content).RejectState).ToList()).Contains(i.ToState)).ToList();
-//			else if (stackSymbol.GetType () == typeof(StackSymbolConditions)) {
-//				instructions = instructions.Where (i => (i.StackSymbol.Content.GetType() == typeof(StackSymbolConditions))).ToList();
-//				instructions = instructions.Where (i => ((i.StackSymbol.Content as StackSymbolConditions) == (stackSymbol as StackSymbolConditions))).ToList();
-//			}
+			//			else if (stackSymbol.GetType () == typeof(StackSymbolConditions)) {
+			//				instructions = instructions.Where (i => (i.StackSymbol.Content.GetType() == typeof(StackSymbolConditions))).ToList();
+			//				instructions = instructions.Where (i => ((i.StackSymbol.Content as StackSymbolConditions) == (stackSymbol as StackSymbolConditions))).ToList();
+			//			}
 
-//			Debug.Log (instructions.Count);
+			//			Debug.Log (instructions.Count);
 
 			return instructions;
 		}
@@ -1773,6 +2223,8 @@ namespace Agent
 			CurrentState = state;
 			Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
 				StackSymbolToString(GetCurrentStackSymbol())));
+
+			StateHistory.Push (CurrentState);
 		}
 
 		void ExecuteStateContent(object tempMessage = null) {

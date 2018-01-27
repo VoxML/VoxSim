@@ -189,7 +189,7 @@ public class JointGestureDemo : AgentInteraction {
 		directionLabels.Add ("front", "in front of");
 		directionLabels.Add ("back", "behind");
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 		if (csuClient == null) {
@@ -209,8 +209,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		if (leftRegion == null) {
 			leftRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
-					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+				Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
@@ -226,8 +226,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		if (rightRegion == null) {
 			rightRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+				Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
@@ -243,8 +243,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		if (frontRegion == null) {
 			frontRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
+				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+				Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
 				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 
 					Helper.GetObjectWorldSize(demoSurface).center.z));
 			frontRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -259,8 +259,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		if (backRegion == null) {
 			backRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
-					Helper.GetObjectWorldSize(demoSurface).center.z),
+				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+				Helper.GetObjectWorldSize(demoSurface).center.z),
 				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			backRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -316,7 +316,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (highlightOscillateDirection == 1) { // grow
 				regionHighlight.transform.localScale = new Vector3 (regionHighlight.transform.localScale.x + Time.deltaTime * highlightOscSpeed,
 					regionHighlight.transform.localScale.y, regionHighlight.transform.localScale.z + Time.deltaTime * highlightOscSpeed);
-					
+
 				if (regionHighlight.transform.localScale.x >= (vectorConeRadius * .2f) * highlightOscUpper) {
 					highlightOscillateDirection *= -1;	
 				}
@@ -414,125 +414,125 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (fusionMessage);
 			switch (messageStr.ToLower ()) {
 			case "yes":
-//				conceptL = epistemicModel.state.GetConcept ("YES", ConceptType.ACTION, ConceptMode.L);
-//				conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
-//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-//
-//				conceptL.Certainty = 1.0;
-//
-//				if (conceptG.Certainty > 0.0) {
-//					relation.Certainty = 1.0;
-//				}
-//
-//				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
-//
-//				Acknowledge (true);
+				//				conceptL = epistemicModel.state.GetConcept ("YES", ConceptType.ACTION, ConceptMode.L);
+				//				conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
+				//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+				//
+				//				conceptL.Certainty = 1.0;
+				//
+				//				if (conceptG.Certainty > 0.0) {
+				//					relation.Certainty = 1.0;
+				//				}
+				//
+				//				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
+				//
+				//				Acknowledge (true);
 				break;
 			case "no":
-//				conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
-//				conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
-//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-//
-//				conceptL.Certainty = 1.0;
-//
-//				if (conceptG.Certainty > 0.0) {
-//					relation.Certainty = 1.0;
-//				}
-//
-//				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
-//
-//				Acknowledge (false);
+				//				conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
+				//				conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
+				//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+				//
+				//				conceptL.Certainty = 1.0;
+				//
+				//				if (conceptG.Certainty > 0.0) {
+				//					relation.Certainty = 1.0;
+				//				}
+				//
+				//				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
+				//
+				//				Acknowledge (false);
 				break;
 			case "grab":
-//				conceptL = epistemicModel.state.GetConcept ("GRAB", ConceptType.ACTION, ConceptMode.L);
-//				conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-//
-//				if (indicatedObj == null) {
-//					if (EpistemicCertainty (conceptL) < 0.5) {
-//						conceptG.Certainty = 0.5;
-//					}
-//					else {
-//						relation.Certainty = 1.0;
-//					}
-//
-//					Suggest ("grab");
-//				}
-//				else {
-//					if (EpistemicCertainty(conceptL) < 0.5) {
-//						conceptG.Certainty = 0.5;
-//
-//						Suggest ("grab");
-//					}
-//					else {
-//						relation.Certainty = 1.0;
-//
-//						Grab (true);
-//					}
-//				}
-//
-//				conceptL.Certainty = 1.0;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptG, conceptL }, new Relation[] { relation });
+				//				conceptL = epistemicModel.state.GetConcept ("GRAB", ConceptType.ACTION, ConceptMode.L);
+				//				conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+				//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+				//
+				//				if (indicatedObj == null) {
+				//					if (EpistemicCertainty (conceptL) < 0.5) {
+				//						conceptG.Certainty = 0.5;
+				//					}
+				//					else {
+				//						relation.Certainty = 1.0;
+				//					}
+				//
+				//					Suggest ("grab");
+				//				}
+				//				else {
+				//					if (EpistemicCertainty(conceptL) < 0.5) {
+				//						conceptG.Certainty = 0.5;
+				//
+				//						Suggest ("grab");
+				//					}
+				//					else {
+				//						relation.Certainty = 1.0;
+				//
+				//						Grab (true);
+				//					}
+				//				}
+				//
+				//				conceptL.Certainty = 1.0;
+				//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptG, conceptL }, new Relation[] { relation });
 				break;
 			case "left":
-//				conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-//
-//				if ((indicatedObj == null) && (graspedObj == null)) {
-//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward point
-//						Deixis ("left");
-//					}
-//					else {	// if speech alone
-//						Deixis("right");
-//					}
-//				}
-//				else if (graspedObj == null) {
-//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
-//						//Push ("left");
-//					}
-//					else {
-//						Push ("right");
-//					}
-//				}
-//				else if (indicatedObj == null) {
-//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
-//						//Move ("left");
-//					}
-//					else {
-//						Move ("right");
-//					}
-//				}
-//				conceptL.Certainty = 1.0;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+				//				conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+				//
+				//				if ((indicatedObj == null) && (graspedObj == null)) {
+				//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward point
+				//						Deixis ("left");
+				//					}
+				//					else {	// if speech alone
+				//						Deixis("right");
+				//					}
+				//				}
+				//				else if (graspedObj == null) {
+				//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
+				//						//Push ("left");
+				//					}
+				//					else {
+				//						Push ("right");
+				//					}
+				//				}
+				//				else if (indicatedObj == null) {
+				//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
+				//						//Move ("left");
+				//					}
+				//					else {
+				//						Move ("right");
+				//					}
+				//				}
+				//				conceptL.Certainty = 1.0;
+				//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "right":
-//				conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-//
-//				if ((indicatedObj == null) && (graspedObj == null)) {
-//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward point
-//						Deixis ("right");
-//					}
-//					else {	// if speech alone
-//						Deixis("left");
-//					}
-//				}
-//				else if (graspedObj == null) {
-//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
-//						//Push ("right");
-//					}
-//					else {
-//						Push ("left");
-//					}
-//				}
-//				else if (indicatedObj == null) {
-//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
-//						//Move ("right");
-//					}
-//					else {
-//						Move ("left");
-//					}
-//				}
-//				conceptL.Certainty = 1.0;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+				//				conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+				//
+				//				if ((indicatedObj == null) && (graspedObj == null)) {
+				//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward point
+				//						Deixis ("right");
+				//					}
+				//					else {	// if speech alone
+				//						Deixis("left");
+				//					}
+				//				}
+				//				else if (graspedObj == null) {
+				//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
+				//						//Push ("right");
+				//					}
+				//					else {
+				//						Push ("left");
+				//					}
+				//				}
+				//				else if (indicatedObj == null) {
+				//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
+				//						//Move ("right");
+				//					}
+				//					else {
+				//						Move ("left");
+				//					}
+				//				}
+				//				conceptL.Certainty = 1.0;
+				//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "this":
 			case "that":
@@ -561,11 +561,11 @@ public class JointGestureDemo : AgentInteraction {
 			case "purple":
 			case "white":
 			case "pink":
-//				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.PROPERTY, ConceptMode.L);
-//				conceptL.Certainty = 1.0;
-//				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
-//
-//				IndexByColor (messageStr);
+				//				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.PROPERTY, ConceptMode.L);
+				//				conceptL.Certainty = 1.0;
+				//				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
+				//
+				//				IndexByColor (messageStr);
 				break;
 			case "big":
 				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
@@ -597,317 +597,317 @@ public class JointGestureDemo : AgentInteraction {
 		else if (messageType == "G") {	// gesture message
 			Debug.Log (fusionMessage);
 			string[] messageComponents = messageStr.Split ();
-//			foreach (string c in messageComponents) {
-//				Debug.Log (c);
-//			}
+			//			foreach (string c in messageComponents) {
+			//				Debug.Log (c);
+			//			}
 			if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("start")) {	// start as trigger
 				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-//				if (messageStr.StartsWith ("engage")) {
-//					if (GetGestureContent (messageStr, "engage") == "") {
-//						//Engage (true);
-//					}
-//				} 
+				//				if (messageStr.StartsWith ("engage")) {
+				//					if (GetGestureContent (messageStr, "engage") == "") {
+				//						//Engage (true);
+				//					}
+				//				} 
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
 				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-//				if (messageStr.StartsWith ("left point")) {
-//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
-//					conceptG.Certainty = 1.0;
-//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
-//
-//					Deixis (TransformToSurface (GetGestureVector (messageStr, "left point")));
-//				} 
-//				else if (messageStr.StartsWith ("right point")) {
-//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
-//					conceptG.Certainty = 1.0;
-//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
-//
-//					Deixis (TransformToSurface (GetGestureVector (messageStr, "right point")));
-//				} 
+				//				if (messageStr.StartsWith ("left point")) {
+				//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
+				//					conceptG.Certainty = 1.0;
+				//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				//
+				//					Deixis (TransformToSurface (GetGestureVector (messageStr, "left point")));
+				//				} 
+				//				else if (messageStr.StartsWith ("right point")) {
+				//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
+				//					conceptG.Certainty = 1.0;
+				//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
+				//
+				//					Deixis (TransformToSurface (GetGestureVector (messageStr, "right point")));
+				//				} 
 				//else
 				if (messageStr.StartsWith ("grab")) {
-//					if ((graspedObj == null) && (eventConfirmation == "")) {
-//						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
-//							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-//							conceptL = epistemicModel.state.GetConcept("GRAB", ConceptType.ACTION, ConceptMode.L);
-//							relation = epistemicModel.state.GetRelation(conceptG, conceptL);
-//
-//							if (EpistemicCertainty (conceptG) < 0.5) {
-//								conceptG.Certainty = 0.5;
-//
-//								Suggest ("grab");
-//							}
-//							else {
-//								conceptG.Certainty = 1.0;
-//
-//								if (conceptL.Certainty > 0.0) {
-//									relation.Certainty = 1.0;
-//								}
-//
-//								Grab (true);
-//							}
-//
-//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { relation });
-//						}
-//					}
-//					else {
-//						if ((graspedObj != null) || (indicatedObj != null)) {
-//							string prevInstruction = FindPreviousMatch ("grab");
-//
-//							if (prevInstruction.StartsWith("grab move")) {
-//								HandleMoveSegment (prevInstruction);
-//							}
-//						}
-//					}
+					//					if ((graspedObj == null) && (eventConfirmation == "")) {
+					//						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
+					//							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept("GRAB", ConceptType.ACTION, ConceptMode.L);
+					//							relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+					//
+					//							if (EpistemicCertainty (conceptG) < 0.5) {
+					//								conceptG.Certainty = 0.5;
+					//
+					//								Suggest ("grab");
+					//							}
+					//							else {
+					//								conceptG.Certainty = 1.0;
+					//
+					//								if (conceptL.Certainty > 0.0) {
+					//									relation.Certainty = 1.0;
+					//								}
+					//
+					//								Grab (true);
+					//							}
+					//
+					//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { relation });
+					//						}
+					//					}
+					//					else {
+					//						if ((graspedObj != null) || (indicatedObj != null)) {
+					//							string prevInstruction = FindPreviousMatch ("grab");
+					//
+					//							if (prevInstruction.StartsWith("grab move")) {
+					//								HandleMoveSegment (prevInstruction);
+					//							}
+					//						}
+					//					}
 				}
 				else if (messageStr.StartsWith ("posack")) {
-//					conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
-//					conceptL = epistemicModel.state.GetConcept("YES", ConceptType.ACTION, ConceptMode.L);
-//					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
-//
-//					if (EpistemicCertainty(conceptG) < 0.5) {
-//						conceptG.Certainty = 0.5;
-//
-//						Suggest ("posack");
-//					}
-//					else {
-//						conceptG.Certainty = 1.0;
-//
-//						if (conceptL.Certainty > 0.0) {
-//							relation.Certainty = 1.0;
-//						}
-//
-//						Acknowledge (true);
-//					}
-//
-//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
+					//					conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
+					//					conceptL = epistemicModel.state.GetConcept("YES", ConceptType.ACTION, ConceptMode.L);
+					//					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+					//
+					//					if (EpistemicCertainty(conceptG) < 0.5) {
+					//						conceptG.Certainty = 0.5;
+					//
+					//						Suggest ("posack");
+					//					}
+					//					else {
+					//						conceptG.Certainty = 1.0;
+					//
+					//						if (conceptL.Certainty > 0.0) {
+					//							relation.Certainty = 1.0;
+					//						}
+					//
+					//						Acknowledge (true);
+					//					}
+					//
+					//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
 
 				}
 				else if (messageStr.StartsWith ("negack")) {
-//					conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
-//					conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
-//					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
-//
-//					if (EpistemicCertainty(conceptG) < 0.5) {
-//						conceptG.Certainty = 0.5;
-//
-//						Suggest ("negack");
-//					}
-//					else {
-//						conceptG.Certainty = 1.0;
-//
-//						if (conceptL.Certainty > 0.0) {
-//							relation.Certainty = 1.0;
-//						}
-//
-//						Acknowledge (false);
-//					}
-//
-//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
+					//					conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
+					//					conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
+					//					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
+					//
+					//					if (EpistemicCertainty(conceptG) < 0.5) {
+					//						conceptG.Certainty = 0.5;
+					//
+					//						Suggest ("negack");
+					//					}
+					//					else {
+					//						conceptG.Certainty = 1.0;
+					//
+					//						if (conceptL.Certainty > 0.0) {
+					//							relation.Certainty = 1.0;
+					//						}
+					//
+					//						Acknowledge (false);
+					//					}
+					//
+					//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
 				}
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
-				messageStr = interactionLogic.RemoveGestureTrigger (messageStr,interactionLogic.GetGestureTrigger(messageStr));
-				if (messageStr.StartsWith ("left point")) {
-					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
-					if (EpistemicCertainty(conceptG) < 0.5) {
-						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					}
-
-					Suggest ("point");
-				} 
-				else if (messageStr.StartsWith ("right point")) {
-					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
-					if (EpistemicCertainty(conceptG) < 0.5) {
-						conceptG.Certainty = 0.5;
-						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					}
-
-					Suggest ("point");
-				} 
-				else if (messageStr.StartsWith ("grab")) {
-					if (interactionLogic.GetGestureContent (messageStr, "grab") == "") {
-						conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-						if (EpistemicCertainty(conceptG) < 0.5) {
-							conceptG.Certainty = 0.5;
-							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-						}
-
-						Suggest ("grab");
-					}
-				} 
-				else if (messageStr.StartsWith ("posack")) {
-					if (eventConfirmation != "") {
-						conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
-						if (EpistemicCertainty(conceptG) < 0.5) {
-							conceptG.Certainty = 0.5;
-							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-						}
-
-						Suggest ("posack");
-					}
-				} 
-				else if (messageStr.StartsWith ("negack")) {
-					if (eventConfirmation != "") {
-						conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
-						if (EpistemicCertainty(conceptG) < 0.5) {
-							conceptG.Certainty = 0.5;
-							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-						}
-
-						Suggest ("negack");
-					}
-				}
+				//				messageStr = interactionLogic.RemoveGestureTrigger (messageStr,interactionLogic.GetGestureTrigger(messageStr));
+				//				if (messageStr.StartsWith ("left point")) {
+				//					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+				//					if (EpistemicCertainty(conceptG) < 0.5) {
+				//						conceptG.Certainty = 0.5;
+				//						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				//					}
+				//
+				//					Suggest ("point");
+				//				} 
+				//				else if (messageStr.StartsWith ("right point")) {
+				//					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
+				//					if (EpistemicCertainty(conceptG) < 0.5) {
+				//						conceptG.Certainty = 0.5;
+				//						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				//					}
+				//
+				//					Suggest ("point");
+				//				} 
+				//				else if (messageStr.StartsWith ("grab")) {
+				//					if (interactionLogic.GetGestureContent (messageStr, "grab") == "") {
+				//						conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
+				//						if (EpistemicCertainty(conceptG) < 0.5) {
+				//							conceptG.Certainty = 0.5;
+				//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				//						}
+				//
+				//						Suggest ("grab");
+				//					}
+				//				} 
+				//				else if (messageStr.StartsWith ("posack")) {
+				//					if (eventConfirmation != "") {
+				//						conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
+				//						if (EpistemicCertainty(conceptG) < 0.5) {
+				//							conceptG.Certainty = 0.5;
+				//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				//						}
+				//
+				//						Suggest ("posack");
+				//					}
+				//				} 
+				//				else if (messageStr.StartsWith ("negack")) {
+				//					if (eventConfirmation != "") {
+				//						conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
+				//						if (EpistemicCertainty(conceptG) < 0.5) {
+				//							conceptG.Certainty = 0.5;
+				//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+				//						}
+				//
+				//						Suggest ("negack");
+				//					}
+				//				}
 			} 
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
 				string startSignal = FindStartSignal (messageStr);
 
 				if (messageStr.StartsWith ("engage")) {
-					if (interactionLogic.GetGestureContent (messageStr, "engage") == "") {
-						Engage (false);
-					}
+					//					if (interactionLogic.GetGestureContent (messageStr, "engage") == "") {
+					//						Engage (false);
+					//					}
 				} 
 				else if (messageStr.StartsWith ("push")) {
-					if (startSignal.EndsWith ("high")) {
-						if (interactionLogic.GetGestureContent (messageStr, "push") == "left") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-
-								Suggest ("push left");
-							}
-							else {
-								conceptG.Certainty = 1.0;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-
-								Push ("left");
-							}
-						} 
-						else if (interactionLogic.GetGestureContent (messageStr, "push") == "right") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-
-								Suggest ("push right");
-							}
-							else {
-								conceptG.Certainty = 1.0;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-
-								Push ("right");
-							}
-						} 
-						else if (interactionLogic.GetGestureContent (messageStr, "push") == "front") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-
-								Suggest ("push front");
-							}
-							else {
-								conceptG.Certainty = 1.0;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-
-								Push ("front");
-							}
-						}
-						else if (interactionLogic.GetGestureContent (messageStr, "push") == "back") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-
-								Suggest ("push back");
-							}
-							else {
-								conceptG.Certainty = 1.0;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-
-								Push ("back");
-							}
-						}
-					} 
-					else if (startSignal.EndsWith ("low")) {
-						if (interactionLogic.GetGestureContent (messageStr, "push") == "left") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-							}
-
-							Suggest ("push left");
-						} 
-						else if (interactionLogic.GetGestureContent (messageStr, "push") == "right") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-							}
-
-							Suggest ("push right");
-						} 
-						else if (interactionLogic.GetGestureContent (messageStr, "push") == "front") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-							}
-
-							Suggest ("push front");
-						} 
-						else if (interactionLogic.GetGestureContent (messageStr, "push") == "back") {
-							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-							}
-
-							Suggest ("push back");
-						}
-					}
+					//					if (startSignal.EndsWith ("high")) {
+					//						if (interactionLogic.GetGestureContent (messageStr, "push") == "left") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//
+					//								Suggest ("push left");
+					//							}
+					//							else {
+					//								conceptG.Certainty = 1.0;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					//
+					//								Push ("left");
+					//							}
+					//						} 
+					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "right") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//
+					//								Suggest ("push right");
+					//							}
+					//							else {
+					//								conceptG.Certainty = 1.0;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					//
+					//								Push ("right");
+					//							}
+					//						} 
+					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "front") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//
+					//								Suggest ("push front");
+					//							}
+					//							else {
+					//								conceptG.Certainty = 1.0;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					//
+					//								Push ("front");
+					//							}
+					//						}
+					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "back") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//
+					//								Suggest ("push back");
+					//							}
+					//							else {
+					//								conceptG.Certainty = 1.0;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
+					//
+					//								Push ("back");
+					//							}
+					//						}
+					//					} 
+					//					else if (startSignal.EndsWith ("low")) {
+					//						if (interactionLogic.GetGestureContent (messageStr, "push") == "left") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//							}
+					//
+					//							Suggest ("push left");
+					//						} 
+					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "right") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//							}
+					//
+					//							Suggest ("push right");
+					//						} 
+					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "front") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//							}
+					//
+					//							Suggest ("push front");
+					//						} 
+					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "back") {
+					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+					//							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
+					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
+					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
+					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
+					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
+					//							}
+					//
+					//							Suggest ("push back");
+					//						}
+					//					}
 				} 
 				else if (messageStr.StartsWith ("grab")) {
-					if (graspedObj != null) {
-						string prevInstruction = FindPreviousMatch ("grab");
-
-						if (prevInstruction.StartsWith("grab move")) {
-							HandleMoveSegment (prevInstruction);
-						}
-						else if (interactionLogic.GetGestureContent (messageStr, "grab") == "") {
-							Grab (false);
-						}
-					}
+					//					if (graspedObj != null) {
+					//						string prevInstruction = FindPreviousMatch ("grab");
+					//
+					//						if (prevInstruction.StartsWith("grab move")) {
+					//							HandleMoveSegment (prevInstruction);
+					//						}
+					//						else if (interactionLogic.GetGestureContent (messageStr, "grab") == "") {
+					//							Grab (false);
+					//						}
+					//					}
 				}
 			}
 		}
 		else if (messageType == "P") {	// continuous pointing message
-			if (messageStr.StartsWith ("l")) {
-				TrackPointing (GetGestureVector (messageStr, "l"));
-			} 
-			else if (messageStr.StartsWith ("r")) {
-				TrackPointing (GetGestureVector (messageStr, "r"));
-			} 
+			//			if (messageStr.StartsWith ("l")) {
+			//				TrackPointing (GetGestureVector (messageStr, "l"));
+			//			} 
+			//			else if (messageStr.StartsWith ("r")) {
+			//				TrackPointing (GetGestureVector (messageStr, "r"));
+			//			} 
 		}
 	}
 
@@ -942,13 +942,13 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	List<float> GetGestureVector(string receivedData, string gestureCode) {
-//		Debug.Log (receivedData);
-//		Debug.Log (gestureCode);
+		//		Debug.Log (receivedData);
+		//		Debug.Log (gestureCode);
 		List<float> vector = new List<float> ();
 		List<string> content = receivedData.Replace (gestureCode, "").Split (',').ToList();
 		foreach (string c in content) {
 			if (c.Trim() != string.Empty) {
-//				Debug.Log (c);
+				//				Debug.Log (c);
 				try {
 					vector.Add (System.Convert.ToSingle (c));
 				}
@@ -988,9 +988,9 @@ public class JointGestureDemo : AgentInteraction {
 						objectConfirmation = objVoxemes [0].gameObject;
 						LookAt(objectConfirmation);
 
-//						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-//						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-//						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
+						//						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+						//						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+						//						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 					}
 				}
 			}
@@ -1022,8 +1022,8 @@ public class JointGestureDemo : AgentInteraction {
 					List<object> uniqueAttrs = new List<object> ();
 					for (int i = 0; i < objVoxemes.Count; i++) {
 						List<object> newAttrs = Helper.DiffLists (
-							                        uniqueAttrs.Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList (),
-							                        objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ().Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList ());
+							uniqueAttrs.Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList (),
+							objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ().Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList ());
 
 						if (newAttrs.Count > 0) {
 							foreach (object attr in newAttrs) {
@@ -1050,9 +1050,9 @@ public class JointGestureDemo : AgentInteraction {
 							objectConfirmation = objVoxemes [0].gameObject;
 							LookAt (objectConfirmation);
 
-//							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-//							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-//							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
+							//							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+							//							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+							//							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 						}
 					}
 				}
@@ -1353,18 +1353,18 @@ public class JointGestureDemo : AgentInteraction {
 		}
 		else if (gesture.StartsWith("left point")) { 
 			//string dir = GetGestureContent (gesture, "left point");
-//			if (dir == "left") {
-//				performGesture = AvatarGesture.LARM_POINT_RIGHT;
-//			}
-//			else if (dir == "right") {
-//				performGesture = AvatarGesture.LARM_POINT_LEFT;
-//			}
-//			else if (dir == "front") {
-//				performGesture = AvatarGesture.LARM_POINT_FRONT;
-//			}
-//			else if (dir == "back") {
-//				performGesture = AvatarGesture.LARM_POINT_BACK;
-//			}
+			//			if (dir == "left") {
+			//				performGesture = AvatarGesture.LARM_POINT_RIGHT;
+			//			}
+			//			else if (dir == "right") {
+			//				performGesture = AvatarGesture.LARM_POINT_LEFT;
+			//			}
+			//			else if (dir == "front") {
+			//				performGesture = AvatarGesture.LARM_POINT_FRONT;
+			//			}
+			//			else if (dir == "back") {
+			//				performGesture = AvatarGesture.LARM_POINT_BACK;
+			//			}
 
 			performGesture = AvatarGesture.LARM_POINT_FRONT;
 
@@ -1375,19 +1375,19 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else if (gesture.StartsWith("right point")) { 
-//			string dir = GetGestureContent (gesture, "right point");
-//			if (dir == "left") {
-//				performGesture = AvatarGesture.RARM_POINT_RIGHT;
-//			}
-//			else if (dir == "right") {
-//				performGesture = AvatarGesture.RARM_POINT_LEFT;
-//			}
-//			else if (dir == "front") {
-//				performGesture = AvatarGesture.RARM_POINT_FRONT;
-//			}
-//			else if (dir == "back") {
-//				performGesture = AvatarGesture.RARM_POINT_BACK;
-//			}
+			//			string dir = GetGestureContent (gesture, "right point");
+			//			if (dir == "left") {
+			//				performGesture = AvatarGesture.RARM_POINT_RIGHT;
+			//			}
+			//			else if (dir == "right") {
+			//				performGesture = AvatarGesture.RARM_POINT_LEFT;
+			//			}
+			//			else if (dir == "front") {
+			//				performGesture = AvatarGesture.RARM_POINT_FRONT;
+			//			}
+			//			else if (dir == "back") {
+			//				performGesture = AvatarGesture.RARM_POINT_BACK;
+			//			}
 
 			performGesture = AvatarGesture.RARM_POINT_FRONT;
 
@@ -1439,7 +1439,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 	}
-	
+
 	void Acknowledge(bool yes) {
 		LookForward ();
 		if (!yes) {
@@ -1481,13 +1481,13 @@ public class JointGestureDemo : AgentInteraction {
 							Disambiguate (objectMatches);
 						} 
 					}
-						
-//						if (eventManager.events.Count == 0) {
-//							indicatedObj = null;
-//							objectMatches.Clear ();
-//							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-//						}
-//					}
+
+					//						if (eventManager.events.Count == 0) {
+					//							indicatedObj = null;
+					//							objectMatches.Clear ();
+					//							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+					//						}
+					//					}
 				}
 			}
 			else if ((eventConfirmation != "") || (indicatedObj != null)) {
@@ -1671,9 +1671,9 @@ public class JointGestureDemo : AgentInteraction {
 					Disambiguate (actionOptions);
 				}
 			} 
-//			else {
-//				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-//			}
+			//			else {
+			//				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
+			//			}
 		}
 	}
 
@@ -1689,7 +1689,7 @@ public class JointGestureDemo : AgentInteraction {
 								isKnown = synVision.IsKnown (block);
 							}
 						}
-							
+
 						if ((block.activeInHierarchy) &&
 							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
 							(isKnown) && (SurfaceClear(block))) {
@@ -1775,8 +1775,8 @@ public class JointGestureDemo : AgentInteraction {
 							Helper.GetObjectWorldSize (match).size.y *
 							Helper.GetObjectWorldSize (match).size.z) >
 							(Helper.GetObjectWorldSize (obj).size.x *
-							Helper.GetObjectWorldSize (obj).size.y *
-							Helper.GetObjectWorldSize (obj).size.z)) {
+								Helper.GetObjectWorldSize (obj).size.y *
+								Helper.GetObjectWorldSize (obj).size.z)) {
 							obj = match;
 						}
 					}
@@ -1787,8 +1787,8 @@ public class JointGestureDemo : AgentInteraction {
 							Helper.GetObjectWorldSize (match).size.y *
 							Helper.GetObjectWorldSize (match).size.z) <
 							(Helper.GetObjectWorldSize (obj).size.x *
-							Helper.GetObjectWorldSize (obj).size.y *
-							Helper.GetObjectWorldSize (obj).size.z)) {
+								Helper.GetObjectWorldSize (obj).size.y *
+								Helper.GetObjectWorldSize (obj).size.z)) {
 							obj = match;
 						}
 					}
@@ -1836,7 +1836,7 @@ public class JointGestureDemo : AgentInteraction {
 				graspedObj.GetComponent<Voxeme>().targetPosition =
 					graspedObj.transform.position = new Vector3 (graspedObj.transform.position.x,
 						Helper.GetObjectWorldSize (demoSurface).max.y+Helper.GetObjectSize(graspedObj).extents.y,
-					graspedObj.transform.position.z);
+						graspedObj.transform.position.z);
 				graspedObj.GetComponent<Voxeme> ().targetRotation =
 					graspedObj.transform.eulerAngles = Vector3.zero;
 
@@ -1932,7 +1932,7 @@ public class JointGestureDemo : AgentInteraction {
 					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 						interactionLogic.GenerateStackSymbol (null, null, null,
 							null, null, new List<string> (new string[]{ message }))));
-				
+
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
@@ -1959,7 +1959,7 @@ public class JointGestureDemo : AgentInteraction {
 					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 						interactionLogic.GenerateStackSymbol (null, null, null,
 							null, null, new List<string> (new string[]{ message }))));
-				
+
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
@@ -2020,15 +2020,115 @@ public class JointGestureDemo : AgentInteraction {
 
 				AvatarGesture performGesture = null;
 
-				if ((interactionLogic.ActionOptions.Count > 0) && (interactionLogic.ActionSuggestions.Count > 0) && 
-					(interactionLogic.ActionOptions[0] == interactionLogic.ActionSuggestions[0])) {
-					if (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
-						interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])).StartsWith ("grab move")) {
+				if ((interactionLogic.ActionOptions.Count > 0) && (interactionLogic.ActionSuggestions.Count > 0)) {
+					if (interactionLogic.ActionOptions[0] == interactionLogic.ActionSuggestions[0]) {
+						if (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
+							interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])).StartsWith ("grab move")) {
+							interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+
+							string dir = interactionLogic.GetGestureContent (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
+								interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])), "grab move");
+
+							if (interactionLogic.GraspedObj == null) {	// not grasping anything
+								if (dir == "left") {
+									performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+								} 
+								else if (dir == "right") {
+									performGesture = AvatarGesture.RARM_CARRY_LEFT;
+								} 
+								else if (dir == "front") {
+									performGesture = AvatarGesture.RARM_CARRY_BACK;
+								} 
+								else if (dir == "back") {
+									performGesture = AvatarGesture.RARM_CARRY_FRONT;
+								} 
+								else if (dir == "up") {
+									performGesture = AvatarGesture.RARM_CARRY_UP;
+								} 
+								else if (dir == "down") {
+									performGesture = AvatarGesture.RARM_CARRY_DOWN;
+								}
+
+								RespondAndUpdate ("Do you want me to move something this way?");
+							} 
+							else {	// grasping something
+								if (dir == "left") {
+									if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+										performGesture = AvatarGesture.RARM_CARRY_RIGHT;
+									} 
+									else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+										performGesture = AvatarGesture.LARM_CARRY_RIGHT;
+									}
+								} 
+								else if (dir == "right") {
+									if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+										performGesture = AvatarGesture.RARM_CARRY_LEFT;
+									} 
+									else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+										performGesture = AvatarGesture.LARM_CARRY_LEFT;
+									}
+								} 
+								else if (dir == "front") {
+									if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+										performGesture = AvatarGesture.RARM_CARRY_BACK;
+									} 
+									else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+										performGesture = AvatarGesture.LARM_CARRY_BACK;
+									}
+								} 
+								else if (dir == "back") {
+									if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+										performGesture = AvatarGesture.RARM_CARRY_FRONT;
+									} 
+									else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+										performGesture = AvatarGesture.LARM_CARRY_FRONT;
+									}
+								} 
+								else if (dir == "up") {
+									if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+										performGesture = AvatarGesture.RARM_CARRY_UP;
+									} 
+									else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+										performGesture = AvatarGesture.LARM_CARRY_UP;
+									}
+								} 
+								else if (dir == "down") {
+									if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+										performGesture = AvatarGesture.RARM_CARRY_DOWN;
+									} 
+									else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+										performGesture = AvatarGesture.LARM_CARRY_DOWN;
+									}
+								}
+								RespondAndUpdate ("Do you want me to move this this way?");
+							}
+						}
+					}
+					else {
 						interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 								interactionLogic.GenerateStackSymbol (null, null, null,
-									null, null, new List<string> (new string[]{ interactionLogic.ActionSuggestions[0] }))));
-						
+									null, null, new List<string> (new string[]{ message }))));
+
+						if (interactionLogic.IndicatedObj == null) {
+							RespondAndUpdate ("Are you asking me to grab something?");
+						} 
+						else {
+							RespondAndUpdate ("Are you asking me to grab this?");
+						}
+						performGesture = AvatarGesture.RARM_CARRY_STILL;
+					}
+				}
+				else {
+					interactionLogic.RewriteStack (
+						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+							interactionLogic.GenerateStackSymbol (null, null, null,
+								null, null, new List<string> (new string[]{ message }))));
+
+					if (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
+						interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])).StartsWith ("grab move")) {
+						interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+
 						string dir = interactionLogic.GetGestureContent (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
 							interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])), "grab move");
 
@@ -2106,20 +2206,153 @@ public class JointGestureDemo : AgentInteraction {
 							RespondAndUpdate ("Do you want me to move this this way?");
 						}
 					}
+					else {
+						if (interactionLogic.IndicatedObj == null) {
+							RespondAndUpdate ("Are you asking me to grab something?");
+						} 
+						else {
+							RespondAndUpdate ("Are you asking me to grab this?");
+						}
+						performGesture = AvatarGesture.RARM_CARRY_STILL;
+					}
+				}
+				gestureController.PerformGesture (performGesture);
+			}
+			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("push")) {
+				LookForward();
+				MoveToPerform ();
+
+				AvatarGesture performGesture = null;
+				if ((interactionLogic.ActionOptions.Count > 0) && (interactionLogic.ActionSuggestions.Count > 0)) {
+					if (interactionLogic.ActionOptions[0] == interactionLogic.ActionSuggestions[0]) {
+						interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+
+						string dir = interactionLogic.GetGestureContent (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
+							interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])), "push");
+
+						if (interactionLogic.GraspedObj == null) {	// not grasping anything
+							if (dir == "left") {
+								performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+							} 
+							else if (dir == "right") {
+								performGesture = AvatarGesture.RARM_PUSH_LEFT;
+							} 
+							else if (dir == "front") {
+								performGesture = AvatarGesture.RARM_PUSH_BACK;
+							} 
+							else if (dir == "back") {
+								performGesture = AvatarGesture.RARM_PUSH_FRONT;
+							} 
+
+							if (interactionLogic.IndicatedObj == null) {
+								RespondAndUpdate ("Do you want me to push something this way?");
+							}
+							else {
+								RespondAndUpdate ("Do you want me to push this this way?");
+							}
+						} 
+						else {	// grasping something
+							if (dir == "left") {
+								if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+									performGesture = AvatarGesture.RARM_PUSH_RIGHT;
+								} 
+								else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+									performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+								}
+							} 
+							else if (dir == "right") {
+								if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+									performGesture = AvatarGesture.RARM_PUSH_LEFT;
+								} 
+								else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+									performGesture = AvatarGesture.LARM_PUSH_LEFT;
+								}
+							} 
+							else if (dir == "front") {
+								if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+									performGesture = AvatarGesture.RARM_PUSH_BACK;
+								} 
+								else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+									performGesture = AvatarGesture.LARM_PUSH_BACK;
+								}
+							} 
+							else if (dir == "back") {
+								if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+									performGesture = AvatarGesture.RARM_PUSH_FRONT;
+								} 
+								else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+									performGesture = AvatarGesture.LARM_PUSH_FRONT;
+								}
+							} 
+							RespondAndUpdate ("Do you want me to push this this way?");
+						}
+					} 
 				}
 				else {
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
 								null, null, new List<string> (new string[]{ message }))));
-					
-					if (interactionLogic.IndicatedObj == null) {
-						RespondAndUpdate ("Are you asking me to grab something?");
+
+					string dir = interactionLogic.GetGestureContent (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionSuggestions[0],
+						interactionLogic.GetInputSymbolType(interactionLogic.ActionSuggestions[0])), "push");
+
+					if (interactionLogic.GraspedObj == null) {	// not grasping anything
+						if (dir == "left") {
+							performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+						} 
+						else if (dir == "right") {
+							performGesture = AvatarGesture.RARM_PUSH_LEFT;
+						} 
+						else if (dir == "front") {
+							performGesture = AvatarGesture.RARM_PUSH_BACK;
+						} 
+						else if (dir == "back") {
+							performGesture = AvatarGesture.RARM_PUSH_FRONT;
+						} 
+
+						if (interactionLogic.IndicatedObj == null) {
+							RespondAndUpdate ("Do you want me to push something this way?");
+						}
+						else {
+							RespondAndUpdate ("Do you want me to push this this way?");
+						}
 					} 
-					else {
-						RespondAndUpdate ("Are you asking me to grab this?");
+					else {	// grasping something
+						if (dir == "left") {
+							if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_PUSH_RIGHT;
+							} 
+							else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_PUSH_RIGHT;
+							}
+						} 
+						else if (dir == "right") {
+							if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_PUSH_LEFT;
+							} 
+							else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_PUSH_LEFT;
+							}
+						} 
+						else if (dir == "front") {
+							if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_PUSH_BACK;
+							} 
+							else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_PUSH_BACK;
+							}
+						} 
+						else if (dir == "back") {
+							if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+								performGesture = AvatarGesture.RARM_PUSH_FRONT;
+							} 
+							else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+								performGesture = AvatarGesture.LARM_PUSH_FRONT;
+							}
+						} 
+						RespondAndUpdate ("Do you want me to push this this way?");
 					}
-					performGesture = AvatarGesture.RARM_CARRY_STILL;
 				}
 				gestureController.PerformGesture (performGesture);
 			}
@@ -2135,10 +2368,76 @@ public class JointGestureDemo : AgentInteraction {
 		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
 			return;
 		}
-			
+
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 
 		// can we use this state to confirm objects or actions?
+	}
+
+	public void TrackPointing(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			highlightTimeoutTimer.Enabled = true;
+
+			if (interactionLogic.RemoveInputSymbolType ((string)content [0],
+				interactionLogic.GetInputSymbolType ((string)content [0])).StartsWith ("l")) {
+				highlightCenter = TransformToSurface (GetGestureVector (interactionLogic.RemoveInputSymbolType (
+					(string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "l"));
+				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+			}
+			else if (interactionLogic.RemoveInputSymbolType ((string)content [0],
+				interactionLogic.GetInputSymbolType ((string)content [0])).StartsWith ("r")) {
+				highlightCenter = TransformToSurface (GetGestureVector (interactionLogic.RemoveInputSymbolType (
+					(string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "r"));
+				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+			}
+
+			//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
+			//Debug.Log (highlightCenter);
+
+			// jump from origin on first update
+			if (regionHighlight.transform.position.sqrMagnitude <= Constants.EPSILON) {
+				MoveHighlight (highlightCenter);
+				regionHighlight.transform.position = highlightCenter;
+			}
+
+			if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
+				Vector3 offset = MoveHighlight (highlightCenter);
+
+				if (offset.sqrMagnitude <= Constants.EPSILON) {
+					regionHighlight.transform.position = highlightCenter;
+				}
+			}
+
+			//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
+			//		Ray ray = new Ray(origin,
+			//				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
+			//
+			//		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
+			//		//float width = height * Screen.width / Screen.height;
+			//		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
+			//		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
+			//			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
+			//			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
+			//
+			//		float distance;
+			//		if (cameraPlane.Raycast (ray, out distance)) {
+			//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
+			//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
+			//		}
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	public void SituateDeixis(object[] content) {
@@ -2182,6 +2481,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
+				highlightTimeoutTimer.Enabled = true;
 			}
 			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("right point")) {
 				Vector3 highlightCenter = TransformToSurface (GetGestureVector (
@@ -2194,9 +2494,29 @@ public class JointGestureDemo : AgentInteraction {
 								new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
 								null, null, null)));
 				}
-				
+
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
+				highlightTimeoutTimer.Enabled = true;
+			}
+			else if ((interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THIS")) ||
+				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THAT")) ||
+				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THERE"))) {
+				if (regionHighlight.GetComponent<Renderer> ().enabled) {
+					if (Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
+						interactionLogic.RewriteStack (
+							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+								interactionLogic.GenerateStackSymbol (null, null,
+									new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
+									null, null, null)));
+					}
+				}
+				else {
+					interactionLogic.RewriteStack (
+						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+							interactionLogic.GenerateStackSymbol (null, null, new FunctionDelegate(interactionLogic.NullObject),
+								null, null, null)));
+				}
 			}
 			break;
 
@@ -2204,7 +2524,7 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 		}
 	}
-		
+
 	public void InterpretDeixis(object[] content) {
 		// region or object?
 		//interactionLogic.ObjectOptions.Clear();
@@ -2222,10 +2542,11 @@ public class JointGestureDemo : AgentInteraction {
 			if (block.activeInHierarchy) {
 				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
 				if (interactionLogic.IndicatedRegion.Contains(new Vector3(point.x, interactionLogic.IndicatedRegion.center.y, point.z))) {
-					if ((!objectOptions.Contains (block)) && (SurfaceClear (block)) && (isKnown)) {
-//						Debug.Log (interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
+					if ((!objectOptions.Contains (block)) && (SurfaceClear (block)) && (isKnown) && 
+						(block != interactionLogic.IndicatedObj) && (block != interactionLogic.GraspedObj)) {
+						//						Debug.Log (interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
 						objectOptions.Add (block);
-//						Debug.Log (interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
+						//						Debug.Log (interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
 					}
 				}
 				else {
@@ -2236,10 +2557,10 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
-//		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
-//			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
+		//		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
+		//			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
 		objectOptions = objectOptions.OrderBy (o => (o.transform.position - highlightCenter).magnitude).ToList();
-			
+
 		if (objectOptions.Count > 0) {
 			interactionLogic.RewriteStack (
 				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
@@ -2284,21 +2605,22 @@ public class JointGestureDemo : AgentInteraction {
 				duplicateNominal = true;
 			}
 		}
-			
+
 		Debug.Log (interactionLogic.ObjectOptions);
 		Debug.Log (interactionLogic.IndicatedObj.name);
 		string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [uniqueAttrs.Count-1]).Value.ToString ();
 
-		if (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj)) {
+		if ((interactionLogic.GraspedObj == null) && 
+			((interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj)) || (interactionLogic.IndicatedObj == null))) {
 			RespondAndUpdate (string.Format ("The {0} block?", attribute));
 			ReachFor (interactionLogic.IndicatedObj);
 			LookAt (interactionLogic.IndicatedObj);
 		}
 		else {
 			RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
-				interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value,
+				interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
 				attribute));
-			LookAt (interactionLogic.ObjectOptions[0]);
+			LookAt (interactionLogic.ObjectOptions [0]);
 		}
 	}
 
@@ -2356,90 +2678,90 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 		}
 
-//		if (eventManager.events.Count == 0) {
-//			if ((indicatedObj == null) && (graspedObj == null)) {
-//				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
-//					foreach (GameObject block in blocks) {
-//						bool isKnown = true;
-//
-//						if (synVision != null) {
-//							if (synVision.enabled) {
-//								isKnown = synVision.IsKnown (block);
-//							}
-//						}
-//
-//						if ((block.activeInHierarchy) &&
-//							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
-//							(isKnown) && (SurfaceClear(block))) {
-//							if (!objectMatches.Contains (block)) {
-//								objectMatches.Add (block);
-//							}
-//						}
-//					}
-//					ResolveIndicatedObject ();
-//				}
-//				else {	// choose from restricted options based on color
-//					List<GameObject> toRemove = new List<GameObject>();
-//					foreach (GameObject match in objectMatches) {
-//						bool isKnown = true;
-//
-//						if (synVision != null) {
-//							if (synVision.enabled) {
-//								isKnown = synVision.IsKnown (match);
-//							}
-//						}
-//
-//						if ((match.activeInHierarchy) &&
-//							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
-//							(isKnown)) {
-//							if (eventManager.events.Count == 0) {
-//								if (objectMatches.Contains (match)) {
-//									toRemove.Add (match);
-//								}
-//							}
-//						}
-//					}
-//
-//					foreach (GameObject item in toRemove) {
-//						objectMatches.Remove (item);
-//					}
-//					ResolveIndicatedObject ();
-//
-//				}
-//
-//				if (indicatedObj == null) {
-//					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
-//						LookForward();
-//						RespondAndUpdate(string.Format ("Which {0} block?", color.ToLower ()));
-//					}
-//					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
-//						LookForward();
-//						RespondAndUpdate(string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
-//					}
-//				}
-//				else {
-//					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
-//						LookForward();
-//						RespondAndUpdate("OK, go on.");
-//					}
-//				}
-//			}
-//			else {	// received color with object already indicated
-//				if (eventManager.events.Count == 0) {
-//					string attr = string.Empty;
-//					if (indicatedObj.GetComponent<Voxeme> () != null) {
-//						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-//					}
-//
-//					if (color.ToLower() != attr) {
-//						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", attr));
-//						TurnForward ();
-//						LookAt (indicatedObj.transform.position);
-//						eventConfirmation = "forget";
-//					}
-//				}
-//			}
-//		} 
+		//		if (eventManager.events.Count == 0) {
+		//			if ((indicatedObj == null) && (graspedObj == null)) {
+		//				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
+		//					foreach (GameObject block in blocks) {
+		//						bool isKnown = true;
+		//
+		//						if (synVision != null) {
+		//							if (synVision.enabled) {
+		//								isKnown = synVision.IsKnown (block);
+		//							}
+		//						}
+		//
+		//						if ((block.activeInHierarchy) &&
+		//							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
+		//							(isKnown) && (SurfaceClear(block))) {
+		//							if (!objectMatches.Contains (block)) {
+		//								objectMatches.Add (block);
+		//							}
+		//						}
+		//					}
+		//					ResolveIndicatedObject ();
+		//				}
+		//				else {	// choose from restricted options based on color
+		//					List<GameObject> toRemove = new List<GameObject>();
+		//					foreach (GameObject match in objectMatches) {
+		//						bool isKnown = true;
+		//
+		//						if (synVision != null) {
+		//							if (synVision.enabled) {
+		//								isKnown = synVision.IsKnown (match);
+		//							}
+		//						}
+		//
+		//						if ((match.activeInHierarchy) &&
+		//							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
+		//							(isKnown)) {
+		//							if (eventManager.events.Count == 0) {
+		//								if (objectMatches.Contains (match)) {
+		//									toRemove.Add (match);
+		//								}
+		//							}
+		//						}
+		//					}
+		//
+		//					foreach (GameObject item in toRemove) {
+		//						objectMatches.Remove (item);
+		//					}
+		//					ResolveIndicatedObject ();
+		//
+		//				}
+		//
+		//				if (indicatedObj == null) {
+		//					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
+		//						LookForward();
+		//						RespondAndUpdate(string.Format ("Which {0} block?", color.ToLower ()));
+		//					}
+		//					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
+		//						LookForward();
+		//						RespondAndUpdate(string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
+		//					}
+		//				}
+		//				else {
+		//					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
+		//						LookForward();
+		//						RespondAndUpdate("OK, go on.");
+		//					}
+		//				}
+		//			}
+		//			else {	// received color with object already indicated
+		//				if (eventManager.events.Count == 0) {
+		//					string attr = string.Empty;
+		//					if (indicatedObj.GetComponent<Voxeme> () != null) {
+		//						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+		//					}
+		//
+		//					if (color.ToLower() != attr) {
+		//						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", attr));
+		//						TurnForward ();
+		//						LookAt (indicatedObj.transform.position);
+		//						eventConfirmation = "forget";
+		//					}
+		//				}
+		//			}
+		//		} 
 	}
 
 	public void IndexByRegion(object[] content) {
@@ -2486,7 +2808,12 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void RegionAsGoal(object[] content) {
-		RespondAndUpdate ("Should I place something here?");
+		if ((interactionLogic.IndicatedObj != null) || (interactionLogic.GraspedObj != null)) {
+			RespondAndUpdate ("Should I place this here?");
+		}
+		else {
+			RespondAndUpdate ("Should I place something here?");
+		}
 		ReachFor (interactionLogic.IndicatedRegion.center);
 	}
 
@@ -2505,11 +2832,26 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void RequestObject(object[] content) {
-		if (Regex.Match(interactionLogic.ActionOptions [0],"grasp({0})") != null) {
-			RespondAndUpdate ("What should I grab?");
+		if (interactionLogic.ActionOptions.Count > 0) {
+			if ((new Regex(@"grasp\(\{0\}\)")).IsMatch (interactionLogic.ActionOptions [0])) {
+				RespondAndUpdate ("What should I grab?");
+			}
+			else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch (interactionLogic.ActionOptions [0])) {
+				RespondAndUpdate ("What should I put there?");
+			}
+			else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch (interactionLogic.ActionOptions [0])) ||
+				(interactionLogic.RemoveInputSymbolType(interactionLogic.ActionOptions [0], 
+					interactionLogic.GetInputSymbolType(interactionLogic.ActionOptions[0])).StartsWith("grab move"))) {
+				RespondAndUpdate ("What should I move?");
+			}
+			else if (((new Regex(@"slide\(\{0\},.+\)")).IsMatch (interactionLogic.ActionOptions [0])) ||
+				(interactionLogic.RemoveInputSymbolType(interactionLogic.ActionOptions [0], 
+					interactionLogic.GetInputSymbolType(interactionLogic.ActionOptions[0])).StartsWith("push"))) {
+				RespondAndUpdate ("What should I push?");
+			}
 		}
-		else if (Regex.Match(interactionLogic.ActionOptions [0],"put({0},<.*,.*,.*>)") != null) {
-			RespondAndUpdate ("What should I put there?");
+		else {
+			RespondAndUpdate ("Which?");
 		}
 	}
 
@@ -2530,10 +2872,18 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void ComposeObjectAndAction(object[] content) {
-		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
-			interactionLogic.GenerateStackSymbol (null, null, null, null, 
-				new List<string>(new string[]{string.Format(interactionLogic.ActionOptions[0],interactionLogic.IndicatedObj.name)}),
-				null)));
+		if (interactionLogic.IndicatedObj != null) {
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+				interactionLogic.GenerateStackSymbol (null, null, null, null, 
+					new List<string> (new string[]{ string.Format (interactionLogic.ActionOptions [0], interactionLogic.IndicatedObj.name) }),
+					null)));
+		}
+		else if (interactionLogic.GraspedObj != null) {
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+				interactionLogic.GenerateStackSymbol (null, null, null, null, 
+					new List<string> (new string[]{ string.Format (interactionLogic.ActionOptions [0], interactionLogic.GraspedObj.name) }),
+					null)));
+		}
 	}
 
 	public void ConfirmEvent(object[] content) {
@@ -2541,13 +2891,15 @@ public class JointGestureDemo : AgentInteraction {
 		eventManager.InsertEvent ("", 0);
 		eventManager.InsertEvent (interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count-1], 1);
 
-		if (Regex.Match(interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count-1], "grasp({0})") != null) {
+		if (Regex.IsMatch(interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count-1], "grasp")) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
-				interactionLogic.GenerateStackSymbol(new FunctionDelegate(interactionLogic.NullObject), interactionLogic.IndicatedObj, 
-					null, null, null, null)));
+				interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+					interactionLogic.IndicatedObj, null, null, null, null)));
 		}
 		else {
-			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+				interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate (interactionLogic.NullObject)),
+					null, null, null, null)));
 		}
 	}
 
@@ -2557,8 +2909,8 @@ public class JointGestureDemo : AgentInteraction {
 		eventManager.InsertEvent (string.Format("grasp({0})", interactionLogic.IndicatedObj.name), 1);
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
-			interactionLogic.GenerateStackSymbol(new FunctionDelegate(interactionLogic.NullObject), interactionLogic.IndicatedObj, 
-				null, null, null, null)));
+			interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+				interactionLogic.IndicatedObj, null, null, null, null)));
 	}
 
 	public void StartGrabMove(object[] content) {
@@ -2602,54 +2954,47 @@ public class JointGestureDemo : AgentInteraction {
 				Debug.Log (interactionLogic.StackSymbolToString (interactionLogic.CurrentStackSymbol));
 				if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionSuggestions).Count > 0) {
 					message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionSuggestions) [0];
-				}
+				} 
 				else {
 					return;
 				}
 			}
 			else {
-				message = (string)content [0];
+				if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions).Count > 0) {
+					message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions) [0];
+				} 
+				else {
+					return;
+				}
 			}
 
 			Debug.Log (message);
-			string dir = interactionLogic.GetGestureContent (
-				             interactionLogic.RemoveInputSymbolType (
-					             interactionLogic.RemoveGestureTrigger (
-						             message, interactionLogic.GetGestureTrigger (message)),
-					             interactionLogic.GetInputSymbolType (message)),
-				             "grab move");
+			string dir = string.Empty;
+
+			if (interactionLogic.GetInputSymbolType (message) == 'G') {
+				dir = interactionLogic.GetGestureContent (
+					interactionLogic.RemoveInputSymbolType (
+						interactionLogic.RemoveGestureTrigger (
+							message, interactionLogic.GetGestureTrigger (message)),
+						interactionLogic.GetInputSymbolType (message)),
+					"grab move").ToLower();
+			}
+			else if (interactionLogic.GetInputSymbolType (message) == 'S') {
+				dir = interactionLogic.RemoveInputSymbolType (message, interactionLogic.GetInputSymbolType (message)).ToLower ();
+			}
 
 			Debug.Log (dir);
 			List<string> options = PopulateMoveOptions (interactionLogic.GraspedObj, dir);
 
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-				Enumerable.Range(0,options.Count).Select(s => interactionLogic.GenerateStackSymbol (null, null, null, null, 
-					options.GetRange(0,s+1).ToArray().Reverse().ToList(), new List<string>())).ToList()));
+				Enumerable.Range(0,options.Count).Select(s => interactionLogic.GenerateStackSymbol (null,
+					dir == "up" ? null : new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, 
+					options.ToArray().Reverse().ToList().GetRange(0,s+1), new List<string>())).ToList()));
 			break;
 
 		default:
 			break;
 		}
-//		string moveStr = RemoveGestureTriggers (content [0].ToString ());
-//
-//		if (moveStr.EndsWith ("left")) {
-//			actionOptions.Add (string.Format("put({0},left)",interactionLogic.GraspedObj.name));
-//		}
-//		else if (moveStr.EndsWith ("right")) {
-//			actionOptions.Add (string.Format("put({0},right)",interactionLogic.GraspedObj.name));
-//		}
-//		else if (moveStr.EndsWith ("front")) {
-//			actionOptions.Add (string.Format("put({0},front)",interactionLogic.GraspedObj.name));
-//		}
-//		else if (moveStr.EndsWith ("back")) {
-//			actionOptions.Add (string.Format("put({0},back)",interactionLogic.GraspedObj.name));
-//		}
-//		else if (moveStr.EndsWith ("up")) {
-//			actionOptions.Add (string.Format("lift({0})",interactionLogic.GraspedObj.name));
-//		}
-//		else if (moveStr.EndsWith ("down")) {
-//			actionOptions.Add (string.Format("put({0},down)",interactionLogic.GraspedObj.name));
-//		}
 	}
 
 	public void StopGrab(object[] content) {
@@ -2662,7 +3007,95 @@ public class JointGestureDemo : AgentInteraction {
 				null, null, null, null)));
 	}
 
+	public void StartPush(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			List<string> actionOptions = new List<string> ();
+			actionOptions.Add (content [0].ToString ());
+
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+				interactionLogic.GenerateStackSymbol(null, null, null, null, 
+					actionOptions, null)));
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	public void StopPush(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = null;
+
+			if (content [0] == null) {
+				Debug.Log (interactionLogic.StackSymbolToString (interactionLogic.CurrentStackSymbol));
+				if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionSuggestions).Count > 0) {
+					message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionSuggestions) [0];
+				} 
+			} else {
+				if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions).Count > 0) {
+					message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions) [0];
+				} 
+			}
+
+			Debug.Log (message);
+			string dir = string.Empty;
+
+			if (message != null) {
+				if (interactionLogic.GetInputSymbolType (message) == 'G') {
+					dir = interactionLogic.GetGestureContent (
+						interactionLogic.RemoveInputSymbolType (
+							interactionLogic.RemoveGestureTrigger (
+								message, interactionLogic.GetGestureTrigger (message)),
+							interactionLogic.GetInputSymbolType (message)),
+						"push").ToLower ();
+				}
+				else if (interactionLogic.GetInputSymbolType (message) == 'S') {
+					dir = interactionLogic.RemoveInputSymbolType (message, interactionLogic.GetInputSymbolType (message)).ToLower ();
+				}
+			}
+			else {
+				dir = interactionLogic.ActionOptions [0].Split (',') [1].TrimEnd (')');
+			}
+
+			Debug.Log (dir);
+			List<string> options = PopulatePushOptions ((interactionLogic.GraspedObj == null) ?
+				interactionLogic.IndicatedObj : interactionLogic.GraspedObj, dir);
+
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+				Enumerable.Range(0,options.Count).Select(s => interactionLogic.GenerateStackSymbol (null,
+					new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, 
+					options.ToArray().Reverse().ToList().GetRange(0,s+1), new List<string>())).ToList()));
+			break;
+
+		default:
+			break;
+		}
+	}
+
 	public void Confusion(object[] content) {
+		if (interactionLogic.GraspedObj != null) {
+			eventManager.InsertEvent ("", 0);
+			eventManager.InsertEvent (string.Format("ungrasp({0})", interactionLogic.GraspedObj.name), 1);
+		}
+
 		RespondAndUpdate ("Sorry, I don't know what you mean.");
 		LookForward ();
 		TurnForward ();
@@ -2865,9 +3298,9 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		// TODO: output timeout timer
-//		if ((indicatedObj == null) && (graspedObj == null)) {
-//			OutputHelper.PrintOutput (Role.Affector, "");
-//		}
+		//		if ((indicatedObj == null) && (graspedObj == null)) {
+		//			OutputHelper.PrintOutput (Role.Affector, "");
+		//		}
 
 		Region region = null;
 
@@ -2918,7 +3351,7 @@ public class JointGestureDemo : AgentInteraction {
 		regionHighlight.transform.position = new Vector3 (regionHighlight.transform.position.x - normalizedOffset.x * Time.deltaTime * highlightMoveSpeed,
 			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * highlightMoveSpeed,
 			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * highlightMoveSpeed);
-		
+
 		if ((regionHighlight.transform.position.x+vectorConeRadius < Helper.GetObjectWorldSize(demoSurface).min.x) ||
 			(regionHighlight.transform.position.x-vectorConeRadius > Helper.GetObjectWorldSize(demoSurface).max.x) ||
 			(regionHighlight.transform.position.z+vectorConeRadius < Helper.GetObjectWorldSize(demoSurface).min.z) ||
@@ -2973,7 +3406,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 	}
-		
+
 	void PopulateOptions(string program, GameObject theme, string dir) {
 		switch (program) {
 		case "grasp":
@@ -3022,7 +3455,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 	}
-		
+
 	void Grab(bool state) {
 		if (eventManager.events.Count > 0) {
 			return;
@@ -3387,7 +3820,7 @@ public class JointGestureDemo : AgentInteraction {
 			List<GameObject> objectPlacements = placementOptions.OfType<GameObject> ().ToList ();
 
 			objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
-			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
+				ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
 
 			for (int i = 0; i < placementOptions.Count; i++) {
 				if (placementOptions [i] is GameObject) {
@@ -3457,7 +3890,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				if (certainty == CertaintyMode.Act) {
 					if (!moveOptions.Contains (string.Format ("put({0},{1})", theme.name,
-						    Helper.VectorToParsable (target)))) {
+						Helper.VectorToParsable (target)))) {
 						moveOptions.Add (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)));
 					}
@@ -3515,7 +3948,7 @@ public class JointGestureDemo : AgentInteraction {
 				Vector3 target = new Vector3 (theme.transform.position.x,
 					Helper.GetObjectWorldSize (demoSurface).max.y,
 					theme.transform.position.z);
-				
+
 				if (certainty == CertaintyMode.Act) {
 					if (!moveOptions.Contains (string.Format ("put({0},{1})", theme.name, Helper.VectorToParsable (target)))) {
 						moveOptions.Add (string.Format ("put({0},{1})", theme.name,
@@ -3523,7 +3956,7 @@ public class JointGestureDemo : AgentInteraction {
 					}
 
 					if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name,
-						    Helper.VectorToParsable (target)))) {
+						Helper.VectorToParsable (target)))) {
 						confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), string.Format ("put the {0} block down", themeAttr));
 					}
@@ -3535,7 +3968,7 @@ public class JointGestureDemo : AgentInteraction {
 					}
 
 					if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)))) {
+						Helper.VectorToParsable (target)))) {
 						confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
 							Helper.VectorToParsable (target)), string.Format ("put the {0} block down", themeAttr));
 					}
@@ -3566,31 +3999,31 @@ public class JointGestureDemo : AgentInteraction {
 		if (theme != null) {
 			PopulateMoveOptions (theme, dir);
 
-//			if (dir == "up") {
-//				string objAttr = string.Empty;
-//				if (theme.GetComponent<Voxeme> () != null) {
-//					objAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-//				}
-//
-//				actionOptions.Add (string.Format ("lift({0})", theme.name));
-//				confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block ", objAttr));
-//			} 
-//			else if (dir == "down") {
-//				if (eventConfirmation == "") {
-//					string objAttr = string.Empty;
-//					if (theme.GetComponent<Voxeme> () != null) {
-//						objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-//					}
-//
-//					Vector3 target = new Vector3 (theme.transform.position.x,
-//						                 Helper.GetObjectWorldSize (demoSurface).max.y,
-//						                 theme.transform.position.z);
-//					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-//						Helper.VectorToParsable (target)));
-//					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
-//						Helper.VectorToParsable (target)), string.Format ("put the {0} block down", objAttr));
-//				}
-//			}
+			//			if (dir == "up") {
+			//				string objAttr = string.Empty;
+			//				if (theme.GetComponent<Voxeme> () != null) {
+			//					objAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+			//				}
+			//
+			//				actionOptions.Add (string.Format ("lift({0})", theme.name));
+			//				confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block ", objAttr));
+			//			} 
+			//			else if (dir == "down") {
+			//				if (eventConfirmation == "") {
+			//					string objAttr = string.Empty;
+			//					if (theme.GetComponent<Voxeme> () != null) {
+			//						objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+			//					}
+			//
+			//					Vector3 target = new Vector3 (theme.transform.position.x,
+			//						                 Helper.GetObjectWorldSize (demoSurface).max.y,
+			//						                 theme.transform.position.z);
+			//					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
+			//						Helper.VectorToParsable (target)));
+			//					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
+			//						Helper.VectorToParsable (target)), string.Format ("put the {0} block down", objAttr));
+			//				}
+			//			}
 
 			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
 				Disambiguate (actionOptions);
@@ -3619,7 +4052,8 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
-	void PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
+	List<string> PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
+		List<string> pushOptions = new List<string> ();
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
 		if (useOrderingHeuristics) {
@@ -3662,15 +4096,15 @@ public class JointGestureDemo : AgentInteraction {
 				GameObject obj = (option as GameObject);
 				if (theme != obj) {
 					if (FitsTouching (theme, obj, directionPreds [relativeDir [dir]]) &&
-					   (Helper.GetObjectWorldSize (theme).min.y >= Helper.GetObjectWorldSize (obj).min.y)) {	// must fit in target destination and be on the same surface
+						(Helper.GetObjectWorldSize (theme).min.y >= Helper.GetObjectWorldSize (obj).min.y)) {	// must fit in target destination and be on the same surface
 						string objAttr = string.Empty;
 						if (obj.GetComponent<Voxeme> () != null) {
 							objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 						}
 
 						if (certainty == CertaintyMode.Act) {
-							if (!actionOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
-								actionOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
+							if (!pushOptions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
+								pushOptions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
 							}
 
 							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
@@ -3682,7 +4116,7 @@ public class JointGestureDemo : AgentInteraction {
 							if (!suggestedActions.Contains (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
 								suggestedActions.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name));
 							}
-						
+
 							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
 								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
 									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
@@ -3695,9 +4129,9 @@ public class JointGestureDemo : AgentInteraction {
 				Vector3 target = (Vector3)option;
 
 				if (certainty == CertaintyMode.Act) {
-					if (!actionOptions.Contains (string.Format ("slide({0},{1})", theme.name,
-						    Helper.VectorToParsable (target)))) {
-						actionOptions.Add (string.Format ("slide({0},{1})", theme.name,
+					if (!pushOptions.Contains (string.Format ("slide({0},{1})", theme.name,
+						Helper.VectorToParsable (target)))) {
+						pushOptions.Add (string.Format ("slide({0},{1})", theme.name,
 							Helper.VectorToParsable (target)));
 
 						foreach (Region region in orthogonalRegions) {
@@ -3710,7 +4144,7 @@ public class JointGestureDemo : AgentInteraction {
 				} 
 				else if (certainty == CertaintyMode.Suggest) {
 					if (!suggestedActions.Contains (string.Format ("slide({0},{1})", theme.name,
-						    Helper.VectorToParsable (target)))) {
+						Helper.VectorToParsable (target)))) {
 						suggestedActions.Add (string.Format ("slide({0},{1})", theme.name,
 							Helper.VectorToParsable (target)));
 
@@ -3724,6 +4158,8 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 		}
+
+		return pushOptions;
 	}
 
 	void Push(string dir) {
@@ -3876,7 +4312,7 @@ public class JointGestureDemo : AgentInteraction {
 			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
 			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
 		}
-			
+
 		LookForward ();
 	}
 
@@ -3984,18 +4420,32 @@ public class JointGestureDemo : AgentInteraction {
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
 		//Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		//Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
-	
-		// which region is obj in?
-		if (leftRegion.Contains(new Vector3(coord.x,
-			leftRegion.center.y,coord.z))) {
-			ikControl.rightHandObj.transform.position = coord+offset;
-			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
+		if (interactionLogic.GraspedObj != null) { // grasping something
+			if (interactionLogic.GraspedObj != null) {
+				if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+					ikControl.rightHandObj.transform.position = coord + offset;
+					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+				}
+				else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+					ikControl.leftHandObj.transform.position = coord + offset;
+					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+				}
+			}
 		}
-		else if (rightRegion.Contains(new Vector3(coord.x,
-			rightRegion.center.y,coord.z))) {
-			ikControl.leftHandObj.transform.position = coord+offset;
-			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		else {
+			// which region is coord in?
+			if (leftRegion.Contains (new Vector3 (coord.x,
+				leftRegion.center.y, coord.z))) {
+				ikControl.rightHandObj.transform.position = coord + offset;
+				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+
+			}
+			else if (rightRegion.Contains (new Vector3 (coord.x,
+				rightRegion.center.y, coord.z))) {
+				ikControl.leftHandObj.transform.position = coord + offset;
+				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+			}
 		}
 
 		LookForward ();
@@ -4004,8 +4454,8 @@ public class JointGestureDemo : AgentInteraction {
 	void ReachFor(GameObject obj) {
 		Bounds bounds = Helper.GetObjectWorldSize(obj);
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
-//		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
-//		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+		//		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		//		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 
 		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
 
@@ -4122,8 +4572,8 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void StorePose() {
-//		Debug.Log (string.Format("Storing pose {0} {1} {2}",
-//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+		//		Debug.Log (string.Format("Storing pose {0} {1} {2}",
+		//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
 		bool leftGrasping = false;
 		bool rightGrasping = false;
 
@@ -4161,9 +4611,9 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
-//		if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo() != null) {
-//			animPlaying = true;
-//		}
+		//		if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo() != null) {
+		//			animPlaying = true;
+		//		}
 
 		if (!animPlaying) {
 			if (leftTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
@@ -4178,11 +4628,11 @@ public class JointGestureDemo : AgentInteraction {
 
 			ikControl.lookObj.transform.position = headTargetStored;
 			InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
-	//		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
-	//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+			//		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
+			//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
 		}
 	}
-		
+
 	double EpistemicCertainty (Concept concept) {
 		double certainty = concept.Certainty;
 
@@ -4217,7 +4667,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	void ReturnToRest(object sender, EventArgs e) {
 		if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
-		    !interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+			!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 			TurnForward ();
 		}
 	}

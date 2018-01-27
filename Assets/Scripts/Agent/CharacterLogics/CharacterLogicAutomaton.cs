@@ -114,7 +114,7 @@ namespace Agent
 			get { return content; }
 			set { content = value; }
 		}
-			
+
 		internal PDAStackOperation(PDAStackOperationType _type, object _content) {
 			type = _type;
 			content = _content;
@@ -201,10 +201,22 @@ namespace Agent
 			get { return GetCurrentStackSymbol(); }
 		}
 
+		PDASymbol lastInputSymbol;
+		public PDASymbol LastInputSymbol {
+			get { return lastInputSymbol; }
+			set { lastInputSymbol = value; }
+		}
+
 		Stack<PDASymbol> stack;
 		public Stack<PDASymbol> Stack {
 			get { return stack; }
 			set { stack = value; }
+		}
+
+		Stack<PDAState> stateHistory;
+		public Stack<PDAState> StateHistory {
+			get { return stateHistory; }
+			set { stateHistory = value; }
 		}
 
 		public virtual void Start() {
@@ -214,6 +226,7 @@ namespace Agent
 			TransitionRelation = new List<PDAInstruction> ();
 
 			Stack = new Stack<PDASymbol> ();
+			StateHistory = new Stack<PDAState> ();
 		}
 
 		public virtual void Update() {
@@ -264,6 +277,10 @@ namespace Agent
 			else {
 				return null; 
 			}
+		}
+
+		protected PDASymbol GetLastInputSymbol() {
+			return LastInputSymbol;
 		}
 	}
 }
