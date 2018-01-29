@@ -536,20 +536,20 @@ public class JointGestureDemo : AgentInteraction {
 				break;
 			case "this":
 			case "that":
-				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.ACTION, ConceptMode.L);
-				conceptL.Certainty = 1.0;
-
-				if (regionHighlight.GetComponent<Renderer> ().enabled) {
-					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
-					conceptG.Certainty = 1.0;
-					relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-					relation.Certainty = 1.0;
-					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {relation});
-
-					Deixis (highlightCenter);
-				}
-
-				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
+//				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.ACTION, ConceptMode.L);
+//				conceptL.Certainty = 1.0;
+//
+//				if (regionHighlight.GetComponent<Renderer> ().enabled) {
+//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
+//					conceptG.Certainty = 1.0;
+//					relation = epistemicModel.state.GetRelation (conceptG, conceptL);
+//					relation.Certainty = 1.0;
+//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {relation});
+//
+//					Deixis (highlightCenter);
+//				}
+//
+//				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
 
 
 				break;
@@ -568,26 +568,26 @@ public class JointGestureDemo : AgentInteraction {
 				//				IndexByColor (messageStr);
 				break;
 			case "big":
-				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
-				conceptL.Certainty = 1.0;
-				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-
-				conceptL = epistemicModel.state.GetConcept ("SMALL", ConceptType.PROPERTY, ConceptMode.L);
-				conceptL.Certainty = 0.5;
-				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-
-				IndexBySize (messageStr);
+//				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
+//				conceptL.Certainty = 1.0;
+//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+//
+//				conceptL = epistemicModel.state.GetConcept ("SMALL", ConceptType.PROPERTY, ConceptMode.L);
+//				conceptL.Certainty = 0.5;
+//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+//
+//				IndexBySize (messageStr);
 				break;
 			case "small":
-				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
-				conceptL.Certainty = 1.0;
-				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-
-				conceptL = epistemicModel.state.GetConcept ("BIG", ConceptType.PROPERTY, ConceptMode.L);
-				conceptL.Certainty = 0.5;
-				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-
-				IndexBySize (messageStr);
+//				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
+//				conceptL.Certainty = 1.0;
+//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+//
+//				conceptL = epistemicModel.state.GetConcept ("BIG", ConceptType.PROPERTY, ConceptMode.L);
+//				conceptL.Certainty = 0.5;
+//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
+//
+//				IndexBySize (messageStr);
 				break;
 			default:
 				Debug.Log ("Cannot recognize the message: " + messageStr);
@@ -1928,54 +1928,74 @@ public class JointGestureDemo : AgentInteraction {
 				Vector3 highlightCenter = TransformToSurface (
 					GetGestureVector (interactionLogic.RemoveInputSymbolType(
 						message,interactionLogic.GetInputSymbolType(message)), "left point"));
-				interactionLogic.RewriteStack (
-					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-						interactionLogic.GenerateStackSymbol (null, null, null,
-							null, null, new List<string> (new string[]{ message }))));
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				RespondAndUpdate ("Are you pointing here?");
-				LookAt (highlightCenter);
+				if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+					interactionLogic.RewriteStack (
+						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+							interactionLogic.GenerateStackSymbol (null, null, null,
+								null, null, new List<string> (new string[]{ message }))));
 
-				if (interactionLogic.GraspedObj == null) {
-					PointAt (highlightCenter, rightGrasper);
-				}
-				else {
-					if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+					RespondAndUpdate ("Are you pointing here?");
+					LookAt (highlightCenter);
+
+					if (interactionLogic.GraspedObj == null) {
 						PointAt (highlightCenter, rightGrasper);
 					}
-					else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-						PointAt (highlightCenter, leftGrasper);
+					else {
+						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+							PointAt (highlightCenter, rightGrasper);
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+							PointAt (highlightCenter, leftGrasper);
+						}
 					}
+				}
+				else {
+					interactionLogic.RewriteStack (
+						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+							interactionLogic.GenerateStackSymbol (null, null,
+								new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+								null, null, null)));
 				}
 			}
 			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("right point")) {
 				Vector3 highlightCenter = TransformToSurface (
 					GetGestureVector (interactionLogic.RemoveInputSymbolType(
 						message,interactionLogic.GetInputSymbolType(message)), "right point"));
-				interactionLogic.RewriteStack (
-					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-						interactionLogic.GenerateStackSymbol (null, null, null,
-							null, null, new List<string> (new string[]{ message }))));
-
+				
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				RespondAndUpdate ("Are you pointing here?");
-				LookAt (highlightCenter);
+				if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+					interactionLogic.RewriteStack (
+						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+							interactionLogic.GenerateStackSymbol (null, null, null,
+								null, null, new List<string> (new string[]{ message }))));
 
-				if (interactionLogic.GraspedObj == null) {
-					PointAt (highlightCenter, leftGrasper);
-				}
-				else {
-					if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+					RespondAndUpdate ("Are you pointing here?");
+					LookAt (highlightCenter);
+
+					if (interactionLogic.GraspedObj == null) {
 						PointAt (highlightCenter, rightGrasper);
 					}
-					else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-						PointAt (highlightCenter, leftGrasper);
+					else {
+						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+							PointAt (highlightCenter, rightGrasper);
+						}
+						else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+							PointAt (highlightCenter, leftGrasper);
+						}
 					}
+				}
+				else {
+					interactionLogic.RewriteStack (
+						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+							interactionLogic.GenerateStackSymbol (null, null,
+								new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+								null, null, null)));
 				}			
 			}
 			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("posack")) {
@@ -2471,33 +2491,53 @@ public class JointGestureDemo : AgentInteraction {
 				Vector3 highlightCenter = TransformToSurface (
 					GetGestureVector (interactionLogic.RemoveInputSymbolType(
 						message,interactionLogic.GetInputSymbolType(message)), "left point"));
-				if (Helper.RegionsEqual(interactionLogic.IndicatedRegion,new Region())) {	// empty region
-					interactionLogic.RewriteStack (
-						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-							interactionLogic.GenerateStackSymbol (null, null,
-								new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
-								null, null, null)));
-				}
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 				highlightTimeoutTimer.Enabled = true;
+
+				if (Helper.RegionsEqual(interactionLogic.IndicatedRegion,new Region())) {	// empty region
+					if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+						interactionLogic.RewriteStack (
+							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+								interactionLogic.GenerateStackSymbol (null, null,
+									new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
+									null, null, null)));
+					}
+					else {
+						interactionLogic.RewriteStack (
+							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+								interactionLogic.GenerateStackSymbol (null, null,
+									new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+									null, null, null)));
+					}
+				}
 			}
 			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("right point")) {
 				Vector3 highlightCenter = TransformToSurface (GetGestureVector (
 					interactionLogic.RemoveInputSymbolType(
 						message,interactionLogic.GetInputSymbolType(message)), "right point"));
-				if (Helper.RegionsEqual(interactionLogic.IndicatedRegion,new Region())) {	// empty region
-					interactionLogic.RewriteStack (
-						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-							interactionLogic.GenerateStackSymbol (null, null,
-								new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
-								null, null, null)));
-				}
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 				highlightTimeoutTimer.Enabled = true;
+
+				if (Helper.RegionsEqual(interactionLogic.IndicatedRegion,new Region())) {	// empty region
+					if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+						interactionLogic.RewriteStack (
+							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+								interactionLogic.GenerateStackSymbol (null, null,
+									new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
+									null, null, null)));
+					}
+					else {
+						interactionLogic.RewriteStack (
+							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+								interactionLogic.GenerateStackSymbol (null, null,
+									new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+									null, null, null)));
+					}
+				}
 			}
 			else if ((interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THIS")) ||
 				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THAT")) ||
@@ -2611,16 +2651,35 @@ public class JointGestureDemo : AgentInteraction {
 		string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [uniqueAttrs.Count-1]).Value.ToString ();
 
 		if ((interactionLogic.GraspedObj == null) && 
-			((interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj)) || (interactionLogic.IndicatedObj == null))) {
+			(interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj))) {
 			RespondAndUpdate (string.Format ("The {0} block?", attribute));
 			ReachFor (interactionLogic.IndicatedObj);
 			LookAt (interactionLogic.IndicatedObj);
 		}
-		else {
+		else if (!interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj)) {
 			RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
 				interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
 				attribute));
 			LookAt (interactionLogic.ObjectOptions [0]);
+
+//			interactionLogic.RewriteStack (
+//				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+//					interactionLogic.GenerateStackSymbol (null, null, null, 
+//						null, new List<string>(new string[]{
+//							string.Format("put({0},",interactionLogic.IndicatedObj.name)+"on({1})"}), null)));
+		}
+		else if (interactionLogic.GraspedObj != null) {
+			RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
+				interactionLogic.GraspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
+				attribute));
+			LookAt (interactionLogic.ObjectOptions [0]);
+
+//			interactionLogic.RewriteStack (
+//				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+//					interactionLogic.GenerateStackSymbol (null, null, null, 
+//						null, new List<string>(new string[]{
+//							string.Format("put({0},",interactionLogic.GraspedObj.name)+"on({1})"}), null)));
+//			
 		}
 	}
 
@@ -2851,7 +2910,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else {
-			RespondAndUpdate ("Which?");
+			RespondAndUpdate ("Which object do you want?");
 		}
 	}
 

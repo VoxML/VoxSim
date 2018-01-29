@@ -369,9 +369,12 @@ namespace Agent
 				}
 
 				GUILayout.Label("State History", bold);
-				if (((DianaInteractionLogic)target).StateHistory != null) {
-					foreach (PDAState item in ((DianaInteractionLogic)target).StateHistory) {
-						GUILayout.Label (item.Name); 
+				if (((DianaInteractionLogic)target).StateTransitionHistory != null) {
+					foreach (Pair<PDASymbol,PDAState> item in ((DianaInteractionLogic)target).StateTransitionHistory) {
+						GUILayout.BeginHorizontal();
+						GUILayout.Label (item.Item1 == null ? "Null" : item.Item1.Name);
+						GUILayout.Label (item.Item2 == null ? "Null" : item.Item2.Name);
+						GUILayout.EndHorizontal();
 					}
 				}
 
@@ -741,6 +744,18 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
+				GetInputSymbolsByName("G left point high","G right point high",
+					"S THIS","S THAT","S THERE"),
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, 
+					(a) => (a.Count > 0) && (a[0].Contains("{0}")), null
+				),
+				GetState("SituateDeixis"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, new Region(), null, null, null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
 				colors,
 				GenerateStackSymbol(null, null, null, null, null, null),
 				GetState("IndexByColor"),
@@ -784,8 +799,7 @@ namespace Agent
 					"G grab move right high",
 					"G grab move front high",
 					"G grab move back high",
-					"G grab move up high",
-					"G grab move down high"),
+					"G grab move up high"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
@@ -850,7 +864,7 @@ namespace Agent
 				GetInputSymbolsByName("G grab low","G grab move left low", "G grab move right low",
 					"G grab move front low","G grab move back low","G grab move up low",
 					"G grab move down low","G push left low","G push right low",
-					"G push front low","G push back low"),
+					"G push front low"/*,"G push back low"*/),
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
 				GetState("Suggest"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1288,8 +1302,7 @@ namespace Agent
 					(m) => m.Count > 0, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0)),
-					null
-				),	
+					null),	
 				GetState("ConfirmObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null,null,new FunctionDelegate(NullObject),
@@ -1303,8 +1316,7 @@ namespace Agent
 					(m) => m.Count > 0,
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0),
-					null
-				),	
+					null),	
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null,null,new FunctionDelegate(NullObject),
@@ -1422,7 +1434,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrabMove"),
-				GetInputSymbolsByName("G grab high","G grab stop"),
+				GetInputSymbolsByName("G grab move down high","G grab high","G grab stop"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
@@ -1437,8 +1449,7 @@ namespace Agent
 					"G grab move right high","G grab move right low",
 					"G grab move front high","G grab move front low",
 					"G grab move back high","G grab move back low",
-					"G grab move up high","G grab move up low",
-					"G grab move down high","G grab move down low"),
+					"G grab move up high","G grab move up low"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
@@ -2213,18 +2224,35 @@ namespace Agent
 		}
 
 		void MoveToState(PDAState state) {
+			Pair<PDASymbol, PDAState> symbolStatePair = new Pair<PDASymbol, PDAState> (GetLastInputSymbol (), state);
+
 			if (CurrentState != null) {
 				if (TransitionRelation.Where (i => (i.FromStates.Contains(CurrentState)) && (i.ToState == state)).ToList ().Count == 0) {
 					Debug.Log (string.Format ("No transition arc between state {0} and state {1}.  Aborting.", CurrentState.Name, state.Name));
 					return;
 				}
+					
+				if (state.Name == "Wait") {
+					if (CurrentState.Name != "TrackPointing") {
+						StateTransitionHistory.Push (symbolStatePair);
+					}
+				}
+				else if (state.Name == "TrackPointing") {
+					if (StateTransitionHistory.Peek().Item2.Name != "TrackPointing") {
+						StateTransitionHistory.Push (symbolStatePair);
+					}
+				}
+				else {
+					StateTransitionHistory.Push (symbolStatePair);
+				}
+			}
+			else {
+				StateTransitionHistory.Push (symbolStatePair);
 			}
 
 			CurrentState = state;
 			Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
 				StackSymbolToString(GetCurrentStackSymbol())));
-
-			StateHistory.Push (CurrentState);
 		}
 
 		void ExecuteStateContent(object tempMessage = null) {
@@ -2253,20 +2281,22 @@ namespace Agent
 				}
 			}
 
-			if (symbolConceptMap.ContainsKey (GetInputSymbolByName (inputSymbol))) {
-				List<Concept> concepts = symbolConceptMap [GetInputSymbolByName (inputSymbol)];
+			if (GetInputSymbolByName (inputSymbol) != null) {
+				if (symbolConceptMap.ContainsKey (GetInputSymbolByName (inputSymbol))) {
+					List<Concept> concepts = symbolConceptMap [GetInputSymbolByName (inputSymbol)];
 
-				foreach (Concept concept in concepts) {
-					if (GetInputSymbolType(inputSymbol) == 'G') {
-						concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ?
+					foreach (Concept concept in concepts) {
+						if (GetInputSymbolType (inputSymbol) == 'G') {
+							concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ?
 							(concept.Certainty < 0.5) ? 0.5 : 1.0 : 0.0;
-					}
-					else if (GetInputSymbolType(inputSymbol) == 'S') {
-						concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ? 1.0 : 0.0;
-					}
+						}
+						else if (GetInputSymbolType (inputSymbol) == 'S') {
+							concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ? 1.0 : 0.0;
+						}
 
-					Debug.Log (string.Format ("Updating epistemic model: Concept {0} Certainty = {1}", concept.Name, concept.Certainty));
-					epistemicModel.state.UpdateEpisim (new Concept[] { concept }, new Relation[] { });
+						Debug.Log (string.Format ("Updating epistemic model: Concept {0} Certainty = {1}", concept.Name, concept.Certainty));
+						epistemicModel.state.UpdateEpisim (new Concept[] { concept }, new Relation[] { });
+					}
 				}
 			}
 		}

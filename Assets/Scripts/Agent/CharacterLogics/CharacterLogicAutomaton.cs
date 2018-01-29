@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 
 using UnityEngine;
+using Global;
 
 namespace Agent
 {
@@ -213,10 +214,10 @@ namespace Agent
 			set { stack = value; }
 		}
 
-		Stack<PDAState> stateHistory;
-		public Stack<PDAState> StateHistory {
-			get { return stateHistory; }
-			set { stateHistory = value; }
+		Stack<Pair<PDASymbol,PDAState>> stateTransitionHistory;
+		public Stack<Pair<PDASymbol,PDAState>> StateTransitionHistory {
+			get { return stateTransitionHistory; }
+			set { stateTransitionHistory = value; }
 		}
 
 		public virtual void Start() {
@@ -226,7 +227,7 @@ namespace Agent
 			TransitionRelation = new List<PDAInstruction> ();
 
 			Stack = new Stack<PDASymbol> ();
-			StateHistory = new Stack<PDAState> ();
+			StateTransitionHistory = new Stack<Pair<PDASymbol,PDAState>> ();
 		}
 
 		public virtual void Update() {
