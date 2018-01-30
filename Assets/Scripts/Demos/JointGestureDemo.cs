@@ -2646,8 +2646,8 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
-		Debug.Log (interactionLogic.ObjectOptions);
-		Debug.Log (interactionLogic.IndicatedObj.name);
+//		Debug.Log (interactionLogic.ObjectOptions);
+//		Debug.Log (interactionLogic.IndicatedObj.name);
 		string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [uniqueAttrs.Count-1]).Value.ToString ();
 
 		if ((interactionLogic.GraspedObj == null) && 
@@ -2656,7 +2656,8 @@ public class JointGestureDemo : AgentInteraction {
 			ReachFor (interactionLogic.IndicatedObj);
 			LookAt (interactionLogic.IndicatedObj);
 		}
-		else if (!interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj)) {
+		else if ((interactionLogic.IndicatedObj != null) && 
+			(!interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj))) {
 			RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
 				interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
 				attribute));
