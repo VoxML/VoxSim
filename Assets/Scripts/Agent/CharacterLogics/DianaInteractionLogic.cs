@@ -621,6 +621,7 @@ namespace Agent
 			States.Add(new PDAState("ComposeObjectAndAction",null));
 			States.Add(new PDAState("DisambiguateEvent",null));
 			States.Add(new PDAState("ConfirmEvent",null));
+			States.Add(new PDAState("AbortAction",null));
 			States.Add(new PDAState("Confusion",null));
 			States.Add(new PDAState("EndState",null));
 
@@ -684,6 +685,8 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("S BACK"));
 			InputSymbols.Add(new PDASymbol("S UP"));
 			InputSymbols.Add(new PDASymbol("S DOWN"));
+			InputSymbols.Add(new PDASymbol("S NOTHING"));
+			InputSymbols.Add(new PDASymbol("S NEVERMIND"));
 			InputSymbols.Add(new PDASymbol("P l"));
 			InputSymbols.Add(new PDASymbol("P r"));
 
@@ -890,7 +893,7 @@ namespace Agent
 				GetInputSymbolsByName("S YES","G posack high"),
 				GenerateStackSymbolFromConditions(											// condition set
 					null, null, null,
-					null, null, (s) => s.Count > 0														// condition: # suggestions > 0
+					null, null, (s) => s.Count > 0											// condition: # suggestions > 0
 				),	
 				GetState("Confirm"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
@@ -1280,6 +1283,13 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null,null,null,null,null,null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G negack high","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, (r) => r != null && r.max != r.min,
@@ -1351,7 +1361,7 @@ namespace Agent
 				GetInputSymbolsByName("G posack high","S YES"),
 				GenerateStackSymbolFromConditions(
 					null, null, (r) => r != null && r.max != r.min,
-					null, null, null
+					null, null, (s) => s.Count == 0
 				),	
 				GetState("RequestObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1366,6 +1376,15 @@ namespace Agent
 				),	
 				GetState("IndexByColor"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RequestObject"),
+				GetInputSymbolsByName("S NOTHING","S NEVERMIND"),
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, null, null
+				),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
@@ -1638,6 +1657,21 @@ namespace Agent
 				),	
 				GetState("Confusion"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateEvent"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null,null,null,null,null,null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("AbortAction"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("Wait"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
+					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Confusion"),
@@ -2080,7 +2114,9 @@ namespace Agent
 
 					if (stateContent.GetType () == typeof(TransitionGate)) {
 						FunctionDelegate evaluateCondition = ((TransitionGate)stateContent).Condition;
-						object result = ((ActionOptions.Count == 0) || (GetInputSymbolByName(ActionOptions[0]) == null)) ? 
+						object result = ((ActionOptions.Count == 0) || (GetInputSymbolByName(ActionOptions[0]) == null) ||
+							((ActionSuggestions.Count > 0) && (ActionOptions.Count > 0) && 
+								(GetInputSymbolByName(ActionOptions[0]) == GetInputSymbolByName(ActionSuggestions[0])))) ? 
 							evaluateCondition (((CharacterLogicEventArgs)e).InputSymbolName) :
 							evaluateCondition (ActionOptions[0]);
 						//						Debug.Log (result.GetType ());
@@ -2153,6 +2189,8 @@ namespace Agent
 				new Concept[]{epistemicModel.state.GetConcept("YES",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S NO"),
 				new Concept[]{epistemicModel.state.GetConcept("NO",ConceptType.ACTION, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S NEVERMIND"),
+				new Concept[]{epistemicModel.state.GetConcept("NEVERMIND",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S GRAB"),
 				new Concept[]{epistemicModel.state.GetConcept("GRAB",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S PUT"),

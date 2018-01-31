@@ -113,7 +113,7 @@ public class GenericLogger : MonoBehaviour {
 
 	protected void Log (string content) {
 		if (PlayerPrefs.GetInt("Make Logs") == 1) {
-			logFile.WriteLine(string.Format("{0}\t{1}",logTimer.ToString(),content));
+			logFile.WriteLine(string.Format("{0}\t{1}",content,logTimer.ToString()));
 		}
 	}
 

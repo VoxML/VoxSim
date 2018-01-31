@@ -37,6 +37,7 @@ namespace Agent {
 			Concept posackL = new Concept("YES", ConceptType.ACTION, ConceptMode.L);
 			Concept negackG = new Concept("negack", ConceptType.ACTION, ConceptMode.G);
 			Concept negackL = new Concept("NO", ConceptType.ACTION, ConceptMode.L);
+			Concept neverMindL = new Concept("NEVERMIND", ConceptType.ACTION, ConceptMode.L);
 
 			// add concepts to the epistemic model
 			state.AddConcept(pointG);
@@ -59,6 +60,7 @@ namespace Agent {
 			state.AddConcept(posackL);
 			state.AddConcept(negackG);
 			state.AddConcept(negackL);
+			state.AddConcept(neverMindL);
 			// add relations between them, third boolean param is bidirectional
 			state.AddRelation(posackG, posackL, true);
 			state.AddRelation(negackG, negackL, true);
@@ -113,6 +115,9 @@ namespace Agent {
 			state.AddConcept(forward);
 			state.AddConcept(up);
 			state.AddConcept(down);
+
+			Concept nothing = new Concept("NOTHING", ConceptType.PROPERTY, ConceptMode.L);
+			state.AddConcept(nothing);
 
 			// now add more concepts (objects)
 			Concept yellowBlock = new Concept("block1", ConceptType.OBJECT, ConceptMode.G);
