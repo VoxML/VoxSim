@@ -351,8 +351,21 @@ namespace Agent
 
 				var bold = new GUIStyle(); 
 				bold.fontStyle = FontStyle.Bold; 
+
 				GUILayout.BeginHorizontal();
-				GUILayout.Label("Current State", bold);
+				GUILayout.Label("Use Ordering Heuristics", bold, GUILayout.Width(150));
+				((DianaInteractionLogic)target).useOrderingHeuristics =
+					GUILayout.Toggle (((DianaInteractionLogic)target).useOrderingHeuristics, "");
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Human Relative Directions", bold, GUILayout.Width(150));
+				((DianaInteractionLogic)target).humanRelativeDirections =
+					GUILayout.Toggle (((DianaInteractionLogic)target).humanRelativeDirections,"");
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Current State", bold, GUILayout.Width(150));
 				GUILayout.Label(((DianaInteractionLogic)target).CurrentState == null ? 
 					"Null" : ((DianaInteractionLogic)target).CurrentState.Name);
 				GUILayout.EndHorizontal();
@@ -373,7 +386,7 @@ namespace Agent
 				if (((DianaInteractionLogic)target).StateTransitionHistory != null) {
 					foreach (Pair<PDASymbol,PDAState> item in ((DianaInteractionLogic)target).StateTransitionHistory) {
 						GUILayout.BeginHorizontal();
-						GUILayout.Label (item.Item1 == null ? "Null" : item.Item1.Name);
+						GUILayout.Label (item.Item1 == null ? "Null" : item.Item1.Name, GUILayout.Width(150));
 						GUILayout.Label (item.Item2 == null ? "Null" : item.Item2.Name);
 						GUILayout.EndHorizontal();
 					}
@@ -911,6 +924,13 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
+				GetInputSymbolsByName("S NEVERMIND"),
+					GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Suggest"),
 				GetInputSymbolsByName("S NO","G negack high"),
 				GenerateStackSymbolFromConditions(
 					null, null, null,
@@ -1306,6 +1326,15 @@ namespace Agent
 					null, null, null, null, null, null
 				),	
 				GetState("Confusion"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RegionAsGoal"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, null, null
+				),	
+				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
