@@ -3132,7 +3132,9 @@ public class JointGestureDemo : AgentInteraction {
 						"push").ToLower ();
 				}
 				else if (interactionLogic.GetInputSymbolType (message) == 'S') {
-					dir = interactionLogic.RemoveInputSymbolType (message, interactionLogic.GetInputSymbolType (message)).ToLower ();
+					dir = interactionLogic.humanRelativeDirections ?
+						interactionLogic.RemoveInputSymbolType (message, interactionLogic.GetInputSymbolType (message)).ToLower () :
+						oppositeDir[interactionLogic.RemoveInputSymbolType (message, interactionLogic.GetInputSymbolType (message)).ToLower ()];
 				}
 			}
 			else {
@@ -4131,7 +4133,13 @@ public class JointGestureDemo : AgentInteraction {
 		List<string> pushOptions = new List<string> ();
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
-		if (useOrderingHeuristics) {
+		foreach (object po in placementOptions) {
+			if (po.GetType () == typeof(GameObject)) {
+				Debug.Log ((po as GameObject));
+			}
+		}
+
+		if (interactionLogic.useOrderingHeuristics) {
 			List<GameObject> objectPlacements = placementOptions.OfType<GameObject> ().ToList ();
 
 			objectPlacements = objectPlacements.OrderBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
@@ -4326,9 +4334,10 @@ public class JointGestureDemo : AgentInteraction {
 			orthogonalRegions.Add (rightRegion);
 			qsr = "Behind";
 		}
-
+			
 		//object qsrClassInstance = Activator.CreateInstance (QSR.QSR);
 		List<object> placementOptions = new List<object>();
+		List<GameObject> objectMatches = new List<GameObject> ();
 		Bounds themeBounds = Helper.GetObjectWorldSize (theme);
 		foreach (Region region in orthogonalRegions) {
 			if (region.Contains(theme)) {

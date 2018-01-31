@@ -341,6 +341,7 @@ namespace Agent
 		public GameObject objectConfirmation = null;
 
 		public bool useOrderingHeuristics;
+		public bool humanRelativeDirections;
 
 		public AgentInteraction interactionController;
 
