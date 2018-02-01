@@ -89,6 +89,9 @@ public class AvatarGesture {
     // Push (updated)
     public static AvatarGesture RARM_PUSH_RIGHT   = new AvatarGesture("RARM_PUSH_RIGHT",  22) { BodyPart = Body.RightArm, Direction = Orientation.Right };
 
+    // Misc
+    public static AvatarGesture RARM_WAVE         = new AvatarGesture("RARM_WAVE",        23) { BodyPart = Body.RightArm, Direction = Orientation.NA    };
+
     //
     //  Left arm gestures
     //
@@ -131,6 +134,10 @@ public class AvatarGesture {
 
     // Push (updated)
     public static AvatarGesture LARM_PUSH_LEFT    = new AvatarGesture("LARM_PUSH_LEFT",   22) { BodyPart = Body.LeftArm, Direction = Orientation.Left  };
+
+    // Misc
+    public static AvatarGesture LARM_WAVE         = new AvatarGesture("LARM_WAVE",        23) { BodyPart = Body.LeftArm, Direction = Orientation.NA    };
+
 
     //
     //  Head gestures
