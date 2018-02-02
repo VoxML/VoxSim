@@ -500,6 +500,15 @@ namespace Agent
 			return actionList;
 		}
 
+		public List<string> GeneratePutObjectOnObjectCommand (object arg) {
+			List<string> actionList = new List<string> (
+				new string[]{ string.Format ("put({0},on({1}))",
+					GraspedObj == null ? "{0}" : GraspedObj.name,
+					IndicatedObj == null ? "{0}" : IndicatedObj.name) });
+
+			return actionList;
+		}
+
 		public List<string> GenerateDirectedPutCommand (object arg) {
 			List<string> actionList = new List<string> (
 				new string[]{ "put({0}" + string.Format (",{0})", 
@@ -591,6 +600,7 @@ namespace Agent
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null))));
 
 			States.Add(new PDAState("IndexByColor",null));
+			States.Add(new PDAState("IndexBySize",null));
 			States.Add(new PDAState("IndexByRegion",null));
 			States.Add(new PDAState("RegionAsGoal",
 				new TransitionGate(
@@ -693,6 +703,7 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("S WHITE"));
 			InputSymbols.Add(new PDASymbol("S PINK"));
 			InputSymbols.Add(new PDASymbol("S BIG"));
+			InputSymbols.Add(new PDASymbol("S SMALL"));
 			InputSymbols.Add(new PDASymbol("S LEFT"));
 			InputSymbols.Add(new PDASymbol("S RIGHT"));
 			InputSymbols.Add(new PDASymbol("S FRONT"));
@@ -775,7 +786,7 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				colors,
-				GenerateStackSymbol(null, null, null, null, null, null),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
 				GetState("IndexByColor"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null, null, null, null, null, null))));
@@ -894,6 +905,13 @@ namespace Agent
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
 				GetState("TrackPointing"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("TrackPointing"),
@@ -1191,6 +1209,16 @@ namespace Agent
 					(m) => m.Count > 1, null, null
 				),
 				GetState("DisambiguateObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("IndexByColor"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, null,
+					(m) => m.Count == 1, null, null
+				),
+				GetState("DisambiguateObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new FunctionDelegate(PushObjectOptions))));
 
@@ -1198,7 +1226,51 @@ namespace Agent
 				GetStates("IndexByColor"),
 				null,
 				GenerateStackSymbolFromConditions(
-					null, null, null,
+					null, (g) => g != null, null,
+					(m) => m.Count == 1, null, null
+				),
+				GetState("DisambiguateObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new FunctionDelegate(PushObjectOptions))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("IndexByColor"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, null,
+					(m) => m.Count == 1, null, null
+				),
+				GetState("ConfirmObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new FunctionDelegate(PushObjectOptions))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("IndexBySize"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, null,
+					(m) => m.Count == 1, null, null
+				),
+				GetState("DisambiguateObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new FunctionDelegate(PushObjectOptions))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("IndexBySize"),
+				null,
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, null,
+					(m) => m.Count == 1, null, null
+				),
+				GetState("DisambiguateObject"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new FunctionDelegate(PushObjectOptions))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("IndexBySize"),
+				null,
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, (g) => g == null, null,
 					(m) => m.Count == 1, null, null
 				),
 				GetState("ConfirmObject"),
@@ -1220,7 +1292,7 @@ namespace Agent
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G posack high","S YES"),
 				GenerateStackSymbolFromConditions(
-					(o) => o != null, null, null,
+					(o) => o != null, (g) => g == null, null,
 					(m) => m.Count > 0, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0)),
@@ -1248,7 +1320,7 @@ namespace Agent
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G posack high","S YES"),
 				GenerateStackSymbolFromConditions(
-					(o) => o != null, null, null,
+					(o) => o != null, (g) => g == null, null,
 					(m) => m.Count > 0,
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0),
@@ -1304,13 +1376,6 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("S NEVERMIND"),
-				GenerateStackSymbolFromConditions(null,null,null,null,null,null),	
-				GetState("AbortAction"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
-
-			TransitionRelation.Add(new PDAInstruction(
-				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G negack high","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, (r) => r != null && r.max != r.min,
@@ -1318,6 +1383,43 @@ namespace Agent
 				),	
 				GetState("RegionAsGoal"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateObject"),
+				GetInputSymbolsByName("G negack high","S NO"),
+				GenerateStackSymbolFromConditions(
+					(o) => o != null, null, (r) => r == null,
+					(m) => m.Count == 1, null, null
+				),	
+				GetState("Confusion"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateObject"),
+				GetInputSymbolsByName("G negack high","S NO"),
+				GenerateStackSymbolFromConditions(
+					null, (g) => g != null, (r) => r == null,
+					(m) => m.Count == 1, null, null
+				),	
+				GetState("Confusion"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateObject"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null ,null, null, null, null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateObject"),
+				GetInputSymbolsByName("S BIG","S SMALL"),
+				GenerateStackSymbolFromConditions(
+					(o) => o == null, null, null,
+					(m) => m.Count > 0, null, null),	
+				GetState("IndexBySize"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+					new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
@@ -1434,11 +1536,22 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmObject"),
 				null,
-				GenerateStackSymbolFromConditions((o) => o != null, null, 
+				GenerateStackSymbolFromConditions((o) => o != null, (g) => g == null, 
 					(r) => r == null, null,
 					(a) => a.Count == 0, null),	
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ConfirmObject"),
+				null,
+				GenerateStackSymbolFromConditions((o) => o != null, (g) => g != null, 
+					(r) => r == null, null,
+					(a) => a.Count == 0, null),	
+				GetState("ComposeObjectAndAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null, null, null, null,
+						new FunctionDelegate(GeneratePutObjectOnObjectCommand), null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmObject"),
@@ -1465,7 +1578,7 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ComposeObjectAndAction"),
 				null,
-				GenerateStackSymbolFromConditions((o) => o != null, null,
+				GenerateStackSymbolFromConditions((o) => o != null, (g) => g == null,
 					null, null,
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}") || 

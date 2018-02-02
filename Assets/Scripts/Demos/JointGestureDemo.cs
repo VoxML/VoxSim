@@ -2622,7 +2622,7 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void DisambiguateObject(object[] content) {
-		bool duplicateNominal = false;
+		bool duplicateNominalAttr = false;
 		List<Voxeme> objVoxemes = new List<Voxeme> ();
 
 		foreach (GameObject option in interactionLogic.ObjectOptions) {
@@ -2649,7 +2649,7 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 			else {
-				duplicateNominal = true;
+				duplicateNominalAttr = true;
 			}
 		}
 
@@ -2657,37 +2657,30 @@ public class JointGestureDemo : AgentInteraction {
 //		Debug.Log (interactionLogic.IndicatedObj.name);
 		string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [uniqueAttrs.Count-1]).Value.ToString ();
 
-		if ((interactionLogic.GraspedObj == null) && 
-			(interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj))) {
-			RespondAndUpdate (string.Format ("The {0} block?", attribute));
-			ReachFor (interactionLogic.IndicatedObj);
-			LookAt (interactionLogic.IndicatedObj);
+		if (duplicateNominalAttr) {
+			RespondAndUpdate (string.Format ("Which {0} block?", attribute));
+			LookForward ();
 		}
-		else if ((interactionLogic.IndicatedObj != null) && 
-			(!interactionLogic.ObjectOptions.Contains(interactionLogic.IndicatedObj))) {
-			RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
-				interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
-				attribute));
-			LookAt (interactionLogic.ObjectOptions [0]);
-
-//			interactionLogic.RewriteStack (
-//				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-//					interactionLogic.GenerateStackSymbol (null, null, null, 
-//						null, new List<string>(new string[]{
-//							string.Format("put({0},",interactionLogic.IndicatedObj.name)+"on({1})"}), null)));
-		}
-		else if (interactionLogic.GraspedObj != null) {
-			RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
-				interactionLogic.GraspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
-				attribute));
-			LookAt (interactionLogic.ObjectOptions [0]);
-
-//			interactionLogic.RewriteStack (
-//				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-//					interactionLogic.GenerateStackSymbol (null, null, null, 
-//						null, new List<string>(new string[]{
-//							string.Format("put({0},",interactionLogic.GraspedObj.name)+"on({1})"}), null)));
-//			
+		else {
+			if ((interactionLogic.GraspedObj == null) &&
+			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+				RespondAndUpdate (string.Format ("The {0} block?", attribute));
+				ReachFor (interactionLogic.IndicatedObj);
+				LookAt (interactionLogic.IndicatedObj);
+			}
+			else if ((interactionLogic.IndicatedObj != null) &&
+			        (!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+				RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
+					interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
+					attribute));
+				LookAt (interactionLogic.ObjectOptions [0]);
+			}
+			else if (interactionLogic.GraspedObj != null) {
+				RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
+					interactionLogic.GraspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
+					attribute));
+				LookAt (interactionLogic.ObjectOptions [0]);
+			}
 		}
 	}
 
@@ -2744,91 +2737,43 @@ public class JointGestureDemo : AgentInteraction {
 		default:
 			break;
 		}
+	}
 
-		//		if (eventManager.events.Count == 0) {
-		//			if ((indicatedObj == null) && (graspedObj == null)) {
-		//				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
-		//					foreach (GameObject block in blocks) {
-		//						bool isKnown = true;
-		//
-		//						if (synVision != null) {
-		//							if (synVision.enabled) {
-		//								isKnown = synVision.IsKnown (block);
-		//							}
-		//						}
-		//
-		//						if ((block.activeInHierarchy) &&
-		//							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
-		//							(isKnown) && (SurfaceClear(block))) {
-		//							if (!objectMatches.Contains (block)) {
-		//								objectMatches.Add (block);
-		//							}
-		//						}
-		//					}
-		//					ResolveIndicatedObject ();
-		//				}
-		//				else {	// choose from restricted options based on color
-		//					List<GameObject> toRemove = new List<GameObject>();
-		//					foreach (GameObject match in objectMatches) {
-		//						bool isKnown = true;
-		//
-		//						if (synVision != null) {
-		//							if (synVision.enabled) {
-		//								isKnown = synVision.IsKnown (match);
-		//							}
-		//						}
-		//
-		//						if ((match.activeInHierarchy) &&
-		//							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
-		//							(isKnown)) {
-		//							if (eventManager.events.Count == 0) {
-		//								if (objectMatches.Contains (match)) {
-		//									toRemove.Add (match);
-		//								}
-		//							}
-		//						}
-		//					}
-		//
-		//					foreach (GameObject item in toRemove) {
-		//						objectMatches.Remove (item);
-		//					}
-		//					ResolveIndicatedObject ();
-		//
-		//				}
-		//
-		//				if (indicatedObj == null) {
-		//					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
-		//						LookForward();
-		//						RespondAndUpdate(string.Format ("Which {0} block?", color.ToLower ()));
-		//					}
-		//					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
-		//						LookForward();
-		//						RespondAndUpdate(string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
-		//					}
-		//				}
-		//				else {
-		//					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
-		//						LookForward();
-		//						RespondAndUpdate("OK, go on.");
-		//					}
-		//				}
-		//			}
-		//			else {	// received color with object already indicated
-		//				if (eventManager.events.Count == 0) {
-		//					string attr = string.Empty;
-		//					if (indicatedObj.GetComponent<Voxeme> () != null) {
-		//						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-		//					}
-		//
-		//					if (color.ToLower() != attr) {
-		//						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", attr));
-		//						TurnForward ();
-		//						LookAt (indicatedObj.transform.position);
-		//						eventConfirmation = "forget";
-		//					}
-		//				}
-		//			}
-		//		} 
+	public void IndexBySize(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = interactionLogic.RemoveInputSymbolType(
+				content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ();
+			GameObject obj = null;
+			if (message == "big") {
+				obj = interactionLogic.ObjectOptions.OrderByDescending (o => 
+					Helper.GetObjectWorldSize (o).size.x *
+					Helper.GetObjectWorldSize (o).size.y *
+					Helper.GetObjectWorldSize (o).size.z).ToList () [0];
+			}
+			else if (message == "small") {
+				obj = interactionLogic.ObjectOptions.OrderBy (o => 
+					Helper.GetObjectWorldSize (o).size.x *
+					Helper.GetObjectWorldSize (o).size.y *
+					Helper.GetObjectWorldSize (o).size.z).ToList () [0];
+			}
+
+			interactionLogic.RewriteStack (
+				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+					interactionLogic.GenerateStackSymbol (null, null, null, new List<GameObject>(new GameObject[] { obj }), null, null)));
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	public void IndexByRegion(object[] content) {
@@ -2892,7 +2837,10 @@ public class JointGestureDemo : AgentInteraction {
 			RespondAndUpdate ("OK.");
 		}
 
-		ReachFor (interactionLogic.IndicatedObj);
+		if (interactionLogic.GraspedObj == null) {
+			ReachFor (interactionLogic.IndicatedObj);
+		}
+
 		LookForward ();
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));

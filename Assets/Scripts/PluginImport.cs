@@ -66,8 +66,8 @@ public class PluginImport : MonoBehaviour {
 
 			string[] csuUrl = csuUrlString.Split(':');
 			string csuAddress = csuUrl [0];
-			int csuPort = Convert.ToInt32 (csuUrl [1]);
 			if (csuAddress != "") {
+				int csuPort = Convert.ToInt32 (csuUrl [1]);
 				try {
 					ConnectCSU (csuAddress, csuPort);
 				}
@@ -81,8 +81,8 @@ public class PluginImport : MonoBehaviour {
 
 			string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
 			string eventLearnerAddress = eventLearnerUrl [0];
-			int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
 			if (eventLearnerAddress != "") {
+				int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
 				try {
 					ConnectSocket (eventLearnerAddress, eventLearnerPort, ref _eventLearningClient);
 				}
@@ -91,7 +91,7 @@ public class PluginImport : MonoBehaviour {
 				}
 			}
 			else {
-				Debug.Log ("CSU gesture input is not specified.");
+				Debug.Log ("Event learner input is not specified.");
 			}
 		}
 		else {
