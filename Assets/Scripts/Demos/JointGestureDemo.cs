@@ -1877,6 +1877,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void BeginInteraction(object[] content) {
 		RespondAndUpdate ("Hello.");
+		MoveToPerform ();
+		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 	}
