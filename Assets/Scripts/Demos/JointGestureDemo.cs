@@ -161,7 +161,8 @@ public class JointGestureDemo : AgentInteraction {
 		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius*.2f,vectorConeRadius*.2f,vectorConeRadius*.2f);
 		regionHighlight.tag = "UnPhysic";
 		regionHighlight.GetComponent<Renderer> ().material = highlightMaterial;
-		regionHighlight.GetComponent<Renderer> ().enabled = false;
+		//regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
+//		regionHighlight.GetComponent<Renderer> ().enabled = false;
 		Destroy (regionHighlight.GetComponent<Collider> ());
 
 		highlightTimeoutTimer = new Timer (highlightTimeoutTime);
@@ -278,7 +279,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		// Vector pointing scaling
 		if (transformToScreenPointing) {
-			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH/(knownScreenWidth * windowScaleFactor);
+			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH / (knownScreenWidth * windowScaleFactor);
 
 			// assume screen more or less directly under Kinect
 
@@ -305,14 +306,23 @@ public class JointGestureDemo : AgentInteraction {
 				H points @ # (far edge of virtual table) -> ~(0.0,-1.6)
 			 */
 		}
+		else {
+			vectorScaleFactor.x = tableSize.x/(float)DEFAULT_SCREEN_WIDTH;
+		}
 
 		if (disableHighlight) {
-			regionHighlight.GetComponent<Renderer> ().enabled = false;
 			regionHighlight.transform.position = Vector3.zero;
+			regionHighlight.GetComponent<Renderer> ().material.color = new Color(1.0f,1.0f,1.0f,
+				(1.0f/((regionHighlight.transform.position-
+					new Vector3(demoSurface.transform.position.x,Helper.GetObjectWorldSize(demoSurface).max.y,demoSurface.transform.position.z)).magnitude+Constants.EPSILON))*
+				regionHighlight.transform.position.y);
+//			Debug.Log ("=======" + regionHighlight.GetComponent<Renderer> ().material.GetColor ("_Color").a);
 			disableHighlight = false;
 		}
 
-		if (regionHighlight.GetComponent<Renderer> ().enabled) {
+//		Debug.Log ("=======" + regionHighlight.GetComponent<Renderer> ().material.GetColor ("_Color").a);
+
+		if (regionHighlight.GetComponent<Renderer> ().material.color.a > 0.0f) {
 			regionHighlight.transform.eulerAngles = new Vector3 (regionHighlight.transform.eulerAngles.x,
 				regionHighlight.transform.eulerAngles.y + Time.deltaTime * highlightTurnSpeed, regionHighlight.transform.eulerAngles.z);
 
@@ -1941,13 +1951,21 @@ public class JointGestureDemo : AgentInteraction {
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) { // enabled = on table
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
 								null, null, new List<string> (new string[]{ message }))));
 
-					RespondAndUpdate ("Are you pointing here?");
+					List<GameObject> blockOptions = FindBlocksInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
+
+					if (blockOptions.Count == 0) {
+						RespondAndUpdate ("Are you pointing here?");
+					}
+					else {
+						RespondAndUpdate ("Are you pointing at this?");
+					}
+
 					LookAt (highlightCenter);
 
 					if (interactionLogic.GraspedObj == null) {
@@ -1978,13 +1996,21 @@ public class JointGestureDemo : AgentInteraction {
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) { // enabled = on table
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
 								null, null, new List<string> (new string[]{ message }))));
 
-					RespondAndUpdate ("Are you pointing here?");
+					List<GameObject> blockOptions = FindBlocksInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
+
+					if (blockOptions.Count == 0) {
+						RespondAndUpdate ("Are you pointing here?");
+					}
+					else {
+						RespondAndUpdate ("Are you pointing at this?");
+					}
+
 					LookAt (highlightCenter);
 
 					if (interactionLogic.GraspedObj == null) {
@@ -2505,8 +2531,12 @@ public class JointGestureDemo : AgentInteraction {
 				regionHighlight.transform.position = highlightCenter;
 				highlightTimeoutTimer.Enabled = true;
 
+				Region testRegion = new Region (
+					new Vector3 (Helper.GetObjectWorldSize (demoSurface).min.x, regionHighlight.transform.position.y, Helper.GetObjectWorldSize (demoSurface).min.z),
+					new Vector3 (Helper.GetObjectWorldSize (demoSurface).max.x, regionHighlight.transform.position.y, Helper.GetObjectWorldSize (demoSurface).max.z));
+
 				if (Helper.RegionsEqual(interactionLogic.IndicatedRegion,new Region())) {	// empty region
-					if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+					if (testRegion.Contains(highlightCenter) && (highlightCenter.y > 0.0f)) { // enabled = on table
 						interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 								interactionLogic.GenerateStackSymbol (null, null,
@@ -2531,8 +2561,12 @@ public class JointGestureDemo : AgentInteraction {
 				regionHighlight.transform.position = highlightCenter;
 				highlightTimeoutTimer.Enabled = true;
 
+				Region testRegion = new Region (
+					new Vector3 (Helper.GetObjectWorldSize (demoSurface).min.x, regionHighlight.transform.position.y, Helper.GetObjectWorldSize (demoSurface).min.z),
+					new Vector3 (Helper.GetObjectWorldSize (demoSurface).max.x, regionHighlight.transform.position.y, Helper.GetObjectWorldSize (demoSurface).max.z));
+
 				if (Helper.RegionsEqual(interactionLogic.IndicatedRegion,new Region())) {	// empty region
-					if (regionHighlight.GetComponent<Renderer> ().enabled) { // enabled = on table
+					if (testRegion.Contains(highlightCenter) && (highlightCenter.y > 0.0f)) { // enabled = on table
 						interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 								interactionLogic.GenerateStackSymbol (null, null,
@@ -2551,7 +2585,7 @@ public class JointGestureDemo : AgentInteraction {
 			else if ((interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THIS")) ||
 				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THAT")) ||
 				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THERE"))) {
-				if (regionHighlight.GetComponent<Renderer> ().enabled) {
+				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) {
 					if (Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
 						interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
@@ -2577,34 +2611,7 @@ public class JointGestureDemo : AgentInteraction {
 	public void InterpretDeixis(object[] content) {
 		// region or object?
 		//interactionLogic.ObjectOptions.Clear();
-		List<GameObject> objectOptions = new List<GameObject>();
-
-		foreach (GameObject block in blocks) {
-			bool isKnown = true;
-
-			if (synVision != null) {
-				if (synVision.enabled) {
-					isKnown = synVision.IsKnown (block);
-				}
-			}
-
-			if (block.activeInHierarchy) {
-				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
-				if (interactionLogic.IndicatedRegion.Contains(new Vector3(point.x, interactionLogic.IndicatedRegion.center.y, point.z))) {
-					if ((!objectOptions.Contains (block)) && (SurfaceClear (block)) && (isKnown) && 
-						(block != interactionLogic.IndicatedObj) && (block != interactionLogic.GraspedObj)) {
-						//						Debug.Log (interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
-						objectOptions.Add (block);
-						//						Debug.Log (interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
-					}
-				}
-				else {
-					if ((objectOptions.Contains (block)) && (isKnown)) {
-						objectOptions.Remove (block);
-					}
-				}
-			}
-		}
+		List<GameObject> objectOptions = FindBlocksInRegion(interactionLogic.IndicatedRegion);
 
 		//		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
 		//			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
@@ -2712,8 +2719,14 @@ public class JointGestureDemo : AgentInteraction {
 					if ((block.GetComponent<AttributeSet> ().attributes.Contains (
 						interactionLogic.RemoveInputSymbolType(
 							content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ())) && 
-						(isKnown) && (SurfaceClear(block))) {
+						(isKnown) && (SurfaceClear(block)) && (block != interactionLogic.IndicatedObj) &&
+						(block != interactionLogic.GraspedObj)){
 						objectOptions.Add (block);
+					}
+
+					if ((objectOptions.Contains (block)) && (isKnown) && ((block == interactionLogic.IndicatedObj) ||
+						(block == interactionLogic.GraspedObj))) {
+						objectOptions.Remove (block);
 					}
 				}
 				else {
@@ -2845,7 +2858,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		LookForward ();
 
-		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
+		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 	}
 
 	public void RequestObject(object[] content) {
@@ -2907,10 +2920,13 @@ public class JointGestureDemo : AgentInteraction {
 		RespondAndUpdate ("OK.");
 		PromptEvent (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1]);
 
-		if (Regex.IsMatch(interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count-1], "grasp")) {
+		if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grasp")) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
-				interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+				interactionLogic.GenerateStackSymbol (new DelegateFactory (new FunctionDelegate (interactionLogic.NullObject)),
 					interactionLogic.IndicatedObj, null, null, null, null)));
+		}
+		else if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 		}
 		else {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
@@ -3384,10 +3400,14 @@ public class JointGestureDemo : AgentInteraction {
 			(regionHighlight.transform.position.z+vectorConeRadius < Helper.GetObjectWorldSize(demoSurface).min.z) ||
 			(regionHighlight.transform.position.z-vectorConeRadius > Helper.GetObjectWorldSize(demoSurface).max.z)) {
 			// hide region highlight
-			regionHighlight.GetComponent<Renderer> ().enabled = false;
+			regionHighlight.GetComponent<Renderer> ().material.color = new Color(1.0f,1.0f,1.0f,
+				(1.0f/((regionHighlight.transform.position-
+					new Vector3(demoSurface.transform.position.x,Helper.GetObjectWorldSize(demoSurface).max.y,demoSurface.transform.position.z)).magnitude+Constants.EPSILON))*
+				regionHighlight.transform.position.y);
+			//Debug.Log ("=======" + regionHighlight.GetComponent<Renderer> ().material.color.a);
 		}
 		else {
-			regionHighlight.GetComponent<Renderer> ().enabled = true;
+			regionHighlight.GetComponent<Renderer> ().material.color = new Color(1.0f,1.0f,1.0f,1.0f);
 		}
 
 		return offset;
@@ -3837,6 +3857,37 @@ public class JointGestureDemo : AgentInteraction {
 
 		grabConcept.Certainty = 1.0;
 		epistemicModel.state.UpdateEpisim(new Concept[] {moveConcept,grabConcept}, new Relation[] {});
+	}
+
+	List<GameObject> FindBlocksInRegion(Region region) {
+		List<GameObject> blockOptions = new List<GameObject> ();
+
+		foreach (GameObject block in blocks) {
+			bool isKnown = true;
+
+			if (synVision != null) {
+				if (synVision.enabled) {
+					isKnown = synVision.IsKnown (block);
+				}
+			}
+
+			if (block.activeInHierarchy) {
+				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
+				if (region.Contains(new Vector3(point.x, region.center.y, point.z))) {
+					if ((!blockOptions.Contains (block)) && (SurfaceClear (block)) && (isKnown) && 
+						(block != interactionLogic.IndicatedObj) && (block != interactionLogic.GraspedObj)) {
+						blockOptions.Add (block);
+					}
+				}
+				else {
+					if ((blockOptions.Contains (block)) && (isKnown)) {
+						blockOptions.Remove (block);
+					}
+				}
+			}
+		}
+
+		return blockOptions;
 	}
 
 	List<string> PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {

@@ -83,7 +83,7 @@ namespace Episteme
 		{	
 			if (_restClient == null)
 			{
-				_restClient = new GameObject();
+				_restClient = new GameObject("RestClient");
 				_restClient.AddComponent<RestClient>();
 			}
 			if (!url.EndsWith("/"))

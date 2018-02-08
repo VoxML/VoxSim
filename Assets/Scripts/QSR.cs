@@ -14,7 +14,7 @@ namespace QSR
 		public static bool Left(Bounds x, Bounds y) {
 			bool left = false;
 
-			if (x.min.x >= y.max.x-Constants.EPSILON) {
+			if (x.min.x+Constants.EPSILON >= y.max.x-Constants.EPSILON) {
 				left = true;
 			}
 
@@ -25,7 +25,7 @@ namespace QSR
 		public static bool Right(Bounds x, Bounds y) {
 			bool right = false;
 
-			if (x.max.x <= y.min.x+Constants.EPSILON) {
+			if (x.max.x-Constants.EPSILON <= y.min.x+Constants.EPSILON) {
 				right = true;
 			}
 
