@@ -4624,8 +4624,19 @@ public class JointGestureDemo : AgentInteraction {
 			Bounds otherBounds = Helper.GetObjectWorldSize (otherBlock);
 			Debug.Log (otherBlock);
 			Debug.Log (otherBounds);
-			if ((QSR.QSR.Above (otherBounds, blockBounds)) && (!QSR.QSR.Left (otherBounds, blockBounds)) &&
-				(!QSR.QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
+			Region blockMax = new Region (new Vector3 (blockBounds.min.x, blockBounds.max.y, blockBounds.min.z),
+				new Vector3 (blockBounds.max.x, blockBounds.max.y, blockBounds.max.z));
+			Region otherMin = new Region (new Vector3 (otherBounds.min.x, blockBounds.max.y, otherBounds.min.z),
+				new Vector3 (otherBounds.max.x, blockBounds.max.y, otherBounds.max.z));
+//			if ((QSR.QSR.Above (otherBounds, blockBounds)) && (!QSR.QSR.Left (otherBounds, blockBounds)) &&
+//				(!QSR.QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
+			Debug.Log(Helper.RegionToString(blockMax));
+			Debug.Log(Helper.RegionToString(otherMin));
+			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y)));
+			Debug.Log(((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area())));
+			if ((QSR.QSR.Above (otherBounds, blockBounds)) && 
+				((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area()) > 0.333f) &&
+				(RCC8.EC (otherBounds, blockBounds))) {
 				surfaceClear = false;
 				break;
 			}

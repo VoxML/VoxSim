@@ -28,7 +28,7 @@ namespace RCC
 			// if y and z dimensions overlap
 			if (Mathf.Abs(x.center.y - y.center.y) * 2 < (x.size.y + y.size.y) &&
 				(Mathf.Abs(x.center.z - y.center.z) * 2 < (x.size.z + y.size.z))){
-				if ((Mathf.Abs(x.min.x-y.max.x) < Constants.EPSILON) ||	// if touching on y
+				if ((Mathf.Abs(x.min.x-y.max.x) < Constants.EPSILON) ||	// if touching on x
 					(Mathf.Abs(x.max.x-y.min.x) < Constants.EPSILON)) {
 					ec = true;
 				}

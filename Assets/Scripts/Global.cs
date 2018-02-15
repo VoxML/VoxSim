@@ -90,6 +90,25 @@ namespace Global {
 			return ((obj.transform.position.x >= min.x) && (obj.transform.position.x <= max.x) &&
 				(obj.transform.position.z >= min.z) && (obj.transform.position.z <= max.z));
 		}
+
+		public float Area() {
+			float area = 0.0f;
+
+			if (min.x == max.x) {
+				area = (max.y - min.y) * (max.z - min.z);
+			}
+			else if (min.y == max.y) {
+				area = (max.x - min.x) * (max.z - min.z);
+			}
+			else if (min.z == max.z) {
+				area = (max.x - min.x) * (max.y - min.y);
+			}
+			else {
+				area = (max.x - min.x) * (max.y - min.y) * (max.z - min.z); // volume
+			}
+	
+			return area;
+		}
 	}
 
 	/// <summary>
@@ -786,14 +805,16 @@ namespace Global {
 			return supported;
 		}
 
-		public static Region FindClearRegion(GameObject surface, GameObject testObj) {
+		public static Region FindClearRegion(GameObject surface, GameObject testObj, float overhang = 0.0f) {
 			Region region = new Region ();
 
 			Bounds surfaceBounds = GetObjectWorldSize (surface);
 			Bounds testBounds = GetObjectWorldSize (testObj);
 
-			region.min = new Vector3 (surfaceBounds.min.x, surfaceBounds.max.y, surfaceBounds.min.z);
-			region.max = new Vector3 (surfaceBounds.max.x, surfaceBounds.max.y, surfaceBounds.max.z);
+			region.min = new Vector3 (surfaceBounds.min.x - (testBounds.size.x*overhang),
+				surfaceBounds.max.y, surfaceBounds.min.z - (testBounds.size.z*overhang));
+			region.max = new Vector3 (surfaceBounds.max.x + (testBounds.size.x*overhang),
+				surfaceBounds.max.y, surfaceBounds.max.z + (testBounds.size.z*overhang));
 
 			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 
@@ -932,6 +953,28 @@ namespace Global {
 			region.max = testPoint + testBounds.extents;
 
 			return region;
+		}
+
+		public static Region RegionOfIntersection(Region r1, Region r2, MajorAxes.MajorAxis axis) {
+			Region intersection = new Region ();
+
+			if (axis == MajorAxes.MajorAxis.X) {
+//				Debug.Log ("X");
+				intersection.min = new Vector3 (r1.max.x, Mathf.Max (r1.min.y, r2.min.y), Mathf.Max (r1.min.z, r2.min.z));
+				intersection.max = new Vector3 (r1.max.x, Mathf.Min (r1.max.y, r2.max.y), Mathf.Min (r1.max.z, r2.max.z));
+			}
+			else if (axis == MajorAxes.MajorAxis.Y) {
+//				Debug.Log ("Y");
+				intersection.min = new Vector3 (Mathf.Max (r1.min.x, r2.min.x), r1.max.y, Mathf.Max (r1.min.z, r2.min.z));
+				intersection.max = new Vector3 (Mathf.Min (r1.max.x, r2.max.x), r1.max.y, Mathf.Min (r1.max.z, r2.max.z));
+			}
+			else if (axis == MajorAxes.MajorAxis.Z) {
+//				Debug.Log ("Z");
+				intersection.min = new Vector3 (Mathf.Max (r1.min.x, r2.min.x), Mathf.Max (r1.min.y, r2.min.y), r1.max.z);
+				intersection.max = new Vector3 (Mathf.Min (r1.max.x, r2.max.x), Mathf.Min (r1.max.y, r2.max.y), r1.max.z);
+			}
+
+			return intersection;
 		}
 
 		public static string RegionToString(Region region) {

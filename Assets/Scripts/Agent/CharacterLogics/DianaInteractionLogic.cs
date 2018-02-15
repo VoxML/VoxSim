@@ -848,15 +848,15 @@ namespace Agent
 				GetState("StartGrabMove"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-			TransitionRelation.Add(new PDAInstruction(
-				GetStates("Wait"),
-				GetInputSymbolsByName("G grab stop"),
-				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, 
-					null, null, null, null
-				),	
-				GetState("StopGrab"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+//			TransitionRelation.Add(new PDAInstruction(
+//				GetStates("Wait"),
+//				GetInputSymbolsByName("G grab stop"),
+//				GenerateStackSymbolFromConditions(
+//					null, (g) => g != null, 
+//					null, null, null, null
+//				),	
+//				GetState("StopGrab"),
+//				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
