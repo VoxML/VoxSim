@@ -1889,6 +1889,12 @@ public class JointGestureDemo : AgentInteraction {
 		RespondAndUpdate ("Hello.");
 		MoveToPerform ();
 		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
+	}
+
+	public void Ready(object[] content) {
+		RespondAndUpdate ("I'm ready to go!");
+		MoveToPerform ();
+		gestureController.PerformGesture (AvatarGesture.RARM_THUMBS_UP);
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 	}

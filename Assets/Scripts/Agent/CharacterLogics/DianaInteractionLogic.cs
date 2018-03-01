@@ -584,6 +584,7 @@ namespace Agent
 
 			States.Add(new PDAState("StartState",null));
 			States.Add(new PDAState("BeginInteraction",null));
+			States.Add(new PDAState("Ready",null));
 			States.Add(new PDAState("Suggest",null));
 
 			States.Add(new PDAState("Confirm",
@@ -751,6 +752,13 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("BeginInteraction"),
 				GetInputSymbolsByName("G wave start"),
+				GenerateStackSymbol(null, null, null, null, null, null),
+				GetState("Ready"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Ready"),
+				null,
 				GenerateStackSymbol(null, null, null, null, null, null),
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
