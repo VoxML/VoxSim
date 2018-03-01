@@ -4589,7 +4589,7 @@ public class JointGestureDemo : AgentInteraction {
 				string.Format("reach({0})",obj.name))));
 	}
 
-	Vector3 TransformToSurface(List<float> vector) {
+	 Vector3 TransformToSurface(List<float> vector) {
 		float zCoord = vector[1];
 
 		if (transformToScreenPointing) {

@@ -96,6 +96,7 @@ public class ExportPrefsUIButton : UIButton {
 		prefsDict.Add ("Video Capture DB", PlayerPrefs.GetString("Video Capture DB"));
 		prefsDict.Add ("Video Output Directory", PlayerPrefs.GetString("Video Output Directory"));
 		prefsDict.Add ("Make Voxemes Editable", (PlayerPrefs.GetInt("Make Voxemes Editable") == 1));
+		prefsDict.Add ("Use Teaching Agent", (PlayerPrefs.GetInt("Use Teaching Agent") == 1));
 
 		StringBuilder sb = new StringBuilder ();
 

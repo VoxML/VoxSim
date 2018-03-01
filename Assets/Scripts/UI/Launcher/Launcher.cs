@@ -97,6 +97,9 @@ public class Launcher : FontManager {
 	public bool editableVoxemes;
 
 	[HideInInspector]
+	public bool teachingAgent;
+
+	[HideInInspector]
 	public bool eulaAccepted;
 
 	ModalWindowManager windowManager;
@@ -504,6 +507,9 @@ public class Launcher : FontManager {
 
 		GUI.Label (new Rect (13*Screen.width/24, bgTop + 35 + (3*Screen.height/6) + 10*fontSizeModifier, 150*fontSizeModifier, 25*fontSizeModifier), "Make Voxemes Editable");
 		editableVoxemes = GUI.Toggle (new Rect ((13*Screen.width/24) + (150*fontSizeModifier), bgTop + 35 + (3*Screen.height/6) + 10*fontSizeModifier, 150, 25*fontSizeModifier), editableVoxemes, string.Empty);
+
+		GUI.Label (new Rect ((13*Screen.width/24 + 3*Screen.width/12) - (150*fontSizeModifier), bgTop + 35 + (3*Screen.height/6) + 10*fontSizeModifier, 150*fontSizeModifier, 25*fontSizeModifier), "Use Teaching Agent");
+		teachingAgent = GUI.Toggle (new Rect ((13*Screen.width/24 + 3*Screen.width/12) - (25*fontSizeModifier), bgTop + 35 + (3*Screen.height/6) + 10*fontSizeModifier, 150, 25*fontSizeModifier), teachingAgent, string.Empty);
 		
 		Vector2 textDimensions = GUI.skin.label.CalcSize(new GUIContent("Scenes"));
 		
@@ -581,6 +587,7 @@ public class Launcher : FontManager {
 		captureDB = PlayerPrefs.GetString("Video Capture DB");
 		videoOutputDir = PlayerPrefs.GetString("Video Output Directory");
 		editableVoxemes = (PlayerPrefs.GetInt("Make Voxemes Editable") == 1);
+		teachingAgent = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 		eulaAccepted = (PlayerPrefs.GetInt("EULA Accepted") == 1);
 	}
 	
@@ -620,6 +627,7 @@ public class Launcher : FontManager {
 		PlayerPrefs.SetString("Video Capture DB", captureDB);
 		PlayerPrefs.SetString("Video Output Directory", videoOutputDir);
 		PlayerPrefs.SetInt("Make Voxemes Editable", System.Convert.ToInt32(editableVoxemes));
+		PlayerPrefs.SetInt("Use Teaching Agent", System.Convert.ToInt32(teachingAgent));
 	}
 }
 

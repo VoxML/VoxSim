@@ -155,6 +155,10 @@ public class ImportPrefsUIButton : UIButton {
 				launcher.editableVoxemes = System.Convert.ToBoolean(line.Split (',') [1].Trim());
 				break;
 
+			case "Use Teaching Agent":
+				launcher.teachingAgent = System.Convert.ToBoolean(line.Split (',') [1].Trim());
+				break;
+
 			default:
 				break;
 			}

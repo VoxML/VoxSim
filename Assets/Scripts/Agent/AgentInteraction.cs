@@ -15,13 +15,20 @@ public class CharacterLogicEventArgs : EventArgs {
 
 public class AgentInteraction : MonoBehaviour
 {
+	private bool useTeaching;
+	public bool UseTeaching 
+	{
+		get { return useTeaching; }
+		set { useTeaching = value; }
+	}
+
 	public event EventHandler CharacterLogicInput;
 
 	public void OnCharacterLogicInput(object sender, EventArgs e)
 	{
-		if (CharacterLogicInput != null)
+		if (CharacterLogicInput != null) 
 		{
-			CharacterLogicInput(this, e);
+			CharacterLogicInput (this, e);
 		}
 	}
 

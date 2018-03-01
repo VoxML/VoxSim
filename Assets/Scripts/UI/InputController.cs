@@ -302,10 +302,28 @@ public class InputController : FontManager {
 
 				OutputHelper.PrintOutput (Role.Affector,"OK.");
 				OutputHelper.PrintOutput (Role.Planner,"");
+
+				Dictionary<string,string> vectors = new Dictionary<string,string> ();
+				Regex v = new Regex ("<.*;.*;.*>");
+
+				Debug.Log (functionalCommand);
+
+				foreach (Match match in v.Matches(functionalCommand)) {
+					vectors.Add (string.Format ("V@{0}", match.Index),match.Value);
+					functionalCommand = v.Replace (functionalCommand, string.Format ("V@{0}", match.Index));
+				}
+
+				Debug.Log (functionalCommand);
+
 				commands = functionalCommand.Split (';');
 				foreach (String commandString in commands) {
+					string command = commandString;
+					foreach (string vector in vectors.Keys) {
+						command = command.Replace (vector, vectors [vector]);
+					}
+
 					// add to queue
-					eventManager.QueueEvent (commandString);
+					eventManager.QueueEvent (command);
 				}
 
 				if (eventManager.immediateExecution) {

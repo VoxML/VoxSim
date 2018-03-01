@@ -578,7 +578,9 @@ namespace Agent
 				// input symbols: received messages
 				// stack symbols: array of state variables
 
-				base.Start ();
+			base.Start ();
+
+			interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 
 			States.Add(new PDAState("StartState",null));
 			States.Add(new PDAState("BeginInteraction",null));
@@ -662,6 +664,7 @@ namespace Agent
 			States.Add(new PDAState("EndState",null));
 
 			InputSymbols.Add(new PDASymbol("G engage start"));
+			InputSymbols.Add(new PDASymbol("G wave start"));
 			InputSymbols.Add(new PDASymbol("G left point high"));
 			InputSymbols.Add(new PDASymbol("G right point high"));
 			InputSymbols.Add(new PDASymbol("G left point low"));
@@ -747,7 +750,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("BeginInteraction"),
-				null,
+				GetInputSymbolsByName("G wave start"),
 				GenerateStackSymbol(null, null, null, null, null, null),
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
@@ -2328,7 +2331,7 @@ namespace Agent
 			if (instruction != null) {
 				//				Debug.Log (instruction.ToState);
 				//				Debug.Log (instruction.ToState.Content);
-				if (instruction.ToState.Content != null) {
+				if ((interactionController.UseTeaching) && (instruction.ToState.Content != null)) {
 					object stateContent = instruction.ToState.Content;
 
 					if (stateContent.GetType () == typeof(TransitionGate)) {
