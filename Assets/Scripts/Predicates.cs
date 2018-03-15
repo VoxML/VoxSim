@@ -3861,16 +3861,16 @@ public class Predicates : MonoBehaviour {
 
 				// nuke any relations between objects to be bound
 				RelationTracker relationTracker = (RelationTracker)GameObject.Find("BehaviorController").GetComponent("RelationTracker");
-				List<object> toRemove = new List<object>();
+				Dictionary<List<GameObject>,string> toRemove = new Dictionary<List<GameObject>, string>();
 
 				foreach (DictionaryEntry pair in relationTracker.relations) {
 					if (objs.Contains ((pair.Key as List<GameObject>) [0]) && objs.Contains ((pair.Key as List<GameObject>) [1])) {
-						toRemove.Add (pair.Key);
+						toRemove.Add (pair.Key as List<GameObject>,pair.Value as string);
 					}
 				}
 
-				foreach (object key in toRemove) {
-					relationTracker.RemoveRelation (key as List<GameObject>);
+				foreach (KeyValuePair<List<GameObject>,string> pair in toRemove) {
+					relationTracker.RemoveRelation (pair.Key as List<GameObject>, pair.Value as string);
 				}
 
 				// bind objects

@@ -12,5 +12,6 @@
             <Arg Value="y:3D" />
         </Args>
         <Constr />
+        <Corresps />
     </Type>
 </VoxML>

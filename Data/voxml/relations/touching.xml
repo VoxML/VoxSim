@@ -2,7 +2,7 @@
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <Entity Type="Relation" />
     <Lex>
-        <Pred>support</Pred>
+        <Pred>touching</Pred>
     </Lex>
     <Type>
         <Class>config</Class>
@@ -12,6 +12,8 @@
             <Arg Value="y:3D" />
         </Args>
         <Constr />
-        <Corresps />
+        <Corresps>
+            <Corresp Value="reflexive" />
+        </Corresps>
     </Type>
 </VoxML>

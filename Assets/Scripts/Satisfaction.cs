@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 
 using Agent;
 using Global;
+using MajorAxes;
 using RCC;
 using RootMotion.FinalIK;
 
@@ -56,7 +57,7 @@ namespace Satisfaction {
 						satisfied = true;
 						//obj.GetComponent<Rigging> ().ActivatePhysics (true);
 						//ReevaluateRelationships (predString, theme);	// we need to talk (do physics reactivation in here?)
-						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 					}
 				}
 			}
@@ -77,7 +78,7 @@ namespace Satisfaction {
 							theme.transform.rotation = Quaternion.identity;
 						}
 						satisfied = true;
-						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 						//theme.GetComponent<Rigging> ().ActivatePhysics (true);
 					}
 				}
@@ -100,7 +101,7 @@ namespace Satisfaction {
 								theme.transform.rotation = Quaternion.identity;
 							}
 							satisfied = true;
-							ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//							ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 							//theme.GetComponent<Rigging> ().ActivatePhysics (true);
 						}
 					}
@@ -129,7 +130,7 @@ namespace Satisfaction {
 
 						//bar;
 						// ROLL once - roll again - voxeme object satisfied TURN but rigidbody subobjects have moved under physics 
-						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 						//theme.GetComponent<Rigging> ().ActivatePhysics (true);
 					}
 				}
@@ -190,7 +191,7 @@ namespace Satisfaction {
 					}
 					else if (Helper.CloseEnough (testLocation, Helper.ParsableToVector ((String)argsStrings [1]))) {
 						satisfied = true;
-						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 						//theme.GetComponent<Rigging> ().ActivatePhysics (true);
 					}
 				}
@@ -247,7 +248,7 @@ namespace Satisfaction {
 				if ((!agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.LeftHand)) ||
 					(!agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.RightHand))) {
 					satisfied = true;
-					ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+//					ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 				}
 
 //				GameObject theme = GameObject.Find (argsStrings [0] as String);
@@ -301,6 +302,7 @@ namespace Satisfaction {
 			if (satisfied) {
 				EventManagerArgs eventArgs = new EventManagerArgs (test, isMacroEvent);
 				em.OnEventComplete(em, eventArgs);
+//				ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 			}
 
 			return satisfied;
@@ -421,11 +423,33 @@ namespace Satisfaction {
 			// get relation tracker
 			RelationTracker relationTracker = (RelationTracker)GameObject.Find ("BehaviorController").GetComponent("RelationTracker");
 
+			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+
 			// get bounds of theme object of program
 			Bounds objBounds = Helper.GetObjectWorldSize(obj.gameObject);
 
-			// get list of all voxeme entities
-			Voxeme[] allVoxemes = UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => a.isActiveAndEnabled).ToArray();
+			// get list of all voxeme entities that are not components of other voxemes
+//			Voxeme[] allVoxemes = objSelector.allVoxemes.Where(a => // where there does not exist another voxeme that has this voxeme as a component
+//				objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)).ToArray();
+			Voxeme[] allVoxemes = objSelector.allVoxemes.Where (a => 
+				!objSelector.allVoxemes.SelectMany(
+					(v, c) => v.opVox.Type.Components.Where(
+						comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList().Contains (a.gameObject)).ToArray ();
+
+			List<GameObject> components = objSelector.allVoxemes.SelectMany((v, c) => v.opVox.Type.Components.Where(comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList();
+
+			foreach (GameObject go in components) {
+				Debug.Log (go);
+			}
+
+			foreach (Voxeme v in allVoxemes) {
+				Debug.Log (v);
+			}
+//			objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)
+			
+//				UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => 
+//				objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a)) 
+//				a.isActiveAndEnabled).ToArray();
 
 			// reactivate physics by default
 			//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
@@ -464,15 +488,38 @@ namespace Satisfaction {
 			// relation-based reasoning from affordances
 			foreach (int objHabitat in affStr.Affordances.Keys) {
 				if (TestHabitat (obj.gameObject, objHabitat)) {
-					Debug.Log (objHabitat);
+//					Debug.Log (objHabitat);
 					foreach (Voxeme test in allVoxemes) {
 						if (test.gameObject != obj.gameObject) {
 							// foreach voxeme
 							// get bounds of object being tested against
 							Bounds testBounds = Helper.GetObjectWorldSize (test.gameObject);
 							if (!test.gameObject.name.Contains ("*")) { // hacky fix to filter out unparented objects w/ disabled voxeme components
+
+								// habitat-independent relation handling
+								foreach (string rel in genericRelations) {
+									string relation = rel.Split('\\')[0];	// not using relation as regex here
+
+									//Debug.Log (string.Format ("Is {0} {1} {2}?", obj.gameObject.name, relation, test.gameObject.name));
+									if (TestRelation (obj.gameObject, relation, test.gameObject)) {
+										relationTracker.AddNewRelation (new List<GameObject>{ obj.gameObject, test.gameObject }, relation);
+									}
+									else {
+										// remove if present
+										relationTracker.RemoveRelation (new List<GameObject>{ obj.gameObject, test.gameObject }, relation);
+									}
+
+									if (TestRelation (test.gameObject, relation, obj.gameObject)) {
+										relationTracker.AddNewRelation (new List<GameObject>{ test.gameObject, obj.gameObject }, relation);
+									}
+									else {
+										// remove if present
+										relationTracker.RemoveRelation (new List<GameObject>{ test.gameObject, obj.gameObject }, relation);
+									}
+								}
+
 								//if (test.enabled) {	// if voxeme is active
-								Debug.Log(test);
+//								Debug.Log(test);
 								foreach (int testHabitat in test.opVox.Affordance.Affordances.Keys) {
 									//if (TestHabitat (test.gameObject, testHabitat)) {	// test habitats
 										for (int i = 0; i < test.opVox.Affordance.Affordances[testHabitat].Count; i++) {	// condition/event/result list for this habitat index
@@ -589,20 +636,6 @@ namespace Satisfaction {
 											}
 										}
 									//}
-
-									// habitat-independent relation handling
-									foreach (string rel in genericRelations) {
-										string relation = rel.Split('\\')[0];	// not using relation as regex here
-
-										//Debug.Log (string.Format ("Is {0} {1} {2}?", obj.gameObject.name, relation, test.gameObject.name));
-										if (TestRelation (obj.gameObject, relation, test.gameObject)) {
-											relationTracker.AddNewRelation (new List<GameObject>{ obj.gameObject, test.gameObject }, relation);
-										}
-
-										if (TestRelation (test.gameObject, relation, obj.gameObject)) {
-											relationTracker.AddNewRelation (new List<GameObject>{ test.gameObject, obj.gameObject }, relation);
-										}
-									}
 								}
 							}
 						}
@@ -615,7 +648,7 @@ namespace Satisfaction {
 				if (TestHabitat (obj.gameObject, objHabitat)) {	// test habitats
 					for (int i = 0; i < affStr.Affordances [objHabitat].Count; i++) {	// condition/event/result list for this habitat index
 						string ev = affStr.Affordances [objHabitat] [i].Item2.Item1;
-						Debug.Log (ev);
+//						Debug.Log (ev);
 						if (ev.Contains (program)) {
 							bool relationIndependent = true;
 							foreach (string rel in supportedRelations) {
@@ -626,11 +659,11 @@ namespace Satisfaction {
 							}
 
 							if (relationIndependent) {
-								Debug.Log (obj.opVox.Lex.Pred);
-								Debug.Log (program);
+//								Debug.Log (obj.opVox.Lex.Pred);
+//								Debug.Log (program);
 
 								result = affStr.Affordances [objHabitat] [i].Item2.Item2;
-								Debug.Log (result);
+//								Debug.Log (result);
 
 								if (result != "") {
 									result = result.Replace ("x", obj.gameObject.name);
@@ -639,8 +672,10 @@ namespace Satisfaction {
 									result = Helper.GetTopPredicate (result);
 									Debug.Log (string.Format ("{0}: {1} {2}.pp",
 										affStr.Affordances [objHabitat] [i].Item2.Item1, obj.gameObject.name, result));
-									// TODO: maybe switch object order here below => passivize relation?
-									relationTracker.AddNewRelation (new List<GameObject>{ obj.gameObject }, result);
+									if (result != "release") {
+										// TODO: maybe switch object order here below => passivize relation?
+										relationTracker.AddNewRelation (new List<GameObject>{ obj.gameObject }, result);
+									}
 									//Debug.Break ();
 									if (result == "hold") {
 										reactivatePhysics = false;
@@ -672,7 +707,7 @@ namespace Satisfaction {
 			MethodInfo methodToCall;
 			bool r = true;
 
-			Debug.Log (string.Format ("H[{0}]", habitatIndex));
+//			Debug.Log (string.Format ("H[{0}]", habitatIndex));
 			if (habitatIndex != 0) {	// index 0 = affordance enabled in all habitats
 				OperationalVox opVox = obj.GetComponent<Voxeme> ().opVox;
 				if (opVox != null) {
@@ -728,7 +763,7 @@ namespace Satisfaction {
 					//flip(cup1);put(ball,under(cup1))
 				}
 			}
-			Debug.Log (r);
+			Debug.Log (string.Format ("H[{0}]:{1}", habitatIndex,r));
 			return r;
 		}
 
@@ -823,6 +858,12 @@ namespace Satisfaction {
 							break;
 
 						case "Y":
+							Debug.Log (obj1);
+							Debug.Log (obj2);
+							Debug.Log (Vector3.Distance (
+								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+								obj2.gameObject.transform.position));
+							Debug.Log (RCC8.EC (Helper.GetObjectOrientedSize (obj1, true), Helper.GetObjectOrientedSize (obj2, true)));
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
 								obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -837,7 +878,7 @@ namespace Satisfaction {
 						default:
 							break;
 						}
-						r &= RCC8.EC (bounds1, bounds2);
+						r &= RCC8.EC (Helper.GetObjectOrientedSize(obj1,true), Helper.GetObjectOrientedSize(obj2,true));
 					}
 				}
 			}
@@ -881,37 +922,103 @@ namespace Satisfaction {
 			// add generic relations--left, right, etc.
 			// TODO: must transform to camera perspective if relative persp is on
 			else if (relation == "behind") {
-				r = (Vector3.Distance (
-					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
-					obj2.gameObject.transform.position) <= Constants.EPSILON);
-				r &= (obj1.gameObject.transform.position.z > obj2.gameObject.transform.position.z);
+				r = QSR.QSR.Behind(bounds1,bounds2) && 
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.X) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.X,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.X) || QSR.QSR.During(bounds1,bounds2,MajorAxis.X,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.X) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.X,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.X) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.X,true)) &&
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.During(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y,true));
+//				r = (Vector3.Distance (
+//					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
+//					obj2.gameObject.transform.position) <= Constants.EPSILON);
+//				r &= (obj1.gameObject.transform.position.z > obj2.gameObject.transform.position.z);
 
 			}
 			else if (relation == "in_front") {
-				r = (Vector3.Distance (
-					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
-					obj2.gameObject.transform.position) <= Constants.EPSILON);
-				r &= (obj1.gameObject.transform.position.z < obj2.gameObject.transform.position.z);
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.InFront(bounds1,bounds2)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.X)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.X,true)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.During(bounds1,bounds2,MajorAxis.X)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.During(bounds1,bounds2,MajorAxis.X,true)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.Starts(bounds1,bounds2,MajorAxis.X)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.Starts(bounds1,bounds2,MajorAxis.X,true)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.X)));
+//				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.X,true)));
+
+				r = QSR.QSR.InFront(bounds1,bounds2) && 
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.X) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.X,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.X) || QSR.QSR.During(bounds1,bounds2,MajorAxis.X,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.X) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.X,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.X) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.X,true)) &&
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.During(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y,true));
+//				r = (Vector3.Distance (
+//					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
+//					obj2.gameObject.transform.position) <= Constants.EPSILON);
+//				r &= (obj1.gameObject.transform.position.z < obj2.gameObject.transform.position.z);
 
 			}
 			else if (relation == "left") {
-				r = (Vector3.Distance (
-					new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-					obj2.gameObject.transform.position) <= Constants.EPSILON);
-				r &= (obj1.gameObject.transform.position.x < obj2.gameObject.transform.position.x);
+//				Debug.Log(string.Format("{0} {3} of {1}:{2}",obj1,obj2,QSR.QSR.Left(bounds1,bounds2),relation));
+//				Debug.Log(string.Format("{0} overlaps {1}:{2}",obj1,obj2,QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Z)));
+//				Debug.Log(string.Format("{1} overlaps {0}:{2}",obj1,obj2,QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Z,true)));
+//				Debug.Log(string.Format("{0} during {1}:{2}",obj1,obj2,QSR.QSR.During(bounds1,bounds2,MajorAxis.Z)));
+//				Debug.Log(string.Format("{1} during {0}:{2}",obj1,obj2,QSR.QSR.During(bounds1,bounds2,MajorAxis.Z,true)));
+//				Debug.Log(string.Format("{0} starts {1}:{2}",obj1,obj2,QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Z)));
+//				Debug.Log(string.Format("{1} starts {0}:{2}",obj1,obj2,QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Z,true)));
+//				Debug.Log(string.Format("{0} finishes {1}:{2}",obj1,obj2,QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Z)));
+//				Debug.Log(string.Format("{1} finishes {0}:{2}",obj1,obj2,QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Z,true)));
+//				Debug.Log(string.Format("{0} overlaps {1}:{2}",obj1,obj2,QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y)));
+//				Debug.Log(string.Format("{1} overlaps {0}:{2}",obj1,obj2,QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y,true)));
+//				Debug.Log(string.Format("{0} during {1}:{2}",obj1,obj2,QSR.QSR.During(bounds1,bounds2,MajorAxis.Y)));
+//				Debug.Log(string.Format("{1} during {0}:{2}",obj1,obj2,QSR.QSR.During(bounds1,bounds2,MajorAxis.Y,true)));
+//				Debug.Log(string.Format("{0} starts {1}:{2}",obj1,obj2,QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y)));
+//				Debug.Log(string.Format("{1} starts {0}:{2}",obj1,obj2,QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y,true)));
+//				Debug.Log(string.Format("{0} finishes {1}:{2}",obj1,obj2,QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y)));
+//				Debug.Log (string.Format ("{1} finishes {0}:{2}", obj1, obj2, QSR.QSR.Finishes (bounds1, bounds2, MajorAxis.Y, true)));
+
+				r = QSR.QSR.Left(bounds1,bounds2) && 
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Z,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.During(bounds1,bounds2,MajorAxis.Z,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Z,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Z,true)) &&
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.During(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y,true));
+					//(Vector3.Distance (
+					//new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+					//obj2.gameObject.transform.position) <= Constants.EPSILON);
+				//r &= (obj1.gameObject.transform.position.x < obj2.gameObject.transform.position.x);
 			}
 			else if (relation == "right") {
-				r = (Vector3.Distance (
-					new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-					obj2.gameObject.transform.position) <= Constants.EPSILON);
-				r &= (obj1.gameObject.transform.position.x > obj2.gameObject.transform.position.x);
+				r = QSR.QSR.Right(bounds1,bounds2) && 
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Z,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.During(bounds1,bounds2,MajorAxis.Z,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Z,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Z) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Z,true)) &&
+					(QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Overlaps(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.During(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.During(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Starts(bounds1,bounds2,MajorAxis.Y,true) ||
+						QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y) || QSR.QSR.Finishes(bounds1,bounds2,MajorAxis.Y,true));
+//				r = (Vector3.Distance (
+//					new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+//					obj2.gameObject.transform.position) <= Constants.EPSILON);
+//				r &= (obj1.gameObject.transform.position.x > obj2.gameObject.transform.position.x);
 			}
 			else if (relation == "touching") {
-				r = RCC8.EC(bounds1, bounds2);
+				r = RCC8.EC(Helper.GetObjectOrientedSize(obj1,true), Helper.GetObjectOrientedSize(obj2,true));
+//				r = RCC8.EC(Helper.GetObjectOrientedSize(obj1), Helper.GetObjectOrientedSize(obj2));
 			}
 			else {
 			}
 
+//			Debug.Log (r);
 			return r;
 		}
 

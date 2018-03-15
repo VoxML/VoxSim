@@ -12,5 +12,6 @@
             <Arg Value="y:3D" />
         </Args>
         <Constr>Head->[Concavity &amp;&amp; align(RotatSym->Axis,E_y)]</Constr>
+        <Corresps />
     </Type>
 </VoxML>

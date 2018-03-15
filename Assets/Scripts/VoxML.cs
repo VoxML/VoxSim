@@ -49,6 +49,11 @@ namespace Vox {
 		public string Value { get; set; }
 	}
 
+	public class VoxTypeCorresp {
+		[XmlAttribute]
+		public string Value { get; set; }
+	}
+
 	public class VoxType {
 		public string Head = "";
 		
@@ -74,6 +79,10 @@ namespace Vox {
 		public string Class = "";
 		public string Value = "";
 		public string Constr = "";
+
+		[XmlArray("Corresps")]
+		[XmlArrayItem("Corresp")]
+		public List<VoxTypeCorresp> Corresps = new List<VoxTypeCorresp>();
 	}
 
 	/// <summary>

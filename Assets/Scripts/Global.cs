@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
 
+using MajorAxes;
+
 namespace Global {
 	/// <summary>
 	/// Constants
@@ -108,6 +110,107 @@ namespace Global {
 			}
 	
 			return area;
+		}
+	}
+
+	/// <summary>
+	/// Object oriented bounds class
+	/// </summary>
+	public class ObjBounds
+	{
+		Vector3 _center;
+		List<Vector3> _points;
+
+		public Vector3 Center {
+			get { return _center; }
+			set { _center = value; }
+		}
+
+		public List<Vector3> Points {
+			get { return _points; }
+			set { _points = value; }
+		}
+
+		public ObjBounds() {
+			_center = Vector3.zero;
+			_points = new List<Vector3>(new Vector3[]{
+				Vector3.zero,Vector3.zero,
+				Vector3.zero,Vector3.zero,
+				Vector3.zero,Vector3.zero,
+				Vector3.zero,Vector3.zero});
+		}
+
+		public ObjBounds(Vector3 center) {
+			_center = center;
+			_points = new List<Vector3>(new Vector3[]{
+				Vector3.zero,Vector3.zero,
+				Vector3.zero,Vector3.zero,
+				Vector3.zero,Vector3.zero,
+				Vector3.zero,Vector3.zero});
+		}
+
+		public ObjBounds(List<Vector3> points) {
+			_center = Vector3.zero;
+			_points = new List<Vector3>(points);
+		}
+
+		public ObjBounds(Vector3 center, List<Vector3> points) {
+			_center = center;
+			_points = new List<Vector3>(points);
+		}
+
+		public Vector3 Min(MajorAxis axis = MajorAxis.None) {
+			List<Vector3> pts = new List<Vector3> ();
+			if (axis == MajorAxis.None) {	// default to Y
+				pts = Points.OrderBy (v => v.y).ToList();
+			}
+			else {
+				if (axis == MajorAxis.X) {
+					pts = Points.OrderBy (v => v.x).ToList();
+				}
+				else if (axis == MajorAxis.Y) {
+					pts = Points.OrderBy (v => v.y).ToList();
+				}
+				else if (axis == MajorAxis.Z) {
+					pts = Points.OrderBy (v => v.z).ToList();
+				}
+			}
+
+			return pts [0];
+		}
+
+		public Vector3 Max(MajorAxis axis = MajorAxis.None) {
+			List<Vector3> pts = new List<Vector3> ();
+			if (axis == MajorAxis.None) {	// default to Y
+				pts = Points.OrderByDescending (v => v.y).ToList();
+			}
+			else {
+				if (axis == MajorAxis.X) {
+					pts = Points.OrderByDescending (v => v.x).ToList();
+				}
+				else if (axis == MajorAxis.Y) {
+					pts = Points.OrderByDescending (v => v.y).ToList();
+				}
+				else if (axis == MajorAxis.Z) {
+					pts = Points.OrderByDescending (v => v.z).ToList();
+				}
+			}
+
+			return pts [0];
+		}
+
+		public bool Contains(Vector3 point) {
+			bool contains = true;
+
+			Vector3 closestPoint = Points.OrderBy (p => (p - point).magnitude).ToList () [0];
+
+			List<Vector3> colinearPoints = Points.Where (p => p != closestPoint).OrderBy (p => (p - closestPoint).magnitude).Take (3).ToList ();
+
+			foreach (Vector3 pt in colinearPoints) {
+				contains &= (Vector3.Dot ((point - closestPoint).normalized, (pt - closestPoint).normalized) >= 0.0f);
+			}
+
+			return contains;
 		}
 	}
 
@@ -524,6 +627,7 @@ namespace Global {
 		}
 
 		// OBJECT METHODS
+		// returns origin-centered object bounds
 		public static Bounds GetObjectSize(GameObject obj) {
 			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
 
@@ -571,6 +675,107 @@ namespace Global {
 			combinedBounds.Encapsulate(bmin);
 			combinedBounds.Encapsulate(bmax);*/
 			return combinedBounds;
+		}
+
+		// returns origin-centered object bounds
+		public static ObjBounds GetObjectOrientedSize(GameObject obj) {
+			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
+
+			Bounds combinedBounds = new Bounds (Vector3.zero, Vector3.zero);
+
+			foreach (MeshFilter mesh in meshes) {
+				Bounds temp = new Bounds (Vector3.zero,mesh.mesh.bounds.size);
+				Vector3 min = new Vector3 (temp.min.x * mesh.gameObject.transform.lossyScale.x,
+					temp.min.y * mesh.gameObject.transform.lossyScale.y,
+					temp.min.z * mesh.gameObject.transform.lossyScale.z);
+				Vector3 max = new Vector3 (temp.max.x * mesh.gameObject.transform.lossyScale.x,
+					temp.max.y * mesh.gameObject.transform.lossyScale.y,
+					temp.max.z * mesh.gameObject.transform.lossyScale.z);
+				temp.SetMinMax (min,max);
+				combinedBounds.Encapsulate(temp);
+			}
+
+			combinedBounds.SetMinMax (combinedBounds.center + obj.transform.position - combinedBounds.extents,
+				combinedBounds.center + obj.transform.position + combinedBounds.extents);
+
+			List<Vector3> pts = new List<Vector3> (new Vector3[]{
+				new Vector3(combinedBounds.min.x,combinedBounds.min.y,combinedBounds.min.z),
+				new Vector3(combinedBounds.min.x,combinedBounds.min.y,combinedBounds.max.z),
+				new Vector3(combinedBounds.min.x,combinedBounds.max.y,combinedBounds.min.z),
+				new Vector3(combinedBounds.min.x,combinedBounds.max.y,combinedBounds.max.z),
+				new Vector3(combinedBounds.max.x,combinedBounds.min.y,combinedBounds.min.z),
+				new Vector3(combinedBounds.max.x,combinedBounds.min.y,combinedBounds.max.z),
+				new Vector3(combinedBounds.max.x,combinedBounds.max.y,combinedBounds.min.z),
+				new Vector3(combinedBounds.max.x,combinedBounds.max.y,combinedBounds.max.z)
+			});
+
+			ObjBounds objBounds = new ObjBounds(combinedBounds.center);
+			List<Vector3> points = new List<Vector3> ();
+			foreach (Vector3 pt in pts) {
+				points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
+			}
+
+			objBounds.Points = new List<Vector3> (points);
+
+			return objBounds;
+		}
+
+		// returns origin-centered object bounds
+		public static ObjBounds GetObjectOrientedSize(GameObject obj, bool excludeChildren) {
+			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter> ();
+
+			// me: I hate computer scientists!  They never document their code properly!
+			// also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
+//			Debug.Log (obj1);
+			MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter> ().Where (
+	            m => (Helper.GetMostImmediateParentVoxeme (m.gameObject) != obj) && (m.gameObject.GetComponent<Voxeme> () != null) &&
+	            (!obj.GetComponent<Voxeme> ().opVox.Type.Components.Select (
+	                c => c.Item2).ToList ().Contains (m.gameObject))).ToArray ();
+			List<GameObject> exclude = new List<GameObject> ();
+			foreach (MeshFilter mesh in children) {
+				Debug.Log (mesh.gameObject);
+				exclude.Add (mesh.gameObject);
+			}
+
+			Bounds combinedBounds = new Bounds (Vector3.zero, Vector3.zero);
+
+			foreach (MeshFilter mesh in meshes) {
+				if (!exclude.Contains (mesh.gameObject)) {
+					Bounds temp = new Bounds (Vector3.zero, mesh.mesh.bounds.size);
+					Vector3 min = new Vector3 (temp.min.x * mesh.gameObject.transform.lossyScale.x,
+						             temp.min.y * mesh.gameObject.transform.lossyScale.y,
+						             temp.min.z * mesh.gameObject.transform.lossyScale.z);
+					Vector3 max = new Vector3 (temp.max.x * mesh.gameObject.transform.lossyScale.x,
+						             temp.max.y * mesh.gameObject.transform.lossyScale.y,
+						             temp.max.z * mesh.gameObject.transform.lossyScale.z);
+					temp.SetMinMax (min, max);
+					combinedBounds.Encapsulate (temp);
+				}
+			}
+
+			combinedBounds.SetMinMax (combinedBounds.center + obj.transform.position - combinedBounds.extents,
+				combinedBounds.center + obj.transform.position + combinedBounds.extents);
+
+			List<Vector3> pts = new List<Vector3> (new Vector3[] {
+				new Vector3 (combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
+				new Vector3 (combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
+				new Vector3 (combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
+				new Vector3 (combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
+				new Vector3 (combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
+				new Vector3 (combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
+				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
+				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z)
+			});
+
+			ObjBounds objBounds = new ObjBounds (combinedBounds.center);
+			List<Vector3> points = new List<Vector3> ();
+			foreach (Vector3 pt in pts) {
+				points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
+			}
+
+			objBounds.Points = new List<Vector3> (points);
+
+			return objBounds;
 		}
 
 		// get the bounds of the object in the current world

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Timers;
 
 using Global;
+using Satisfaction;
 
 public class PhysicsPrimitives : MonoBehaviour {
 
@@ -14,6 +15,7 @@ public class PhysicsPrimitives : MonoBehaviour {
 	Timer catchupTimer;
 
 	bool macroEventSatisfied;
+	string testSatisfied;
 
 	// Use this for initialization
 	void Start () {
@@ -41,6 +43,23 @@ public class PhysicsPrimitives : MonoBehaviour {
 				if (eventManager.events.Count > 0) {
 					catchupTimer.Interval = 1;
 				}
+
+				Hashtable predArgs = Helper.ParsePredicate (testSatisfied);
+				String predString = "";
+				String[] argsStrings = null;
+
+				foreach (DictionaryEntry entry in predArgs) {
+					predString = (String)entry.Key;
+					argsStrings = ((String)entry.Value).Split (new char[] {','});
+				}
+
+				// TODO: better than this
+				// which predicates result in affordance-based consequence?
+				if ((predString == "ungrasp") || (predString == "lift") || 
+					(predString == "turn") || (predString == "roll") ||
+					(predString == "slide") || (predString == "put")) {
+					Satisfaction.SatisfactionTest.ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+				}
 			}
 		//}
 	}
@@ -50,6 +69,7 @@ public class PhysicsPrimitives : MonoBehaviour {
 		resolveDiscrepancies = true;
 		catchupTimer.Enabled = true;
 		macroEventSatisfied = ((EventManagerArgs)e).MacroEvent;
+		testSatisfied = ((EventManagerArgs)e).EventString;
 	}
 
 	void Resolve(object sender, ElapsedEventArgs e) {
