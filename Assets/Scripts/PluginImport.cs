@@ -10,6 +10,7 @@ public class PluginImport : MonoBehaviour {
 	private CmdServer _cmdServer;
 	private CSUClient _csuClient;
 	private EventLearningClient _eventLearningClient;
+	private CommanderClient _commanderClient;
 
 	public CSUClient CSUClient {
 		get { return _csuClient; }
@@ -17,6 +18,10 @@ public class PluginImport : MonoBehaviour {
 
 	public EventLearningClient EventLearningClient {
 		get { return _eventLearningClient; }
+	}
+
+	public CommanderClient CommanderClient {
+		get { return _commanderClient; }
 	}
 
 	// Make our calls from the Plugin
@@ -64,6 +69,14 @@ public class PluginImport : MonoBehaviour {
 				}
 			}
 
+			string commanderUrlString = string.Empty;
+			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
+				if (url.Split ('=') [0] == "Commander URL") {
+					commanderUrlString = url.Split ('=') [1];
+					break;
+				}
+			}
+
 			string[] csuUrl = csuUrlString.Split(':');
 			string csuAddress = csuUrl [0];
 			if (csuAddress != "") {
@@ -84,7 +97,7 @@ public class PluginImport : MonoBehaviour {
 			if (eventLearnerAddress != "") {
 				int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
 				try {
-					ConnectSocket (eventLearnerAddress, eventLearnerPort, ref _eventLearningClient);
+					_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
 				}
 				catch (Exception e) {
 					Debug.Log (e.Message);
@@ -92,6 +105,21 @@ public class PluginImport : MonoBehaviour {
 			}
 			else {
 				Debug.Log ("Event learner input is not specified.");
+			}
+
+			string[] commanderUrl = commanderUrlString.Split(':');
+			string commanderAddress = commanderUrl [0];
+			if (commanderAddress != "") {
+				int commanderPort = Convert.ToInt32 (commanderUrl [1]);
+				try {
+					_commanderClient = (CommanderClient)ConnectSocket (commanderAddress, commanderPort, typeof(CommanderClient));
+				}
+				catch (Exception e) {
+					Debug.Log (e.Message);
+				}
+			}
+			else {
+				Debug.Log ("Commander input is not specified.");
 			}
 		}
 		else {
@@ -147,6 +175,15 @@ public class PluginImport : MonoBehaviour {
 				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(inputFromCommander.Trim());
 			}
 		}
+
+		if (_commanderClient != null) {
+			string inputFromCommander = _commanderClient.GetMessage();
+			if (inputFromCommander != "") {
+				Debug.Log (inputFromCommander);
+				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = inputFromCommander.Trim();
+				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(inputFromCommander.Trim());
+			}
+		}
 	}
 
 	public void ConnectCSU(string address, int port)
@@ -157,12 +194,28 @@ public class PluginImport : MonoBehaviour {
 		Debug.Log(string.Format("{2} :: Connected to CSU recognizer @ {0}:{1}", address, port, _csuClient.IsConnected()));
 	}
 
-	public void ConnectSocket(string address, int port, ref EventLearningClient client)
+	public SocketClient ConnectSocket(string address, int port, Type clientType)
 	{ // TODO: Abstract EventLearningClient and CSUClient to generic type inheritance
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
-		client = new EventLearningClient();
-		client.Connect(address, port);
-		Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1}", address, port, client.IsConnected()));
+
+		SocketClient client = null;
+
+		if (clientType == typeof(CommanderClient)) {
+			client = new CommanderClient ();
+		}
+		else if (clientType == typeof(EventLearningClient)) {
+			client = new EventLearningClient ();
+		}
+
+		if (client != null) {
+			client.Connect (address, port);
+			Debug.Log (string.Format ("{2} :: Connected to client @ {0}:{1} as {3}", address, port, client.IsConnected (), clientType.ToString()));
+		}
+		else {
+			Debug.Log ("Failed to create client");
+		}
+
+		return client;
 	}
 
 	public void OpenPortInternal(string port) {

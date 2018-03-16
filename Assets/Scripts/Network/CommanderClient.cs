@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+
+using UnityEngine;
+
+namespace Network
+{
+	public class CommanderEventArgs : EventArgs {
+		public string Content { get; set; }
+
+		public CommanderEventArgs(string content, bool macroEvent = false)
+		{
+			this.Content = content;
+		}
+	}
+
+	public class CommanderClient : SocketClient
+	{
+		public void Write(string content) {
+			// Check to see if this NetworkStream is writable.
+			if (_client.GetStream().CanWrite) {
+
+				byte[] writeBuffer = Encoding.ASCII.GetBytes (content);
+				_client.GetStream().Write (writeBuffer, 0, writeBuffer.Length);
+				Debug.Log (string.Format("Written to this NetworkStream: {0}",writeBuffer.Length));  
+			} 
+			else {
+				Debug.Log ("Sorry.  You cannot write to this NetworkStream.");  
+			}
+		}
+	}
+}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Episteme;
+using Network;
 
 namespace Agent {
 	public enum EpistemicCertaintyOperation
@@ -154,7 +155,9 @@ namespace Agent {
 		
 		// Update is called once per frame
 		void Update () {
-			
+			if (Input.GetKeyDown (KeyCode.R)) {
+				GameObject.Find("RestClient").GetComponent<RestClient>().Get("http://localhost:5000","okay", "error");
+			}
 		}
 	}
 }

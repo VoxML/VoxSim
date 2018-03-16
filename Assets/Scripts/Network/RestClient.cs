@@ -22,7 +22,7 @@ namespace Network
             Request(url, "DELETE", jsonPayload, success, error);
         }
 
-        private void Request(string url, string method, string jsonPayload, string success, string error){
+		private void Request(string url, string method, string jsonPayload, string success, string error){
             StartCoroutine(AsyncRequest(jsonPayload, method, url, success, error));
         }
 
@@ -31,6 +31,8 @@ namespace Network
             var payloadBytes = string.IsNullOrEmpty(jsonPayload)
                 ? System.Text.Encoding.UTF8.GetBytes("{}")
                 : System.Text.Encoding.UTF8.GetBytes(jsonPayload);
+
+			Debug.Log (method);
 
             UploadHandler upload = new UploadHandlerRaw(payloadBytes);
             webRequest.uploadHandler = upload;
@@ -47,6 +49,7 @@ namespace Network
             } 
             else
             {
+				Debug.Log (webRequest.downloadHandler.text);
                 //gameObject.BroadcastMessage(success, null);
             }
         } 
