@@ -15,6 +15,14 @@ using QSR;
 using RCC;
 using RootMotion.FinalIK;
 
+public class SelectionEventArgs : EventArgs {
+	public GameObject Obj;
+
+	public SelectionEventArgs(GameObject obj) {
+		Obj = obj;
+	}
+}
+
 public class JointGestureDemo : AgentInteraction {
 
 	CSUClient csuClient;
@@ -117,6 +125,16 @@ public class JointGestureDemo : AgentInteraction {
 	Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
 
 	int sessionCounter = 0;
+
+	public event EventHandler ObjectSelected;
+
+	public void OnObjectSelected(object sender, EventArgs e)
+	{
+		if (ObjectSelected != null)
+		{
+			ObjectSelected(this, e);
+		}
+	}
 
 	// Use this for initialization
 	void Start () {
@@ -343,8 +361,8 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 		}
-
-		if (epistemicModel.engaged) {
+			
+		if ((epistemicModel != null) && (epistemicModel.engaged) && (epistemicModel.state != null)) {
 			Concept putConcept = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
 			putConcept.Certainty = -1.0;
@@ -375,6 +393,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
+
 		// Deixis by click
 		if (allowDeixisByClick) {
 			if (Input.GetMouseButtonDown (0)) {
@@ -385,12 +404,15 @@ public class JointGestureDemo : AgentInteraction {
 
 				if (hit.collider != null) {
 					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-						epistemicModel.engaged = true;
+						if (epistemicModel != null) {
+							epistemicModel.engaged = true;
+						}
 						if (synVision != null) {
 							if (synVision.enabled) {
 								Debug.Log(string.Format("SyntheticVision.IsVisible({0}):{1}",hit.collider.gameObject,synVision.IsVisible (hit.collider.gameObject)));
 								if (synVision.IsKnown (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-									Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+									//Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+									OnObjectSelected(this,new SelectionEventArgs(Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject)));
 								}
 							}
 						}
@@ -4524,78 +4546,7 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<IKControl>().targetRotation = Quaternion.LookRotation (offset,Vector3.up).eulerAngles;
 	}
 
-	void ReachFor(Vector3 coord) {
-		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
-		//Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
-		//Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
-
-		if (interactionLogic.GraspedObj != null) { // grasping something
-			if (interactionLogic.GraspedObj != null) {
-				if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
-					ikControl.rightHandObj.transform.position = coord + offset;
-					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-				}
-				else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-					ikControl.leftHandObj.transform.position = coord + offset;
-					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-				}
-			}
-		}
-		else {
-			// which region is coord in?
-			if (leftRegion.Contains (new Vector3 (coord.x,
-				leftRegion.center.y, coord.z))) {
-				ikControl.rightHandObj.transform.position = coord + offset;
-				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-
-			}
-			else if (rightRegion.Contains (new Vector3 (coord.x,
-				rightRegion.center.y, coord.z))) {
-				ikControl.leftHandObj.transform.position = coord + offset;
-				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-			}
-		}
-
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("reach({0})",Helper.VectorToParsable(coord)))));
-		
-		LookForward ();
-	}
-
-	void ReachFor(GameObject obj) {
-		Bounds bounds = Helper.GetObjectWorldSize(obj);
-		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
-		//		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
-		//		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
-
-		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
-
-		// which region is obj in?
-		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
-			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
-			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-
-		}
-		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
-			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
-			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-		}
-
-		//LookAt (obj);
-
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("reach({0})",obj.name))));
-	}
-
-	 Vector3 TransformToSurface(List<float> vector) {
+	Vector3 TransformToSurface(List<float> vector) {
 		float zCoord = vector[1];
 
 		if (transformToScreenPointing) {
@@ -4702,6 +4653,77 @@ public class JointGestureDemo : AgentInteraction {
 		return fits;
 	}
 
+	public void ReachFor(Vector3 coord) {
+		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
+		//Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		//Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+
+		if (interactionLogic.GraspedObj != null) { // grasping something
+			if (interactionLogic.GraspedObj != null) {
+				if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+					ikControl.rightHandObj.transform.position = coord + offset;
+					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+				}
+				else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+					ikControl.leftHandObj.transform.position = coord + offset;
+					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+				}
+			}
+		}
+		else {
+			// which region is coord in?
+			if (leftRegion.Contains (new Vector3 (coord.x,
+				leftRegion.center.y, coord.z))) {
+				ikControl.rightHandObj.transform.position = coord + offset;
+				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+
+			}
+			else if (rightRegion.Contains (new Vector3 (coord.x,
+				rightRegion.center.y, coord.z))) {
+				ikControl.leftHandObj.transform.position = coord + offset;
+				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+			}
+		}
+
+		logger.OnLogEvent(this, new LoggerArgs (
+			string.Format("{0}\t{1}\t{2}",
+				(++logIndex).ToString(),
+				"AG",
+				string.Format("reach({0})",Helper.VectorToParsable(coord)))));
+
+		LookForward ();
+	}
+
+	public void ReachFor(GameObject obj) {
+		Bounds bounds = Helper.GetObjectWorldSize(obj);
+		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
+		//		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		//		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
+
+		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
+
+		// which region is obj in?
+		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
+			leftRegion.center.y,obj.transform.position.z))) {
+			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
+			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+
+		}
+		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
+			leftRegion.center.y,obj.transform.position.z))) {
+			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
+			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		}
+
+		//LookAt (obj);
+
+		logger.OnLogEvent(this, new LoggerArgs (
+			string.Format("{0}\t{1}\t{2}",
+				(++logIndex).ToString(),
+				"AG",
+				string.Format("reach({0})",obj.name))));
+	}
+
 	public void StorePose() {
 		//		Debug.Log (string.Format("Storing pose {0} {1} {2}",
 		//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
@@ -4776,7 +4798,7 @@ public class JointGestureDemo : AgentInteraction {
 		return certainty;
 	}
 
-	void RespondAndUpdate(string utterance) {
+	public void RespondAndUpdate(string utterance) {
 		if (OutputHelper.GetCurrentOutputString(Role.Affector) != utterance) {
 		logger.OnLogEvent (this, new LoggerArgs (
 			string.Format("{0}\t{1}\t{2}",
@@ -4788,6 +4810,10 @@ public class JointGestureDemo : AgentInteraction {
 		OutputHelper.PrintOutput (Role.Affector, utterance);
 
 		// get all linguistic concepts
+		if ((epistemicModel == null) || (epistemicModel.state == null)) {
+			return;
+		}
+
 		List<Concepts> conceptsList = epistemicModel.state.GetAllConcepts();
 		foreach (Concepts concepts in conceptsList) {
 			if (concepts.GetConcepts ().ContainsKey (ConceptMode.L)) {

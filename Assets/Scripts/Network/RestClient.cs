@@ -1,38 +1,57 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace Network
 {
+	public class RestEventArgs : EventArgs {
+
+		public object Content { get; set; }
+
+		public RestEventArgs(object content)
+		{
+			this.Content = content;
+		}
+	}
+
     public class RestClient : MonoBehaviour
     {
+		public event EventHandler GotData;
+
+		public void OnGotData(object sender, EventArgs e)
+		{
+			if (GotData != null)
+			{
+				GotData(this, e);
+			}
+		}
+
         public void Get(string url, string success, string error){
-            Request(url, "GET", null, success, error);
+            Request(url, "GET", null, "GET_"+success, error);
         }
  
         public void Post(string url, string jsonPayload, string success, string error){
-            Request(url, "POST", jsonPayload, success, error);
+			Request(url, "POST", jsonPayload, "POST_"+success, error);
         }
 
         public void Put(string url, string jsonPayload, string success, string error){
-            Request(url, "PUT", jsonPayload, success, error);
+			Request(url, "PUT", jsonPayload, "PUT_"+success, error);
         }
 
         public void Delete(string url, string jsonPayload, string success, string error){
-            Request(url, "DELETE", jsonPayload, success, error);
+			Request(url, "DELETE", jsonPayload, "DELETE_"+success, error);
         }
 
 		private void Request(string url, string method, string jsonPayload, string success, string error){
             StartCoroutine(AsyncRequest(jsonPayload, method, url, success, error));
         }
 
-        private IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error){
+		private IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error){
             var webRequest = new UnityWebRequest(url, method);
             var payloadBytes = string.IsNullOrEmpty(jsonPayload)
                 ? System.Text.Encoding.UTF8.GetBytes("{}")
                 : System.Text.Encoding.UTF8.GetBytes(jsonPayload);
-
-			Debug.Log (method);
 
             UploadHandler upload = new UploadHandlerRaw(payloadBytes);
             webRequest.uploadHandler = upload;
@@ -49,9 +68,13 @@ namespace Network
             } 
             else
             {
-				Debug.Log (webRequest.downloadHandler.text);
-                //gameObject.BroadcastMessage(success, null);
+				//Debug.Log (webRequest.downloadHandler.text);
+				gameObject.BroadcastMessage(success, webRequest.downloadHandler.text);
             }
-        } 
+        }
+
+		void GET_okay(object parameter) {
+			OnGotData (this, new RestEventArgs(parameter));
+		}
     }
 }

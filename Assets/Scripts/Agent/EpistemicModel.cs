@@ -146,18 +146,22 @@ namespace Agent {
 			engaged = false;
 			state = initModel();
 
-			string url = PlayerPrefs.GetString ("EpiSim URL");
-			url = !url.StartsWith ("http://") ? "http://" + url : url;
-			state.SetEpisimUrl(url);
-
-			state.InitiateEpisim();
+			if (PlayerPrefs.HasKey ("URLs")) {
+				string epiSimUrlString = string.Empty;
+				foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
+					if (url.Split ('=') [0] == "EpiSim URL") {
+						epiSimUrlString = url.Split ('=') [1];
+						string epiSimUrl = !epiSimUrlString.StartsWith ("http://") ? "http://" + epiSimUrlString : epiSimUrlString;
+						state.SetEpisimUrl (epiSimUrl);
+						state.InitiateEpisim();
+						break;
+					}
+				}
+			}
 		}
-		
+
 		// Update is called once per frame
 		void Update () {
-			if (Input.GetKeyDown (KeyCode.R)) {
-				GameObject.Find("RestClient").GetComponent<RestClient>().Get("http://localhost:5000","okay", "error");
-			}
 		}
 	}
 }

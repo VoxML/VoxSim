@@ -665,6 +665,21 @@ public class Predicates : MonoBehaviour {
 		return objName;
 	}
 
+	public String PURPLE(object[] args) {
+		String objName = "";
+
+		if (args [0] is GameObject) {	// assume all inputs are of same type
+			List<GameObject> objs = args.Cast<GameObject>().ToList();
+			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("purple"));
+
+			if (attrObjs.Count > 0) {
+				objName = attrObjs [0].name;
+			}
+		}
+
+		return objName;
+	}
+
 	public String BIG(object[] args) {
 		String objName = "";
 		GameObject obj = null;

@@ -128,6 +128,7 @@ namespace NLU
 			"pink",
 			"white",
 			"gray",
+			"purple",
 			"leftmost",
 			"middle",
 			"rightmost"
