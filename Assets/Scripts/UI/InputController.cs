@@ -249,7 +249,7 @@ public class InputController : FontManager {
 
 	public void MessageReceived(String inputString) {
 		Regex r = new Regex(@".*\(.*\)");
-		Regex v = new Regex ("<.*;.*;.*>");
+		Regex v = new Regex ("<.*?;.*?;.*?>");
 		string functionalCommand = "";
 
 		if (inputString != "") {
@@ -277,7 +277,8 @@ public class InputController : FontManager {
 
 			foreach (Match match in v.Matches(inputString)) {
 				vectors.Add (string.Format ("V@{0}", match.Index),match.Value);
-				inputString = v.Replace (inputString, string.Format ("V@{0}", match.Index));
+				Debug.Log (string.Format ("{0}:{1}", string.Format ("V@{0}", match.Index), match.Value));
+				inputString = v.Replace (inputString, string.Format ("V@{0}", match.Index),1);
 			}
 
 			Debug.Log (inputString);
