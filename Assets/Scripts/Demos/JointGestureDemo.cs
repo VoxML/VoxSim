@@ -16,10 +16,10 @@ using RCC;
 using RootMotion.FinalIK;
 
 public class SelectionEventArgs : EventArgs {
-	public GameObject Obj;
+	public object Content;
 
-	public SelectionEventArgs(GameObject obj) {
-		Obj = obj;
+	public SelectionEventArgs(object content) {
+		Content = content;
 	}
 }
 
@@ -133,6 +133,16 @@ public class JointGestureDemo : AgentInteraction {
 		if (ObjectSelected != null)
 		{
 			ObjectSelected(this, e);
+		}
+	}
+
+	public event EventHandler PointSelected;
+
+	public void OnPointSelected(object sender, EventArgs e)
+	{
+		if (PointSelected != null)
+		{
+			PointSelected(this, e);
 		}
 	}
 
@@ -409,13 +419,19 @@ public class JointGestureDemo : AgentInteraction {
 						}
 						if (synVision != null) {
 							if (synVision.enabled) {
-								Debug.Log(string.Format("SyntheticVision.IsVisible({0}):{1}",hit.collider.gameObject,synVision.IsVisible (hit.collider.gameObject)));
+								Debug.Log (string.Format ("SyntheticVision.IsVisible({0}):{1}", hit.collider.gameObject, synVision.IsVisible (hit.collider.gameObject)));
 								if (synVision.IsKnown (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
 									//Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
-									OnObjectSelected(this,new SelectionEventArgs(Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject)));
+									OnObjectSelected (this, new SelectionEventArgs (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject)));
 								}
 							}
 						}
+					}
+					else if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
+						if (epistemicModel != null) {
+							epistemicModel.engaged = true;
+						}
+						OnPointSelected (this, new SelectionEventArgs (hit.point));
 					}
 				}
 			}
@@ -4658,16 +4674,14 @@ public class JointGestureDemo : AgentInteraction {
 		//Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
 		//Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 
-		if (interactionLogic.GraspedObj != null) { // grasping something
-			if (interactionLogic.GraspedObj != null) {
-				if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
-					ikControl.rightHandObj.transform.position = coord + offset;
-					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-				}
-				else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-					ikControl.leftHandObj.transform.position = coord + offset;
-					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-				}
+		if ((interactionLogic != null) && (interactionLogic.enabled) && (interactionLogic.GraspedObj != null)) { // grasping something
+			if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
+				ikControl.rightHandObj.transform.position = coord + offset;
+				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+			}
+			else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
+				ikControl.leftHandObj.transform.position = coord + offset;
+				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 			}
 		}
 		else {

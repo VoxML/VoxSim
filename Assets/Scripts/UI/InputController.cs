@@ -249,6 +249,7 @@ public class InputController : FontManager {
 
 	public void MessageReceived(String inputString) {
 		Regex r = new Regex(@".*\(.*\)");
+		Regex v = new Regex ("<.*;.*;.*>");
 		string functionalCommand = "";
 
 		if (inputString != "") {
@@ -271,6 +272,16 @@ public class InputController : FontManager {
 			}
 
 			Debug.Log ("User entered: " + inputString);
+
+			Dictionary<string,string> vectors = new Dictionary<string,string> ();
+
+			foreach (Match match in v.Matches(inputString)) {
+				vectors.Add (string.Format ("V@{0}", match.Index),match.Value);
+				inputString = v.Replace (inputString, string.Format ("V@{0}", match.Index));
+			}
+
+			Debug.Log (inputString);
+
 			if (!r.IsMatch (inputString)) { // is not already functional form
 				// parse into functional form
 				String[] inputs = inputString.Split(new char[]{'.',',','!'});
@@ -285,6 +296,8 @@ public class InputController : FontManager {
 			else {
 				functionalCommand = inputString;
 			}
+
+			Debug.Log (functionalCommand);
 
 			if (functionalCommand.Count (x => x == '(') == functionalCommand.Count (x => x == ')')) {
 				//eventManager.ClearEvents ();
@@ -302,16 +315,6 @@ public class InputController : FontManager {
 
 				OutputHelper.PrintOutput (Role.Affector,"OK.");
 				OutputHelper.PrintOutput (Role.Planner,"");
-
-				Dictionary<string,string> vectors = new Dictionary<string,string> ();
-				Regex v = new Regex ("<.*;.*;.*>");
-
-				Debug.Log (functionalCommand);
-
-				foreach (Match match in v.Matches(functionalCommand)) {
-					vectors.Add (string.Format ("V@{0}", match.Index),match.Value);
-					functionalCommand = v.Replace (functionalCommand, string.Format ("V@{0}", match.Index));
-				}
 
 				Debug.Log (functionalCommand);
 

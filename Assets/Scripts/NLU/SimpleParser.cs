@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
+using UnityEngine;
+
 namespace NLU
 {
 	public class SimpleParser : INLParser {
@@ -230,6 +232,12 @@ namespace NLU
 					lastObj = tokens[cur];
 					form += lastObj;
 					form = MatchParens(form);
+					cur++;
+				}
+				else if (tokens[cur].StartsWith("v@"))
+				{
+					form += "," + tokens [cur].ToUpper();
+					Debug.Log (form);
 					cur++;
 				}
 				else

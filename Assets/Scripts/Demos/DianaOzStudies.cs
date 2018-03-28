@@ -7,6 +7,7 @@ using System.Timers;
 using UnityEngine;
 
 using Episteme;
+using Global;
 using Network;
 
 public class DianaOzStudies : MonoBehaviour {
@@ -59,6 +60,7 @@ public class DianaOzStudies : MonoBehaviour {
 
 		restClient.GetComponent<RestClient>().GotData += ConsumeData;
 		world.ObjectSelected += BlockClicked;
+		world.PointSelected += PointClicked;
 
 		// Create a timer
 		getTimer = new Timer();
@@ -105,15 +107,22 @@ public class DianaOzStudies : MonoBehaviour {
 						((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(dict.input.Trim());
 					}
 					else if (dict.question != string.Empty) {
-						world.RespondAndUpdate (dict.question);
-
-						if (Regex.IsMatch(dict.question,@"The .+ block\?")) {
+						if (Regex.IsMatch (dict.question, @"The .+ block\?")) {
 							string color = dict.question.Split () [1];
 							MethodInfo methodToCall = preds.GetType ().GetMethod (color.ToUpper ());
-							object obj = methodToCall.Invoke (preds, new object[]{ world.blocks.ToArray() });
+							object obj = methodToCall.Invoke (preds, new object[]{ world.blocks.ToArray () });
 							if (obj != null) {
 								world.ReachFor (GameObject.Find (obj as string));
 							}
+							world.RespondAndUpdate (dict.question);
+						}
+						else if (Regex.IsMatch (dict.question, @".*<.+; .+; .+>\?")) {
+							string coord = Regex.Match (dict.question, @"<.+; .+; .+>").Value;
+							world.RespondAndUpdate (Regex.Replace(dict.question,@"<.+; .+; .+>","here"));
+							world.ReachFor (Helper.ParsableToVector (coord));
+						}
+						else {
+							world.RespondAndUpdate (dict.question);
 						}
 					}
 					else if (dict.utter != string.Empty) {
@@ -125,10 +134,16 @@ public class DianaOzStudies : MonoBehaviour {
 	}
 
 	void BlockClicked(object sender, EventArgs e) {
-		string color = ((SelectionEventArgs)e).Obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs[0].Value;
+		string color = (((SelectionEventArgs)e).Content as GameObject).GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;
 
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
 			JsonUtility.ToJson(new CommanderStatus("","","",string.Format("the {0} block",color))),
-			"okay", "error");
+				"okay", "error");
+	}
+
+	void PointClicked(object sender, EventArgs e) {
+		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
+			JsonUtility.ToJson(new CommanderStatus("","","",Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content))),
+				"okay", "error");
 	}
 }

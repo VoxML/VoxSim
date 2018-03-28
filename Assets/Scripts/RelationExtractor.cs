@@ -36,6 +36,19 @@ public class RelationExtractor : MonoBehaviour {
 				foreach (string rel in relationTracker.relStrings) {
 					sb = sb.AppendFormat (string.Format ("{0}\n", rel));
 				}
+
+				List<GameObject> objects = new List<GameObject> ();
+				foreach (DictionaryEntry dictEntry in relationTracker.relations) {
+					foreach (GameObject go in dictEntry.Key as List<GameObject>) {
+						if (!objects.Contains (go)) {
+							objects.Add (go);
+						}
+					}
+				}
+
+				foreach (GameObject go in objects) {
+					sb = sb.AppendFormat (string.Format ("{0} {1}\n", go.name, Helper.VectorToParsable(go.transform.eulerAngles)));
+				}
 				commBridge.CommanderClient.Write (sb.ToString());
 			}
 		}
