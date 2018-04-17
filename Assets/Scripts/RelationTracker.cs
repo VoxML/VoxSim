@@ -106,6 +106,9 @@ public class RelationTracker : MonoBehaviour {
 					if (relations [key].ToString ().Contains (",")) {
 						Debug.Log (relations [key]);
 						relations [key] = Regex.Replace (relations [key].ToString (), string.Format ("{0},?", relation), "");
+						if (relations [key].ToString ().EndsWith (",")) {
+							relations [key] = relations [key].ToString ().Trim (new char[]{ ',' });
+						}
 						Debug.Log (relations [key]);
 
 						if (recurse) {

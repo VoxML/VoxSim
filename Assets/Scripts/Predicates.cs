@@ -385,6 +385,64 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Object (single element array)
 	// OUT: Location
+	public Vector3 LEFTDC(object[] args)
+	{
+		Vector3 outValue = Vector3.zero;
+		if (args [0] is GameObject) {	// left of an object
+			GameObject obj = ((GameObject)args [0]);
+
+			Bounds bounds = new Bounds ();
+
+			bounds = Helper.GetObjectWorldSize (obj);
+
+			GameObject camera = GameObject.Find ("Main Camera");
+			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
+			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
+				Mathf.Abs(bounds.size.z));
+			rayStart = Quaternion.Euler (0.0f, povDir+270.0f, 0.0f) * rayStart;
+			rayStart += obj.transform.position;
+			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+
+			Debug.Log ("left-dc: " + Helper.VectorToParsable (outValue));
+		}
+		else if (args [0] is Vector3) {	// left of a location
+			outValue = (Vector3)args[0];
+		}
+
+		return outValue;
+	}
+
+	// IN: Object (single element array)
+	// OUT: Location
+	public Vector3 RIGHTDC(object[] args)
+	{
+		Vector3 outValue = Vector3.zero;
+		if (args [0] is GameObject) {	// right of an object
+			GameObject obj = ((GameObject)args [0]);
+
+			Bounds bounds = new Bounds ();
+
+			bounds = Helper.GetObjectWorldSize (obj);
+
+			GameObject camera = GameObject.Find ("Main Camera");
+			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
+			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
+				Mathf.Abs(bounds.size.z));
+			rayStart = Quaternion.Euler (0.0f, povDir+90.0f, 0.0f) * rayStart;
+			rayStart += obj.transform.position;
+			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+
+			Debug.Log ("left-dc: " + Helper.VectorToParsable (outValue));
+		}
+		else if (args [0] is Vector3) {	// right of a location
+			outValue = (Vector3)args[0];
+		}
+
+		return outValue;
+	}
+
+	// IN: Object (single element array)
+	// OUT: Location
 	public Vector3 TOUCHING(object[] args)
 	{
 		List<string> manners = new List<string> () {"LEFT",
@@ -1420,7 +1478,69 @@ public class Predicates : MonoBehaviour {
 					}
 				}
 			}
-		} 
+		}
+		else if (prep == "_leftdc") {	// fix for multiple RDF triples
+			if (args [0] is GameObject) {
+				if (args [1] is Vector3) {
+					GameObject theme = args [0] as GameObject;	// get theme obj ("apple" in "put apple on plate")
+					GameObject dest = GameObject.Find (rdfTriples [0].Item3);	// get destination obj ("plate" in "put apple on plate")
+					Voxeme voxComponent = theme.GetComponent<Voxeme> ();
+
+					Bounds themeBounds = Helper.GetObjectWorldSize (theme);	// bounds of theme obj
+					Bounds destBounds = Helper.GetObjectWorldSize (dest);	// bounds of dest obj => alter to get interior enumerated by VoxML structure
+
+					GameObject mainCamera = GameObject.Find ("Main Camera");
+					float povDir = cameraRelativeDirections ? mainCamera.transform.eulerAngles.y : 0.0f;
+
+					float xAdjust = (theme.transform.position.x - themeBounds.center.x)-
+						(RandomHelper.RandomFloat(0.0f,1.0f)*(themeBounds.size.x*0.5f));
+
+					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
+						Mathf.Abs (themeBounds.size.z));
+					rayStart = Quaternion.Euler (0.0f, povDir + 90.0f, 0.0f) * rayStart;
+					rayStart += theme.transform.position;
+					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+
+					Debug.Log ("X-adjust = " + xAdjust);
+					Debug.Log ("put_leftdc: " + Helper.VectorToParsable (contactPoint));
+
+					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
+
+					if (args [args.Length - 1] is bool) {
+						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
+							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
+								loc.y - (contactPoint.y - theme.transform.position.y),
+								loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+
+							targetPosition = dir + loc;
+						} 
+						else {
+							targetPosition = loc;
+						}
+
+						Debug.Log (Helper.VectorToParsable (targetPosition));
+
+						if (voxComponent != null) {
+							if (!voxComponent.enabled) {
+								voxComponent.gameObject.transform.parent = null;
+								voxComponent.enabled = true;
+							}
+
+							voxComponent.targetPosition = targetPosition;
+
+							/*if (voxComponent.isGrasped) {
+								voxComponent.targetPosition = voxComponent.targetPosition +
+								(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+							}*/
+						}
+					}
+
+					if (voxComponent.moveSpeed == 0.0f) {
+						voxComponent.moveSpeed = RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+					}
+				}
+			}
+		}
 		else if (prep == "_right") {	// fix for multiple RDF triples
 			if (args [0] is GameObject) {
 				if (args [1] is Vector3) {
@@ -1452,6 +1572,67 @@ public class Predicates : MonoBehaviour {
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
 								              loc.y - (contactPoint.y - theme.transform.position.y),
 								              loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+
+							targetPosition = dir + loc;
+						} 
+						else {
+							targetPosition = loc;
+						}
+						Debug.Log (Helper.VectorToParsable (targetPosition));
+
+						if (voxComponent != null) {
+							if (!voxComponent.enabled) {
+								voxComponent.gameObject.transform.parent = null;
+								voxComponent.enabled = true;
+							}
+
+							voxComponent.targetPosition = targetPosition;
+
+							/*if (voxComponent.isGrasped) {
+								voxComponent.targetPosition = voxComponent.targetPosition +
+								(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+							}*/
+						}
+					}
+
+					if (voxComponent.moveSpeed == 0.0f) {
+						voxComponent.moveSpeed = RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+					}
+				}
+			}
+		}
+		else if (prep == "_rightdc") {	// fix for multiple RDF triples
+			if (args [0] is GameObject) {
+				if (args [1] is Vector3) {
+					GameObject theme = args [0] as GameObject;	// get theme obj ("apple" in "put apple on plate")
+					GameObject dest = GameObject.Find (rdfTriples [0].Item3);	// get destination obj ("plate" in "put apple on plate")
+					Voxeme voxComponent = theme.GetComponent<Voxeme> ();
+
+					Bounds themeBounds = Helper.GetObjectWorldSize (theme);	// bounds of theme obj
+					Bounds destBounds = Helper.GetObjectWorldSize (dest);	// bounds of dest obj => alter to get interior enumerated by VoxML structure
+
+					GameObject mainCamera = GameObject.Find ("Main Camera");
+					float povDir = cameraRelativeDirections ? mainCamera.transform.eulerAngles.y : 0.0f;
+
+					float xAdjust = (theme.transform.position.x - themeBounds.center.x)+
+						(RandomHelper.RandomFloat(0.0f,1.0f)*(themeBounds.size.x*0.5f));
+
+					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
+						Mathf.Abs (themeBounds.size.z));
+					rayStart = Quaternion.Euler (0.0f, povDir + 270.0f, 0.0f) * rayStart;
+					rayStart += theme.transform.position;
+					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+
+					Debug.Log ("X-adjust = " + xAdjust);
+					Debug.Log ("put_rightdc: " + Helper.VectorToParsable (contactPoint));
+
+					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
+
+					if (args [args.Length - 1] is bool) {
+						if ((bool)args [args.Length - 1] == false) {
+							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
+								loc.y - (contactPoint.y - theme.transform.position.y),
+								loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -2751,34 +2932,55 @@ public class Predicates : MonoBehaviour {
 		string rotAxis = "";
 
 		// look for agent
-		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+		GameObject agent = null;//GameObject.FindGameObjectWithTag("Agent");
 		if (agent != null) {
 			// add preconditions
-			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-				if (args.Length > 2) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
+			if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
+				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
+				if (args.Length > 4) {
+					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1},{2},{3})", (args [0] as GameObject).name, 
+						Helper.VectorToParsable ((Vector3)args [1]), Helper.VectorToParsable ((Vector3)args [2]),
+						Helper.VectorToParsable ((Vector3)args [3]))], 1);
+				}
+				else if (args.Length > 3) {
+					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1},{2})", (args [0] as GameObject).name, 
+						Helper.VectorToParsable ((Vector3)args [1]), Helper.VectorToParsable ((Vector3)args [2]))], 1);
+				}
+				else if (args.Length > 2) {
+					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1})", (args [0] as GameObject).name, 
+						Helper.VectorToParsable ((Vector3)args [1]))], 1);
 				}
 				else {
 					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0})", (args [0] as GameObject).name)], 1);
-				}
-				eventManager.RemoveEvent (3);
+				}	
+				eventManager.RemoveEvent (2);
 				return;
 			}
-			else {
-				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
-					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
-					if (args.Length > 2) {
-						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-					}
-					else {
-						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0})", (args [0] as GameObject).name)], 1);
-					}
-					eventManager.RemoveEvent (2);
-					return;
-				}
-			}
+//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+//				if (args.Length > 2) {
+//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
+//				}
+//				else {
+//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0})", (args [0] as GameObject).name)], 1);
+//				}
+//				eventManager.RemoveEvent (3);
+//				return;
+//			}
+//			else {
+//				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
+//					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
+//					if (args.Length > 2) {
+//						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
+//					}
+//					else {
+//						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0})", (args [0] as GameObject).name)], 1);
+//					}
+//					eventManager.RemoveEvent (2);
+//					return;
+//				}
+//			}
 
 			// add postconditions
 			if (args [args.Length - 1] is bool) {
@@ -2838,7 +3040,7 @@ public class Predicates : MonoBehaviour {
 					voxComponent.enabled = true;
 				}
 
-				if (args [1] is Vector3 &&  args [2] is Vector3){
+				if (args [1] is Vector3 && args [2] is Vector3){
 					// args[1] is local space axis
 					// args[2] is world space axis
 					if (args [3] is Vector3) {
