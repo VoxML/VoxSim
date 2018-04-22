@@ -469,144 +469,17 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (fusionMessage);
 			switch (messageStr.ToLower ()) {
 			case "yes":
-				//				conceptL = epistemicModel.state.GetConcept ("YES", ConceptType.ACTION, ConceptMode.L);
-				//				conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
-				//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-				//
-				//				conceptL.Certainty = 1.0;
-				//
-				//				if (conceptG.Certainty > 0.0) {
-				//					relation.Certainty = 1.0;
-				//				}
-				//
-				//				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
-				//
-				//				Acknowledge (true);
 				break;
 			case "no":
-				//				conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
-				//				conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
-				//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-				//
-				//				conceptL.Certainty = 1.0;
-				//
-				//				if (conceptG.Certainty > 0.0) {
-				//					relation.Certainty = 1.0;
-				//				}
-				//
-				//				epistemicModel.state.UpdateEpisim(new Concept[] { conceptL,conceptG }, new Relation[] { relation });
-				//
-				//				Acknowledge (false);
 				break;
 			case "grab":
-				//				conceptL = epistemicModel.state.GetConcept ("GRAB", ConceptType.ACTION, ConceptMode.L);
-				//				conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-				//				relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-				//
-				//				if (indicatedObj == null) {
-				//					if (EpistemicCertainty (conceptL) < 0.5) {
-				//						conceptG.Certainty = 0.5;
-				//					}
-				//					else {
-				//						relation.Certainty = 1.0;
-				//					}
-				//
-				//					Suggest ("grab");
-				//				}
-				//				else {
-				//					if (EpistemicCertainty(conceptL) < 0.5) {
-				//						conceptG.Certainty = 0.5;
-				//
-				//						Suggest ("grab");
-				//					}
-				//					else {
-				//						relation.Certainty = 1.0;
-				//
-				//						Grab (true);
-				//					}
-				//				}
-				//
-				//				conceptL.Certainty = 1.0;
-				//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptG, conceptL }, new Relation[] { relation });
 				break;
 			case "left":
-				//				conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				//
-				//				if ((indicatedObj == null) && (graspedObj == null)) {
-				//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward point
-				//						Deixis ("left");
-				//					}
-				//					else {	// if speech alone
-				//						Deixis("right");
-				//					}
-				//				}
-				//				else if (graspedObj == null) {
-				//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward push
-				//						//Push ("left");
-				//					}
-				//					else {
-				//						Push ("right");
-				//					}
-				//				}
-				//				else if (indicatedObj == null) {
-				//					if (indicatedRegion == leftRegion) {	// if ensemble with leftward carry
-				//						//Move ("left");
-				//					}
-				//					else {
-				//						Move ("right");
-				//					}
-				//				}
-				//				conceptL.Certainty = 1.0;
-				//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "right":
-				//				conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				//
-				//				if ((indicatedObj == null) && (graspedObj == null)) {
-				//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward point
-				//						Deixis ("right");
-				//					}
-				//					else {	// if speech alone
-				//						Deixis("left");
-				//					}
-				//				}
-				//				else if (graspedObj == null) {
-				//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward push
-				//						//Push ("right");
-				//					}
-				//					else {
-				//						Push ("left");
-				//					}
-				//				}
-				//				else if (indicatedObj == null) {
-				//					if (indicatedRegion == rightRegion) {	// if ensemble with righttward carry
-				//						//Move ("right");
-				//					}
-				//					else {
-				//						Move ("left");
-				//					}
-				//				}
-				//				conceptL.Certainty = 1.0;
-				//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
 				break;
 			case "this":
 			case "that":
-//				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.ACTION, ConceptMode.L);
-//				conceptL.Certainty = 1.0;
-//
-//				if (regionHighlight.GetComponent<Renderer> ().enabled) {
-//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
-//					conceptG.Certainty = 1.0;
-//					relation = epistemicModel.state.GetRelation (conceptG, conceptL);
-//					relation.Certainty = 1.0;
-//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {relation});
-//
-//					Deixis (highlightCenter);
-//				}
-//
-//				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
-
-
 				break;
 			case "red":
 			case "green":
@@ -616,33 +489,10 @@ public class JointGestureDemo : AgentInteraction {
 			case "purple":
 			case "white":
 			case "pink":
-				//				conceptL = epistemicModel.state.GetConcept(messageStr, ConceptType.PROPERTY, ConceptMode.L);
-				//				conceptL.Certainty = 1.0;
-				//				epistemicModel.state.UpdateEpisim(new Concept[] {conceptL}, new Relation[] {});
-				//
-				//				IndexByColor (messageStr);
 				break;
 			case "big":
-//				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
-//				conceptL.Certainty = 1.0;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-//
-//				conceptL = epistemicModel.state.GetConcept ("SMALL", ConceptType.PROPERTY, ConceptMode.L);
-//				conceptL.Certainty = 0.5;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-//
-//				IndexBySize (messageStr);
 				break;
 			case "small":
-//				conceptL = epistemicModel.state.GetConcept (messageStr, ConceptType.PROPERTY, ConceptMode.L);
-//				conceptL.Certainty = 1.0;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-//
-//				conceptL = epistemicModel.state.GetConcept ("BIG", ConceptType.PROPERTY, ConceptMode.L);
-//				conceptL.Certainty = 0.5;
-//				epistemicModel.state.UpdateEpisim (new Concept[] { conceptL }, new Relation[] { });
-//
-//				IndexBySize (messageStr);
 				break;
 			default:
 				Debug.Log ("Cannot recognize the message: " + messageStr);
@@ -657,312 +507,31 @@ public class JointGestureDemo : AgentInteraction {
 			//			}
 			if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("start")) {	// start as trigger
 				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-				//				if (messageStr.StartsWith ("engage")) {
-				//					if (GetGestureContent (messageStr, "engage") == "") {
-				//						//Engage (true);
-				//					}
-				//				} 
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
 				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-				//				if (messageStr.StartsWith ("left point")) {
-				//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
-				//					conceptG.Certainty = 1.0;
-				//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
-				//
-				//					Deixis (TransformToSurface (GetGestureVector (messageStr, "left point")));
-				//				} 
-				//				else if (messageStr.StartsWith ("right point")) {
-				//					conceptG = epistemicModel.state.GetConcept("point", ConceptType.ACTION, ConceptMode.G);
-				//					conceptG.Certainty = 1.0;
-				//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG}, new Relation[] {});
-				//
-				//					Deixis (TransformToSurface (GetGestureVector (messageStr, "right point")));
-				//				} 
-				//else
 				if (messageStr.StartsWith ("grab")) {
-					//					if ((graspedObj == null) && (eventConfirmation == "")) {
-					//						if ((GetGestureContent (messageStr, "grab") == "") || (GetGestureContent (messageStr, "grab move") == "front")) {
-					//							conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept("GRAB", ConceptType.ACTION, ConceptMode.L);
-					//							relation = epistemicModel.state.GetRelation(conceptG, conceptL);
-					//
-					//							if (EpistemicCertainty (conceptG) < 0.5) {
-					//								conceptG.Certainty = 0.5;
-					//
-					//								Suggest ("grab");
-					//							}
-					//							else {
-					//								conceptG.Certainty = 1.0;
-					//
-					//								if (conceptL.Certainty > 0.0) {
-					//									relation.Certainty = 1.0;
-					//								}
-					//
-					//								Grab (true);
-					//							}
-					//
-					//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { relation });
-					//						}
-					//					}
-					//					else {
-					//						if ((graspedObj != null) || (indicatedObj != null)) {
-					//							string prevInstruction = FindPreviousMatch ("grab");
-					//
-					//							if (prevInstruction.StartsWith("grab move")) {
-					//								HandleMoveSegment (prevInstruction);
-					//							}
-					//						}
-					//					}
 				}
 				else if (messageStr.StartsWith ("posack")) {
-					//					conceptG = epistemicModel.state.GetConcept("posack", ConceptType.ACTION, ConceptMode.G);
-					//					conceptL = epistemicModel.state.GetConcept("YES", ConceptType.ACTION, ConceptMode.L);
-					//					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
-					//
-					//					if (EpistemicCertainty(conceptG) < 0.5) {
-					//						conceptG.Certainty = 0.5;
-					//
-					//						Suggest ("posack");
-					//					}
-					//					else {
-					//						conceptG.Certainty = 1.0;
-					//
-					//						if (conceptL.Certainty > 0.0) {
-					//							relation.Certainty = 1.0;
-					//						}
-					//
-					//						Acknowledge (true);
-					//					}
-					//
-					//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
-
 				}
 				else if (messageStr.StartsWith ("negack")) {
-					//					conceptG = epistemicModel.state.GetConcept("negack", ConceptType.ACTION, ConceptMode.G);
-					//					conceptL = epistemicModel.state.GetConcept("NO", ConceptType.ACTION, ConceptMode.L);
-					//					relation = epistemicModel.state.GetRelation(conceptG, conceptL);
-					//
-					//					if (EpistemicCertainty(conceptG) < 0.5) {
-					//						conceptG.Certainty = 0.5;
-					//
-					//						Suggest ("negack");
-					//					}
-					//					else {
-					//						conceptG.Certainty = 1.0;
-					//
-					//						if (conceptL.Certainty > 0.0) {
-					//							relation.Certainty = 1.0;
-					//						}
-					//
-					//						Acknowledge (false);
-					//					}
-					//
-					//					epistemicModel.state.UpdateEpisim(new Concept[] {conceptG, conceptL}, new Relation[] {relation});
 				}
 			}
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
-				//				messageStr = interactionLogic.RemoveGestureTrigger (messageStr,interactionLogic.GetGestureTrigger(messageStr));
-				//				if (messageStr.StartsWith ("left point")) {
-				//					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
-				//					if (EpistemicCertainty(conceptG) < 0.5) {
-				//						conceptG.Certainty = 0.5;
-				//						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-				//					}
-				//
-				//					Suggest ("point");
-				//				} 
-				//				else if (messageStr.StartsWith ("right point")) {
-				//					conceptG = epistemicModel.state.GetConcept ("point", ConceptType.ACTION, ConceptMode.G);
-				//					if (EpistemicCertainty(conceptG) < 0.5) {
-				//						conceptG.Certainty = 0.5;
-				//						epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-				//					}
-				//
-				//					Suggest ("point");
-				//				} 
-				//				else if (messageStr.StartsWith ("grab")) {
-				//					if (interactionLogic.GetGestureContent (messageStr, "grab") == "") {
-				//						conceptG = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-				//						if (EpistemicCertainty(conceptG) < 0.5) {
-				//							conceptG.Certainty = 0.5;
-				//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-				//						}
-				//
-				//						Suggest ("grab");
-				//					}
-				//				} 
-				//				else if (messageStr.StartsWith ("posack")) {
-				//					if (eventConfirmation != "") {
-				//						conceptG = epistemicModel.state.GetConcept ("posack", ConceptType.ACTION, ConceptMode.G);
-				//						if (EpistemicCertainty(conceptG) < 0.5) {
-				//							conceptG.Certainty = 0.5;
-				//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-				//						}
-				//
-				//						Suggest ("posack");
-				//					}
-				//				} 
-				//				else if (messageStr.StartsWith ("negack")) {
-				//					if (eventConfirmation != "") {
-				//						conceptG = epistemicModel.state.GetConcept ("negack", ConceptType.ACTION, ConceptMode.G);
-				//						if (EpistemicCertainty(conceptG) < 0.5) {
-				//							conceptG.Certainty = 0.5;
-				//							epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-				//						}
-				//
-				//						Suggest ("negack");
-				//					}
-				//				}
 			} 
 			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
 				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
 				string startSignal = FindStartSignal (messageStr);
 
 				if (messageStr.StartsWith ("engage")) {
-					//					if (interactionLogic.GetGestureContent (messageStr, "engage") == "") {
-					//						Engage (false);
-					//					}
 				} 
 				else if (messageStr.StartsWith ("push")) {
-					//					if (startSignal.EndsWith ("high")) {
-					//						if (interactionLogic.GetGestureContent (messageStr, "push") == "left") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//
-					//								Suggest ("push left");
-					//							}
-					//							else {
-					//								conceptG.Certainty = 1.0;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					//
-					//								Push ("left");
-					//							}
-					//						} 
-					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "right") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//
-					//								Suggest ("push right");
-					//							}
-					//							else {
-					//								conceptG.Certainty = 1.0;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					//
-					//								Push ("right");
-					//							}
-					//						} 
-					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "front") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//
-					//								Suggest ("push front");
-					//							}
-					//							else {
-					//								conceptG.Certainty = 1.0;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					//
-					//								Push ("front");
-					//							}
-					//						}
-					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "back") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//
-					//								Suggest ("push back");
-					//							}
-					//							else {
-					//								conceptG.Certainty = 1.0;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG }, new Relation[] { });
-					//
-					//								Push ("back");
-					//							}
-					//						}
-					//					} 
-					//					else if (startSignal.EndsWith ("low")) {
-					//						if (interactionLogic.GetGestureContent (messageStr, "push") == "left") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//							}
-					//
-					//							Suggest ("push left");
-					//						} 
-					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "right") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//							}
-					//
-					//							Suggest ("push right");
-					//						} 
-					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "front") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//							}
-					//
-					//							Suggest ("push front");
-					//						} 
-					//						else if (interactionLogic.GetGestureContent (messageStr, "push") == "back") {
-					//							conceptG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-					//							conceptL = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-					//							if ((EpistemicCertainty(conceptG) < 0.5) || (EpistemicCertainty(conceptL) < 0.5)) {
-					//								conceptG.Certainty = (conceptG.Certainty < 0.5) ? 0.5 : conceptG.Certainty;
-					//								conceptL.Certainty = (conceptL.Certainty < 0.5) ? 0.5 : conceptL.Certainty;
-					//								epistemicModel.state.UpdateEpisim (new Concept[] { conceptG,conceptL }, new Relation[] { });
-					//							}
-					//
-					//							Suggest ("push back");
-					//						}
-					//					}
 				} 
 				else if (messageStr.StartsWith ("grab")) {
-					//					if (graspedObj != null) {
-					//						string prevInstruction = FindPreviousMatch ("grab");
-					//
-					//						if (prevInstruction.StartsWith("grab move")) {
-					//							HandleMoveSegment (prevInstruction);
-					//						}
-					//						else if (interactionLogic.GetGestureContent (messageStr, "grab") == "") {
-					//							Grab (false);
-					//						}
-					//					}
 				}
 			}
 		}
 		else if (messageType == "P") {	// continuous pointing message
-			//			if (messageStr.StartsWith ("l")) {
-			//				TrackPointing (GetGestureVector (messageStr, "l"));
-			//			} 
-			//			else if (messageStr.StartsWith ("r")) {
-			//				TrackPointing (GetGestureVector (messageStr, "r"));
-			//			} 
 		}
 	}
 
