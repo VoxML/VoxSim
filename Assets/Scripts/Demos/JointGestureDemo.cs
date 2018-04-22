@@ -3824,6 +3824,15 @@ public class JointGestureDemo : AgentInteraction {
 							}
 						}
 					}
+					else {
+						if (!FitsTouching (theme, obj, directionPreds [relativeDir [dir]])) {
+							Debug.Log (string.Format("!FitsTouching({0},{1},{2}",theme, obj, directionPreds [relativeDir [dir]]));
+						}
+						else if (Helper.GetObjectWorldSize (theme).min.y < Helper.GetObjectWorldSize (obj).min.y) {
+							Debug.Log (string.Format("{0}.min.y < {1}.min.y",theme, obj));
+						}
+
+					}	
 				}
 			} 
 			else if (option is Vector3) {
