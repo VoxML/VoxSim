@@ -3797,7 +3797,7 @@ public class JointGestureDemo : AgentInteraction {
 				GameObject obj = (option as GameObject);
 				if (theme != obj) {
 					if (FitsTouching (theme, obj, directionPreds [relativeDir [dir]]) &&
-						(Helper.GetObjectWorldSize (theme).min.y >= Helper.GetObjectWorldSize (obj).min.y)) {	// must fit in target destination and be on the same surface
+						(Helper.GetObjectWorldSize (theme).min.y >= Helper.GetObjectWorldSize (obj).min.y+Constants.EPSILON)) {	// must fit in target destination and be on the same surface
 						string objAttr = string.Empty;
 						if (obj.GetComponent<Voxeme> () != null) {
 							objAttr = obj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
