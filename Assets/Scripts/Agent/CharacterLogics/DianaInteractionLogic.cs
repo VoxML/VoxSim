@@ -344,6 +344,7 @@ namespace Agent
 
 		public bool useOrderingHeuristics;
 		public bool humanRelativeDirections;
+		public bool waveToStart;
 
 		public AgentInteraction interactionController;
 
@@ -365,6 +366,12 @@ namespace Agent
 				GUILayout.Label("Human Relative Directions", bold, GUILayout.Width(150));
 				((DianaInteractionLogic)target).humanRelativeDirections =
 					GUILayout.Toggle (((DianaInteractionLogic)target).humanRelativeDirections,"");
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Wave To Start", bold, GUILayout.Width(150));
+				((DianaInteractionLogic)target).waveToStart =
+					GUILayout.Toggle (((DianaInteractionLogic)target).waveToStart,"");
 				GUILayout.EndHorizontal();
 
 				GUILayout.BeginHorizontal();
@@ -749,12 +756,22 @@ namespace Agent
 				GetState("BeginInteraction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
-				GetStates("BeginInteraction"),
-				GetInputSymbolsByName("G wave start"),
-				GenerateStackSymbol(null, null, null, null, null, null),
-				GetState("Ready"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+			if (waveToStart) {
+				TransitionRelation.Add (new PDAInstruction (
+					GetStates ("BeginInteraction"),
+					GetInputSymbolsByName ("G wave start"),
+					GenerateStackSymbol (null, null, null, null, null, null),
+					GetState ("Ready"),
+					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null)));
+			}
+			else {
+				TransitionRelation.Add (new PDAInstruction (
+					GetStates ("BeginInteraction"),
+					GetInputSymbolsByName ("G wave start"),
+					GenerateStackSymbol (null, null, null, null, null, null),
+					GetState ("Ready"),
+					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null)));
+			}
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Ready"),
