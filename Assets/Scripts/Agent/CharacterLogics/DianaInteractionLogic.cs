@@ -2314,7 +2314,9 @@ namespace Agent
 			LastInputSymbol = GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName);
 
 			// update epistemic model
-			UpdateEpistemicModel(((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
+			if (useEpistemicModel) {
+				UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
+			}
 
 			List<PDAInstruction> instructions =  GetApplicableInstructions (CurrentState,
 				GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName),
