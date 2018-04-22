@@ -4824,7 +4824,7 @@ public class JointGestureDemo : AgentInteraction {
 		OutputHelper.PrintOutput (Role.Affector, utterance);
 
 		// get all linguistic concepts
-		if ((epistemicModel == null) || (epistemicModel.state == null)) {
+		if (!interactionLogic.useEpistemicModel) {
 			return;
 		}
 
