@@ -3962,13 +3962,30 @@ public class JointGestureDemo : AgentInteraction {
 				foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 					if (block.activeInHierarchy) {
 						if (block != theme) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-							if ((bool)(Type.GetType("QSR.QSR").GetMethod(qsr).Invoke(null, new object[]{ Helper.GetObjectWorldSize (block), themeBounds })) &&	// if it's to the left of the grasped block
-								(region.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
+							if ((bool)(Type.GetType ("QSR.QSR").GetMethod (qsr).Invoke (null, new object[] {
+								Helper.GetObjectWorldSize (block),
+								themeBounds
+							})) &&	// if it's to the left of the grasped block
+							    (region.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 								if (!objectMatches.Contains (block)) {
 									objectMatches.Add (block);
 								}
 							}
+							else {
+								if (!region.Contains (block)) {
+									Debug.Log (string.Format ("{0} not in region {1}", block.name, region));
+								}
+								else {
+									Debug.Log (string.Format ("{0} not {1} of {2}", block.name, qsr, theme.name));
+								}
+							}
 						}
+						else {
+							Debug.Log (string.Format ("{0} == theme", block.name));
+						}
+					}
+					else {
+						Debug.Log (string.Format ("{0} inactive", block.name));
 					}
 				}
 			}
