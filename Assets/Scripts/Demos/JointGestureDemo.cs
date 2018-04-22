@@ -457,7 +457,7 @@ public class JointGestureDemo : AgentInteraction {
 		OnCharacterLogicInput (this, new CharacterLogicEventArgs (string.Format ("{0} {1}", messageType, messageStr.Split (',') [0]),
 			string.Format ("{0} {1}", messageType, messageStr)));
 
-		if (!epistemicModel.engaged) {
+		if ((interactionLogic.useEpistemicModel) && (!epistemicModel.engaged)) {
 			epistemicModel.engaged = true;
 		}
 

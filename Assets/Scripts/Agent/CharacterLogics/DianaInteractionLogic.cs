@@ -2654,9 +2654,13 @@ namespace Agent
 		}
 
 		object EpistemicallyCertain (object inputSignal) {
+			if (!useEpistemicModel) {
+				return 1.0;
+			}
+				
 			if (inputSignal.GetType () != typeof(string)) {
 				Debug.Log ("EpistemicCertainty: inputSignal not of type string.  Aborting.");
-				return 0;
+				return 0.0;
 			}
 
 			double aggregateCertainty = 1.0;
