@@ -767,9 +767,9 @@ namespace Agent
 			else {
 				TransitionRelation.Add (new PDAInstruction (
 					GetStates ("BeginInteraction"),
-					GetInputSymbolsByName ("G wave start"),
+					null,
 					GenerateStackSymbol (null, null, null, null, null, null),
-					GetState ("Ready"),
+					GetState ("Wait"),
 					new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null)));
 			}
 
