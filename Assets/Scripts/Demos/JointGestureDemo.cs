@@ -4200,7 +4200,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		foreach (GameObject test in blocks) {
 			if ((test != theme) && (test != obj)) {
-				if (dir == "left") {
+				if (dir == "right") {
 					Bounds projectedBounds = new Bounds (
 						new Vector3 (objBounds.min.x - themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
 						themeBounds.size);
@@ -4209,7 +4209,7 @@ public class JointGestureDemo : AgentInteraction {
 						fits = false;
 					}
 				}
-				else if (dir == "right") {
+				else if (dir == "left") {
 					Bounds projectedBounds = new Bounds (
 						new Vector3 (objBounds.max.x + themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
 						themeBounds.size);
