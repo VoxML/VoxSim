@@ -770,7 +770,13 @@ namespace Global {
 				new Vector3 (combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
 				new Vector3 (combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
 				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
-				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z)
+				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
+				new Vector3 (combinedBounds.min.x,combinedBounds.center.y,combinedBounds.center.z),
+				new Vector3 (combinedBounds.max.x,combinedBounds.center.y,combinedBounds.center.z),
+				new Vector3 (combinedBounds.center.x,combinedBounds.min.y,combinedBounds.center.z),
+				new Vector3 (combinedBounds.center.x,combinedBounds.max.y,combinedBounds.center.z),
+				new Vector3 (combinedBounds.center.x,combinedBounds.center.y,combinedBounds.min.z),
+				new Vector3 (combinedBounds.center.x,combinedBounds.center.y,combinedBounds.max.z)
 			});
 
 			ObjBounds objBounds = new ObjBounds (combinedBounds.center);
