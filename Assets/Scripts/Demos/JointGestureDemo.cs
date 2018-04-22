@@ -414,7 +414,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				if (hit.collider != null) {
 					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-						if (interactionLogic.useEpistemicModel) {
+						if (!epistemicModel.engaged) {
 							epistemicModel.engaged = true;
 						}
 						if (synVision != null) {
@@ -428,7 +428,7 @@ public class JointGestureDemo : AgentInteraction {
 						}
 					}
 					else if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
-						if (interactionLogic.useEpistemicModel) {
+						if (!epistemicModel.engaged) {
 							epistemicModel.engaged = true;
 						}
 						OnPointSelected (this, new SelectionEventArgs (hit.point));
@@ -457,7 +457,7 @@ public class JointGestureDemo : AgentInteraction {
 		OnCharacterLogicInput (this, new CharacterLogicEventArgs (string.Format ("{0} {1}", messageType, messageStr.Split (',') [0]),
 			string.Format ("{0} {1}", messageType, messageStr)));
 
-		if ((interactionLogic.useEpistemicModel) && (!epistemicModel.engaged)) {
+		if (!epistemicModel.engaged) {
 			epistemicModel.engaged = true;
 		}
 
