@@ -372,7 +372,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 			
-		if ((epistemicModel != null) && (epistemicModel.engaged) && (epistemicModel.state != null)) {
+		if (interactionLogic.useEpistemicModel) {
 			Concept putConcept = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
 			putConcept.Certainty = -1.0;
@@ -414,7 +414,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				if (hit.collider != null) {
 					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-						if (epistemicModel != null) {
+						if (interactionLogic.useEpistemicModel) {
 							epistemicModel.engaged = true;
 						}
 						if (synVision != null) {
@@ -428,7 +428,7 @@ public class JointGestureDemo : AgentInteraction {
 						}
 					}
 					else if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
-						if (epistemicModel != null) {
+						if (interactionLogic.useEpistemicModel) {
 							epistemicModel.engaged = true;
 						}
 						OnPointSelected (this, new SelectionEventArgs (hit.point));

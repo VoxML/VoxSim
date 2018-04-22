@@ -345,6 +345,7 @@ namespace Agent
 		public bool useOrderingHeuristics;
 		public bool humanRelativeDirections;
 		public bool waveToStart;
+		public bool useEpistemicModel;
 
 		public AgentInteraction interactionController;
 
@@ -372,6 +373,12 @@ namespace Agent
 				GUILayout.Label("Wave To Start", bold, GUILayout.Width(150));
 				((DianaInteractionLogic)target).waveToStart =
 					GUILayout.Toggle (((DianaInteractionLogic)target).waveToStart,"");
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Use Epistemic Model", bold, GUILayout.Width(150));
+				((DianaInteractionLogic)target).useEpistemicModel =
+					GUILayout.Toggle (((DianaInteractionLogic)target).useEpistemicModel,"");
 				GUILayout.EndHorizontal();
 
 				GUILayout.BeginHorizontal();
