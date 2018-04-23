@@ -2469,7 +2469,8 @@ public class Predicates : MonoBehaviour {
 
 				aStarSearch.start = (args [0] as GameObject).transform.position;
 				aStarSearch.goal = targetPosition;
-				aStarSearch.PlanPath2 (aStarSearch.start, aStarSearch.goal, out aStarSearch.path, (args [0] as GameObject), embeddingSpaceBounds, "Y");
+				aStarSearch.PlanPath2 (aStarSearch.start, aStarSearch.goal, out aStarSearch.path, (args [0] as GameObject), 
+					GameObject.Find (rdfTriples [0].Item3) != null ? GameObject.Find (rdfTriples [0].Item3).GetComponent<Voxeme>() : null, "Y");
 
 				foreach (Vector3 node in aStarSearch.path) {
 					(args [0] as GameObject).GetComponent<Voxeme> ().interTargetPositions.Enqueue (node);
