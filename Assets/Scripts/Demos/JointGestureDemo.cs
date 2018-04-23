@@ -4480,17 +4480,19 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {
-		Debug.Log (string.Format ("Completed event: {0}", ((EventManagerArgs)e).EventString));
-		if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
-			!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
-			TurnForward ();
-			LookForward ();
+		if (((EventManagerArgs)e).EventString != string.Empty) {
+			Debug.Log (string.Format ("Completed event: {0}", ((EventManagerArgs)e).EventString));
+			if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
+				!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+				TurnForward ();
+				LookForward ();
 
-			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
+				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
+			}
+
+	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand));
+	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
 		}
-
-//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand));
-//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
