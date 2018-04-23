@@ -4483,6 +4483,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
 			!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 			TurnForward ();
+			LookForward ();
 		}
 	}
 
