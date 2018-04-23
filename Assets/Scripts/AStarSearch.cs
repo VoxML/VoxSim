@@ -482,7 +482,7 @@ public class AStarSearch : MonoBehaviour {
 		float bestMagnitude = Mathf.Infinity;
 		Vector3 bestLastPos = new Vector3();
 
-		while (openSet.Count > 0 && counter < 300) {
+		while (openSet.Count > 0 && counter < 50) {
 			// O(1)
 			curPos = openSet.TakeMin ();
 
