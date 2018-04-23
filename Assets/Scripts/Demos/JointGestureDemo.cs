@@ -2542,9 +2542,9 @@ public class JointGestureDemo : AgentInteraction {
 				interactionLogic.GenerateStackSymbol (new DelegateFactory (new FunctionDelegate (interactionLogic.NullObject)),
 					interactionLogic.IndicatedObj, null, null, null, null)));
 		}
-		else if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
-			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
-		}
+//		else if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
+//			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+//		}
 		else {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
 				interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate (interactionLogic.NullObject)),
@@ -4483,12 +4483,17 @@ public class JointGestureDemo : AgentInteraction {
 		if (((EventManagerArgs)e).EventString != string.Empty) {
 			Debug.Log (string.Format ("Completed event: {0}", ((EventManagerArgs)e).EventString));
 			if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
-				!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+			    !interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 				TurnForward ();
 				LookForward ();
-			}
 
-			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
+				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+			}
+			else {
+				if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
+					interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+				}
+			}
 
 	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand));
 	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));

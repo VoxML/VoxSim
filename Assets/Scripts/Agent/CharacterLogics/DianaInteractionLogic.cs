@@ -1777,9 +1777,21 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ExecuteEvent"),
 				null,
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ExecuteEvent"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0), null),	
+				GetState("Wait"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null,null,null,null,null,new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrab"),
