@@ -2040,11 +2040,14 @@ public class Predicates : MonoBehaviour {
 		}
 
 		// override physics rigging
-		/*foreach (object arg in args) {
+		foreach (object arg in args) {
 			if (arg is GameObject) {
-				(arg as GameObject).GetComponent<Rigging> ().ActivatePhysics(false);
+				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+				if (rigging != null) {
+					rigging.ActivatePhysics (false);
+				}
 			}
-		}*/
+		}
 
 		Vector3 targetPosition = Vector3.zero;
 		Vector3 translocDir = Vector3.zero;
