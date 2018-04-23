@@ -674,6 +674,7 @@ namespace Agent
 			States.Add(new PDAState("ComposeObjectAndAction",null));
 			States.Add(new PDAState("DisambiguateEvent",null));
 			States.Add(new PDAState("ConfirmEvent",null));
+			States.Add(new PDAState("ExecuteEvent",null));
 			States.Add(new PDAState("AbortAction",null));
 			States.Add(new PDAState("Confusion",null));
 			States.Add(new PDAState("EndState",null));
@@ -1748,6 +1749,13 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmEvent"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("ExecuteEvent"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ExecuteEvent"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("Wait"),
