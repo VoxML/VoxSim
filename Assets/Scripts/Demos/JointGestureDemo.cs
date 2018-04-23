@@ -2761,12 +2761,15 @@ public class JointGestureDemo : AgentInteraction {
 		switch (choice) {
 		case 1:
 			RespondAndUpdate ("Sorry, I'm confused.");
+			break;
 
 		case 2:
 			RespondAndUpdate ("Sorry, I don't understand.");
+			break;
 
 		default:
 			RespondAndUpdate ("Sorry, I don't know what you mean.");
+			break;
 		}
 
 		LookForward ();
