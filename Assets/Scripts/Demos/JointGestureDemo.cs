@@ -2542,9 +2542,9 @@ public class JointGestureDemo : AgentInteraction {
 				interactionLogic.GenerateStackSymbol (new DelegateFactory (new FunctionDelegate (interactionLogic.NullObject)),
 					interactionLogic.IndicatedObj, null, null, null, null)));
 		}
-//		else if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
-//			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
-//		}
+		else if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+		}
 		else {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
 				interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate (interactionLogic.NullObject)),
