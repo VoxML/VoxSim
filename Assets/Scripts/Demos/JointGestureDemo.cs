@@ -4486,9 +4486,9 @@ public class JointGestureDemo : AgentInteraction {
 				!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 				TurnForward ();
 				LookForward ();
-
-				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 			}
+
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 
 	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand));
 	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
