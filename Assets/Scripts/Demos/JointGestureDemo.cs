@@ -4480,6 +4480,7 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {
+		Debug.Log (string.Format ("Completed event: {0}", ((EventManagerArgs)e).EventString));
 		if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
 			!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 			TurnForward ();
