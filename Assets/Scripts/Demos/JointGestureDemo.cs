@@ -4487,6 +4487,7 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
+		Debug.Break ();
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
