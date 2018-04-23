@@ -1781,7 +1781,8 @@ namespace Agent
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
 				GetState("Wait"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+					new StackSymbolContent(null,null,null,null,null,new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ExecuteEvent"),
@@ -1790,8 +1791,7 @@ namespace Agent
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0), null),	
 				GetState("Wait"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-					new StackSymbolContent(null,null,null,null,null,new List<string>()))));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrab"),
