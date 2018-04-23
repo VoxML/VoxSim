@@ -42,7 +42,7 @@ public class AStarSearch : MonoBehaviour {
 	public Vector3 start = new Vector3();
 	public Vector3 goal = new Vector3();
 
-	public float rigAttrationWeight;
+	public float rigAttractionWeight;
 	public FullBodyBipedIK bodyIk;
 		
 
@@ -369,7 +369,7 @@ public class AStarSearch : MonoBehaviour {
 
 	float getGScoreErgonomic( Vector3 fromPoint, Vector3 explorePoint) {
 		if (bodyIk != null) {
-			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude * (1 + rigAttrationWeight * (getErgonomicScore (fromPoint) + getErgonomicScore (explorePoint)));
+			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude * (1 + rigAttractionWeight * (getErgonomicScore (fromPoint) + getErgonomicScore (explorePoint)));
 		}
 		else {
 			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude;
@@ -379,7 +379,7 @@ public class AStarSearch : MonoBehaviour {
 	float getHScoreErgonomic( Vector3 explorePoint, Vector3 goalPoint) {
 		// a discount factor of 2 so that the algorith would be faster
 		if (bodyIk != null) {
-			return (goalPoint - explorePoint).magnitude * (1 + rigAttrationWeight / 2 * (getErgonomicScore (goalPoint) + getErgonomicScore (explorePoint)));
+			return (goalPoint - explorePoint).magnitude * (1 + rigAttractionWeight / 2 * (getErgonomicScore (goalPoint) + getErgonomicScore (explorePoint)));
 		}
 		else {
 			return (goalPoint - explorePoint).magnitude;
