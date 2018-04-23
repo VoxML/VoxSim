@@ -2756,7 +2756,19 @@ public class JointGestureDemo : AgentInteraction {
 			PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
 		}
 
-		RespondAndUpdate ("Sorry, I don't know what you mean.");
+		int choice = RandomHelper.RandomInt (0, 3);
+
+		switch (choice) {
+		case 1:
+			RespondAndUpdate ("Sorry, I'm confused.");
+
+		case 2:
+			RespondAndUpdate ("Sorry, I don't understand.");
+
+		default:
+			RespondAndUpdate ("Sorry, I don't know what you mean.");
+		}
+
 		LookForward ();
 		TurnForward ();
 
