@@ -125,6 +125,7 @@ public static class OutputHelper {
 				{
 					if (voice.role == role)
 					{
+						Debug.Log (string.Format ("Speaking {0}", str));
 						voice.Speak(str);
 					}
 				}
