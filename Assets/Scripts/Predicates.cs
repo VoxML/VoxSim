@@ -2040,11 +2040,13 @@ public class Predicates : MonoBehaviour {
 		}
 
 		// override physics rigging
-		foreach (object arg in args) {
-			if (arg is GameObject) {
-				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-				if (rigging != null) {
-					rigging.ActivatePhysics (false);
+		if (agent != null) {
+			foreach (object arg in args) {
+				if (arg is GameObject) {
+					Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+					if (rigging != null) {
+						rigging.ActivatePhysics (false);
+					}
 				}
 			}
 		}
@@ -2350,26 +2352,94 @@ public class Predicates : MonoBehaviour {
 		}
 		else { 
 			if (args [0] is GameObject) {
-				GameObject obj = (args [0] as GameObject);
-				Voxeme voxComponent = obj.GetComponent<Voxeme> ();
-				if (voxComponent != null) {
-					if (!voxComponent.enabled) {
-						voxComponent.gameObject.transform.parent = null;
-						voxComponent.enabled = true;
+				if (agent == null) {
+					GameObject obj = (args [0] as GameObject);
+					Voxeme voxComponent = obj.GetComponent<Voxeme> ();
+					if (voxComponent != null) {
+						if (!voxComponent.enabled) {
+							voxComponent.gameObject.transform.parent = null;
+							voxComponent.enabled = true;
+						}
+
+						if (args [1] is Vector3) {
+							targetPosition = (Vector3)args [1];
+						}
+						else {
+							targetPosition = new Vector3 (obj.transform.position.x + UnityEngine.Random.insideUnitSphere.x,
+								obj.transform.position.y, obj.transform.position.z + UnityEngine.Random.insideUnitSphere.z);
+						}
+
+						voxComponent.targetPosition = targetPosition;
 					}
 
-					if (args [1] is Vector3) {
-						targetPosition = (Vector3)args [1];
-					} else {
-						targetPosition = new Vector3 (obj.transform.position.x + UnityEngine.Random.insideUnitSphere.x,
-							obj.transform.position.y, obj.transform.position.z + UnityEngine.Random.insideUnitSphere.z);
+					if (voxComponent.moveSpeed == 0.0f) {
+						voxComponent.moveSpeed = RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
 					}
-
-					voxComponent.targetPosition = targetPosition;
 				}
+				else {
+					if (args [1] is Vector3) {
+						GameObject theme = args [0] as GameObject;	// get theme obj ("apple" in "put apple on plate")
+						Bounds themeBounds = Helper.GetObjectWorldSize (theme);	// bounds of theme obj
 
-				if (voxComponent.moveSpeed == 0.0f) {
-					voxComponent.moveSpeed = RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+						Vector3 loc = ((Vector3)args [1]);	// coord
+
+						targetPosition = loc;
+						//targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y), loc.z);
+
+						Debug.Log (Helper.VectorToParsable (targetPosition));
+
+						Voxeme voxComponent = theme.GetComponent<Voxeme> ();
+						if (voxComponent != null) {
+							if (!voxComponent.enabled) {
+								voxComponent.gameObject.transform.parent = null;
+								voxComponent.enabled = true;
+							}
+
+							if (voxComponent.moveSpeed == 0.0f) {
+								voxComponent.moveSpeed = RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+							}
+
+							RaycastHit[] hits = Physics.RaycastAll (
+								new Vector3(targetPosition.x,targetPosition.y + Constants.EPSILON,
+									targetPosition.z), -Constants.yAxis);
+							List<RaycastHit> hitList = new List<RaycastHit> ((RaycastHit[])hits);
+							hits = hitList.OrderBy (h => h.distance).ToArray ();
+
+							GameObject supportingSurface = null;
+							foreach (RaycastHit hit in hits) {
+								if (hit.collider.gameObject.GetComponent<BoxCollider> () != null) {
+									if ((!hit.collider.gameObject.GetComponent<BoxCollider> ().isTrigger) &&
+										(!hit.collider.gameObject.transform.IsChildOf (gameObject.transform))) {
+										if (!Helper.FitsIn (Helper.GetObjectWorldSize (hit.collider.gameObject),
+											Helper.GetObjectWorldSize (gameObject), true)) {
+											supportingSurface = hit.collider.gameObject;
+											break;
+										}
+									}
+								}
+							}
+
+							if (supportingSurface != null) {
+								Debug.Log (targetPosition.y);
+								Debug.Log ((themeBounds.center.y-themeBounds.min.y));
+								Debug.Log (Helper.GetObjectWorldSize(supportingSurface).max.y);
+								Debug.Log (supportingSurface.name);
+								if (targetPosition.y - (themeBounds.center.y-themeBounds.min.y) < Helper.GetObjectWorldSize(supportingSurface).max.y) {
+									targetPosition = new Vector3 (targetPosition.x,
+										Helper.GetObjectWorldSize(supportingSurface).max.y + (themeBounds.center.y-themeBounds.min.y),
+										targetPosition.z);
+									Debug.Log (Helper.VectorToParsable (targetPosition));
+								}
+							}
+
+							voxComponent.targetPosition = targetPosition;
+
+							if (voxComponent.isGrasped) {
+								voxComponent.targetPosition = voxComponent.targetPosition +
+									(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+							}
+						}
+					}
 				}
 			}
 		}
