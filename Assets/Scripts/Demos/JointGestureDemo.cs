@@ -4484,10 +4484,10 @@ public class JointGestureDemo : AgentInteraction {
 			!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 			TurnForward ();
 			LookForward ();
-		}
 
-		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
-		Debug.Break ();
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
+			Debug.Break ();
+		}
 	}
 
 	void ConnectionLost(object sender, EventArgs e) {
