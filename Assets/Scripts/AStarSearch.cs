@@ -408,6 +408,23 @@ public class AStarSearch : MonoBehaviour {
 		Vector3 size = Helper.GetObjectWorldSize (obj).size;
 
 		Vector3 increment = defaultIncrement;
+
+		foreach (object constraint in constraints) {
+			if (constraint is string) {
+				if ((constraint as string).Contains ('X')) {
+					increment = new Vector3(0.0f,increment.y,increment.z);
+				}
+
+				if ((constraint as string).Contains ('Y')) {
+					increment = new Vector3(increment.x,0.0f,increment.z);
+				}
+
+				if ((constraint as string).Contains ('Z')) {
+					increment = new Vector3(increment.x,increment.y,0.0f);
+				}
+			}
+		}
+
 		int step = 1;
 
 		Debug.Log (" ======== size.magnitude ====== " + size.magnitude);
