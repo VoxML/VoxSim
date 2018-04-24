@@ -2849,7 +2849,7 @@ public class JointGestureDemo : AgentInteraction {
 		RespondAndUpdate ("Bye!");
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-			interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, 
+			interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
 				null, null, null)));
 	}
 
