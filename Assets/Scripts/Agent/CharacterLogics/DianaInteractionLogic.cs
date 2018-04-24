@@ -811,10 +811,8 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(											// instruction operated by input signal
 				GetStates("Wait"),																// in this state
-				GetInputSymbolsByName("G left point high","G right point high",
-					"S THIS","S THAT","S THERE"),												// when we get this message
-				GenerateStackSymbolFromConditions(null, null, (r) => r != null && r.max != r.min,
-					null, null, null),															// and this is the top of the stack
+				GetInputSymbolsByName("G left point high","G right point high"),				// when we get this message
+				GenerateStackSymbol(null, null, null, null, null, null),						// and this is the top of the stack
 				GetState("SituateDeixis"),														// go to this state
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,				// and do this to the stack
 					new StackSymbolContent(null, null, new Region(), null, null, null))));		// with this symbol
