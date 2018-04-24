@@ -2448,11 +2448,6 @@ namespace Agent
 
 			LastInputSymbol = GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName);
 
-			// update epistemic model
-			if (useEpistemicModel) {
-				UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
-			}
-
 			List<PDAInstruction> instructions =  GetApplicableInstructions (CurrentState,
 				GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName),
 				GetCurrentStackSymbol ().Content);
@@ -2498,6 +2493,11 @@ namespace Agent
 			}
 
 			if (instruction != null) {
+				// update epistemic model
+				if (useEpistemicModel) {
+					UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
+				}
+
 				//				Debug.Log (instruction.ToState);
 				//				Debug.Log (instruction.ToState.Content);
 				if ((interactionController.UseTeaching) && (instruction.ToState.Content != null)) {
