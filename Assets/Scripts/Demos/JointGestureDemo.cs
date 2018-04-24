@@ -2552,6 +2552,13 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
+	public void ExecuteEvent(object[] content) {
+		if ((interactionLogic.ActionOptions.Count > 0) && 
+			(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grasp"))) {
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+		}
+	}
+
 	public void StartGrab(object[] content) {
 		RespondAndUpdate ("OK.");
 		PromptEvent (string.Format ("grasp({0})", interactionLogic.IndicatedObj.name));
@@ -2741,12 +2748,25 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void AbortAction(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
-			PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
+			if ((interactionLogic.ActionOptions.Count > 0) &&
+			    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
+				PromptEvent (string.Format ("put({0},{1})", 
+					interactionLogic.GraspedObj.name,
+					Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
+						Helper.GetObjectWorldSize (demoSurface).max.y,
+						interactionLogic.GraspedObj.transform.position.z))));
+			}
+			else {
+				PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
+			}
+
+		}
+		else {
+			LookForward ();
+			TurnForward ();
 		}
 
 		RespondAndUpdate ("OK, never mind.");
-		LookForward ();
-		TurnForward ();
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 	}
@@ -4490,7 +4510,8 @@ public class JointGestureDemo : AgentInteraction {
 				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 			}
 			else {
-				if (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) {
+				if ((interactionLogic.ActionOptions.Count > 0) &&
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
 					interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 				}
 			}

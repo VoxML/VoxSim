@@ -977,9 +977,20 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count == 0) || ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("TrackPointing"),
@@ -1021,9 +1032,20 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
 				GetInputSymbolsByName("S NEVERMIND"),
-					GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+					GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count == 0) || ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+			
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Suggest"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
@@ -1537,9 +1559,20 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("S NEVERMIND"),
-				GenerateStackSymbolFromConditions(null, null ,null, null, null, null),	
+				GenerateStackSymbolFromConditions(null, null ,null, null, 
+					(a) => ((a.Count == 0) || ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateObject"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null ,null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
@@ -1564,10 +1597,23 @@ namespace Agent
 				GetStates("RegionAsGoal"),
 				GetInputSymbolsByName("S NEVERMIND"),
 				GenerateStackSymbolFromConditions(
-					null, null, null, null, null, null
+					null, null, null, null, 
+					(a) => ((a.Count == 0) || ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null
 				),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RegionAsGoal"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(
+					null, null, null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null
+				),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
@@ -1641,12 +1687,21 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
-				GetInputSymbolsByName("S NOTHING","S NEVERMIND"),
-				GenerateStackSymbolFromConditions(
-					null, null, null, null, null, null
-				),	
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count == 0) || ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("RequestObject"),
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
@@ -1953,9 +2008,20 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
 				GetInputSymbolsByName("S NEVERMIND"),
-				GenerateStackSymbolFromConditions(null,null,null,null,null,null),	
+				GenerateStackSymbolFromConditions(null,null,null,null,
+					(a) => ((a.Count == 0) || ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("put"))).ToList().Count == 0)),null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("DisambiguateEvent"),
+				GetInputSymbolsByName("S NEVERMIND"),
+				GenerateStackSymbolFromConditions(null,null,null,null,
+					(a) => ((a.Count > 0) &&
+						(a.Where(aa => aa.Contains("put"))).ToList().Count > 0),null),	
+				GetState("AbortAction"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("AbortAction"),
@@ -2415,8 +2481,8 @@ namespace Agent
 								(GetInputSymbolByName(ActionOptions[0]) == GetInputSymbolByName(ActionSuggestions[0])))) ? 
 							evaluateCondition (((CharacterLogicEventArgs)e).InputSymbolName) :
 							evaluateCondition (ActionOptions[0]);
-						//						Debug.Log (result.GetType ());
-						//						Debug.Log (result);
+						Debug.Log (result.GetType ());
+						Debug.Log (result);
 
 						if (!(bool)result) {
 							MoveToState (((TransitionGate)stateContent).RejectState);
@@ -2697,12 +2763,12 @@ namespace Agent
 
 		object EpistemicallyCertain (object inputSignal) {
 			if (!useEpistemicModel) {
-				return 1.0;
+				return true;
 			}
 				
 			if (inputSignal.GetType () != typeof(string)) {
 				Debug.Log ("EpistemicCertainty: inputSignal not of type string.  Aborting.");
-				return 0.0;
+				return false;
 			}
 
 			double aggregateCertainty = 1.0;
