@@ -533,10 +533,22 @@ public class JointGestureDemo : AgentInteraction {
 		}
 		else if (messageType == "P") {	// continuous pointing message
 			if (messageStr.StartsWith ("l")) {
-				MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l")));
+				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
+					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l")));
+
+					if (offset.sqrMagnitude <= Constants.EPSILON) {
+						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "l"));
+					}
+				}
 			}
 			else if (messageStr.StartsWith ("r")) {
-				MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "r")));
+				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
+					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "r")));
+
+					if (offset.sqrMagnitude <= Constants.EPSILON) {
+						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "r"));
+					}
+				}
 			}
 		}
 	}
