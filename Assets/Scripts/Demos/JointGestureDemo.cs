@@ -2850,7 +2850,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 			interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, 
-				null, null, null));
+				null, null, null)));
 	}
 
 	void Deixis(string dir) {
