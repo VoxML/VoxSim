@@ -1574,6 +1574,17 @@ namespace Agent
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
+//			TransitionRelation.Add(new PDAInstruction(
+//				GetStates("DisambiguateObject"),
+//				GetInputSymbolsByName("G left point high","G right point high",
+//					"S THIS","S THAT","S THERE"),
+//				GenerateStackSymbolFromConditions(
+//					null, (g) => g != null, null, null, null, null
+//				),
+//				GetState("SituateDeixis"),
+//				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+//					new StackSymbolContent(null, null, new Region(), null, null, null))));
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("S BIG","S SMALL"),
