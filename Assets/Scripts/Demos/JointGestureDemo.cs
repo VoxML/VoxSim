@@ -2751,14 +2751,18 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void AbortAction(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
-			if ((interactionLogic.ActionOptions.Count > 0) &&
-			    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
-				(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
-				PromptEvent (string.Format ("put({0},{1})", 
-					interactionLogic.GraspedObj.name,
-					Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
-						Helper.GetObjectWorldSize (demoSurface).max.y,
-						interactionLogic.GraspedObj.transform.position.z))));
+			if (interactionLogic.ActionOptions.Count > 0) {
+				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
+					PromptEvent (string.Format ("put({0},{1})", 
+						interactionLogic.GraspedObj.name,
+						Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
+							Helper.GetObjectWorldSize (demoSurface).max.y,
+							interactionLogic.GraspedObj.transform.position.z))));
+				}
+				else {
+					PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
+				}
 			}
 			else {
 				PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
