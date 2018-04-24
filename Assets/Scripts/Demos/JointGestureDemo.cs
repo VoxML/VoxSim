@@ -2782,7 +2782,8 @@ public class JointGestureDemo : AgentInteraction {
 		if (interactionLogic.GraspedObj != null) {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
-					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")) ||
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grab move"))) {
 					PromptEvent (string.Format ("put({0},{1})", 
 						interactionLogic.GraspedObj.name,
 						Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
