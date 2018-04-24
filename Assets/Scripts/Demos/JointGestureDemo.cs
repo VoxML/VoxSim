@@ -532,6 +532,8 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else if (messageType == "P") {	// continuous pointing message
+			highlightTimeoutTimer.Enabled = true;
+
 			if (messageStr.StartsWith ("l")) {
 				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
 					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l")));
