@@ -73,6 +73,10 @@ namespace Network
             }
         }
 
+		void POST_okay(object parameter) {
+			// do nothing
+		}
+
 		void GET_okay(object parameter) {
 			OnGotData (this, new RestEventArgs(parameter));
 		}
