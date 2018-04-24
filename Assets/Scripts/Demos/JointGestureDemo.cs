@@ -3062,6 +3062,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	void TrackPointing(List<float> vector) {
 		highlightTimeoutTimer.Enabled = true;
+		regionHighlight.GetComponent<Renderer> ().material.color = new Color (0.0f, 1.0f, 0.0f,
+			regionHighlight.GetComponent<Renderer> ().material.color.a);
 
 		if (eventManager.events.Count > 0) {
 			return;
