@@ -1592,7 +1592,7 @@ namespace Agent
 					null, null, null, null, null, null
 				),	
 				GetState("Confusion"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
