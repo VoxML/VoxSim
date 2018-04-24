@@ -2043,7 +2043,7 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction (
 				States,
 				GetInputSymbolsByName("G engage stop"),
-				GenerateStackSymbolFromConditions(null, (g) => g == null, null, null, (a) => a.Count == 0, null),	
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("CleanUp"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
