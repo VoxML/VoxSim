@@ -677,6 +677,7 @@ namespace Agent
 			States.Add(new PDAState("ExecuteEvent",null));
 			States.Add(new PDAState("AbortAction",null));
 			States.Add(new PDAState("Confusion",null));
+			States.Add(new PDAState("CleanUp",null));
 			States.Add(new PDAState("EndState",null));
 
 			InputSymbols.Add(new PDASymbol("G engage start"));
@@ -2039,26 +2040,40 @@ namespace Agent
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
 					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
+			TransitionRelation.Add(new PDAInstruction (
+				States,
+				GetInputSymbolsByName("G engage stop"),
+				GenerateStackSymbolFromConditions(null, (g) => g == null, null, null, (a) => a.Count == 0, null),	
+				GetState("EndState"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction (
+				States,
+				GetInputSymbolsByName("G engage stop"),
+				GenerateStackSymbolFromConditions(null, (g) => g != null, null, null, null, null),	
+				GetState("CleanUp"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction (
+				States,
+				GetInputSymbolsByName("G engage stop"),
+				GenerateStackSymbolFromConditions(null, null, null, null, (a) => a.Count > 0, null),	
+				GetState("CleanUp"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
+			TransitionRelation.Add(new PDAInstruction (
+				GetStates("CleanUp"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("EndState"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
 			TransitionRelation.Add (new PDAInstruction(
 				GetStates("EndState"),
 				GetInputSymbolsByName("G engage start"),
 				GenerateStackSymbolFromConditions (null, null, null, null, null, null),	
 				GetState("BeginInteraction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
-
-			TransitionRelation.Add(new PDAInstruction (
-				States,
-				GetInputSymbolsByName("G engage stop"),
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
-				GetState("EndState"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
-
-			TransitionRelation.Add(new PDAInstruction (
-				GetStates("EndState"),
-				null,
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
-				GetState("EndState"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
 			List<PDAInstruction> gateInstructions = new List<PDAInstruction> ();
 			foreach (PDAInstruction instruction in TransitionRelation) {
