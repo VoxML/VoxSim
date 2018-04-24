@@ -69,7 +69,8 @@ public class JointGestureDemo : AgentInteraction {
 	public float highlightMoveSpeed;
 	public float highlightTurnSpeed;
 	public float highlightQuantum;
-	public Material highlightMaterial;
+	public Material activeHighlightMaterial;
+	public Material inactiveHighlightMaterial;
 
 	// highlight oscillation speed factor, upper limit scale, and lower limit scale
 	public float highlightOscSpeed;
@@ -188,7 +189,7 @@ public class JointGestureDemo : AgentInteraction {
 		regionHighlight.transform.position = Vector3.zero;
 		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius*.2f,vectorConeRadius*.2f,vectorConeRadius*.2f);
 		regionHighlight.tag = "UnPhysic";
-		regionHighlight.GetComponent<Renderer> ().material = highlightMaterial;
+		regionHighlight.GetComponent<Renderer> ().material = activeHighlightMaterial;
 		//regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
 //		regionHighlight.GetComponent<Renderer> ().enabled = false;
 		Destroy (regionHighlight.GetComponent<Collider> ());
@@ -532,6 +533,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else if (messageType == "P") {	// continuous pointing message
+			regionHighlight.GetComponent<Renderer> ().material = inactiveHighlightMaterial;
 			highlightTimeoutTimer.Interval = highlightTimeoutTime;
 			highlightTimeoutTimer.Enabled = true;
 
@@ -2078,6 +2080,7 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 
 		case 1:
+			regionHighlight.GetComponent<Renderer> ().material = activeHighlightMaterial;
 			highlightTimeoutTimer.Interval = highlightTimeoutTime;
 			highlightTimeoutTimer.Enabled = true;
 
