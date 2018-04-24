@@ -4215,7 +4215,7 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			// point at base of Kinect -> 0.0 -> -.8 (Diana's edge)
 			// point down in front of me -> 1.6 -> .8 (my edge)
-			zCoord = (vector[1] + (tableSize.y / 2.0f)) * vectorScaleFactor.y;
+			zCoord = (vector[1] - (tableSize.y / 2.0f)) * vectorScaleFactor.y;
 		}
 
 		Vector3 coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
