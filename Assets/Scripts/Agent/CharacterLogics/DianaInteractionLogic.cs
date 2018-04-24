@@ -2045,7 +2045,7 @@ namespace Agent
 				GetInputSymbolsByName("G engage stop"),
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("CleanUp"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 //			TransitionRelation.Add(new PDAInstruction (
 //				States,
