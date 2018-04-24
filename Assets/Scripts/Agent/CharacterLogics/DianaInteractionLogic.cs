@@ -2053,6 +2053,13 @@ namespace Agent
 				GetState("EndState"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
+			TransitionRelation.Add(new PDAInstruction (
+				GetStates("EndState"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("EndState"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+
 			List<PDAInstruction> gateInstructions = new List<PDAInstruction> ();
 			foreach (PDAInstruction instruction in TransitionRelation) {
 				if (instruction.ToState.Content != null) {
