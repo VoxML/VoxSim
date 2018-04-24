@@ -532,6 +532,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else if (messageType == "P") {	// continuous pointing message
+			highlightTimeoutTimer.Interval = highlightTimeoutTime;
 			highlightTimeoutTimer.Enabled = true;
 
 			if (messageStr.StartsWith ("l")) {
@@ -2077,6 +2078,7 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 
 		case 1:
+			highlightTimeoutTimer.Interval = highlightTimeoutTime;
 			highlightTimeoutTimer.Enabled = true;
 
 			if (interactionLogic.RemoveInputSymbolType ((string)content [0],
@@ -2166,6 +2168,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
+				highlightTimeoutTimer.Interval = highlightTimeoutTime;
 				highlightTimeoutTimer.Enabled = true;
 
 				Region testRegion = new Region (
@@ -2196,6 +2199,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
+				highlightTimeoutTimer.Interval = highlightTimeoutTime;
 				highlightTimeoutTimer.Enabled = true;
 
 				Region testRegion = new Region (
