@@ -42,6 +42,8 @@ public class AStarSearch : MonoBehaviour {
 	public Vector3 start = new Vector3();
 	public Vector3 goal = new Vector3();
 
+	public int counterMax = 20;
+
 	public float rigAttractionWeight;
 	public FullBodyBipedIK bodyIk;
 		
@@ -482,7 +484,7 @@ public class AStarSearch : MonoBehaviour {
 		float bestMagnitude = Mathf.Infinity;
 		Vector3 bestLastPos = new Vector3();
 
-		while (openSet.Count > 0 && counter < 50) {
+		while (openSet.Count > 0 && counter < counterMax) {
 			// O(1)
 			curPos = openSet.TakeMin ();
 
