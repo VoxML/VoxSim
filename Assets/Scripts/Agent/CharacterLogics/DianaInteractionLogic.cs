@@ -1561,7 +1561,7 @@ namespace Agent
 				GetInputSymbolsByName("S NEVERMIND"),
 				GenerateStackSymbolFromConditions(null, null ,null, null, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
-						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
+						(a.Where(aa => aa.Contains("put"))).ToList().Count == 0)), null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
 
@@ -1570,7 +1570,7 @@ namespace Agent
 				GetInputSymbolsByName("S NEVERMIND"),
 				GenerateStackSymbolFromConditions(null, null ,null, null, 
 					(a) => ((a.Count > 0) &&
-						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
+						(a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null),	
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
