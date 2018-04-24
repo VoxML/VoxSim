@@ -2641,9 +2641,12 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (dir);
 			List<string> options = PopulateMoveOptions (interactionLogic.GraspedObj, dir);
 
+//			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+//				Enumerable.Range(0,options.Count).Select(s => interactionLogic.GenerateStackSymbol (null,
+//					dir == "up" ? null : new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, 
+//					options.ToArray().Reverse().ToList().GetRange(0,s+1), new List<string>())).ToList()));
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-				Enumerable.Range(0,options.Count).Select(s => interactionLogic.GenerateStackSymbol (null,
-					dir == "up" ? null : new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, 
+				Enumerable.Range(0,options.Count).Select(s => interactionLogic.GenerateStackSymbol (null, null, null, null, 
 					options.ToArray().Reverse().ToList().GetRange(0,s+1), new List<string>())).ToList()));
 			break;
 
@@ -2749,7 +2752,8 @@ public class JointGestureDemo : AgentInteraction {
 	public void AbortAction(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
 			if ((interactionLogic.ActionOptions.Count > 0) &&
-			    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
+			    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
+				(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
 				PromptEvent (string.Format ("put({0},{1})", 
 					interactionLogic.GraspedObj.name,
 					Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
