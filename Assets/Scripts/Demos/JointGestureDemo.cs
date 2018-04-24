@@ -533,7 +533,9 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else if (messageType == "P") {	// continuous pointing message
-			regionHighlight.GetComponent<Renderer> ().material = inactiveHighlightMaterial;
+			if ((interactionLogic.CurrentState.Name != "Wait") && (interactionLogic.CurrentState.Name != "TrackPointing")) {
+				regionHighlight.GetComponent<Renderer> ().material = inactiveHighlightMaterial;
+			}
 			highlightTimeoutTimer.Interval = highlightTimeoutTime;
 			highlightTimeoutTimer.Enabled = true;
 
