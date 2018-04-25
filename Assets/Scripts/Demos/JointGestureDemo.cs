@@ -83,7 +83,7 @@ public class JointGestureDemo : AgentInteraction {
 	bool disableHighlight = false;
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
-	public float knownScreenWidth = .3646f; //m
+	public Vector2 knownScreenSize = new Vector2(1.155f,.6f); //m
 	public float windowScaleFactor;
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 
@@ -308,7 +308,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		// Vector pointing scaling
 		if (transformToScreenPointing) {
-			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH / (knownScreenWidth * windowScaleFactor);
+			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH / (knownScreenSize.x * windowScaleFactor);
 
 			// assume screen more or less directly under Kinect
 
@@ -4279,22 +4279,42 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	Vector3 TransformToSurface(List<float> vector) {
-		float zCoord = vector[1];
+		Vector3 coord = Vector3.zero;
 
 		if (transformToScreenPointing) {
-			// point at base of Kinect -> 0.0 -> .8 (my edge)
-			// point at far edge of virtual table -> -1.6 -> -.8 (Diana's edge)
-			zCoord = (vector[1] * vectorScaleFactor.y) + (tableSize.y / 2.0f);
+			Vector3 screenPoint = new Vector3 (
+				((Screen.width * vector [0]) / tableSize.x) + (Screen.width / 2.0f),
+				((Screen.height * vector [1] / knownScreenSize.y) + Screen.height),
+				0.0f);
+
+			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
+			RaycastHit hit;
+			// Casts the ray and get the first game object hit
+			Physics.Raycast (ray, out hit);
+
+			if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
+				coord = hit.point;
+			}
+
+//			float zCoord = vector[1];
+//
+//			// point at base of Kinect -> 0.0 -> .8 (my edge)
+//			// point at far edge of virtual table -> -1.6 -> -.8 (Diana's edge)
+//			zCoord = (vector[1] * vectorScaleFactor.y) + (tableSize.y / 2.0f);
+//			coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
+//				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+//				zCoord);
 		}
 		else {
+			float zCoord = vector[1];
+
 			// point at base of Kinect -> 0.0 -> -.8 (Diana's edge)
 			// point down in front of me -> 1.6 -> .8 (my edge)
 			zCoord = (vector[1] - (tableSize.y / 2.0f)) * vectorScaleFactor.y;
+			coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
+				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+				zCoord);
 		}
-
-		Vector3 coord = new Vector3 (-vector[0]*vectorScaleFactor.x,
-			Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
-			zCoord);
 
 		return coord;
 	}

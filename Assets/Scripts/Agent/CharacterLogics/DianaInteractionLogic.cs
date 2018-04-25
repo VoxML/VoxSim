@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Timers;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -421,15 +422,8 @@ namespace Agent
 
 		Dictionary<PDASymbol,List<Concept>> symbolConceptMap;
 
-		//?
-		//		Dictionary<Region,string> regionLabels = new Dictionary<Region, string> ();
-		//		Dictionary<string,string> directionPreds = new Dictionary<string, string> ();
-		//		Dictionary<string,string> directionLabels = new Dictionary<string, string> ();
-		//		Dictionary<string,string> oppositeDir = new Dictionary<string, string> ();
-		//		Dictionary<string,string> relativeDir = new Dictionary<string, string> ();
-
-		//?
-		//Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
+		Timer repeatTimer;
+		public double repeatTimerTime;
 
 		protected GameObject GetIndicatedObj(object arg) {
 			return IndicatedObj;
@@ -593,6 +587,10 @@ namespace Agent
 				// stack symbols: array of state variables
 
 			base.Start ();
+
+			repeatTimer = new Timer (repeatTimerTime);
+			repeatTimer.Enabled = false;
+			repeatTimer.Elapsed += RepeatUtterance;
 
 			interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 
@@ -2835,6 +2833,11 @@ namespace Agent
 			}
 
 			return (aggregateCertainty > 0.5);
+		}
+
+		void RepeatUtterance(object sender, ElapsedEventArgs e) {
+			repeatTimer.Enabled = false;
+			repeatTimer.Interval = repeatTimerTime;
 		}
 	}
 }
