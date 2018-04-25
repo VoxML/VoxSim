@@ -4295,8 +4295,6 @@ public class JointGestureDemo : AgentInteraction {
 				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y)) + (Screen.height / 2.0f)),
 				0.0f);
 
-
-
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
 			RaycastHit hit;
 			// Casts the ray and get the first game object hit

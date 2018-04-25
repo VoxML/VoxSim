@@ -409,7 +409,6 @@ namespace Agent
 						GUILayout.EndHorizontal();
 					}
 				}
-
 			}
 		}
 #endif
@@ -2844,7 +2843,7 @@ namespace Agent
 
 		void RepeatUtterance(object sender, ElapsedEventArgs e) {
 			repeatTimer.Enabled = false;
-			repeatTimer.Interval = repeatTimerTime;
+			repeatTimer.Interval = 5000;
 			forceRepeat = true;
 			Debug.Log ("Repeating");
 		}
