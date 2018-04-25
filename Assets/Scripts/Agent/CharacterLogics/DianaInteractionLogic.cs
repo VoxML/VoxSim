@@ -588,7 +588,7 @@ namespace Agent
 
 			base.Start ();
 
-			repeatTimer = new Timer (repeatTimerTime);
+			repeatTimer = new Timer (5000);
 			repeatTimer.Enabled = false;
 			repeatTimer.Elapsed += RepeatUtterance;
 
