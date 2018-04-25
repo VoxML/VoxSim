@@ -4292,7 +4292,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (transformToScreenPointing) {
 			screenPoint = new Vector3 (
 				((Screen.width * vector [0]) / tableSize.x) + (Screen.width / 2.0f),
-				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y))),
+				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y)) + (Screen.height / 2.0f)),
 				0.0f);
 
 
