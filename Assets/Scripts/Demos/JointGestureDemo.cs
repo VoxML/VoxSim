@@ -90,6 +90,7 @@ public class JointGestureDemo : AgentInteraction {
 	public float kinectToSurfaceHeight = .63f; //m
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 	public Vector2 receivedPointingCoord = Vector2.zero;
+	public Vector2 screenPoint = Vector2.zero;
 
 	public bool allowDeixisByClick = false;
 
@@ -4289,10 +4290,12 @@ public class JointGestureDemo : AgentInteraction {
 		receivedPointingCoord = new Vector2 (vector [0], vector [1]);
 
 		if (transformToScreenPointing) {
-			Vector3 screenPoint = new Vector3 (
+			screenPoint = new Vector3 (
 				((Screen.width * vector [0]) / tableSize.x) + (Screen.width / 2.0f),
-				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y)) + Screen.height),
+				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y))),
 				0.0f);
+
+
 
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
 			RaycastHit hit;
