@@ -148,7 +148,7 @@ public static class OutputHelper {
 		return output;
 	}
 
-	public static string ForceRepeat(Role role) {
+	public static void ForceRepeat(Role role) {
 		OutputController[] outputs;
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
 
