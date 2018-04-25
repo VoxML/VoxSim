@@ -4294,7 +4294,9 @@ public class JointGestureDemo : AgentInteraction {
 			// Casts the ray and get the first game object hit
 			if (Physics.Raycast (ray, out hit)) {
 				if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
-					coord = hit.point;
+					coord = new Vector3(hit.point.x,
+						Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+						hit.point.z);
 				}
 			}
 

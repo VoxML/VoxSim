@@ -2753,6 +2753,7 @@ namespace Agent
 			}
 
 			CurrentState = state;
+			repeatTimer.Interval = repeatTimerTime;
 			repeatTimer.Enabled = true;
 			Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
 				StackSymbolToString(GetCurrentStackSymbol())));
