@@ -129,7 +129,6 @@ public static class OutputHelper {
 						voice.Speak(str);
 					}
 				}
-				
 			}
 		}
 	}
@@ -147,5 +146,26 @@ public static class OutputHelper {
 		}
 
 		return output;
+	}
+
+	public static string ForceRepeat(Role role) {
+		OutputController[] outputs;
+		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
+
+		foreach (OutputController outputController in outputs) {
+			if (outputController.role == role) {
+
+				// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
+				VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
+				foreach (VoiceController voice in voices) 
+				{
+					if (voice.role == role)
+					{
+						Debug.Log (string.Format ("Speaking: \"{0}\"", outputController.outputString));
+						voice.Speak(outputController.outputString);
+					}
+				}
+			}
+		}
 	}
 }

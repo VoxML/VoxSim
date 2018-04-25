@@ -419,11 +419,11 @@ namespace Agent
 			Suggest,
 			Act
 		};
-
+			
 		Dictionary<PDASymbol,List<Concept>> symbolConceptMap;
 
 		Timer repeatTimer;
-		public double repeatTimerTime;
+		public double repeatTimerTime = 5000;
 
 		protected GameObject GetIndicatedObj(object arg) {
 			return IndicatedObj;
@@ -2748,6 +2748,7 @@ namespace Agent
 			}
 
 			CurrentState = state;
+			repeatTimer.Enabled = true;
 			Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
 				StackSymbolToString(GetCurrentStackSymbol())));
 		}
@@ -2836,6 +2837,8 @@ namespace Agent
 		}
 
 		void RepeatUtterance(object sender, ElapsedEventArgs e) {
+			OutputHelper.ForceRepeat (Role.Affector);
+
 			repeatTimer.Enabled = false;
 			repeatTimer.Interval = repeatTimerTime;
 		}

@@ -2319,7 +2319,7 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if ((interactionLogic.GraspedObj == null) &&
 			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-				RespondAndUpdate (string.Format ("The {0} block?", attribute));
+				RespondAndUpdate (string.Format ("The {0} one?", attribute));
 				ReachFor (interactionLogic.IndicatedObj);
 				LookAt (interactionLogic.IndicatedObj);
 			}
