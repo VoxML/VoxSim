@@ -1615,7 +1615,7 @@ public class JointGestureDemo : AgentInteraction {
 						RespondAndUpdate ("Are you pointing at this?");
 					}
 
-					LookAt (highlightCenter);
+					LookForward ();
 
 					if (interactionLogic.GraspedObj == null) {
 						PointAt (highlightCenter, rightGrasper);
@@ -1660,7 +1660,7 @@ public class JointGestureDemo : AgentInteraction {
 						RespondAndUpdate ("Are you pointing at this?");
 					}
 
-					LookAt (highlightCenter);
+					LookForward ();
 
 					if (interactionLogic.GraspedObj == null) {
 						PointAt (highlightCenter, rightGrasper);
@@ -2328,20 +2328,20 @@ public class JointGestureDemo : AgentInteraction {
 			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
 				RespondAndUpdate (string.Format ("The {0} one?", attribute));
 				ReachFor (interactionLogic.IndicatedObj);
-				LookAt (interactionLogic.IndicatedObj);
+				LookForward ();
 			}
 			else if ((interactionLogic.IndicatedObj != null) &&
 			        (!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
 				RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
 					interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
 					attribute));
-				LookAt (interactionLogic.ObjectOptions [0]);
+				LookForward ();
 			}
 			else if (interactionLogic.GraspedObj != null) {
 				RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
 					interactionLogic.GraspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
 					attribute));
-				LookAt (interactionLogic.ObjectOptions [0]);
+				LookForward ();
 			}
 		}
 	}
@@ -2495,6 +2495,7 @@ public class JointGestureDemo : AgentInteraction {
 			RespondAndUpdate ("Should I place something here?");
 		}
 		ReachFor (interactionLogic.IndicatedRegion.center);
+		LookForward ();
 	}
 
 	public void ConfirmObject(object[] content) {
