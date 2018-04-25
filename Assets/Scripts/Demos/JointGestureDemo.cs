@@ -84,10 +84,10 @@ public class JointGestureDemo : AgentInteraction {
 	bool disableHighlight = false;
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
-	const float DEFAULT_SCREEN_HEIGHT = .6f;
+	const float DEFAULT_SCREEN_HEIGHT = .53f;
 	public Vector2 knownScreenSize = new Vector2(.9146f,.53f); //m
 	public Vector2 windowScaleFactor;
-	public float kinectToSurfaceHeight = .63; //m
+	public float kinectToSurfaceHeight = .63f; //m
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 	public Vector2 receivedPointingCoord = Vector2.zero;
 
