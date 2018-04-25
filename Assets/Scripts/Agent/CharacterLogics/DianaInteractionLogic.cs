@@ -2845,6 +2845,7 @@ namespace Agent
 			repeatTimer.Enabled = false;
 			repeatTimer.Interval = repeatTimerTime;
 			forceRepeat = true;
+			Debug.Log ("Repeating");
 		}
 	}
 }
