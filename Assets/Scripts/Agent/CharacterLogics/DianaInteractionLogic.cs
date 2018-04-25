@@ -601,9 +601,11 @@ namespace Agent
 
 			base.Start ();
 
-			repeatTimer = new Timer (repeatTimerTime);
-			repeatTimer.Enabled = false;
-			repeatTimer.Elapsed += RepeatUtterance;
+			if ((repeatAfterWait) && (repeatTimerTime > 0)) {
+				repeatTimer = new Timer (repeatTimerTime);
+				repeatTimer.Enabled = false;
+				repeatTimer.Elapsed += RepeatUtterance;
+			}
 
 			interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 
