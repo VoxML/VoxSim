@@ -1599,7 +1599,7 @@ public class JointGestureDemo : AgentInteraction {
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) { // enabled = on table
+				if (highlightCenter.y > 0) { // on table
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
@@ -1644,7 +1644,7 @@ public class JointGestureDemo : AgentInteraction {
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) { // enabled = on table
+				if (highlightCenter.y > 0) { // on table
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
