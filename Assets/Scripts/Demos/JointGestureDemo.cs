@@ -83,8 +83,9 @@ public class JointGestureDemo : AgentInteraction {
 	bool disableHighlight = false;
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
+	const float DEFAULT_SCREEN_HEIGHT = .6f;
 	public Vector2 knownScreenSize = new Vector2(1.155f,.6f); //m
-	public float windowScaleFactor;
+	public Vector2 windowScaleFactor;
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 	public Vector2 receivedPointingCoord = Vector2.zero;
 
@@ -150,7 +151,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	// Use this for initialization
 	void Start () {
-		windowScaleFactor = (float)Screen.width/(float)Screen.currentResolution.width;
+		windowScaleFactor.x = (float)Screen.width/(float)Screen.currentResolution.width;
+		windowScaleFactor.y = (float)Screen.height/(float)Screen.currentResolution.height;
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
@@ -309,7 +311,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		// Vector pointing scaling
 		if (transformToScreenPointing) {
-			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH / (knownScreenSize.x * windowScaleFactor);
+			vectorScaleFactor.x = (float)DEFAULT_SCREEN_WIDTH / (knownScreenSize.x * windowScaleFactor.x);
+			vectorScaleFactor.y = (float)DEFAULT_SCREEN_HEIGHT / (knownScreenSize.y * windowScaleFactor.y);
 
 			// assume screen more or less directly under Kinect
 
@@ -4286,7 +4289,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (transformToScreenPointing) {
 			Vector3 screenPoint = new Vector3 (
 				((Screen.width * vector [0]) / tableSize.x) + (Screen.width / 2.0f),
-				((Screen.height * vector [1] / knownScreenSize.y) + Screen.height),
+				((Screen.height * vector [1] / (knownScreenSize.y*vectorScaleFactor.y)) + Screen.height),
 				0.0f);
 
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
