@@ -347,6 +347,8 @@ namespace Agent
 		public bool humanRelativeDirections;
 		public bool waveToStart;
 		public bool useEpistemicModel;
+		public bool repeatAfterWait;
+		public double repeatTimerTime = 10000;
 
 		public AgentInteraction interactionController;
 
@@ -380,6 +382,18 @@ namespace Agent
 				GUILayout.Label("Use Epistemic Model", bold, GUILayout.Width(150));
 				((DianaInteractionLogic)target).useEpistemicModel =
 					GUILayout.Toggle (((DianaInteractionLogic)target).useEpistemicModel,"");
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Repeat After Wait", bold, GUILayout.Width(150));
+				((DianaInteractionLogic)target).repeatAfterWait =
+					GUILayout.Toggle (((DianaInteractionLogic)target).repeatAfterWait,"");
+				GUILayout.EndHorizontal();
+
+				GUILayout.BeginHorizontal();
+				GUILayout.Label("Repeat Wait Time", bold, GUILayout.Width(150));
+				((DianaInteractionLogic)target).repeatTimerTime = System.Convert.ToDouble(
+					GUILayout.TextField (((DianaInteractionLogic)target).repeatTimerTime.ToString(), GUILayout.Width(50)));
 				GUILayout.EndHorizontal();
 
 				GUILayout.BeginHorizontal();
@@ -422,7 +436,6 @@ namespace Agent
 		Dictionary<PDASymbol,List<Concept>> symbolConceptMap;
 
 		Timer repeatTimer;
-		public double repeatTimerTime = 5000;
 		bool forceRepeat = false;
 
 		protected GameObject GetIndicatedObj(object arg) {
@@ -588,7 +601,7 @@ namespace Agent
 
 			base.Start ();
 
-			repeatTimer = new Timer (5000);
+			repeatTimer = new Timer (repeatTimerTime);
 			repeatTimer.Enabled = false;
 			repeatTimer.Elapsed += RepeatUtterance;
 
@@ -2752,8 +2765,12 @@ namespace Agent
 			}
 
 			CurrentState = state;
-			repeatTimer.Interval = 5000;
-			repeatTimer.Enabled = true;
+
+			if ((repeatAfterWait) && (repeatTimerTime > 0)) {
+				repeatTimer.Interval = repeatTimerTime;
+				repeatTimer.Enabled = true;
+			}
+
 			Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
 				StackSymbolToString(GetCurrentStackSymbol())));
 		}
@@ -2842,9 +2859,11 @@ namespace Agent
 		}
 
 		void RepeatUtterance(object sender, ElapsedEventArgs e) {
-			repeatTimer.Interval = 5000;
-			forceRepeat = true;
-			Debug.Log ("Repeating");
+			if ((repeatAfterWait) && (repeatTimerTime > 0)) {
+				repeatTimer.Interval = repeatTimerTime;
+				forceRepeat = true;
+				Debug.Log ("Repeating");
+			}
 		}
 	}
 }
