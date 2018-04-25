@@ -1,0 +1,18 @@
+Listener Port,
+SRI URL,
+CSU URL,blue.cs.colostate.edu:9126
+Parser URL,
+Make Logs,False
+Capture Video,False
+Capture Params,False
+Video Capture Mode,0
+Reset Between Events,False
+Event Reset Counter,1
+Video Capture Filename Type,0
+Sort By Event String,False
+Custom Video Filename Prefix,
+Auto Events List,
+Start Index,0
+Video Capture DB,
+Video Output Directory,
+Make Voxemes Editable,True

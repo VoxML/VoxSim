@@ -1,0 +1,18 @@
+Listener Port,7777
+SRI URL,
+CSU URL,localhost:8220
+Parser URL,
+Make Logs,False
+Capture Video,False
+Capture Params,False
+Video Capture Mode,2
+Reset Between Events,True
+Event Reset Counter,1
+Video Capture Filename Type,1
+Sort By Event String,True
+Custom Video Filename Prefix,
+Auto Events List,../../../thesis-docs-utils/utils/test-sets/param-generation/extended_move
+Start Index,0
+Video Capture DB,../../../../Underspecification Analysis/data/aet-test-set
+Video Output Directory,../../../../Underspecification Analysis/data/video
+Make Voxemes Editable,True
