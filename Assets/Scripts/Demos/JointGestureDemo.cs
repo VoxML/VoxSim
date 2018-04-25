@@ -55,6 +55,7 @@ public class JointGestureDemo : AgentInteraction {
 	Vector3 headTargetDefault,headTargetStored;
 
 	public GameObject demoSurface;
+	public Collider demoSurfaceCollider;
 	public List<GameObject> blocks;
 	public GameObject indicatedObj = null;
 	public GameObject indicatedObjObj = null;
@@ -4295,12 +4296,12 @@ public class JointGestureDemo : AgentInteraction {
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
 			RaycastHit hit;
 			// Casts the ray and get the first game object hit
-			if (Physics.Raycast (ray, out hit)) {
-				if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
+			if (demoSurfaceCollider.Raycast (ray, out hit, 10.0f)) {
+//				if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
 					coord = new Vector3(hit.point.x,
 						Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 						hit.point.z);
-				}
+//				}
 			}
 
 //			float zCoord = vector[1];
