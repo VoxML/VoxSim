@@ -86,6 +86,7 @@ public class JointGestureDemo : AgentInteraction {
 	public Vector2 knownScreenSize = new Vector2(1.155f,.6f); //m
 	public float windowScaleFactor;
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
+	public Vector2 receivedPointingCoord = Vector2.zero;
 
 	public bool allowDeixisByClick = false;
 
@@ -4280,6 +4281,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	Vector3 TransformToSurface(List<float> vector) {
 		Vector3 coord = Vector3.zero;
+		receivedPointingCoord = new Vector2 (vector [0], vector [1]);
 
 		if (transformToScreenPointing) {
 			Vector3 screenPoint = new Vector3 (
@@ -4290,10 +4292,10 @@ public class JointGestureDemo : AgentInteraction {
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
 			RaycastHit hit;
 			// Casts the ray and get the first game object hit
-			Physics.Raycast (ray, out hit);
-
-			if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
-				coord = hit.point;
+			if (Physics.Raycast (ray, out hit)) {
+				if (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject) == demoSurface) {
+					coord = hit.point;
+				}
 			}
 
 //			float zCoord = vector[1];

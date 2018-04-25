@@ -424,6 +424,7 @@ namespace Agent
 
 		Timer repeatTimer;
 		public double repeatTimerTime = 5000;
+		bool forceRepeat = false;
 
 		protected GameObject GetIndicatedObj(object arg) {
 			return IndicatedObj;
@@ -2169,6 +2170,10 @@ namespace Agent
 		}
 
 		public override void Update() {
+			if (forceRepeat) {
+				OutputHelper.ForceRepeat (Role.Affector);
+				forceRepeat = false;
+			}
 		}
 
 		public PDASymbol GenerateStackSymbol(
@@ -2837,10 +2842,9 @@ namespace Agent
 		}
 
 		void RepeatUtterance(object sender, ElapsedEventArgs e) {
-			OutputHelper.ForceRepeat (Role.Affector);
-
 			repeatTimer.Enabled = false;
 			repeatTimer.Interval = repeatTimerTime;
+			forceRepeat = true;
 		}
 	}
 }
