@@ -85,8 +85,9 @@ public class JointGestureDemo : AgentInteraction {
 
 	const float DEFAULT_SCREEN_WIDTH = .9146f; // ≈ 36" = 3'
 	const float DEFAULT_SCREEN_HEIGHT = .6f;
-	public Vector2 knownScreenSize = new Vector2(1.155f,.6f); //m
+	public Vector2 knownScreenSize = new Vector2(.9146f,.53f); //m
 	public Vector2 windowScaleFactor;
+	public float kinectToSurfaceHeight = .63; //m
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 	public Vector2 receivedPointingCoord = Vector2.zero;
 
@@ -4290,7 +4291,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (transformToScreenPointing) {
 			Vector3 screenPoint = new Vector3 (
 				((Screen.width * vector [0]) / tableSize.x) + (Screen.width / 2.0f),
-				((Screen.height * vector [1] / (knownScreenSize.y*vectorScaleFactor.y)) + Screen.height),
+				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y)) + Screen.height),
 				0.0f);
 
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
