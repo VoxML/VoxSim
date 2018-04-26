@@ -83,6 +83,10 @@ namespace Agent
 		public bool IsVisible(GameObject obj) {
 			bool r = false;
 
+			if (objSelector.disabledObjects.Contains (obj)) {
+				return r;
+			}
+
 			Bounds bounds = Helper.GetObjectWorldSize (obj);
 
 			float c = 1.0f;

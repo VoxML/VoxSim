@@ -13,16 +13,20 @@ using Network;
 public class DianaOzStudies : MonoBehaviour {
 
 	class CommanderStatus {
-		public CommanderStatus(string _input, string _question, string _utter, string _clicked) {
+		public CommanderStatus(string _input, string _question, string _utter, string _show, string _hide, string _clicked) {
 			input = _input;
 			question = _question;
 			utter = _utter;
+			show = _show;
+			hide = _hide;
 			clicked = _clicked;
 		}
 
 		public string input;
 		public string question;
 		public string utter;
+		public string show;
+		public string hide;
 		public string clicked;
 	}
 
@@ -36,6 +40,7 @@ public class DianaOzStudies : MonoBehaviour {
 
 	JointGestureDemo world;
 	Predicates preds;
+	ObjectSelector objSelector;
 
 	// Use this for initialization
 	void Start () {
@@ -44,6 +49,7 @@ public class DianaOzStudies : MonoBehaviour {
 
 		world = GameObject.Find ("JointGestureDemo").GetComponent<JointGestureDemo> ();
 		preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
+		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 
 		if (PlayerPrefs.HasKey ("URLs")) {
 			string cmdrUrlString = string.Empty;
@@ -128,6 +134,19 @@ public class DianaOzStudies : MonoBehaviour {
 					else if (dict.utter != string.Empty) {
 						world.RespondAndUpdate (dict.utter);
 					}
+					else if (dict.hide != string.Empty) {
+						GameObject obj = GameObject.Find (dict.hide);
+						if (obj != null) {
+							preds.DISABLE (new object[]{ obj });
+						}
+					}
+					else if (dict.show != string.Empty) {
+						foreach (GameObject obj in objSelector.disabledObjects) {
+							if (obj.name == dict.show) {
+								preds.ENABLE (new object[]{ obj });
+							}
+						}
+					}	
 				}
 			}
 		}
@@ -137,13 +156,14 @@ public class DianaOzStudies : MonoBehaviour {
 		string color = (((SelectionEventArgs)e).Content as GameObject).GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;
 
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","",string.Format("the {0} block",color))),
+			JsonUtility.ToJson(new CommanderStatus("","","","","",
+				string.Format("the {0} block",color))),
 				"okay", "error");
 	}
 
 	void PointClicked(object sender, EventArgs e) {
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","",Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content))),
+			JsonUtility.ToJson(new CommanderStatus("","","","","",Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content))),
 				"okay", "error");
 	}
 }

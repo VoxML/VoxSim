@@ -55,7 +55,7 @@ public class JointGestureDemo : AgentInteraction {
 	Vector3 headTargetDefault,headTargetStored;
 
 	public GameObject demoSurface;
-	public Collider demoSurfaceCollider;
+	public BoxCollider demoSurfaceCollider;
 	public List<GameObject> blocks;
 	public GameObject indicatedObj = null;
 	public GameObject indicatedObjObj = null;
@@ -380,7 +380,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 			
-		if (interactionLogic.useEpistemicModel) {
+		if ((UseTeaching) && (interactionLogic.useEpistemicModel)) {
 			Concept putConcept = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
 			putConcept.Certainty = -1.0;
@@ -4571,7 +4571,7 @@ public class JointGestureDemo : AgentInteraction {
 		OutputHelper.PrintOutput (Role.Affector, utterance);
 
 		// get all linguistic concepts
-		if (!interactionLogic.useEpistemicModel) {
+		if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
 			return;
 		}
 

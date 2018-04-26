@@ -2521,7 +2521,7 @@ namespace Agent
 
 			if (instruction != null) {
 				// update epistemic model
-				if (useEpistemicModel) {
+				if ((interactionController.UseTeaching) && (useEpistemicModel)) {
 					UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
 				}
 
@@ -2824,7 +2824,7 @@ namespace Agent
 		}
 
 		object EpistemicallyCertain (object inputSignal) {
-			if (!useEpistemicModel) {
+			if ((!interactionController.UseTeaching) || (!useEpistemicModel)) {
 				return true;
 			}
 				
