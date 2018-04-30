@@ -141,9 +141,9 @@ public class DianaOzStudies : MonoBehaviour {
 						}
 					}
 					else if (dict.show != string.Empty) {
-						foreach (GameObject obj in objSelector.disabledObjects) {
-							if (obj.name == dict.show) {
-								preds.ENABLE (new object[]{ obj });
+						for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
+							if (objSelector.disabledObjects[i].name == dict.show) {
+								preds.ENABLE (new object[]{ objSelector.disabledObjects[i] });
 							}
 						}
 					}	

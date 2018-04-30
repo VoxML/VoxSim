@@ -22,6 +22,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 	string[] verbosityListItems = { "Everything", "Disambiguation only", "None" };
 	string[] disambiguationListItems = { "Elimination", "Deictic/Gestural" };
+	string[] deixisListItems = { "Screen", "Table" };
 
 	List<string> programs = new List<string>();
 	public List<string> Programs {
@@ -45,8 +46,17 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		DeicticGestural
 	};
 
+	public enum DeixisMethod
+	{
+		Screen,
+		Table
+	};
+
 	public VerbosityLevel verbosityLevel = VerbosityLevel.Disambiguation;
 	public DisambiguationStrategy disambiguationStrategy = DisambiguationStrategy.DeicticGestural;
+	public DeixisMethod deixisMethod = DeixisMethod.Screen;
+
+	public bool useTeachingAgent = false;
 
 	string actionButtonText;
 
@@ -87,19 +97,32 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 		//makes GUI window scrollable
 		scrollPosition = GUILayout.BeginScrollView (scrollPosition);
+//		GUILayout.BeginVertical(GUI.skin.box);
+//		GUILayout.Label ("Confirmation Verbosity:");
+//		GUILayout.BeginVertical(GUI.skin.box);
+//		verbosityLevel = (VerbosityLevel)GUILayout.SelectionGrid((int)verbosityLevel, verbosityListItems, 1, new GUIStyle ("Toggle"), GUILayout.ExpandWidth(true));
+//		GUILayout.EndVertical();
+//		GUILayout.EndVertical();
+//
+//		GUILayout.BeginVertical(GUI.skin.box);
+//		GUILayout.Label ("Disambiguation Strategy:");
+//		GUILayout.BeginVertical(GUI.skin.box);
+//		disambiguationStrategy = (DisambiguationStrategy)GUILayout.SelectionGrid((int)disambiguationStrategy, disambiguationListItems, 1, new GUIStyle ("Toggle"), GUILayout.ExpandWidth(true));
+//		GUILayout.EndVertical();
+//		GUILayout.EndVertical();
+//		GUILayout.EndScrollView ();
+
 		GUILayout.BeginVertical(GUI.skin.box);
-		GUILayout.Label ("Confirmation Verbosity:");
+		GUILayout.Label ("Deixis:");
 		GUILayout.BeginVertical(GUI.skin.box);
-		verbosityLevel = (VerbosityLevel)GUILayout.SelectionGrid((int)verbosityLevel, verbosityListItems, 1, new GUIStyle ("Toggle"), GUILayout.ExpandWidth(true));
+		deixisMethod = (DeixisMethod)GUILayout.SelectionGrid((int)deixisMethod, deixisListItems, 1, new GUIStyle ("Toggle"), GUILayout.ExpandWidth(true));
 		GUILayout.EndVertical();
 		GUILayout.EndVertical();
 
-		GUILayout.BeginVertical(GUI.skin.box);
-		GUILayout.Label ("Disambiguation Strategy:");
-		GUILayout.BeginVertical(GUI.skin.box);
-		disambiguationStrategy = (DisambiguationStrategy)GUILayout.SelectionGrid((int)disambiguationStrategy, disambiguationListItems, 1, new GUIStyle ("Toggle"), GUILayout.ExpandWidth(true));
-		GUILayout.EndVertical();
-		GUILayout.EndVertical();
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		useTeachingAgent = GUILayout.Toggle (useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth (true));
+		GUILayout.EndHorizontal();
+
 		GUILayout.EndScrollView ();
 	}
 }

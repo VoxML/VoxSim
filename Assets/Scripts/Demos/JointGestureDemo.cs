@@ -90,7 +90,9 @@ public class JointGestureDemo : AgentInteraction {
 	public float kinectToSurfaceHeight = .63f; //m
 	public bool transformToScreenPointing = false;	// false = assume table in demo space and use its coords to mirror table coords
 	public Vector2 receivedPointingCoord = Vector2.zero;
+	public Vector2 receivedPointingVariance = Vector2.zero;
 	public Vector2 screenPoint = Vector2.zero;
+	public Vector3 varianceScaleFactor = Vector2.zero;
 
 	public bool allowDeixisByClick = false;
 
@@ -171,6 +173,7 @@ public class JointGestureDemo : AgentInteraction {
 		logIndex = 0;
 
 		Diana = GameObject.Find ("Diana");
+		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		synVision = Diana.GetComponent<SyntheticVision> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
@@ -311,6 +314,8 @@ public class JointGestureDemo : AgentInteraction {
 
 			regionLabels.Add (backRegion, "back");
 		}
+
+		transformToScreenPointing = (interactionPrefs.deixisMethod == InteractionPrefsModalWindow.DeixisMethod.Screen);
 
 		// Vector pointing scaling
 		if (transformToScreenPointing) {
@@ -548,7 +553,8 @@ public class JointGestureDemo : AgentInteraction {
 
 			if (messageStr.StartsWith ("l")) {
 				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
-					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l")));
+					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l")),
+						GetVectorVariance (GetGestureVector (messageStr, "l")));
 
 					if (offset.sqrMagnitude <= Constants.EPSILON) {
 						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "l"));
@@ -557,7 +563,8 @@ public class JointGestureDemo : AgentInteraction {
 			}
 			else if (messageStr.StartsWith ("r")) {
 				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
-					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "r")));
+					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "r")),
+						GetVectorVariance (GetGestureVector (messageStr, "r")));
 
 					if (offset.sqrMagnitude <= Constants.EPSILON) {
 						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "r"));
@@ -614,6 +621,21 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		return vector;
+	}
+
+	float GetVectorVariance(List<float> vector) {
+		if (vector.Count == 4) {
+			return Mathf.Max(vector[vector.Count - 1],vector[vector.Count - 2]);
+		}
+		else {
+			if (transformToScreenPointing) {
+				receivedPointingVariance = new Vector2 (RandomHelper.RandomFloat (0.0f, 0.2f), RandomHelper.RandomFloat (0.0f, 0.2f));
+			}
+			else {
+				receivedPointingVariance = new Vector2 (RandomHelper.RandomFloat(0.0f,0.06f),RandomHelper.RandomFloat(0.0f,0.06f));
+			}
+			return Mathf.Max(receivedPointingVariance.x,receivedPointingVariance.y);
+		}
 	}
 
 	void Disambiguate(object content) {
@@ -3129,13 +3151,23 @@ public class JointGestureDemo : AgentInteraction {
 		//LookAt (cube.transform.position);
 	}
 
-	Vector3 MoveHighlight(Vector3 highlightCenter) {
+	Vector3 MoveHighlight(Vector3 highlightCenter, float variance = 0.0f) {
 		Vector3 offset = regionHighlight.transform.position - highlightCenter;
 		Vector3 normalizedOffset = Vector3.Normalize (offset);
 
 		regionHighlight.transform.position = new Vector3 (regionHighlight.transform.position.x - normalizedOffset.x * Time.deltaTime * highlightMoveSpeed,
 			regionHighlight.transform.position.y - normalizedOffset.y * Time.deltaTime * highlightMoveSpeed,
 			regionHighlight.transform.position.z - normalizedOffset.z * Time.deltaTime * highlightMoveSpeed);
+
+		Vector3 normalizedScaleOffset = Vector3.Normalize (new Vector3(regionHighlight.transform.localScale.x - vectorConeRadius * (.2f + 10.0f*variance),
+			regionHighlight.transform.localScale.y - vectorConeRadius * (.2f + 10.0f*variance),
+			regionHighlight.transform.localScale.z - vectorConeRadius * (.2f + 10.0f*variance)));
+
+		varianceScaleFactor = regionHighlight.transform.localScale;
+
+		regionHighlight.transform.localScale = new Vector3 (regionHighlight.transform.localScale.x - normalizedScaleOffset.x * Time.deltaTime * highlightOscSpeed,
+			regionHighlight.transform.localScale.y - normalizedScaleOffset.y * Time.deltaTime * highlightOscSpeed,
+			regionHighlight.transform.localScale.z - normalizedScaleOffset.z * Time.deltaTime * highlightOscSpeed);
 
 		if ((regionHighlight.transform.position.x+vectorConeRadius < Helper.GetObjectWorldSize(demoSurface).min.x) ||
 			(regionHighlight.transform.position.x-vectorConeRadius > Helper.GetObjectWorldSize(demoSurface).max.x) ||
@@ -4620,12 +4652,16 @@ public class JointGestureDemo : AgentInteraction {
 				TurnForward ();
 				LookForward ();
 
-				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
+					interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+				}
 			}
 			else {
-				if ((interactionLogic.ActionOptions.Count > 0) &&
-					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
-					interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
+					if ((interactionLogic.ActionOptions.Count > 0) &&
+					   (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
+						interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+					}
 				}
 			}
 

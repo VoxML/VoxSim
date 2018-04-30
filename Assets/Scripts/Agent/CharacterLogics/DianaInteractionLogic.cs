@@ -607,7 +607,7 @@ namespace Agent
 				repeatTimer.Elapsed += RepeatUtterance;
 			}
 
-			interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
+			//interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 
 			States.Add(new PDAState("StartState",null));
 			States.Add(new PDAState("BeginInteraction",null));
@@ -2185,8 +2185,11 @@ namespace Agent
 
 		public override void Update() {
 			if (forceRepeat) {
-				OutputHelper.ForceRepeat (Role.Affector);
-				forceRepeat = false;
+				if ((OutputHelper.GetCurrentOutputString (Role.Affector) != "OK.") &&
+				    (OutputHelper.GetCurrentOutputString (Role.Affector) != "Bye!")) {
+					OutputHelper.ForceRepeat (Role.Affector);
+					forceRepeat = false;
+				}
 			}
 		}
 

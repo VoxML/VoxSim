@@ -801,20 +801,20 @@ namespace Satisfaction {
 						case "X":
 							r = (Vector3.Distance (
 								new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						case "Y":
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							r &= (obj1.gameObject.transform.position.y > obj2.gameObject.transform.position.y);
 							break;
 
 						case "Z":
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						default:
@@ -828,20 +828,20 @@ namespace Satisfaction {
 						case "X":
 							r = (Vector3.Distance (
 								new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						case "Y":
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							r &= (obj1.gameObject.transform.position.y > obj2.gameObject.transform.position.y);
 							break;
 
 						case "Z":
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						default:
@@ -854,25 +854,25 @@ namespace Satisfaction {
 						case "X":
 							r = (Vector3.Distance (
 								new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						case "Y":
-							Debug.Log (obj1);
-							Debug.Log (obj2);
-							Debug.Log (Vector3.Distance (
+//							Debug.Log (obj1);
+//							Debug.Log (obj2);
+							Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position));
-							Debug.Log (RCC8.EC (Helper.GetObjectOrientedSize (obj1, true), Helper.GetObjectOrientedSize (obj2, true)));
+								obj2.gameObject.transform.position)));
+							Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,RCC8.EC (Helper.GetObjectOrientedSize (obj1, true), Helper.GetObjectOrientedSize (obj2, true))));
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						case "Z":
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
-								obj2.gameObject.transform.position) <= Constants.EPSILON);
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						default:
