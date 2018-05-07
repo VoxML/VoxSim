@@ -33,7 +33,6 @@ public class JointGestureDemo : AgentInteraction {
 	GameObject leftGrasper;
 	GameObject rightGrasper;
 
-	AvatarGestureController gestureController;
 	FullBodyBipedIK ik;
 	InteractionSystem interactionSystem;
 
@@ -53,6 +52,8 @@ public class JointGestureDemo : AgentInteraction {
 	Vector3 leftTargetDefault,leftTargetStored;
 	Vector3 rightTargetDefault,rightTargetStored;
 	Vector3 headTargetDefault,headTargetStored;
+
+	public 	AvatarGestureController gestureController;
 
 	public GameObject demoSurface;
 	public BoxCollider demoSurfaceCollider;
@@ -2914,6 +2915,53 @@ public class JointGestureDemo : AgentInteraction {
 		RespondAndUpdate ("Bye!");
 	}
 
+	public void MoveToPerform() {
+		bool leftGrasping = false;
+		bool rightGrasping = false;
+
+		if (graspedObj != null) {
+			if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
+				leftGrasping = true;
+			}
+			else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
+				rightGrasping = true;
+			}
+		}
+
+		if (!leftGrasping) {
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
+		}
+
+		if (!rightGrasping) {
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
+			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
+		}
+
+		LookForward ();
+	}
+
+	public void TurnForward() {
+		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
+
+		ikControl.leftHandObj.position = leftTargetDefault;
+		ikControl.rightHandObj.position = rightTargetDefault;
+		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+	}
+
+	public void LookForward() {
+		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
+		Diana.GetComponent<LookAtIK> ().solver.headWeight = 0.0f;
+	}
+
+	public void AllowHeadMotion() {
+		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 0.0f;
+		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
+	}
+
 	void Deixis(string dir) {
 		if (eventManager.events.Count > 0) {
 			return;
@@ -4175,44 +4223,6 @@ public class JointGestureDemo : AgentInteraction {
 		return placementOptions;
 	}
 
-	void MoveToPerform() {
-		bool leftGrasping = false;
-		bool rightGrasping = false;
-
-		if (graspedObj != null) {
-			if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-				leftGrasping = true;
-			}
-			else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-				rightGrasping = true;
-			}
-		}
-
-		if (!leftGrasping) {
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
-		}
-
-		if (!rightGrasping) {
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
-			Diana.GetComponent<FullBodyBipedIK> ().solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
-		}
-
-		LookForward ();
-	}
-
-	void LookForward() {
-		Diana.GetComponent<LookAtIK> ().solver.target.position = headTargetDefault;
-		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
-		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
-		Diana.GetComponent<LookAtIK> ().solver.headWeight = 0.0f;
-	}
-
-	void AllowHeadMotion() {
-		Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 0.0f;
-		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
-	}
-
 	void LookAt(GameObject obj) {
 		Vector3 target = new Vector3 (obj.transform.position.x/2.0f,
 			(obj.transform.position.y+headTargetDefault.y)/2.0f, obj.transform.position.z/2.0f);
@@ -4277,15 +4287,6 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	void TurnToward(Vector3 point) {
-		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
-
-		ikControl.leftHandObj.position = leftTargetDefault;
-		ikControl.rightHandObj.position = rightTargetDefault;
-		InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-		InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-	}
-
-	void TurnForward() {
 		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
 
 		ikControl.leftHandObj.position = leftTargetDefault;

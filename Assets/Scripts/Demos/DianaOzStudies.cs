@@ -13,10 +13,11 @@ using Network;
 public class DianaOzStudies : MonoBehaviour {
 
 	class CommanderStatus {
-		public CommanderStatus(string _input, string _question, string _utter, string _show, string _hide, string _clicked) {
+		public CommanderStatus(string _input, string _question, string _utter, string _anim, string _show, string _hide, string _clicked) {
 			input = _input;
 			question = _question;
 			utter = _utter;
+			anim = _anim;
 			show = _show;
 			hide = _hide;
 			clicked = _clicked;
@@ -25,6 +26,7 @@ public class DianaOzStudies : MonoBehaviour {
 		public string input;
 		public string question;
 		public string utter;
+		public string anim;
 		public string show;
 		public string hide;
 		public string clicked;
@@ -146,7 +148,11 @@ public class DianaOzStudies : MonoBehaviour {
 								preds.ENABLE (new object[]{ objSelector.disabledObjects[i] });
 							}
 						}
-					}	
+					}
+					else if (dict.anim != string.Empty) {
+						world.MoveToPerform();
+						world.gestureController.PerformGesture (dict.anim);
+					}
 				}
 			}
 		}
@@ -156,14 +162,14 @@ public class DianaOzStudies : MonoBehaviour {
 		string color = (((SelectionEventArgs)e).Content as GameObject).GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;
 
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","","","",
+			JsonUtility.ToJson(new CommanderStatus("","","","","","",
 				string.Format("the {0} block",color))),
 				"okay", "error");
 	}
 
 	void PointClicked(object sender, EventArgs e) {
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","","","",Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content))),
+			JsonUtility.ToJson(new CommanderStatus("","","","","","",Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content))),
 				"okay", "error");
 	}
 }
