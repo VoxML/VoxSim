@@ -2528,8 +2528,8 @@ namespace Agent
 					UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, EpistemicCertaintyOperation.Increase);
 				}
 
-				//				Debug.Log (instruction.ToState);
-				//				Debug.Log (instruction.ToState.Content);
+				Debug.Log (interactionController.UseTeaching);
+				Debug.Log (useEpistemicModel);
 				if ((interactionController.UseTeaching) && (instruction.ToState.Content != null)) {
 					object stateContent = instruction.ToState.Content;
 

@@ -316,6 +316,7 @@ public class JointGestureDemo : AgentInteraction {
 			regionLabels.Add (backRegion, "back");
 		}
 
+		UseTeaching = interactionPrefs.useTeachingAgent;
 		transformToScreenPointing = (interactionPrefs.deixisMethod == InteractionPrefsModalWindow.DeixisMethod.Screen);
 
 		// Vector pointing scaling
