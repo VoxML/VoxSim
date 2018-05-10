@@ -4389,7 +4389,7 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y)));
 			Debug.Log(((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area())));
 			if ((QSR.QSR.Above (otherBounds, blockBounds)) && 
-				((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area()) > 0.333f) &&
+				((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area()) > 0.25f) &&
 				(RCC8.EC (otherBounds, blockBounds))) {
 				surfaceClear = false;
 				break;
