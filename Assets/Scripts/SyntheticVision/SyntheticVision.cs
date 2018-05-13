@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Timers;
 
 using Global;
@@ -48,7 +46,7 @@ namespace Agent
 //			reactionTimer.Elapsed += CheckIfStillVisible;
 //			// Set it to go off after interval
 //			reactionTimer.Interval = reactionDelayInterval;
-//			// Don't start it        
+//			// Don't start it
 //			reactionTimer.Enabled = false;
 		}
 
@@ -56,7 +54,7 @@ namespace Agent
 		void Update () {
 			//if (objSelector == null) {
 			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
-				//Debug.Log (objSelector);
+			//Debug.Log (objSelector);
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
 				//Debug.Log (voxeme);
 				if (IsVisible (voxeme.gameObject)) {
@@ -81,25 +79,24 @@ namespace Agent
 		}
 
 		public bool IsVisible(GameObject obj) {
-			bool r = false;
 
 			if (objSelector.disabledObjects.Contains (obj)) {
-				return r;
+				return false;
 			}
 
 			Bounds bounds = Helper.GetObjectWorldSize (obj);
 
 			float c = 1.0f;
 
-			List<Vector3> vertices = new List<Vector3> () {
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
+			List<Vector3> vertices = new List<Vector3> {
+				new Vector3 (bounds.min.x*c, bounds.min.y*c, bounds.min.z*c),
+				new Vector3 (bounds.min.x*c, bounds.min.y*c, bounds.max.z*c),
+				new Vector3 (bounds.min.x*c, bounds.max.y*c, bounds.min.z*c),
+				new Vector3 (bounds.min.x*c, bounds.max.y*c, bounds.max.z*c),
+				new Vector3 (bounds.max.x*c, bounds.min.y*c, bounds.min.z*c),
+				new Vector3 (bounds.max.x*c, bounds.min.y*c, bounds.max.z*c),
+				new Vector3 (bounds.max.x*c, bounds.max.y*c, bounds.min.z*c),
+				new Vector3 (bounds.max.x*c, bounds.max.y*c, bounds.max.z*c),
 			};
 
 			int numHits = 0;
@@ -107,11 +104,14 @@ namespace Agent
 				RaycastHit hitInfo;
 				bool hit = Physics.Raycast (vertex, Vector3.Normalize (sensor.transform.position - vertex), out hitInfo,
 					Vector3.Magnitude (sensor.transform.position - vertex));
-				if (hit) {
-					if ((Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj) && (hitInfo.collider.gameObject != obj)) {
-						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
-						numHits += System.Convert.ToInt32 (hit);
-					}
+				if (
+					hit
+					&& hitInfo.collider.gameObject != obj
+					&& Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj
+				    )
+				{
+					//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
+					numHits += Convert.ToInt32 (hit);
 				}
 			}
 
@@ -141,4 +141,3 @@ namespace Agent
 //		}
 	}
 }
-
