@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Timers;
@@ -29,7 +29,7 @@ namespace Agent
 			}
 		}
 
-		public GameObject sensor;
+		public Camera sensor;
 		public List<Voxeme> visibleObjects;
 		public List<Voxeme> knownObjects;
 
@@ -78,44 +78,51 @@ namespace Agent
 			}
 		}
 
-		public bool IsVisible(GameObject obj) {
 
-			if (objSelector.disabledObjects.Contains (obj)) {
+		public bool IsVisible(GameObject obj)
+		{
+
+			if (objSelector.disabledObjects.Contains(obj))
+			{
 				return false;
 			}
 
-			Bounds bounds = Helper.GetObjectWorldSize (obj);
+			return GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(sensor), Helper.GetObjectWorldSize(obj))
+			       && GetBlockedVetices(obj, sensor.transform.position) < 2;
+		}
 
-			float c = 1.0f;
+
+		private int GetBlockedVetices(GameObject obj, Vector3 origin)
+		{
+			Bounds bounds = Helper.GetObjectWorldSize(obj);
+            float c = 0.99f;
 
 			List<Vector3> vertices = new List<Vector3> {
-				new Vector3 (bounds.min.x*c, bounds.min.y*c, bounds.min.z*c),
-				new Vector3 (bounds.min.x*c, bounds.min.y*c, bounds.max.z*c),
-				new Vector3 (bounds.min.x*c, bounds.max.y*c, bounds.min.z*c),
-				new Vector3 (bounds.min.x*c, bounds.max.y*c, bounds.max.z*c),
-				new Vector3 (bounds.max.x*c, bounds.min.y*c, bounds.min.z*c),
-				new Vector3 (bounds.max.x*c, bounds.min.y*c, bounds.max.z*c),
-				new Vector3 (bounds.max.x*c, bounds.max.y*c, bounds.min.z*c),
-				new Vector3 (bounds.max.x*c, bounds.max.y*c, bounds.max.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
 			};
 
-			int numHits = 0;
+			int numBlocked = 0;
 			foreach (Vector3 vertex in vertices) {
 				RaycastHit hitInfo;
-				bool hit = Physics.Raycast (vertex, Vector3.Normalize (sensor.transform.position - vertex), out hitInfo,
-					Vector3.Magnitude (sensor.transform.position - vertex));
-				if (
-					hit
-					&& hitInfo.collider.gameObject != obj
-					&& Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj
-				    )
+				bool hit = Physics.Raycast(
+					vertex, Vector3.Normalize(origin - vertex),
+					out hitInfo,
+					Vector3.Magnitude (origin - vertex));
+				if (hit && hitInfo.collider.gameObject != obj
+					&& Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj)
 				{
 					//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
-					numHits += Convert.ToInt32 (hit);
+					numBlocked += 1;
 				}
 			}
-
-			return (numHits < 2);
+			return numBlocked;
 		}
 
 		public bool IsKnown(GameObject obj) {
