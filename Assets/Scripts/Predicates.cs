@@ -1322,6 +1322,10 @@ public class Predicates : MonoBehaviour {
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "behind"
 
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
+
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
@@ -1383,6 +1387,10 @@ public class Predicates : MonoBehaviour {
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "in front"
 
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
+
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
@@ -1443,6 +1451,10 @@ public class Predicates : MonoBehaviour {
 					Debug.Log ("put_left: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
+
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
@@ -1506,6 +1518,10 @@ public class Predicates : MonoBehaviour {
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
+
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
@@ -1567,6 +1583,10 @@ public class Predicates : MonoBehaviour {
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
+
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
@@ -1627,6 +1647,10 @@ public class Predicates : MonoBehaviour {
 					Debug.Log ("put_rightdc: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
+
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {
@@ -2086,6 +2110,10 @@ public class Predicates : MonoBehaviour {
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "behind"
 
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
+
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
@@ -2146,6 +2174,10 @@ public class Predicates : MonoBehaviour {
 					Debug.Log ("put_in_front: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "in front"
+
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
@@ -2208,6 +2240,10 @@ public class Predicates : MonoBehaviour {
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
+
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
 							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
@@ -2268,6 +2304,10 @@ public class Predicates : MonoBehaviour {
 					Debug.Log ("put_right: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
+
+					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+					}
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {
