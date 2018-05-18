@@ -2350,7 +2350,7 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if ((interactionLogic.GraspedObj == null) &&
 			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-				RespondAndUpdate (string.Format ("The {0} one?", attribute));
+				RespondAndUpdate (string.Format ("Do you mean the {0} one?", attribute));
 				ReachFor (interactionLogic.IndicatedObj);
 				LookForward ();
 			}
@@ -2815,11 +2815,23 @@ public class JointGestureDemo : AgentInteraction {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
 					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
-					PromptEvent (string.Format ("put({0},{1})", 
-						interactionLogic.GraspedObj.name,
-						Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
-							Helper.GetObjectWorldSize (demoSurface).max.y,
-							interactionLogic.GraspedObj.transform.position.z))));
+					RaycastHit hitInfo;
+
+					if ((!Physics.Raycast (new Ray (interactionLogic.GraspedObj.transform.position, Vector3.down), out hitInfo)) ||
+						(hitInfo.collider.gameObject == demoSurfaceCollider.gameObject)){
+						PromptEvent (string.Format ("put({0},{1})", 
+							interactionLogic.GraspedObj.name,
+							Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
+								Helper.GetObjectWorldSize (demoSurface).max.y,
+								interactionLogic.GraspedObj.transform.position.z))));
+					}
+					else {
+						PromptEvent (string.Format ("put({0},{1})", 
+							interactionLogic.GraspedObj.name,
+							Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
+								Helper.GetObjectWorldSize (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject)).max.y,
+								interactionLogic.GraspedObj.transform.position.z))));
+					}
 				}
 				else {
 					PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
@@ -2888,11 +2900,23 @@ public class JointGestureDemo : AgentInteraction {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
 				    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
-					PromptEvent (string.Format ("put({0},{1})", 
-						interactionLogic.GraspedObj.name,
-						Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
-							Helper.GetObjectWorldSize (demoSurface).max.y,
-							interactionLogic.GraspedObj.transform.position.z))));
+					RaycastHit hitInfo;
+
+					if ((!Physics.Raycast (new Ray (interactionLogic.GraspedObj.transform.position, Vector3.down), out hitInfo)) ||
+						(hitInfo.collider.gameObject == demoSurfaceCollider.gameObject)){
+						PromptEvent (string.Format ("put({0},{1})", 
+							interactionLogic.GraspedObj.name,
+							Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
+								Helper.GetObjectWorldSize (demoSurface).max.y,
+								interactionLogic.GraspedObj.transform.position.z))));
+					}
+					else {
+						PromptEvent (string.Format ("put({0},{1})", 
+							interactionLogic.GraspedObj.name,
+							Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
+								Helper.GetObjectWorldSize (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject)).max.y,
+								interactionLogic.GraspedObj.transform.position.z))));
+					}
 				}
 				else {
 					PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));

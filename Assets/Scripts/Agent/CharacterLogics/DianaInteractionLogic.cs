@@ -2186,7 +2186,8 @@ namespace Agent
 		public override void Update() {
 			if (forceRepeat) {
 				if ((OutputHelper.GetCurrentOutputString (Role.Affector) != "OK.") &&
-				    (OutputHelper.GetCurrentOutputString (Role.Affector) != "Bye!")) {
+					(OutputHelper.GetCurrentOutputString (Role.Affector) != "OK, never mind.") &&
+					(OutputHelper.GetCurrentOutputString (Role.Affector) != "Bye!")) {
 					OutputHelper.ForceRepeat (Role.Affector);
 					forceRepeat = false;
 				}
