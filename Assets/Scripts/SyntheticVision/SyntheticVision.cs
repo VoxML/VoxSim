@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Timers;
 
 using Global;
@@ -23,8 +21,8 @@ namespace Agent
 
 		public VisionEventArgs(Voxeme voxeme, InconsistencyType inconsistency)
 		{
-			this.Voxeme = voxeme;
-			this.Inconsistency = inconsistency;
+			Voxeme = voxeme;
+			Inconsistency = inconsistency;
 		}
 	}
 
@@ -41,7 +39,7 @@ namespace Agent
 		}
 
 		private bool showFoV;
-		public bool ShowFoV 
+		public bool ShowFoV
 		{
 			get { return showFoV; }
 			set { showFoV = value; }
@@ -78,7 +76,7 @@ namespace Agent
 			reactionTimer.Elapsed += Surprise;
 			// Set it to go off after interval
 			reactionTimer.Interval = reactionDelayInterval;
-			// Don't start it        
+			// Don't start it
 			reactionTimer.Enabled = false;
 		}
 
@@ -101,11 +99,11 @@ namespace Agent
 			}
 
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
-//				Debug.Log (voxeme);
+				//Debug.Log (voxeme);
 				if (IsVisible (voxeme.gameObject)) {
 					if (!visibleObjects.Contains (voxeme)) {
 						visibleObjects.Add (voxeme);
-//						Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
+						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
 					}
 
 					if (epistemicModel.engaged) {
@@ -132,7 +130,7 @@ namespace Agent
 				else {
 					if (visibleObjects.Contains (voxeme)) {
 						visibleObjects.Remove (voxeme);
-//						Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
+						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
 					}
 					else {	// if it's not visible
 						if (knownObjects.Contains (voxeme)) {	// but I know about it
@@ -159,74 +157,50 @@ namespace Agent
 			}
 		}
 
-		public bool IsVisible(GameObject obj) {
-			bool r = false;
-
-			if (objSelector.disabledObjects.Contains (obj)) {
-				return r;
-			}
-
-			Bounds bounds = Helper.GetObjectWorldSize (obj);
-
-			float c = 1.0f;
-
-			List<Vector3> vertices = new List<Vector3> () {
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-			};
-
-			int numVisibleVertices = 0;
-			foreach (Vector3 vertex in vertices) {
-				RaycastHit hitInfo;
-				bool visible = !Physics.Raycast (vertex, Vector3.Normalize (sensor.transform.position - vertex), out hitInfo,
-					Vector3.Magnitude (gameObject.transform.position - vertex));
-				if (visible) {
-//					if ((Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj) && (hitInfo.collider.gameObject != obj)) {
-						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
-						numVisibleVertices += System.Convert.ToInt32 (visible);
-//					}
-				}
-			}
-
-			return (numVisibleVertices > 0);
+		public bool IsVisible(Bounds bounds)
+		{
+			return GetVisibleVetices(bounds, sensor.transform.position) > 0;
 		}
 
-		public bool IsVisible(Bounds bounds) {
-			bool r = false;
+		public bool IsVisible(GameObject obj)
+		{
+			if (objSelector.disabledObjects.Contains(obj))
+			{
+				return false;
+			}
+			return IsVisible(Helper.GetObjectWorldSize(obj));
+		}
 
+		private int GetVisibleVetices(Bounds bounds, Vector3 origin)
+		{
 			float c = 1.0f;
-
-			List<Vector3> vertices = new List<Vector3> () {
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.min.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.min.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.min.z-bounds.center.z)*c)),
-				new Vector3 (bounds.center.x+((bounds.max.x-bounds.center.x)*c), bounds.center.y+((bounds.max.y-bounds.center.y)*c), bounds.center.z+((bounds.max.z-bounds.center.z)*c)),
+			List<Vector3> vertices = new List<Vector3> {
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
+				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
 			};
 
 			int numVisibleVertices = 0;
 			foreach (Vector3 vertex in vertices) {
 				RaycastHit hitInfo;
-				bool visible = !Physics.Raycast (vertex, Vector3.Normalize (sensor.transform.position - vertex), out hitInfo,
-					Vector3.Magnitude (gameObject.transform.position - vertex));
+				bool visible = !Physics.Raycast (
+					vertex, Vector3.Normalize (origin - vertex),
+					out hitInfo,
+					Vector3.Magnitude (origin - vertex));
 				if (visible) {
 //					if ((Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj) && (hitInfo.collider.gameObject != obj)) {
 						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
-						numVisibleVertices += System.Convert.ToInt32 (visible);
+						numVisibleVertices += Convert.ToInt32(visible);
 //					}
 				}
 			}
 
-			return (numVisibleVertices > 0);
+			return numVisibleVertices;
 		}
 
 		public bool IsKnown(GameObject obj) {
