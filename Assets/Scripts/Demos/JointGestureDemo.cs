@@ -27,7 +27,6 @@ public class JointGestureDemo : AgentInteraction {
 
 	CSUClient csuClient;
 	EventManager eventManager;
-	InteractionPrefsModalWindow interactionPrefs;
 
 	GameObject Diana;
 	GameObject leftGrasper;
@@ -53,7 +52,8 @@ public class JointGestureDemo : AgentInteraction {
 	Vector3 rightTargetDefault,rightTargetStored;
 	Vector3 headTargetDefault,headTargetStored;
 
-	public 	AvatarGestureController gestureController;
+	public InteractionPrefsModalWindow interactionPrefs;
+	public AvatarGestureController gestureController;
 
 	public GameObject demoSurface;
 	public BoxCollider demoSurfaceCollider;

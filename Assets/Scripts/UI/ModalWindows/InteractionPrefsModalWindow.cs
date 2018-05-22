@@ -57,6 +57,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 	public DeixisMethod deixisMethod = DeixisMethod.Screen;
 
 	public bool useTeachingAgent = false;
+	public bool showSyntheticVision = false;
 
 	string actionButtonText;
 
@@ -121,6 +122,10 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 		GUILayout.BeginHorizontal(GUI.skin.box);
 		useTeachingAgent = GUILayout.Toggle (useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth (true));
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Synthetic Vision", GUILayout.ExpandWidth (true));
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndScrollView ();
