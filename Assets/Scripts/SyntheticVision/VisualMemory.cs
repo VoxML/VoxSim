@@ -1,12 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using SyntheticVision;
+using VisionViz;
 
 namespace Agent
 {
 	public class VisualMemory : MonoBehaviour {
 
-		public List<GameObject> memory;
 		public SyntheticVision vision;
 		public Dictionary<Voxeme, GameObject> memorized;
 
@@ -27,7 +26,6 @@ namespace Agent
 					clone = GetVisualClone(block);
 
 					memorized.Add(voxeme, clone);
-					memory.Add(clone);
 				}
 				else
 				{
@@ -60,8 +58,9 @@ namespace Agent
 					clone.transform.SetParent(t.gameObject.transform);
 					clone.transform.position = t.transform.position;
                     Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
-                    originalColor.a = 0.1f;
+                    originalColor.a = 0.5f;
 					Renderer rend = clone.GetComponent<Renderer>();
+					SetRenderingModeToTransparent(rend.material);
                     rend.material.color = originalColor;
                     BoundBox boxer = clone.AddComponent<BoundBox>();
 					boxer.setupOnAwake = true;
@@ -77,6 +76,17 @@ namespace Agent
 
 		public bool IsKnown(GameObject obj) {
 			return memorized.ContainsKey(obj.GetComponent<Voxeme>());
+		}
+
+		private void SetRenderingModeToTransparent(Material mat)
+		{
+			mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+			mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+			mat.SetInt("_ZWrite", 0);
+			mat.DisableKeyword("_ALPHATEST_ON");
+			mat.DisableKeyword("_ALPHABLEND_ON");
+			mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+			mat.renderQueue = 3000;
 		}
 
 

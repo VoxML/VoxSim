@@ -6,7 +6,7 @@ using Global;
 using UnityEditor;
 #endif
 
-namespace SyntheticVision
+namespace VisionViz
 {
     [ExecuteInEditMode]
     public class BoundBox : MonoBehaviour

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-namespace SyntheticVision
+namespace VisionViz
 {
     [ExecuteInEditMode]
     public class DrawLines : MonoBehaviour
