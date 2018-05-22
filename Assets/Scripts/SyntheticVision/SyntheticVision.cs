@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Timers;
@@ -30,8 +30,10 @@ namespace Agent
 		}
 
 		public Camera sensor;
+		public GameObject gazeAt;
 		public List<Voxeme> visibleObjects;
 		public List<Voxeme> knownObjects;
+		public Dictionary<Voxeme, GameObject> perception;
 
 		ObjectSelector objSelector = null;
 
@@ -39,6 +41,8 @@ namespace Agent
 		float reactionDelayInterval = 1000;
 
 		void Start () {
+			perception = new Dictionary<Voxeme, GameObject>();
+			sensor = GetComponent<Camera>();
 			// Create reaction timer
 			// Create a timer
 //			reactionTimer = new Timer();
@@ -52,6 +56,17 @@ namespace Agent
 
 		// Update is called once per frame
 		void Update () {
+
+//			Camera vision = gameObject.GetComponent<Camera>();
+//			vision.transform.LookAt(gazeAt.transform.position);
+
+			Gizmos.matrix = sensor.transform.localToWorldMatrix;
+			Gizmos.DrawFrustum(new Vector3(0, 0, sensor.nearClipPlane),
+				sensor.fieldOfView,
+				sensor.farClipPlane,
+				sensor.nearClipPlane,
+				sensor.aspect);
+
 			//if (objSelector == null) {
 			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 			//Debug.Log (objSelector);
@@ -76,8 +91,14 @@ namespace Agent
 					}
 				}
 			}
+//			visibleObjects.Clear();
 		}
 
+		public void see(Voxeme obj)
+		{
+			visibleObjects.Add(obj);
+
+		}
 
 		public bool IsVisible(GameObject obj)
 		{
@@ -87,15 +108,17 @@ namespace Agent
 				return false;
 			}
 
+//			Debug.Log(message: obj.GetComponent<Renderer>().isVisible());
 			return GeometryUtility.TestPlanesAABB(GeometryUtility.CalculateFrustumPlanes(sensor), Helper.GetObjectWorldSize(obj))
-			       && GetBlockedVetices(obj, sensor.transform.position) < 2;
+				   && GetBlockedVetices(obj, sensor.transform.position) < 2;
 		}
 
 
 		private int GetBlockedVetices(GameObject obj, Vector3 origin)
 		{
+			// todo Q: why get world size? why not .collider or .mesh?
 			Bounds bounds = Helper.GetObjectWorldSize(obj);
-            float c = 0.99f;
+			float c = 0.99f;
 
 			List<Vector3> vertices = new List<Vector3> {
 				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
@@ -116,7 +139,7 @@ namespace Agent
 					out hitInfo,
 					Vector3.Magnitude (origin - vertex));
 				if (hit && hitInfo.collider.gameObject != obj
-					&& Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj)
+						&& Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj)
 				{
 					//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
 					numBlocked += 1;
