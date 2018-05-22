@@ -8,14 +8,24 @@ namespace Agent
 
 		public SyntheticVision vision;
 		public Dictionary<Voxeme, GameObject> memorized;
+		InteractionPrefsModalWindow interactionPrefs;
 
 		void Start()
 		{
 			memorized = new Dictionary<Voxeme, GameObject>();
+			interactionPrefs = FindObjectOfType<JointGestureDemo>().GetComponent<InteractionPrefsModalWindow> ();
 		}
 
 		void Update()
 		{
+
+			if (!interactionPrefs.showSyntheticVision)
+			{
+				gameObject.GetComponent<Camera>().enabled = false;
+			}
+			else {
+				gameObject.GetComponent<Camera>().enabled = true;
+			}
 			foreach (GameObject block in GameObject.Find("JointGestureDemo").GetComponent<JointGestureDemo>().blocks)
 			{
 				Voxeme voxeme = block.GetComponent<Voxeme>();
@@ -62,9 +72,8 @@ namespace Agent
 					SetRenderingModeToTransparent(rend.material);
                     rend.material.color = originalColor;
                     clone.AddComponent<BoundBox>();
-                    clone.GetComponent<Collider>().enabled = false;
-					clone.GetComponent<Rigidbody>().useGravity = false;
-					clone.GetComponent<Rigidbody>().useGravity = false;
+                    Destroy(clone.GetComponent<Collider>());
+					Destroy(clone.GetComponent<Rigidbody>());
                     clone.layer = 11;
 					break;
 				}

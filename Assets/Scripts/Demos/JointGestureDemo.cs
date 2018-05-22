@@ -200,6 +200,7 @@ public class JointGestureDemo : AgentInteraction {
 		regionHighlight.transform.localScale = new Vector3 (vectorConeRadius*.2f,vectorConeRadius*.2f,vectorConeRadius*.2f);
 		regionHighlight.tag = "UnPhysic";
 		regionHighlight.GetComponent<Renderer> ().material = activeHighlightMaterial;
+		regionHighlight.gameObject.layer = 5;
 		//regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
 //		regionHighlight.GetComponent<Renderer> ().enabled = false;
 		Destroy (regionHighlight.GetComponent<Collider> ());

@@ -125,7 +125,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal(GUI.skin.box);
-		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Synthetic Vision", GUILayout.ExpandWidth (true));
+		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Diana Perception", GUILayout.ExpandWidth (true));
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndScrollView ();
