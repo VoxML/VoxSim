@@ -36,7 +36,6 @@ public class JointGestureDemo : AgentInteraction {
 	InteractionSystem interactionSystem;
 
 	DianaInteractionLogic interactionLogic;
-	SyntheticVision synVision;
 	EpistemicModel epistemicModel;
 	enum CertaintyMode {
 		Suggest,
@@ -54,6 +53,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	public InteractionPrefsModalWindow interactionPrefs;
 	public AvatarGestureController gestureController;
+	public SyntheticVision synVision;
 
 	public GameObject demoSurface;
 	public BoxCollider demoSurfaceCollider;
@@ -176,7 +176,7 @@ public class JointGestureDemo : AgentInteraction {
 		Diana = GameObject.Find ("Diana");
 		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
-		synVision = Diana.GetComponent<SyntheticVision> ();
+		//synVision = Diana.GetComponent<SyntheticVision> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
 
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
