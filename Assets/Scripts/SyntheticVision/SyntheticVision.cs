@@ -49,6 +49,7 @@ namespace Agent
 		public GameObject agent;
 		public EpistemicModel epistemicModel;
 		public GameObject sensor;
+		public Transform attached;
 		public List<Voxeme> visibleObjects;
 		public List<Voxeme> knownObjects;
 		public Dictionary<Voxeme,Bounds> knownObjectBounds = new Dictionary<Voxeme, Bounds>();
@@ -66,8 +67,12 @@ namespace Agent
 
 		void Start () {
 			interactionPrefs = world.GetComponent<InteractionPrefsModalWindow> ();
-
 			epistemicModel = agent.GetComponent<EpistemicModel> ();
+			if (attached != null)
+			{
+				gameObject.transform.SetParent(attached);
+
+			}
 
 			// Create reaction timer
 			// Create a timer

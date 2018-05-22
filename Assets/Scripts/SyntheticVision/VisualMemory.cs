@@ -35,11 +35,11 @@ namespace Agent
 				BoundBox highlighter = clone.GetComponent<BoundBox>();
 				if (vision.IsVisible(voxeme.gameObject))
 				{
-					highlighter.lineColor = Color.green;
+					highlighter.lineColor = new Color(0.0f, 1.0f, 0.0f, 0.1f);
 				}
 				else
 				{
-					highlighter.lineColor = Color.red;
+					highlighter.lineColor = new Color(1.0f, 0.0f, 0.0f, 0.8f);
 				}
             }
 		}
@@ -57,12 +57,11 @@ namespace Agent
 					clone.transform.SetParent(t.gameObject.transform);
 					clone.transform.position = t.transform.position;
                     Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
-                    originalColor.a = 0.5f;
+                    originalColor.a = 0.3f;
 					Renderer rend = clone.GetComponent<Renderer>();
 					SetRenderingModeToTransparent(rend.material);
                     rend.material.color = originalColor;
-                    BoundBox boxer = clone.AddComponent<BoundBox>();
-					boxer.setupOnAwake = true;
+                    clone.AddComponent<BoundBox>();
                     clone.GetComponent<Collider>().enabled = false;
 					clone.GetComponent<Rigidbody>().useGravity = false;
 					clone.GetComponent<Rigidbody>().useGravity = false;
