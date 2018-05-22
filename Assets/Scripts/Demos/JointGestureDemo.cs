@@ -1624,7 +1624,11 @@ public class JointGestureDemo : AgentInteraction {
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				if (highlightCenter.y > 0) { // on table
+				Bounds surfaceBounds = Helper.GetObjectWorldSize (demoSurface);
+				Region surfaceRegion = new Region (new Vector3 (surfaceBounds.min.x, highlightCenter.y, surfaceBounds.min.z),
+					new Vector3 (surfaceBounds.max.x, highlightCenter.y, surfaceBounds.max.z));
+				
+				if ((highlightCenter.y > 0) && (surfaceRegion.Contains (highlightCenter))) { // on table
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
@@ -1669,12 +1673,16 @@ public class JointGestureDemo : AgentInteraction {
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
 
-				if (highlightCenter.y > 0) { // on table
+				Bounds surfaceBounds = Helper.GetObjectWorldSize (demoSurface);
+				Region surfaceRegion = new Region (new Vector3 (surfaceBounds.min.x, highlightCenter.y, surfaceBounds.min.z),
+					new Vector3 (surfaceBounds.max.x, highlightCenter.y, surfaceBounds.max.z));
+
+				if ((highlightCenter.y > 0) && (surfaceRegion.Contains (highlightCenter))) { // on table
 					interactionLogic.RewriteStack (
 						new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 							interactionLogic.GenerateStackSymbol (null, null, null,
 								null, null, new List<string> (new string[]{ message }))));
-
+										
 					List<GameObject> blockOptions = FindBlocksInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
 
 					if (blockOptions.Count == 0) {
@@ -1688,11 +1696,11 @@ public class JointGestureDemo : AgentInteraction {
 
 					if (interactionLogic.GraspedObj == null) {
 						PointAt (highlightCenter, rightGrasper);
-					}
+					} 
 					else {
 						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
 							PointAt (highlightCenter, rightGrasper);
-						}
+						} 
 						else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
 							PointAt (highlightCenter, leftGrasper);
 						}
