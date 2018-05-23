@@ -71,7 +71,6 @@ namespace Agent
 			if (attached != null)
 			{
 				gameObject.transform.SetParent(attached);
-
 			}
 
 			// Create reaction timer
@@ -90,6 +89,8 @@ namespace Agent
 			if (agent == null) {
 				return;
 			}
+
+//			sensor.transform.eulerAngles = attached.transform.eulerAngles;
 
 			//if (objSelector == null) {
 			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
