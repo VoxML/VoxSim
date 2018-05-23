@@ -9,11 +9,13 @@ namespace Agent
 		public SyntheticVision vision;
 		public Dictionary<Voxeme, GameObject> memorized;
 		InteractionPrefsModalWindow interactionPrefs;
+		private ObjectSelector _objectSelector;
 
 		void Start()
 		{
 			memorized = new Dictionary<Voxeme, GameObject>();
 			interactionPrefs = FindObjectOfType<JointGestureDemo>().GetComponent<InteractionPrefsModalWindow> ();
+			_objectSelector = FindObjectOfType<ObjectSelector>();
 		}
 
 		void Update()
@@ -39,7 +41,15 @@ namespace Agent
 				else
 				{
 					clone = memorized[voxeme];
-
+					if (_objectSelector.disabledObjects.Contains(voxeme.gameObject))
+					{
+						clone.transform.parent = null;
+						clone.SetActive(true);
+					}
+					else if (clone.transform.parent != null)
+					{
+						clone.transform.SetParent(voxeme.gameObject.transform);
+					}
 				}
 
 				BoundBox highlighter = clone.GetComponent<BoundBox>();
@@ -51,7 +61,7 @@ namespace Agent
 				{
 					highlighter.lineColor = new Color(1.0f, 0.0f, 0.0f, 0.8f);
 				}
-            }
+			}
 		}
 
 		private GameObject GetVisualClone(GameObject obj)
@@ -66,15 +76,15 @@ namespace Agent
 					clone = Instantiate(t.gameObject);
 					clone.transform.SetParent(t.gameObject.transform);
 					clone.transform.position = t.transform.position;
-                    Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
-                    originalColor.a = 0.3f;
+					Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
+					originalColor.a = 0.3f;
 					Renderer rend = clone.GetComponent<Renderer>();
 					SetRenderingModeToTransparent(rend.material);
-                    rend.material.color = originalColor;
-                    clone.AddComponent<BoundBox>();
-                    Destroy(clone.GetComponent<Collider>());
+					rend.material.color = originalColor;
+					clone.AddComponent<BoundBox>();
+					Destroy(clone.GetComponent<Collider>());
 					Destroy(clone.GetComponent<Rigidbody>());
-                    clone.layer = 11;
+					clone.layer = 11;
 					break;
 				}
 			}
