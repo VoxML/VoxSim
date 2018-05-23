@@ -164,7 +164,7 @@ namespace Agent
 
 		public bool IsVisible(Bounds bounds)
 		{
-			return GetVisibleVetices(bounds, sensor.transform.position) > 0;
+			return GetVisibleVertices(bounds, sensor.transform.position) > 0;
 		}
 
 		public bool IsVisible(GameObject obj)
@@ -173,35 +173,46 @@ namespace Agent
 			{
 				return false;
 			}
+//			Debug.Log (obj);
 			return IsVisible(Helper.GetObjectWorldSize(obj));
 		}
 
-		private int GetVisibleVetices(Bounds bounds, Vector3 origin)
+		private int GetVisibleVertices(Bounds bounds, Vector3 origin)
 		{
 			float c = 1.0f;
 			List<Vector3> vertices = new List<Vector3> {
-				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
-				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
-				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
-				new Vector3(bounds.center.x - bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
-				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
-				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y - bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
-				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z - bounds.extents.z*c),
-				new Vector3(bounds.center.x + bounds.extents.x*c, bounds.center.y + bounds.extents.y*c, bounds.center.z + bounds.extents.z*c),
+				new Vector3(bounds.center.x - (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y - (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z - (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x - (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y - (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z + (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x - (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y + (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z - (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x - (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y + (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z + (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x + (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y - (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z - (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x + (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y - (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z + (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x + (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y + (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z - (bounds.extents.z+Constants.EPSILON)*c),
+				new Vector3(bounds.center.x + (bounds.extents.x+Constants.EPSILON)*c, bounds.center.y + (bounds.extents.y+Constants.EPSILON)*c, bounds.center.z + (bounds.extents.z+Constants.EPSILON)*c),
 			};
 
 			int numVisibleVertices = 0;
 			foreach (Vector3 vertex in vertices) {
 				RaycastHit hitInfo;
-				bool visible = !Physics.Raycast (
-					vertex, Vector3.Normalize (origin - vertex),
-					out hitInfo,
-					Vector3.Magnitude (origin - vertex));
+				bool hit = Physics.Raycast (
+					           vertex, Vector3.Normalize (origin - vertex),
+					           out hitInfo,
+					           Vector3.Magnitude (origin - vertex));
+				bool visible = (!hit) || ((hitInfo.point-vertex).magnitude < Constants.EPSILON);
+//				if ((visible) || 
+//					(new Bounds(bounds.center,new Vector3(bounds.size.x+Constants.EPSILON,
+//						bounds.size.y+Constants.EPSILON,
+//						bounds.size.z+Constants.EPSILON)).Contains(hitInfo.point))) {
 				if (visible) {
-//					if ((Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject) != obj) && (hitInfo.collider.gameObject != obj)) {
-						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
-						numVisibleVertices += Convert.ToInt32(visible);
+					//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
+					numVisibleVertices += Convert.ToInt32 (visible);
 //					}
+				}
+				else {
+//					Debug.Log(string.Format("Ray from {0} collides with {1} at {2}",
+//						Helper.VectorToParsable(vertex),
+//						Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
+//						Helper.VectorToParsable(hitInfo.point)));
 				}
 			}
 

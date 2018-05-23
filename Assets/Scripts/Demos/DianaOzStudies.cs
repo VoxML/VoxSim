@@ -59,7 +59,7 @@ public class DianaOzStudies : MonoBehaviour {
 				if (url.Split ('=') [0] == "Commander URL") {
 					cmdrUrlString = url.Split ('=') [1];
 					cmdrUrl = !cmdrUrlString.StartsWith ("http://") ? "http://" + cmdrUrlString : cmdrUrlString;
-					Debug.Log (cmdrUrl);
+//					Debug.Log (cmdrUrl);
 					restClient.GetComponent<RestClient>().Post(cmdrUrl + "/init", "", "okay", "error");
 					break;
 				}
