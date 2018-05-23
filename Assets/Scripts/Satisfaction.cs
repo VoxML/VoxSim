@@ -349,9 +349,17 @@ namespace Satisfaction {
 									if (matches.Count == 0) {
 										go = GameObject.Find (arg as String);
 										if (go == null) {
-//											Debug.Break ();
-											OutputHelper.PrintOutput (Role.Affector,string.Format("What is that?", (arg as String)));
-											return false;	// abort
+											for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
+												if (objSelector.disabledObjects[j].name == (arg as String)) {
+													go = objSelector.disabledObjects[j];
+													break;
+												}
+											}
+
+											if (go == null) {
+												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+												return false;	// abort
+											}
 										}
 									}
 									else if (matches.Count == 1) {

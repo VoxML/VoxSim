@@ -2797,6 +2797,10 @@ namespace Agent
 		}
 
 		void UpdateEpistemicModel(string inputSymbol, EpistemicCertaintyOperation certaintyOperation) {
+			if (CurrentState == GetState ("StartState") || CurrentState == GetState ("BeginInteraction")) {
+				return;
+			}
+
 			// if input symbol is negack/NO, state is Suggest, take the action suggestion and reduce its Certainty
 			if ((CurrentState == GetState("Suggest")) && (ActionSuggestions.Count > 0)) {
 				if (GetInputSymbolsByName ("G negack high", "S NO").Contains (GetInputSymbolByName (inputSymbol))) {

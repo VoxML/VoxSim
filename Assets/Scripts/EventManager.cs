@@ -864,8 +864,17 @@ public class EventManager : MonoBehaviour {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 											GameObject go = GameObject.Find (arg as String);
 											if (go == null) {
-												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-												return false;	// abort
+												for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
+													if (objSelector.disabledObjects[i].name == (arg as String)) {
+														go = objSelector.disabledObjects[i];
+														break;
+													}
+												}
+
+												if (go == null) {
+													OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+													return false;	// abort
+												}
 											}
 											objs.Add (go);
 										}

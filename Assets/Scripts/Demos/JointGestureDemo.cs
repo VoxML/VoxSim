@@ -27,6 +27,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	CSUClient csuClient;
 	EventManager eventManager;
+	ObjectSelector objSelector;
 
 	GameObject Diana;
 	GameObject leftGrasper;
@@ -159,6 +160,8 @@ public class JointGestureDemo : AgentInteraction {
 	void Start () {
 		windowScaleFactor.x = (float)Screen.width/(float)Screen.currentResolution.width;
 		windowScaleFactor.y = (float)Screen.height/(float)Screen.currentResolution.height;
+
+		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
@@ -2401,7 +2404,7 @@ public class JointGestureDemo : AgentInteraction {
 					}
 				}
 
-				if (block.activeInHierarchy) {
+				if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
 					if ((block.GetComponent<AttributeSet> ().attributes.Contains (
 						interactionLogic.RemoveInputSymbolType(
 							content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ())) && 
@@ -3727,7 +3730,7 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 
-			if (block.activeInHierarchy) {
+			if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
 				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
 				if (region.Contains(new Vector3(point.x, region.center.y, point.z))) {
 					if ((!blockOptions.Contains (block)) && (SurfaceClear (block)) && (isKnown) && 
