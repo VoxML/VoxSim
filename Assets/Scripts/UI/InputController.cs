@@ -42,6 +42,7 @@ public class InputController : FontManager {
 	public Rect inputRect = new Rect();
 
 	public bool textField = true;
+	public bool silenceAcknowledgment = false;
 	public bool allowToggleAgent = true;
 
 	String[] commands;
@@ -314,8 +315,10 @@ public class InputController : FontManager {
 				InputEventArgs parseArgs = new InputEventArgs (functionalCommand);
 				OnParseComplete (this, parseArgs);
 
-				OutputHelper.PrintOutput (Role.Affector,"OK.");
-				OutputHelper.PrintOutput (Role.Planner,"");
+				if (!silenceAcknowledgment) {
+					OutputHelper.PrintOutput (Role.Affector, "OK.");
+					OutputHelper.PrintOutput (Role.Planner, "");
+				}
 
 				Debug.Log (functionalCommand);
 

@@ -696,6 +696,8 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G engage start"));
 			InputSymbols.Add(new PDASymbol("G wave start"));
 			InputSymbols.Add(new PDASymbol("G wave stop"));
+			InputSymbols.Add(new PDASymbol("G left point start"));
+			InputSymbols.Add(new PDASymbol("G right point start"));
 			InputSymbols.Add(new PDASymbol("G left point high"));
 			InputSymbols.Add(new PDASymbol("G right point high"));
 			InputSymbols.Add(new PDASymbol("G left point low"));

@@ -43,40 +43,58 @@ namespace Network
 
 		public void Connect(string address, int port)
 		{
+			Debug.Log (string.Format("{0}:{1}",address,port));
+
 			_messages = new Queue<string>();
+			Debug.Log (_messages);
 			_client = new TcpClient();
+			Debug.Log (_client);
 			_client.Connect(address, port);
-			_t  = new Thread(Loop);
-			_t.Start();
+			if (_client.Connected) {
+				_t = new Thread (Loop);
+				Debug.Log (_t);
+				_t.Start ();
+				Debug.Log ("I am connected to " + ((System.Net.IPEndPoint)_client.Client.RemoteEndPoint).Address.ToString () +
+				" on port " + ((System.Net.IPEndPoint)_client.Client.RemoteEndPoint).Port.ToString ());
+				Debug.Log ("I am connected from " + ((System.Net.IPEndPoint)_client.Client.LocalEndPoint).Address.ToString () +
+				" on port " + ((System.Net.IPEndPoint)_client.Client.LocalEndPoint).Port.ToString ());
+			}
 		}
 
 		protected void Loop()
 		{
 			while (_client.Connected)
 			{
+				Debug.Log (_client);
 				NetworkStream stream = _client.GetStream();
+				Debug.Log (stream);
 				byte[] byteBuffer = new byte[IntSize];
+				Debug.Log (byteBuffer);
 				stream.Read(byteBuffer, 0, IntSize);
+				Debug.Log (BitConverter.ToChar (byteBuffer, 0));
 
-//				if (!BitConverter.IsLittleEndian)
-//				{
-//					Array.Reverse(byteBuffer);
-//				}
+				//				if (!BitConverter.IsLittleEndian)
+				//				{
+				//					Array.Reverse(byteBuffer);
+				//				}
 				int len = BitConverter.ToInt32(byteBuffer, 0);
-
-				//Debug.Log (len);
+				Debug.Log (len);
 
 				byteBuffer = new byte[len];
+				Debug.Log (byteBuffer);
 				int numBytesRead = stream.Read(byteBuffer, 0, len);
+				Debug.Log (numBytesRead);
 				//Debug.Log (numBytesRead);
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
+				Debug.Log (message);
 				_messages.Enqueue (message);
+				Debug.Log (stream.DataAvailable);
 				//_messages.Enqueue (message);
-//				Debug.Log (stream.DataAvailable);
 
 			}
 			_client.Close();
+			Debug.Log (_client);
 		}
 
 		public void Close()
@@ -116,6 +134,7 @@ namespace Network
 
 		public string GetMessage()
 		{
+//			Debug.Log (_messages.Count);
 			if (_messages.Count > 0)
 			{
 			    lock (_messages)

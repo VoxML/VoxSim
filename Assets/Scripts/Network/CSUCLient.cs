@@ -55,8 +55,15 @@ namespace Network
 			_messages = new Queue<string>();
 			_client = new TcpClient();
 			_client.Connect(address, port);
-			_t  = new Thread(Loop);
-			_t.Start();
+			if (_client.Connected) {
+				_t = new Thread (Loop);
+				_t.Start ();
+				Debug.Log ("I am connected to " + ((System.Net.IPEndPoint)_client.Client.RemoteEndPoint).Address.ToString () +
+					" on port " + ((System.Net.IPEndPoint)_client.Client.RemoteEndPoint).Port.ToString ());
+				Debug.Log ("I am connected from " + ((System.Net.IPEndPoint)_client.Client.LocalEndPoint).Address.ToString () +
+					" on port " + ((System.Net.IPEndPoint)_client.Client.LocalEndPoint).Port.ToString ());
+				
+			}
 		}
 
 //		private void Loop()
@@ -82,8 +89,11 @@ namespace Network
 		{
 			while (_client.Connected)
 			{
+				Debug.Log (_client);
 				NetworkStream stream = _client.GetStream();
+				Debug.Log (stream);
 				byte[] byteBuffer = new byte[IntSize];
+				Debug.Log (byteBuffer);
 				stream.Read(byteBuffer, 0, IntSize);
 
 //				if (!BitConverter.IsLittleEndian)
@@ -112,6 +122,7 @@ namespace Network
 
 			}
 			_client.Close();
+			Debug.Log ("Client closed");
 		}
 
 		public void Close()

@@ -349,7 +349,7 @@ namespace Satisfaction {
 									if (matches.Count == 0) {
 										go = GameObject.Find (arg as String);
 										if (go == null) {
-											for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
+											for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
 												if (objSelector.disabledObjects[j].name == (arg as String)) {
 													go = objSelector.disabledObjects[j];
 													break;
@@ -364,8 +364,15 @@ namespace Satisfaction {
 									}
 									else if (matches.Count == 1) {
 										go = matches[0];
+										for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
+											if (objSelector.disabledObjects[j].name == (arg as String)) {
+												go = objSelector.disabledObjects[j];
+												break;
+											}
+										}
+
 										if (go == null) {
-											OutputHelper.PrintOutput (Role.Affector,string.Format ("What is that?", (arg as String)));
+											OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
 											return false;	// abort
 										}
 									}

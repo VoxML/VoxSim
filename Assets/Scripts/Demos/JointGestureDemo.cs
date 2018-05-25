@@ -242,8 +242,10 @@ public class JointGestureDemo : AgentInteraction {
 		if (csuClient == null) {
 			csuClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
 			//TODO: What if there is no CSUClient address assigned?
-			csuClient.GestureReceived += ReceivedFusion;
-			csuClient.ConnectionLost += ConnectionLost;
+			if (csuClient != null) {
+				csuClient.GestureReceived += ReceivedFusion;
+				csuClient.ConnectionLost += ConnectionLost;
+			}
 
 			for (int i = 0; i < blocks.Count; i++) {
 				blocks[i] = Helper.GetMostImmediateParentVoxeme (blocks [i]);

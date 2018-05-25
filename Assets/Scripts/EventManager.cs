@@ -539,10 +539,19 @@ public class EventManager : MonoBehaviour {
 							if (matches.Count <= 1) {
 								GameObject go = GameObject.Find (arg as String);
 								if (go == null) {
-									OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+									for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
+										if (objSelector.disabledObjects[j].name == (arg as String)) {
+											go = objSelector.disabledObjects[j];
+											break;
+										}
+									}
 
-								throw new ArgumentNullException ("Couldn't resolve the object");
-									// abort
+									if (go == null) {
+										OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+
+										throw new ArgumentNullException ("Couldn't resolve the object");
+										// abort
+									}
 								}
 								objs.Add (go);
 							}
@@ -883,8 +892,17 @@ public class EventManager : MonoBehaviour {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 											GameObject go = matches [0];
 											if (go == null) {
-												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-												return false;	// abort
+												for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
+													if (objSelector.disabledObjects[i].name == (arg as String)) {
+														go = objSelector.disabledObjects[i];
+														break;
+													}
+												}
+
+												if (go == null) {
+													OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+													return false;	// abort
+												}
 											}
 											objs.Add (go);
 											doSkolemReplacement = true;

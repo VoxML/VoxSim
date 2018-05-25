@@ -42,7 +42,9 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	void Update () {
 		if (csuClient == null) {
 			csuClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
-			csuClient.GestureReceived += ReceivedGesture;
+			if (csuClient != null) {
+				csuClient.GestureReceived += ReceivedGesture;
+			}
 		}
 	}	
 

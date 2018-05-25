@@ -1,3 +1,4 @@
+import argparse
 import socket
 import struct
 import sys
@@ -9,6 +10,7 @@ from datetime import datetime
 def generate_line():
     global f 
     global index_time
+    global timestamps
     content = ''
     wait_time = 0
     if f is not None:
@@ -37,24 +39,61 @@ def generate_line():
     #ts = datetime.fromtimestamp(time.time()).strftime("%M:%S:%f")[:-3]
     ts = "{0:.3f}".format(time.time())
     data_to_send = new_state
-    if not re.search(r";\d+.\d{3}$",data_to_send) and data_to_send is not '':
+    if not re.search(r";\d+.\d{3}$",data_to_send) and data_to_send is not '' and timestamps:
         data_to_send += ";" + ts  #attaching timestamp to the data before sending
     #print(data_to_send)
     return (data_to_send,wait_time)
 
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser(
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                     description=__doc__
+                                     )
+    parser.add_argument(
+                     '-p', '--port',
+                     default=8220,
+                     type=int,
+                     action='store',
+                     nargs='?',
+                     help='Specify port number to run the app.'
+                     )
+    parser.add_argument(
+                     '-s', '--host',
+                     default='localhost',
+                     action='store',
+                     nargs='?',
+                     help='Specify host name for app to run on.'
+                     )
+    parser.add_argument(
+                     '-f', '--file',
+                     default='',
+                     action='store',
+                     nargs='?',
+                     help='Specify input log file.'
+                     )
+    parser.add_argument(
+                     '-t', '--timestamps',
+                     default=True,
+                     action='store_false',
+                     help='Silence timestamps'
+                     )
+    args = parser.parse_args()
+
     global f
     global index_time
+    global timestamps
 
-    host = 'localhost'
-    port = 8220
-    address = (host, port) #Initializing the port and the host for the connection
+    host = args.host
+    port = args.port
+    timestamps = args.timestamps
+    #address = (host, port) #Initializing the port and the host for the connection
+    print((host, port))
 
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(address)
-    server_socket.listen(5) #Setting up connection with the client and listening
+    server_socket.bind((host, port))
+    server_socket.listen(1) #Setting up connection with the client and listening
 
     print("Listening for client . . .")
     conn, address = server_socket.accept()
@@ -63,15 +102,16 @@ if __name__=="__main__":
 
     f = None
     index_time = 0
-    if len(sys.argv) > 1:
-        file_name = sys.argv[1]
-        if file_name is not None:
-            f = open(file_name,'r')
+    
+    file_name = args.file
+    if file_name is not '':
+        f = open(file_name,'r')
     while True:  #continuously generate line from the file and send to the client
         try: 
-            msg_to_send = generate_line()  
+            msg_to_send = generate_line()
             if msg_to_send is not ('',0):
                 time.sleep(msg_to_send[1])
+#                print("msg_to_send:" + msg_to_send[0])
                 if msg_to_send[0] is not '':
                     conn.send(struct.pack("<i" + str(len(msg_to_send[0])) + "s", len(msg_to_send[0]), msg_to_send[0].encode('utf-8')))
                     print(msg_to_send[0])
@@ -80,7 +120,7 @@ if __name__=="__main__":
                 #time.sleep(random.randint(3,3))
         except (KeyboardInterrupt, SystemExit):
             msg_to_send = "shutting down server"
-            conn.send(msg_to_send)
+            conn.send(msg_to_send.encode('utf-8'))
             break
     conn.close()
     server_socket.close()

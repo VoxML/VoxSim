@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Runtime.InteropServices;
 using Network;
 using NLU;
@@ -50,8 +51,6 @@ public class PluginImport : MonoBehaviour {
 			Debug.Log ("No listener port specified. Skipping interface startup.");
 		}
 
-
-
 		if (PlayerPrefs.HasKey ("URLs")) {
 			string csuUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
@@ -97,7 +96,7 @@ public class PluginImport : MonoBehaviour {
 			if (eventLearnerAddress != "") {
 				int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
 				try {
-					_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
+					//_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
 				}
 				catch (Exception e) {
 					Debug.Log (e.Message);
@@ -129,6 +128,7 @@ public class PluginImport : MonoBehaviour {
 		InitParser();
 
 	}
+
 	public void InitParser() {
 		var parserUrl = PlayerPrefs.GetString ("Parser URL");
 		if (parserUrl.Length == 0)
@@ -177,6 +177,7 @@ public class PluginImport : MonoBehaviour {
 		}
 
 		if (_commanderClient != null) {
+//			Debug.Log (_commanderClient.IsConnected ());
 			string inputFromCommander = _commanderClient.GetMessage();
 			if (inputFromCommander != "") {
 				Debug.Log (inputFromCommander);
@@ -214,7 +215,7 @@ public class PluginImport : MonoBehaviour {
 		else {
 			Debug.Log ("Failed to create client");
 		}
-
+			
 		return client;
 	}
 
@@ -255,6 +256,12 @@ public class PluginImport : MonoBehaviour {
 		{
 			_csuClient.Close();
 			_csuClient = null;
+		}
+
+		if (_commanderClient != null && _commanderClient.IsConnected())
+		{
+			_commanderClient.Close();
+			_commanderClient = null;
 		}
 	}
 
