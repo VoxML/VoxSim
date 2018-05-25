@@ -74,7 +74,10 @@ namespace Agent
 				if (t.name == obj.name + "*")
 				{
 					clone = Instantiate(t.gameObject);
+					// obj = original blockX with `voxeme` attached
+					// t = blockX* with physics
 					clone.transform.SetParent(t.gameObject.transform);
+                    clone.transform.localScale = obj.transform.localScale;
 					clone.transform.position = t.transform.position;
 					Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
 					originalColor.a = 0.3f;
