@@ -2817,6 +2817,8 @@ namespace Agent
 				if (symbolConceptMap.ContainsKey (GetInputSymbolByName (inputSymbol))) {
 					List<Concept> concepts = symbolConceptMap [GetInputSymbolByName (inputSymbol)];
 
+					List<Concept> conceptsToUpdate = new List<Concept>();
+					List<Relation> relationsToUpdate = new List<Relation>();
 					foreach (Concept concept in concepts) {
 						if (GetInputSymbolType (inputSymbol) == 'G') {
 							concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ?
@@ -2827,8 +2829,21 @@ namespace Agent
 						}
 
 						Debug.Log (string.Format ("Updating epistemic model: Concept {0} Certainty = {1}", concept.Name, concept.Certainty));
-						epistemicModel.state.UpdateEpisim (new Concept[] { concept }, new Relation[] { });
+						conceptsToUpdate.Add(concept);
+
+						foreach (Concept relatedConcept in epistemicModel.state.GetRelated(concept))
+						{
+							Relation relation = epistemicModel.state.GetRelation(concept, relatedConcept);
+							double prevCertainty = relation.Certainty;
+							double newCertainty = Math.Min(concept.Certainty, relatedConcept.Certainty);
+							if (Math.Abs(prevCertainty - newCertainty) > 0.01)
+							{
+								relation.Certainty = newCertainty;
+								relationsToUpdate.Add(relation);
+							}
+						}
 					}
+                    epistemicModel.state.UpdateEpisim (conceptsToUpdate.ToArray(), relationsToUpdate.ToArray());
 				}
 			}
 		}

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -4652,13 +4652,27 @@ public class JointGestureDemo : AgentInteraction {
 			if (concepts.GetConcepts ().ContainsKey (ConceptMode.L)) {
 				List<Concept> linguisticConcepts = concepts.GetConcepts () [ConceptMode.L];
 
+                List<Concept> conceptsToUpdate = new List<Concept>();
+                List<Relation> relationsToUpdate = new List<Relation>();
 				// if mentioned, introduce if not used already
 				foreach (Concept concept in linguisticConcepts) {
 					if (utterance.ToLower().Contains (concept.Name.ToLower ())) {
-						concept.Certainty = ((concept.Certainty < 0.5) && (concept.Certainty >= 0.0)) ? 0.5 : concept.Certainty;
-						epistemicModel.state.UpdateEpisim (new Concept[]{ concept }, new Relation[]{ });
+						concept.Certainty = concept.Certainty < 0.5 && concept.Certainty >= 0.0 ? 0.5 : concept.Certainty;
+
+						foreach (Concept relatedConcept in epistemicModel.state.GetRelated(concept))
+						{
+							Relation relation = epistemicModel.state.GetRelation(concept, relatedConcept);
+							double prevCertainty = relation.Certainty;
+							double newCertainty = Math.Min(concept.Certainty, relatedConcept.Certainty);
+							if (Math.Abs(prevCertainty - newCertainty) > 0.01)
+							{
+								relation.Certainty = newCertainty;
+								relationsToUpdate.Add(relation);
+							}
+						}
 					}
 				}
+                epistemicModel.state.UpdateEpisim (conceptsToUpdate.ToArray(), relationsToUpdate.ToArray());
 			}
 		}
 	}

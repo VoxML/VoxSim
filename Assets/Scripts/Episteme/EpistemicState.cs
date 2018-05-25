@@ -43,6 +43,11 @@ namespace Episteme
 		{
 			return _episteme[origin.Type].GetRelation(origin, destination);
 		}
+
+		public List<Concept> GetRelated(Concept origin)
+		{
+			return _episteme[origin.Type].GetRelated(origin);
+		}
 		
 		public void AddConcept(Concept c)
 		{

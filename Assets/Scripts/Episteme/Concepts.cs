@@ -76,6 +76,23 @@ namespace Episteme
 			_relations.Add(relation);
 		}
 
+		public List<Concept> GetRelated(Concept origin)
+		{
+			List<Concept> related = new List<Concept>();
+			foreach (var relation in _relations)
+			{
+				if (Equals(relation.Origin, origin))
+				{
+					related.Add(relation.Destination);
+				}
+				else if (Equals(relation.Destination, origin) && relation.Bidirectional)
+				{
+					related.Add(relation.Origin);
+				}
+			}
+			return related;
+		}
+
 		public Relation GetRelation(Concept ori, Concept dest)
 		{
 			foreach (var relation in _relations)
