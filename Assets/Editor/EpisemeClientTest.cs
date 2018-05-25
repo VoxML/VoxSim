@@ -61,7 +61,7 @@ public class EpisemeClientTest : MonoBehaviour
 		mock();
 		
 		// for logging
-		var json = Jsonifier.JsonifyEpistemicState(model);
+		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 		Debug.Log(json);
 		
 		// this would do the actual http request
@@ -99,7 +99,7 @@ public class EpisemeClientTest : MonoBehaviour
 	{
 		second_mock();
 		model.InitiateEpisim();
-		var json = Jsonifier.JsonifyEpistemicState(model);
+		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 		Debug.Log(json);
 		
 		var conceptG = model.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
@@ -136,7 +136,7 @@ public class EpisemeClientTest : MonoBehaviour
 		model.AddConcept(small);
 		model.AddConcept(blue);
 		model.AddConcept(red);
-		var json = Jsonifier.JsonifyEpistemicState(model);
+		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 		Debug.Log(json);
 		model.InitiateEpisim();
 	}
@@ -153,7 +153,7 @@ public class EpisemeClientTest : MonoBehaviour
 		var pushL = model.GetConcept("PUSH", ConceptType.ACTION, ConceptMode.L);
 		moveL.Certainty = -1;
 		pushL.Certainty = -1;
-		var json = Jsonifier.JsonifyEpistemicState(model);
+		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 		Debug.Log(json);
         model.UpdateEpisim(new[] {moveL, pushL}, new Relation[] { });
 

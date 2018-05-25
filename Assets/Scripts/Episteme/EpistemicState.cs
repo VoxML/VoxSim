@@ -95,7 +95,7 @@ namespace Episteme
 		
 		public void InitiateEpisim()
 		{
-			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimInitRoute, Jsonifier.JsonifyEpistemicState(this),"okay", "error");
+			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimInitRoute, Jsonifier.JsonifyEpistemicStateInitiation(this),"okay", "error");
 		}
 
 		public void UpdateEpisim(Concept[] updatedConcepts, Relation[] updatedRelations)

@@ -11,7 +11,7 @@ namespace Episteme
 		private static readonly string JsonSubgroupSuffix = "-subgroups";
 		private static readonly string JsonRelationConnector = "-";
 
-		public static string JsonifyConcepts(Concepts collection)
+		public static string JsonifyConceptDefinitions(Concepts collection)
 		{
 			var relationStrings = new List<string>();
 			var conceptStrings = new List<string>();
@@ -76,11 +76,11 @@ namespace Episteme
 			return jsonString;
 		}
 
-		public static string JsonifyEpistemicState(EpistemicState collections)
+		public static string JsonifyEpistemicStateInitiation(EpistemicState collections)
 		{
 			return string.Format("{{{0}}}", 
 				string.Join(", ", collections.GetAllConcepts().Select(
-					JsonifyConcepts).ToArray()));
+					JsonifyConceptDefinitions).ToArray()));
 		}
 
 		public static string JsonifyUpdatedConcepts(EpistemicState state, params Concept[] concepts)
@@ -109,10 +109,10 @@ namespace Episteme
 			return string.Format("[{0}]", string.Join(", ",
 				relations.Select(relation =>
 					string.Format("\"{0}-{1}-{2}-{3}-{4}{6}{5:0.00}\"",
-						(int)collection.Type(),
-						(int)relation.Origin.Mode,
+						(int) collection.Type(),
+						(int) relation.Origin.Mode,
 						collection.GetIndex(relation.Origin),
-						(int)relation.Destination.Mode,
+						(int)  relation.Destination.Mode,
 						collection.GetIndex(relation.Destination),
 						relation.Certainty,
 						CertaintySep
