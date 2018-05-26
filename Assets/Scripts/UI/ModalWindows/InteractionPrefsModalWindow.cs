@@ -58,6 +58,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 	public bool useTeachingAgent = false;
 	public bool showSyntheticVision = false;
+	public bool showVisualMemory = false;
 
 	string actionButtonText;
 
@@ -124,9 +125,13 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		useTeachingAgent = GUILayout.Toggle (useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth (true));
 		GUILayout.EndHorizontal();
 
-		GUILayout.BeginHorizontal(GUI.skin.box);
-		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Agent Perception", GUILayout.ExpandWidth (true));
-		GUILayout.EndHorizontal();
+		GUILayout.BeginVertical(GUI.skin.box);
+		GUILayout.Label ("Agent Perception:");
+		GUILayout.BeginVertical(GUI.skin.box);
+		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Synthetic Vision", GUILayout.ExpandWidth (true));
+		showVisualMemory = GUILayout.Toggle (showVisualMemory, "Show Visual Memory", GUILayout.ExpandWidth (true));
+		GUILayout.EndVertical();
+		GUILayout.EndVertical();
 
 		GUILayout.EndScrollView ();
 	}

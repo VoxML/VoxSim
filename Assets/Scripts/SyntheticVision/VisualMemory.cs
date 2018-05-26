@@ -11,6 +11,13 @@ namespace Agent
 		InteractionPrefsModalWindow interactionPrefs;
 		private ObjectSelector _objectSelector;
 
+		private bool showMemory;
+		public bool ShowMemory
+		{
+			get { return showMemory; }
+			set { showMemory = value; }
+		}
+
 		void Start()
 		{
 			memorized = new Dictionary<Voxeme, GameObject>();
@@ -20,8 +27,8 @@ namespace Agent
 
 		void Update()
 		{
-
-			if (!interactionPrefs.showSyntheticVision)
+			ShowMemory = interactionPrefs.showVisualMemory;
+			if (!ShowMemory)
 			{
 				gameObject.GetComponent<Camera>().enabled = false;
 			}
