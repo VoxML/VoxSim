@@ -115,7 +115,7 @@ namespace Agent
 					if (epistemicModel.engaged) {
 						if (!knownObjects.Contains (voxeme)) {
 							knownObjects.Add (voxeme);
-							knownObjectBounds.Add (voxeme, Helper.GetObjectWorldSize(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject)));
+							knownObjectBounds.Add (voxeme, Helper.GetObjectWorldSize(voxeme.gameObject));
 							Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsKnown (voxeme.gameObject).ToString ()));
 
 							if (!initVision) {	// don't do this when you initially populate knownObjects
@@ -128,7 +128,7 @@ namespace Agent
 						}
 						else {
 							if (knownObjectBounds.ContainsKey (voxeme)) {
-								knownObjectBounds [voxeme] = Helper.GetObjectWorldSize(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject))	;
+								knownObjectBounds [voxeme] = Helper.GetObjectWorldSize(voxeme.gameObject);
 							}
 						}
 					}

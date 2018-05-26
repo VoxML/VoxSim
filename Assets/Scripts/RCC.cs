@@ -30,8 +30,8 @@ namespace RCC
 			// if y and z dimensions overlap
 			if (Mathf.Abs(x.center.y - y.center.y) * 2 < (x.size.y + y.size.y) &&
 				(Mathf.Abs(x.center.z - y.center.z) * 2 < (x.size.z + y.size.z))){
-				if ((Mathf.Abs (x.min.x - y.max.x) < Constants.EPSILON) ||	// if touching on x
-				    (Mathf.Abs (x.max.x - y.min.x) < Constants.EPSILON)) {
+				if ((Mathf.Abs (x.min.x - y.max.x) < Constants.EPSILON * 2) ||	// if touching on x
+					(Mathf.Abs (x.max.x - y.min.x) < Constants.EPSILON * 2)) {
 					ec = true;
 				}
 				else {
@@ -42,16 +42,18 @@ namespace RCC
 			// if x and z dimensions overlap
 			if (Mathf.Abs(x.center.x - y.center.x) * 2 < (x.size.x + y.size.x) &&
 				(Mathf.Abs(x.center.z - y.center.z) * 2 < (x.size.z + y.size.z))){
-				if ((Mathf.Abs(x.min.y-y.max.y) < Constants.EPSILON) ||	// if touching on y
-					(Mathf.Abs(x.max.y-y.min.y) < Constants.EPSILON)) {
+				Debug.Log (x.min.y);
+				Debug.Log (y.max.y);
+				if ((Mathf.Abs(x.min.y-y.max.y) < Constants.EPSILON * 2) ||	// if touching on y
+					(Mathf.Abs(x.max.y-y.min.y) < Constants.EPSILON * 2)) {
 					ec = true;
 				}
 			}
 			// if x and y dimensions overlap
 			if (Mathf.Abs (x.center.x - y.center.x) * 2 < (x.size.x + y.size.x) &&
 			    (Mathf.Abs (x.center.y - y.center.y) * 2 < (x.size.y + y.size.y))) {
-				if ((Mathf.Abs (x.min.z - y.max.z) < Constants.EPSILON) ||	// if touching on z
-					(Mathf.Abs (x.max.z - y.min.z) < Constants.EPSILON)) {
+				if ((Mathf.Abs (x.min.z - y.max.z) < Constants.EPSILON * 2) ||	// if touching on z
+					(Mathf.Abs (x.max.z - y.min.z) < Constants.EPSILON * 2)) {
 					ec = true;
 				}
 			}

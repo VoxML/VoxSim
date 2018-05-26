@@ -4436,16 +4436,29 @@ public class JointGestureDemo : AgentInteraction {
 		Debug.Log (block);
 		bool surfaceClear = true;
 		List<GameObject> excludeChildren = block.GetComponentsInChildren<Renderer>().Where(
-			o => Helper.GetMostImmediateParentVoxeme(o.gameObject) != block).Select(o => o.gameObject).ToList();
+			o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != block) || 
+			(o.gameObject.layer == LayerMask.NameToLayer("blocks-known"))).Select(o => o.gameObject).ToList();
 		foreach (GameObject go in excludeChildren) {
 			Debug.Log (go);
 		}
 		Bounds blockBounds = Helper.GetObjectWorldSize (block, excludeChildren);
 		Debug.Log (blockBounds);
+		Debug.Log (Helper.GetObjectWorldSize (block).max.y);
+		Debug.Log (Helper.GetObjectWorldSize (block,excludeChildren).max.y);
+		Debug.Log (blockBounds.max.y);
 		foreach (GameObject otherBlock in blocks) {
-			Bounds otherBounds = Helper.GetObjectWorldSize (otherBlock);
+			excludeChildren = otherBlock.GetComponentsInChildren<Renderer>().Where(
+				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != otherBlock) || 
+				(o.gameObject.layer == LayerMask.NameToLayer("blocks-known"))).Select(o => o.gameObject).ToList();
+			foreach (GameObject go in excludeChildren) {
+				Debug.Log (go);
+			}
+			Bounds otherBounds = Helper.GetObjectWorldSize (otherBlock,excludeChildren);
 			Debug.Log (otherBlock);
 			Debug.Log (otherBounds);
+			Debug.Log (Helper.GetObjectWorldSize (otherBlock).min.y);
+			Debug.Log (Helper.GetObjectWorldSize (otherBlock,excludeChildren).min.y);
+			Debug.Log (otherBounds.min.y);
 			Region blockMax = new Region (new Vector3 (blockBounds.min.x, blockBounds.max.y, blockBounds.min.z),
 				new Vector3 (blockBounds.max.x, blockBounds.max.y, blockBounds.max.z));
 			Region otherMin = new Region (new Vector3 (otherBounds.min.x, blockBounds.max.y, otherBounds.min.z),
@@ -4455,7 +4468,9 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log(Helper.RegionToString(blockMax));
 			Debug.Log(Helper.RegionToString(otherMin));
 			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y)));
+			Debug.Log(QSR.QSR.Above (otherBounds, blockBounds));
 			Debug.Log(((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area())));
+			Debug.Log(RCC8.EC (otherBounds, blockBounds));
 			if ((QSR.QSR.Above (otherBounds, blockBounds)) && 
 				((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area()) > 0.25f) &&
 				(RCC8.EC (otherBounds, blockBounds))) {
