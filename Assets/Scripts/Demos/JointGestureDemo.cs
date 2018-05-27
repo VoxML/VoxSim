@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -394,34 +394,18 @@ public class JointGestureDemo : AgentInteraction {
 		}
 			
 		if ((UseTeaching) && (interactionLogic.useEpistemicModel)) {
-			Concept putConcept = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
+			Concept putL = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-			putConcept.Certainty = -1.0;
-			Concept pushConcept = epistemicModel.state.GetConcept ("PUSH", ConceptType.ACTION, ConceptMode.L);
+			putL.Certainty = -1.0;
+			Concept pushL = epistemicModel.state.GetConcept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 			Concept pushG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-			pushConcept.Certainty = -1.0;
-			var putRelation = epistemicModel.state.GetRelation (putConcept, putG);
-			var pushRelation = epistemicModel.state.GetRelation (pushConcept, pushG);
+			pushL.Certainty = -1.0;
+			var putRelation = epistemicModel.state.GetRelation (putL, putG);
+			var pushRelation = epistemicModel.state.GetRelation (pushL, pushG);
 			putRelation.Certainty = -1.0;
 			pushRelation.Certainty = -1.0;
-			epistemicModel.state.UpdateEpisim (new Concept[] { putConcept, pushConcept }, new Relation[]{ pushRelation, putRelation });
+			epistemicModel.state.UpdateEpisim (new []{putL, pushL}, new []{pushRelation, putRelation});
 
-			foreach (GameObject block in blocks) {	// limit to blocks only for now
-				Voxeme blockVox = block.GetComponent<Voxeme> ();
-				if (blockVox != null) {
-					if (synVision.knownObjects.Contains (blockVox)) {
-						string color = string.Empty;
-						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-
-						Concept blockConcept = epistemicModel.state.GetConcept (block.name, ConceptType.OBJECT, ConceptMode.G);
-
-						if (blockConcept.Certainty < 1.0) {
-							blockConcept.Certainty = 1.0;
-							epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
-						}
-					}
-				}
-			}
 		}
 
 
@@ -674,9 +658,10 @@ public class JointGestureDemo : AgentInteraction {
 						objectConfirmation = objVoxemes [0].gameObject;
 						LookAt(objectConfirmation);
 
-						//						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-						//						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-						//						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
+						// not using languages for property for now (colors, sizes, ...  are in G row)
+//						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+//						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+//						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 					}
 				}
 			}
@@ -736,9 +721,10 @@ public class JointGestureDemo : AgentInteraction {
 							objectConfirmation = objVoxemes [0].gameObject;
 							LookAt (objectConfirmation);
 
-							//							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-							//							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-							//							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
+						// not using languages for property for now (colors, sizes, ...  are in G row)
+//							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
+//							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
+//							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
 						}
 					}
 				}
@@ -3431,293 +3417,6 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 		}
-	}
-
-	void HandleMoveSegment(string instruction) {
-		actionOptions.Clear ();
-		suggestedActions.Clear ();
-
-		Concept moveConcept = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-		Concept grabConcept = epistemicModel.state.GetConcept ("grab", ConceptType.ACTION, ConceptMode.G);
-
-		if (instruction.EndsWith ("high")) {
-			if (interactionLogic.GetGestureContent (instruction, "grab move") == "left") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
-					//moveConcept.Certainty = (moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty;
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-
-					Suggest ("grab move left");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("left");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "right") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-
-					Suggest ("grab move right");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("right");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "front") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-
-					Suggest ("grab move front");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("front");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "back") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-
-					Suggest ("grab move back");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("back");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "left front") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
-					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-
-					Suggest ("grab move left front");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("left front");
-				}
-			} 
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "right front") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
-					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-
-					Suggest ("grab move right front");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("right front");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "left back") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
-					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-
-					Suggest ("grab move left back");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("left back");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "right back") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConceptX) < 0.5)
-					|| (EpistemicCertainty(dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					dirConceptZ.Certainty = (dirConceptZ.Certainty < 0.5) ? 0.5 : dirConceptZ.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-
-					Suggest ("grab move right back");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("right back");
-				}
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "up") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("UP", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-
-					Suggest ("grab move up");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("up");
-				}
-			} 
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "down") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("DOWN", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty(moveConcept) < 0.5) || (EpistemicCertainty(dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : ((moveConcept.Certainty >= 0.5) ? 1.0 : moveConcept.Certainty);
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-
-					Suggest ("grab move down");
-				}
-				else {
-					moveConcept.Certainty = 1.0;
-
-					Move ("down");
-				}
-			}
-		} 
-		else if (instruction.EndsWith ("low")) {
-			if (interactionLogic.GetGestureContent (instruction, "grab move") == "left") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-				}
-
-				Suggest ("grab move left");
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "right") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-				}
-
-				Suggest ("grab move right");
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "front") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-				}
-
-				Suggest ("grab move front");
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "back") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-				}
-
-				Suggest ("grab move back");
-			} 
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "left front") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
-					(EpistemicCertainty (dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-				}
-
-				Suggest ("grab move left front");
-			} 
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "right front") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("FRONT", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
-					(EpistemicCertainty (dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-				}
-
-				Suggest ("grab move right front");
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "left back") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("LEFT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
-					(EpistemicCertainty (dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-				}
-
-				Suggest ("grab move left back");
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "right back") {
-				Concept dirConceptX = epistemicModel.state.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
-				Concept dirConceptZ = epistemicModel.state.GetConcept ("BACK", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConceptX) < 0.5) ||
-					(EpistemicCertainty (dirConceptZ) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConceptX.Certainty = (dirConceptX.Certainty < 0.5) ? 0.5 : dirConceptX.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConceptX,dirConceptZ }, new Relation[] { });
-				}
-
-				Suggest ("grab move right back");
-			}
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "up") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("UP", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-				}
-
-				Suggest ("grab move up");
-			} 
-			else if (interactionLogic.GetGestureContent (instruction, "grab move") == "down") {
-				Concept dirConcept = epistemicModel.state.GetConcept ("DOWN", ConceptType.PROPERTY, ConceptMode.L);
-				if ((EpistemicCertainty (moveConcept) < 0.5) || (EpistemicCertainty (dirConcept) < 0.5)) {
-					moveConcept.Certainty = (moveConcept.Certainty < 0.5) ? 0.5 : moveConcept.Certainty;
-					dirConcept.Certainty = (dirConcept.Certainty < 0.5) ? 0.5 : dirConcept.Certainty;
-					epistemicModel.state.UpdateEpisim (new Concept[] { dirConcept }, new Relation[] { });
-				}
-
-				Suggest ("grab move down");
-			}
-		}
-
-		grabConcept.Certainty = 1.0;
-		epistemicModel.state.UpdateEpisim(new Concept[] {moveConcept,grabConcept}, new Relation[] {});
 	}
 
 	List<GameObject> FindBlocksInRegion(Region region) {

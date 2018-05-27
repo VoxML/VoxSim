@@ -38,7 +38,10 @@ namespace Agent {
 			Concept posackL = new Concept("YES", ConceptType.ACTION, ConceptMode.L);
 			Concept negackG = new Concept("negack", ConceptType.ACTION, ConceptMode.G);
 			Concept negackL = new Concept("NO", ConceptType.ACTION, ConceptMode.L);
+
+			// todo nevermind as "undo" and nothing as "cancel"
 			Concept neverMindL = new Concept("NEVERMIND", ConceptType.ACTION, ConceptMode.L);
+			Concept nothingL = new Concept("NOTHING", ConceptType.ACTION, ConceptMode.L);
 
 			// add concepts to the epistemic model
 			state.AddConcept(pointG);
@@ -62,10 +65,11 @@ namespace Agent {
 			state.AddConcept(negackG);
 			state.AddConcept(negackL);
 			state.AddConcept(neverMindL);
+			state.AddConcept(nothingL);
 			// add relations between them, third boolean param is bidirectional
 			state.AddRelation(posackG, posackL, true);
 			state.AddRelation(negackG, negackL, true);
-			
+
 			state.AddPropertyGroup(new PropertyGroup("COLOR", PropertyType.Nominal));
 			Concept red = new Concept("RED", ConceptType.PROPERTY, ConceptMode.L);
 			Concept green = new Concept("GREEN", ConceptType.PROPERTY, ConceptMode.L);
@@ -89,13 +93,13 @@ namespace Agent {
 			state.AddConcept(purple);
 			state.AddConcept(white);
 
-			state.AddPropertyGroup(new PropertyGroup("SIZE", PropertyType.Ordinal));
-			Concept small = new Concept("SMALL", ConceptType.PROPERTY, ConceptMode.L);
-			Concept big = new Concept("BIG", ConceptType.PROPERTY, ConceptMode.L);
-			small.SubgroupName = "SIZE";
-			big.SubgroupName = "SIZE";
-			state.AddConcept(small);
-			state.AddConcept(big);
+//			state.AddPropertyGroup(new PropertyGroup("SIZE", PropertyType.Ordinal));
+//			Concept small = new Concept("SMALL", ConceptType.PROPERTY, ConceptMode.L);
+//			Concept big = new Concept("BIG", ConceptType.PROPERTY, ConceptMode.L);
+//			small.SubgroupName = "SIZE";
+//			big.SubgroupName = "SIZE";
+//			state.AddConcept(small);
+//			state.AddConcept(big);
 
 			state.AddPropertyGroup(new PropertyGroup("DIRECTION", PropertyType.Nominal));
 			Concept left = new Concept("LEFT", ConceptType.PROPERTY, ConceptMode.L);
@@ -117,8 +121,6 @@ namespace Agent {
 			state.AddConcept(up);
 			state.AddConcept(down);
 
-			Concept nothing = new Concept("NOTHING", ConceptType.PROPERTY, ConceptMode.L);
-			state.AddConcept(nothing);
 
 			// now add more concepts (objects)
 			Concept yellowBlock = new Concept("block1", ConceptType.OBJECT, ConceptMode.G);
