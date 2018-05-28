@@ -62,11 +62,11 @@ namespace Agent
 			foreach (GameObject block in _world.blocks)
 			{
 				Voxeme voxeme = block.GetComponent<Voxeme>();
-				Debug.Log(voxeme + " is visible?");
+//				Debug.Log(voxeme + " is visible?");
 				GameObject clone = null;
 				if (_vision.IsVisible(voxeme))
 				{
-					Debug.Log(voxeme + " is");
+//					Debug.Log(voxeme + " is");
 					if (!_memorized.ContainsKey(voxeme))
 					{
 						clone = GetVisualClone(block.gameObject);

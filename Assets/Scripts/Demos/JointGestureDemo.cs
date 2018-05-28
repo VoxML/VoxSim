@@ -409,7 +409,7 @@ public class JointGestureDemo : AgentInteraction {
 			foreach (GameObject block in blocks) {	// limit to blocks only for now
 				Voxeme blockVox = block.GetComponent<Voxeme> ();
 				if (blockVox != null) {
-					if (synVision.knownObjects.Contains (blockVox)) {
+					if (dianaMemory.IsKnown(blockVox)) {
 						string color = string.Empty;
 						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
 
