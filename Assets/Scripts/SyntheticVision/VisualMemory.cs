@@ -93,7 +93,7 @@ namespace Agent
 				// block is not visible
 				else
 				{
-					Debug.Log(voxeme + " is not ");
+//					Debug.Log(voxeme + " is not ");
 					// but I know about it
 					if (_memorized.ContainsKey(voxeme))
 					{
