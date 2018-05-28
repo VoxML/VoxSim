@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
-
+using System.Timers;
 using Global;
+using UnityEngine.UI;
 
 namespace Agent
 {
@@ -24,7 +25,18 @@ namespace Agent
 		ObjectSelector objSelector;
 		InteractionPrefsModalWindow interactionPrefs;
 
+		Timer reactionTimer;
+		float reactionDelayInterval = 1000;
+
+		bool surprise = false;
+		VisionEventArgs surpriseArgs;
+
+		bool initVision = true;
+
+		public GameObject VisionCanvas;
+
 		void Start () {
+			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) VisionCanvas.GetComponentInChildren<RawImage>().texture;
 			interactionPrefs = world.GetComponent<InteractionPrefsModalWindow> ();
 			if (attached != null)
 			{
@@ -41,10 +53,10 @@ namespace Agent
 
 			ShowFoV = interactionPrefs.showSyntheticVision;
 			if (!ShowFoV) {
-				gameObject.GetComponent<Camera>().enabled = false;
+				VisionCanvas.SetActive(false);
 			}
 			else {
-				gameObject.GetComponent<Camera>().enabled = true;
+				VisionCanvas.SetActive(true);
 			}
 
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {

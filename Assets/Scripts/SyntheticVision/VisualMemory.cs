@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Timers;
+using UnityEngine.UI;
 using VisionViz;
 
 namespace Agent
@@ -14,6 +15,8 @@ namespace Agent
 		public Dictionary<Voxeme, GameObject> _memorized;
 		private InteractionPrefsModalWindow _interactionPrefs;
 		private ObjectSelector _objectSelector;
+
+		public GameObject MemoryCanvas;
 
 		private bool showMemory;
 		public bool ShowMemory
@@ -46,6 +49,7 @@ namespace Agent
 
 			_percievingInitialConfiguration = true;
 			_memorized = new Dictionary<Voxeme, GameObject>();
+			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) MemoryCanvas.GetComponentInChildren<RawImage>().texture;
 		}
 
 		// updating memory happens in LateUpdate after all visual perception happened in Update (See SyntheticVision)
@@ -54,10 +58,10 @@ namespace Agent
 			ShowMemory = _interactionPrefs.showVisualMemory;
 			if (!ShowMemory)
 			{
-				gameObject.GetComponent<Camera>().enabled = false;
+				MemoryCanvas.SetActive(false);
 			}
 			else {
-				gameObject.GetComponent<Camera>().enabled = true;
+				MemoryCanvas.SetActive(true);
 			}
 			foreach (GameObject block in _world.blocks)
 			{
