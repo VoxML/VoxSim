@@ -79,6 +79,7 @@ namespace Agent
 							// surprise!
 							// todo _surpriseArgs can be plural
 							_surpriseArgs = new VisionEventArgs(voxeme, InconsistencyType.Present);
+							StartCoroutine(clone.GetComponent<BoundBox>().Flash(10));
 							Debug.Log(string.Format("{0} Surprise!", voxeme));
 							_reactionTimer.Enabled = true;
 						}
@@ -86,15 +87,7 @@ namespace Agent
 					else
 					{
 						clone = _memorized[voxeme];
-						if (_objectSelector.disabledObjects.Contains(voxeme.gameObject))
-						{
-							clone.transform.parent = null;
-							clone.SetActive(true);
-						}
-						else if (clone.transform.parent != null)
-						{
-							clone.transform.SetParent(voxeme.gameObject.transform);
-						}
+
 					}
 				}
 				// block is not visible
@@ -104,6 +97,7 @@ namespace Agent
 					// but I know about it
 					if (_memorized.ContainsKey(voxeme))
 					{
+						// but can't see where it should be
 						if (!_vision.IsVisible(_memorized[voxeme]))
 						{
 							clone = _memorized[voxeme];
@@ -111,10 +105,12 @@ namespace Agent
 						// or I see it's not where it supposed to be!
 						else
 						{
+							clone = _memorized[voxeme];
 							// surprise!
-							Destroy(_memorized[voxeme]);
-							_memorized.Remove(voxeme);
 							_surpriseArgs = new VisionEventArgs(voxeme, InconsistencyType.Missing);
+							StartCoroutine(clone.GetComponent<BoundBox>().Flash(10));
+							Destroy(_memorized[voxeme], 3);
+							_memorized.Remove(voxeme);
 							Debug.Log(string.Format("{0} Surprise!", voxeme));
 							_reactionTimer.Enabled = true;
 						}
@@ -122,6 +118,16 @@ namespace Agent
 				}
 
 				if (clone == null) continue;
+
+				if (_objectSelector.disabledObjects.Contains(voxeme.gameObject))
+				{
+					clone.transform.parent = null;
+					clone.SetActive(true);
+				}
+				else if (clone.transform.parent != null)
+				{
+					clone.transform.SetParent(voxeme.gameObject.transform);
+				}
 
 				BoundBox highlighter = clone.GetComponent<BoundBox>();
 				if (_vision.IsVisible(voxeme))
