@@ -54,7 +54,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	public InteractionPrefsModalWindow interactionPrefs;
 	public AvatarGestureController gestureController;
-	public SyntheticVision synVision;
+	public VisualMemory dianaMemory;
 
 	public GameObject demoSurface;
 	public BoxCollider demoSurfaceCollider;
@@ -177,9 +177,9 @@ public class JointGestureDemo : AgentInteraction {
 		logIndex = 0;
 
 		Diana = GameObject.Find ("Diana");
+		dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
-		//synVision = Diana.GetComponent<SyntheticVision> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
 
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
@@ -438,13 +438,11 @@ public class JointGestureDemo : AgentInteraction {
 						if (!epistemicModel.engaged) {
 							epistemicModel.engaged = true;
 						}
-						if (synVision != null) {
-							if (synVision.enabled) {
-								Debug.Log (string.Format ("SyntheticVision.IsVisible({0}):{1}", hit.collider.gameObject, synVision.IsVisible (hit.collider.gameObject)));
-								if (synVision.IsKnown (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
-									//Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
-									OnObjectSelected (this, new SelectionEventArgs (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject)));
-								}
+						if (dianaMemory != null && dianaMemory.enabled) {
+							Debug.Log (string.Format ("Does Agent know {0}:{1}", hit.collider.gameObject, dianaMemory.IsKnown(hit.collider.gameObject.GetComponent<Voxeme>())));
+							if (dianaMemory.IsKnown (Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject).GetComponent<Voxeme>())) {
+								//Deixis (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject));
+								OnObjectSelected (this, new SelectionEventArgs (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject)));
 							}
 						}
 					}
@@ -1370,10 +1368,8 @@ public class JointGestureDemo : AgentInteraction {
 					foreach (GameObject block in blocks) {
 						bool isKnown = true;
 
-						if (synVision != null) {
-							if (synVision.enabled) {
-								isKnown = synVision.IsKnown (block);
-							}
+						if (dianaMemory != null && dianaMemory.enabled) {
+							isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
 						}
 
 						if ((block.activeInHierarchy) &&
@@ -1391,10 +1387,8 @@ public class JointGestureDemo : AgentInteraction {
 					foreach (GameObject match in objectMatches) {
 						bool isKnown = true;
 
-						if (synVision != null) {
-							if (synVision.enabled) {
-								isKnown = synVision.IsKnown (match);
-							}
+						if (dianaMemory != null && dianaMemory.enabled) {
+							isKnown = dianaMemory.IsKnown (match.GetComponent<Voxeme>());
 						}
 
 						if ((match.activeInHierarchy) &&
@@ -2369,7 +2363,7 @@ public class JointGestureDemo : AgentInteraction {
 				LookForward ();
 			}
 			else if ((interactionLogic.IndicatedObj != null) &&
-			        (!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+					(!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
 				RespondAndUpdate (string.Format ("Should I put the {0} block on the {1} block?",
 					interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
 					attribute));
@@ -2400,10 +2394,8 @@ public class JointGestureDemo : AgentInteraction {
 			foreach (GameObject block in blocks) {
 				bool isKnown = true;
 
-				if (synVision != null) {
-					if (synVision.enabled) {
-						isKnown = synVision.IsKnown (block);
-					}
+				if (dianaMemory != null && dianaMemory.enabled) {
+					isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
 				}
 
 				if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
@@ -2899,8 +2891,8 @@ public class JointGestureDemo : AgentInteraction {
 		if (interactionLogic.GraspedObj != null) {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
-				    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")) ||
-				    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grab move"))) {
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")) ||
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grab move"))) {
 					PromptEvent (string.Format ("put({0},{1})", 
 						interactionLogic.GraspedObj.name,
 						Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
@@ -2943,7 +2935,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (interactionLogic.GraspedObj != null) {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
-				    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
+					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
 					RaycastHit hitInfo;
 
 					if ((!Physics.Raycast (new Ray (interactionLogic.GraspedObj.transform.position, Vector3.down), out hitInfo)) ||
@@ -3076,10 +3068,8 @@ public class JointGestureDemo : AgentInteraction {
 			foreach (GameObject block in blocks) {
 				bool isKnown = true;
 
-				if (synVision != null) {
-					if (synVision.enabled) {
-						isKnown = synVision.IsKnown (block);
-					}
+				if (dianaMemory != null && dianaMemory.enabled) {
+					isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
 				}
 
 				if (block.activeInHierarchy) {
@@ -3108,10 +3098,8 @@ public class JointGestureDemo : AgentInteraction {
 	void Deixis(GameObject obj) {
 		bool isKnown = true;
 
-		if (synVision != null) {
-			if (synVision.enabled) {
-				isKnown = synVision.IsKnown (obj);
-			}
+		if (dianaMemory != null && dianaMemory.enabled) {
+			isKnown = dianaMemory.IsKnown (obj.GetComponent<Voxeme>());
 		}
 
 		objectMatches.Clear ();
@@ -3150,10 +3138,8 @@ public class JointGestureDemo : AgentInteraction {
 		foreach (GameObject block in blocks) {
 			bool isKnown = true;
 
-			if (synVision != null) {
-				if (synVision.enabled) {
-					isKnown = synVision.IsKnown (block);
-				}
+			if (dianaMemory != null && dianaMemory.enabled) {
+				isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
 			}
 
 			if (block.activeInHierarchy) {
@@ -3756,10 +3742,8 @@ public class JointGestureDemo : AgentInteraction {
 		foreach (GameObject block in blocks) {
 			bool isKnown = true;
 
-			if (synVision != null) {
-				if (synVision.enabled) {
-					isKnown = synVision.IsKnown (block);
-				}
+			if (dianaMemory != null && dianaMemory.enabled) {
+				isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
 			}
 
 			if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
@@ -4249,7 +4233,7 @@ public class JointGestureDemo : AgentInteraction {
 								Helper.GetObjectWorldSize (block),
 								themeBounds
 							})) &&	// if it's to the left of the grasped block
-							    (region.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
+								(region.Contains (block))) {	// and in the same region (orthogonal to dir of movement)
 								if (!objectMatches.Contains (block)) {
 									objectMatches.Add (block);
 								}
@@ -4733,7 +4717,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (((EventManagerArgs)e).EventString != string.Empty) {
 			Debug.Log (string.Format ("Completed event: {0}", ((EventManagerArgs)e).EventString));
 			if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
-			    !interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
+				!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 				TurnForward ();
 				LookForward ();
 
