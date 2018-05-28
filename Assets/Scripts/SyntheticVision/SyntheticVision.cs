@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Timers;
 
 using Global;
+using UnityEngine.UI;
 
 namespace Agent
 {
@@ -65,7 +66,10 @@ namespace Agent
 
 		bool initVision = true;
 
+		public GameObject VisionCanvas;
+
 		void Start () {
+			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) VisionCanvas.GetComponentInChildren<RawImage>().texture;
 			interactionPrefs = world.GetComponent<InteractionPrefsModalWindow> ();
 			epistemicModel = agent.GetComponent<EpistemicModel> ();
 			if (attached != null)
@@ -98,10 +102,10 @@ namespace Agent
 
 			ShowFoV = interactionPrefs.showSyntheticVision;
 			if (!ShowFoV) {
-				gameObject.GetComponent<Camera>().enabled = false;
+				VisionCanvas.SetActive(false);
 			}
 			else {
-				gameObject.GetComponent<Camera>().enabled = true;
+				VisionCanvas.SetActive(true);
 			}
 
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {

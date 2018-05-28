@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using VisionViz;
 
 namespace Agent
@@ -10,6 +11,8 @@ namespace Agent
 		public Dictionary<Voxeme, GameObject> memorized;
 		InteractionPrefsModalWindow interactionPrefs;
 		private ObjectSelector _objectSelector;
+
+		public GameObject MemoryCanvas;
 
 		private bool showMemory;
 		public bool ShowMemory
@@ -23,6 +26,7 @@ namespace Agent
 			memorized = new Dictionary<Voxeme, GameObject>();
 			interactionPrefs = FindObjectOfType<JointGestureDemo>().GetComponent<InteractionPrefsModalWindow> ();
 			_objectSelector = FindObjectOfType<ObjectSelector>();
+			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) MemoryCanvas.GetComponentInChildren<RawImage>().texture;
 		}
 
 		void Update()
@@ -30,10 +34,10 @@ namespace Agent
 			ShowMemory = interactionPrefs.showVisualMemory;
 			if (!ShowMemory)
 			{
-				gameObject.GetComponent<Camera>().enabled = false;
+				MemoryCanvas.SetActive(false);
 			}
 			else {
-				gameObject.GetComponent<Camera>().enabled = true;
+				MemoryCanvas.SetActive(true);
 			}
 			foreach (GameObject block in GameObject.Find("JointGestureDemo").GetComponent<JointGestureDemo>().blocks)
 			{
