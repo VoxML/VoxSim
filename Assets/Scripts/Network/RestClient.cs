@@ -27,20 +27,32 @@ namespace Network
 			}
 		}
 
+		public event EventHandler PostError;
+
+		public void OnPostError(object sender, EventArgs e)
+		{
+			if (PostError != null)
+			{
+				PostError(this, e);
+			}
+		}
+
+		public bool isConnected = false;
+
         public void Get(string url, string success, string error){
-            Request(url, "GET", null, "GET_"+success, error);
+			Request(url, "GET", null, "GET_"+success, "GET_"+error);
         }
  
         public void Post(string url, string jsonPayload, string success, string error){
-			Request(url, "POST", jsonPayload, "POST_"+success, error);
+			Request(url, "POST", jsonPayload, "POST_"+success, "POST_"+error);
         }
 
         public void Put(string url, string jsonPayload, string success, string error){
-			Request(url, "PUT", jsonPayload, "PUT_"+success, error);
+			Request(url, "PUT", jsonPayload, "PUT_"+success, "PUT_"+error);
         }
 
         public void Delete(string url, string jsonPayload, string success, string error){
-			Request(url, "DELETE", jsonPayload, "DELETE_"+success, error);
+			Request(url, "DELETE", jsonPayload, "DELETE_"+success, "DELETE_"+error);
         }
 
 		private void Request(string url, string method, string jsonPayload, string success, string error){
@@ -74,7 +86,11 @@ namespace Network
         }
 
 		void POST_okay(object parameter) {
-			// do nothing
+			isConnected = true;
+		}
+
+		void POST_error(object parameter) {
+			OnPostError (this, null);
 		}
 
 		void GET_okay(object parameter) {

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using MajorAxes;
+using Agent;
 
 namespace Global {
 	/// <summary>
@@ -811,6 +812,7 @@ namespace Global {
 
 			foreach (Renderer renderer in renderers) {
 				if (!exclude.Contains (renderer.transform.gameObject)) {
+					Debug.Log (renderer.transform.gameObject.name);
 					combinedBounds.Encapsulate (renderer.bounds);
 				}
 			}

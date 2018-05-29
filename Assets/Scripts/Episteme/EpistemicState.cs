@@ -10,6 +10,7 @@ namespace Episteme
 	{
 		private Dictionary<ConceptType, Concepts> _episteme;
 		private GameObject _restClient;
+		private RestClient client;
 		private string _episimUrl;
 
 		private static readonly string EpisimInitRoute = "init";
@@ -90,12 +91,18 @@ namespace Episteme
 			{
 				_restClient = new GameObject("RestClient");
 				_restClient.AddComponent<RestClient>();
+				client = _restClient.GetComponent<RestClient> ();
+				client.PostError += ConnectionLost;
 			}
 			if (!url.EndsWith("/"))
 			{
 				url += "/";
 			}
 			_episimUrl = url;
+		}
+
+		void ConnectionLost(object sender, EventArgs e) {
+			client.isConnected = false;
 		}
 		
 		public void InitiateEpisim()
@@ -111,7 +118,9 @@ namespace Episteme
 
 		public void UpdateEpisim(Concept[] updatedConcepts, Relation[] updatedRelations)
 		{
-			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimUpdateRoute, Jsonifier.JsonifyUpdates(this, updatedConcepts, updatedRelations),"okay", "error");
+			if ((client != null) && (client.isConnected)) {
+				_restClient.GetComponent<RestClient> ().Post (_episimUrl + EpisimUpdateRoute, Jsonifier.JsonifyUpdates (this, updatedConcepts, updatedRelations), "okay", "error");
+			}
 		}
 	}
 }

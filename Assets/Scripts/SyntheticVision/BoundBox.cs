@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using Global;
@@ -208,6 +209,17 @@ namespace VisionViz
             {
                 lines[j, 0] = _lines[j][0];
                 lines[j, 1] = _lines[j][1];
+            }
+        }
+
+        public IEnumerator Flash(int flashNum)
+        {
+            for (int i = 0; i < flashNum; i++)
+            {
+                lineColor.a = 0.0f;
+                yield return new WaitForSeconds(.2f);
+                lineColor.a = 1.0f;
+                yield return new WaitForSeconds(.1f);
             }
         }
 

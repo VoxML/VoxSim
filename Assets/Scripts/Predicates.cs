@@ -4670,11 +4670,10 @@ public class Predicates : MonoBehaviour {
 		//Debug.Break ();
 		foreach (object obj in args) {
 			if (obj is GameObject) {
-				objSelector.disabledObjects.Add((obj as GameObject));
-				(obj as GameObject).SetActive (false);
-//				foreach (Renderer renderer in (obj as GameObject).GetComponentsInChildren<Renderer>()) {
-//					renderer.enabled = false;
-//				}
+				if (!objSelector.disabledObjects.Contains ((obj as GameObject))) {
+					objSelector.disabledObjects.Add ((obj as GameObject));
+					(obj as GameObject).SetActive (false);
+				}
 			}
 		}
 

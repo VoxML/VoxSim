@@ -689,6 +689,7 @@ namespace Agent
 			States.Add(new PDAState("ConfirmEvent",null));
 			States.Add(new PDAState("ExecuteEvent",null));
 			States.Add(new PDAState("AbortAction",null));
+			States.Add(new PDAState("BlockUnavailable",null));
 			States.Add(new PDAState("Confusion",null));
 			States.Add(new PDAState("CleanUp",null));
 			States.Add(new PDAState("EndState",null));
@@ -704,14 +705,22 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G right point low"));
 			InputSymbols.Add(new PDASymbol("G left point stop"));
 			InputSymbols.Add(new PDASymbol("G right point stop"));
+			InputSymbols.Add(new PDASymbol("G posack start"));
+			InputSymbols.Add(new PDASymbol("G negack start"));
 			InputSymbols.Add(new PDASymbol("G posack high"));
 			InputSymbols.Add(new PDASymbol("G negack high"));
 			InputSymbols.Add(new PDASymbol("G posack low"));
 			InputSymbols.Add(new PDASymbol("G negack low"));
 			InputSymbols.Add(new PDASymbol("G posack stop"));
 			InputSymbols.Add(new PDASymbol("G negack stop"));
+			InputSymbols.Add(new PDASymbol("G grab start"));
 			InputSymbols.Add(new PDASymbol("G grab high"));
 			InputSymbols.Add(new PDASymbol("G grab low"));
+			InputSymbols.Add(new PDASymbol("G grab move left start"));
+			InputSymbols.Add(new PDASymbol("G grab move right start"));
+			InputSymbols.Add(new PDASymbol("G grab move front start"));
+			InputSymbols.Add(new PDASymbol("G grab move back start"));
+			InputSymbols.Add(new PDASymbol("G grab move up start"));
 			InputSymbols.Add(new PDASymbol("G grab move left high"));
 			InputSymbols.Add(new PDASymbol("G grab move right high"));
 			InputSymbols.Add(new PDASymbol("G grab move front high"));
@@ -725,18 +734,27 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G grab move up low"));
 			InputSymbols.Add(new PDASymbol("G grab move down low"));
 			InputSymbols.Add(new PDASymbol("G grab stop"));
+			InputSymbols.Add(new PDASymbol("G push left start"));
+			InputSymbols.Add(new PDASymbol("G push right start"));
+			InputSymbols.Add(new PDASymbol("G push front start"));
+			InputSymbols.Add(new PDASymbol("G push back start"));
 			InputSymbols.Add(new PDASymbol("G push left high"));
-			InputSymbols.Add(new PDASymbol("G push left low"));
-			InputSymbols.Add(new PDASymbol("G push left stop"));
 			InputSymbols.Add(new PDASymbol("G push right high"));
-			InputSymbols.Add(new PDASymbol("G push right low"));
-			InputSymbols.Add(new PDASymbol("G push right stop"));
 			InputSymbols.Add(new PDASymbol("G push front high"));
-			InputSymbols.Add(new PDASymbol("G push front low"));
-			InputSymbols.Add(new PDASymbol("G push front stop"));
 			InputSymbols.Add(new PDASymbol("G push back high"));
+			InputSymbols.Add(new PDASymbol("G push left low"));
+			InputSymbols.Add(new PDASymbol("G push right low"));
+			InputSymbols.Add(new PDASymbol("G push front low"));
 			InputSymbols.Add(new PDASymbol("G push back low"));
+			InputSymbols.Add(new PDASymbol("G push left stop"));
+			InputSymbols.Add(new PDASymbol("G push right stop"));
+			InputSymbols.Add(new PDASymbol("G push front stop"));
 			InputSymbols.Add(new PDASymbol("G push back stop"));
+			InputSymbols.Add(new PDASymbol("G count one start"));
+			InputSymbols.Add(new PDASymbol("G count two start"));
+			InputSymbols.Add(new PDASymbol("G count three start"));
+			InputSymbols.Add(new PDASymbol("G count four start"));
+			InputSymbols.Add(new PDASymbol("G count five start"));
 			InputSymbols.Add(new PDASymbol("G count one high"));
 			InputSymbols.Add(new PDASymbol("G count two high"));
 			InputSymbols.Add(new PDASymbol("G count three high"));
@@ -1408,7 +1426,7 @@ namespace Agent
 					(o) => o == null, (g) => g == null, null,
 					(m) => m.Count == 0, null, null
 				),
-				GetState("Confusion"),
+				GetState("BlockUnavailable"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
@@ -2051,6 +2069,14 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("AbortAction"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("Wait"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
+					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("BlockUnavailable"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("Wait"),

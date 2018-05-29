@@ -2,41 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
-
 using Global;
+using UnityEngine.UI;
 
 namespace Agent
 {
-	public enum InconsistencyType
-	{
-		Missing,
-		Present
-	};
-
-
-	public class VisionEventArgs : EventArgs {
-
-		public Voxeme Voxeme { get; set; }
-		public InconsistencyType Inconsistency { get; set; }
-
-		public VisionEventArgs(Voxeme voxeme, InconsistencyType inconsistency)
-		{
-			Voxeme = voxeme;
-			Inconsistency = inconsistency;
-		}
-	}
-
 	public class SyntheticVision : MonoBehaviour {
-
-		public event EventHandler React;
-
-		public void OnReact(object sender, VisionEventArgs e)
-		{
-			if (React != null)
-			{
-				React(this, e);
-			}
-		}
 
 		private bool showFoV;
 		public bool ShowFoV
@@ -47,14 +18,11 @@ namespace Agent
 
 		public JointGestureDemo world;
 		public GameObject agent;
-		public EpistemicModel epistemicModel;
 		public GameObject sensor;
 		public Transform attached;
 		public List<Voxeme> visibleObjects;
-		public List<Voxeme> knownObjects;
-		public Dictionary<Voxeme,Bounds> knownObjectBounds = new Dictionary<Voxeme, Bounds>();
 
-		ObjectSelector objSelector = null;
+		ObjectSelector objSelector;
 		InteractionPrefsModalWindow interactionPrefs;
 
 		Timer reactionTimer;
@@ -65,43 +33,30 @@ namespace Agent
 
 		bool initVision = true;
 
+		public GameObject VisionCanvas;
+
 		void Start () {
+			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) VisionCanvas.GetComponentInChildren<RawImage>().texture;
 			interactionPrefs = world.GetComponent<InteractionPrefsModalWindow> ();
-			epistemicModel = agent.GetComponent<EpistemicModel> ();
 			if (attached != null)
 			{
 				gameObject.transform.SetParent(attached);
 			}
-
-			// Create reaction timer
-			// Create a timer
-			reactionTimer = new Timer();
-			// Tell the timer what to do when it elapses
-			reactionTimer.Elapsed += Surprise;
-			// Set it to go off after interval
-			reactionTimer.Interval = reactionDelayInterval;
-			// Don't start it
-			reactionTimer.Enabled = false;
+			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+//			visibleObjects = new HashSet<Voxeme>();
 		}
 
-		// Update is called once per frame
 		void Update () {
 			if (agent == null) {
 				return;
 			}
 
-//			sensor.transform.eulerAngles = attached.transform.eulerAngles;
-
-			//if (objSelector == null) {
-			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
-				//Debug.Log (objSelector);
-
 			ShowFoV = interactionPrefs.showSyntheticVision;
 			if (!ShowFoV) {
-				gameObject.GetComponent<Camera>().enabled = false;
+				VisionCanvas.SetActive(false);
 			}
 			else {
-				gameObject.GetComponent<Camera>().enabled = true;
+				VisionCanvas.SetActive(true);
 			}
 
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
@@ -111,56 +66,19 @@ namespace Agent
 						visibleObjects.Add (voxeme);
 						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
 					}
-
-					if (epistemicModel.engaged) {
-						if (!knownObjects.Contains (voxeme)) {
-							knownObjects.Add (voxeme);
-							knownObjectBounds.Add (voxeme, Helper.GetObjectWorldSize(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject)));
-							Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsKnown (voxeme.gameObject).ToString ()));
-
-							if (!initVision) {	// don't do this when you initially populate knownObjects
-								// but otherwise
-								// surprise!
-								surpriseArgs = new VisionEventArgs(voxeme,InconsistencyType.Present);
-								Debug.Log(string.Format("{0} Surprise!",voxeme.ToString()));
-								reactionTimer.Enabled = true;
-							}
-						}
-						else {
-							if (knownObjectBounds.ContainsKey (voxeme)) {
-								knownObjectBounds [voxeme] = Helper.GetObjectWorldSize(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject))	;
-							}
-						}
-					}
 				}
 				else {
 					if (visibleObjects.Contains (voxeme)) {
 						visibleObjects.Remove (voxeme);
 						//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}", voxeme.name, IsVisible (voxeme.gameObject).ToString ()));
 					}
-					else {	// if it's not visible
-						if (knownObjects.Contains (voxeme)) {	// but I know about it
-							if (IsVisible (knownObjectBounds [voxeme])) {	// and I know it should be here
-								// surprise!
-								knownObjects.Remove(voxeme);
-								knownObjectBounds.Remove(voxeme);
-								surpriseArgs = new VisionEventArgs(voxeme,InconsistencyType.Missing);
-								Debug.Log(string.Format("{0} Surprise!",voxeme.ToString()));
-								reactionTimer.Enabled = true;
-							}
-						}
-					}
 				}
 			}
+		}
 
-			if (surprise) {
-				NewInformation (surpriseArgs);
-				surprise = false;
-			}
-
-			if ((knownObjects.Count > 0) && (initVision)) {
-				initVision = false;
-			}
+		public bool IsVisible(Voxeme voxeme)
+		{
+			return visibleObjects.Contains(voxeme);
 		}
 
 		public bool IsVisible(Bounds bounds)
@@ -196,9 +114,9 @@ namespace Agent
 			foreach (Vector3 vertex in vertices) {
 				RaycastHit hitInfo;
 				bool hit = Physics.Raycast (
-					           vertex, Vector3.Normalize (origin - vertex),
-					           out hitInfo,
-					           Vector3.Magnitude (origin - vertex));
+							   vertex, Vector3.Normalize (origin - vertex),
+							   out hitInfo,
+							   Vector3.Magnitude (origin - vertex));
 				bool visible = (!hit) || ((hitInfo.point-vertex).magnitude < Constants.EPSILON);
 //				if ((visible) || 
 //					(new Bounds(bounds.center,new Vector3(bounds.size.x+Constants.EPSILON,
@@ -219,42 +137,6 @@ namespace Agent
 
 			return numVisibleVertices;
 		}
-
-		public bool IsKnown(GameObject obj) {
-			return knownObjects.Contains (obj.GetComponent<Voxeme>());
-		}
-
-		public void Surprise(object source, ElapsedEventArgs e) {
-			reactionTimer.Interval = reactionDelayInterval;
-			reactionTimer.Enabled = false;
-
-			surprise = true;
-		}
-
-		public void NewInformation(VisionEventArgs e) {
-			string color = e.Voxeme.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-
-			if (e.Inconsistency == InconsistencyType.Missing) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("Holy cow!  What happened to the {0} block?", color));
-			}
-			else if (e.Inconsistency == InconsistencyType.Present) {
-				OutputHelper.PrintOutput (Role.Affector, string.Format ("I didn't know that {0} block was there!", color));
-			}
-		}
-
-//		public void NewInformation(object content) {
-//			reactionTimer.Enabled = true;
-//		}
-//
-//		private void CheckIfStillVisible(object source, ElapsedEventArgs e) {
-//			PrintResponse();
-//			reactionTimer.Interval = reactionDelayInterval;
-//			reactionTimer.Enabled = false;
-//		}
-//
-//		void PrintResponse() {
-//			OutputHelper.PrintOutput (Role.Affector, "Holy shit!");
-//		}
 	}
 }
 
