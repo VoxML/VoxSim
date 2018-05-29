@@ -396,32 +396,37 @@ public class JointGestureDemo : AgentInteraction {
 		if ((UseTeaching) && (interactionLogic.useEpistemicModel)) {
 			Concept putL = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-			putL.Certainty = -1.0;
 			Concept pushL = epistemicModel.state.GetConcept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 			Concept pushG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-			pushL.Certainty = -1.0;
 			var putRelation = epistemicModel.state.GetRelation (putL, putG);
 			var pushRelation = epistemicModel.state.GetRelation (pushL, pushG);
-			putRelation.Certainty = -1.0;
-			pushRelation.Certainty = -1.0;
-			epistemicModel.state.UpdateEpisim (new []{putL, pushL}, new []{pushRelation, putRelation});
 
-			foreach (GameObject block in blocks) {	// limit to blocks only for now
-				Voxeme blockVox = block.GetComponent<Voxeme> ();
-				if (blockVox != null) {
-					if (dianaMemory.IsKnown(blockVox)) {
-						string color = string.Empty;
-						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+			if ((putL.Certainty > -1.0) && (pushL.Certainty > -1.0) && 
+				(pushRelation.Certainty > -1.0) && (putRelation.Certainty > -1.0)) { 
+				putL.Certainty = -1.0;
+				pushL.Certainty = -1.0;
+				putRelation.Certainty = -1.0;
+				pushRelation.Certainty = -1.0;
 
-						Concept blockConcept = epistemicModel.state.GetConcept (block.name, ConceptType.OBJECT, ConceptMode.G);
-
-						if (blockConcept.Certainty < 1.0) {
-							blockConcept.Certainty = 1.0;
-							epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
-						}
-					}
-				}
+				epistemicModel.state.UpdateEpisim (new []{putL, pushL}, new []{pushRelation, putRelation});
 			}
+
+//			foreach (GameObject block in blocks) {	// limit to blocks only for now
+//				Voxeme blockVox = block.GetComponent<Voxeme> ();
+//				if (blockVox != null) {
+//					if (dianaMemory.IsKnown(blockVox)) {
+//						string color = string.Empty;
+//						color = blockVox.voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
+//
+//						Concept blockConcept = epistemicModel.state.GetConcept (block.name, ConceptType.OBJECT, ConceptMode.G);
+//
+//						if (blockConcept.Certainty < 1.0) {
+//							blockConcept.Certainty = 1.0;
+//							epistemicModel.state.UpdateEpisim (new Concept[] { blockConcept }, new Relation[] { });
+//						}
+//					}
+//				}
+//			}
 		}
 
 
@@ -4396,27 +4401,28 @@ public class JointGestureDemo : AgentInteraction {
 			if (concepts.GetConcepts ().ContainsKey (ConceptMode.L)) {
 				List<Concept> linguisticConcepts = concepts.GetConcepts () [ConceptMode.L];
 
-                List<Concept> conceptsToUpdate = new List<Concept>();
-                List<Relation> relationsToUpdate = new List<Relation>();
+				List<Concept> conceptsToUpdate = new List<Concept> ();
+				List<Relation> relationsToUpdate = new List<Relation> ();
 				// if mentioned, introduce if not used already
 				foreach (Concept concept in linguisticConcepts) {
-					if (utterance.ToLower().Contains (concept.Name.ToLower ())) {
+					if (utterance.ToLower ().Contains (concept.Name.ToLower ())) {
 						concept.Certainty = concept.Certainty < 0.5 && concept.Certainty >= 0.0 ? 0.5 : concept.Certainty;
 
-						foreach (Concept relatedConcept in epistemicModel.state.GetRelated(concept))
-						{
-							Relation relation = epistemicModel.state.GetRelation(concept, relatedConcept);
+						foreach (Concept relatedConcept in epistemicModel.state.GetRelated(concept)) {
+							Relation relation = epistemicModel.state.GetRelation (concept, relatedConcept);
 							double prevCertainty = relation.Certainty;
-							double newCertainty = Math.Min(concept.Certainty, relatedConcept.Certainty);
-							if (Math.Abs(prevCertainty - newCertainty) > 0.01)
-							{
+							double newCertainty = Math.Min (concept.Certainty, relatedConcept.Certainty);
+							if (Math.Abs (prevCertainty - newCertainty) > 0.01) {
 								relation.Certainty = newCertainty;
-								relationsToUpdate.Add(relation);
+								relationsToUpdate.Add (relation);
 							}
 						}
 					}
 				}
-                epistemicModel.state.UpdateEpisim (conceptsToUpdate.ToArray(), relationsToUpdate.ToArray());
+
+				if (conceptsToUpdate.Count + relationsToUpdate.Count > 0) {
+					epistemicModel.state.UpdateEpisim (conceptsToUpdate.ToArray (), relationsToUpdate.ToArray ());
+				}
 			}
 		}
 	}

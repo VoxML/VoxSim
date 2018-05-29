@@ -2780,15 +2780,24 @@ namespace Agent
 					return;
 				}
 					
-				if (state.Name == "Wait") {
+				/*if (state.Name == "BeginInteraction") {
+					epistemicModel.state.InitiateEpisim ();
+					StateTransitionHistory.Push (symbolStatePair);
+				}
+				else */if (state.Name == "Wait") {
 					if (CurrentState.Name != "TrackPointing") {
 						StateTransitionHistory.Push (symbolStatePair);
 					}
 				}
 				else if (state.Name == "TrackPointing") {
-					if (StateTransitionHistory.Peek().Item2.Name != "TrackPointing") {
+					if (StateTransitionHistory.Peek ().Item2.Name != "TrackPointing") {
 						StateTransitionHistory.Push (symbolStatePair);
 					}
+				}
+				else if (state.Name == "EndState") {
+					Debug.Log ("Disengaging EpiSim");
+					epistemicModel.state.DisengageEpisim ();
+					StateTransitionHistory.Push (symbolStatePair);
 				}
 				else {
 					StateTransitionHistory.Push (symbolStatePair);
