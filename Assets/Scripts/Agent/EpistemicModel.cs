@@ -123,7 +123,7 @@ namespace Agent {
 
 
 			// now add more concepts (objects)
-			Concept yellowBlock = new Concept("block1", ConceptType.OBJECT, ConceptMode.G);
+			/*Concept yellowBlock = new Concept("block1", ConceptType.OBJECT, ConceptMode.G);
 			Concept smPurpleBlock = new Concept("block2", ConceptType.OBJECT, ConceptMode.G);
 			Concept blackBlock = new Concept("block3", ConceptType.OBJECT, ConceptMode.G);
 			Concept greenBlock = new Concept("block4", ConceptType.OBJECT, ConceptMode.G);
@@ -138,7 +138,7 @@ namespace Agent {
 			state.AddConcept(orangeBlock);
 			state.AddConcept(redBlock);
 			state.AddConcept(lgPurpleBlock);
-			state.AddConcept(whiteBlock);
+			state.AddConcept(whiteBlock);*/
 
 			return state;
 		}

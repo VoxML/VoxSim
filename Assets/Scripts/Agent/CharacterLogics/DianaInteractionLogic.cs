@@ -2643,8 +2643,24 @@ namespace Agent
 				new Concept[]{epistemicModel.state.GetConcept("NEVERMIND",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S GRAB"),
 				new Concept[]{epistemicModel.state.GetConcept("GRAB",ConceptType.ACTION, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("S PUT"),
-				new Concept[]{epistemicModel.state.GetConcept("PUT", ConceptType.ACTION, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S RED"),
+				new Concept[]{epistemicModel.state.GetConcept("RED",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S GREEN"),
+				new Concept[]{epistemicModel.state.GetConcept("GREEN",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S YELLOW"),
+				new Concept[]{epistemicModel.state.GetConcept("YELLOW",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S ORANGE"),
+				new Concept[]{epistemicModel.state.GetConcept("ORANGE",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S BLACK"),
+				new Concept[]{epistemicModel.state.GetConcept("BLACK",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S PURPLE"),
+				new Concept[]{epistemicModel.state.GetConcept("PURPLE",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+//			mapping.Add(GetInputSymbolByName("S PINK"),
+//				new Concept[]{epistemicModel.state.GetConcept("PINK",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S WHITE"),
+				new Concept[]{epistemicModel.state.GetConcept("WHITE",ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+//			mapping.Add(GetInputSymbolByName("S PUT"),
+//				new Concept[]{epistemicModel.state.GetConcept("PUT", ConceptType.ACTION, ConceptMode.L)}.ToList());
 
 			foreach (PDASymbol symbol in symbols) {
 				if (!mapping.ContainsKey (symbol)) {
