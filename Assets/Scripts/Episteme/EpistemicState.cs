@@ -103,6 +103,12 @@ namespace Episteme
 			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimInitRoute, Jsonifier.JsonifyEpistemicStateInitiation(this),"okay", "error");
 		}
 
+		public void DisengageEpisim()
+		{
+			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimUpdateRoute, "0","okay", "error");
+		}
+
+
 		public void UpdateEpisim(Concept[] updatedConcepts, Relation[] updatedRelations)
 		{
 			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimUpdateRoute, Jsonifier.JsonifyUpdates(this, updatedConcepts, updatedRelations),"okay", "error");
