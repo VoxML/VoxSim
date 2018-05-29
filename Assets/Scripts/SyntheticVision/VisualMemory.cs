@@ -31,7 +31,7 @@ namespace Agent
 
 		private VisionEventArgs _surpriseArgs;
 
-		public bool _percievingInitialConfiguration;
+		public bool _perceivingInitialConfiguration;
 
 		void Start()
 		{
@@ -47,7 +47,7 @@ namespace Agent
 			// but don't start it yet
 			_reactionTimer.Enabled = false;
 
-			_percievingInitialConfiguration = true;
+			_perceivingInitialConfiguration = true;
 			_memorized = new Dictionary<Voxeme, GameObject>();
 			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) MemoryCanvas.GetComponentInChildren<RawImage>().texture;
 		}
@@ -76,7 +76,7 @@ namespace Agent
 						clone = GetVisualClone(block.gameObject);
 						_memorized.Add(voxeme, clone);
 
-						if (!_percievingInitialConfiguration)
+						if (!_perceivingInitialConfiguration)
 						{
 							// don't do this when you initially populate knownObjects
 							// but otherwise
@@ -143,9 +143,9 @@ namespace Agent
 					highlighter.lineColor = new Color(1.0f, 0.0f, 0.0f, 0.8f);
 				}
 			}
-			if (_memorized.Count > 0 && _percievingInitialConfiguration) {
+			if (_memorized.Count > 0 && _perceivingInitialConfiguration) {
 				// effectively this goes false after the first frame
-				_percievingInitialConfiguration = false;
+				_perceivingInitialConfiguration = false;
 			}
 
 			if (_surprise) {

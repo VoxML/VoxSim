@@ -4404,9 +4404,14 @@ public class JointGestureDemo : AgentInteraction {
 				List<Concept> conceptsToUpdate = new List<Concept> ();
 				List<Relation> relationsToUpdate = new List<Relation> ();
 				// if mentioned, introduce if not used already
+//				Debug.Log (utterance.ToLower ());
 				foreach (Concept concept in linguisticConcepts) {
+//					Debug.Log (concept.Name.ToLower ());
 					if (utterance.ToLower ().Contains (concept.Name.ToLower ())) {
+//						Debug.Log (string.Format("{0} certainty: {1}",concept.Name.ToLower (),concept.Certainty));
 						concept.Certainty = concept.Certainty < 0.5 && concept.Certainty >= 0.0 ? 0.5 : concept.Certainty;
+//						Debug.Log (string.Format("{0} certainty: {1}",concept.Name.ToLower (),concept.Certainty));
+						conceptsToUpdate.Add (concept);
 
 						foreach (Concept relatedConcept in epistemicModel.state.GetRelated(concept)) {
 							Relation relation = epistemicModel.state.GetRelation (concept, relatedConcept);

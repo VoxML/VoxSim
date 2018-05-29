@@ -2780,11 +2780,11 @@ namespace Agent
 					return;
 				}
 					
-				/*if (state.Name == "BeginInteraction") {
+				if (state.Name == "BeginInteraction") {
 					epistemicModel.state.InitiateEpisim ();
 					StateTransitionHistory.Push (symbolStatePair);
 				}
-				else */if (state.Name == "Wait") {
+				else if (state.Name == "Wait") {
 					if (CurrentState.Name != "TrackPointing") {
 						StateTransitionHistory.Push (symbolStatePair);
 					}
