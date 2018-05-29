@@ -422,7 +422,6 @@ public class JointGestureDemo : AgentInteraction {
 					}
 				}
 			}
->>>>>>> master
 		}
 
 
