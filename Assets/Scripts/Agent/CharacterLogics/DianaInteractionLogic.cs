@@ -2635,12 +2635,20 @@ namespace Agent
 				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
 					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
 
+			mapping.Add(GetInputSymbolByName("S THIS"),
+				new Concept[]{epistemicModel.state.GetConcept("THIS",ConceptType.ACTION, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S THAT"),
+				new Concept[]{epistemicModel.state.GetConcept("THAT",ConceptType.ACTION, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S THERE"),
+				new Concept[]{epistemicModel.state.GetConcept("THERE",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S YES"),
 				new Concept[]{epistemicModel.state.GetConcept("YES",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S NO"),
 				new Concept[]{epistemicModel.state.GetConcept("NO",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S NEVERMIND"),
 				new Concept[]{epistemicModel.state.GetConcept("NEVERMIND",ConceptType.ACTION, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("S NOTHING"),
+				new Concept[]{epistemicModel.state.GetConcept("NOTHING",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S GRAB"),
 				new Concept[]{epistemicModel.state.GetConcept("GRAB",ConceptType.ACTION, ConceptMode.L)}.ToList());
 			mapping.Add(GetInputSymbolByName("S RED"),

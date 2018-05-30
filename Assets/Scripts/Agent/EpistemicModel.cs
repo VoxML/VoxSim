@@ -27,12 +27,13 @@ namespace Agent {
 			Concept pointG = new Concept ("point", ConceptType.ACTION, ConceptMode.G);
 			Concept deixis_thisL = new Concept("THIS", ConceptType.ACTION, ConceptMode.L);
 			Concept deixis_thatL = new Concept("THAT", ConceptType.ACTION, ConceptMode.L);
+			Concept deixis_thereL = new Concept("THERE", ConceptType.ACTION, ConceptMode.L);
 			Concept grabG = new Concept ("grab", ConceptType.ACTION, ConceptMode.G);
 			Concept grabL = new Concept ("GRAB", ConceptType.ACTION, ConceptMode.L);
 			Concept moveG = new Concept ("move", ConceptType.ACTION, ConceptMode.G);
-			Concept moveL = new Concept ("PUT", ConceptType.ACTION, ConceptMode.L);
+			//Concept moveL = new Concept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept pushG = new Concept ("push", ConceptType.ACTION, ConceptMode.G);
-			Concept pushL = new Concept ("PUSH", ConceptType.ACTION, ConceptMode.L);
+			//Concept pushL = new Concept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 
 			Concept posackG = new Concept("posack", ConceptType.ACTION, ConceptMode.G);
 			Concept posackL = new Concept("YES", ConceptType.ACTION, ConceptMode.L);
@@ -47,18 +48,20 @@ namespace Agent {
 			state.AddConcept(pointG);
 			state.AddConcept(deixis_thisL);
 			state.AddConcept(deixis_thatL);
+			state.AddConcept(deixis_thereL);
 			state.AddRelation(pointG, deixis_thisL, true);
 			state.AddRelation(pointG, deixis_thatL, true);
+			state.AddRelation(pointG, deixis_thereL, true);
 
 			state.AddConcept(grabG);
 			state.AddConcept(grabL);
 			state.AddRelation(grabG, grabL, true);
 			state.AddConcept(moveG);
-			state.AddConcept(moveL);
-			state.AddRelation(moveG, moveL, true);
+//			state.AddConcept(moveL);
+//			state.AddRelation(moveG, moveL, true);
 			state.AddConcept(pushG);
-			state.AddConcept(pushL);
-			state.AddRelation(pushG, pushL, true);
+//			state.AddConcept(pushL);
+//			state.AddRelation(pushG, pushL, true);
 
 			state.AddConcept(posackG);
 			state.AddConcept(posackL);
