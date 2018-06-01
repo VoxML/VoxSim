@@ -263,6 +263,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
+			Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
 			leftRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			leftRegionHighlight.name = "LeftRegionHighlight";
 			leftRegionHighlight.transform.position = leftRegion.center;
@@ -280,6 +281,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
+			Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
 			rightRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			rightRegionHighlight.name = "RightRegionHighlight";
 			rightRegionHighlight.transform.position = rightRegion.center;
@@ -294,7 +296,8 @@ public class JointGestureDemo : AgentInteraction {
 			frontRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
 				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 				Helper.GetObjectWorldSize(demoSurface).min.z+Constants.EPSILON),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 
+				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON, 
 					Helper.GetObjectWorldSize(demoSurface).center.z));
 			frontRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			frontRegionHighlight.name = "FrontRegionHighlight";
@@ -310,7 +313,8 @@ public class JointGestureDemo : AgentInteraction {
 			backRegion = new Region (new Vector3 (Helper.GetObjectWorldSize(demoSurface).min.x+Constants.EPSILON,
 				Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 				Helper.GetObjectWorldSize(demoSurface).center.z),
-				new Vector3 (0.85f, Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
+				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x+Constants.EPSILON,
+					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
 			backRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			backRegionHighlight.name = "BackRegionHighlight";
@@ -394,22 +398,22 @@ public class JointGestureDemo : AgentInteraction {
 		}
 			
 		if ((UseTeaching) && (interactionLogic.useEpistemicModel)) {
-			Concept putL = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
+			//Concept putL = epistemicModel.state.GetConcept ("PUT", ConceptType.ACTION, ConceptMode.L);
 			Concept putG = epistemicModel.state.GetConcept ("move", ConceptType.ACTION, ConceptMode.G);
-			Concept pushL = epistemicModel.state.GetConcept ("PUSH", ConceptType.ACTION, ConceptMode.L);
+			//Concept pushL = epistemicModel.state.GetConcept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 			Concept pushG = epistemicModel.state.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
-			var putRelation = epistemicModel.state.GetRelation (putL, putG);
-			var pushRelation = epistemicModel.state.GetRelation (pushL, pushG);
+			//var putRelation = epistemicModel.state.GetRelation (putL, putG);
+			//var pushRelation = epistemicModel.state.GetRelation (pushL, pushG);
 
-			if ((putL.Certainty > -1.0) && (pushL.Certainty > -1.0) && 
-				(pushRelation.Certainty > -1.0) && (putRelation.Certainty > -1.0)) { 
-				putL.Certainty = -1.0;
-				pushL.Certainty = -1.0;
-				putRelation.Certainty = -1.0;
-				pushRelation.Certainty = -1.0;
-
-				epistemicModel.state.UpdateEpisim (new []{putL, pushL}, new []{pushRelation, putRelation});
-			}
+//			if ((putL.Certainty > -1.0) && (pushL.Certainty > -1.0) && 
+//				(pushRelation.Certainty > -1.0) && (putRelation.Certainty > -1.0)) { 
+//				putL.Certainty = -1.0;
+//				pushL.Certainty = -1.0;
+//				putRelation.Certainty = -1.0;
+//				pushRelation.Certainty = -1.0;
+//
+//				epistemicModel.state.UpdateEpisim (new []{putL, pushL}, new []{pushRelation, putRelation});
+//			}
 
 //			foreach (GameObject block in blocks) {	// limit to blocks only for now
 //				Voxeme blockVox = block.GetComponent<Voxeme> ();
@@ -2628,7 +2632,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void ExecuteEvent(object[] content) {
 		if ((interactionLogic.ActionOptions.Count > 0) && 
-			(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grasp"))) {
+			((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grasp")) ||
+				(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")))) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 		}
 	}
@@ -3729,6 +3734,7 @@ public class JointGestureDemo : AgentInteraction {
 		List<string> pushOptions = new List<string> ();
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
 
+		Debug.Log (string.Format ("{0} placement options", placementOptions.Count));
 		foreach (object po in placementOptions) {
 			if (po.GetType () == typeof(GameObject)) {
 				Debug.Log ((po as GameObject));
@@ -3945,7 +3951,9 @@ public class JointGestureDemo : AgentInteraction {
 		List<GameObject> objectMatches = new List<GameObject> ();
 		Bounds themeBounds = Helper.GetObjectWorldSize (theme);
 		foreach (Region region in orthogonalRegions) {
+			Debug.Log (string.Format ("{0}:{1}", region.center, region.Contains (theme)));
 			if (region.Contains(theme)) {
+				Debug.Log (string.Format ("{0} contains {1}", region, theme));
 				foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
 					if (block.activeInHierarchy) {
 						if (block != theme) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)

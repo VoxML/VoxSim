@@ -219,6 +219,9 @@ namespace Satisfaction {
 
 				if ((agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.LeftHand)) ||
 					(agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.RightHand))) {
+					foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+						handRot.enabled = false;
+					}
 					satisfied = true;
 				}
 //				if (theme != null) {
@@ -247,6 +250,9 @@ namespace Satisfaction {
 
 				if ((!agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.LeftHand)) ||
 					(!agent.GetComponent<InteractionSystem> ().IsPaused (FullBodyBipedEffector.RightHand))) {
+					foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+						handRot.enabled = true;
+					}
 					satisfied = true;
 //					ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 				}

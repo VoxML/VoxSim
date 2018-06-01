@@ -55,6 +55,10 @@ public class Rigging : MonoBehaviour {
 				}
 			}
 
+			foreach (FixHandRotation handRot in gameObject.GetComponentsInChildren<FixHandRotation>()) {
+				handRot.enabled = true;
+			}
+
 			usePhysicsRig = false;
 		}
 		else {
