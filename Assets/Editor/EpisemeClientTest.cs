@@ -151,7 +151,6 @@ public class EpisemeClientTest : MonoBehaviour
 		model.InitiateEpisim();
 		var moveL = model.GetConcept("PUT", ConceptType.ACTION, ConceptMode.L);
 		var pushL = model.GetConcept("PUSH", ConceptType.ACTION, ConceptMode.L);
-
 		if ((moveL != null) && (pushL != null)) {
 			moveL.Certainty = -1;
 			pushL.Certainty = -1;
@@ -160,6 +159,14 @@ public class EpisemeClientTest : MonoBehaviour
 	        model.UpdateEpisim(new[] {moveL, pushL}, new Relation[] { });
 		}
 
+	[Test]
+	public void TestDisengage()
+	{
+		mock();
+		model.InitiateEpisim();
+		System.Threading.Thread.Sleep(2000);
+		model.DisengageEpisim();
+		System.Threading.Thread.Sleep(2000);
 	}
 
 }
