@@ -158,6 +158,7 @@ public class EpisemeClientTest : MonoBehaviour
 			Debug.Log(json);
 	        model.UpdateEpisim(new[] {moveL, pushL}, new Relation[] { });
 		}
+	}
 
 	[Test]
 	public void TestDisengage()
