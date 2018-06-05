@@ -797,6 +797,10 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("S DOWN"));
 			InputSymbols.Add(new PDASymbol("S NOTHING"));
 			InputSymbols.Add(new PDASymbol("S NEVERMIND"));
+			InputSymbols.Add(new PDASymbol("S NP"));
+			InputSymbols.Add(new PDASymbol("S PP"));
+			InputSymbols.Add(new PDASymbol("S VP"));
+			InputSymbols.Add(new PDASymbol("S S"));
 			InputSymbols.Add(new PDASymbol("P l"));
 			InputSymbols.Add(new PDASymbol("P r"));
 
@@ -844,7 +848,8 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(											// instruction operated by input signal
 				GetStates("Wait"),																// in this state
-				GetInputSymbolsByName("G left point high","G right point high"),				// when we get this message
+				GetInputSymbolsByName("G left point high","G right point high",
+										"G left point start","G right point start"),			// when we get this message
 				GenerateStackSymbol(null, null, null, null, null, null),						// and this is the top of the stack
 				GetState("SituateDeixis"),														// go to this state
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,				// and do this to the stack
@@ -852,7 +857,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G left point high","G right point high",
+				GetInputSymbolsByName("G left point high","G right point high","G left point start","G right point start",
 					"S THIS","S THAT","S THERE"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, null, null, null, null
@@ -863,7 +868,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G left point high","G right point high",
+				GetInputSymbolsByName("G left point high","G right point high","G left point start","G right point start",
 					"S THIS","S THAT","S THERE"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, null, null, null, null
@@ -874,7 +879,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G left point high","G right point high",
+				GetInputSymbolsByName("G left point high","G right point high","G left point start","G right point start",
 					"S THIS","S THAT","S THERE"),
 				GenerateStackSymbolFromConditions(
 					null, null, null, null, 
@@ -902,7 +907,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G grab high","S GRAB"),
+				GetInputSymbolsByName("G grab high","G grab start","S GRAB"),
 				GenerateStackSymbolFromConditions(
 					(o) => o == null, (g) => g == null, 
 					null, null, null, null
@@ -914,7 +919,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G grab high","S GRAB"),
+				GetInputSymbolsByName("G grab high","G grab start","S GRAB"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, (g) => g == null, 
 					null, null, null, null
@@ -929,7 +934,12 @@ namespace Agent
 					"G grab move right high",
 					"G grab move front high",
 					"G grab move back high",
-					"G grab move up high"),
+					"G grab move up high",
+					"G grab move left start",
+					"G grab move right start",
+					"G grab move front start",
+					"G grab move back start",
+					"G grab move up start"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
@@ -964,7 +974,11 @@ namespace Agent
 				GetInputSymbolsByName("G push left high",
 					"G push right high",
 					"G push front high",
-					"G push back high"),
+					"G push back high",
+					"G push left start",
+					"G push right start",
+					"G push front start",
+					"G push back start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("StartPush"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
@@ -1044,7 +1058,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S YES","G posack high"),
+				GetInputSymbolsByName("S YES","G posack high","G posack start"),
 				GenerateStackSymbolFromConditions(											// condition set
 					null, null, null,
 					null, null, (s) => s.Count > 0											// condition: # suggestions > 0
@@ -1054,7 +1068,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S NO","G negack high"),
+				GetInputSymbolsByName("S NO","G negack high","G negack start"),
 				GenerateStackSymbolFromConditions(
 					null, null, null,
 					(m) => m.Count == 0, null, (s) => s.Count > 0
@@ -1082,7 +1096,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S NO","G negack high"),
+				GetInputSymbolsByName("S NO","G negack high","G negack start"),
 				GenerateStackSymbolFromConditions(
 					null, null, null,
 					(m) => m.Count > 1, null, null
@@ -1092,7 +1106,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S NO","G negack high"),
+				GetInputSymbolsByName("S NO","G negack high","G negack start"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, (r) => r != null && r.max != r.min,
 					(m) => m.Count == 1, null, null
@@ -1102,7 +1116,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S NO","G negack high"),
+				GetInputSymbolsByName("S NO","G negack high","G negack start"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, null,
 					(m) => m.Count == 1, null, (s) => s.Count > 0
@@ -1475,7 +1489,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, (g) => g == null, null,
 					(m) => m.Count > 0, 
@@ -1489,7 +1503,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, null,
 					(m) => m.Count > 0, 
@@ -1503,7 +1517,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, (g) => g == null, null,
 					(m) => m.Count > 0,
@@ -1517,7 +1531,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, null,
 					(m) => m.Count > 0,
@@ -1531,7 +1545,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, null,
 					(m) => m.Count > 1, null, null
@@ -1541,7 +1555,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, null,
 					(m) => m.Count > 1, null, null
@@ -1551,7 +1565,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, (r) => r != null && r.max != r.min,
 					(m) => m.Count == 1, null, null
@@ -1561,7 +1575,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, (r) => r != null && r.max != r.min,
 					(m) => m.Count == 1, null, null
@@ -1571,7 +1585,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, (r) => r == null,
 					(m) => m.Count == 1, null, null
@@ -1581,7 +1595,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, (r) => r == null,
 					(m) => m.Count == 1, null, null
@@ -1630,7 +1644,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, null, null, null, null, null
 				),	
@@ -1661,7 +1675,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					(o) => o == null, (g) => g == null,
 					(r) => r != null && r.max != r.min,
@@ -1674,7 +1688,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, (r) => r != null && r.max != r.min,
 					null, null, null
@@ -1686,7 +1700,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, (r) => r != null && r.max != r.min,
 					null, null, null
@@ -1710,7 +1724,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					null, null, (r) => r != null && r.max != r.min,
 					null, null, (s) => s.Count == 0
@@ -1756,7 +1770,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
-				GetInputSymbolsByName("G left point high","G right point high"),
+				GetInputSymbolsByName("G left point high","G right point high","G left point start","G right point start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1904,7 +1918,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrabMove"),
-				GetInputSymbolsByName("G grab move down high","G grab high","G grab stop"),
+				GetInputSymbolsByName("G grab move down high","G grab high","G grab move down start","G grab start","G grab stop"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
@@ -1915,11 +1929,16 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrabMove"),
-				GetInputSymbolsByName("G grab move left high",//"G grab move left low",
-					"G grab move right high",//"G grab move right low",
-					"G grab move front high",//"G grab move front low",
-					"G grab move back high",//"G grab move back low",
-					"G grab move up high"/*,"G grab move up low"*/),
+				GetInputSymbolsByName("G grab move left high",
+					"G grab move right high",
+					"G grab move front high",
+					"G grab move back high",
+					"G grab move up high",
+					"G grab move left start",
+					"G grab move right start",
+					"G grab move front start",
+					"G grab move back start",
+					"G grab move up start"),
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, 
 					null, null, null, null
@@ -2020,7 +2039,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
-				GetInputSymbolsByName("G posack high","S YES"),
+				GetInputSymbolsByName("G posack high","G posack start","S YES"),
 				GenerateStackSymbolFromConditions(
 					null, null, null,
 					null, (a) => a.Count > 0, null
@@ -2031,7 +2050,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, null, null,
 					null, (a) => a.Count > 1, null
@@ -2041,7 +2060,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
-				GetInputSymbolsByName("G negack high","S NO"),
+				GetInputSymbolsByName("G negack high","G negack start","S NO"),
 				GenerateStackSymbolFromConditions(
 					null, null, null,
 					null, (a) => a.Count == 1, null
