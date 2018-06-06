@@ -626,6 +626,7 @@ namespace Agent
 					GetState("Suggest"),
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null))));
 
+			States.Add(new PDAState("ParseSentence",null));
 			States.Add(new PDAState("TrackPointing",null));
 			States.Add(new PDAState("SituateDeixis",
 				new TransitionGate(
@@ -1042,9 +1043,17 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S S"),
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
-				GetState("InterpretSentence"),
+				GenerateStackSymbol(null, null, null, null, null, null),	
+				GetState("ParseSentence"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			// if items have value, check and see if sentence is consistent with them
+//			TransitionRelation.Add(new PDAInstruction(
+//				GetStates("Wait"),
+//				GetInputSymbolsByName("S S"),
+//				GenerateStackSymbol(null, null, null, null, null, null),	
+//				GetState("InterpretSentence"),
+//				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("TrackPointing"),

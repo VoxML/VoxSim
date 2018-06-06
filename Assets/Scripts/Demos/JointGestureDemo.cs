@@ -28,6 +28,7 @@ public class JointGestureDemo : AgentInteraction {
 	CSUClient csuClient;
 	EventManager eventManager;
 	ObjectSelector objSelector;
+	PluginImport commBridge;
 
 	GameObject Diana;
 	GameObject leftGrasper;
@@ -162,6 +163,7 @@ public class JointGestureDemo : AgentInteraction {
 		windowScaleFactor.y = (float)Screen.height/(float)Screen.currentResolution.height;
 
 		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
@@ -617,6 +619,14 @@ public class JointGestureDemo : AgentInteraction {
 
 		Debug.Log (prevMessage);
 		return prevMessage;
+	}
+
+	string GetSpeechString(string receivedData, string constituentTag) {
+		//		Debug.Log (receivedData);
+		//		Debug.Log (gestureCode);
+		List<string> content = receivedData.Replace (constituentTag, "").Split (',').ToList();
+
+		return content[content.Count-1];
 	}
 
 	List<float> GetGestureVector(string receivedData, string gestureCode) {
@@ -2182,6 +2192,37 @@ public class JointGestureDemo : AgentInteraction {
 			//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
 			//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
 			//		}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	public void ParseSentence(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = null;
+
+			if (content [0] != null) {
+				message = GetSpeechString(
+					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+
+			}
+			Debug.Log (message);
+			// do stuff here
+
+			interactionLogic.RewriteStack(new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+				interactionLogic.GenerateStackSymbol (null, null, null,
+					null, new List<string>(new string[]{ commBridge.NLParse (message) }), null)));
 			break;
 
 		default:
