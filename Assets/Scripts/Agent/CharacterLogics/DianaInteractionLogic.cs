@@ -1040,6 +1040,13 @@ namespace Agent
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S S"),
+				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+				GetState("InterpretSentence"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
 				GetStates("TrackPointing"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),
