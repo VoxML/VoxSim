@@ -2220,9 +2220,93 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (message);
 			// do stuff here
 
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	public void ParseVP(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = null;
+
+			if (content [0] != null) {
+				message = GetSpeechString(
+					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+
+			}
+			Debug.Log (message);
+			// do stuff here
+
 			interactionLogic.RewriteStack(new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 				interactionLogic.GenerateStackSymbol (null, null, null,
 					null, new List<string>(new string[]{ commBridge.NLParse (message) }), null)));
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	public void ParseNP(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = null;
+
+			if (content [0] != null) {
+				message = GetSpeechString(
+					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+
+			}
+			Debug.Log (message);
+			// do stuff here
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	public void ParsePP(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = null;
+
+			if (content [0] != null) {
+				message = GetSpeechString(
+					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+
+			}
+			Debug.Log (message);
+			// do stuff here
+
 			break;
 
 		default:

@@ -627,6 +627,9 @@ namespace Agent
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null))));
 
 			States.Add(new PDAState("ParseSentence",null));
+			States.Add(new PDAState("ParseVP",null));
+			States.Add(new PDAState("ParseNP",null));
+			States.Add(new PDAState("ParsePP",null));
 			States.Add(new PDAState("TrackPointing",null));
 			States.Add(new PDAState("SituateDeixis",
 				new TransitionGate(
@@ -722,6 +725,7 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G grab move front start"));
 			InputSymbols.Add(new PDASymbol("G grab move back start"));
 			InputSymbols.Add(new PDASymbol("G grab move up start"));
+			InputSymbols.Add(new PDASymbol("G grab move down start"));
 			InputSymbols.Add(new PDASymbol("G grab move left high"));
 			InputSymbols.Add(new PDASymbol("G grab move right high"));
 			InputSymbols.Add(new PDASymbol("G grab move front high"));
@@ -771,6 +775,8 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G count three stop"));
 			InputSymbols.Add(new PDASymbol("G count four stop"));
 			InputSymbols.Add(new PDASymbol("G count five stop"));
+			InputSymbols.Add(new PDASymbol("G nevermind start"));
+			InputSymbols.Add(new PDASymbol("G nevermind stop"));
 			InputSymbols.Add(new PDASymbol("G engage stop"));
 			InputSymbols.Add(new PDASymbol("S YES"));
 			InputSymbols.Add(new PDASymbol("S NO"));
@@ -1024,7 +1030,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
@@ -1033,7 +1039,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, 
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
@@ -1045,6 +1051,35 @@ namespace Agent
 				GetInputSymbolsByName("S S"),
 				GenerateStackSymbol(null, null, null, null, null, null),	
 				GetState("ParseSentence"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S VP"),
+				GenerateStackSymbol(null, null, null, null, null, null),	
+				GetState("ParseVP"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S NP"),
+				GenerateStackSymbol(null, null, null, null, null, null),	
+				GetState("ParseNP"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("Wait"),
+				GetInputSymbolsByName("S PP"),
+				GenerateStackSymbol(null, null, null, null, null, null),	
+				GetState("ParsePP"),
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+			TransitionRelation.Add(new PDAInstruction(
+				GetStates("ParseVP"),
+				null,
+				GenerateStackSymbolFromConditions(null, null, null, null, 
+					(a) => a.Count == 1, null),	
+				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
 			// if items have value, check and see if sentence is consistent with them
@@ -1094,7 +1129,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 					GenerateStackSymbolFromConditions(null, null, null, null, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
@@ -1103,7 +1138,7 @@ namespace Agent
 			
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Suggest"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, 
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
@@ -1621,7 +1656,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null ,null, null, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("put"))).ToList().Count == 0)), null),	
@@ -1630,7 +1665,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null ,null, null, 
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null),	
@@ -1669,7 +1704,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(
 					null, null, null, null, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
@@ -1680,7 +1715,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RegionAsGoal"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(
 					null, null, null, null, 
 					(a) => ((a.Count > 0) &&
@@ -1761,7 +1796,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
-				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, 
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count == 0)), null),	
@@ -1770,7 +1805,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("RequestObject"),
-				GetInputSymbolsByName("S NOTHING", "S NEVERMIND"),
+				GetInputSymbolsByName("S NOTHING", "S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null, null, null, 
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
@@ -2086,7 +2121,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null,null,null,null,
 					(a) => ((a.Count == 0) || ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("put"))).ToList().Count == 0)),null),	
@@ -2095,7 +2130,7 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
-				GetInputSymbolsByName("S NEVERMIND"),
+				GetInputSymbolsByName("S NEVERMIND", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null,null,null,null,
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("put"))).ToList().Count > 0),null),	
@@ -2669,6 +2704,49 @@ namespace Agent
 			mapping.Add(GetInputSymbolByName("G push back high"),
 				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
 					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+
+			mapping.Add(GetInputSymbolByName("G left point start"),
+				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
+			mapping.Add(GetInputSymbolByName("G right point start"),
+				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
+			mapping.Add(GetInputSymbolByName("G posack start"),
+				new Concept[]{epistemicModel.state.GetConcept("posack",ConceptType.ACTION, ConceptMode.G)}.ToList());
+			mapping.Add(GetInputSymbolByName("G negack start"),
+				new Concept[]{epistemicModel.state.GetConcept("negack",ConceptType.ACTION, ConceptMode.G)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab start"),
+				new Concept[]{epistemicModel.state.GetConcept("grab",ConceptType.ACTION, ConceptMode.G)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab move left start"),
+				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("LEFT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab move right start"),
+				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab move front start"),
+				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("FRONT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab move back start"),
+				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab move up start"),
+				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("UP", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G grab move down start"),
+				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("DOWN", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push left start"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("LEFT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push right start"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push front start"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("FRONT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G push back start"),
+				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
+					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
+			mapping.Add(GetInputSymbolByName("G nevermind start"),
+				new Concept[]{epistemicModel.state.GetConcept("NEVERMIND",ConceptType.ACTION, ConceptMode.L)}.ToList());
 
 			mapping.Add(GetInputSymbolByName("S THIS"),
 				new Concept[]{epistemicModel.state.GetConcept("THIS",ConceptType.ACTION, ConceptMode.L)}.ToList());

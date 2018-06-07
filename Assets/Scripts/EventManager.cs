@@ -507,7 +507,7 @@ public class EventManager : MonoBehaviour {
 		return true;
 	}
 
-	List<object> extractObjects (String pred, String predArg)
+	List<object> ExtractObjects (String pred, String predArg)
 	{
 		List<object> objs = new List<object> ();
 		Queue<String> argsStrings = new Queue<String> (predArg.Split (new char[] {
@@ -575,7 +575,7 @@ public class EventManager : MonoBehaviour {
 
 		if (predArgs.Count > 0) {
 			try {
-				var objs = extractObjects (pred, (String)predArgs [pred]);
+				var objs = ExtractObjects (pred, (String)predArgs [pred]);
 
 				if (preds.rdfTriples.Count > 0) {
 					if (methodToCall != null) {
