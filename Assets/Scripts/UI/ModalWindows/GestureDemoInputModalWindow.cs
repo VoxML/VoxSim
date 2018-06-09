@@ -1,20 +1,17 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using Global;
 using Network;
 
 public class GestureDemoInputModalWindow : ModalWindow {
 
-	CSUClient csuClient;
+	CSUClient fusionClient;
 
 	public int fontSize = 12;
 
 	GUIStyle buttonStyle;
+	private bool showSpeech = true;
+	private bool showGesture = true;
 
 	float fontSizeModifier;	
 	public float FontSizeModifier {
@@ -29,8 +26,8 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	void Start () {
 		base.Start ();
 
-		actionButtonText = "View Gesture Input";
-		windowTitle = "Gesture Input Log";
+		actionButtonText = "View Input Symbols";
+		windowTitle = "Input Symbol Log";
 		persistent = true;
 
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
@@ -40,10 +37,10 @@ public class GestureDemoInputModalWindow : ModalWindow {
 
 	// Update is called once per frame
 	void Update () {
-		if (csuClient == null) {
-			csuClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
-			if (csuClient != null) {
-				csuClient.GestureReceived += ReceivedGesture;
+		if (fusionClient == null) {
+			fusionClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
+			if (fusionClient != null) {
+				fusionClient.GestureReceived += ReceivedGesture;
 			}
 		}
 	}	
@@ -52,10 +49,15 @@ public class GestureDemoInputModalWindow : ModalWindow {
 		buttonStyle = new GUIStyle ("Button");
 		buttonStyle.fontSize = fontSize;
 
-		if (GUI.Button (new Rect (10, 10, GUI.skin.label.CalcSize (new GUIContent (actionButtonText)).x + 10, 20 * fontSizeModifier),
-			actionButtonText, buttonStyle)) {
+		Rect buttonRect = new Rect(10, 10,
+			GUI.skin.label.CalcSize(new GUIContent(actionButtonText)).x + 10,
+			20 * fontSizeModifier);
+		if (GUI.Button (buttonRect, actionButtonText, buttonStyle)) {
 			render = true;
 		}
+
+		showSpeech = GUI.Toggle(new Rect(buttonRect.x * 2 + buttonRect.width, buttonRect.y, 25, buttonRect.height), showSpeech, "S");
+		showGesture = GUI.Toggle(new Rect(buttonRect.x * 2 + buttonRect.width + 30, buttonRect.y, 25, buttonRect.height), showGesture, "G");
 
 		base.OnGUI ();
 	}
@@ -74,11 +76,31 @@ public class GestureDemoInputModalWindow : ModalWindow {
 		GUILayout.EndScrollView ();
 	}
 
+	private bool IsInputSpeech(string msg)
+	{
+		return msg.StartsWith("S");
+	}
+
+	private bool IsInputGesture(string msg)
+	{
+		return msg.StartsWith("G");
+	}
+
+	private bool IsInputPointing(string msg)
+	{
+		return msg.StartsWith("P");
+	}
+
 	void ReceivedGesture(object sender, EventArgs e) {
 		string msg = ((GestureEventArgs)e).Content;
-		if (!msg.StartsWith ("P")) {
-			Debug.Log (msg);
-			inputs.Add (string.Format ("{0} {1}", msg.Split (';') [0], msg.Split (';') [1]));
+		if (!IsInputPointing(msg))
+		{
+			bool showInModal = IsInputSpeech(msg) ? showSpeech : showGesture;
+            Debug.Log (string.Format("\"{0}\", shown in scene: {1}", msg, showInModal));
+			if (showInModal)
+			{
+				inputs.Add (string.Format ("{0} {1}", msg.Split (';') [0], msg.Split (';') [1]));
+			}
 		}
 		scrollPosition.y = Mathf.Infinity;	// scroll to bottom
 	}
