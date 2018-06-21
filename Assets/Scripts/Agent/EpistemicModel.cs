@@ -143,6 +143,7 @@ namespace Agent {
 			state.AddConcept(lgPurpleBlock);
 			state.AddConcept(whiteBlock);*/
 
+			Debug.Log (state);
 			return state;
 		}
 		
@@ -150,6 +151,8 @@ namespace Agent {
 		void Start () {
 			engaged = false;
 			state = initModel();
+			Debug.Log (state);
+
 
 			if (PlayerPrefs.HasKey ("URLs")) {
 				string epiSimUrlString = string.Empty;

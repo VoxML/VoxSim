@@ -264,6 +264,11 @@ namespace Global {
 			}
 		}
 
+		public Pair<T2,T1> Reverse() {
+			Pair<T2,T1> tuple = new Pair<T2, T1> (Item2, Item1);
+			return tuple;
+		}
+
 		public override int GetHashCode() {
 			return Item1.GetHashCode() ^ Item2.GetHashCode();
 		}

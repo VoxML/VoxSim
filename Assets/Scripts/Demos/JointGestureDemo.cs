@@ -29,6 +29,7 @@ public class JointGestureDemo : AgentInteraction {
 	EventManager eventManager;
 	ObjectSelector objSelector;
 	PluginImport commBridge;
+	RelationTracker relationTracker;
 
 	GameObject Diana;
 	GameObject leftGrasper;
@@ -123,6 +124,29 @@ public class JointGestureDemo : AgentInteraction {
 	GameObject frontRegionHighlight;
 	GameObject backRegionHighlight;
 
+	List<string> knownDysfluencies = new List<string> (new string[] {
+		"uh", 
+		//"uhm", 
+		//"um", 
+		//"em",
+		//"ah", 
+		//"y",
+		//"oh", 
+		"hmm"
+	});
+
+	List<string> knownPreables = new List<string> (new string[] {
+		"diana",
+		"could you",
+		"would you",
+		"can you",
+		"tell me",
+		"could_you",
+		"would_you",
+		"can_you",
+		"tell_me"
+	});
+
 	public List<string> actionOptions = new List<string> ();
 	public string eventConfirmation = "";
 
@@ -167,6 +191,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
+
+		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
 
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
@@ -2213,12 +2239,136 @@ public class JointGestureDemo : AgentInteraction {
 			string message = null;
 
 			if (content [0] != null) {
-				message = GetSpeechString(
-					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+				message = GetSpeechString (
+					interactionLogic.RemoveInputSymbolType ((string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "S");
 
+				foreach (string preamble in knownPreables) {
+					if (message.Contains (preamble)) {
+						if (preamble.Contains (" ")) {
+							message = message.Replace (preamble, preamble.Replace (" ", "_"));
+						}
+					}
+				}
+
+				List<string> splitMessage = message.Split ().Where (m => (!knownDysfluencies.Contains (m) && !knownPreables.Contains (m))).ToList ();
+				message = String.Join (" ", splitMessage.ToArray ());
 			}
 			Debug.Log (message);
 			// do stuff here
+
+			if (message == "yes") {
+//				interactionLogic.RewriteStack(new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+//					interactionLogic.GenerateStackSymbol (null, null, null,
+//						null, new List<string>(new string[]{ commBridge.NLParse (message) }), null)));
+			}
+			else if (message == "no") {
+			}
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	public void ParseQuestion(object[] content) {
+		// type check
+		if (!Helper.CheckAllObjectsOfType(content,typeof(string))) {
+			return;
+		}
+
+		switch (content.Length) {
+		case 0:
+			break;
+
+		case 1:
+			string message = null;
+
+			if (content [0] != null) {
+				message = GetSpeechString(
+					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+
+				foreach (string preamble in knownPreables) {
+					if (message.Contains (preamble)) {
+						if (preamble.Contains (" ")) {
+							message = message.Replace (preamble, preamble.Replace (" ", "_"));
+						}
+					}
+				}
+
+				List<string> splitMessage = message.Split ().Where(m => (!knownDysfluencies.Contains(m) && !knownPreables.Contains(m))).ToList();
+				message = String.Join(" ",splitMessage.ToArray());
+			}
+			Debug.Log (message);
+			// do stuff here
+
+			// demo hacks TODO: better than this
+			if (message == "how many blocks are there") {
+				if (dianaMemory != null && dianaMemory.enabled) {
+					int knownCount = blocks.Where(b => dianaMemory.IsKnown (b.GetComponent<Voxeme>())).ToList().Count;
+
+					RespondAndUpdate (string.Format ("There are {0} blocks on the table.", knownCount));
+				}
+			}
+			else if (message == "how many blocks do you see") {
+				int visibleCount = blocks.Where(b => dianaMemory._vision.IsVisible (b.GetComponent<Voxeme>())).ToList().Count;
+
+				RespondAndUpdate (string.Format ("I can see {0} blocks.", visibleCount));
+			}
+			else if (message.StartsWith("where is the")) {
+				string blockString = message.Replace ("where is the", "").Trim ();
+				string attr = blockString.Replace("block","").Trim();
+
+				GameObject blockObj = null;
+
+				foreach (GameObject block in blocks) {
+					bool isKnown = true;
+
+					if (dianaMemory != null && dianaMemory.enabled) {
+						isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
+					}
+
+					if (block.activeInHierarchy) {
+						if ((block.GetComponent<AttributeSet> ().attributes.Contains (attr)) && 
+							(isKnown)){
+							blockObj = block;
+						}
+					}
+				}
+
+				if (blockObj != null) {
+					Debug.Log (blockObj);
+					List<Pair<Pair<GameObject,GameObject>,string>> relationsInForce = new List<Pair<Pair<GameObject, GameObject>, string>>(); 
+
+					foreach (DictionaryEntry relation in relationTracker.relations) {
+						// longest relation set == most relevant
+						
+						if ((relation.Key as List<GameObject>).Contains (blockObj)) {
+							relationsInForce.Add (new Pair<Pair<GameObject, GameObject>, string> (
+								new Pair<GameObject,GameObject> ((relation.Key as List<GameObject>) [0], (relation.Key as List<GameObject>) [1]),
+								relation.Value as string));
+						}
+					}
+
+					relationsInForce = relationsInForce.OrderByDescending (r => r.Item2.Split (',').ToList ().Count).ToList ();
+					foreach (Pair<Pair<GameObject,GameObject>,string> relation in relationsInForce) {
+						if (relation.Item2.Contains("support")) {	// use support as proxy for inverse of "on"
+							relation.Item1 = relation.Item1.Reverse();
+							relation.Item2 = "on";
+						}
+					}
+					Debug.Log(string.Format("{0} {1} {2}",relationsInForce[0].Item1.Item1,relationsInForce[0].Item2,relationsInForce[0].Item1.Item2));
+
+					RespondAndUpdate (string.Format ("The {0} block is {1} the {2} block.",
+						relationsInForce[0].Item1.Item1.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
+						relationsInForce[0].Item2,
+						relationsInForce[0].Item1.Item2.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value));
+				}
+			}
+
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+				interactionLogic.GenerateStackSymbol (null, null, null,
+					null, null, null)));
 
 			break;
 
@@ -2241,16 +2391,39 @@ public class JointGestureDemo : AgentInteraction {
 			string message = null;
 
 			if (content [0] != null) {
-				message = GetSpeechString(
-					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+				message = GetSpeechString (
+					interactionLogic.RemoveInputSymbolType ((string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "S");
 
+				foreach (string preamble in knownPreables) {
+					if (message.Contains (preamble)) {
+						if (preamble.Contains (" ")) {
+							message = message.Replace (preamble, preamble.Replace (" ", "_"));
+						}
+					}
+				}
+
+				List<string> splitMessage = message.Split ().Where (m => (!knownDysfluencies.Contains (m) && !knownPreables.Contains (m))).ToList ();
+				message = String.Join (" ", splitMessage.ToArray ());
 			}
 			Debug.Log (message);
 			// do stuff here
 
-			interactionLogic.RewriteStack(new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
-				interactionLogic.GenerateStackSymbol (null, null, null,
-					null, new List<string>(new string[]{ commBridge.NLParse (message) }), null)));
+			if (message.Contains ("there")) {
+				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) {
+					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
+						interactionLogic.RewriteStack (
+							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+								interactionLogic.GenerateStackSymbol (null, null,
+									new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
+									null, null, null)));
+					}
+				}
+			}
+			else {
+				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+					interactionLogic.GenerateStackSymbol (null, null, null,
+						null, new List<string> (new string[]{ commBridge.NLParse (message) }), null)));
+			}
 			break;
 
 		default:

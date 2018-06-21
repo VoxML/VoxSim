@@ -19,6 +19,12 @@ public class ModalWindow : FontManager
 		set { render = value; }
 	}
 
+	public bool autoOpen = false;
+	public virtual bool AutoOpen {
+		get { return autoOpen; }
+		set { autoOpen = value; }
+	}
+
 	public bool allowResize = true;
 	public virtual bool AllowResize {
 		get { return allowResize; }
@@ -45,6 +51,10 @@ public class ModalWindow : FontManager
 		else {
 			Debug.Log ("ModalWindow of id " + id.ToString () + " already exists on this object!");
 			Destroy(this);
+		}
+
+		if (autoOpen) {
+			Render = true;
 		}
 	}
 
