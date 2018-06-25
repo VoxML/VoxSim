@@ -42,7 +42,7 @@ namespace Agent
 			{
 				gameObject.transform.SetParent(attached);
 			}
-			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 //			visibleObjects = new HashSet<Voxeme>();
 		}
 

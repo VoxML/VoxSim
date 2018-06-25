@@ -1040,7 +1040,7 @@ namespace Global {
 			region.max = new Vector3 (surfaceBounds.max.x + (testBounds.size.x*overhang),
 				surfaceBounds.max.y, surfaceBounds.max.z + (testBounds.size.z*overhang));
 
-			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
 			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
 				                    UnityEngine.Random.Range (region.min.y, region.max.y),
@@ -1077,7 +1077,7 @@ namespace Global {
 		public static Region FindClearRegion(GameObject surface, Region region, GameObject testObj) {
 			Bounds testBounds = GetObjectWorldSize (testObj);
 
-			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
 			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
 				UnityEngine.Random.Range (region.min.y, region.max.y),
@@ -1115,7 +1115,7 @@ namespace Global {
 			Region region = new Region ();
 			Bounds testBounds = GetObjectWorldSize (testObj);
 
-			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
 			Region intersection = new Region ();
 			intersection.min = regions [0].min;
@@ -1300,7 +1300,7 @@ namespace Global {
 	/// </summary>
 	public static class PhysicsHelper {
 		public static void ResolveAllPhysicsDiscrepancies(bool macroEventSatisfied) {
-			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
 				ResolvePhysicsDiscrepancies (voxeme.gameObject, macroEventSatisfied);
 			}
@@ -1596,7 +1596,7 @@ namespace Global {
 		}
 
 		public static GameObject RandomVoxeme() {
-			List<Voxeme> allVoxemes = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ().allVoxemes.ToList();
+			List<Voxeme> allVoxemes = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().allVoxemes.ToList();
 
 			Voxeme voxeme = allVoxemes [RandomInt (0, allVoxemes.Count, (int)RangeFlags.MinInclusive)];
 			while (Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) {
@@ -1607,7 +1607,7 @@ namespace Global {
 		}
 
 		public static GameObject RandomVoxeme(List<GameObject> exclude) {
-			List<Voxeme> allVoxemes = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ().allVoxemes.ToList();
+			List<Voxeme> allVoxemes = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().allVoxemes.ToList();
 
 			Voxeme voxeme = allVoxemes [RandomInt (0, allVoxemes.Count, (int)RangeFlags.MinInclusive)];
 			while ((Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||

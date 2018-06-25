@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -54,8 +54,8 @@ public class Predicates : MonoBehaviour {
 
 	void Start () {
 		eventManager = gameObject.GetComponent<EventManager> ();
-		aStarSearch = GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ();
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		aStarSearch = GameObject.Find ("VoxWorld").GetComponent<AStarSearch> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker> ();
 		macros = GameObject.Find ("BehaviorController").GetComponent<Macros> ();
 	}

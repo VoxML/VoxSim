@@ -44,7 +44,7 @@ public class ScriptSelector : ResetUIButton {
 	void Start () {
 		base.Start ();
 
-		scenarioManager = GameObject.Find ("BlocksWorld").GetComponent<ScenarioManager> ();
+		scenarioManager = GameObject.Find ("VoxWorld").GetComponent<ScenarioManager> ();
 
 		List<GameObject> scripts = new List<GameObject> ();
 		foreach (Transform child in transform) {

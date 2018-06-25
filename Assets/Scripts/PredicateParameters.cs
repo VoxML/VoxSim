@@ -274,7 +274,7 @@ public static class PredicateParameters {
 
 	public static string SwitchPredicate(List<Triple<string, string, int>> alternateList, Hashtable predArgs, string pred) {
 		VideoAutoCapture vidCap = Camera.main.GetComponent<VideoAutoCapture> ();
-		ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		string outValue = string.Empty;
 
 		Triple<string, string, int> alternate = alternateList[RandomHelper.RandomInt(0, alternateList.Count,

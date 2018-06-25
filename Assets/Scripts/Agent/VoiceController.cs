@@ -31,8 +31,10 @@ namespace UI
             
             _speaker = gameObject.AddComponent<LiveSpeaker>();
             string vName = null;
+            Crosstales.RTVoice.Model.Enum.Gender vGender = Crosstales.RTVoice.Model.Enum.Gender.UNKNOWN;
             if (Gender == Gender.Female)
             {
+                vGender = Crosstales.RTVoice.Model.Enum.Gender.FEMALE;
                 if (SystemInfo.operatingSystemFamily ==
                     OperatingSystemFamily.Windows)
                 {
@@ -47,6 +49,7 @@ namespace UI
             }
             else if (Gender == Gender.Male)
             {
+                vGender = Crosstales.RTVoice.Model.Enum.Gender.MALE;
                 if (SystemInfo.operatingSystemFamily ==
                     OperatingSystemFamily.Windows)
                 {
@@ -61,7 +64,7 @@ namespace UI
 
             if (vName != null)
             {
-                v = new Voice(vName, DUMMY, LANG);
+                v = new Voice(vName, "", vGender, DUMMY, LANG);
             }
 
             // TODO 6/6/2017-23:19 this is jsut for test, delete later

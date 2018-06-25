@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Runtime.InteropServices;
@@ -9,12 +9,12 @@ public class PluginImport : MonoBehaviour {
 
 	private INLParser _parser;
 	private CmdServer _cmdServer;
-	private CSUClient _csuClient;
+	private FusionClient _fusionClient;
 	private EventLearningClient _eventLearningClient;
 	private CommanderClient _commanderClient;
 
-	public CSUClient CSUClient {
-		get { return _csuClient; }
+	public FusionClient FusionClient {
+        get { return _fusionClient; }
 	}
 
 	public EventLearningClient EventLearningClient {
@@ -52,10 +52,10 @@ public class PluginImport : MonoBehaviour {
 		}
 
 		if (PlayerPrefs.HasKey ("URLs")) {
-			string csuUrlString = string.Empty;
+			string fusionUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-				if (url.Split ('=') [0] == "CSU URL") {
-					csuUrlString = url.Split ('=') [1];
+				if (url.Split ('=') [0] == "Fusion URL") {
+                    fusionUrlString = url.Split ('=') [1];
 					break;
 				}
 			}
@@ -76,19 +76,19 @@ public class PluginImport : MonoBehaviour {
 				}
 			}
 
-			string[] csuUrl = csuUrlString.Split(':');
-			string csuAddress = csuUrl [0];
-			if (csuAddress != "") {
-				int csuPort = Convert.ToInt32 (csuUrl [1]);
+            string[] fusionUrl = fusionUrlString.Split(':');
+            string fusionAddress = fusionUrl [0];
+			if (fusionAddress != "") {
+                int fusionPort = Convert.ToInt32 (fusionUrl [1]);
 				try {
-					ConnectCSU (csuAddress, csuPort);
+                    ConnectFusion (fusionAddress, fusionPort);
 				}
 				catch (Exception e) {
 					Debug.Log (e.Message);
 				}
 			}
 			else {
-				Debug.Log ("CSU gesture input is not specified.");
+				Debug.Log ("Fusion input is not specified.");
 			}
 
 			string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
@@ -146,23 +146,23 @@ public class PluginImport : MonoBehaviour {
 	}
 
 	void Update () {
-		if (_csuClient != null)
+		if (_fusionClient != null)
 		{
-			if (_csuClient.IsConnected())
+			if (_fusionClient.IsConnected())
 			{
-				string inputFromCSU = _csuClient.GetMessage();
-				if (inputFromCSU != "")
+                string inputFromFusion = _fusionClient.GetMessage();
+				if (inputFromFusion != "")
 				{
-					Debug.Log(inputFromCSU);
-					Debug.Log(_csuClient.HowManyLeft() + " messages left.");
-					_csuClient.OnGestureReceived(this, new GestureEventArgs(inputFromCSU));
+					Debug.Log(inputFromFusion);
+					Debug.Log(_fusionClient.HowManyLeft() + " messages left.");
+					_fusionClient.OnGestureReceived(this, new GestureEventArgs(inputFromFusion));
 				}
 			}
 			else
 			{
-				Debug.LogError("Connection to CSU server is lost!");
-				_csuClient.OnConnectionLost(this, null);
-				_csuClient = null;
+				Debug.LogError("Connection to Fusion server is lost!");
+				_fusionClient.OnConnectionLost(this, null);
+				_fusionClient = null;
 			}
 		}
 
@@ -187,12 +187,12 @@ public class PluginImport : MonoBehaviour {
 		}
 	}
 
-	public void ConnectCSU(string address, int port)
+	public void ConnectFusion(string address, int port)
 	{
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
-		_csuClient = new CSUClient();
-		_csuClient.Connect(address, port);
-		Debug.Log(string.Format("{2} :: Connected to CSU recognizer @ {0}:{1}", address, port, _csuClient.IsConnected()));
+		_fusionClient = new FusionClient();
+		_fusionClient.Connect(address, port);
+		Debug.Log(string.Format("{2} :: Connected to Fusion @ {0}:{1}", address, port, _fusionClient.IsConnected()));
 	}
 
 	public SocketClient ConnectSocket(string address, int port, Type clientType)
@@ -252,10 +252,10 @@ public class PluginImport : MonoBehaviour {
 			_cmdServer = null;
 		}
 
-		if (_csuClient != null && _csuClient.IsConnected())
+		if (_fusionClient != null && _fusionClient.IsConnected())
 		{
-			_csuClient.Close();
-			_csuClient = null;
+			_fusionClient.Close();
+			_fusionClient = null;
 		}
 
 		if (_commanderClient != null && _commanderClient.IsConnected())

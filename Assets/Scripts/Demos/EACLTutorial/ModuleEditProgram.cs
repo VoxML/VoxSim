@@ -95,7 +95,7 @@ public class ModuleEditProgram : ModalWindow {
 		if (selected != -1) {
 			render = false;
 
-			VoxemeInspectorModalWindow newInspector = GameObject.Find("BlocksWorld").AddComponent<VoxemeInspectorModalWindow> ();
+			VoxemeInspectorModalWindow newInspector = GameObject.Find("VoxWorld").AddComponent<VoxemeInspectorModalWindow> ();
 			newInspector.InspectorPosition = new Vector2 (25,25);
 			newInspector.windowRect = new Rect (newInspector.InspectorPosition.x, newInspector.InspectorPosition.y, newInspector.inspectorWidth, newInspector.inspectorHeight);
 			newInspector.InspectorVoxeme = "programs/" + listItems[selected];

@@ -51,7 +51,7 @@ public class DianaOzStudies : MonoBehaviour {
 
 		world = GameObject.Find ("JointGestureDemo").GetComponent<JointGestureDemo> ();
 		preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
 		if (PlayerPrefs.HasKey ("URLs")) {
 			string cmdrUrlString = string.Empty;

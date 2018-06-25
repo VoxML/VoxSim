@@ -52,8 +52,8 @@ public class GhostFreeRoamCamera : MonoBehaviour
 		help = GameObject.Find ("Help").GetComponent<HelpModalWindow> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 		outputController = GameObject.Find ("IOController").GetComponent<OutputController> ();
-		windowManager = GameObject.Find ("BlocksWorld").GetComponent<ModalWindowManager> ();
-		buttonManager = GameObject.Find ("BlocksWorld").GetComponent<UIButtonManager> ();
+		windowManager = GameObject.Find ("VoxWorld").GetComponent<ModalWindowManager> ();
+		buttonManager = GameObject.Find ("VoxWorld").GetComponent<UIButtonManager> ();
 
 		if (cursorToggleAllowed)
 		{

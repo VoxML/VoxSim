@@ -77,10 +77,10 @@ public class ModuleObjectCreation : ModalWindow {
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
 		buttonStyle.fontSize = fontSize;
 
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
-		voxemeInit = GameObject.Find ("BlocksWorld").GetComponent<VoxemeInit> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+		voxemeInit = GameObject.Find ("VoxWorld").GetComponent<VoxemeInit> ();
 		preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
-		//windowManager = GameObject.Find ("BlocksWorld").GetComponent<ModalWindowManager> ();
+		//windowManager = GameObject.Find ("VoxWorld").GetComponent<ModalWindowManager> ();
 
 		cameraControl = Camera.main.GetComponent<GhostFreeRoamCamera> ();
 

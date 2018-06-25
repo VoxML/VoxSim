@@ -134,21 +134,24 @@ sysinfo.txt
 *.pyc
 
 ## ignore 3rd-party libraries/large externals (devs should keep local copies)
-Assets/Plugins*
 Assets/MORPH3D* 
-Assets/crosstales*
-Assets/Plugins/RTVoice* 
+Assets/StreamingAssets/Morph3D*
+Assets/Plugins/crosstales* 
+Assets/Plugins/RootMotion*
 Assets/RootMotion* 
 Assets/FlashbackRecorder* 
+Assets/GracesGames*
 Assets/SimpleFileBrowser* 
-Assets/Editor\ Default\ Resources*
+Assets/Editor\ Default\ Resources/crosstales*
+
+# ignore UntrackedScenes folder
+Assets/UntrackedScenes*
 
 # ignore ScenesLists file
 Assets/Resources/ScenesList.txt
 
 # ignore Logs folder
 Logs*
-
 
 # ignore NuGet packages (e.g. Nunit)
 packages*

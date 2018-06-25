@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -131,7 +131,7 @@ public class EventManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		preds = gameObject.GetComponent<Predicates> ();
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 
 		inputController.ParseComplete += StoreParse;
@@ -215,7 +215,7 @@ public class EventManager : MonoBehaviour {
 //				lookAtIk.solver.IKPositionWeight = 1f;
 //
 //				if (q) {
-//					GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
+//					GameObject.Find ("VoxWorld").GetComponent<AStarSearch> ().path.Clear ();
 //					Debug.Log ("Satisfied " + events [0]);
 //
 //					for (int i = 0; i < events.Count - 1; i++) {
@@ -309,7 +309,7 @@ public class EventManager : MonoBehaviour {
 			bool q = SatisfactionTest.IsSatisfied (events [0]);
 
 			if (q) {
-				GameObject.Find ("BlocksWorld").GetComponent<AStarSearch> ().path.Clear ();
+				GameObject.Find ("VoxWorld").GetComponent<AStarSearch> ().path.Clear ();
 				Debug.Log ("Satisfied " + events [0]);
 
 				for (int i = 0; i < events.Count - 1; i++) {

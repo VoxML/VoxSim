@@ -14,7 +14,7 @@ public class VoxemeInit : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		Macros macros = GameObject.Find ("BehaviorController").GetComponent<Macros> ();
 
 		InitializeVoxemes ();

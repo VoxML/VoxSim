@@ -160,8 +160,8 @@ public class Launcher : FontManager {
 
 		fontSizeModifier = (fontSize / defaultFontSize);
 
-		windowManager = GameObject.Find("BlocksWorld").GetComponent<ModalWindowManager> ();
-		buttonManager = GameObject.Find("BlocksWorld").GetComponent<UIButtonManager> ();
+		windowManager = GameObject.Find("VoxWorld").GetComponent<ModalWindowManager> ();
+		buttonManager = GameObject.Find("VoxWorld").GetComponent<UIButtonManager> ();
 		buttonManager.windowPort = new Rect (bgLeft, bgTop, bgWidth, bgHeight);
 	}
 
@@ -283,7 +283,7 @@ public class Launcher : FontManager {
 		GUILayout.BeginVertical(GUI.skin.box);
 
 //		GUILayout.BeginHorizontal(GUI.skin.box);
-//		GUILayout.Label ("CSU URL",GUILayout.Width(80*fontSizeModifier));
+//		GUILayout.Label ("Fusion URL",GUILayout.Width(80*fontSizeModifier));
 //		csuUrl = GUILayout.TextField(csuUrl,GUILayout.Width(140*fontSizeModifier));
 //		GUILayout.EndHorizontal();
 //
@@ -570,7 +570,7 @@ public class Launcher : FontManager {
 			}
 		}
 
-//		csuUrl = PlayerPrefs.GetString("CSU URL");
+//		csuUrl = PlayerPrefs.GetString("Fusion URL");
 //		epiSimUrl = PlayerPrefs.GetString("EpiSim URL");
 //		sriUrl = PlayerPrefs.GetString("SRI URL");
 //		parserUrl = PlayerPrefs.GetString("Parser URL");
@@ -610,7 +610,7 @@ public class Launcher : FontManager {
 		}
 		PlayerPrefs.SetString("URLs", urlsString);
 
-		//		PlayerPrefs.SetString("CSU URL", csuUrl);
+		//		PlayerPrefs.SetString("Fusion URL", csuUrl);
 //		PlayerPrefs.SetString("EpiSim URL", epiSimUrl);
 //		PlayerPrefs.SetString("SRI URL", sriUrl);
 //		PlayerPrefs.SetString("Parser URL", parserUrl);

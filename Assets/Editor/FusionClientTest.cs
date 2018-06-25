@@ -3,11 +3,11 @@ using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
 
-public class CSUClientTest {
+public class FusionClientTest {
 
 	[Test]
 	public void ClientTest() {
-		CSUClient client = new CSUClient();
+		FusionClient client = new FusionClient();
 		client.Connect("localhost", 8887);
 		int i = 0;
 		while (i < 20)

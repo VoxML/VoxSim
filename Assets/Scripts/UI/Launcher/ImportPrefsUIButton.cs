@@ -7,7 +7,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-using SimpleFileBrowser.Scripts.GracesGames;
+using GracesGames.SimpleFileBrowser.Scripts;
 using Global;
 using VideoCapture;
 
@@ -87,7 +87,7 @@ public class ImportPrefsUIButton : UIButton {
 				}
 				break;
 
-//			case "CSU URL":
+//			case "Fusion URL":
 //				launcher.csuUrl = line.Split (',') [1].Trim();
 //				break;
 //
@@ -174,7 +174,8 @@ public class ImportPrefsUIButton : UIButton {
 		FileBrowser fileBrowserScript = fileBrowserObject.GetComponent<FileBrowser>();
 		fileBrowserScript.SetupFileBrowser(ViewMode.Landscape);
 		if (fileBrowserMode == FileBrowserMode.Load) {
-			fileBrowserScript.OpenFilePanel(this, "LoadFileUsingPath", "txt");
+            fileBrowserScript.OpenFilePanel(new string[] { "txt" });
+            fileBrowserScript.OnFileSelect += LoadFileUsingPath;
 		}
 
 		GameObject uiObject = GameObject.Find (fileBrowserObject.name + "UI");

@@ -25,7 +25,7 @@ public class SelectionEventArgs : EventArgs {
 
 public class JointGestureDemo : AgentInteraction {
 
-	CSUClient csuClient;
+    FusionClient fusionClient;
 	EventManager eventManager;
 	ObjectSelector objSelector;
 	PluginImport commBridge;
@@ -186,7 +186,7 @@ public class JointGestureDemo : AgentInteraction {
 		windowScaleFactor.x = (float)Screen.width/(float)Screen.currentResolution.width;
 		windowScaleFactor.y = (float)Screen.height/(float)Screen.currentResolution.height;
 
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
@@ -209,6 +209,14 @@ public class JointGestureDemo : AgentInteraction {
 		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
+
+        fusionClient = commBridge.GetComponent<PluginImport>().FusionClient;
+        //TODO: What if there is no CSUClient address assigned?
+        if (fusionClient != null)
+        {
+            fusionClient.GestureReceived += ReceivedFusion;
+            fusionClient.ConnectionLost += ConnectionLost;
+        }
 
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.rightHand.gameObject;
@@ -266,22 +274,14 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	// Update is called once per frame
-	void Update () {
-		if (csuClient == null) {
-			csuClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().CSUClient;
-			//TODO: What if there is no CSUClient address assigned?
-			if (csuClient != null) {
-				csuClient.GestureReceived += ReceivedFusion;
-				csuClient.ConnectionLost += ConnectionLost;
-			}
-
-			for (int i = 0; i < blocks.Count; i++) {
-				blocks[i] = Helper.GetMostImmediateParentVoxeme (blocks [i]);
-			}
-		}
-
+    void Update () {
 		if (demoSurface != Helper.GetMostImmediateParentVoxeme (demoSurface)) {
 			demoSurface = Helper.GetMostImmediateParentVoxeme (demoSurface);
+
+            for (int i = 0; i < blocks.Count; i++)
+            {
+                blocks[i] = Helper.GetMostImmediateParentVoxeme(blocks[i]);
+            }
 		}
 
 		if (leftRegion == null) {
@@ -4787,6 +4787,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	void ConnectionLost(object sender, EventArgs e) {
 		LookForward();
+        Debug.Log("Connection Lost");
+
 
 		if (sessionCounter >= 1) {
 			if (eventManager.events.Count == 0) {

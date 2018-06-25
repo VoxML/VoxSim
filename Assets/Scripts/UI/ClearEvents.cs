@@ -21,7 +21,7 @@ public class ClearEvents : FontManager {
 
 	// Use this for initialization
 	protected void Start () {
-		exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenuUIButton> ();
+		exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
 
 		buttonStyle = new GUIStyle ("Button");
 

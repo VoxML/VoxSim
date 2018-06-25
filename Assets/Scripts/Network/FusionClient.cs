@@ -17,7 +17,7 @@ namespace Network
 		}
 	}
 
-	public class CSUClient
+	public class FusionClient
 	{
 		public event EventHandler GestureReceived;
 

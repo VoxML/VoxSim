@@ -20,7 +20,7 @@ public class Macros : MonoBehaviour {
 		/* agh i hate this hack so much */
 		// needs to be done in CLOSE predicate
 		// how do you reason satisfaction conditions on a predicate you sub in?
-		ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+		ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		GameObject mug = GameObject.Find ("mug");
 		GameObject table = GameObject.Find ("square_table");
 

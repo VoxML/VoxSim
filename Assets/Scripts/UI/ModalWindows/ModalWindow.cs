@@ -41,7 +41,7 @@ public class ModalWindow : FontManager
 
 	// Use this for initialization
 	protected virtual void Start () {
-		windowManager = GameObject.Find("BlocksWorld").GetComponent<ModalWindowManager> ();
+		windowManager = GameObject.Find("VoxWorld").GetComponent<ModalWindowManager> ();
 
 		id = windowManager.windowManager.Count;
 
@@ -78,11 +78,11 @@ public class ModalWindow : FontManager
 
 	public static Rect ResizeWindow (Rect windowRect, ref bool isResizing, ref Rect resizeStart, Vector2 minWindowSize){
 		Vector2 mouse = GUIUtility.ScreenToGUIPoint (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y));
-		if (Event.current.type == EventType.mouseDown && windowRect.Contains (mouse)) {
+		if (Event.current.type == EventType.MouseDown && windowRect.Contains (mouse)) {
 			isResizing = true;
 			resizeStart = new Rect (mouse.x, mouse.y, windowRect.width, windowRect.height);
 		}
-		else if (Event.current.type == EventType.mouseUp && isResizing) {
+		else if (Event.current.type == EventType.MouseUp && isResizing) {
 			isResizing = false;
 		}
 		else if (!Input.GetMouseButton (0)) {

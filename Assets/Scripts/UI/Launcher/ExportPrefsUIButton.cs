@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 using Global;
-using SimpleFileBrowser.Scripts.GracesGames;
+using GracesGames.SimpleFileBrowser.Scripts;
 
 public class ExportPrefsUIButton : UIButton {
 
@@ -79,7 +79,7 @@ public class ExportPrefsUIButton : UIButton {
 		}
 		prefsDict.Add ("URLs", urlsString);
 
-//		prefsDict.Add ("CSU URL", PlayerPrefs.GetString ("CSU URL"));
+//		prefsDict.Add ("Fusion URL", PlayerPrefs.GetString ("Fusion URL"));
 //		prefsDict.Add ("EpiSim URL", PlayerPrefs.GetString ("EpiSim URL"));
 //		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
 //		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
@@ -116,7 +116,8 @@ public class ExportPrefsUIButton : UIButton {
 		FileBrowser fileBrowserScript = fileBrowserObject.GetComponent<FileBrowser>();
 		fileBrowserScript.SetupFileBrowser(ViewMode.Landscape);
 		if (fileBrowserMode == FileBrowserMode.Save) {
-			fileBrowserScript.SaveFilePanel(this, "SaveFileUsingPath", "NewPrefs", "txt");
+            fileBrowserScript.SaveFilePanel("NewPrefs", new string[] { "txt" });
+            fileBrowserScript.OnFileSelect += SaveFileUsingPath;
 		}
 
 		GameObject uiObject = GameObject.Find (fileBrowserObject.name + "UI");

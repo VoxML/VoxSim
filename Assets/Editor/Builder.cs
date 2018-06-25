@@ -46,7 +46,7 @@ public class Builder : Editor {
 			// TODO: Migrate away from this in favor of build scripts
 			if (buildMac || buildAll) {
 				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
-				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSXUniversal, BuildOptions.None);
+				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSX, BuildOptions.None);
 			}
 
 			if (buildWindows || buildAll) {
@@ -89,7 +89,7 @@ public static class AutoBuilder {
 		}
 			
 		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
-		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSXUniversal, BuildOptions.None);
+		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSX, BuildOptions.None);
 	}
 
 	public static void BuildWindows() {

@@ -11,7 +11,7 @@ public class AssetBundleBuilder : Editor {
 		base.OnInspectorGUI();
 		
 		if (GUILayout.Button ("Build Asset Bundles", GUILayout.Height (30))) {
-			BuildPipeline.BuildAssetBundles("Assets/AssetBundles", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSXUniversal);
+			BuildPipeline.BuildAssetBundles("Assets/AssetBundles", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
 		}
 	}
 }

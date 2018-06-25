@@ -113,7 +113,7 @@ namespace VideoCapture {
 			recorder = gameObject.GetComponent<FlashbackRecorder> ();
 			inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
 			eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
-			objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 			commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 			preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
 
@@ -310,7 +310,7 @@ namespace VideoCapture {
 			if (captureMode == VideoCaptureMode.PerEvent) {
 				if ((resetScene) && (eventsExecuted % eventResetCounter == 0)) {
 					EnableObjects ();
-					GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
+					GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
 					DisableObjects ();
 					eventObjs.Clear ();
 				}
@@ -522,7 +522,7 @@ namespace VideoCapture {
 				}
 				eventManager.AbortEvent ();
 				paramValues.Clear();
-				GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
+				GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
 				CaptureComplete (null, null);
 			}
 		}
@@ -546,7 +546,7 @@ namespace VideoCapture {
 			}
 			else {
 				EnableObjects ();
-				GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
+				GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().SendMessage ("ResetScene");
 			}
 		}
 

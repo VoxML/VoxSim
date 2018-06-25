@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -90,8 +90,8 @@ public class InputController : FontManager {
 		eventManager = bc.GetComponent<EventManager> ();
 		macros = bc.GetComponent<Macros> ();
 
-		objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
-		//exitToMenu = GameObject.Find ("BlocksWorld").GetComponent<ExitToMenuUIButton> ();
+		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+		//exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
 
 		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 
@@ -263,12 +263,12 @@ public class InputController : FontManager {
 			}
 
 			if (inputString == "repeat") {
-				GameObject.Find ("BlocksWorld").GetComponent<ScenarioManager> ().scenarioScript.SendMessage("Repeat");
+				GameObject.Find ("VoxWorld").GetComponent<ScenarioManager> ().scenarioScript.SendMessage("Repeat");
 				return;
 			}
 
 			if (inputString == "that's all") {
-				GameObject.Find ("BlocksWorld").GetComponent<ScenarioManager> ().scenarioScript.SendMessage("PlayGame");
+				GameObject.Find ("VoxWorld").GetComponent<ScenarioManager> ().scenarioScript.SendMessage("PlayGame");
 				return;
 			}
 

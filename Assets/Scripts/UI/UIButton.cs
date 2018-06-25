@@ -35,7 +35,7 @@ public class UIButton : FontManager
 
 	// Use this for initialization
 	protected virtual void Start () {
-		buttonManager = GameObject.Find("BlocksWorld").GetComponent<UIButtonManager> ();
+		buttonManager = GameObject.Find("VoxWorld").GetComponent<UIButtonManager> ();
 
 		id = buttonManager.buttonManager.Count;
 

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -317,7 +317,7 @@ namespace Satisfaction {
 		public static bool ComputeSatisfactionConditions(String command) {
 			Hashtable predArgs = Helper.ParsePredicate (command);
 			String pred = Helper.GetTopPredicate (command);
-			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 			EventManager em = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 
 			if (predArgs.Count > 0) {
@@ -444,7 +444,7 @@ namespace Satisfaction {
 			// get relation tracker
 			RelationTracker relationTracker = (RelationTracker)GameObject.Find ("BehaviorController").GetComponent("RelationTracker");
 
-			ObjectSelector objSelector = GameObject.Find ("BlocksWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
 			// get bounds of theme object of program
 			Bounds objBounds = Helper.GetObjectWorldSize(obj.gameObject);
