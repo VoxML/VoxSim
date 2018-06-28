@@ -507,7 +507,7 @@ public class EventManager : MonoBehaviour {
 		return true;
 	}
 
-	List<object> ExtractObjects (String pred, String predArg)
+	public List<object> ExtractObjects (String pred, String predArg)
 	{
 		List<object> objs = new List<object> ();
 		Queue<String> argsStrings = new Queue<String> (predArg.Split (new char[] {

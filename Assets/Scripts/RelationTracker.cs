@@ -75,7 +75,12 @@ public class RelationTracker : MonoBehaviour {
 			}
 		}
 
-		Debug.Log (string.Format("Adding {0} {1} {2}",relation,objs[0],objs[1]));
+        try{
+            Debug.Log(string.Format("Adding {0} {1} {2}", relation, objs[0], objs[1]));
+        }
+        catch (Exception e) {
+        }
+
 		relations.Add(objs,relation);	// add key-val pair or modify value if key already exists
 
 		if (recurse) {

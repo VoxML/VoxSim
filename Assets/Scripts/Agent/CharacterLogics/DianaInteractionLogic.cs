@@ -1140,6 +1140,41 @@ namespace Agent
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseQuestion"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseSentence"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParsePP"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("TrackPointing"),
 				null,

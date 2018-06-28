@@ -2357,12 +2357,18 @@ public class JointGestureDemo : AgentInteraction {
 							relation.Item2 = "on";
 						}
 					}
-					Debug.Log(string.Format("{0} {1} {2}",relationsInForce[0].Item1.Item1,relationsInForce[0].Item2,relationsInForce[0].Item1.Item2));
 
-					RespondAndUpdate (string.Format ("The {0} block is {1} the {2} block.",
-						relationsInForce[0].Item1.Item1.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
-						relationsInForce[0].Item2,
-						relationsInForce[0].Item1.Item2.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value));
+                    if (relationsInForce.Count > 0) {
+                        Debug.Log(string.Format("{0} {1} {2}", relationsInForce[0].Item1.Item1, relationsInForce[0].Item2, relationsInForce[0].Item1.Item2));
+
+                        RespondAndUpdate(string.Format("The {0} block is {1} the {2} block.",
+                            relationsInForce[0].Item1.Item1.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value,
+                            relationsInForce[0].Item2,
+                            relationsInForce[0].Item1.Item2.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value));
+                    }
+                    else {
+                        RespondAndUpdate(string.Format("Sorry, I don't know the answer to that."));
+                    }
 				}
 			}
 
@@ -2710,7 +2716,7 @@ public class JointGestureDemo : AgentInteraction {
 				if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
 					if ((block.GetComponent<AttributeSet> ().attributes.Contains (
 						interactionLogic.RemoveInputSymbolType(
-							content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ())) && 
+                            content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ().Replace("np ", ""))) && 
 						(isKnown) && (SurfaceClear(block)) && (block != interactionLogic.IndicatedObj) &&
 						(block != interactionLogic.GraspedObj)){
 						objectOptions.Add (block);
@@ -4775,7 +4781,13 @@ public class JointGestureDemo : AgentInteraction {
 				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
 					if ((interactionLogic.ActionOptions.Count > 0) &&
 					   (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
-						interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+                        GameObject graspedObject = null;
+                        if (((EventManagerArgs)e).EventString.Contains("lift")) {
+                            graspedObject = eventManager.ExtractObjects("lift", (String)Helper.ParsePredicate(((EventManagerArgs)e).EventString)["lift"])[0] as GameObject;
+                        }
+					    interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+                            interactionLogic.GenerateStackSymbol(null,graspedObject,
+                                null,null,null,null)));
 					}
 				}
 			}
