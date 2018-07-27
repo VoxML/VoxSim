@@ -73,6 +73,18 @@ public class ImportPrefsUIButton : UIButton {
 				launcher.logsPrefix = line.Split (',') [1].Trim();
 				break;
 
+            case "Actions Only Logs":
+                launcher.actionsOnly = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+                break;
+
+            case "Full State Info":
+                launcher.actionsOnly = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+                break;
+
+            case "Log Timestamps":
+                launcher.actionsOnly = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+                break;
+
 			case "URLs":
 				launcher.urlLabels.Clear ();
 				launcher.urls.Clear ();
@@ -84,24 +96,7 @@ public class ImportPrefsUIButton : UIButton {
 						launcher.urls.Add (urlString.Split ('=') [1]);
 						launcher.numUrls++;
 					}
-				}
-				break;
-
-//			case "Fusion URL":
-//				launcher.csuUrl = line.Split (',') [1].Trim();
-//				break;
-//
-//			case "EpiSim URL":
-//				launcher.epiSimUrl = line.Split (',') [1].Trim();
-//				break;
-//
-//			case "SRI URL":
-//				launcher.sriUrl = line.Split (',') [1].Trim();
-//				break;
-//
-//			case "Parser URL":
-//				launcher.parserUrl = line.Split (',') [1].Trim();
-//				break;
+				}break;
 
 			case "Capture Video":
 				launcher.captureVideo = System.Convert.ToBoolean(line.Split (',') [1].Trim());
@@ -153,11 +148,7 @@ public class ImportPrefsUIButton : UIButton {
 
 			case "Make Voxemes Editable":
 				launcher.editableVoxemes = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-				break;
-
-//			case "Use Teaching Agent":
-//				launcher.teachingAgent = System.Convert.ToBoolean(line.Split (',') [1].Trim());
-//				break;
+                break;
 
 			default:
 				break;

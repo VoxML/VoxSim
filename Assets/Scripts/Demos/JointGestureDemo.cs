@@ -103,6 +103,10 @@ public class JointGestureDemo : AgentInteraction {
 	GenericLogger logger;
 	int logIndex;
 
+    bool logActionsOnly;
+    bool logFullState;
+    bool useTimestamps;
+
 	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
 
 	Region leftRegion;
@@ -201,6 +205,9 @@ public class JointGestureDemo : AgentInteraction {
 		if (PlayerPrefs.GetInt ("Make Logs") == 1) {
 			logger.OpenLog (PlayerPrefs.GetString ("Logs Prefix"));
 		}
+
+        logActionsOnly = (PlayerPrefs.GetInt("Actions Only Logs") == 1);
+        logFullState = (PlayerPrefs.GetInt("Full State Info") == 1);
 
 		logIndex = 0;
 
@@ -503,10 +510,13 @@ public class JointGestureDemo : AgentInteraction {
 		string messageStr = splitMessage[1];
 		string messageTime = splitMessage[2];
 
-		logger.OnLogEvent (this, new LoggerArgs (string.Format("{0}\t{1}\t{2}",
-			(++logIndex).ToString(),
-			string.Format("{0}{1}","H",messageType),
-			messageStr)));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    string.Format("{0}{1}", "H", messageType),
+                    messageStr)));
+        }
 
 		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
@@ -1599,6 +1609,19 @@ public class JointGestureDemo : AgentInteraction {
 		RespondAndUpdate ("Hello.");
 		MoveToPerform ();
 		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
+
+        if (logFullState) {
+            foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                if ((voxeme.gameObject.activeInHierarchy) &&
+                    (!objSelector.disabledObjects.Contains(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject)))) {
+                    logger.OnLogEvent(this, new LoggerArgs(
+                        string.Format("{0}\t{1}\t{2}",
+                            logIndex.ToString(),
+                            "", string.Format("{0}:{1},{2}", voxeme.gameObject.name, Helper.VectorToParsable(voxeme.gameObject.transform.position),
+                                  Helper.VectorToParsable(voxeme.gameObject.transform.eulerAngles)))));
+                }
+            }
+        }
 
 		if (!interactionLogic.waveToStart) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
@@ -4316,11 +4339,13 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("look_at({0})",obj.name))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("look_at({0})", obj.name))));
+        }
 	}
 
 	void LookAt(Vector3 point) {
@@ -4330,11 +4355,13 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("look_at({0})",Helper.VectorToParsable(point)))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("look_at({0})", Helper.VectorToParsable(point)))));
+        }
 	}
 
 	void PointAt(Vector3 point, GameObject hand) {
@@ -4355,11 +4382,14 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		gestureController.PerformGesture (performGesture);
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("point({0},{1})",hand.name,Helper.VectorToParsable(point)))));
+
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("point({0},{1})", hand.name, Helper.VectorToParsable(point)))));
+        }
 	}
 
 	void TurnToward(GameObject obj) {
@@ -4579,11 +4609,13 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("reach({0})",Helper.VectorToParsable(coord)))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("reach({0})", Helper.VectorToParsable(coord)))));
+        }
 
 		LookForward ();
 	}
@@ -4609,13 +4641,15 @@ public class JointGestureDemo : AgentInteraction {
 			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
-		//LookAt (obj);
+        //LookAt (obj);
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("reach({0})",obj.name))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("reach({0})", obj.name))));
+        }
 	}
 
 	public void StorePose() {
@@ -4694,11 +4728,13 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void RespondAndUpdate(string utterance) {
 		if (OutputHelper.GetCurrentOutputString(Role.Affector) != utterance) {
-		logger.OnLogEvent (this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AS",
-				string.Format("\"{0}\"",utterance))));
+            if (!logActionsOnly) {
+                logger.OnLogEvent(this, new LoggerArgs(
+                    string.Format("{0}\t{1}\t{2}",
+                        (++logIndex).ToString(),
+                        "AS",
+                        string.Format("\"{0}\"", utterance))));
+            }
 		}
 
 		OutputHelper.PrintOutput (Role.Affector, utterance);
@@ -4748,21 +4784,36 @@ public class JointGestureDemo : AgentInteraction {
 		eventManager.InsertEvent ("", 0);
 		eventManager.InsertEvent (eventStr, 1);
 
-		logger.OnLogEvent (this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AA",
-				eventStr)));
+        logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AA",
+                    eventStr)));
+        
+        if (logFullState) {
+            foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                if ((voxeme.gameObject.activeInHierarchy) && 
+                    (!objSelector.disabledObjects.Contains(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject)))) {
+                    logger.OnLogEvent(this, new LoggerArgs(
+                        string.Format("{0}\t{1}\t{2}",
+                            logIndex.ToString(),
+                            "", string.Format("{0}:{1},{2}", voxeme.gameObject.name, Helper.VectorToParsable(voxeme.gameObject.transform.position),
+                                  Helper.VectorToParsable(voxeme.gameObject.transform.eulerAngles)))));
+                }
+            }
+        }
 	}
 
 	void PerformAndLogGesture(AvatarGesture gesture) {
 		gestureController.PerformGesture (gesture);
 
-		logger.OnLogEvent (this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				gesture.Name)));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    gesture.Name)));
+        }
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {

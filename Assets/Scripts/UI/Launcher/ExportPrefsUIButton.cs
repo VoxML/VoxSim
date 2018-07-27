@@ -72,6 +72,9 @@ public class ExportPrefsUIButton : UIButton {
 		prefsDict.Add ("Listener Port", PlayerPrefs.GetString ("Listener Port"));
 		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
 		prefsDict.Add ("Logs Prefix", PlayerPrefs.GetString ("Logs Prefix"));
+        prefsDict.Add("Action Only Logs", (PlayerPrefs.GetInt("Action Only Logs") == 1));
+        prefsDict.Add("Full State Info", (PlayerPrefs.GetInt("Full State Info") == 1));
+        prefsDict.Add("Log Timestamps", (PlayerPrefs.GetInt("Log Timestamps") == 1));
 
 		string urlsString = string.Empty;
 		for (int i = 0; i < launcher.numUrls; i++) {
@@ -79,10 +82,6 @@ public class ExportPrefsUIButton : UIButton {
 		}
 		prefsDict.Add ("URLs", urlsString);
 
-//		prefsDict.Add ("Fusion URL", PlayerPrefs.GetString ("Fusion URL"));
-//		prefsDict.Add ("EpiSim URL", PlayerPrefs.GetString ("EpiSim URL"));
-//		prefsDict.Add ("SRI URL", PlayerPrefs.GetString ("SRI URL"));
-//		prefsDict.Add ("Parser URL", PlayerPrefs.GetString ("Parser URL"));
 		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
 		prefsDict.Add ("Capture Params", (PlayerPrefs.GetInt ("Capture Params") == 1));
 		prefsDict.Add ("Video Capture Mode", PlayerPrefs.GetInt ("Video Capture Mode"));
@@ -96,7 +95,6 @@ public class ExportPrefsUIButton : UIButton {
 		prefsDict.Add ("Video Capture DB", PlayerPrefs.GetString("Video Capture DB"));
 		prefsDict.Add ("Video Output Directory", PlayerPrefs.GetString("Video Output Directory"));
 		prefsDict.Add ("Make Voxemes Editable", (PlayerPrefs.GetInt("Make Voxemes Editable") == 1));
-//		prefsDict.Add ("Use Teaching Agent", (PlayerPrefs.GetInt("Use Teaching Agent") == 1));
 
 		StringBuilder sb = new StringBuilder ();
 
