@@ -304,12 +304,17 @@ namespace Satisfaction {
 			else {
 				satisfied = true;
 			}
-				
-			if (satisfied) {
-				EventManagerArgs eventArgs = new EventManagerArgs (test, isMacroEvent);
-				em.OnEventComplete(em, eventArgs);
-//				ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
-			}
+
+            if (satisfied) {
+                MethodInfo method = preds.GetType().GetMethod(predString.ToUpper());
+                if ((method != null) && (method.ReturnType == typeof(void))) {    // is a program
+                    Debug.Log(predString);
+                    EventManagerArgs eventArgs = new EventManagerArgs(test, isMacroEvent);
+                    em.OnEventComplete(em, eventArgs);
+                    //				ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+
+                }
+            }
 
 			return satisfied;
 		}
@@ -400,9 +405,15 @@ namespace Satisfaction {
 				objs.Add (false);
 				methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
-				if (methodToCall != null) {
-					Debug.Log ("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
-					object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
+                if (methodToCall != null) {  // found a method
+                    if (methodToCall.ReturnType == typeof(void)) { // is it a program?
+                        Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
+                        object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
+                    }
+                    else {  // not a program
+                        Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
+                            methodToCall.Name,methodToCall.ReturnType.ToString()));
+                    }
 				}
 				else {
 					// no coded-behavior

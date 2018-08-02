@@ -52,6 +52,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		Table
 	};
 
+    public string userName = "";
 	public VerbosityLevel verbosityLevel = VerbosityLevel.Disambiguation;
 	public DisambiguationStrategy disambiguationStrategy = DisambiguationStrategy.DeicticGestural;
 	public DeixisMethod deixisMethod = DeixisMethod.Screen;
@@ -114,7 +115,13 @@ public class InteractionPrefsModalWindow : ModalWindow {
 //		GUILayout.EndVertical();
 //		GUILayout.EndScrollView ();
 
-		GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.BeginHorizontal(GUI.skin.box);
+        GUILayout.Label("User Name:");
+        userName = GUILayout.TextField(userName, GUILayout.Width(this.windowRect.width-GUI.skin.label.CalcSize(new GUIContent("User Name:")).x-50),
+            GUILayout.ExpandWidth(false));
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginVertical(GUI.skin.box);
 		GUILayout.Label ("Deixis:");
 		GUILayout.BeginVertical(GUI.skin.box);
 		deixisMethod = (DeixisMethod)GUILayout.SelectionGrid((int)deixisMethod, deixisListItems, 1, new GUIStyle ("Toggle"), GUILayout.ExpandWidth(true));

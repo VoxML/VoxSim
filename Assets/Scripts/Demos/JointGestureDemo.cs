@@ -140,7 +140,10 @@ public class JointGestureDemo : AgentInteraction {
 	});
 
 	List<string> knownPreables = new List<string> (new string[] {
-		"diana",
+        "now",  // connective, not preamble
+        "and",
+        "so",
+		"diana",    // begin actual preambles
 		"could you",
 		"would you",
 		"can you",
@@ -195,6 +198,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
+        eventManager.AntecedentComputed += AntecedentIndicated;
 
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
 
@@ -1606,7 +1610,8 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void BeginInteraction(object[] content) {
-		RespondAndUpdate ("Hello.");
+        RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
+            "Hello.");
 		MoveToPerform ();
 		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
 
@@ -2435,7 +2440,21 @@ public class JointGestureDemo : AgentInteraction {
 				message = String.Join (" ", splitMessage.ToArray ());
 			}
 			Debug.Log (message);
-			// do stuff here
+            // do stuff here
+
+            // do verb mapping
+            if (message.StartsWith("pick up")) {
+                message = message.Replace("pick up", "lift");
+            }
+            else if (message.StartsWith("push")) {
+                message = message.Replace("push", "slide");
+            }
+
+            // assume everything is a block
+            if (message.Contains("one"))
+            {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
+                message = message.Replace("one", "block");
+            }
 
 			if (message.Contains ("there")) {
 				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) {
@@ -2479,7 +2498,24 @@ public class JointGestureDemo : AgentInteraction {
 
 			}
 			Debug.Log (message);
-			// do stuff here
+
+            if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
+                if (regionHighlight.GetComponent<Renderer>().material.color.a == 1.0f) {
+                    interactionLogic.RewriteStack(
+                        new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null,
+                                new Region(highlightCenter, vectorConeRadius * highlightOscUpper * 2),
+                                null, null, null)));
+                }
+            }
+            else {
+                // assume everything is a block
+                if (message.EndsWith("one")) {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
+                    message = message.Replace("one", "block");
+                }
+
+                PromptEvent(commBridge.NLParse(message));
+            }
 
 			break;
 
@@ -3305,7 +3341,9 @@ public class JointGestureDemo : AgentInteraction {
 			LookForward ();
 			TurnForward ();
 		}
-	
+
+        eventManager.ClearEvents();
+
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 			interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
 				null, null, null)));
@@ -4822,7 +4860,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
 				!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 				TurnForward ();
-				LookForward ();
+                LookForward ();
 
 				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
 					interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
@@ -4847,6 +4885,26 @@ public class JointGestureDemo : AgentInteraction {
 	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
 		}
 	}
+
+    void AntecedentIndicated(object sender, EventArgs e)
+    {
+        if (((EventAntecedentArgs)e).Antecendent is String)   // object
+        {
+            GameObject obj = GameObject.Find(((string)((EventAntecedentArgs)e).Antecendent).ToString());
+            if (obj != null)
+            {
+                if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
+                {
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
+                        interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                }
+            }
+        }
+        else if (((EventAntecedentArgs)e).Antecendent is Vector3) // location
+        {
+        }
+
+    }
 
 	void ConnectionLost(object sender, EventArgs e) {
 		LookForward();
