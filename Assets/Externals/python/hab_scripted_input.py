@@ -16,13 +16,13 @@ def generate_line():
     if f is not None:
         line = f.readline()
         if re.match(r"^\d+\t",line):
-            #print(line)
+            print(line)
             if index_time == 0:
-                #print(re.search(r"\t\d+.\d+",line)) 
+                print(re.search(r"\t\d+.\d+",line)) 
                 index_time = float(re.search(r"\t\d+.\d+",line).group(0).rstrip()) - 2
             wait_time = float(re.search(r"\t\d+.\d+",line).group(0).rstrip()) - index_time
             index_time += wait_time
-            #print((index_time,wait_time))
+            print((index_time,wait_time))
             if re.split(r'\t',line)[1].startswith('H'):
                 content = re.split(r'\t',line)[1].replace('H','') + ';' + re.split(r'\t',line)[2]
         elif line == '':
@@ -41,7 +41,7 @@ def generate_line():
     data_to_send = new_state
     if not re.search(r";\d+.\d{3}$",data_to_send) and data_to_send is not '' and timestamps:
         data_to_send += ";" + ts  #attaching timestamp to the data before sending
-    #print(data_to_send)
+    print((data_to_send,wait_time))
     return (data_to_send,wait_time)
 
 
@@ -111,12 +111,13 @@ if __name__=="__main__":
             msg_to_send = generate_line()
             if msg_to_send is not ('',0):
                 time.sleep(msg_to_send[1])
-#                print("msg_to_send:" + msg_to_send[0])
+                print("msg_to_send:" + msg_to_send[0] + " wait:" + str(msg_to_send[1]) + " sec")
                 if msg_to_send[0] is not '':
                     conn.send(struct.pack("<i" + str(len(msg_to_send[0])) + "s", len(msg_to_send[0]), msg_to_send[0].encode('utf-8')))
                     print(msg_to_send[0])
-                else: 
-                    break
+                #else:
+                #    print("breaking")
+                #    break
                 #time.sleep(random.randint(3,3))
         except (KeyboardInterrupt, SystemExit):
             msg_to_send = "shutting down server"
