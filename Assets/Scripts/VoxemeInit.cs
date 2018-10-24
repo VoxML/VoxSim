@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
 using Global;
 using RootMotion.FinalIK;
+using System;
 
 public class VoxemeInit : MonoBehaviour {
 	Predicates preds;
@@ -68,7 +69,13 @@ public class VoxemeInit : MonoBehaviour {
 					// copy interaction object
 					InteractionObject interactionObject = go.GetComponent<InteractionObject>();
 					if (interactionObject != null) {
+                        // Set the object inactive to avoid InteractionObject initializing before attributes are set
+						Boolean containerState = container.activeInHierarchy;
+                        container.SetActive(false);
+						
 						CopyComponent (interactionObject, container);
+						
+                        container.SetActive(containerState);
 					}
 					Destroy (interactionObject);
 
@@ -207,10 +214,12 @@ public class VoxemeInit : MonoBehaviour {
 
 	T CopyComponent<T>(T original, GameObject destination) where T : Component {
 		System.Type type = original.GetType();
-		//var dst = destination.GetComponent(type) as T;
-		//if (!dst) {
-		var dst = destination.AddComponent (type) as T;
+        //var dst = destination.GetComponent(type) as T;
+        //if (!dst) {
+        var dst = destination.AddComponent(type) as T;
 		//}
+
+
 
 		var fields = type.GetFields();
 		foreach (var field in fields) {
@@ -223,6 +232,7 @@ public class VoxemeInit : MonoBehaviour {
 			if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
 			prop.SetValue(dst, prop.GetValue(original, null), null);
 		}
-		return dst as T;
+        return dst as T;
+
 	}
 }
