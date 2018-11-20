@@ -12,6 +12,7 @@ public class PluginImport : MonoBehaviour {
 	private FusionClient _fusionClient;
 	private EventLearningClient _eventLearningClient;
 	private CommanderClient _commanderClient;
+    private KSIMClient _ksimClient;
 
 	public FusionClient FusionClient {
         get { return _fusionClient; }
@@ -24,6 +25,10 @@ public class PluginImport : MonoBehaviour {
 	public CommanderClient CommanderClient {
 		get { return _commanderClient; }
 	}
+
+    public KSIMClient KSIMClient {
+        get { return _ksimClient; }
+    }
 
 	// Make our calls from the Plugin
 	[DllImport ("CommunicationsBridge")]
@@ -76,6 +81,15 @@ public class PluginImport : MonoBehaviour {
 				}
 			}
 
+            string ksimUrlString = string.Empty;
+            foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
+                if (url.Split('=')[0] == "KSIM URL")
+                {
+                    ksimUrlString = url.Split('=')[1];
+                    break;
+                }
+            }
+
             string[] fusionUrl = fusionUrlString.Split(':');
             string fusionAddress = fusionUrl [0];
 			if (fusionAddress != "") {
@@ -118,8 +132,24 @@ public class PluginImport : MonoBehaviour {
 				}
 			}
 			else {
-				Debug.Log ("Commander input is not specified.");
+				Debug.Log ("Commander client is not specified.");
 			}
+
+            string[] ksimUrl = ksimUrlString.Split(':');
+            string ksimAddress = ksimUrl[0];
+            if (ksimAddress != "") {
+                int ksimPort = Convert.ToInt32(ksimUrl[1]);
+                try {
+                    _ksimClient = (KSIMClient)ConnectSocket(ksimAddress, ksimPort, typeof(KSIMClient));
+                    _ksimClient.Write("0");
+                }
+                catch (Exception e) {
+                    Debug.Log(e.Message);
+                }
+            }
+            else {
+                Debug.Log("KSIM client is not specified.");
+            }
 		}
 		else {
 			Debug.Log ("No input URLs specified.");
@@ -207,6 +237,9 @@ public class PluginImport : MonoBehaviour {
 		else if (clientType == typeof(EventLearningClient)) {
 			client = new EventLearningClient ();
 		}
+        else if (clientType == typeof(KSIMClient)) {
+            client = new KSIMClient();
+        }
 
 		if (client != null) {
 			client.Connect (address, port);

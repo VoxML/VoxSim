@@ -37,6 +37,13 @@ public class ModalWindow : FontManager
 		set { allowDrag = value; }
 	}
 
+    public bool allowForceClose = true;
+    public virtual bool AllowForceClose
+    {
+        get { return allowForceClose; }
+        set { allowForceClose = value; }
+    }
+
 	protected ModalWindowManager windowManager;
 
 	// Use this for initialization
@@ -99,7 +106,7 @@ public class ModalWindow : FontManager
 
 	public virtual void DoModalWindow(int windowID){
 		//Debug.Log (windowID);
-		if (GUI.Button (new Rect (windowRect.width - 25, 2, 23, 16), "X")) {
+        if ((allowForceClose) && (GUI.Button (new Rect (windowRect.width - 25, 2, 23, 16), "X"))) {
 			if (persistent) {
 				Render = false;
 			}

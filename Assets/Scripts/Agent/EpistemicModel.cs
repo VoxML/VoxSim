@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 using Episteme;
@@ -13,10 +15,15 @@ namespace Agent {
 	}
 
 	public class EpistemicModel : MonoBehaviour {
-
 		public EpistemicState state;
 
 		public bool engaged;
+        public bool reuseModel;
+
+        UserNameModalWindow userNameModalWindow;
+
+        bool idUser = false;
+        string userID = string.Empty;
 
 		public static EpistemicState initModel()
 		{
@@ -150,8 +157,22 @@ namespace Agent {
 		// Use this for initialization
 		void Start () {
 			engaged = false;
-			state = initModel();
-			Debug.Log (state);
+
+            if (reuseModel) {
+                idUser = true;
+                userNameModalWindow = gameObject.AddComponent<UserNameModalWindow>();
+                userNameModalWindow.windowRect = new Rect(Screen.width/2 - 185 / 2, Screen.height / 2 - 60 / 2, 185, 60);
+                userNameModalWindow.Render = true;
+                userNameModalWindow.AllowDrag = false;
+                userNameModalWindow.AllowResize = false;
+                userNameModalWindow.AllowForceClose = false;
+                userNameModalWindow.UserNameEvent += IdentifyUser;
+            }
+
+            if (state == null) {
+                state = initModel();
+                Debug.Log(state);
+            }
 
 
 			if (PlayerPrefs.HasKey ("URLs")) {
@@ -168,8 +189,17 @@ namespace Agent {
 			}
 		}
 
-		// Update is called once per frame
-		void Update () {
-		}
+        // Update is called once per frame
+        void Update() {
+        }
+
+        void IdentifyUser(object sender, EventArgs e) {
+            string username = ((UserNameInfo)((ModalWindowEventArgs)e).Data).Username;
+            userNameModalWindow.CloseWindow((ModalWindowEventArgs)e);
+
+            if (File.Exists(string.Format(@"EpiSim/UserModels/user-{0}.json", username))) {
+                // load user model
+            }
+        }
 	}
 }
