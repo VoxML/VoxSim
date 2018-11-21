@@ -141,10 +141,13 @@ public class PluginImport : MonoBehaviour {
                 int ksimPort = Convert.ToInt32(ksimUrl[1]);
                 try {
                     _ksimClient = (KSIMClient)ConnectSocket(ksimAddress, ksimPort, typeof(KSIMClient));
-                    _ksimClient.Write("0");
                 }
                 catch (Exception e) {
                     Debug.Log(e.Message);
+                }
+
+                if (_ksimClient != null) {
+                    _ksimClient.Write("0");
                 }
             }
             else {

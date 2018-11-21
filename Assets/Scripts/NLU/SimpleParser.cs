@@ -225,7 +225,8 @@ namespace NLU
 				}
 				else if (_attribs.Contains(tokens[cur]))
 				{
-					cur += ParseNextNP(tokens.Skip(cur).ToArray(), ref form, ref lastObj);
+                    form += tokens[cur] + "(";
+					cur += ParseNextNP(tokens.Skip(cur+1).ToArray(), ref form, ref lastObj);
 				}
 				else if (_objects.Contains(tokens[cur]))
 				{

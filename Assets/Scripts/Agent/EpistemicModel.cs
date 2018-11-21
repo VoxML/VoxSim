@@ -23,7 +23,7 @@ namespace Agent {
         UserNameModalWindow userNameModalWindow;
 
         bool idUser = false;
-        string userID = string.Empty;
+        public string userID = string.Empty;
 
 		public static EpistemicState initModel()
 		{

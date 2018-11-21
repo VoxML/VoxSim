@@ -54,6 +54,8 @@ public class JointGestureDemo : AgentInteraction {
 	Vector3 rightTargetDefault,rightTargetStored;
 	Vector3 headTargetDefault,headTargetStored;
 
+    public bool callUserByName = false;
+
 	public InteractionPrefsModalWindow interactionPrefs;
 	public AvatarGestureController gestureController;
 	public VisualMemory dianaMemory;
@@ -1610,6 +1612,10 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void BeginInteraction(object[] content) {
+        if ((epistemicModel.userID != string.Empty) && (callUserByName)) {
+            interactionPrefs.userName = epistemicModel.userID;
+        }
+
         RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
             "Hello.");
 		MoveToPerform ();
