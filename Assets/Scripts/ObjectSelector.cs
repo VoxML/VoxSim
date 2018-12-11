@@ -134,6 +134,28 @@ public class ObjectSelector : MonoBehaviour {
 		}
 	}
 
+    public List<String> ExtractCommonFeatureLabels(object[] objects) {
+        List<String> common = new List<string>();
+
+        // are all objects nominally predicated the same?
+        // are any attributes shared by all objects?
+
+        if (objects[0].GetType() == typeof(Voxeme)) {
+            List<String> predicates = objects.Cast<Voxeme>().Select(o => o.voxml.Lex.Pred).ToList<String>();
+
+            if (predicates.All(p => p == predicates[0])) {
+                common.Add(predicates[0]);
+            }
+
+            foreach (String c in common)
+            {
+                Debug.Log(c);
+            }
+        }
+
+        return common;
+    }
+
 	public void ResetScene() {
 		relationTracker.relations.Clear ();
 		PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Entity Type="Function" />
+  <Lex>
+    <Pred>the</Pred>
+  </Lex>
+  <Type>
+    <Args>
+      <Arg Value="x:physobj" />
+    </Args>
+    <Referent>x</Referent>
+    <Mapping>n:1</Mapping>
+  </Type>
+</VoxML>

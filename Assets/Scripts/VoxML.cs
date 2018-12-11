@@ -80,7 +80,10 @@ namespace Vox {
 		public string Value = "";
 		public string Constr = "";
 
-		[XmlArray("Corresps")]
+        public string Referent = "";
+        public string Mapping = "";
+
+        [XmlArray("Corresps")]
 		[XmlArrayItem("Corresp")]
 		public List<VoxTypeCorresp> Corresps = new List<VoxTypeCorresp>();
 	}

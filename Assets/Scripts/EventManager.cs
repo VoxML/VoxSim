@@ -38,6 +38,22 @@ public class EventAntecedentArgs : EventArgs {
     }
 }
 
+public class EventDisambiguationArgs : EventArgs{
+
+    public string Event { get; set; }
+    public string AmbiguityStr { get; set; }
+    public string AmbiguityVar { get; set; }
+    public object[] Candidates { get; set; }
+
+    public EventDisambiguationArgs(string eventStr, string ambiguityStr, string ambiguityVar, object[] candidates)
+    {
+        this.Event = eventStr;
+        this.AmbiguityStr = ambiguityStr;
+        this.AmbiguityVar = ambiguityVar;
+        this.Candidates = candidates;
+    }
+}
+
 public class EventManager : MonoBehaviour {
 	public FullBodyBipedIK bodyIk;
 	public InteractionLookAt lookAt = new InteractionLookAt();
@@ -56,7 +72,8 @@ public class EventManager : MonoBehaviour {
 	public Dictionary<String,String> evalResolved = new Dictionary<String, String>();
 	public Hashtable globalVars = new Hashtable();
 
-    public List<object> antecedents = new List<object>();
+    public AntecedentStore antecedents;   // TODO: make agent-specific
+    //public List<object> antecedents = new List<object>();
 
 	public double eventWaitTime = 2000.0;
 	Timer eventWaitTimer;
@@ -97,6 +114,16 @@ public class EventManager : MonoBehaviour {
         if (AntecedentComputed != null)
         {
             AntecedentComputed(this, e);
+        }
+    }
+
+    public event EventHandler DisambiguationError;
+
+    public void OnDisambiguationError(object sender, EventArgs e)
+    {
+        if (DisambiguationError != null)
+        {
+            DisambiguationError(this, e);
         }
     }
 
@@ -155,6 +182,7 @@ public class EventManager : MonoBehaviour {
 		preds = gameObject.GetComponent<Predicates> ();
 		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
+        antecedents = gameObject.GetComponent<AntecedentStore>();
 
 		inputController.ParseComplete += StoreParse;
 		inputController.ParseComplete += ClearGlobalVars;
@@ -616,7 +644,7 @@ public class EventManager : MonoBehaviour {
                         else {  // not a program
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                             Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
-                            antecedents.Add(obj);
+                            antecedents.stack.Push(obj);
                             OnAntecedentComputed(this, new EventAntecedentArgs(obj));
                         }
 					}
@@ -901,11 +929,18 @@ public class EventManager : MonoBehaviour {
 								    (arg as String).Count (f => f == ')') == 0) {
 									//if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 									List<GameObject> matches = new List<GameObject> ();
-									foreach (Voxeme voxeme in objSelector.allVoxemes) {
-										if (voxeme.voxml.Lex.Pred.Equals(arg)) {
-											matches.Add (voxeme.gameObject);
-										}
-									}
+
+                                    if (GameObject.Find(arg as String) != null) {
+                                        matches.Add(GameObject.Find(arg as String));
+                                    }
+                                    else {
+                                        foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                            if (voxeme.voxml.Lex.Pred.Equals(arg)) {
+                                                matches.Add(voxeme.gameObject);
+                                            }
+                                        }
+                                    }
+                                    Debug.Log(string.Format("{0} matches", matches.Count));
 
 									if (matches.Count == 0) {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
@@ -952,14 +987,62 @@ public class EventManager : MonoBehaviour {
 										}
 									}
 									else {
-										//Debug.Log (string.Format ("Which {0}?", (arg as String)));
-										//OutputHelper.PrintOutput (Role.Affector,string.Format("Which {0}?", (arg as String)));
-										//return false;	// abort
-										foreach (GameObject match in matches) {
-											objs.Add (match);
-										}
+                                        // if predicate arity of enclosing predicate as encoded in VoxML != matches.Count
+                                        VoxML predVoxeme = new VoxML();
+                                        String path = string.Empty;
+                                        Debug.Log(pred);
+                                        if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                            path = string.Format("/programs/{0}.xml", pred);
+                                        }
+                                        else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
+                                            path = string.Format("/relations/{0}.xml", pred);
+                                        }
+                                        else if (File.Exists(Data.voxmlDataPath + string.Format("/functions/{0}.xml", pred))) {
+                                            path = string.Format("/functions/{0}.xml", pred);
+                                        }
+
+                                        if (path != string.Empty) {
+                                            using (StreamReader sr = new StreamReader(Data.voxmlDataPath + path)) {
+                                                predVoxeme = VoxML.LoadFromText(sr.ReadToEnd());
+                                            }
+
+                                            Debug.Log(predVoxeme);
+                                            if (path.Contains("functions")) {
+                                                Debug.Log(predVoxeme.Type.Mapping);
+                                                int arity;
+                                                bool isInt = Int32.TryParse(predVoxeme.Type.Mapping.Split(':')[1],out arity);
+
+                                                if (isInt) {
+                                                    Debug.Log(string.Format("{0} : {1} : {2}", pred.ToUpper(), arity, matches.Count));
+
+                                                    if (arity != matches.Count) {
+                                                        OnDisambiguationError(this, new EventDisambiguationArgs(events[0], (String)kv.Value, "{0}",
+                                                            matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
+                                                        return false;   // abort
+                                                    }
+                                                }
+                                            }
+                                            else {
+                                                int arity = predVoxeme.Type.Args.Count - 1;
+                                                Debug.Log(string.Format("{0} : {1} : {2}", pred.ToUpper(), arity, matches.Count));
+
+                                                if (arity != matches.Count) {
+                                                    //Debug.Log(string.Format("Which {0}?", (arg as String)));
+                                                    //OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
+                                                    OnDisambiguationError(this, new EventDisambiguationArgs(events[0], (String)kv.Value,
+                                                        ((String)kv.Value).Replace(arg as String, "{0}"),
+                                                        matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
+                                                    return false;   // abort
+                                                }
+                                            }
+                                        }
+                                        else {
+										    foreach (GameObject match in matches) {
+                                                //Debug.Log(match);
+											    objs.Add (match);
+    										}
+    									}
 									}
-									//}
 								}
 
 								if (objs.Count == 0) {
@@ -1025,7 +1108,7 @@ public class EventManager : MonoBehaviour {
 			//Debug.Log (kv.Value);
 			String matchVal = kv.Value as String;
 			if (matchVal == null) {
-				matchVal = @"DEADBEEF";
+				matchVal = @"DEADBEEF"; // dummy val
 			}
 			argsMatch = regex.Match (matchVal);
 			if (argsMatch.Groups [0].Value.Length > 0) {

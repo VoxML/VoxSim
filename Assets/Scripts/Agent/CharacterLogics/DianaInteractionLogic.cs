@@ -943,15 +943,37 @@ namespace Agent
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
-				GetInputSymbolsByName("G grab high","G grab start","S GRAB"),
+				null,
 				GenerateStackSymbolFromConditions(
-					(o) => o == null, (g) => g == null, 
-					null, null, null, null
+					null, null, null, null,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0), null
 				),	
 				GetState("RequestObject"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
-					new StackSymbolContent(null, null, null, null, 
-						new FunctionDelegate(GenerateGraspCommand), new List<string>()))));
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0), null
+                ),
+                GetState("ConfirmEvent"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("G grab high", "G grab start", "S GRAB"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null,
+                    null, null, null, null
+                ),
+                GetState("RequestObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null,
+                        new FunctionDelegate(GenerateGraspCommand), new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -1936,6 +1958,16 @@ namespace Agent
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new StackSymbolContent(null,null,new Region(),null,null,null))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestObject"),
+                GetInputSymbolsByName("S NP"),
+                GenerateStackSymbolFromConditions(
+                        null, null, null, null, 
+                        (a) => ((a.Count > 0) &&
+                            (a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0), null),
+                GetState("ParseNP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmObject"),

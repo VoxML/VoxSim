@@ -122,12 +122,13 @@ public class Predicates : MonoBehaviour {
 
 			}
 
-			/*Voxeme voxComponent = (args [0] as GameObject).GetComponent<Voxeme> ();
+            /*Voxeme voxComponent = (args [0] as GameObject).GetComponent<Voxeme> ();
 			if (voxComponent.isGrasped) {
 				outValue = (outValue +
 					(voxComponent.graspTracker.position - voxComponent.gameObject.transform.position));
 			}*/
 
+            //Debug.Log(obj);
 			Debug.Log ("on: " + Helper.VectorToParsable (outValue));
 		}
 		else if (args [0] is Vector3) {	// on a location
@@ -822,7 +823,7 @@ public class Predicates : MonoBehaviour {
 	}
 
 	// IN: Objects
-	// OUT: String
+    // OUT: String TODO: List<String>
 	public String TWO(object[] args)
 	{
 		//Debug.Log (args.Length);
