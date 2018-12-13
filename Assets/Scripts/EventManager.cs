@@ -28,11 +28,11 @@ public class EventManagerArgs : EventArgs {
 	}
 }
 
-public class EventAntecedentArgs : EventArgs {
+public class EventReferentArgs : EventArgs {
 
     public object Antecendent { get; set; }
 
-    public EventAntecedentArgs(object antecendent)
+    public EventReferentArgs(object antecendent)
     {
         this.Antecendent = antecendent;
     }
@@ -72,7 +72,7 @@ public class EventManager : MonoBehaviour {
 	public Dictionary<String,String> evalResolved = new Dictionary<String, String>();
 	public Hashtable globalVars = new Hashtable();
 
-    public AntecedentStore antecedents;   // TODO: make agent-specific
+    public ReferentStore referents;   // TODO: make agent-specific
     //public List<object> antecedents = new List<object>();
 
 	public double eventWaitTime = 2000.0;
@@ -107,13 +107,13 @@ public class EventManager : MonoBehaviour {
 		}
 	}
 
-    public event EventHandler AntecedentComputed;
+    public event EventHandler ReferentComputed;
 
-    public void OnAntecedentComputed(object sender, EventArgs e)
+    public void OnReferentComputed(object sender, EventArgs e)
     {
-        if (AntecedentComputed != null)
+        if (ReferentComputed != null)
         {
-            AntecedentComputed(this, e);
+            ReferentComputed(this, e);
         }
     }
 
@@ -182,7 +182,7 @@ public class EventManager : MonoBehaviour {
 		preds = gameObject.GetComponent<Predicates> ();
 		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 		inputController = GameObject.Find ("IOController").GetComponent<InputController> ();
-        antecedents = gameObject.GetComponent<AntecedentStore>();
+        referents = gameObject.GetComponent<ReferentStore>();
 
 		inputController.ParseComplete += StoreParse;
 		inputController.ParseComplete += ClearGlobalVars;
@@ -644,8 +644,8 @@ public class EventManager : MonoBehaviour {
                         else {  // not a program
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                             Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
-                            antecedents.stack.Push(obj);
-                            OnAntecedentComputed(this, new EventAntecedentArgs(obj));
+                            referents.stack.Push(obj);
+                            OnReferentComputed(this, new EventReferentArgs(obj));
                         }
 					}
 					else {

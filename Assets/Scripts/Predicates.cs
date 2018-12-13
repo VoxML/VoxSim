@@ -787,7 +787,51 @@ public class Predicates : MonoBehaviour {
 		return objName;
 	}
 
-	// IN: Objects
+    // IN: Objects
+    // OUT: String
+    public String THAT(object[] args)
+    {
+        List<String> objNames = new List<String>();
+        //System.Random random = new System.Random ();
+
+        if (args[0] is GameObject)
+        {   // assume all inputs are of same type
+            //int index = random.Next(args.Length);
+            for (int index = 0; index < args.Length; index++)
+            {
+                if (args[index] is GameObject)
+                {
+                    objNames.Add((args[index] as GameObject).name);
+                }
+            }
+        }
+
+        return string.Join(",", objNames.ToArray());
+    }
+
+    // IN: Objects
+    // OUT: String
+    public String THIS(object[] args)
+    {
+        List<String> objNames = new List<String>();
+        //System.Random random = new System.Random ();
+
+        if (args[0] is GameObject)
+        {   // assume all inputs are of same type
+            //int index = random.Next(args.Length);
+            for (int index = 0; index < args.Length; index++)
+            {
+                if (args[index] is GameObject)
+                {
+                    objNames.Add((args[index] as GameObject).name);
+                }
+            }
+        }
+
+        return string.Join(",", objNames.ToArray());
+    }
+
+    // IN: Objects
 	// OUT: String
 	public String THE(object[] args)
 	{

@@ -200,7 +200,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
-        eventManager.AntecedentComputed += AntecedentIndicated;
+        eventManager.ReferentComputed += ReferentIndicated;
         eventManager.DisambiguationError += Disambiguate;
 
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
@@ -4893,11 +4893,11 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
-    void AntecedentIndicated(object sender, EventArgs e)
+    void ReferentIndicated(object sender, EventArgs e)
     {
-        if (((EventAntecedentArgs)e).Antecendent is String)   // object
+        if (((EventReferentArgs)e).Antecendent is String)   // object
         {
-            GameObject obj = GameObject.Find(((string)((EventAntecedentArgs)e).Antecendent).ToString());
+            GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Antecendent).ToString());
             if (obj != null)
             {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
@@ -4907,7 +4907,7 @@ public class JointGestureDemo : AgentInteraction {
                 }
             }
         }
-        else if (((EventAntecedentArgs)e).Antecendent is Vector3) // location
+        else if (((EventReferentArgs)e).Antecendent is Vector3) // location
         {
         }
 
@@ -4919,26 +4919,26 @@ public class JointGestureDemo : AgentInteraction {
         // check antecedents
         // does something in antecedent store match type and attribs in common features list?
 
-        List<object> antecedentMatches = new List<object>();
-        foreach (object antecedent in eventManager.antecedents.stack) {
-            if (antecedent.GetType() == typeof(String)) {
-                GameObject voxObj = GameObject.Find(antecedent as String);
+        List<object> referentMatches = new List<object>();
+        foreach (object referent in eventManager.referents.stack) {
+            if (referent.GetType() == typeof(String)) {
+                GameObject voxObj = GameObject.Find(referent as String);
                 string pred = voxObj.GetComponent<Voxeme>().voxml.Lex.Pred;
                 if (commonFeatures.Contains(pred)) {
                     Debug.Log(voxObj);
-                    antecedentMatches.Add(voxObj);
+                    referentMatches.Add(voxObj);
                     foreach (string feature in commonFeatures) {
                         if ((feature != pred) && (!commonFeatures.Contains(feature))) {
                             Debug.Log(voxObj);
-                            antecedentMatches.Remove(voxObj);
+                            referentMatches.Remove(voxObj);
                         }
                     }
                 }
             }
         }
 
-        if ((eventManager.antecedents.stack.Count == 0) || (antecedentMatches.Count > 1)) {
-            Debug.Log(string.Format("Antecedent(s) found: {0}", string.Join(", ", antecedentMatches.Cast<GameObject>().Select(g => g.name).ToArray())));
+        if ((eventManager.referents.stack.Count == 0) || (referentMatches.Count > 1)) {
+            Debug.Log(string.Format("Referent(s) found: {0}", string.Join(", ", referentMatches.Cast<GameObject>().Select(g => g.name).ToArray())));
 
             Debug.Log(string.Format("Which {0}?", String.Join(" ", commonFeatures.ToArray())));
             RespondAndUpdate(string.Format("Which {0}?", String.Join(" ", commonFeatures.ToArray())));
@@ -4950,14 +4950,14 @@ public class JointGestureDemo : AgentInteraction {
                     new List<string>() { ((EventDisambiguationArgs)e).Event.Replace(ambiguityStr, ambiguityVar) }, null)));
         }
         else {
-            Debug.Log(string.Format("Antecedent found: {0}",((GameObject)antecedentMatches[0]).name));
+            Debug.Log(string.Format("Referent found: {0}",((GameObject)referentMatches[0]).name));
         
             string ambiguityStr = ((EventDisambiguationArgs)e).AmbiguityStr;
             string ambiguityVar = ((EventDisambiguationArgs)e).AmbiguityVar;
             string eventStr = ((EventDisambiguationArgs)e).Event.Replace(ambiguityStr, ambiguityVar);
             interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                 interactionLogic.GenerateStackSymbol(null, null, null, null,
-                    new List<string>() { string.Format(eventStr,((GameObject)antecedentMatches[0]).name) }, null)));
+                    new List<string>() { string.Format(eventStr,((GameObject)referentMatches[0]).name) }, null)));
         }
 
         //Debug.Log(interactionLogic.CurrentState.Name);

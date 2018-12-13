@@ -3,9 +3,9 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-public class AntecedentStore : MonoBehaviour
+public class ReferentStore : MonoBehaviour
 {
-    public enum AntecedentType
+    public enum ReferentType
     {
         Object,
         Location
@@ -14,7 +14,7 @@ public class AntecedentStore : MonoBehaviour
     public Stack<object> stack;
 
 #if UNITY_EDITOR
-    [CustomEditor(typeof(AntecedentStore))]
+    [CustomEditor(typeof(ReferentStore))]
     public class DebugPreview : Editor
     {
         public override void OnInspectorGUI()
@@ -27,9 +27,9 @@ public class AntecedentStore : MonoBehaviour
             // add a label for each item, you can add more properties
             // you can even access components inside each item and display them
             // for example if every item had a sprite we could easily show it 
-            if (((AntecedentStore)target).stack != null)
+            if (((ReferentStore)target).stack != null)
             {
-                foreach (object item in ((AntecedentStore)target).stack)
+                foreach (object item in ((ReferentStore)target).stack)
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label(item.ToString());
@@ -53,7 +53,7 @@ public class AntecedentStore : MonoBehaviour
 			
 	}
 
-    List<object> MatchBy(AntecedentType glType)
+    List<object> MatchBy(ReferentType glType)
     {
         List<object> matches = new List<object>();
 
