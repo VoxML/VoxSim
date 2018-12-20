@@ -16,11 +16,11 @@ using RCC;
 using RootMotion.FinalIK;
 
 public class SelectionEventArgs : EventArgs {
-	public object Content;
+    public object Content;
 
-	public SelectionEventArgs(object content) {
-		Content = content;
-	}
+    public SelectionEventArgs(object content) {
+        Content = content;
+    }
 }
 
 public class JointGestureDemo : AgentInteraction {

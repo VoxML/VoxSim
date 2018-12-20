@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Entity Type="Object" />
+  <Lex>
+    <Pred>block</Pred>
+    <Type>physobj*artifact</Type>
+  </Lex>
+  <Type>
+    <Head>rectangular_prism[1]</Head>
+    <Components />
+    <Concavity>Flat</Concavity>
+    <RotatSym>X,Y,Z</RotatSym>
+    <ReflSym>XY,XZ,YZ</ReflSym>
+    <Args />
+    <Body />
+    <Scale />
+    <Arity />
+    <Class />
+    <Value />
+    <Constr />
+  </Type>
+  <Habitat>
+    <Intrinsic>
+      <Intr Name="CONSTR[2]" Value="X = Y = Z" />
+    </Intrinsic>
+    <Extrinsic />
+  </Habitat>
+  <Afford_Str>
+    <Affordances>
+      <Affordance Formula="H-&gt;[put(x, on([1]))]support([1], x)" />
+      <Affordance Formula="H-&gt;[lift(x, [1])]hold(x, [1])" />
+    </Affordances>
+  </Afford_Str>
+  <Embodiment>
+    <Scale>&lt;agent</Scale>
+    <Movable>true</Movable>
+  </Embodiment>
+  <Attributes>
+    <Attrs>
+      <Attr Value="purple" />
+    </Attrs>
+  </Attributes>
+</VoxML>

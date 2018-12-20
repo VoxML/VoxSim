@@ -193,12 +193,51 @@ namespace Agent {
         void Update() {
         }
 
+        void LoadUserModel(string path) {
+        }
+
+        void SaveUserModel(string userID) {
+            List<Concept> stateConcepts = new List<Concept>();
+            List<Relation> stateRelations = new List<Relation>();
+
+            foreach (Concepts conceptsByMode in state.GetAllConcepts()) {
+                List<Concept> gestureConcepts = conceptsByMode.GetConcepts()[ConceptMode.G];
+                List<Concept> linguisticConcepts = conceptsByMode.GetConcepts()[ConceptMode.L];
+
+                foreach (Concept gestureConcept in gestureConcepts) {
+                    stateConcepts.Add(gestureConcept);
+
+                    foreach (Concept relatedConcept in state.GetRelated(gestureConcept)) {
+                        Relation relation = state.GetRelation(gestureConcept, relatedConcept);
+                        if (!stateRelations.Contains(relation)) {
+                            stateRelations.Add(relation);
+                        }
+                    }
+                }
+
+                foreach (Concept linguisticConcept in linguisticConcepts) {
+                    stateConcepts.Add(linguisticConcept);
+
+                    foreach (Concept relatedConcept in state.GetRelated(linguisticConcept)) {
+                        Relation relation = state.GetRelation(linguisticConcept, relatedConcept);
+                        if (!stateRelations.Contains(relation)) {
+                            stateRelations.Add(relation);
+                        }
+                    }
+                }
+            }
+
+            string jsonifiedState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
+        }
+
         void IdentifyUser(object sender, EventArgs e) {
             string username = ((UserNameInfo)((ModalWindowEventArgs)e).Data).Username;
             userNameModalWindow.CloseWindow((ModalWindowEventArgs)e);
 
-            if (File.Exists(string.Format(@"EpiSim/UserModels/user-{0}.json", username))) {
+            string userModelPath = string.Format(@"EpiSim/UserModels/user-{0}.json", username);
+            if (File.Exists(userModelPath)) {
                 // load user model
+                LoadUserModel(userModelPath);
             }
         }
 	}

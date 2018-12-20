@@ -61,6 +61,9 @@ public class InteractionPrefsModalWindow : ModalWindow {
 	public bool showSyntheticVision = false;
 	public bool showVisualMemory = false;
 
+    public bool linguisticReference = true;
+    public bool gesturalReference = true;
+
 	string actionButtonText;
 
 	// Use this for initialization
@@ -139,6 +142,14 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		showVisualMemory = GUILayout.Toggle (showVisualMemory, "Show Visual Memory", GUILayout.ExpandWidth (true));
 		GUILayout.EndVertical();
 		GUILayout.EndVertical();
+
+        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.Label("Referring Expressions:");
+        GUILayout.BeginVertical(GUI.skin.box);
+        linguisticReference = GUILayout.Toggle(linguisticReference, "Linguistic", GUILayout.ExpandWidth(true));
+        gesturalReference = GUILayout.Toggle(gesturalReference, "Gestural", GUILayout.ExpandWidth(true));
+        GUILayout.EndVertical();
+        GUILayout.EndVertical();
 
 		GUILayout.EndScrollView ();
 	}
