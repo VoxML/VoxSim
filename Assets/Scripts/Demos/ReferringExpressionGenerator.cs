@@ -9,7 +9,9 @@ using UnityEngine.UI;
 
 using Episteme;
 using Global;
+using Agent;
 using Network;
+
 
 public class ReferringExpressionGenerator : MonoBehaviour {
 
@@ -28,9 +30,9 @@ public class ReferringExpressionGenerator : MonoBehaviour {
     public int focusTimeoutTime;
     public int referWaitTime;
 
-    public Image focusCircle;
-
     public JointGestureDemo world;
+    public GameObject agent;
+    public Image focusCircle;
 
     public event EventHandler ObjectSelected;
 
@@ -66,6 +68,8 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         preds = behaviorController.GetComponent<Predicates>();
         eventManager = behaviorController.GetComponent<EventManager>();
 
+        eventManager.EntityReferenced += ReferenceObject;
+                    
         ObjectSelected += IndicateFocus;
 	}
 
@@ -89,8 +93,13 @@ public class ReferringExpressionGenerator : MonoBehaviour {
             timeoutFocus = false;
             focusCircle.enabled = false;
             spriteAnimator.enabled = false;
+            referWaitTimer.Enabled = true;
         }
-		
+
+        if (refer) {
+            refer = false;
+            eventManager.OnEntityReferenced(this, new EventReferentArgs(focusObj));
+        }		
 	}
 
     void IndicateFocus(object sender, EventArgs e) {
@@ -106,12 +115,16 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         focusTimeoutTimer.Interval = focusTimeoutTime;
         focusTimeoutTimer.Enabled = true;
         spriteAnimator.enabled = true;
-        //spriteRenderer.transform.position = focusObj.transform.position;
-        //spriteRenderer.transform.LookAt(Camera.main.transform.position, -Vector3.up);
         spriteAnimator.Play("circle_anim_test",0,0);
+    }
 
-        //spriteRenderer.transform.position = focusObj.transform.position;
-        //spriteRenderer.transform.LookAt(Camera.main.transform.position, -Vector3.up);
+    void ReferenceObject(object sender, EventArgs e) {
+        Debug.Log(string.Format("Referring to {0}", focusObj.name));
+
+        if (world.interactionPrefs.gesturalReference) {
+            GameObject hand = InteractionHelper.GetCloserHand(agent, focusObj);
+            world.PointAt(focusObj.transform.position, hand);
+        }
     }
 
     void TimeoutFocus(object sender, ElapsedEventArgs e) {
@@ -120,10 +133,8 @@ public class ReferringExpressionGenerator : MonoBehaviour {
     }
 
     void ReferToFocusedObject(object sender, ElapsedEventArgs e) {
+        referWaitTimer.Interval = referWaitTime;
         referWaitTimer.Enabled = false;
         refer = true;
-
-        Debug.Log(string.Format("Referring to {0}", focusObj.name));
-
     }
 }

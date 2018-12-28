@@ -144,7 +144,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		GUILayout.EndVertical();
 
         GUILayout.BeginVertical(GUI.skin.box);
-        GUILayout.Label("Referring Expressions:");
+        GUILayout.Label("Referencing:");
         GUILayout.BeginVertical(GUI.skin.box);
         linguisticReference = GUILayout.Toggle(linguisticReference, "Linguistic", GUILayout.ExpandWidth(true));
         gesturalReference = GUILayout.Toggle(gesturalReference, "Gestural", GUILayout.ExpandWidth(true));

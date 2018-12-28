@@ -200,7 +200,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
-        eventManager.ReferentComputed += ReferentIndicated;
+        eventManager.EntityReferenced += ReferentIndicated;
         eventManager.DisambiguationError += Disambiguate;
 
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
@@ -1728,14 +1728,14 @@ public class JointGestureDemo : AgentInteraction {
 					LookForward ();
 
 					if (interactionLogic.GraspedObj == null) {
-						PointAt (highlightCenter, rightGrasper);
+						ReachAndPoint (highlightCenter, rightGrasper);
 					}
 					else {
 						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
-							PointAt (highlightCenter, rightGrasper);
+							ReachAndPoint (highlightCenter, rightGrasper);
 						}
 						else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-							PointAt (highlightCenter, leftGrasper);
+							ReachAndPoint (highlightCenter, leftGrasper);
 						}
 					}
 				}
@@ -1777,14 +1777,14 @@ public class JointGestureDemo : AgentInteraction {
 					LookForward ();
 
 					if (interactionLogic.GraspedObj == null) {
-						PointAt (highlightCenter, rightGrasper);
+						ReachAndPoint (highlightCenter, rightGrasper);
 					} 
 					else {
 						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
-							PointAt (highlightCenter, rightGrasper);
+							ReachAndPoint (highlightCenter, rightGrasper);
 						} 
 						else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-							PointAt (highlightCenter, leftGrasper);
+							ReachAndPoint (highlightCenter, leftGrasper);
 						}
 					}
 				}
@@ -4409,34 +4409,6 @@ public class JointGestureDemo : AgentInteraction {
         }
 	}
 
-	void PointAt(Vector3 point, GameObject hand) {
-		Vector3 target = new Vector3 (point.x, point.y+0.2f, point.z);
-		AvatarGesture performGesture = null;
-
-		MoveToPerform ();
-
-		if (hand == leftGrasper) {
-			ikControl.leftHandObj.position = target;
-			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-			performGesture = AvatarGesture.LARM_POINT_FRONT;
-		}
-		else if (hand == rightGrasper) {
-			ikControl.rightHandObj.position = target;
-			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-			performGesture = AvatarGesture.RARM_POINT_FRONT;
-		}
-
-		gestureController.PerformGesture (performGesture);
-
-        if (!logActionsOnly) {
-            logger.OnLogEvent(this, new LoggerArgs(
-                string.Format("{0}\t{1}\t{2}",
-                    (++logIndex).ToString(),
-                    "AG",
-                    string.Format("point({0},{1})", hand.name, Helper.VectorToParsable(point)))));
-        }
-	}
-
 	void TurnToward(GameObject obj) {
 		//Diana.GetComponent<IKControl> ().targetRotation = Vector3.zero;
 
@@ -4697,6 +4669,64 @@ public class JointGestureDemo : AgentInteraction {
         }
 	}
 
+    public void ReachAndPoint(Vector3 point, GameObject hand) {
+        Vector3 target = new Vector3(point.x, point.y + 0.2f, point.z);
+        AvatarGesture performGesture = null;
+
+        MoveToPerform();
+
+        if (hand == leftGrasper) {
+            ikControl.leftHandObj.position = target;
+            InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
+            performGesture = AvatarGesture.LARM_POINT_FRONT;
+        }
+        else if (hand == rightGrasper) {
+            ikControl.rightHandObj.position = target;
+            InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
+            performGesture = AvatarGesture.RARM_POINT_FRONT;
+        }
+
+        gestureController.PerformGesture(performGesture);
+
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("point({0},{1})", hand.name, Helper.VectorToParsable(point)))));
+        }
+    }
+
+    public void PointAt(Vector3 point, GameObject hand) {
+        Vector3 target = new Vector3(point.x, point.y, point.z);
+        AvatarGesture performGesture = null;
+
+        MoveToPerform();
+
+        if (hand == leftGrasper) {
+            LimbIK leftArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList()[0];
+            leftArmIK.solver.target.position = target;
+            //InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj, 1.0f, 1.0f);
+            performGesture = AvatarGesture.LARM_POINT_FRONT;
+        }
+        else if (hand == rightGrasper) {
+            LimbIK rightArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList()[0];
+            rightArmIK.solver.target.position = target;
+            //InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj, 1.0f, 1.0f);
+            performGesture = AvatarGesture.RARM_POINT_FRONT;
+        }
+
+        gestureController.PerformGesture(performGesture);
+
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("point({0},{1})", hand.name, Helper.VectorToParsable(point)))));
+        }
+    }
+
 	public void StorePose() {
 		//		Debug.Log (string.Format("Storing pose {0} {1} {2}",
 		//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
@@ -4895,9 +4925,9 @@ public class JointGestureDemo : AgentInteraction {
 
     void ReferentIndicated(object sender, EventArgs e)
     {
-        if (((EventReferentArgs)e).Antecendent is String)   // object
+        if (((EventReferentArgs)e).Referent is String)   // object
         {
-            GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Antecendent).ToString());
+            GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Referent).ToString());
             if (obj != null)
             {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
@@ -4907,7 +4937,7 @@ public class JointGestureDemo : AgentInteraction {
                 }
             }
         }
-        else if (((EventReferentArgs)e).Antecendent is Vector3) // location
+        else if (((EventReferentArgs)e).Referent is Vector3) // location
         {
         }
 

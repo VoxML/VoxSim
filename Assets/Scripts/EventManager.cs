@@ -30,15 +30,15 @@ public class EventManagerArgs : EventArgs {
 
 public class EventReferentArgs : EventArgs {
 
-    public object Antecendent { get; set; }
+    public object Referent { get; set; }
 
-    public EventReferentArgs(object antecendent)
+    public EventReferentArgs(object referent)
     {
-        this.Antecendent = antecendent;
+        this.Referent = referent;
     }
 }
 
-public class EventDisambiguationArgs : EventArgs{
+public class EventDisambiguationArgs : EventArgs {
 
     public string Event { get; set; }
     public string AmbiguityStr { get; set; }
@@ -107,13 +107,13 @@ public class EventManager : MonoBehaviour {
 		}
 	}
 
-    public event EventHandler ReferentComputed;
+    public event EventHandler EntityReferenced;
 
-    public void OnReferentComputed(object sender, EventArgs e)
+    public void OnEntityReferenced(object sender, EventArgs e)
     {
-        if (ReferentComputed != null)
+        if (EntityReferenced != null)
         {
-            ReferentComputed(this, e);
+            EntityReferenced(this, e);
         }
     }
 
@@ -645,7 +645,7 @@ public class EventManager : MonoBehaviour {
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                             Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
                             referents.stack.Push(obj);
-                            OnReferentComputed(this, new EventReferentArgs(obj));
+                            OnEntityReferenced(this, new EventReferentArgs(obj));
                         }
 					}
 					else {

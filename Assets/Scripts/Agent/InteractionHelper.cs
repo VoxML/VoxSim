@@ -30,29 +30,35 @@ namespace Agent
 			return grasper;
 		}
 
-		public static void SetLeftHandTarget(GameObject agent, Transform target) {
+        public static void SetLeftHandTarget(GameObject agent, Transform target,
+                                              float positionWeight = 1.0f, float pullWeight = 1.0f) {
 			FullBodyBipedIK ik = agent.GetComponent<FullBodyBipedIK>();
 			if (target != null) {
 				ik.solver.GetEffector (FullBodyBipedEffector.LeftHand).target = target;
-				ik.solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 1.0f;
+                ik.solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = positionWeight;
+                ik.solver.GetChain (FullBodyBipedChain.LeftArm).pull = pullWeight;
 			}
 			else {
 				ik.solver.GetEffector (FullBodyBipedEffector.LeftHand).target = null;
 				ik.solver.GetEffector (FullBodyBipedEffector.LeftHand).positionWeight = 0.0f;
 				ik.solver.GetEffector (FullBodyBipedEffector.LeftHand).rotationWeight = 0.0f;
+                ik.solver.GetChain (FullBodyBipedChain.LeftArm).pull = 1.0f;
 			}
 		}
 
-		public static void SetRightHandTarget(GameObject agent, Transform target) {
+        public static void SetRightHandTarget(GameObject agent, Transform target,
+                                              float positionWeight = 1.0f, float pullWeight = 1.0f) {
 			FullBodyBipedIK ik = agent.GetComponent<FullBodyBipedIK> ();
 			if (target != null) {
 				ik.solver.GetEffector (FullBodyBipedEffector.RightHand).target = target;
-				ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 1.0f;
+                ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = positionWeight;
+                ik.solver.GetChain (FullBodyBipedChain.RightArm).pull = pullWeight;
 			}
 			else {
 				ik.solver.GetEffector (FullBodyBipedEffector.RightHand).target = null;
 				ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight = 0.0f;
 				ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight = 0.0f;
+                ik.solver.GetChain (FullBodyBipedChain.RightArm).pull = 1.0f;
 			}
 		}
 
