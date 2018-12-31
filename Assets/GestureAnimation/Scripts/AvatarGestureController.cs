@@ -66,6 +66,8 @@ public class AvatarGestureController : MonoBehaviour {
     //
 
     public UnityEvent OnGestureStart;
+    public UnityEvent OnGesturePause;
+    public UnityEvent OnGestureResume;
     public UnityEvent OnGestureEnd;
 
     //
@@ -256,5 +258,21 @@ public class AvatarGestureController : MonoBehaviour {
             };
             behavior.AnimationEnd += eventHandler; // Subscribe
         }
+    }
+
+    public void StorePose()
+    {
+        OnGestureStart.Invoke();
+    }
+
+    public void PauseGesture()
+    {
+        animator.speed = 0f;
+        OnGesturePause.Invoke();
+    }
+
+    public void ResumeGesture()
+    {
+        animator.speed = 1f;
     }
 }

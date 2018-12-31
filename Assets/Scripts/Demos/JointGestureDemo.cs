@@ -102,6 +102,10 @@ public class JointGestureDemo : AgentInteraction {
 
 	public bool allowDeixisByClick = false;
 
+    Timer gestureResumeTimer;
+    public double gestureResumeTime;
+    bool gestureResume = false;
+
 	GenericLogger logger;
 	int logIndex;
 
@@ -247,6 +251,11 @@ public class JointGestureDemo : AgentInteraction {
 		rightTargetDefault = ikControl.rightHandObj.transform.position;
 		headTargetDefault = ikControl.lookObj.transform.position;
 
+        // store default positions at start
+        leftTargetStored = new Vector3(float.MaxValue,float.MaxValue,float.MaxValue);
+        rightTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        headTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+
 		regionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 		regionHighlight.name = "Highlight";
 		regionHighlight.transform.position = Vector3.zero;
@@ -261,6 +270,10 @@ public class JointGestureDemo : AgentInteraction {
 		highlightTimeoutTimer = new Timer (highlightTimeoutTime);
 		highlightTimeoutTimer.Enabled = false;
 		highlightTimeoutTimer.Elapsed += DisableHighlight;
+
+        gestureResumeTimer = new Timer(gestureResumeTime);
+        gestureResumeTimer.Enabled = false;
+        gestureResumeTimer.Elapsed += GestureResume;
 
 		relativeDir.Add ("left", "left");
 		relativeDir.Add ("right", "right");
@@ -506,6 +519,11 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 		}
+
+        if (gestureResume) {
+            gestureController.OnGestureResume.Invoke();
+            gestureResume = false;
+        }
 	}
 
 	void ReceivedFusion(object sender, EventArgs e) {
@@ -4676,17 +4694,24 @@ public class JointGestureDemo : AgentInteraction {
         MoveToPerform();
 
         if (hand == leftGrasper) {
-            ikControl.leftHandObj.position = target;
-            InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
             performGesture = AvatarGesture.LARM_POINT_FRONT;
         }
         else if (hand == rightGrasper) {
-            ikControl.rightHandObj.position = target;
-            InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
             performGesture = AvatarGesture.RARM_POINT_FRONT;
+            ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
         }
 
         gestureController.PerformGesture(performGesture);
+
+        if (hand == leftGrasper) {
+            ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
+        }
+        else if (hand == rightGrasper) {
+            ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
+        }
 
         if (!logActionsOnly) {
             logger.OnLogEvent(this, new LoggerArgs(
@@ -4704,19 +4729,24 @@ public class JointGestureDemo : AgentInteraction {
         MoveToPerform();
 
         if (hand == leftGrasper) {
-            LimbIK leftArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList()[0];
-            leftArmIK.solver.target.position = target;
-            //InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj, 1.0f, 1.0f);
             performGesture = AvatarGesture.LARM_POINT_FRONT;
         }
         else if (hand == rightGrasper) {
-            LimbIK rightArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList()[0];
-            rightArmIK.solver.target.position = target;
-            //InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj, 1.0f, 1.0f);
             performGesture = AvatarGesture.RARM_POINT_FRONT;
         }
 
         gestureController.PerformGesture(performGesture);
+
+        if (hand == leftGrasper) {
+            LimbIK leftArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList()[0];
+            leftArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            //InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj, 1.0f, 1.0f);
+        }
+        else if (hand == rightGrasper) {
+            LimbIK rightArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList()[0];
+            rightArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            //InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj, 1.0f, 1.0f);
+        }
 
         if (!logActionsOnly) {
             logger.OnLogEvent(this, new LoggerArgs(
@@ -4727,9 +4757,20 @@ public class JointGestureDemo : AgentInteraction {
         }
     }
 
+	public void GesturePause() {
+        Debug.Log("Pausing");
+        gestureResumeTimer.Enabled = true;
+	}
+
+    public void GestureResume(object sender, ElapsedEventArgs e) {
+        Debug.Log("Resuming gesture");
+        gestureResume = true;
+        gestureResumeTimer.Enabled = false;
+        gestureResumeTimer.Interval = gestureResumeTime;
+    }
+
 	public void StorePose() {
-		//		Debug.Log (string.Format("Storing pose {0} {1} {2}",
-		//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+        //Debug.Break();
 		bool leftGrasping = false;
 		bool rightGrasping = false;
 
@@ -4743,14 +4784,26 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		if (!leftGrasping) {
-			leftTargetStored = ikControl.leftHandObj.transform.position;
+            if (leftTargetStored == new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)) {
+                leftTargetStored = ikControl.leftHandObj.transform.position;
+                Debug.Log(string.Format("Storing pose {0} {1} {2}",
+                                 Helper.VectorToParsable(ikControl.leftHandObj.transform.position),
+                                 Helper.VectorToParsable(ikControl.rightHandObj.transform.position),
+                                 Helper.VectorToParsable(ikControl.lookObj.transform.position)));
+            }
 		}
 		else {
 			leftTargetStored = new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue);
 		}
 
 		if (!rightGrasping) {
-			rightTargetStored = ikControl.rightHandObj.transform.position;
+            if (rightTargetStored == new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)) {
+                rightTargetStored = ikControl.rightHandObj.transform.position;
+                Debug.Log(string.Format("Storing pose {0} {1} {2}",
+                                 Helper.VectorToParsable(ikControl.leftHandObj.transform.position),
+                                 Helper.VectorToParsable(ikControl.rightHandObj.transform.position),
+                                 Helper.VectorToParsable(ikControl.lookObj.transform.position)));
+            }
 		}
 		else {
 			rightTargetStored = new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue);
@@ -4760,9 +4813,14 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void ReturnToPose() {
-		bool animPlaying = false;
+        Debug.Log(string.Format("Returning to pose {0} {1} {2}",
+                                Helper.VectorToParsable(leftTargetStored),
+                                Helper.VectorToParsable(rightTargetStored),
+                                Helper.VectorToParsable(headTargetStored)));
+        bool animPlaying = false;
 		for (int i = 0; i < Diana.GetComponent<Animator> ().layerCount; i++) {
-			if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo(i)[0].clip != null) {
+            if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo(i)[0].clip != null) {
+                //Debug.Log(string.Format("{0}: {1}", i, Diana.GetComponent<Animator>().GetCurrentAnimatorClipInfo(i)[0].clip.name));
 				animPlaying = true;
 			}
 		}
@@ -4771,22 +4829,36 @@ public class JointGestureDemo : AgentInteraction {
 		//			animPlaying = true;
 		//		}
 
-		if (!animPlaying) {
+		//if (!animPlaying) {
 			if (leftTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
 				ikControl.leftHandObj.transform.position = leftTargetStored;
 				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+
+                List<LimbIK> leftArmIKs = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList();
+                if (leftArmIKs.Count > 0) {
+                    LimbIK leftArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList()[0];
+                    leftArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = leftTargetStored;
+                }
+                leftTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
 			}
 
 			if (rightTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
 				ikControl.rightHandObj.transform.position = rightTargetStored;
 				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+
+                List<LimbIK> rightArmIKs = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList();
+                if (rightArmIKs.Count > 0) {
+                    LimbIK rightArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList()[0];
+                    rightArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = rightTargetStored;
+                }
+                rightTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
 			}
 
 			ikControl.lookObj.transform.position = headTargetStored;
 			InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
 			//		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
 			//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
-		}
+		//}
 	}
 
 	double EpistemicCertainty (Concept concept) {
