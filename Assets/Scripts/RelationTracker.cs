@@ -10,17 +10,27 @@ using Global;
 using Vox;
 
 public class RelationTracker : MonoBehaviour {
+    ObjectSelector objectSelector;
 
 	public Hashtable relations = new Hashtable();
 	public List<String> relStrings = new List<String>();
 
+    bool initialCalcComplete = false;
+
 	// Use this for initialization
 	void Start () {
-		UpdateRelationStrings ();
+        objectSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
+        if (!initialCalcComplete) {
+            SurveyRelations();
+            UpdateRelationStrings();
+
+            initialCalcComplete = true;
+        }
+
 		// for each relation
 		// assume they still hold
 		// unless break condition is met
@@ -141,6 +151,12 @@ public class RelationTracker : MonoBehaviour {
 			}
 		}
 	}
+
+    void SurveyRelations() {
+        foreach (Voxeme voxeme in objectSelector.allVoxemes) {
+            Satisfaction.SatisfactionTest.ReasonFromAffordances("put", voxeme);
+        }
+    }
 
 	void UpdateRelationStrings() {
 		relStrings.Clear ();

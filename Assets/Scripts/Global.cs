@@ -1035,10 +1035,10 @@ namespace Global {
 			Bounds surfaceBounds = GetObjectWorldSize (surface);
 			Bounds testBounds = GetObjectWorldSize (testObj);
 
-			region.min = new Vector3 (surfaceBounds.min.x - (testBounds.size.x*overhang),
-				surfaceBounds.max.y, surfaceBounds.min.z - (testBounds.size.z*overhang));
-			region.max = new Vector3 (surfaceBounds.max.x + (testBounds.size.x*overhang),
-				surfaceBounds.max.y, surfaceBounds.max.z + (testBounds.size.z*overhang));
+            region.min = new Vector3 (surfaceBounds.min.x - (testBounds.size.x*overhang) + testBounds.extents.x,
+                surfaceBounds.max.y, surfaceBounds.min.z - (testBounds.size.z*overhang) + testBounds.extents.z);
+            region.max = new Vector3 (surfaceBounds.max.x + (testBounds.size.x*overhang) - testBounds.extents.x,
+                surfaceBounds.max.y, surfaceBounds.max.z + (testBounds.size.z*overhang) - testBounds.extents.z);
 
 			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
@@ -1050,8 +1050,8 @@ namespace Global {
 				testBounds.center = testPoint;
 				bool regionClear = true;
 				foreach (Voxeme voxeme in objSelector.allVoxemes) {
-					if (voxeme.gameObject != surface) {
-						if (testBounds.Intersects(Helper.GetObjectWorldSize(voxeme.gameObject))) {
+                    if ((voxeme.gameObject != surface) && (voxeme.gameObject.activeInHierarchy)) {
+						if (testBounds.Intersects(GetObjectWorldSize(voxeme.gameObject))) {
 							regionClear = false;
 							break;
 						}

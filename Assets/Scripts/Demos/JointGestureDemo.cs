@@ -64,7 +64,6 @@ public class JointGestureDemo : AgentInteraction {
 	public BoxCollider demoSurfaceCollider;
 	public List<GameObject> blocks;
 	public GameObject indicatedObj = null;
-	public GameObject indicatedObjObj = null;
 	public GameObject graspedObj = null;
 
 	public Region indicatedRegion = null;
@@ -305,8 +304,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (demoSurface != Helper.GetMostImmediateParentVoxeme (demoSurface)) {
 			demoSurface = Helper.GetMostImmediateParentVoxeme (demoSurface);
 
-            for (int i = 0; i < blocks.Count; i++)
-            {
+            for (int i = 0; i < blocks.Count; i++) {
                 blocks[i] = Helper.GetMostImmediateParentVoxeme(blocks[i]);
             }
 		}

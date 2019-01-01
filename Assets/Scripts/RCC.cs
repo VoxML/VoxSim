@@ -130,13 +130,13 @@ namespace RCC
 							Vector3 origin = new Vector3 (point.x == x.Min (MajorAxis.X).x ? point.x + Constants.EPSILON : point.x == x.Max (MajorAxis.X).x ? point.x - Constants.EPSILON : point.x,
 								point.y+Constants.EPSILON, point.z == x.Min (MajorAxis.Z).z ? point.x + Constants.EPSILON : point.z == x.Max (MajorAxis.Z).z ? point.z - Constants.EPSILON : point.z);
 							bool hit = Physics.Raycast (origin, -Vector3.up, out hitInfo);
-							Debug.Log (hitInfo.collider.gameObject);
-							if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
-								Debug.Log (hitInfo.collider.gameObject);
-								Debug.Log (hitInfo.distance);
-								Debug.Log (Helper.VectorToParsable(hitInfo.collider.gameObject.transform.position));
-								Debug.Log (Helper.VectorToParsable (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position));
-							}
+							//Debug.Log (hitInfo.collider.gameObject);
+							//if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
+							//	Debug.Log (hitInfo.collider.gameObject);
+							//	Debug.Log (hitInfo.distance);
+							//	Debug.Log (Helper.VectorToParsable(hitInfo.collider.gameObject.transform.position));
+							//	Debug.Log (Helper.VectorToParsable (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position));
+							//}
 							if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) &&
 								(hitInfo.distance <= Constants.EPSILON * 3)) {
 								Debug.Log (string.Format ("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));

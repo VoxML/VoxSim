@@ -19,13 +19,17 @@ public class ReferringExpressionGenerator : MonoBehaviour {
 	Predicates preds;
 	ObjectSelector objSelector;
     EventManager eventManager;
+    RelationTracker relationTracker;
     GameObject focusObj;
 
     Animator spriteAnimator;
     Timer focusTimeoutTimer;
     Timer referWaitTimer;
 
+    bool itemsSituated;
     bool timeoutFocus,refer;
+
+    public List<GameObject> landmarks;
 
     public int focusTimeoutTime;
     public int referWaitTime;
@@ -68,6 +72,8 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         preds = behaviorController.GetComponent<Predicates>();
         eventManager = behaviorController.GetComponent<EventManager>();
 
+        relationTracker = behaviorController.GetComponent<RelationTracker>();
+
         eventManager.EntityReferenced += ReferenceObject;
                     
         ObjectSelected += IndicateFocus;
@@ -75,6 +81,22 @@ public class ReferringExpressionGenerator : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
+        if (!itemsSituated) {
+            for (int i = 0; i < landmarks.Count; i++) {
+                landmarks[i] = Helper.GetMostImmediateParentVoxeme(landmarks[i]);
+            }
+
+            for (int i = 0; i < world.blocks.Count; i++) {
+                world.blocks[i] = world.blocks[i] != Helper.GetMostImmediateParentVoxeme(world.blocks[i]) ?
+                    Helper.GetMostImmediateParentVoxeme(world.blocks[i]) : world.blocks[i];
+            }
+
+            PlaceRandomly(world.demoSurface != Helper.GetMostImmediateParentVoxeme(world.demoSurface) ?
+                          Helper.GetMostImmediateParentVoxeme(world.demoSurface) : world.demoSurface,
+                          landmarks, world.blocks);
+            itemsSituated = true;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -102,6 +124,20 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         }		
 	}
 
+    void PlaceRandomly(GameObject surface, List<GameObject> landmarkObjs, List<GameObject> focusObjs) {
+        // place landmarks
+        foreach (GameObject landmark in landmarkObjs) {
+            landmark.transform.position = Helper.FindClearRegion(surface, landmark).center;
+            landmark.GetComponent<Voxeme>().targetPosition = landmark.transform.position;
+        }
+
+        // place focus objects
+        foreach (GameObject obj in focusObjs) {
+            obj.transform.position = Helper.FindClearRegion(surface, obj).center;
+            obj.GetComponent<Voxeme>().targetPosition = obj.transform.position;
+        }
+    }
+
     void IndicateFocus(object sender, EventArgs e) {
         focusObj = ((SelectionEventArgs)e).Content as GameObject;
         Debug.Log(string.Format("Focused on {0}, world @ {1} screen @ {2}", focusObj.name,
@@ -112,6 +148,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         focusCircle.transform.position = new Vector3(focusObj.transform.position.x,
                                                      Helper.GetObjectWorldSize(focusObj).max.y,
                                                      focusObj.transform.position.z);
+        //Debug.Log(Helper.VectorToParsable(focusCircle.transform.position));
         focusTimeoutTimer.Interval = focusTimeoutTime;
         focusTimeoutTimer.Enabled = true;
         spriteAnimator.enabled = true;
