@@ -26,7 +26,6 @@ public class RelationTracker : MonoBehaviour {
 	void Update () {
         if (!initialCalcComplete) {
             SurveyRelations();
-            UpdateRelationStrings();
 
             initialCalcComplete = true;
         }
@@ -152,10 +151,11 @@ public class RelationTracker : MonoBehaviour {
 		}
 	}
 
-    void SurveyRelations() {
+    public void SurveyRelations() {
         foreach (Voxeme voxeme in objectSelector.allVoxemes) {
             Satisfaction.SatisfactionTest.ReasonFromAffordances("put", voxeme);
         }
+        UpdateRelationStrings();
     }
 
 	void UpdateRelationStrings() {

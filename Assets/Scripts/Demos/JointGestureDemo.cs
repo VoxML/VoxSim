@@ -101,6 +101,11 @@ public class JointGestureDemo : AgentInteraction {
 
 	public bool allowDeixisByClick = false;
 
+    public Region leftRegion;
+    public Region rightRegion;
+    public Region frontRegion;
+    public Region backRegion;
+
     Timer gestureResumeTimer;
     public double gestureResumeTime;
     bool gestureResume = false;
@@ -113,11 +118,6 @@ public class JointGestureDemo : AgentInteraction {
     bool useTimestamps;
 
 	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
-
-	Region leftRegion;
-	Region rightRegion;
-	Region frontRegion;
-	Region backRegion;
 
 	Dictionary<Region,string> regionLabels = new Dictionary<Region, string> ();
 	Dictionary<string,string> directionPreds = new Dictionary<string, string> ();
@@ -222,10 +222,11 @@ public class JointGestureDemo : AgentInteraction {
 		logIndex = 0;
 
 		Diana = GameObject.Find ("Diana");
-		dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
+
+        dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 
         fusionClient = commBridge.GetComponent<PluginImport>().FusionClient;
         //TODO: What if there is no CSUClient address assigned?
@@ -5069,16 +5070,18 @@ public class JointGestureDemo : AgentInteraction {
         Debug.Log("Connection Lost");
 
 
-		if (sessionCounter >= 1) {
-			if (eventManager.events.Count == 0) {
-				RespondAndUpdate("Hey, where'd you go?");
-			}
-		}
-		else {
-			if (eventManager.events.Count == 0) {
-				RespondAndUpdate("Anyone there?");
-			}
-		}
+        if (interactionPrefs.connectionLostNotification) {
+            if (sessionCounter >= 1) {
+                if (eventManager.events.Count == 0) {
+                    RespondAndUpdate("Hey, where'd you go?");
+                }
+            }
+            else {
+                if (eventManager.events.Count == 0) {
+                    RespondAndUpdate("Anyone there?");
+                }
+            }
+        }
 	}
 
 	void DisableHighlight(object sender, ElapsedEventArgs e) {

@@ -60,6 +60,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 	public bool useTeachingAgent = false;
 	public bool showSyntheticVision = false;
 	public bool showVisualMemory = false;
+    public bool connectionLostNotification = true;
 
     public bool linguisticReference = true;
     public bool gesturalReference = true;
@@ -150,6 +151,10 @@ public class InteractionPrefsModalWindow : ModalWindow {
         gesturalReference = GUILayout.Toggle(gesturalReference, "Gestural", GUILayout.ExpandWidth(true));
         GUILayout.EndVertical();
         GUILayout.EndVertical();
+
+        GUILayout.BeginHorizontal(GUI.skin.box);
+        connectionLostNotification = GUILayout.Toggle(useTeachingAgent, "Connection Lost Notification", GUILayout.ExpandWidth(true));
+        GUILayout.EndHorizontal();
 
 		GUILayout.EndScrollView ();
 	}

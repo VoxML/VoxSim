@@ -1577,7 +1577,7 @@ namespace Global {
 				rangeMax = max + 1;
 			}
 
-			return UnityEngine.Random.Range(min, max);
+            return UnityEngine.Random.Range(rangeMin, rangeMax);
 		}
 
 		public static float RandomFloat(float min, float max, int flags = (int)RangeFlags.MinInclusive) {
