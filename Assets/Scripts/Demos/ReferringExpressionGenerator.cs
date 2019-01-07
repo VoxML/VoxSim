@@ -227,6 +227,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         descriptorString = string.Empty;
 
         if (world.interactionPrefs.gesturalReference) {
+            distanceDistinction = false;
             GameObject hand = InteractionHelper.GetCloserHand(agent, focusObj);
             world.PointAt(focusObj.transform.position, hand);
 
