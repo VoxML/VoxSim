@@ -234,12 +234,12 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                 // G + L
                 // variables: bool proximal/distal distinction (this/that)
                 //  int 0-3 relational descriptors
-                distanceDistinction = true;//System.Convert.ToBoolean(
-                    //RandomHelper.RandomInt(0, 1,
-                                           //(int)(RandomHelper.RangeFlags.MinInclusive) | (int)(RandomHelper.RangeFlags.MaxInclusive)));
-                relativeDistance = true;//System.Convert.ToBoolean(
-                    //RandomHelper.RandomInt(0, 1,
-                                           //(int)(RandomHelper.RangeFlags.MinInclusive) | (int)(RandomHelper.RangeFlags.MaxInclusive)));
+                distanceDistinction = Convert.ToBoolean(
+                    RandomHelper.RandomInt(0, 1,
+                    (int)(RandomHelper.RangeFlags.MinInclusive) | (int)(RandomHelper.RangeFlags.MaxInclusive)));
+                relativeDistance = Convert.ToBoolean(
+                    RandomHelper.RandomInt(0, 1,
+                    (int)(RandomHelper.RangeFlags.MinInclusive) | (int)(RandomHelper.RangeFlags.MaxInclusive)));
                 int relationalDescriptors = RandomHelper.RandomInt(0, 4);
                 Debug.Log(string.Format("Use distance distinction: {0}, relative distance: {1}, {2} relational descriptors",
                                         distanceDistinction, relativeDistance, relationalDescriptors));
@@ -292,6 +292,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         }
         else if (world.interactionPrefs.linguisticReference) {
             // variables: int 1-3 relational descriptors
+            distanceDistinction = false;
             int relationalDescriptors = RandomHelper.RandomInt(1, 4);
             descriptorString = FindFocusObjRelations(relationalDescriptors);
 
