@@ -18,10 +18,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
 
     GameObject behaviorController;
 	Predicates preds;
-	ObjectSelector objSelector;
     EventManager eventManager;
-    RelationTracker relationTracker;
-    GameObject focusObj;
 
     Animator spriteAnimator;
     Timer focusTimeoutTimer;
@@ -32,11 +29,18 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         {"left","right of"},
         {"right","left of"},
         {"in_front","in front of"},
-        {"behind","behind"}
+        {"behind","behind"},
+        {"left,touching","right of and touching"},
+        {"right,touching","left of and touching"},
+        {"in_front,touching","in front of and touching"},
+        {"behind,touching","behind and touching"}
     };
 
-    bool itemsSituated;
+    bool itemsInited;
+    bool resituateItems;
     bool timeoutFocus,refer;
+
+    string descriptorString = string.Empty;
 
     public List<GameObject> landmarks;
 
@@ -46,6 +50,33 @@ public class ReferringExpressionGenerator : MonoBehaviour {
     public JointGestureDemo world;
     public GameObject agent;
     public Image focusCircle;
+    public ObjectSelector objSelector;
+    public RelationTracker relationTracker;
+    public GameObject focusObj;
+    public string fullDesc;
+    public List<string> descriptors = new List<string>();
+    public bool distanceDistinction;
+    public bool relativeDistance;
+
+    public event EventHandler PlaceObjects;
+
+    public void OnPlaceObjects(object sender, EventArgs e)
+    {
+        if (PlaceObjects != null)
+        {
+            PlaceObjects(this, e);
+        }
+    }
+
+    public event EventHandler ItemsSituated;
+
+    public void OnItemsSituated(object sender, EventArgs e)
+    {
+        if (ItemsSituated != null)
+        {
+            ItemsSituated(this, e);
+        }
+    }
 
     public event EventHandler ObjectSelected;
 
@@ -84,15 +115,17 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         relationTracker = behaviorController.GetComponent<RelationTracker>();
 
         eventManager.EntityReferenced += ReferenceObject;
-                    
+
+        PlaceObjects += PlaceObjectsRandomly;
         ObjectSelected += IndicateFocus;
 	}
 
 	// Update is called once per frame
 	void Update () {
-        if (!itemsSituated) {
+        if (!itemsInited) {
             for (int i = 0; i < landmarks.Count; i++) {
-                landmarks[i] = Helper.GetMostImmediateParentVoxeme(landmarks[i]);
+                landmarks[i] = landmarks[i] != Helper.GetMostImmediateParentVoxeme(landmarks[i]) ?
+                    Helper.GetMostImmediateParentVoxeme(landmarks[i]) : landmarks[i];
             }
 
             for (int i = 0; i < world.blocks.Count; i++) {
@@ -100,10 +133,17 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                     Helper.GetMostImmediateParentVoxeme(world.blocks[i]) : world.blocks[i];
             }
 
+            itemsInited = true;
+            resituateItems = true;
+        }
+
+        if (resituateItems) {
             PlaceRandomly(world.demoSurface != Helper.GetMostImmediateParentVoxeme(world.demoSurface) ?
                           Helper.GetMostImmediateParentVoxeme(world.demoSurface) : world.demoSurface,
                           landmarks, world.blocks);
-            itemsSituated = true;
+            behaviorController.GetComponent<RelationTracker>().SurveyRelations();
+            resituateItems = false;
+            OnItemsSituated(this, null);
         }
 
         if (Input.GetMouseButtonDown(0)) {
@@ -124,6 +164,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                           Helper.GetMostImmediateParentVoxeme(world.demoSurface) : world.demoSurface,
                           landmarks, world.blocks);
             behaviorController.GetComponent<RelationTracker>().SurveyRelations();
+            OnItemsSituated(this, null);
         }
 
         if (timeoutFocus) {
@@ -136,7 +177,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         if (refer) {
             refer = false;
             eventManager.OnEntityReferenced(this, new EventReferentArgs(focusObj));
-        }		
+        }
 	}
 
     void PlaceRandomly(GameObject surface, List<GameObject> landmarkObjs, List<GameObject> focusObjs) {
@@ -155,6 +196,11 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                                                  coord.y + Helper.GetObjectWorldSize(obj).extents.y, coord.z);
             obj.GetComponent<Voxeme>().targetPosition = obj.transform.position;
         }
+    }
+
+    void PlaceObjectsRandomly(object sender, EventArgs e) {
+        resituateItems = true;
+        Debug.Log("Reshuffle objects");
     }
 
     void IndicateFocus(object sender, EventArgs e) {
@@ -178,7 +224,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         Debug.Log(string.Format("Referring to {0}", focusObj.name));
 
         //List<string> descriptors = new List<string>();
-        string descriptorString = string.Empty;
+        descriptorString = string.Empty;
 
         if (world.interactionPrefs.gesturalReference) {
             GameObject hand = InteractionHelper.GetCloserHand(agent, focusObj);
@@ -188,10 +234,10 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                 // G + L
                 // variables: bool proximal/distal distinction (this/that)
                 //  int 0-3 relational descriptors
-                bool distanceDistinction = true;//System.Convert.ToBoolean(
+                distanceDistinction = true;//System.Convert.ToBoolean(
                     //RandomHelper.RandomInt(0, 1,
                                            //(int)(RandomHelper.RangeFlags.MinInclusive) | (int)(RandomHelper.RangeFlags.MaxInclusive)));
-                bool relativeDistance = true;//System.Convert.ToBoolean(
+                relativeDistance = true;//System.Convert.ToBoolean(
                     //RandomHelper.RandomInt(0, 1,
                                            //(int)(RandomHelper.RangeFlags.MinInclusive) | (int)(RandomHelper.RangeFlags.MaxInclusive)));
                 int relationalDescriptors = RandomHelper.RandomInt(0, 4);
@@ -239,7 +285,8 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                 if (objVox != null) {
                     string color = string.Empty;
                     color = objVox.voxml.Attributes.Attrs[0].Value;  // just grab the first one for now
-                    world.RespondAndUpdate(string.Format("{0} {1} {2}{3}.", demonstrative, color, objVox.opVox.Lex.Pred, descriptorString));
+                    fullDesc = string.Format("{0} {1} {2}{3}.", demonstrative, color, objVox.opVox.Lex.Pred, descriptorString);
+                    world.RespondAndUpdate(fullDesc);
                 }
             }
         }
@@ -253,14 +300,15 @@ public class ReferringExpressionGenerator : MonoBehaviour {
             if (objVox != null) {
                 string color = string.Empty;
                 color = objVox.voxml.Attributes.Attrs[0].Value;  // just grab the first one for now
-                world.RespondAndUpdate(string.Format("The {0} {1}{2}.", color, objVox.opVox.Lex.Pred, descriptorString));
+                fullDesc = string.Format("The {0} {1}{2}.", color, objVox.opVox.Lex.Pred, descriptorString);
+                world.RespondAndUpdate(fullDesc);
             }
         }
     }
 
     string FindFocusObjRelations(int relationalDescriptors) {
-        List<string> descriptors = new List<string>();
-        string descriptorString = string.Empty;
+        descriptors = new List<string>();
+        descriptorString = string.Empty;
 
         // find relations involving focusObj
         List<Pair<GameObject, string>> focusObjRelations = new List<Pair<GameObject, string>>();

@@ -4855,9 +4855,9 @@ public class JointGestureDemo : AgentInteraction {
 
 			ikControl.lookObj.transform.position = headTargetStored;
 			InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
-			//		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
-			//			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
-		//}
+        //		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
+        //			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
+        //}
 	}
 
 	double EpistemicCertainty (Concept concept) {
