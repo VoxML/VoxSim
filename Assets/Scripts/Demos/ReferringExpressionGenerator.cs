@@ -33,7 +33,12 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         {"left,touching","right of and touching"},
         {"right,touching","left of and touching"},
         {"in_front,touching","in front of and touching"},
-        {"behind,touching","behind and touching"}
+        {"behind,touching","behind and touching"},
+        {"touching,left","right of and touching"},
+        {"touching,right","left of and touching"},
+        {"touching,in_front","in front of and touching"},
+        {"touching,behind","behind and touching"},
+        {"touching","touching"}
     };
 
     bool itemsInited;
@@ -204,6 +209,8 @@ public class ReferringExpressionGenerator : MonoBehaviour {
     }
 
     void IndicateFocus(object sender, EventArgs e) {
+        world.RespondAndUpdate(string.Empty);   // clear dialogue box
+
         focusObj = ((SelectionEventArgs)e).Content as GameObject;
         Debug.Log(string.Format("Focused on {0}, world @ {1} screen @ {2}", focusObj.name,
             Helper.VectorToParsable(focusObj.transform.position),
@@ -352,6 +359,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
             string color = string.Empty;
             Voxeme descriptorObjVox = (focusObjRelations[i].Item1 as GameObject).GetComponent<Voxeme>();
             color = (descriptorObjVox.voxml.Attributes.Attrs.Count > 0) ? descriptorObjVox.voxml.Attributes.Attrs[0].Value : string.Empty;  // just grab the first one for now
+            color = (color == focusObj.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value) ? "other " + color : color;
             string descriptorObj = string.Format("{0}{1} {2}", "the",
                                                  (color == string.Empty) ? string.Empty : " " + color,
                                                  descriptorObjVox.opVox.Lex.Pred);

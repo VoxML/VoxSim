@@ -72,8 +72,10 @@ namespace RCC
 					foreach (Vector3 point in x.Points.Where(p => p.x >= x.Center.x).ToList()) {
 //						Debug.Log (Helper.VectorToParsable (point));
 						RaycastHit hitInfo;
-						Vector3 origin = new Vector3 (point.x-Constants.EPSILON, point.y == x.Min (MajorAxis.Y).y ? point.y + Constants.EPSILON : point.y == x.Max (MajorAxis.Y).y ? point.y - Constants.EPSILON : point.y,
-							point.z == x.Min (MajorAxis.Z).z ? point.x + Constants.EPSILON : point.z == x.Max (MajorAxis.Z).z ? point.z - Constants.EPSILON : point.z);
+                        Vector3 origin = new Vector3 (point.x-Constants.EPSILON, (Mathf.Abs(point.y-x.Min (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON : 
+                                                      (Mathf.Abs(point.y-x.Max (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y - Constants.EPSILON : point.y, 
+                                                      (Mathf.Abs(point.z-x.Min (MajorAxis.Z).z) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                      (Mathf.Abs(point.z-x.Max (MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON : point.z);
 						bool hit = Physics.Raycast (origin, Vector3.right, out hitInfo);
 						if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) &&
 							(hitInfo.distance <= Constants.EPSILON * 3) ) {
@@ -85,8 +87,10 @@ namespace RCC
 				else if (x.Center.x >= y.Max(MajorAxis.X).x) {
 					foreach (Vector3 point in x.Points.Where(p => p.x <= x.Center.x).ToList()) {
 						RaycastHit hitInfo;
-						Vector3 origin = new Vector3 (point.x+Constants.EPSILON, point.y == x.Min (MajorAxis.Y).y ? point.y + Constants.EPSILON : point.y == x.Max (MajorAxis.Y).y ? point.y - Constants.EPSILON : point.y,
-							point.z == x.Min (MajorAxis.Z).z ? point.x + Constants.EPSILON : point.z == x.Max (MajorAxis.Z).z ? point.z - Constants.EPSILON : point.z);
+                    Vector3 origin = new Vector3 (point.x+Constants.EPSILON, (Mathf.Abs(point.y-x.Min (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON : 
+                                                  (Mathf.Abs(point.y-x.Max (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y - Constants.EPSILON : point.y,
+                                                  (Mathf.Abs(point.z-x.Min (MajorAxis.Z).z) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                  (Mathf.Abs(point.z-x.Max (MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON : point.z);
 						bool hit = Physics.Raycast (origin, -Vector3.right, out hitInfo);
 						if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) && 
 							(hitInfo.distance <= Constants.EPSILON * 3)) {
@@ -105,8 +109,10 @@ namespace RCC
 						Debug.Log (Helper.VectorToParsable(y.Center));
 						foreach (Vector3 point in x.Points.Where(p => p.y >= x.Center.y).ToList()) {
 							RaycastHit hitInfo;
-							Vector3 origin = new Vector3 (point.x == x.Min (MajorAxis.X).x ? point.x + Constants.EPSILON : point.x == x.Max (MajorAxis.X).x ? point.x - Constants.EPSILON : point.x,
-								point.y-Constants.EPSILON, point.z == x.Min (MajorAxis.Z).z ? point.x + Constants.EPSILON : point.z == x.Max (MajorAxis.Z).z ? point.z - Constants.EPSILON : point.z);
+                            Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                          (Mathf.Abs(point.x-x.Max (MajorAxis.X).x) <= Constants.EPSILON) ? point.x - Constants.EPSILON : point.x, 
+                                                          point.y-Constants.EPSILON, (Mathf.Abs(point.z-x.Min (MajorAxis.Z).z) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                          (Mathf.Abs(point.z-x.Max (MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON : point.z);
 							bool hit = Physics.Raycast (origin, Vector3.up, out hitInfo);
 //							if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
 //								Debug.Log (hitInfo.collider.gameObject);
@@ -127,8 +133,10 @@ namespace RCC
 						foreach (Vector3 point in x.Points.Where(p => p.y <= x.Center.y).ToList()) {
 							Debug.Log(point);
 							RaycastHit hitInfo;
-							Vector3 origin = new Vector3 (point.x == x.Min (MajorAxis.X).x ? point.x + Constants.EPSILON : point.x == x.Max (MajorAxis.X).x ? point.x - Constants.EPSILON : point.x,
-								point.y+Constants.EPSILON, point.z == x.Min (MajorAxis.Z).z ? point.x + Constants.EPSILON : point.z == x.Max (MajorAxis.Z).z ? point.z - Constants.EPSILON : point.z);
+                            Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                          (Mathf.Abs(point.x-x.Max (MajorAxis.X).x) <= Constants.EPSILON) ? point.x - Constants.EPSILON : point.x, 
+                                                          point.y+Constants.EPSILON, (Mathf.Abs(point.z-x.Min (MajorAxis.Z).z) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                          (Mathf.Abs(point.z-x.Max (MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON : point.z);
 							bool hit = Physics.Raycast (origin, -Vector3.up, out hitInfo);
 							//Debug.Log (hitInfo.collider.gameObject);
 							//if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
@@ -152,8 +160,10 @@ namespace RCC
 				if (x.Center.z <= y.Min(MajorAxis.Z).z) {
 					foreach (Vector3 point in x.Points.Where(p => p.z >= x.Center.z).ToList()) {
 						RaycastHit hitInfo;
-						Vector3 origin = new Vector3 (point.x == x.Min (MajorAxis.X).x ? point.x + Constants.EPSILON : point.x == x.Max (MajorAxis.X).x ? point.x - Constants.EPSILON : point.x,
-							point.y == x.Min (MajorAxis.Y).y ? point.y + Constants.EPSILON : point.y == x.Max (MajorAxis.Y).y ? point.y - Constants.EPSILON : point.y, point.z-Constants.EPSILON);
+                        Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                      (Mathf.Abs(point.x-x.Max (MajorAxis.X).x) <= Constants.EPSILON) ? point.x - Constants.EPSILON : point.x,
+                                                      (Mathf.Abs(point.y-x.Min (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON : 
+                                                      (Mathf.Abs(point.y-x.Max (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y - Constants.EPSILON : point.y, point.z-Constants.EPSILON);
 						bool hit = Physics.Raycast (origin, Vector3.forward, out hitInfo);
 						if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) &&
 							(hitInfo.distance <= Constants.EPSILON * 3)) {
@@ -165,8 +175,10 @@ namespace RCC
 				else if (x.Center.z >= y.Max(MajorAxis.X).z) {
 					foreach (Vector3 point in x.Points.Where(p => p.z <= x.Center.z).ToList()) {
 						RaycastHit hitInfo;
-						Vector3 origin = new Vector3 (point.x == x.Min (MajorAxis.X).x ? point.x + Constants.EPSILON : point.x == x.Max (MajorAxis.X).x ? point.x - Constants.EPSILON : point.x,
-							point.y == x.Min (MajorAxis.Y).y ? point.y + Constants.EPSILON : point.y == x.Max (MajorAxis.Y).y ? point.y - Constants.EPSILON : point.y, point.z+Constants.EPSILON);
+                        Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
+                                                      (Mathf.Abs(point.x-x.Max (MajorAxis.X).x) <= Constants.EPSILON) ? point.x - Constants.EPSILON : point.x,
+                                                      (Mathf.Abs(point.y-x.Min (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON : 
+                                                      (Mathf.Abs(point.y-x.Max (MajorAxis.Y).y) <= Constants.EPSILON) ? point.y - Constants.EPSILON : point.y, point.z+Constants.EPSILON);
 						bool hit = Physics.Raycast (origin, -Vector3.forward, out hitInfo);
 						if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) &&
 							(hitInfo.distance <= Constants.EPSILON * 3)) {
