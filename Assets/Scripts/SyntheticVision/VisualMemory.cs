@@ -18,12 +18,14 @@ namespace Agent
 
 		public GameObject MemoryCanvas;
 
-		private bool showMemory;
-		public bool ShowMemory
-		{
-			get { return showMemory; }
-			set { showMemory = value; }
-		}
+        public bool reactToNewInfo;
+
+        private bool showMemory;
+        public bool ShowMemory
+        {
+            get { return showMemory; }
+            set { showMemory = value; }
+        }
 
 		private Timer _reactionTimer;
 		private const float ReactionDelayInterval = 1000;
@@ -207,6 +209,11 @@ namespace Agent
 		}
 
 		public void NewInformation(VisionEventArgs e) {
+            if (!reactToNewInfo)
+            {
+                return;
+            }
+
 			if (e.Inconsistency == InconsistencyType.Missing)
 			{
 				KnownUnseen(e.Voxeme);
