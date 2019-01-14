@@ -4798,7 +4798,8 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if (eventManager.events.Count == 0) {
 				RespondAndUpdate("Anyone there?");
-			}
+                commBridge.ConnectFusion("localhost", 9126);
+            }
 		}
 	}
 

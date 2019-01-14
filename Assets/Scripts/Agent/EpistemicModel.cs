@@ -157,8 +157,10 @@ namespace Agent {
 			if (PlayerPrefs.HasKey ("URLs")) {
 				string epiSimUrlString = string.Empty;
 				foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-					if (url.Split ('=') [0] == "EpiSim URL") {
-						epiSimUrlString = url.Split ('=') [1];
+					//if (url.Split ('=') [0] == "EpiSim URL") {
+                    if (true) {
+                        //epiSimUrlString = url.Split ('=') [1];
+                        epiSimUrlString = "localhost:5000";
 						string epiSimUrl = !epiSimUrlString.StartsWith ("http://") ? "http://" + epiSimUrlString : epiSimUrlString;
 						state.SetEpisimUrl (epiSimUrl);
 						state.InitiateEpisim();

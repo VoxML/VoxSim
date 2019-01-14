@@ -77,9 +77,11 @@ public class PluginImport : MonoBehaviour {
 			}
 
             string[] fusionUrl = fusionUrlString.Split(':');
-            string fusionAddress = fusionUrl [0];
+            //string fusionAddress = fusionUrl [0];
+            string fusionAddress = "localhost";
 			if (fusionAddress != "") {
-                int fusionPort = Convert.ToInt32 (fusionUrl [1]);
+                //int fusionPort = Convert.ToInt32 (fusionUrl [1]);
+                int fusionPort = 9126;
 				try {
                     ConnectFusion (fusionAddress, fusionPort);
 				}

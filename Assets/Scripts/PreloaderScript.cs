@@ -17,6 +17,6 @@ public class PreloaderScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        Debug.Log("Framerate is set to" + Application.targetFrameRate);
     }
 }

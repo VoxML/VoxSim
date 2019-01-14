@@ -18,7 +18,7 @@ public class AgentInteraction : MonoBehaviour
 	private bool useTeaching;
 	public bool UseTeaching 
 	{
-		get { return useTeaching; }
+		get { return false; }
 		set { useTeaching = value; }
 	}
 
