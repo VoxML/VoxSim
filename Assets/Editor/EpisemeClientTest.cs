@@ -3,6 +3,7 @@ using Agent;
 using Episteme;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 public class EpisemeClientTest : MonoBehaviour
 {
@@ -55,15 +56,15 @@ public class EpisemeClientTest : MonoBehaviour
 		model.SetEpisimUrl("http://localhost:5000");
 	}
 
-    [Test]
+	[Test]
 	public void TestInit()
 	{
 		mock();
-		
+
 		// for logging
 		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 		Debug.Log(json);
-		
+
 		// this would do the actual http request
 		model.InitiateEpisim();
 	}
@@ -72,7 +73,7 @@ public class EpisemeClientTest : MonoBehaviour
 	public void TestUpdate()
 	{
 		mock();
-		
+
 		// retrieve a concept
 		var yesL = model.GetConcept("posack", ConceptType.ACTION, ConceptMode.L);
 		// set certainty value
@@ -85,11 +86,11 @@ public class EpisemeClientTest : MonoBehaviour
 		{
 			r.Certainty = 1.0;
 		}
-		
+
 		// for logging
 		var json = Jsonifier.JsonifyUpdates(model, new[] {yesL}, new[] {r});
 		Debug.Log(json);
-		
+
 		// this would do the actual http request: need to pass two arrays for each 
 		model.UpdateEpisim(new[] {yesL}, new[] {r});
 	}
@@ -101,17 +102,17 @@ public class EpisemeClientTest : MonoBehaviour
 		model.InitiateEpisim();
 		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 		Debug.Log(json);
-		
-		var conceptG = model.GetConcept ("push", ConceptType.ACTION, ConceptMode.G);
+
+		var conceptG = model.GetConcept("push", ConceptType.ACTION, ConceptMode.G);
 		Debug.Log(conceptG);
-		var conceptL = model.GetConcept ("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
+		var conceptL = model.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
 		Debug.Log(conceptL);
 		if (conceptG.Certainty < 0.5 || conceptL.Certainty < 0.5)
 		{
 			conceptG.Certainty = 0.5;
 			conceptL.Certainty = 0.5;
-            json = Jsonifier.JsonifyUpdates(model, new[] {conceptG, conceptL}, new Relation[] {});
-            Debug.Log(json);
+			json = Jsonifier.JsonifyUpdates(model, new[] {conceptG, conceptL}, new Relation[] { });
+			Debug.Log(json);
 			model.UpdateEpisim(new[] {conceptG, conceptL}, new Relation[] { });
 		}
 	}
@@ -151,12 +152,13 @@ public class EpisemeClientTest : MonoBehaviour
 		model.InitiateEpisim();
 		var moveL = model.GetConcept("PUT", ConceptType.ACTION, ConceptMode.L);
 		var pushL = model.GetConcept("PUSH", ConceptType.ACTION, ConceptMode.L);
-		if ((moveL != null) && (pushL != null)) {
+		if ((moveL != null) && (pushL != null))
+		{
 			moveL.Certainty = -1;
 			pushL.Certainty = -1;
 			var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
 			Debug.Log(json);
-	        model.UpdateEpisim(new[] {moveL, pushL}, new Relation[] { });
+			model.UpdateEpisim(new[] {moveL, pushL}, new Relation[] { });
 		}
 	}
 
@@ -168,6 +170,31 @@ public class EpisemeClientTest : MonoBehaviour
 		System.Threading.Thread.Sleep(2000);
 		model.DisengageEpisim();
 		System.Threading.Thread.Sleep(2000);
+	}
+
+	[Test]
+	public void TestSideload()
+	{
+		mock();
+		// retrieve a concept
+		var yesL = model.GetConcept("posack", ConceptType.ACTION, ConceptMode.L);
+		// set certainty value
+		yesL.Certainty = .99;
+		// retrive a relation
+		var yesG = model.GetConcept("POSACK", ConceptType.ACTION, ConceptMode.G);
+		var r = model.GetRelation(yesL, yesG);
+		// set certainty value
+		if (r != null)
+		{
+			r.Certainty = 0.43;
+		}
+
+		// for logging
+		var json = Jsonifier.JsonifyUpdates(model, new[] {yesL}, new[] {r});
+		Debug.Log(json);
+		mock();
+		model.SideloadCertaintyState(json);
+
 	}
 
 }

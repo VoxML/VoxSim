@@ -98,7 +98,7 @@ namespace Episteme
 						(int)concept.Mode,
 						collection.GetIndex(concept),
 						concept.Certainty,
-						CertaintySep, ConceptIdSep);
+						CertaintySep, JsonRelationConnector);
 			}
 			return string.Format("[{0}]", string.Join(", ", updatedConceptIndices));
 		}
@@ -116,7 +116,7 @@ namespace Episteme
 						(int)  relation.Destination.Mode,
 						collection.GetIndex(relation.Destination),
 						relation.Certainty,
-						CertaintySep, ConceptIdSep
+						CertaintySep, JsonRelationConnector
 					)).ToArray()));
 		}
 

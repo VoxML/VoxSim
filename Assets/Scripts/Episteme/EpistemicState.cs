@@ -144,7 +144,7 @@ namespace Episteme
 				string conceptString = split1[0];
 				string certaintyString = split1[1];
 
-				string[] split2 = conceptString.Split(Jsonifier.ConceptIdSep);
+				string[] split2 = conceptString.Split(Jsonifier.JsonRelationConnector);
 				ConceptType type = (ConceptType) Int32.Parse(split2[0]);
 				ConceptMode mode = (ConceptMode) Int32.Parse(split2[1]);
 				int idx = Int32.Parse(split2[2]);
@@ -158,7 +158,7 @@ namespace Episteme
 				string relationString = split1[0];
 				string certaintyString = split1[1];
 
-				string[] split2 = relationString.Split(Jsonifier.ConceptIdSep);
+				string[] split2 = relationString.Split(Jsonifier.JsonRelationConnector);
 				ConceptType type = (ConceptType) Int32.Parse(split2[0]);
 				ConceptMode oMode = (ConceptMode) Int32.Parse(split2[1]);
 				int oIdx = Int32.Parse(split2[2]);
