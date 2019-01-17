@@ -57,6 +57,11 @@ namespace Episteme
 			return found;
 		}
 
+		public Concept GetConcept(int conceptIdx, ConceptMode mode)
+		{
+			return _concepts[mode][conceptIdx];
+		}
+
 		public int GetIndex(Concept concept)
 		{
 			return _concepts[concept.Mode].IndexOf(concept);

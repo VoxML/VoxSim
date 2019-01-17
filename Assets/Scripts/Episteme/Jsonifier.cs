@@ -5,11 +5,11 @@ namespace Episteme
 {
 	public static class Jsonifier
 	{
-		private static readonly string CertaintySep = "::";
-		private static readonly string ConceptIdSep = ":";
-		private static readonly string JsonRelationSuffix = "-relations";
-		private static readonly string JsonSubgroupSuffix = "-subgroups";
-		private static readonly string JsonRelationConnector = "-";
+		public static readonly char CertaintySep = '|';
+		public static readonly char ConceptIdSep = ':';
+		public static readonly string JsonRelationSuffix = "-relations";
+		public static readonly string JsonSubgroupSuffix = "-subgroups";
+		public static readonly char JsonRelationConnector = '-';
 
 		public static string JsonifyConceptDefinitions(Concepts collection)
 		{
@@ -79,8 +79,9 @@ namespace Episteme
 		public static string JsonifyEpistemicStateInitiation(EpistemicState collections)
 		{
 			return string.Format("{{{0}}}", 
-				string.Join(", ", collections.GetAllConcepts().Select(
-					JsonifyConceptDefinitions).ToArray()));
+				string.Join(", ",
+					collections.GetAllConcepts().Select(JsonifyConceptDefinitions)
+					.ToArray()));
 		}
 
 		public static string JsonifyUpdatedConcepts(EpistemicState state, params Concept[] concepts)
@@ -92,12 +93,12 @@ namespace Episteme
 				var concept = concepts[i];
 				var collection = state.GetConcepts(concept.Type);
 				updatedConceptIndices[i] = 
-					string.Format("\"{0}-{1}-{2}{4}{3:0.00}\"",
+					string.Format("\"{0}{5}{1}{5}{2}{4}{3:0.00}\"",
 						(int)concept.Type,
 						(int)concept.Mode,
 						collection.GetIndex(concept),
 						concept.Certainty,
-						CertaintySep);
+						CertaintySep, ConceptIdSep);
 			}
 			return string.Format("[{0}]", string.Join(", ", updatedConceptIndices));
 		}
@@ -108,14 +109,14 @@ namespace Episteme
 			var collection = state.GetConcepts(relations[0].Origin.Type);
 			return string.Format("[{0}]", string.Join(", ",
 				relations.Select(relation =>
-					string.Format("\"{0}-{1}-{2}-{3}-{4}{6}{5:0.00}\"",
+					string.Format("\"{0}{7}{1}{7}{2}{7}{3}{7}{4}{6}{5:0.00}\"",
 						(int) collection.Type(),
 						(int) relation.Origin.Mode,
 						collection.GetIndex(relation.Origin),
 						(int)  relation.Destination.Mode,
 						collection.GetIndex(relation.Destination),
 						relation.Certainty,
-						CertaintySep
+						CertaintySep, ConceptIdSep
 					)).ToArray()));
 		}
 

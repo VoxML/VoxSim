@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
 using Episteme;
-using Network;
 
 namespace Agent {
 	public enum EpistemicCertaintyOperation
@@ -193,13 +191,11 @@ namespace Agent {
         void Update() {
         }
 
-        void LoadUserModel(string path) {
-            using (StreamReader sr = new StreamReader(string.Format(@"EpiSim/UserModels/user-{0}.json", userID))) {
-                string jsonifiedState = sr.ReadToEnd();
-
-                Debug.Log(jsonifiedState);
-            }
-        }
+		void LoadUserModel(string path) {
+			string savedCertainties = File.ReadAllText(path);
+			Debug.Log(savedCertainties);
+			state.SideloadCertaintyState(savedCertainties);
+		}
 
         public void SaveUserModel(string userID) {
             List<Concept> stateConcepts = new List<Concept>();
@@ -240,16 +236,21 @@ namespace Agent {
                 }
             }
 
-            string jsonifiedState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
-            Debug.Log(jsonifiedState);
+            string jsonifiedCertaintyState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
+            Debug.Log(jsonifiedCertaintyState);
 
-            if (!Directory.Exists(@"EpiSim/UserModels")) {
-                Directory.CreateDirectory(@"EpiSim/UserModels");
-            }
 
-            using (StreamWriter sw = new StreamWriter(string.Format(@"EpiSim/UserModels/user-{0}.json", userID))) {
-                sw.Write(jsonifiedState);
+            using (StreamWriter sw = new StreamWriter(GetUserModelPath(userID))) {
+                sw.Write(jsonifiedCertaintyState);
             }
+        }
+
+        string GetUserModelPath(string username) {
+            string userModelLocation = @"EpiSim/UserModels";
+            if (!Directory.Exists(userModelLocation)) {
+                Directory.CreateDirectory(userModelLocation);
+            }
+            return string.Format(@"{0}/user-{1}.json", userModelLocation, username);
         }
 
         void IdentifyUser(object sender, EventArgs e) {
@@ -257,11 +258,11 @@ namespace Agent {
             userNameModalWindow.CloseWindow((ModalWindowEventArgs)e);
             userID = username;
 
-            string userModelPath = string.Format(@"EpiSim/UserModels/user-{0}.json", username);
+            string userModelPath = GetUserModelPath(username);
             if (File.Exists(userModelPath)) {
                 // load user model
                 LoadUserModel(userModelPath);
             }
         }
-	}
+    }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Network;
+using SimpleJSON;
 using UnityEngine;
 
 namespace Episteme
@@ -38,6 +39,16 @@ namespace Episteme
 		public Concept GetConcept(string name, ConceptType type, ConceptMode mode)
 		{
 			return _episteme[type].GetConcept(name, mode);
+		}
+
+		public void SetCertainty(Concept c, double certainty)
+		{
+			GetConcept(c).Certainty = certainty;
+		}
+
+		public void SetCertainty(Concept origin, Concept destination, double certainty)
+		{
+			GetRelation(origin, destination).Certainty = certainty;
 		}
 
 		public Relation GetRelation(Concept origin, Concept destination)
@@ -120,6 +131,50 @@ namespace Episteme
 		{
 			if ((client != null) && (client.isConnected)) {
 				_restClient.GetComponent<RestClient> ().Post (_episimUrl + EpisimUpdateRoute, Jsonifier.JsonifyUpdates (this, updatedConcepts, updatedRelations), "okay", "error");
+			}
+		}
+
+		public void SideloadCertaintyState(string certaintyJson) {
+
+			UpdateEpisim(certaintyJson);
+			var certainties = JSON.Parse(certaintyJson);
+			JSONArray cCertainties = certainties["c"].AsArray;
+			foreach (string cCertainty in cCertainties.Values) {
+				string[] split1 = cCertainty.Split(Jsonifier.CertaintySep);
+				string conceptString = split1[0];
+				string certaintyString = split1[1];
+
+				string[] split2 = conceptString.Split(Jsonifier.ConceptIdSep);
+				ConceptType type = (ConceptType) Int32.Parse(split2[0]);
+				ConceptMode mode = (ConceptMode) Int32.Parse(split2[1]);
+				int idx = Int32.Parse(split2[2]);
+
+				GetConcepts(type).GetConcept(idx, mode).Certainty = Double.Parse(certaintyString);
+			}
+
+			JSONArray rCertainties = certainties["r"].AsArray;
+			foreach (string rCertainty in rCertainties.Values) {
+				string[] split1 = rCertainty.Split(Jsonifier.CertaintySep);
+				string relationString = split1[0];
+				string certaintyString = split1[1];
+
+				string[] split2 = relationString.Split(Jsonifier.ConceptIdSep);
+				ConceptType type = (ConceptType) Int32.Parse(split2[0]);
+				ConceptMode oMode = (ConceptMode) Int32.Parse(split2[1]);
+				int oIdx = Int32.Parse(split2[2]);
+				ConceptMode dMode = (ConceptMode) Int32.Parse(split2[3]);
+				int dIdx = Int32.Parse(split2[4]);
+
+				Concept origin = GetConcepts(type).GetConcept(oIdx, oMode);
+				Concept destination = GetConcepts(type).GetConcept(dIdx, dMode);
+				GetRelation(origin, destination).Certainty = Double.Parse(certaintyString);
+			}
+		}
+
+		public void UpdateEpisim(string updateJsonString)
+		{
+			if ((client != null) && (client.isConnected)) {
+				_restClient.GetComponent<RestClient> ().Post (_episimUrl + EpisimUpdateRoute, updateJsonString, "okay", "error");
 			}
 		}
 	}
