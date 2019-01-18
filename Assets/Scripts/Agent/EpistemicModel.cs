@@ -214,23 +214,27 @@ namespace Agent {
                 }
 
                 foreach (Concept gestureConcept in gestureConcepts) {
-                    stateConcepts.Add(gestureConcept);
+                    if (!stateConcepts.Contains(gestureConcept)) {
+                        stateConcepts.Add(gestureConcept);
 
-                    foreach (Concept relatedConcept in state.GetRelated(gestureConcept)) {
-                        Relation relation = state.GetRelation(gestureConcept, relatedConcept);
-                        if (!stateRelations.Contains(relation)) {
-                            stateRelations.Add(relation);
+                        foreach (Concept relatedConcept in state.GetRelated(gestureConcept)) {
+                            Relation relation = state.GetRelation(gestureConcept, relatedConcept);
+                            if (!stateRelations.Contains(relation)) {
+                                stateRelations.Add(relation);
+                            }
                         }
                     }
                 }
 
                 foreach (Concept linguisticConcept in linguisticConcepts) {
-                    stateConcepts.Add(linguisticConcept);
+                    if (!stateConcepts.Contains(linguisticConcept)){
+                        stateConcepts.Add(linguisticConcept);
 
-                    foreach (Concept relatedConcept in state.GetRelated(linguisticConcept)) {
-                        Relation relation = state.GetRelation(linguisticConcept, relatedConcept);
-                        if (!stateRelations.Contains(relation)) {
-                            stateRelations.Add(relation);
+                        foreach (Concept relatedConcept in state.GetRelated(linguisticConcept)) {
+                            Relation relation = state.GetRelation(linguisticConcept, relatedConcept);
+                            if (!stateRelations.Contains(relation)) {
+                                stateRelations.Add(relation);
+                            }
                         }
                     }
                 }
