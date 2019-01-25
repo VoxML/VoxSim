@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 
+using Global;
 using UnityEngine;
 
 namespace Network
@@ -29,13 +31,23 @@ namespace Network
 			}
 		}
 
-		public void Write(string content) {
+        public void Write(byte[] content) {
 			// Check to see if this NetworkStream is writable.
 			if (_client.GetStream().CanWrite) {
+                byte[] writeBuffer = content;
+                if (!BitConverter.IsLittleEndian)
+                {
+                    Array.Reverse(writeBuffer);
+                }
 
-				byte[] writeBuffer = Encoding.ASCII.GetBytes (content);
+                //using (BinaryWriter w = new BinaryWriter(_client.GetStream(), Encoding.ASCII))
+                //{
+                //    w.Write(writeBuffer);
+                    //w.Write(2);
+                //}
+                       
 				_client.GetStream().Write (writeBuffer, 0, writeBuffer.Length);
-				Debug.Log (string.Format("Written to this NetworkStream: {0}",writeBuffer.Length));  
+                Debug.Log (string.Format("Written to this NetworkStream: {0} ({1})",writeBuffer.Length,Helper.PrintByteArray(writeBuffer)));  
 			} 
 			else {
 				Debug.Log ("Sorry.  You cannot write to this NetworkStream.");  

@@ -65,9 +65,9 @@ namespace Agent
 			else {
 				MemoryCanvas.SetActive(true);
 			}
-			foreach (GameObject block in _world.blocks)
+            foreach (GameObject obj in _world.availableObjs)
 			{
-				Voxeme voxeme = block.GetComponent<Voxeme>();
+				Voxeme voxeme = obj.GetComponent<Voxeme>();
 //				Debug.Log(voxeme + " is visible?");
 				GameObject clone = null;
 				if (_vision.IsVisible(voxeme))
@@ -75,7 +75,7 @@ namespace Agent
 //					Debug.Log(voxeme + " is");
 					if (!_memorized.ContainsKey(voxeme))
 					{
-						clone = GetVisualClone(block.gameObject);
+						clone = GetVisualClone(obj.gameObject);
 						_memorized.Add(voxeme, clone);
 
 						if (!_perceivingInitialConfiguration)

@@ -28,4 +28,9 @@
     <Scale>&lt;agent</Scale>
     <Movable>true</Movable>
   </Embodiment>
+  <Attributes>
+      <Attrs>
+          <Attr Value="silver" />
+      </Attrs>
+  </Attributes>
 </VoxML>

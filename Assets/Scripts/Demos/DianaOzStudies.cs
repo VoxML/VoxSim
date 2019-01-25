@@ -129,7 +129,7 @@ public class DianaOzStudies : MonoBehaviour {
 						if (Regex.IsMatch (dict.question, @"The .+ block\?")) {
 							string color = dict.question.Split () [1];
 							MethodInfo methodToCall = preds.GetType ().GetMethod (color.ToUpper ());
-							object obj = methodToCall.Invoke (preds, new object[]{ world.blocks.ToArray () });
+							object obj = methodToCall.Invoke (preds, new object[]{ world.availableObjs.ToArray () });
 							if (obj != null) {
 								world.ReachFor (GameObject.Find (obj as string));
 							}

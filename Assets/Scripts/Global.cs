@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
 
@@ -528,6 +529,17 @@ namespace Global {
 
 			return output;
 		}
+
+        public static string PrintByteArray(byte[] bytes) {
+            var sb = new StringBuilder("new byte[] { ");
+            foreach (var b in bytes)
+            {
+                sb.Append(b + ", ");
+            }
+            sb.Append("}");
+
+            return sb.ToString();
+        }
 
 		public static List<object> DiffLists(List<object> baseline, List<object> comparand) {
 			return comparand.Except (baseline).ToList ();

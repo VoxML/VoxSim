@@ -30,6 +30,28 @@ namespace Agent
 			return grasper;
 		}
 
+        public static GameObject GetCloserHand(GameObject agent, Vector3 coord) {
+            GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+            GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+            GameObject grasper;
+
+            // which hand is closer?
+            float leftToGoalDist = (leftGrasper.transform.position - coord).magnitude;
+            float rightToGoalDist = (rightGrasper.transform.position - coord).magnitude;
+
+            if (leftToGoalDist < rightToGoalDist)
+            {
+                grasper = leftGrasper;
+            }
+            else
+            {
+                grasper = rightGrasper;
+            }
+
+            //          Debug.Log (grasper);
+            return grasper;
+        }
+
         public static void SetLeftHandTarget(GameObject agent, Transform target,
                                               float positionWeight = 1.0f, float pullWeight = 1.0f) {
 			FullBodyBipedIK ik = agent.GetComponent<FullBodyBipedIK>();

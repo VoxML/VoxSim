@@ -133,9 +133,9 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                     Helper.GetMostImmediateParentVoxeme(landmarks[i]) : landmarks[i];
             }
 
-            for (int i = 0; i < world.blocks.Count; i++) {
-                world.blocks[i] = world.blocks[i] != Helper.GetMostImmediateParentVoxeme(world.blocks[i]) ?
-                    Helper.GetMostImmediateParentVoxeme(world.blocks[i]) : world.blocks[i];
+            for (int i = 0; i < world.availableObjs.Count; i++) {
+                world.availableObjs[i] = world.availableObjs[i] != Helper.GetMostImmediateParentVoxeme(world.availableObjs[i]) ?
+                    Helper.GetMostImmediateParentVoxeme(world.availableObjs[i]) : world.availableObjs[i];
             }
 
             itemsInited = true;
@@ -145,7 +145,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         if (resituateItems) {
             PlaceRandomly(world.demoSurface != Helper.GetMostImmediateParentVoxeme(world.demoSurface) ?
                           Helper.GetMostImmediateParentVoxeme(world.demoSurface) : world.demoSurface,
-                          landmarks, world.blocks);
+                          landmarks, world.availableObjs);
             behaviorController.GetComponent<RelationTracker>().SurveyRelations();
             resituateItems = false;
             OnItemsSituated(this, null);
@@ -158,7 +158,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
             Physics.Raycast(ray, out hit);
 
             if (hit.collider != null) {
-                if (world.blocks.Contains(Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
+                if (world.availableObjs.Contains(Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
                     OnObjectSelected(this, new SelectionEventArgs(Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject)));
                 }
             }
@@ -167,7 +167,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
         if ((Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && (Input.GetKeyDown(KeyCode.R))) {
             PlaceRandomly(world.demoSurface != Helper.GetMostImmediateParentVoxeme(world.demoSurface) ?
                           Helper.GetMostImmediateParentVoxeme(world.demoSurface) : world.demoSurface,
-                          landmarks, world.blocks);
+                          landmarks, world.availableObjs);
             behaviorController.GetComponent<RelationTracker>().SurveyRelations();
             OnItemsSituated(this, null);
         }
@@ -260,7 +260,7 @@ public class ReferringExpressionGenerator : MonoBehaviour {
                         // is focusObj closer to the agent than the other block of the same color?
                         string color = string.Empty;
                         color = objVox.voxml.Attributes.Attrs[0].Value;  // just grab the first one for now
-                        List<GameObject> otherObjs = world.blocks.Where(b => b.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value == color &&
+                        List<GameObject> otherObjs = world.availableObjs.Where(b => b.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value == color &&
                                                                         b != focusObj).ToList();
                         if (otherObjs.Count > 0) {
                             if (Vector3.Distance(agent.transform.position, focusObj.transform.position) <

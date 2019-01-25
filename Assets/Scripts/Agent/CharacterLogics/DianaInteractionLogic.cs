@@ -679,6 +679,16 @@ namespace Agent
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 						new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptions))))));
 
+            States.Add(new PDAState("StartServo", null));
+            States.Add(new PDAState("WaitServo", null));
+            States.Add(new PDAState("Servo",
+                new TransitionGate(
+                    new FunctionDelegate(EpistemicallyCertain),
+                    GetState("Suggest"),
+                    new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                        new StackSymbolContent(null, null, null, null, null, new FunctionDelegate(GetActionOptions))))));
+            States.Add(new PDAState("StopServo", null));
+
 			States.Add(new PDAState("ConfirmObject",null));
 			States.Add(new PDAState("RequestObject",
 				new TransitionGate(
@@ -756,6 +766,14 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G push right stop"));
 			InputSymbols.Add(new PDASymbol("G push front stop"));
 			InputSymbols.Add(new PDASymbol("G push back stop"));
+            InputSymbols.Add(new PDASymbol("G push servo left start"));
+            InputSymbols.Add(new PDASymbol("G push servo right start"));
+            InputSymbols.Add(new PDASymbol("G push servo front start"));
+            InputSymbols.Add(new PDASymbol("G push servo back start"));
+            InputSymbols.Add(new PDASymbol("G push servo left stop"));
+            InputSymbols.Add(new PDASymbol("G push servo right stop"));
+            InputSymbols.Add(new PDASymbol("G push servo front stop"));
+            InputSymbols.Add(new PDASymbol("G push servo back stop"));
 			InputSymbols.Add(new PDASymbol("G count one start"));
 			InputSymbols.Add(new PDASymbol("G count two start"));
 			InputSymbols.Add(new PDASymbol("G count three start"));

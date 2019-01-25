@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Network;
 using NLU;
@@ -147,7 +148,8 @@ public class PluginImport : MonoBehaviour {
                 }
 
                 if (_ksimClient != null) {
-                    _ksimClient.Write("0");
+                    byte[] bytes = BitConverter.GetBytes(1).Concat( new byte[] { 0x02 }).ToArray<byte>();
+                    _ksimClient.Write(bytes);
                 }
             }
             else {

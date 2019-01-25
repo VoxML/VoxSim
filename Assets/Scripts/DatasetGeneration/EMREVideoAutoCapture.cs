@@ -177,7 +177,7 @@ namespace VideoCapture {
                 intervalWaitTimer.Interval = intervalWaitTime;
                 intervalWaitTimer.Enabled = false;
                 Debug.Log(string.Format("Focusing object {0}", focusObjIndex));
-                refExpGenerator.OnObjectSelected(this, new SelectionEventArgs(refExpGenerator.world.blocks[focusObjIndex]));
+                refExpGenerator.OnObjectSelected(this, new SelectionEventArgs(refExpGenerator.world.availableObjs[focusObjIndex]));
                 initialWaitComplete = false;
             }
 
@@ -319,7 +319,7 @@ namespace VideoCapture {
             if (expModalityIndex >= referringModalities.Count) {
                 expModalityIndex = 0;
                 focusObjIndex++;
-                if (focusObjIndex >= refExpGenerator.world.blocks.Count) {
+                if (focusObjIndex >= refExpGenerator.world.availableObjs.Count) {
                     focusObjIndex = 0;
                     refExpGenerator.OnPlaceObjects(this, null);
                     situationIndex++;

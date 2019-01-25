@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 
@@ -62,7 +63,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	public GameObject demoSurface;
 	public BoxCollider demoSurfaceCollider;
-	public List<GameObject> blocks;
+	public List<GameObject> availableObjs;
 	public GameObject indicatedObj = null;
 	public GameObject graspedObj = null;
 
@@ -226,7 +227,10 @@ public class JointGestureDemo : AgentInteraction {
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
 
-        dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
+        if (GameObject.Find("DianaMemory") != null)
+        {
+            dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
+        }
 
         fusionClient = commBridge.GetComponent<PluginImport>().FusionClient;
         //TODO: What if there is no CSUClient address assigned?
@@ -305,8 +309,8 @@ public class JointGestureDemo : AgentInteraction {
 		if (demoSurface != Helper.GetMostImmediateParentVoxeme (demoSurface)) {
 			demoSurface = Helper.GetMostImmediateParentVoxeme (demoSurface);
 
-            for (int i = 0; i < blocks.Count; i++) {
-                blocks[i] = Helper.GetMostImmediateParentVoxeme(blocks[i]);
+            for (int i = 0; i < availableObjs.Count; i++) {
+                availableObjs[i] = Helper.GetMostImmediateParentVoxeme(availableObjs[i]);
             }
 		}
 
@@ -497,7 +501,7 @@ public class JointGestureDemo : AgentInteraction {
 				Physics.Raycast (ray, out hit);
 
 				if (hit.collider != null) {
-					if (blocks.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
+					if (availableObjs.Contains (Helper.GetMostImmediateParentVoxeme (hit.collider.gameObject))) {
 						if (!epistemicModel.engaged) {
 							epistemicModel.engaged = true;
 						}
@@ -1446,7 +1450,7 @@ public class JointGestureDemo : AgentInteraction {
 		if (eventManager.events.Count == 0) {
 			if ((indicatedObj == null) && (graspedObj == null)) {
 				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
-					foreach (GameObject block in blocks) {
+					foreach (GameObject block in availableObjs) {
 						bool isKnown = true;
 
 						if (dianaMemory != null && dianaMemory.enabled) {
@@ -1629,10 +1633,21 @@ public class JointGestureDemo : AgentInteraction {
 		epistemicModel.engaged = state;
 	}
 
-	public void BeginInteraction(object[] content) {
+    public void StartState(object[] content) {
+        if (commBridge.KSIMClient != null) {
+            byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(4)).
+                                       Concat(BitConverter.GetBytes("learn".Length)).Concat(Encoding.ASCII.GetBytes("learn")).
+                                       ToArray<byte>();
+            commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+        }
+    }
+
+    public void BeginInteraction(object[] content) {
         if ((epistemicModel.userID != string.Empty) && (callUserByName)) {
             interactionPrefs.userName = epistemicModel.userID;
         }
+
+        byte[] bytes;
 
         RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
             "Hello.");
@@ -1733,9 +1748,9 @@ public class JointGestureDemo : AgentInteraction {
 							interactionLogic.GenerateStackSymbol (null, null, null,
 								null, null, new List<string> (new string[]{ message }))));
 
-					List<GameObject> blockOptions = FindBlocksInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
+                    List<GameObject> objOptions = FindObjectsInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
 
-					if (blockOptions.Count == 0) {
+					if (objOptions.Count == 0) {
 						RespondAndUpdate ("Are you pointing here?");
 					}
 					else {
@@ -1745,7 +1760,12 @@ public class JointGestureDemo : AgentInteraction {
 					LookForward ();
 
 					if (interactionLogic.GraspedObj == null) {
-						ReachAndPoint (highlightCenter, rightGrasper);
+                        if (InteractionHelper.GetCloserHand(Diana, highlightCenter) == rightGrasper) {
+                            ReachAndPoint(highlightCenter, rightGrasper);
+                        }
+                        else if (InteractionHelper.GetCloserHand(Diana, highlightCenter) == leftGrasper) {
+                            ReachAndPoint(highlightCenter, leftGrasper);
+                        }
 					}
 					else {
 						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
@@ -1782,9 +1802,9 @@ public class JointGestureDemo : AgentInteraction {
 							interactionLogic.GenerateStackSymbol (null, null, null,
 								null, null, new List<string> (new string[]{ message }))));
 										
-					List<GameObject> blockOptions = FindBlocksInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
+                    List<GameObject> objOptions = FindObjectsInRegion (new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2));
 
-					if (blockOptions.Count == 0) {
+					if (objOptions.Count == 0) {
 						RespondAndUpdate ("Are you pointing here?");
 					}
 					else {
@@ -1793,17 +1813,22 @@ public class JointGestureDemo : AgentInteraction {
 
 					LookForward ();
 
-					if (interactionLogic.GraspedObj == null) {
-						ReachAndPoint (highlightCenter, rightGrasper);
-					} 
-					else {
-						if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
-							ReachAndPoint (highlightCenter, rightGrasper);
-						} 
-						else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-							ReachAndPoint (highlightCenter, leftGrasper);
-						}
-					}
+                    if (interactionLogic.GraspedObj == null) {
+                        if (InteractionHelper.GetCloserHand(Diana, highlightCenter) == rightGrasper) {
+                            ReachAndPoint(highlightCenter, rightGrasper);
+                        }
+                        else if (InteractionHelper.GetCloserHand(Diana, highlightCenter) == leftGrasper) {
+                            ReachAndPoint(highlightCenter, leftGrasper);
+                        }
+                    }
+                    else {
+                        if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper) {
+                            ReachAndPoint(highlightCenter, rightGrasper);
+                        }
+                        else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper) {
+                            ReachAndPoint(highlightCenter, leftGrasper);
+                        }
+                    }
 				}
 				else {
 					interactionLogic.RewriteStack (
@@ -1950,6 +1975,16 @@ public class JointGestureDemo : AgentInteraction {
 						} 
 						else {
 							RespondAndUpdate ("Are you asking me to grab this?");
+
+#pragma mark OneShotLearningTrial
+                            if (commBridge.KSIMClient != null)
+                            {
+                                string command = "learn";
+                                    byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
+                                                                   Concat(BitConverter.GetBytes("learn".Length)).Concat(Encoding.ASCII.GetBytes("learn")).
+                                                                   ToArray<byte>();
+                                commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+                            }
 						}
 						performGesture = AvatarGesture.RARM_CARRY_STILL;
 					}
@@ -2357,13 +2392,13 @@ public class JointGestureDemo : AgentInteraction {
 			// demo hacks TODO: better than this
 			if (message == "how many blocks are there") {
 				if (dianaMemory != null && dianaMemory.enabled) {
-					int knownCount = blocks.Where(b => dianaMemory.IsKnown (b.GetComponent<Voxeme>())).ToList().Count;
+					int knownCount = availableObjs.Where(b => dianaMemory.IsKnown (b.GetComponent<Voxeme>())).ToList().Count;
 
 					RespondAndUpdate (string.Format ("There are {0} blocks on the table.", knownCount));
 				}
 			}
 			else if (message == "how many blocks do you see") {
-				int visibleCount = blocks.Where(b => dianaMemory._vision.IsVisible (b.GetComponent<Voxeme>())).ToList().Count;
+				int visibleCount = availableObjs.Where(b => dianaMemory._vision.IsVisible (b.GetComponent<Voxeme>())).ToList().Count;
 
 				RespondAndUpdate (string.Format ("I can see {0} blocks.", visibleCount));
 			}
@@ -2373,7 +2408,7 @@ public class JointGestureDemo : AgentInteraction {
 
 				GameObject blockObj = null;
 
-				foreach (GameObject block in blocks) {
+				foreach (GameObject block in availableObjs) {
 					bool isKnown = true;
 
 					if (dianaMemory != null && dianaMemory.enabled) {
@@ -2694,7 +2729,7 @@ public class JointGestureDemo : AgentInteraction {
 	public void InterpretDeixis(object[] content) {
 		// region or object?
 		//interactionLogic.ObjectOptions.Clear();
-		List<GameObject> objectOptions = FindBlocksInRegion(interactionLogic.IndicatedRegion);
+		List<GameObject> objectOptions = FindObjectsInRegion(interactionLogic.IndicatedRegion);
 
 		//		objectPlacements = objectPlacements.OrderByDescending (o => o.transform.position.y).
 		//			ThenBy (o => (o.transform.position - theme.transform.position).magnitude).ToList ();
@@ -2747,7 +2782,7 @@ public class JointGestureDemo : AgentInteraction {
 
 //		Debug.Log (interactionLogic.ObjectOptions);
 //		Debug.Log (interactionLogic.IndicatedObj.name);
-		string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [uniqueAttrs.Count-1]).Value.ToString ();
+        string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [uniqueAttrs.Count-1]).Value.ToString ();
 
 		if (duplicateNominalAttr) {
 			RespondAndUpdate (string.Format ("Which {0} block?", attribute));
@@ -2789,7 +2824,7 @@ public class JointGestureDemo : AgentInteraction {
 		case 1:
 			List<GameObject> objectOptions = new List<GameObject>();
 
-			foreach (GameObject block in blocks) {
+			foreach (GameObject block in availableObjs) {
 				bool isKnown = true;
 
 				if (dianaMemory != null && dianaMemory.enabled) {
@@ -3467,7 +3502,7 @@ public class JointGestureDemo : AgentInteraction {
 			TurnForward ();
 			LookAt (region.center);
 
-			foreach (GameObject block in blocks) {
+			foreach (GameObject block in availableObjs) {
 				bool isKnown = true;
 
 				if (dianaMemory != null && dianaMemory.enabled) {
@@ -3537,7 +3572,7 @@ public class JointGestureDemo : AgentInteraction {
 		//TurnForward ();
 		//LookAt (cube.transform.position);
 
-		foreach (GameObject block in blocks) {
+		foreach (GameObject block in availableObjs) {
 			bool isKnown = true;
 
 			if (dianaMemory != null && dianaMemory.enabled) {
@@ -3851,33 +3886,33 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
-	List<GameObject> FindBlocksInRegion(Region region) {
-		List<GameObject> blockOptions = new List<GameObject> ();
+    List<GameObject> FindObjectsInRegion(Region region) {
+        List<GameObject> objOptions = new List<GameObject> ();
 
-		foreach (GameObject block in blocks) {
+        foreach (GameObject obj in availableObjs) {
 			bool isKnown = true;
 
 			if (dianaMemory != null && dianaMemory.enabled) {
-				isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
+				isKnown = dianaMemory.IsKnown (obj.GetComponent<Voxeme>());
 			}
 
-			if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
-				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
+			if ((obj.activeInHierarchy) || (objSelector.disabledObjects.Contains(obj))) {
+				Vector3 point = Helper.GetObjectWorldSize(obj).ClosestPoint(highlightCenter);
 				if (region.Contains(new Vector3(point.x, region.center.y, point.z))) {
-					if ((!blockOptions.Contains (block)) && (SurfaceClear (block)) && (isKnown) && 
-						(block != interactionLogic.IndicatedObj) && (block != interactionLogic.GraspedObj)) {
-						blockOptions.Add (block);
+					if ((!objOptions.Contains (obj)) && (SurfaceClear (obj)) && (isKnown) && 
+						(obj != interactionLogic.IndicatedObj) && (obj != interactionLogic.GraspedObj)) {
+						objOptions.Add (obj);
 					}
 				}
 				else {
-					if ((blockOptions.Contains (block)) && (isKnown)) {
-						blockOptions.Remove (block);
+					if ((objOptions.Contains (obj)) && (isKnown)) {
+						objOptions.Remove (obj);
 					}
 				}
 			}
 		}
 
-		return blockOptions;
+		return objOptions;
 	}
 
 	List<string> PopulateMoveOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
@@ -4344,7 +4379,7 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (string.Format ("{0}:{1}", region.center, region.Contains (theme)));
 			if (region.Contains(theme)) {
 				Debug.Log (string.Format ("{0} contains {1}", region, theme));
-				foreach (GameObject block in blocks) {	// find any objects in the direction relative to the grasped object
+				foreach (GameObject block in availableObjs) {	// find any objects in the direction relative to the grasped object
 					if (block.activeInHierarchy) {
 						if (block != theme) {	// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
 							if ((bool)(Type.GetType ("QSR.QSR").GetMethod (qsr).Invoke (null, new object[] {
@@ -4527,7 +4562,7 @@ public class JointGestureDemo : AgentInteraction {
 		Debug.Log (Helper.GetObjectWorldSize (block).max.y);
 		Debug.Log (Helper.GetObjectWorldSize (block,excludeChildren).max.y);
 		Debug.Log (blockBounds.max.y);
-		foreach (GameObject otherBlock in blocks) {
+		foreach (GameObject otherBlock in availableObjs) {
 			excludeChildren = otherBlock.GetComponentsInChildren<Renderer>().Where(
 				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != otherBlock) || 
 				(o.gameObject.layer == LayerMask.NameToLayer("blocks-known"))).Select(o => o.gameObject).ToList();
@@ -4570,7 +4605,7 @@ public class JointGestureDemo : AgentInteraction {
 		Bounds themeBounds = Helper.GetObjectWorldSize (theme);
 		Bounds objBounds = Helper.GetObjectWorldSize (obj);
 
-		foreach (GameObject test in blocks) {
+		foreach (GameObject test in availableObjs) {
 			if ((test != theme) && (test != obj)) {
 				if (dir == "left") {
 					Bounds projectedBounds = new Bounds (
@@ -4698,18 +4733,32 @@ public class JointGestureDemo : AgentInteraction {
         }
         else if (hand == rightGrasper) {
             performGesture = AvatarGesture.RARM_POINT_FRONT;
-            ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
-            InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
         }
 
         gestureController.PerformGesture(performGesture);
 
         if (hand == leftGrasper) {
-            ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            // TODO: I don't like this solution
+            if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled)
+            {
+                ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            }
+            else
+            {
+                ikControl.leftHandObj.position = target;
+            }
             InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
         }
         else if (hand == rightGrasper) {
-            ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            // TODO: I don't like this solution
+            if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled)
+            {
+                ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
+            }
+            else
+            {
+                ikControl.rightHandObj.position = target;
+            }
             InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
         }
 
@@ -4829,33 +4878,40 @@ public class JointGestureDemo : AgentInteraction {
 		//			animPlaying = true;
 		//		}
 
-		//if (!animPlaying) {
-			if (leftTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
-				ikControl.leftHandObj.transform.position = leftTargetStored;
-				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-
-                List<LimbIK> leftArmIKs = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList();
-                if (leftArmIKs.Count > 0) {
-                    LimbIK leftArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList()[0];
-                    leftArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = leftTargetStored;
+        //if (!animPlaying) {
+		if (leftTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
+            List<LimbIK> leftArmIKs = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList();
+            if (leftArmIKs.Count > 0) {
+                LimbIK leftArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.leftHandObj).ToList()[0];
+                leftArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = leftTargetStored;
+            }
+            else {
+                if (!animPlaying) {
+                    ikControl.leftHandObj.transform.GetComponent<TransformTarget>().targetPosition = leftTargetStored;
+                    InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
                 }
-                leftTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-			}
+            }
+            leftTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+		}
 
-			if (rightTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
-				ikControl.rightHandObj.transform.position = rightTargetStored;
-				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-
-                List<LimbIK> rightArmIKs = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList();
-                if (rightArmIKs.Count > 0) {
-                    LimbIK rightArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList()[0];
-                    rightArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = rightTargetStored;
+        if (rightTargetStored != new Vector3 (float.MaxValue, float.MaxValue, float.MaxValue)) {
+            List<LimbIK> rightArmIKs = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList();
+            if (rightArmIKs.Count > 0) {
+                LimbIK rightArmIK = Diana.GetComponents<LimbIK>().Where(ik => ik.solver.target == ikControl.rightHandObj).ToList()[0];
+                rightArmIK.solver.target.gameObject.GetComponent<TransformTarget>().targetPosition = rightTargetStored;
+            }
+            else {
+                if (!animPlaying) {
+                    ikControl.rightHandObj.transform.position = rightTargetStored;
+                    ikControl.rightHandObj.transform.GetComponent<TransformTarget>().targetPosition = rightTargetStored;
+                    InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
                 }
-                rightTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-			}
+            }
+            rightTargetStored = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+		}
 
-			ikControl.lookObj.transform.position = headTargetStored;
-			InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
+		ikControl.lookObj.transform.position = headTargetStored;
+		InteractionHelper.SetHeadTarget (Diana, ikControl.lookObj);
         //		Debug.Log (string.Format("Returning to pose {0} {1} {2}",
         //			ikControl.leftHandObj.transform.position,ikControl.rightHandObj.transform.position,ikControl.lookObj.transform.position));
         //}
