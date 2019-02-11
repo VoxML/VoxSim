@@ -796,8 +796,12 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G count five stop"));
 			InputSymbols.Add(new PDASymbol("G nevermind start"));
 			InputSymbols.Add(new PDASymbol("G nevermind stop"));
-			InputSymbols.Add(new PDASymbol("G engage stop"));
-			InputSymbols.Add(new PDASymbol("S YES"));
+			InputSymbols.Add(new PDASymbol("G teaching start"));
+            InputSymbols.Add(new PDASymbol("G teaching suceeded"));
+            InputSymbols.Add(new PDASymbol("G teaching stop"));
+            InputSymbols.Add(new PDASymbol("G engage stop"));
+
+            InputSymbols.Add(new PDASymbol("S YES"));
 			InputSymbols.Add(new PDASymbol("S NO"));
 			InputSymbols.Add(new PDASymbol("S THIS"));
 			InputSymbols.Add(new PDASymbol("S THAT"));
@@ -2106,7 +2110,7 @@ namespace Agent
 						(a.Where(aa => aa.Contains("lift"))).ToList().Count > 0), null),	
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-					new StackSymbolContent(null,null,null,null,null,new List<string>()))));
+                    new StackSymbolContent(null,null,null,null,new List<string>(),null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ExecuteEvent"),

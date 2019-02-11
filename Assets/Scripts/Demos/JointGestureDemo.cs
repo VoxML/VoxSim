@@ -170,6 +170,9 @@ public class JointGestureDemo : AgentInteraction {
 
 	public bool useOrderingHeuristics;
 
+    public bool useSpeechGrammar;
+    public bool useServos;
+
 	Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
 
 	int sessionCounter = 0;
@@ -727,912 +730,6 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
-	void Disambiguate(object content) {
-		if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.Elimination) {
-			if ((content is IList) && (content.GetType().IsGenericType) && 
-				content.GetType().IsAssignableFrom(typeof(List<GameObject>))) {	// disambiguate objects
-				if (((List<GameObject>)content).Equals (objectMatches)) {
-					List<Voxeme> objVoxemes = new List<Voxeme> ();
-
-					foreach (GameObject option in objectMatches) {
-						if (option.GetComponent<Voxeme> () != null) {
-							objVoxemes.Add (option.GetComponent<Voxeme> ());
-						}
-					}
-
-					List<object> uniqueAttrs = new List<object> ();
-					for (int i = 0; i < objVoxemes.Count; i++) {
-						List<object> newAttrs = Helper.DiffLists (uniqueAttrs, objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ());
-						foreach (object attr in newAttrs) {
-							uniqueAttrs.Add (attr);
-						}
-					}
-
-					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
-
-					if (eventManager.events.Count == 0) {
-						RespondAndUpdate(string.Format ("The {0} block?", attribute));
-						objectConfirmation = objVoxemes [0].gameObject;
-						LookAt(objectConfirmation);
-
-						// not using languages for property for now (colors, sizes, ...  are in G row)
-//						Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-//						attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-//						epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
-					}
-				}
-			}
-			else if ((content is IList) && (content.GetType().IsGenericType) && 
-				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
-				actionOptions = (List<string>)content;
-
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate(string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
-					eventConfirmation = actionOptions [0];
-				}
-			}
-		}
-		else if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
-			// disambiguation strategy: deictic (gesture, use demonstratives)
-			if ((content is IList) && (content.GetType().IsGenericType) && 
-				content.GetType().IsAssignableFrom(typeof(List<GameObject>))) {	// disambiguate objects
-				if (((List<GameObject>)content).Equals (objectMatches)) {
-					bool duplicateNominal = false;
-					List<Voxeme> objVoxemes = new List<Voxeme> ();
-
-					foreach (GameObject option in objectMatches) {
-						if (option.GetComponent<Voxeme> () != null) {
-							objVoxemes.Add (option.GetComponent<Voxeme> ());
-						}
-					}
-
-					List<object> uniqueAttrs = new List<object> ();
-					for (int i = 0; i < objVoxemes.Count; i++) {
-						List<object> newAttrs = Helper.DiffLists (
-							uniqueAttrs.Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList (),
-							objVoxemes [i].voxml.Attributes.Attrs.Cast<object> ().ToList ().Select (x => ((Vox.VoxAttributesAttr)x).Value).Cast<object> ().ToList ());
-
-						if (newAttrs.Count > 0) {
-							foreach (object attr in newAttrs) {
-								Debug.Log (string.Format ("{0}:{1}", objVoxemes [i].name, attr.ToString ()));
-								Vox.VoxAttributesAttr attrToAdd = new Vox.VoxAttributesAttr ();
-								attrToAdd.Value = attr.ToString ();
-
-								if (uniqueAttrs.Where (x => ((Vox.VoxAttributesAttr)x).Value == attrToAdd.Value).ToList ().Count == 0) {
-									uniqueAttrs.Add (attrToAdd);
-								}
-							}
-						}
-						else {
-							duplicateNominal = true;
-						}
-					}
-
-					string attribute = ((Vox.VoxAttributesAttr)uniqueAttrs [0]).Value.ToString ();
-
-					if (eventManager.events.Count == 0) {
-						if (!duplicateNominal) {
-							RespondAndUpdate(string.Format ("The {0} block?", attribute));
-							ReachFor (objVoxemes [0].gameObject);
-							objectConfirmation = objVoxemes [0].gameObject;
-							LookAt (objectConfirmation);
-
-						// not using languages for property for now (colors, sizes, ...  are in G row)
-//							Concept attrConcept = epistemicModel.state.GetConcept (attribute.ToUpper(), ConceptType.PROPERTY, ConceptMode.L);
-//							attrConcept.Certainty = (attrConcept.Certainty < 0.5) ? 0.5 : attrConcept.Certainty;
-//							epistemicModel.state.UpdateEpisim (new Concept[]{ attrConcept }, new Relation[]{ });
-						}
-					}
-				}
-			}
-			else if ((content is IList) && (content.GetType().IsGenericType) && 
-				content.GetType().IsAssignableFrom(typeof(List<string>))) {	// disambiguate events
-				actionOptions = (List<string>)content;
-
-				if (eventManager.events.Count == 0) {
-					LookForward();
-
-					if (confirmationTexts.ContainsKey (actionOptions [0])) {
-						RespondAndUpdate(string.Format ("Should I {0}?", confirmationTexts [actionOptions [0]]));
-						eventConfirmation = actionOptions [0];
-					}
-					else {
-						actionOptions.RemoveAt (0);
-						Disambiguate (actionOptions);
-					}
-				}
-			}
-		}
-	}
-
-	void Suggest(string gesture) {
-		if ((eventConfirmation != "") && (gesture != "posack") && (gesture != "negack")) {
-			return;
-		}
-
-		AvatarGesture performGesture = null;
-		if (gesture.StartsWith("grab move")) {
-			string dir = interactionLogic.GetGestureContent (gesture, "grab move");
-			if (indicatedObj == null) {	// not indicating anything
-				if (graspedObj == null) {	// not grasping anything
-					if (dir == "left") {
-						performGesture = AvatarGesture.RARM_CARRY_RIGHT;
-					}
-					else if (dir == "right") {
-						performGesture = AvatarGesture.RARM_CARRY_LEFT;
-					}
-					else if (dir == "front") {
-						performGesture = AvatarGesture.RARM_CARRY_BACK;
-					}
-					else if (dir == "back") {
-						performGesture = AvatarGesture.RARM_CARRY_FRONT;
-					}
-					else if (dir == "up") {
-						performGesture = AvatarGesture.RARM_CARRY_UP;
-					}
-					else if (dir == "down") {
-						performGesture = AvatarGesture.RARM_CARRY_DOWN;
-					}
-
-					if (eventManager.events.Count == 0) {
-						LookForward();
-						RespondAndUpdate("Do you want me to move something this way?");
-						MoveToPerform ();
-						gestureController.PerformGesture (performGesture);
-					}
-				}
-				else {	// grasping something
-					if (dir == "left") {
-						if (graspedObj == null) {
-							performGesture = AvatarGesture.RARM_CARRY_RIGHT;
-						}
-						else {
-							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-								performGesture = AvatarGesture.RARM_CARRY_RIGHT;
-							}
-							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-								performGesture = AvatarGesture.LARM_CARRY_RIGHT;
-							}
-						}
-					}
-					else if (dir == "right") {
-						if (graspedObj == null) {
-							performGesture = AvatarGesture.RARM_CARRY_LEFT;
-						}
-						else {
-							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-								performGesture = AvatarGesture.RARM_CARRY_LEFT;
-							}
-							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-								performGesture = AvatarGesture.LARM_CARRY_LEFT;
-							}
-						}
-					}
-					else if (dir == "front") {
-						if (graspedObj == null) {
-							performGesture = AvatarGesture.RARM_CARRY_BACK;
-						}
-						else {
-							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-								performGesture = AvatarGesture.RARM_CARRY_BACK;
-							}
-							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-								performGesture = AvatarGesture.LARM_CARRY_BACK;
-							}
-						}
-					}
-					else if (dir == "back") {
-						if (graspedObj == null) {
-							performGesture = AvatarGesture.RARM_CARRY_FRONT;
-						}
-						else {
-							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-								performGesture = AvatarGesture.RARM_CARRY_FRONT;
-							}
-							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-								performGesture = AvatarGesture.LARM_CARRY_FRONT;
-							}
-						}
-					}
-					else if (dir == "up") {
-						if (graspedObj == null) {
-							performGesture = AvatarGesture.RARM_CARRY_UP;
-						}
-						else {
-							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-								performGesture = AvatarGesture.RARM_CARRY_UP;
-							}
-							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-								performGesture = AvatarGesture.LARM_CARRY_UP;
-							}
-						}
-					}
-					else if (dir == "down") {
-						if (graspedObj == null) {
-							performGesture = AvatarGesture.RARM_CARRY_DOWN;
-						}
-						else {
-							if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-								performGesture = AvatarGesture.RARM_CARRY_DOWN;
-							}
-							else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-								performGesture = AvatarGesture.LARM_CARRY_DOWN;
-							}
-						}
-					}
-
-					if (eventManager.events.Count == 0) {
-						LookForward();
-						RespondAndUpdate("Do you want me to move this this way?");
-						MoveToPerform ();
-						gestureController.PerformGesture (performGesture);
-						PopulateMoveOptions (graspedObj, dir, CertaintyMode.Suggest);
-					}
-				}
-			}
-			else {	// indicating something
-				if (dir == "left") {
-					performGesture = AvatarGesture.RARM_CARRY_RIGHT;
-				}
-				else if (dir == "right") {
-					performGesture = AvatarGesture.RARM_CARRY_LEFT;
-				}
-				else if (dir == "front") {
-					performGesture = AvatarGesture.RARM_CARRY_BACK;
-				}
-				else if (dir == "back") {
-					performGesture = AvatarGesture.RARM_CARRY_FRONT;
-				}
-				else if (dir == "up") {
-					performGesture = AvatarGesture.RARM_CARRY_UP;
-				}
-				else if (dir == "down") {
-					performGesture = AvatarGesture.RARM_CARRY_DOWN;
-				}
-
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("Do you want me to move this this way?");
-					MoveToPerform ();
-					gestureController.PerformGesture (performGesture);
-					PopulateMoveOptions (indicatedObj, dir, CertaintyMode.Suggest);
-				}
-			}
-		}
-		else if (gesture.StartsWith("grab")) {
-			if (indicatedObj == null) {	// not indicating anything
-				if (graspedObj == null) {	// not grasping anything
-					if (eventManager.events.Count == 0) {
-						LookForward();
-						RespondAndUpdate("Do you want me to grab something?");
-						MoveToPerform ();
-						gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
-						suggestedActions.Add("grasp({0})");
-					}
-				}	// already grasping something
-				else {
-					// ignore this
-				}
-			}
-			else {	// indicating something
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("Are you asking me to grab this?");
-					MoveToPerform ();
-					gestureController.PerformGesture (AvatarGesture.RARM_CARRY_STILL);
-					PopulateGrabOptions (indicatedObj, CertaintyMode.Suggest);
-				}
-			}
-		}
-		else if (gesture.StartsWith("push")) {
-			string dir = interactionLogic.GetGestureContent (gesture, "push");
-			if ((indicatedObj == null) && (graspedObj == null)) {	// not indicating or grasping anything
-				if (dir == "left") {
-					performGesture = AvatarGesture.LARM_PUSH_RIGHT;
-				}
-				else if (dir == "right") {
-					performGesture = AvatarGesture.RARM_PUSH_LEFT;
-				}
-				else if (dir == "front") {
-					performGesture = AvatarGesture.RARM_PUSH_BACK;
-				}
-				else if (dir == "back") {
-					performGesture = AvatarGesture.RARM_PUSH_FRONT;
-				}
-
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("Are you asking me to push something this way?");
-					MoveToPerform ();
-					gestureController.PerformGesture (performGesture);
-					suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
-				}
-			}
-			else {	// something indicated or grasped
-				GameObject theme = null;
-				if (indicatedObj != null) {
-					theme = indicatedObj;
-				}
-				else if (graspedObj != null) {
-					theme = graspedObj;
-				}
-
-				if (dir == "left") {
-					if (graspedObj == null) {
-						performGesture = AvatarGesture.LARM_PUSH_RIGHT;
-					}
-					else {
-						if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-							performGesture = AvatarGesture.RARM_PUSH_RIGHT;
-						}
-						else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-							performGesture = AvatarGesture.LARM_PUSH_RIGHT;
-						}
-					}
-				}
-				else if (dir == "right") {
-					if (graspedObj == null) {
-						performGesture = AvatarGesture.RARM_PUSH_LEFT;
-					}
-					else {
-						if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-							performGesture = AvatarGesture.RARM_PUSH_LEFT;
-						}
-						else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-							performGesture = AvatarGesture.LARM_PUSH_LEFT;
-						}
-					}
-				}
-				else if (dir == "front") {
-					if (theme != null) {
-						if (InteractionHelper.GetCloserHand (Diana, theme) == leftGrasper) {
-							performGesture = AvatarGesture.LARM_PUSH_BACK;
-						}
-						else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
-							performGesture = AvatarGesture.RARM_PUSH_BACK;
-						}
-					}
-					else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
-						performGesture = AvatarGesture.RARM_PUSH_BACK;
-					}
-				}
-				else if (dir == "back") {
-					if (theme != null) {
-						if (InteractionHelper.GetCloserHand (Diana, theme) == leftGrasper) {
-							performGesture = AvatarGesture.LARM_PUSH_FRONT;
-						}
-						else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
-							performGesture = AvatarGesture.RARM_PUSH_FRONT;
-						}
-					}
-					else if (InteractionHelper.GetCloserHand (Diana, theme) == rightGrasper) {
-						performGesture = AvatarGesture.RARM_PUSH_FRONT;
-					}
-				}
-
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("Are you asking me to push this this way?");
-					MoveToPerform ();
-					gestureController.PerformGesture (performGesture);
-					PopulatePushOptions (theme, dir, CertaintyMode.Suggest);
-				}
-			}
-		}
-		else if (gesture.StartsWith("left point")) { 
-			//string dir = GetGestureContent (gesture, "left point");
-			//			if (dir == "left") {
-			//				performGesture = AvatarGesture.LARM_POINT_RIGHT;
-			//			}
-			//			else if (dir == "right") {
-			//				performGesture = AvatarGesture.LARM_POINT_LEFT;
-			//			}
-			//			else if (dir == "front") {
-			//				performGesture = AvatarGesture.LARM_POINT_FRONT;
-			//			}
-			//			else if (dir == "back") {
-			//				performGesture = AvatarGesture.LARM_POINT_BACK;
-			//			}
-
-			performGesture = AvatarGesture.LARM_POINT_FRONT;
-
-			if (eventManager.events.Count == 0) {
-				RespondAndUpdate("It looks like you're pointing to something.");
-				MoveToPerform ();
-				gestureController.PerformGesture (performGesture);
-			}
-		}
-		else if (gesture.StartsWith("right point")) { 
-			//			string dir = GetGestureContent (gesture, "right point");
-			//			if (dir == "left") {
-			//				performGesture = AvatarGesture.RARM_POINT_RIGHT;
-			//			}
-			//			else if (dir == "right") {
-			//				performGesture = AvatarGesture.RARM_POINT_LEFT;
-			//			}
-			//			else if (dir == "front") {
-			//				performGesture = AvatarGesture.RARM_POINT_FRONT;
-			//			}
-			//			else if (dir == "back") {
-			//				performGesture = AvatarGesture.RARM_POINT_BACK;
-			//			}
-
-			performGesture = AvatarGesture.RARM_POINT_FRONT;
-
-			if (eventManager.events.Count == 0) {
-				RespondAndUpdate("It looks like you're pointing to something.");
-				MoveToPerform ();
-				gestureController.PerformGesture (performGesture);
-			}
-		}
-		else if (gesture.StartsWith("posack")) {
-			if (eventManager.events.Count == 0) {
-				RespondAndUpdate("Yes?");
-				MoveToPerform ();
-				AllowHeadMotion ();
-
-				if (graspedObj == null) {
-					gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_UP);
-				}
-				else {
-					if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-						gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_UP);
-					}
-					else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-						gestureController.PerformGesture(AvatarGesture.LARM_THUMBS_UP);
-					}
-				}
-				gestureController.PerformGesture (AvatarGesture.HEAD_NOD);
-			}
-		}
-		else if (gesture.StartsWith("negack")) { 
-			if (eventManager.events.Count == 0) {
-				RespondAndUpdate("No?");
-				MoveToPerform ();
-				AllowHeadMotion ();
-
-				if (graspedObj == null) {
-					gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_DOWN);
-				}
-				else {
-					if (InteractionHelper.GetCloserHand (Diana, graspedObj) == leftGrasper) {
-						gestureController.PerformGesture(AvatarGesture.RARM_THUMBS_DOWN);
-					}
-					else if (InteractionHelper.GetCloserHand (Diana, graspedObj) == rightGrasper) {
-						gestureController.PerformGesture(AvatarGesture.LARM_THUMBS_DOWN);
-					}
-				}
-				gestureController.PerformGesture (AvatarGesture.HEAD_SHAKE);
-				eventConfirmation = "negack";
-			}
-		}
-	}
-
-	void Acknowledge(bool yes) {
-		LookForward ();
-		if (!yes) {
-			if (eventConfirmation == "forget") {	// forget about previously indicated block? no
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("OK.");
-					eventConfirmation = "";
-					if (indicatedObj != null) {
-						ReachFor (indicatedObj);
-					}
-				}
-			} 
-			else if (eventConfirmation == "negack") {	// no? no 
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("OK.");
-					indicatedObj = null;
-					eventConfirmation = "";
-
-					if ((graspedObj == null) && (eventConfirmation == "")) {
-						TurnForward ();
-					}
-					//objectMatches.Clear ();
-					suggestedActions.Clear ();
-
-					if (actionOptions.Count > 0) {
-						confirmationTexts.Remove (actionOptions [0]);
-						actionOptions.RemoveAt (0);
-						Disambiguate (actionOptions);
-					}
-					else if (objectConfirmation != null) {
-						if (objectMatches.Contains (objectConfirmation)) {
-							objectMatches.Remove (objectConfirmation);
-						}
-
-						objectConfirmation = null;
-
-						if (objectMatches.Count > 0) {
-							Disambiguate (objectMatches);
-						} 
-					}
-
-					//						if (eventManager.events.Count == 0) {
-					//							indicatedObj = null;
-					//							objectMatches.Clear ();
-					//							OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-					//						}
-					//					}
-				}
-			}
-			else if ((eventConfirmation != "") || (indicatedObj != null)) {
-				if (actionOptions.Contains (eventConfirmation)) {
-					actionOptions.Remove (eventConfirmation);
-					confirmationTexts.Remove (eventConfirmation);
-				}
-
-				if (graspedObj == null) {
-					ikControl.leftHandObj.position = leftTargetDefault;
-					ikControl.rightHandObj.position = rightTargetDefault;
-					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-				}
-
-				eventConfirmation = "";
-
-				if (actionOptions.Count > 0) {
-					Disambiguate (actionOptions);
-				} 
-				else {
-					if (eventManager.events.Count == 0) {
-						indicatedObj = null;
-						objectMatches.Clear ();
-						LookForward();
-						RespondAndUpdate("OK.");
-						//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-					}
-				}
-			} 
-			else if (objectConfirmation != null) {
-				if (objectMatches.Contains (objectConfirmation)) {
-					objectMatches.Remove (objectConfirmation);
-				}
-
-				if (graspedObj == null) {
-					ikControl.leftHandObj.position = leftTargetDefault;
-					ikControl.rightHandObj.position = rightTargetDefault;
-					InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
-					InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
-				}
-
-				objectConfirmation = null;
-
-				if (objectMatches.Count > 0) {
-					Disambiguate (objectMatches);
-				} 
-				else {
-					if (eventManager.events.Count == 0) {
-						indicatedObj = null;
-						indicatedRegion = null;
-						RespondAndUpdate("Sorry, I don't know what you mean.");
-					}
-				}
-			}
-			else if (suggestedActions.Count > 0) {
-				suggestedActions.Remove (suggestedActions [0]);
-
-				if (suggestedActions.Count == 0) {
-					LookForward();
-					RespondAndUpdate("OK.");
-				}
-
-				//				eventConfirmation = "";
-				//				suggestedActions.Clear ();
-				//				actionOptions.Clear ();
-				//				objectMatches.Clear ();
-				//				confirmationTexts.Clear ();
-				//				TurnForward ();
-			}
-			else if (indicatedObj != null) {
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("OK.");
-					eventConfirmation = "";
-					indicatedObj = null;
-					TurnForward ();
-					LookForward ();
-				}
-			}
-		} 
-		else {
-			if (eventConfirmation == "forget") {	// forget about previously indicated block? yes
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("OK.");
-					eventConfirmation = "";
-					indicatedObj = null;
-					TurnForward ();
-					LookForward ();
-				}
-			}
-			else if (eventConfirmation == "negack") {	// no? yes 
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("OK.");
-					indicatedObj = null;
-					eventConfirmation = "";
-					//objectMatches.Clear ();
-					suggestedActions.Clear ();
-
-					confirmationTexts.Remove (actionOptions [0]);
-					actionOptions.RemoveAt (0);
-
-					if (actionOptions.Count > 0) {
-						Disambiguate (actionOptions);
-					} 
-					else if (objectConfirmation != null) {
-						if (objectMatches.Contains (objectConfirmation)) {
-							objectMatches.Remove (objectConfirmation);
-						}
-
-						objectConfirmation = null;
-
-						if (objectMatches.Count > 0) {
-							Disambiguate (objectMatches);
-						} 
-					}
-					else {
-						if (eventManager.events.Count == 0) {
-							indicatedObj = null;
-							objectMatches.Clear ();
-							RespondAndUpdate("Sorry, I don't know what you mean.");
-						}
-					}
-				}
-			}
-			else if (eventConfirmation != "") {
-				if (eventConfirmation.StartsWith ("grasp")) {
-					graspedObj = indicatedObj;
-					indicatedObj = null;
-					indicatedRegion = null;
-				} 
-				else if (eventConfirmation.StartsWith ("put")) {
-					graspedObj = null;
-					indicatedRegion = null;
-				} 
-				else if (eventConfirmation.StartsWith ("slide")) {
-					indicatedObj = null;
-					graspedObj = null;
-					indicatedRegion = null;
-				} 
-				else if (eventConfirmation.StartsWith ("ungrasp")) {
-					graspedObj = null;
-					indicatedRegion = null;
-				}
-
-				if (eventManager.events.Count == 0) {
-					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (eventConfirmation, 1);
-					eventConfirmation = "";
-					suggestedActions.Clear ();
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-					confirmationTexts.Clear ();
-					LookForward();
-					RespondAndUpdate("OK.");
-				}
-			} 
-			else if (objectConfirmation != null) {
-				if (eventManager.events.Count == 0) {
-					LookForward();
-					RespondAndUpdate("OK, go on.");
-					indicatedObj = objectConfirmation;
-					ReachFor (indicatedObj);
-					objectConfirmation = null;
-					objectMatches.Clear ();
-				}
-			}
-			else if (suggestedActions.Count > 0) {
-				if (suggestedActions [0].Contains ("{0}")) {
-					if (eventManager.events.Count == 0) {
-						if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
-							LookForward();
-							RespondAndUpdate(string.Format ("What do you want me to {0}?", suggestedActions [0].Split ('(') [0]));
-						}
-					}
-				} 
-				else {
-					//eventConfirmation = suggestedActions [0];
-					actionOptions = new List<string>(suggestedActions);
-					suggestedActions.Clear ();
-					Disambiguate (actionOptions);
-				}
-			} 
-			//			else {
-			//				OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-			//			}
-		}
-	}
-
-	void IndexByColor(string color) {
-		if (eventManager.events.Count == 0) {
-			if ((indicatedObj == null) && (graspedObj == null)) {
-				if (objectMatches.Count == 0) {	// if received color without existing disambiguation options
-					foreach (GameObject block in availableObjs) {
-						bool isKnown = true;
-
-						if (dianaMemory != null && dianaMemory.enabled) {
-							isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
-						}
-
-						if ((block.activeInHierarchy) &&
-							(block.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) && 
-							(isKnown) && (SurfaceClear(block))) {
-							if (!objectMatches.Contains (block)) {
-								objectMatches.Add (block);
-							}
-						}
-					}
-					ResolveIndicatedObject ();
-				}
-				else {	// choose from restricted options based on color
-					List<GameObject> toRemove = new List<GameObject>();
-					foreach (GameObject match in objectMatches) {
-						bool isKnown = true;
-
-						if (dianaMemory != null && dianaMemory.enabled) {
-							isKnown = dianaMemory.IsKnown (match.GetComponent<Voxeme>());
-						}
-
-						if ((match.activeInHierarchy) &&
-							(!match.GetComponent<AttributeSet> ().attributes.Contains (color.ToLower ())) &&
-							(isKnown)) {
-							if (eventManager.events.Count == 0) {
-								if (objectMatches.Contains (match)) {
-									toRemove.Add (match);
-								}
-							}
-						}
-					}
-
-					foreach (GameObject item in toRemove) {
-						objectMatches.Remove (item);
-					}
-					ResolveIndicatedObject ();
-
-				}
-
-				if (indicatedObj == null) {
-					if ((eventManager.events.Count == 0) && (objectMatches.Count > 0)) {
-						LookForward();
-						RespondAndUpdate(string.Format ("Which {0} block?", color.ToLower ()));
-					}
-					else if ((eventManager.events.Count == 0) && (objectConfirmation == null)) {
-						LookForward();
-						RespondAndUpdate(string.Format ("None of the blocks over here is {0}.", color.ToLower ()));
-					}
-				}
-				else {
-					if ((eventManager.events.Count == 0) && (eventConfirmation == "")) {
-						LookForward();
-						RespondAndUpdate("OK, go on.");
-					}
-				}
-			}
-			else {	// received color with object already indicated
-				if (eventManager.events.Count == 0) {
-					string attr = string.Empty;
-					if (indicatedObj.GetComponent<Voxeme> () != null) {
-						attr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-
-					if (color.ToLower() != attr) {
-						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", attr));
-						TurnForward ();
-						LookAt (indicatedObj.transform.position);
-						eventConfirmation = "forget";
-					}
-				}
-			}
-		} 
-	}
-
-	void IndexBySize(string size) {
-		if (eventManager.events.Count == 0) {
-			if (objectMatches.Count > 0) {
-				GameObject obj = objectMatches[0];
-				if (size.ToLower() == "big") {
-					foreach (GameObject match in objectMatches) {
-						Debug.Log (match);
-						if ((Helper.GetObjectWorldSize (match).size.x *
-							Helper.GetObjectWorldSize (match).size.y *
-							Helper.GetObjectWorldSize (match).size.z) >
-							(Helper.GetObjectWorldSize (obj).size.x *
-								Helper.GetObjectWorldSize (obj).size.y *
-								Helper.GetObjectWorldSize (obj).size.z)) {
-							obj = match;
-						}
-					}
-				}
-				else if (size.ToLower() == "small") {
-					foreach (GameObject match in objectMatches) {
-						if ((Helper.GetObjectWorldSize (match).size.x *
-							Helper.GetObjectWorldSize (match).size.y *
-							Helper.GetObjectWorldSize (match).size.z) <
-							(Helper.GetObjectWorldSize (obj).size.x *
-								Helper.GetObjectWorldSize (obj).size.y *
-								Helper.GetObjectWorldSize (obj).size.z)) {
-							obj = match;
-						}
-					}
-				}
-
-				objectMatches.Clear ();
-				objectMatches.Add (obj);
-				ResolveIndicatedObject ();
-			}
-		}
-	}
-
-	void Engage(bool state) {
-		if (state == true) {
-			sessionCounter++;
-			if (sessionCounter > 1) {
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("Hi again!");
-				}
-			} 
-			else {
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("Hello.");
-				}
-			}
-
-			objectMatches.Clear ();
-			objectConfirmation = null;
-
-			actionOptions.Clear ();
-			eventConfirmation = "";
-
-			ikControl.leftHandObj.position = leftTargetDefault;
-			ikControl.rightHandObj.position = rightTargetDefault;
-
-			LookForward ();
-			TurnForward ();
-
-			indicatedObj = null;
-			graspedObj = null;
-		}
-		else {
-			if (graspedObj != null) {
-				RiggingHelper.UnRig (graspedObj, graspedObj.transform.parent.gameObject);
-				graspedObj.GetComponent<Voxeme>().targetPosition =
-					graspedObj.transform.position = new Vector3 (graspedObj.transform.position.x,
-						Helper.GetObjectWorldSize (demoSurface).max.y+Helper.GetObjectSize(graspedObj).extents.y,
-						graspedObj.transform.position.z);
-				graspedObj.GetComponent<Voxeme> ().targetRotation =
-					graspedObj.transform.eulerAngles = Vector3.zero;
-
-				graspedObj.GetComponent<Voxeme>().isGrasped = false;
-				graspedObj.GetComponent<Voxeme>().graspTracker = null;
-				graspedObj.GetComponent<Voxeme>().grasperCoord = null;
-			}
-
-			if (eventManager.events.Count == 0) {	// TODO: what if we disengage while Diana is performing an action?
-				RespondAndUpdate("Bye!");
-
-				objectMatches.Clear ();
-				objectConfirmation = null;
-
-				actionOptions.Clear ();
-				eventConfirmation = "";
-
-				ikControl.leftHandObj.position = leftTargetDefault;
-				ikControl.rightHandObj.position = rightTargetDefault;
-
-				LookForward ();
-				TurnForward ();
-
-				indicatedObj = null;
-				graspedObj = null;
-			}
-		}
-
-		epistemicModel.engaged = state;
-	}
-
     public void StartState(object[] content) {
         if (commBridge.KSIMClient != null) {
             byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(4)).
@@ -2082,6 +1179,16 @@ public class JointGestureDemo : AgentInteraction {
 						} 
 						else {
 							RespondAndUpdate ("Are you asking me to grab this?");
+
+#pragma mark OneShotLearningTrial
+                            if (commBridge.KSIMClient != null)
+                            {
+                                string command = "learn";
+                                byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
+                                                               Concat(BitConverter.GetBytes("learn".Length)).Concat(Encoding.ASCII.GetBytes("learn")).
+                                                               ToArray<byte>();
+                                commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+                            }
 						}
 						performGesture = AvatarGesture.RARM_CARRY_STILL;
 					}
@@ -3058,6 +2165,11 @@ public class JointGestureDemo : AgentInteraction {
 				(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")))) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 		}
+
+        //if (interactionLogic.GraspedObj != null)
+        //{
+        //    ReturnHandsToDefault();
+        //}
 	}
 
 	public void StartGrab(object[] content) {
@@ -3286,6 +2398,10 @@ public class JointGestureDemo : AgentInteraction {
 			TurnForward ();
 		}
 
+        if (interactionLogic.GraspedObj != null) {
+            ReturnHandsToDefault();
+        }
+
 		RespondAndUpdate ("OK, never mind.");
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
@@ -3460,181 +2576,6 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
 	}
 
-	void Deixis(string dir) {
-		if (eventManager.events.Count > 0) {
-			return;
-		}
-
-		RespondAndUpdate("");
-		Region region = null;
-
-		if (dir == "left") {
-			region = leftRegion;
-		}
-		else if (dir == "right") {
-			region = rightRegion;
-		}
-		else if (dir == "front") {
-			region = frontRegion;
-		}
-		else if (dir == "down") {
-			region = backRegion;
-		}
-
-		if (region != null) {
-			indicatedRegion = region;
-			objectMatches.Clear ();
-			objectConfirmation = null;
-			indicatedObj = null;
-
-			actionOptions.Clear ();
-			eventConfirmation = "";
-
-			if (graspedObj == null) {
-				ikControl.leftHandObj.position = leftTargetDefault;
-				ikControl.rightHandObj.position = rightTargetDefault;
-			}
-			else {
-				RespondAndUpdate("Sorry, I don't know what you mean.");
-				return;
-			}
-
-			TurnForward ();
-			LookAt (region.center);
-
-			foreach (GameObject block in availableObjs) {
-				bool isKnown = true;
-
-				if (dianaMemory != null && dianaMemory.enabled) {
-					isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
-				}
-
-				if (block.activeInHierarchy) {
-					if (region.Contains (block)) {
-						if ((!objectMatches.Contains (block)) && (SurfaceClear(block)) && (isKnown)) {
-							objectMatches.Add (block);
-						}
-					} 
-				}
-			}
-
-			if (useOrderingHeuristics) {
-				objectMatches = objectMatches.OrderBy (o => (o.transform.position - Diana.transform.position).magnitude).ToList ();
-			}
-
-			if (objectMatches.Count > 0) {
-				ResolveIndicatedObject ();
-			} 
-			else {	// indicating region
-				indicatedRegion = region;
-				RespondAndUpdate("Sorry, I don't know what you mean.");
-			}
-		}
-	}
-
-	void Deixis(GameObject obj) {
-		bool isKnown = true;
-
-		if (dianaMemory != null && dianaMemory.enabled) {
-			isKnown = dianaMemory.IsKnown (obj.GetComponent<Voxeme>());
-		}
-
-		objectMatches.Clear ();
-
-		if (obj.activeInHierarchy) {
-			if ((!objectMatches.Contains (obj)) && (SurfaceClear(obj)) && (isKnown)) {
-				objectMatches.Add (obj);
-			}
-		}
-
-		if (objectMatches.Count > 0) {
-			ResolveIndicatedObject ();
-		}
-	}
-
-	void Deixis(Vector3 coord) {
-		if (eventManager.events.Count > 0) {
-			return;
-		}
-
-		highlightTimeoutTimer.Enabled = true;
-
-		//OutputHelper.PrintOutput (Role.Affector, "");
-		Region region = null;
-
-		Vector3 highlightCenter = coord;
-
-		Debug.Log (string.Format("Deixis: {0}",highlightCenter));
-
-		MoveHighlight (highlightCenter);
-		regionHighlight.transform.position = highlightCenter;
-
-		//TurnForward ();
-		//LookAt (cube.transform.position);
-
-		foreach (GameObject block in availableObjs) {
-			bool isKnown = true;
-
-			if (dianaMemory != null && dianaMemory.enabled) {
-				isKnown = dianaMemory.IsKnown (block.GetComponent<Voxeme>());
-			}
-
-			if (block.activeInHierarchy) {
-				Vector3 point = Helper.GetObjectWorldSize(block).ClosestPoint(highlightCenter);
-				//Debug.Log (string.Format("{0}:{1} {2} {3}",block,point,highlightCenter,(point-highlightCenter).magnitude));
-				if ((point - highlightCenter).magnitude <= vectorConeRadius * highlightOscUpper) {
-					//if (region.Contains (new Vector3 (block.transform.position.x,
-					//	region.center.y, block.transform.position.z))) {
-					if ((!objectMatches.Contains (block)) && (SurfaceClear (block)) && (isKnown)) {
-						objectMatches.Add (block);
-					}
-				}
-				else {
-					if ((objectMatches.Contains (block)) && (isKnown)) {
-						objectMatches.Remove (block);
-					}
-				}
-			}
-		}
-
-
-		if ((indicatedObj == null) && (graspedObj == null)) {
-			if (objectMatches.Count > 0) {
-				TurnForward ();
-				ReachFor (new Vector3 (highlightCenter.x, highlightCenter.y + Helper.GetObjectSize (objectMatches [0].gameObject).max.y,
-					highlightCenter.z));
-				ResolveIndicatedObject ();
-			}
-			else if (graspedObj == null) {	// indicating region
-				indicatedRegion = new Region (new Vector3 (highlightCenter.x - vectorConeRadius, highlightCenter.y, highlightCenter.z - vectorConeRadius),
-					new Vector3 (highlightCenter.x + vectorConeRadius, highlightCenter.y, highlightCenter.z + vectorConeRadius));
-				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you're pointing at.");
-			}
-		}
-		else {	// already indicated another object
-			if (objectMatches.Count > 0) {
-				if (eventManager.events.Count == 0) {
-					string themeAttr = string.Empty;
-					if (indicatedObj.GetComponent<Voxeme> () != null) {
-						themeAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-
-					string otherAttr = string.Empty;
-					if (objectMatches[0].GetComponent<Voxeme> () != null) {
-						otherAttr = indicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-					}
-
-					if (themeAttr != otherAttr) {
-						RespondAndUpdate(string.Format ("Should I forget about this {0} block?", themeAttr));
-						TurnForward ();
-						LookAt (indicatedObj.transform.position);
-						eventConfirmation = "forget";
-					}
-				}
-			}
-		}
-	}
-
 	void TrackPointing(List<float> vector) {
 		highlightTimeoutTimer.Enabled = true;
 		regionHighlight.GetComponent<Renderer> ().material.color = new Color (0.0f, 1.0f, 0.0f,
@@ -3727,47 +2668,6 @@ public class JointGestureDemo : AgentInteraction {
 		return offset;
 	}
 
-	void ResolveIndicatedObject() {
-		Debug.Log (string.Format("Object matches: {0}",objectMatches.Count));
-		if (objectMatches.Count == 1) {	// single object match
-			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-				Disambiguate (objectMatches);
-			} 
-			else {
-				indicatedObj = objectMatches [0];
-				objectMatches.Clear ();
-
-				if (interactionPrefs.disambiguationStrategy == InteractionPrefsModalWindow.DisambiguationStrategy.DeicticGestural) {
-					TurnForward();
-					ReachFor (indicatedObj);
-					RespondAndUpdate("OK, go on.");
-				}
-			}
-		} 
-		else {	// multiple objects matches: disambiguate
-			if ((interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) ||
-				(interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation)) {
-				Disambiguate (objectMatches);
-			} 
-			else {	// just pick one
-
-			}
-		}
-
-		if (suggestedActions.Count > 0) {
-			if (suggestedActions [0].Contains ("{0}")) {
-				if (indicatedObj != null) {
-					suggestedActions [0] = string.Format (suggestedActions [0], indicatedObj.name);
-					PopulateOptions (suggestedActions [0].Split ('(')[0], indicatedObj,
-						suggestedActions [0].Contains(',') ? suggestedActions [0].Split (',')[1].Replace(")","") : "");
-					//actionOptions = new List<string> (suggestedActions);
-					suggestedActions.Clear ();
-					Disambiguate (actionOptions);
-				}
-			}
-		}
-	}
-
 	void PopulateOptions(string program, GameObject theme, string dir) {
 		switch (program) {
 		case "grasp":
@@ -3813,75 +2713,6 @@ public class JointGestureDemo : AgentInteraction {
 			if (!confirmationTexts.ContainsKey (string.Format ("grasp({0})", theme.name))) {
 				confirmationTexts.Add (string.Format ("grasp({0})", theme.name),
 					string.Format ("grab the {0} block", themeAttr));
-			}
-		}
-	}
-
-	void Grab(bool state) {
-		if (eventManager.events.Count > 0) {
-			return;
-		}
-
-		if (eventConfirmation == "") {
-			RespondAndUpdate("");
-		}
-
-		if (state == true) {
-			if (indicatedObj != null) {
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					actionOptions.Add (string.Format ("grasp({0})", indicatedObj.name));
-					confirmationTexts.Add (string.Format ("grasp({0})", indicatedObj.name), string.Format ("grasp the {0}", indicatedObj.name));
-					Disambiguate (actionOptions);
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (string.Format ("grasp({0})", indicatedObj.name), 1);
-					LookForward();
-					graspedObj = indicatedObj;
-					indicatedObj = null;
-					indicatedRegion = null;
-					suggestedActions.Clear ();
-					actionOptions.Clear ();
-					eventConfirmation = "";
-					RespondAndUpdate("OK.");
-				}
-			} 
-			else if ((graspedObj == null) && (indicatedObj == null) && (objectConfirmation == null)) {
-				//OutputHelper.PrintOutput (Role.Affector, "Sorry, I don't know what you mean.");
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("What do you want me to grab?");
-					LookForward();
-					if (!suggestedActions.Contains ("grasp({0})")) {
-						suggestedActions.Add ("grasp({0})");
-					}
-				}
-			}
-		} 
-		else {
-			if (eventConfirmation == "") {
-				if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-					if (graspedObj != null) {
-						if (graspedObj.GetComponent<Voxeme> ().isGrasped) {
-							actionOptions.Add (string.Format ("ungrasp({0})", graspedObj.name));
-							confirmationTexts.Add (string.Format ("ungrasp({0})", graspedObj.name), string.Format ("release the {0}", graspedObj.name));
-							Disambiguate (actionOptions);
-						} 
-						else {
-							graspedObj = null;
-						}
-					}
-				} 
-				else {
-					if (graspedObj != null) {
-						eventManager.InsertEvent ("", 0);
-						eventManager.InsertEvent (string.Format ("ungrasp({0})", graspedObj.name), 1);
-						LookForward ();
-						actionOptions.Clear ();
-						confirmationTexts.Clear ();
-						graspedObj = null;
-						//TurnForward ();
-					}
-				}
 			}
 		}
 	}
@@ -4082,79 +2913,6 @@ public class JointGestureDemo : AgentInteraction {
 		return moveOptions;
 	}
 
-	void Move(string dir) {
-		if (eventManager.events.Count > 0) {
-			return;
-		}
-
-		if (eventConfirmation == "") {
-			RespondAndUpdate("");
-		}
-
-		GameObject theme = null;
-		if (indicatedObj != null) {
-			theme = indicatedObj;
-		}
-		else if (graspedObj != null) {
-			theme = graspedObj;
-		}
-
-		if (theme != null) {
-			PopulateMoveOptions (theme, dir);
-
-			//			if (dir == "up") {
-			//				string objAttr = string.Empty;
-			//				if (theme.GetComponent<Voxeme> () != null) {
-			//					objAttr = theme.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-			//				}
-			//
-			//				actionOptions.Add (string.Format ("lift({0})", theme.name));
-			//				confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block ", objAttr));
-			//			} 
-			//			else if (dir == "down") {
-			//				if (eventConfirmation == "") {
-			//					string objAttr = string.Empty;
-			//					if (theme.GetComponent<Voxeme> () != null) {
-			//						objAttr = graspedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;	// just grab the first one for now
-			//					}
-			//
-			//					Vector3 target = new Vector3 (theme.transform.position.x,
-			//						                 Helper.GetObjectWorldSize (demoSurface).max.y,
-			//						                 theme.transform.position.z);
-			//					actionOptions.Add (string.Format ("put({0},{1})", theme.name,
-			//						Helper.VectorToParsable (target)));
-			//					confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
-			//						Helper.VectorToParsable (target)), string.Format ("put the {0} block down", objAttr));
-			//				}
-			//			}
-
-			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-				Disambiguate (actionOptions);
-			} 
-			else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-				if (actionOptions.Count > 1) {
-					Disambiguate (actionOptions);
-				} 
-				else {
-					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (actionOptions [0], 1);
-					indicatedObj = null;
-					//graspedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-				}
-			} 
-			else {
-				eventManager.InsertEvent ("", 0);
-				eventManager.InsertEvent (actionOptions [0], 1);
-				indicatedObj = null;
-				//graspedObj = null;
-				actionOptions.Clear ();
-				objectMatches.Clear ();
-			}
-		}
-	}
-
 	List<string> PopulatePushOptions(GameObject theme, string dir, CertaintyMode certainty = CertaintyMode.Act) {
 		List<string> pushOptions = new List<string> ();
 		List<object> placementOptions = FindPlacementOptions (theme, dir);
@@ -4279,64 +3037,6 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		return pushOptions;
-	}
-
-	void Push(string dir) {
-		if (eventManager.events.Count > 0) {
-			return;
-		}
-
-		if (eventConfirmation == "") {
-			RespondAndUpdate("");
-		}
-
-		GameObject theme = null;
-		if (indicatedObj != null) {
-			theme = indicatedObj;
-		}
-		else if (graspedObj != null) {
-			theme = graspedObj;
-		}
-
-		if (theme != null) {
-			PopulatePushOptions (theme, dir);
-
-			if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Everything) {
-				Disambiguate (actionOptions);
-			}
-			else if (interactionPrefs.verbosityLevel == InteractionPrefsModalWindow.VerbosityLevel.Disambiguation) {
-				if (actionOptions.Count > 1) {
-					Disambiguate (actionOptions);
-				}
-				else {
-					eventManager.InsertEvent ("", 0);
-					eventManager.InsertEvent (actionOptions [0], 1);
-					indicatedObj = null;
-					graspedObj = null;
-					actionOptions.Clear ();
-					objectMatches.Clear ();
-				}
-			}
-			else {
-				eventManager.InsertEvent ("", 0);
-				eventManager.InsertEvent (actionOptions [0], 1);
-				indicatedObj = null;
-				graspedObj = null;
-				actionOptions.Clear ();
-				objectMatches.Clear ();
-			}
-		}
-		else {
-			if (objectConfirmation == null) {
-				if (eventManager.events.Count == 0) {
-					RespondAndUpdate("What do you want me to push?");
-					LookForward();
-					if (!suggestedActions.Contains("slide({0}"+string.Format(",{0})",dir))) {
-						suggestedActions.Add("slide({0}"+string.Format(",{0})",dir));
-					}
-				}
-			}
-		}
 	}
 
 	List<object> FindPlacementOptions(GameObject theme, string dir) {
@@ -4656,11 +3356,21 @@ public class JointGestureDemo : AgentInteraction {
 
 		if ((interactionLogic != null) && (interactionLogic.enabled) && (interactionLogic.GraspedObj != null)) { // grasping something
 			if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == leftGrasper) {
-				ikControl.rightHandObj.transform.position = coord + offset;
+                if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+                    ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = coord + offset;
+                }
+                else {
+                    ikControl.rightHandObj.position = coord + offset;
+                }
 				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 			}
 			else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
-				ikControl.leftHandObj.transform.position = coord + offset;
+                if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+                    ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = coord + offset;
+                }
+                else {
+                    ikControl.leftHandObj.position = coord + offset;
+                }
 				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 			}
 		}
@@ -4668,13 +3378,23 @@ public class JointGestureDemo : AgentInteraction {
 			// which region is coord in?
 			if (leftRegion.Contains (new Vector3 (coord.x,
 				leftRegion.center.y, coord.z))) {
-				ikControl.rightHandObj.transform.position = coord + offset;
+                if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+                    ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = coord + offset;
+                }
+                else {
+                    ikControl.rightHandObj.position = coord + offset;
+                }
 				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 			}
 			else if (rightRegion.Contains (new Vector3 (coord.x,
 				rightRegion.center.y, coord.z))) {
-				ikControl.leftHandObj.transform.position = coord + offset;
+                if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+                    ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = coord + offset;
+                }
+                else {
+                    ikControl.leftHandObj.position = coord + offset;
+                }
 				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 			}
 		}
@@ -4701,13 +3421,23 @@ public class JointGestureDemo : AgentInteraction {
 		// which region is obj in?
 		if (leftRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.rightHandObj.transform.position = obj.transform.position+offset;
+            if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+                ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = obj.transform.position + offset;
+            }
+            else {
+                ikControl.rightHandObj.position = obj.transform.position + offset;
+            }
 			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 		}
 		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
 			leftRegion.center.y,obj.transform.position.z))) {
-			ikControl.leftHandObj.transform.position = obj.transform.position+offset;
+            if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+                ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = obj.transform.position + offset;
+            }
+            else {
+                ikControl.leftHandObj.position = obj.transform.position + offset;
+            }
 			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
@@ -4739,24 +3469,20 @@ public class JointGestureDemo : AgentInteraction {
 
         if (hand == leftGrasper) {
             // TODO: I don't like this solution
-            if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled)
-            {
+            if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
                 ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
             }
-            else
-            {
+            else {
                 ikControl.leftHandObj.position = target;
             }
             InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
         }
         else if (hand == rightGrasper) {
             // TODO: I don't like this solution
-            if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled)
-            {
+            if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
                 ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = target;
             }
-            else
-            {
+            else {
                 ikControl.rightHandObj.position = target;
             }
             InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
@@ -4917,7 +3643,23 @@ public class JointGestureDemo : AgentInteraction {
         //}
 	}
 
-	double EpistemicCertainty (Concept concept) {
+    public void ReturnHandsToDefault() {
+        if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+            ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = leftTargetDefault;
+        }
+        else {
+            ikControl.leftHandObj.position = leftTargetDefault;
+        }
+
+        if (ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
+            ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = rightTargetDefault;
+        }
+        else {
+            ikControl.rightHandObj.position = rightTargetDefault;
+        }
+    }
+
+    double EpistemicCertainty (Concept concept) {
 		double certainty = concept.Certainty;
 
 		foreach (Concept related in concept.Related) {
@@ -5046,8 +3788,10 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 
-	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand));
-	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
+            //		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand));
+            //		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
+
+            ReturnHandsToDefault();
 		}
 	}
 
