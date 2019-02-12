@@ -2529,6 +2529,7 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void EndState(object[] content) {
+        ReturnHandsToDefault();
         epistemicModel.SaveUserModel(epistemicModel.userID);
 		RespondAndUpdate ("Bye!");
 	}
