@@ -2478,6 +2478,10 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 		}
 
+        if (interactionLogic.GraspedObj != null) {
+            ReturnHandsToDefault();
+        }
+
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 	}
 
