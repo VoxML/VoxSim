@@ -2478,7 +2478,7 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 		}
 
-        if (interactionLogic.GraspedObj != null) {
+        if (interactionLogic.GraspedObj == null) {
             ReturnHandsToDefault();
         }
 
