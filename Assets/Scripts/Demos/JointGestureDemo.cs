@@ -3898,10 +3898,12 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	void OnDestroy() {
+        epistemicModel.SaveUserModel(epistemicModel.userID);
 		logger.CloseLog ();
 	}
 
 	void OnApplicationQuit() {
+        epistemicModel.SaveUserModel(epistemicModel.userID);
 		logger.CloseLog ();
 	}
 }
