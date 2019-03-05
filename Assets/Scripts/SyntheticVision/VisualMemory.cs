@@ -71,7 +71,7 @@ namespace Agent
 				if (_vision.IsVisible(voxeme))
 				{
 //					Debug.Log(voxeme + " is");
-					if (!_memorized.ContainsKey(voxeme))
+					if (_memorized != null && !_memorized.ContainsKey(voxeme))
 					{
 						clone = GetVisualClone(block.gameObject);
 						_memorized.Add(voxeme, clone);

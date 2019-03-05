@@ -195,8 +195,12 @@ public class JointGestureDemo : AgentInteraction {
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
 
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
+        interactionPrefs.useTeachingAgent = false;
+        interactionPrefs.showSyntheticVision = false;
+        interactionPrefs.showVisualMemory = false;
 
-		logger = GetComponent<GenericLogger> ();
+
+        logger = GetComponent<GenericLogger> ();
 
 		if (PlayerPrefs.GetInt ("Make Logs") == 1) {
 			logger.OpenLog (PlayerPrefs.GetString ("Logs Prefix"));
@@ -291,7 +295,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
-			Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
+			//Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
 			leftRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			leftRegionHighlight.name = "LeftRegionHighlight";
 			leftRegionHighlight.transform.position = leftRegion.center;
@@ -309,7 +313,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
-			Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
+			//Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
 			rightRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			rightRegionHighlight.name = "RightRegionHighlight";
 			rightRegionHighlight.transform.position = rightRegion.center;
@@ -517,10 +521,6 @@ public class JointGestureDemo : AgentInteraction {
 			epistemicModel.engaged = true;
 		}
 
-		Concept conceptL = null;
-		Concept conceptG = null;
-		Relation relation = null;
-
 		if (messageType == "S") {	// speech message
 			Debug.Log (fusionMessage);
 			switch (messageStr.ToLower ()) {
@@ -666,7 +666,7 @@ public class JointGestureDemo : AgentInteraction {
 				try {
 					vector.Add (System.Convert.ToSingle (c));
 				}
-				catch (Exception e) {
+				catch (Exception) {
 				}
 			}
 		}
@@ -3433,7 +3433,6 @@ public class JointGestureDemo : AgentInteraction {
 		highlightTimeoutTimer.Enabled = true;
 
 		//OutputHelper.PrintOutput (Role.Affector, "");
-		Region region = null;
 
 		Vector3 highlightCenter = coord;
 
@@ -3522,7 +3521,6 @@ public class JointGestureDemo : AgentInteraction {
 		//			OutputHelper.PrintOutput (Role.Affector, "");
 		//		}
 
-		Region region = null;
 
 		highlightCenter = TransformToSurface (vector);
 
@@ -4798,8 +4796,7 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if (eventManager.events.Count == 0) {
 				RespondAndUpdate("Anyone there?");
-                commBridge.ConnectFusion("localhost", 9126);
-            }
+			}
 		}
 	}
 

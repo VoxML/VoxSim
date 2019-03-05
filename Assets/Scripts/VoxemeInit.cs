@@ -63,7 +63,7 @@ public class VoxemeInit : MonoBehaviour {
 							newAttrSet.attributes.Add (s);
 						}
 					}
-					Debug.Log (newAttrSet.attributes.Count);
+					//Debug.Log (newAttrSet.attributes.Count);
 
 					// copy interaction object
 					InteractionObject interactionObject = go.GetComponent<InteractionObject>();
@@ -101,7 +101,7 @@ public class VoxemeInit : MonoBehaviour {
 							}
 
 							if ((go.tag != "UnPhysic") && (go.tag != "Ground")) {	// Non-physics objects are either scene markers or, like the ground, cognitively immobile
-								Debug.Log (subObj.name);
+								//Debug.Log (subObj.name);
 
 								if (container.GetComponent<Voxeme> ().density == 0) {
 									container.GetComponent<Voxeme> ().density = 1;
@@ -155,7 +155,7 @@ public class VoxemeInit : MonoBehaviour {
 
 					// add to master voxeme list
 					objSelector.allVoxemes.Add (container.GetComponent<Voxeme> ());
-					Debug.Log (Helper.VectorToParsable (container.transform.position - Helper.GetObjectWorldSize (container).center));
+					//Debug.Log (Helper.VectorToParsable (container.transform.position - Helper.GetObjectWorldSize (container).center));
 				}
 			}
 		}

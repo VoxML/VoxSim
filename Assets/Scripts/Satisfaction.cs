@@ -272,7 +272,7 @@ namespace Satisfaction {
 //					}
 //				}
 			}
-#pragma mark MacroEvents
+//#pragma mark MacroEvents
 			else if (predString == "lean") {
 				isMacroEvent = true;
 				satisfied = true;

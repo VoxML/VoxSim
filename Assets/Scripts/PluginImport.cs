@@ -77,11 +77,9 @@ public class PluginImport : MonoBehaviour {
 			}
 
             string[] fusionUrl = fusionUrlString.Split(':');
-            //string fusionAddress = fusionUrl [0];
-            string fusionAddress = "localhost";
+            string fusionAddress = fusionUrl [0];
 			if (fusionAddress != "") {
-                //int fusionPort = Convert.ToInt32 (fusionUrl [1]);
-                int fusionPort = 9126;
+                int fusionPort = Convert.ToInt32 (fusionUrl [1]);
 				try {
                     ConnectFusion (fusionAddress, fusionPort);
 				}
@@ -135,7 +133,7 @@ public class PluginImport : MonoBehaviour {
 		var parserUrl = PlayerPrefs.GetString ("Parser URL");
 		if (parserUrl.Length == 0)
 		{
-			Debug.Log("Initializing Simple Parser");
+			//Debug.Log("Initializing Simple Parser");
 			_parser = new SimpleParser();
 		}
 		else

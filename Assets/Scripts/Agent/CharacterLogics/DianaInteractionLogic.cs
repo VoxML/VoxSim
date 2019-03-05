@@ -2286,29 +2286,29 @@ namespace Agent
 									((TransitionGate)instruction.ToState.Content).RejectState,
 									new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null));
 								gateInstructions.Add (newInstruction);
-								Debug.Log (string.Format ("Adding gate instruction {0} because {1} ToState {2} has TransitionGate to RejectState {3}",
-									string.Format ("{0},{1},{2},{3},{4}",
-										(newInstruction.FromStates == null) ? "Null" :
-										String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
-										(newInstruction.InputSymbols == null) ? "Null" :
-										String.Join (", ", ((List<PDASymbol>)newInstruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
-										StackSymbolToString (newInstruction.StackSymbol),
-										newInstruction.ToState.Name,
-										string.Format ("[{0},{1}]",
-											newInstruction.StackOperation.Type.ToString (),
-											(newInstruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (newInstruction.StackOperation.Content))),
-									string.Format ("{0},{1},{2},{3},{4}", 
-										(newInstruction.FromStates == null) ? "Null" :
-										String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
-										(instruction.InputSymbols == null) ? "Null" :
-										String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
-										StackSymbolToString (instruction.StackSymbol),
-										instruction.ToState.Name,
-										string.Format ("[{0},{1}]",
-											instruction.StackOperation.Type.ToString (),
-											(instruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (instruction.StackOperation.Content))),
-									instruction.ToState.Name,
-									newInstruction.ToState.Name));
+								//Debug.Log (string.Format ("Adding gate instruction {0} because {1} ToState {2} has TransitionGate to RejectState {3}",
+								//	string.Format ("{0},{1},{2},{3},{4}",
+								//		(newInstruction.FromStates == null) ? "Null" :
+								//		String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
+								//		(newInstruction.InputSymbols == null) ? "Null" :
+								//		String.Join (", ", ((List<PDASymbol>)newInstruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
+								//		StackSymbolToString (newInstruction.StackSymbol),
+								//		newInstruction.ToState.Name,
+								//		string.Format ("[{0},{1}]",
+								//			newInstruction.StackOperation.Type.ToString (),
+								//			(newInstruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (newInstruction.StackOperation.Content))),
+								//	string.Format ("{0},{1},{2},{3},{4}", 
+								//		(newInstruction.FromStates == null) ? "Null" :
+								//		String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
+								//		(instruction.InputSymbols == null) ? "Null" :
+								//		String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
+								//		StackSymbolToString (instruction.StackSymbol),
+								//		instruction.ToState.Name,
+								//		string.Format ("[{0},{1}]",
+								//			instruction.StackOperation.Type.ToString (),
+								//			(instruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (instruction.StackOperation.Content))),
+								//	instruction.ToState.Name,
+								//	newInstruction.ToState.Name));
 							}
 						}
 					}
@@ -2320,8 +2320,8 @@ namespace Agent
 			}
 
 			epistemicModel = GetComponent<EpistemicModel> ();
-			Debug.Log (epistemicModel);
-			Debug.Log (epistemicModel.state);
+			//Debug.Log (epistemicModel);
+			//Debug.Log (epistemicModel.state);
 
 			symbolConceptMap = MapInputSymbolsToConcepts (InputSymbols);
 
@@ -2717,7 +2717,7 @@ namespace Agent
 		Dictionary<PDASymbol,List<Concept>> MapInputSymbolsToConcepts(List<PDASymbol> symbols) {
 			Dictionary<PDASymbol,List<Concept>> mapping = new Dictionary<PDASymbol,List<Concept>> ();
 
-			Debug.Log (epistemicModel.state);
+			//Debug.Log (epistemicModel.state);
 
 			mapping.Add(GetInputSymbolByName("G left point high"),
 				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
@@ -2840,7 +2840,7 @@ namespace Agent
 
 			foreach (PDASymbol symbol in symbols) {
 				if (!mapping.ContainsKey (symbol)) {
-					Debug.Log (string.Format ("MapInputSymbolsToConcepts: no mapping for symbol \"{0}\"", symbol.Name));
+					//Debug.Log (string.Format ("MapInputSymbolsToConcepts: no mapping for symbol \"{0}\"", symbol.Name));
 				}
 			}
 
@@ -3011,10 +3011,10 @@ namespace Agent
 		}
 
 		void ExecuteStateContent(object tempMessage = null) {
-			Debug.Log (interactionController);
-			Debug.Log (interactionController.GetType ());
-			Debug.Log (CurrentState.Name);
-			Debug.Log (interactionController.GetType().GetMethod (CurrentState.Name));
+			//Debug.Log (interactionController);
+			//Debug.Log (interactionController.GetType ());
+			//Debug.Log (CurrentState.Name);
+			//Debug.Log (interactionController.GetType().GetMethod (CurrentState.Name));
 			MethodInfo methodToCall = interactionController.GetType ().GetMethod (CurrentState.Name);
 			List<object> contentMessages = new List<object> ();
 

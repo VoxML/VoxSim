@@ -50,12 +50,12 @@ public class ModalWindowManager : MonoBehaviour {
 	}
 
 	public void RegisterWindow(ModalWindow window) {
-		Debug.Log (string.Format("Register {0}:{1}",this,window.id));
+		//Debug.Log (string.Format("Register {0}:{1}",this,window.id));
 		windowManager.Add(window.id,window);
 	}
 
 	public void UnregisterWindow(ModalWindow window) {
-		Debug.Log (string.Format("Unregister {0}:{1}",this,window.id));
+		//Debug.Log (string.Format("Unregister {0}:{1}",this,window.id));
 		windowManager.Remove(window.id);
 	}
 }

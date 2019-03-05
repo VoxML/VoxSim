@@ -138,9 +138,9 @@ public class Voxeme : MonoBehaviour {
 			}
 		}
 
-		Debug.Log (gameObject);
-		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).min));
-		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).max));
+		//Debug.Log (gameObject);
+		//Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).min));
+		//Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).max));
 	}
 		
 	// Update is called once per frame
@@ -528,7 +528,7 @@ public class Voxeme : MonoBehaviour {
 			//Quaternion resolve = Quaternion.identity;
 
 			if (rigging.usePhysicsRig) {
-				float displacementAngle = 360.0f;
+				//float displacementAngle = 360.0f;
 				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody> ();
 				foreach (Rigidbody rigidbody in rigidbodies) {
 					rigidbody.MoveRotation (rot);
@@ -593,7 +593,7 @@ public class Voxeme : MonoBehaviour {
 				voxml = VoxML.LoadFromText (sr.ReadToEnd ());
 			}
 		}
-		catch (FileNotFoundException ex) {
+		catch (FileNotFoundException) {
 			voxml = new VoxML ();
 			voxml.Entity.Type = VoxEntity.EntityType.Object;
 		}
@@ -821,7 +821,7 @@ public class Voxeme : MonoBehaviour {
 				attrSet.attributes.Clear ();
 				for (int i = 0; i < voxml.Attributes.Attrs.Count; i++) {
 					attrSet.attributes.Add (voxml.Attributes.Attrs [i].Value);
-					Debug.Log (attrSet.attributes[i]);
+					//Debug.Log (attrSet.attributes[i]);
 				}
 			}
 		}

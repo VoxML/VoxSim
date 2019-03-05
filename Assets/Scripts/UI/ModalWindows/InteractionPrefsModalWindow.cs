@@ -62,8 +62,8 @@ public class InteractionPrefsModalWindow : ModalWindow {
 
 	string actionButtonText;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    new void Start () {
 		base.Start ();
 
 		actionButtonText = "Interaction Prefs";
@@ -122,15 +122,15 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		GUILayout.EndVertical();
 
 		GUILayout.BeginHorizontal(GUI.skin.box);
-		useTeachingAgent = GUILayout.Toggle (useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth (true));
-		GUILayout.EndHorizontal();
+        useTeachingAgent = GUILayout.Toggle(useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth(true));
+        GUILayout.EndHorizontal();
 
 		GUILayout.BeginVertical(GUI.skin.box);
 		GUILayout.Label ("Agent Perception:");
 		GUILayout.BeginVertical(GUI.skin.box);
 		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Synthetic Vision", GUILayout.ExpandWidth (true));
-		showVisualMemory = GUILayout.Toggle (showVisualMemory, "Show Visual Memory", GUILayout.ExpandWidth (true));
-		GUILayout.EndVertical();
+        showVisualMemory = GUILayout.Toggle (showVisualMemory, "Show Visual Memory", GUILayout.ExpandWidth (true));
+        GUILayout.EndVertical();
 		GUILayout.EndVertical();
 
 		GUILayout.EndScrollView ();

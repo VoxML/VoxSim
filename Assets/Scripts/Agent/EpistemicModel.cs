@@ -143,7 +143,7 @@ namespace Agent {
 			state.AddConcept(lgPurpleBlock);
 			state.AddConcept(whiteBlock);*/
 
-			Debug.Log (state);
+			//Debug.Log (state);
 			return state;
 		}
 		
@@ -151,16 +151,14 @@ namespace Agent {
 		void Start () {
 			engaged = false;
 			state = initModel();
-			Debug.Log (state);
+			//Debug.Log (state);
 
 
 			if (PlayerPrefs.HasKey ("URLs")) {
 				string epiSimUrlString = string.Empty;
 				foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-					//if (url.Split ('=') [0] == "EpiSim URL") {
-                    if (true) {
-                        //epiSimUrlString = url.Split ('=') [1];
-                        epiSimUrlString = "localhost:5000";
+					if (url.Split ('=') [0] == "EpiSim URL") {
+						epiSimUrlString = url.Split ('=') [1];
 						string epiSimUrl = !epiSimUrlString.StartsWith ("http://") ? "http://" + epiSimUrlString : epiSimUrlString;
 						state.SetEpisimUrl (epiSimUrl);
 						state.InitiateEpisim();
