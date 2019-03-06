@@ -4,6 +4,8 @@ using System.Collections;
 using System.Runtime.InteropServices;
 using Network;
 using NLU;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class PluginImport : MonoBehaviour {
 
@@ -39,97 +41,169 @@ public class PluginImport : MonoBehaviour {
 		}
 	}
 
+
+
 	void Start()
-	{
-		string port = PlayerPrefs.GetString("Listener Port");
-		if (port != "")
-		{
-			OpenPortInternal(port);
-		}
-		else
-		{
-			Debug.Log ("No listener port specified. Skipping interface startup.");
-		}
+    {
+        string prefsFile = @"prefs.txt";
+        LoadPrefsFromFile(prefsFile);
+        string port = PlayerPrefs.GetString("Listener Port");
+        if (port != "")
+        {
+            OpenPortInternal(port);
+        }
+        else
+        {
+            Debug.Log("No listener port specified. Skipping interface startup.");
+        }
 
-		if (PlayerPrefs.HasKey ("URLs")) {
-			string fusionUrlString = string.Empty;
-			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-				if (url.Split ('=') [0] == "Fusion URL") {
-                    fusionUrlString = url.Split ('=') [1];
-					break;
-				}
-			}
+        if (PlayerPrefs.HasKey("URLs"))
+        {
+            string fusionUrlString = string.Empty;
+            foreach (string url in PlayerPrefs.GetString("URLs").Split(';'))
+            {
+                if (url.Split('=')[0] == "Fusion URL")
+                {
+                    fusionUrlString = url.Split('=')[1];
+                    break;
+                }
+            }
 
-			string eventLearnerUrlString = string.Empty;
-			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-				if (url.Split ('=') [0] == "Event Learner URL") {
-					eventLearnerUrlString = url.Split ('=') [1];
-					break;
-				}
-			}
+            string eventLearnerUrlString = string.Empty;
+            foreach (string url in PlayerPrefs.GetString("URLs").Split(';'))
+            {
+                if (url.Split('=')[0] == "Event Learner URL")
+                {
+                    eventLearnerUrlString = url.Split('=')[1];
+                    break;
+                }
+            }
 
-			string commanderUrlString = string.Empty;
-			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-				if (url.Split ('=') [0] == "Commander URL") {
-					commanderUrlString = url.Split ('=') [1];
-					break;
-				}
-			}
+            string commanderUrlString = string.Empty;
+            foreach (string url in PlayerPrefs.GetString("URLs").Split(';'))
+            {
+                if (url.Split('=')[0] == "Commander URL")
+                {
+                    commanderUrlString = url.Split('=')[1];
+                    break;
+                }
+            }
 
             string[] fusionUrl = fusionUrlString.Split(':');
-            string fusionAddress = fusionUrl [0];
-			if (fusionAddress != "") {
-                int fusionPort = Convert.ToInt32 (fusionUrl [1]);
-				try {
-                    ConnectFusion (fusionAddress, fusionPort);
-				}
-				catch (Exception e) {
-					Debug.Log (e.Message);
-				}
-			}
-			else {
-				Debug.Log ("Fusion input is not specified.");
-			}
+            string fusionAddress = fusionUrl[0];
+            if (fusionAddress != "")
+            {
+                int fusionPort = Convert.ToInt32(fusionUrl[1]);
+                try
+                {
+                    ConnectFusion(fusionAddress, fusionPort);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
+            }
+            else
+            {
+                Debug.Log("Fusion input is not specified.");
+            }
 
-			string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
-			string eventLearnerAddress = eventLearnerUrl [0];
-			if (eventLearnerAddress != "") {
-				int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
-				try {
-					//_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
-				}
-				catch (Exception e) {
-					Debug.Log (e.Message);
-				}
-			}
-			else {
-				Debug.Log ("Event learner input is not specified.");
-			}
+            string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
+            string eventLearnerAddress = eventLearnerUrl[0];
+            if (eventLearnerAddress != "")
+            {
+                int eventLearnerPort = Convert.ToInt32(eventLearnerUrl[1]);
+                try
+                {
+                    //_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
+            }
+            else
+            {
+                Debug.Log("Event learner input is not specified.");
+            }
 
-			string[] commanderUrl = commanderUrlString.Split(':');
-			string commanderAddress = commanderUrl [0];
-			if (commanderAddress != "") {
-				int commanderPort = Convert.ToInt32 (commanderUrl [1]);
-				try {
-					_commanderClient = (CommanderClient)ConnectSocket (commanderAddress, commanderPort, typeof(CommanderClient));
-				}
-				catch (Exception e) {
-					Debug.Log (e.Message);
-				}
-			}
-			else {
-				Debug.Log ("Commander input is not specified.");
-			}
-		}
-		else {
-			Debug.Log ("No input URLs specified.");
-		}
+            string[] commanderUrl = commanderUrlString.Split(':');
+            string commanderAddress = commanderUrl[0];
+            if (commanderAddress != "")
+            {
+                int commanderPort = Convert.ToInt32(commanderUrl[1]);
+                try
+                {
+                    _commanderClient = (CommanderClient)ConnectSocket(commanderAddress, commanderPort, typeof(CommanderClient));
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
+            }
+            else
+            {
+                Debug.Log("Commander input is not specified.");
+            }
+        }
+        else
+        {
+            Debug.Log("No input URLs specified.");
+        }
 
-		InitParser();
+        InitParser();
 
-	}
+    }
 
-	public void InitParser() {
+    private static void LoadPrefsFromFile(string prefsFile)
+    {
+        BinaryFormatter bFormatter = new BinaryFormatter();
+        FileStream file = File.OpenRead(prefsFile);
+        string fileData = bFormatter.Deserialize(file) as string;
+        file.Close();
+        foreach (string line in fileData.Split('\n'))
+        {
+            string[] splitLine = line.Split(',');
+            if (splitLine.Length > 1)
+            {
+                string pref = splitLine[0].Trim();
+                string val = splitLine[1].Trim();
+                switch (line.Split(',')[0])
+                {
+                    //handle Strings
+                    case "Listener Port":
+                    case "Logs Prefix":
+                    case "URLs":
+                    case "Event Reset Counter":
+                    case "Custom Video Filename Prefix":
+                    case "Auto Events List":
+                    case "Video Capture DB":
+                    case "Video Output Directory":
+                        PlayerPrefs.SetString(pref, val.Trim());
+                        break;
+                    //handle Booleans
+                    case "Make Logs":
+                    case "Capture Video":
+                    case "Capture Params":
+                    case "Reset Between Events":
+                    case "Sort By Event String":
+                    case "Make Voxemes Editable":
+                        PlayerPrefs.SetInt(pref, Convert.ToBoolean(val) ? 1 : 0);
+                        break;
+                    //Handle Ints
+                    case "Start Index":
+                    case "Video Capture Mode":
+                    case "Video Capture Filename Type":
+                        PlayerPrefs.SetInt(pref, Convert.ToInt32(val.Trim()));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+    public void InitParser() {
 		var parserUrl = PlayerPrefs.GetString ("Parser URL");
 		if (parserUrl.Length == 0)
 		{
@@ -189,6 +263,7 @@ public class PluginImport : MonoBehaviour {
 
 	public void ConnectFusion(string address, int port)
 	{
+        address = address == "localhost" ? System.Net.IPAddress.Loopback.ToString() : address;
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
 		_fusionClient = new FusionClient();
 		_fusionClient.Connect(address, port);

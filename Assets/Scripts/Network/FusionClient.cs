@@ -33,11 +33,8 @@ namespace Network
 
 		public void OnConnectionLost(object sender, EventArgs e)
 		{
-			if (ConnectionLost != null)
-			{
-				ConnectionLost(this, e);
-			}
-		}
+            ConnectionLost?.Invoke(this, e);
+        }
 
 		private const int IntSize = sizeof(Int32);
 		private TcpClient _client;
