@@ -272,6 +272,7 @@ public class PluginImport : MonoBehaviour {
 
 	public SocketClient ConnectSocket(string address, int port, Type clientType)
 	{ // TODO: Abstract EventLearningClient and CSUClient to generic type inheritance
+		address = address == "localhost" ? System.Net.IPAddress.Loopback.ToString() : address;
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
 
 		SocketClient client = null;

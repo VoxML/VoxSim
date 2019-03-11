@@ -90,7 +90,8 @@ namespace Agent
 					}
 					else
 					{
-						clone = _memorized[voxeme];
+						if (_memorized != null)
+							clone = _memorized[voxeme];
 
 					}
 				}

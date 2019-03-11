@@ -95,13 +95,6 @@ public class InputController : FontManager {
 
 		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
 
-		labelStyle = new GUIStyle ("Label");
-		textFieldStyle = new GUIStyle ("TextField");
-		buttonStyle = new GUIStyle ("Button");
-		labelStyle.fontSize = fontSize;
-		textFieldStyle.fontSize = fontSize;
-		buttonStyle.fontSize = fontSize;
-
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
 
 		inputWidth = (System.Convert.ToInt32(Screen.width - inputMargin) > inputMaxWidth) ? inputMaxWidth : System.Convert.ToInt32(Screen.width - inputMargin);
@@ -151,6 +144,13 @@ public class InputController : FontManager {
 		labelStyle = new GUIStyle ("Label");
 		textFieldStyle = new GUIStyle ("TextField");
 		buttonStyle = new GUIStyle ("Button");
+
+		labelStyle = new GUIStyle("Label");
+		textFieldStyle = new GUIStyle("TextField");
+		buttonStyle = new GUIStyle("Button");
+		labelStyle.fontSize = fontSize;
+		textFieldStyle.fontSize = fontSize;
+		buttonStyle.fontSize = fontSize;
 #if !UNITY_IOS
 		Event e = Event.current;
 		if (e.keyCode == KeyCode.Return) {
