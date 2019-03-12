@@ -51,6 +51,10 @@ public class JointGestureDemo : AgentInteraction {
 	IKTarget rightTarget;
 	IKTarget headTarget;
 
+    bool setLeftHandTarget = false;
+    bool setRightHandTarget = false;
+    bool setHeadTarget = false;
+
 	Vector3 leftTargetDefault,leftTargetStored;
 	Vector3 rightTargetDefault,rightTargetStored;
 	Vector3 headTargetDefault,headTargetStored;
@@ -731,20 +735,12 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
     public void StartState(object[] content) {
-        if (commBridge.KSIMClient != null) {
-            byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(4)).
-                                       Concat(BitConverter.GetBytes("learn".Length)).Concat(Encoding.ASCII.GetBytes("learn")).
-                                       ToArray<byte>();
-            commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
-        }
     }
 
     public void BeginInteraction(object[] content) {
         if ((epistemicModel.userID != string.Empty) && (callUserByName)) {
             interactionPrefs.userName = epistemicModel.userID;
         }
-
-        byte[] bytes;
 
         RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
             "Hello.");
@@ -1072,16 +1068,6 @@ public class JointGestureDemo : AgentInteraction {
 						} 
 						else {
 							RespondAndUpdate ("Are you asking me to grab this?");
-
-#pragma mark OneShotLearningTrial
-                            if (commBridge.KSIMClient != null)
-                            {
-                                string command = "learn";
-                                    byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
-                                                                   Concat(BitConverter.GetBytes("learn".Length)).Concat(Encoding.ASCII.GetBytes("learn")).
-                                                                   ToArray<byte>();
-                                commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
-                            }
 						}
 						performGesture = AvatarGesture.RARM_CARRY_STILL;
 					}
@@ -1179,16 +1165,6 @@ public class JointGestureDemo : AgentInteraction {
 						} 
 						else {
 							RespondAndUpdate ("Are you asking me to grab this?");
-
-#pragma mark OneShotLearningTrial
-                            if (commBridge.KSIMClient != null)
-                            {
-                                string command = "learn";
-                                byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
-                                                               Concat(BitConverter.GetBytes("learn".Length)).Concat(Encoding.ASCII.GetBytes("learn")).
-                                                               ToArray<byte>();
-                                commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
-                            }
 						}
 						performGesture = AvatarGesture.RARM_CARRY_STILL;
 					}
@@ -1898,7 +1874,9 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if ((interactionLogic.GraspedObj == null) &&
 			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-				RespondAndUpdate (string.Format ("Do you mean the {0} one?", attribute));
+                RespondAndUpdate (string.Format ("Do you mean the {0} {1}?", attribute,
+                                                 interactionLogic.IndicatedObj.GetComponent<Voxeme>().voxml.Lex.Pred));
+                //Debug.Log(interactionLogic.IndicatedObj);
 				ReachFor (interactionLogic.IndicatedObj);
 				LookForward ();
 			}
@@ -2173,13 +2151,42 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void StartGrab(object[] content) {
-		RespondAndUpdate ("OK.");
-		PromptEvent (string.Format ("grasp({0})", interactionLogic.IndicatedObj.name));
+        int numGrabPoses = GetNumberOfGrabPoses(interactionLogic.IndicatedObj);
 
-		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
-			interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-				interactionLogic.IndicatedObj, null, null, null, null)));
+        if (numGrabPoses > 1) {
+            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                interactionLogic.GenerateStackSymbol(null, null, null, null,
+                Enumerable.Range(0, numGrabPoses).Select(s => string.Format("grasp({0},with(*_{1}_{2}))", interactionLogic.IndicatedObj.name,
+                    interactionLogic.IndicatedObj.name, s.ToString())).ToList(),
+                null)));
+        }
+        else {
+            RespondAndUpdate("OK.");
+            PromptEvent(string.Format("grasp({0})", interactionLogic.IndicatedObj.name));
+
+            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                    interactionLogic.IndicatedObj, null, null, null, null)));
+        }
 	}
+
+    public void DisambiguateGrabPose(object[] content) {
+        RespondAndUpdate("Should I grasp it like this?");
+
+        String eventPrompt = interactionLogic.ActionOptions[0];
+
+        if (InteractionHelper.GetCloserHand(Diana, interactionLogic.IndicatedObj) == leftGrasper) {
+            eventPrompt = eventPrompt.Replace("*", "lHand");
+        }
+        else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.IndicatedObj) == rightGrasper) {
+            eventPrompt = eventPrompt.Replace("*", "rHand");
+        }
+
+        PromptEvent(string.Format("{0}", eventPrompt));
+
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+            interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), interactionLogic.IndicatedObj, null, null, null, null)));
+    }
 
 	public void StartGrabMove(object[] content) {
 		// type check
@@ -2362,6 +2369,70 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
+    public void StartLearn(object[] content) {
+        RespondAndUpdate("What's the gesture for that?");
+
+        if (commBridge.KSIMClient != null)
+        {
+            string command = "learn";
+            byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
+                                               Concat(BitConverter.GetBytes(command.Length)).Concat(Encoding.ASCII.GetBytes(command)).
+                                               ToArray<byte>();
+            commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+        }
+    }
+
+    public void LearningSucceeded(object[] content) {
+        RespondAndUpdate("OK, got it!");
+    }
+
+    public void LearnNewInstruction(object[] content) {
+        // type check
+        if (!Helper.CheckAllObjectsOfType(content, typeof(string)))
+        {
+            return;
+        }
+
+        switch (content.Length)
+        {
+            case 0:
+                break;
+
+            case 1:
+                string message = content[0].ToString();
+
+                Debug.Log(message);
+                Debug.Log(interactionLogic.GetLearnableInstructionKeyByName(message));
+                Debug.Log(string.Format("[{0}]",string.Join(",",interactionLogic.GetLearnableInstructionKeyByName(message).Select(k => k.Name).ToArray())));
+                Debug.Log(interactionLogic.LearnableInstructions.ContainsKey(interactionLogic.GetLearnableInstructionKeyByName(message)));
+
+                if (interactionLogic.LearnableInstructions.ContainsKey(interactionLogic.GetLearnableInstructionKeyByName(message))) {
+                    interactionLogic.LearnableInstructions[interactionLogic.GetLearnableInstructionKeyByName(message)] =
+                        new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                                              new StackSymbolContent(null, null, null, null, new List<string>() { interactionLogic.ActionOptions[0] }, null));
+
+                    foreach (List<PDASymbol> key in interactionLogic.LearnableInstructions.Keys) {
+                        if (interactionLogic.LearnableInstructions[key] != null) {
+                            Debug.Log(string.Format("[{0}],{1}", string.Join(",", key.Select(k => k.Name).ToArray()),
+                                interactionLogic.StackSymbolToString(interactionLogic.LearnableInstructions[key].Content)));
+                        }
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+    }
+
+    public void LearningFailed(object[] content) {
+        RespondAndUpdate("Sorry, I didn't get that.");
+
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+    }
+
 	public void AbortAction(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
 			if (interactionLogic.ActionOptions.Count > 0) {
@@ -2442,7 +2513,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
 					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")) ||
-					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grab move"))) {
+                    (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grab move"))) { // why is this here? shouldn't all action options be in predicate form?
 					PromptEvent (string.Format ("put({0},{1})", 
 						interactionLogic.GraspedObj.name,
 						Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
@@ -2458,6 +2529,12 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 		else {
+            if (interactionLogic.IndicatedObj != null) {
+                if (Regex.IsMatch(interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1], "grasp")) {
+                    PromptEvent(string.Format("ungrasp({0})", interactionLogic.IndicatedObj.name));
+                }
+            }
+
 			LookForward ();
 			TurnForward ();
 		}
@@ -3354,6 +3431,19 @@ public class JointGestureDemo : AgentInteraction {
 		return fits;
 	}
 
+    public int GetNumberOfGrabPoses(GameObject obj) {
+        int numPoses = 0;
+
+        InteractionTarget[] poses = obj.GetComponentsInChildren<InteractionTarget>();
+        numPoses = (poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count ==
+                    poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count) ?
+            poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count :
+                 Math.Min(poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count,
+                          poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count);
+
+        return numPoses;
+    }
+
 	public void ReachFor(Vector3 coord) {
 		Vector3 offset = Diana.GetComponent<GraspScript>().graspTrackerOffset;
 		//Diana.GetComponent<LookAtIK> ().solver.IKPositionWeight = 1.0f;
@@ -3367,7 +3457,8 @@ public class JointGestureDemo : AgentInteraction {
                 else {
                     ikControl.rightHandObj.position = coord + offset;
                 }
-				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+                setRightHandTarget = true;
+				//InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 			}
 			else if (InteractionHelper.GetCloserHand (Diana, interactionLogic.GraspedObj) == rightGrasper) {
                 if (ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().enabled) {
@@ -3376,7 +3467,8 @@ public class JointGestureDemo : AgentInteraction {
                 else {
                     ikControl.leftHandObj.position = coord + offset;
                 }
-				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+                setLeftHandTarget = true;
+				//InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 			}
 		}
 		else {
@@ -3389,7 +3481,8 @@ public class JointGestureDemo : AgentInteraction {
                 else {
                     ikControl.rightHandObj.position = coord + offset;
                 }
-				InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+                setRightHandTarget = true;
+				//InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 			}
 			else if (rightRegion.Contains (new Vector3 (coord.x,
@@ -3400,7 +3493,8 @@ public class JointGestureDemo : AgentInteraction {
                 else {
                     ikControl.leftHandObj.position = coord + offset;
                 }
-				InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+                setLeftHandTarget = true;
+				//InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 			}
 		}
 
@@ -3430,9 +3524,12 @@ public class JointGestureDemo : AgentInteraction {
                 ikControl.rightHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = obj.transform.position + offset;
             }
             else {
-                ikControl.rightHandObj.position = obj.transform.position + offset;
+                ikControl.rightHandObj.position = new Vector3(Helper.GetObjectWorldSize(obj).center.x,
+                                                              Helper.GetObjectWorldSize(obj).max.y,
+                                                              Helper.GetObjectWorldSize(obj).center.z) + offset;
             }
-			InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
+            setRightHandTarget = true;
+			//InteractionHelper.SetRightHandTarget (Diana, ikControl.rightHandObj);
 
 		}
 		else if (rightRegion.Contains(new Vector3(obj.transform.position.x,
@@ -3441,9 +3538,12 @@ public class JointGestureDemo : AgentInteraction {
                 ikControl.leftHandObj.gameObject.GetComponent<TransformTarget>().targetPosition = obj.transform.position + offset;
             }
             else {
-                ikControl.leftHandObj.position = obj.transform.position + offset;
+                ikControl.leftHandObj.position = new Vector3(Helper.GetObjectWorldSize(obj).center.x,
+                                                             Helper.GetObjectWorldSize(obj).max.y,
+                                                             Helper.GetObjectWorldSize(obj).center.z) + offset;
             }
-			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
+            setLeftHandTarget = true;
+			//InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
         //LookAt (obj);
@@ -3895,6 +3995,25 @@ public class JointGestureDemo : AgentInteraction {
 		highlightTimeoutTimer.Interval = highlightTimeoutTime;
 
 		disableHighlight = true;
+	}
+
+	void LateUpdate() {
+        if (setLeftHandTarget)
+        {
+            InteractionHelper.SetLeftHandTarget(Diana, ikControl.leftHandObj);
+            setLeftHandTarget = false;
+        }
+
+        if (setRightHandTarget)
+        {
+            InteractionHelper.SetRightHandTarget(Diana, ikControl.rightHandObj);
+            setRightHandTarget = false;
+        }
+
+        if (setHeadTarget)
+        {
+            setHeadTarget = false;
+        }
 	}
 
 	void OnDestroy() {

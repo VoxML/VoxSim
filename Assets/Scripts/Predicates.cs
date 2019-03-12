@@ -268,6 +268,24 @@ public class Predicates : MonoBehaviour {
 		return outValue;
 	}
 
+    // IN: Object (single element array)
+    // OUT: Polymorphic type
+    public object WITH(object[] args)
+    {
+        object outValue = null;
+        if (args[0] is GameObject)
+        {   // for an object
+            GameObject obj = args[0] as GameObject;
+            outValue = obj.name;
+        }
+        else if (args[0] is Vector3)
+        {   // for a location
+            outValue = (Vector3)args[0];
+        }
+
+        return outValue;
+    }
+
 	// IN: Object (single element array)
 	// OUT: Location
 	public Vector3 BEHIND(object[] args)
@@ -4853,49 +4871,86 @@ public class Predicates : MonoBehaviour {
 		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 
+        string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("grasp", "") : "";
+        Debug.Log(prep);
+
 		if (agent != null) {
 			if (args [args.Length - 1] is bool) {
 				if ((bool)args [args.Length - 1] == true) {
-					foreach (object arg in args) {
-						if (arg is GameObject) {
-							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
-							if (interactionObject != null) {
-								if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == leftGrasper) {
-									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponentsInChildren<InteractionTarget>()) {
-										if (interactionTarget.gameObject.name == "lHand") {
-											interactionTarget.gameObject.SetActive (true);
-										}
-										else if (interactionTarget.gameObject.name == "rHand") {
-											interactionTarget.gameObject.SetActive (false);
-										}
-									}
+                    //foreach (object arg in args) {
+                    if (prep == "_with") {
+                        if (args[0] is GameObject) {
+                            InteractionObject interactionObject = (args[0] as GameObject).GetComponent<InteractionObject>();
+                            Debug.Log(interactionObject);
+                            if (interactionObject != null) {
+                                if (args[1] is GameObject) {
+                                    InteractionTarget interactionTarget = null;
+                                    foreach (InteractionTarget target in (args[0] as GameObject).GetComponentsInChildren<InteractionTarget>()) {
+                                        if (target.gameObject == (args[1] as GameObject)) {
+                                            Debug.Log(target.gameObject);
+                                            interactionTarget = target;
+                                            break;
+                                        }
+                                    }
 
-									Debug.Log (string.Format ("Starting {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
+                                    Debug.Log(string.Format("Starting {0} interaction with {1}",
+                                        InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)).name, (args[1] as GameObject).name));
 
-									InteractionHelper.SetLeftHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
-									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.LeftHand, interactionObject, true);
-								} 
-								else if (InteractionHelper.GetCloserHand (agent, (arg as GameObject)) == rightGrasper) {
-									foreach (InteractionTarget interactionTarget in (arg as GameObject).GetComponent<Voxeme>().interactionTargets) {
-										if (interactionTarget.gameObject.name == "lHand") {
-											interactionTarget.gameObject.SetActive (false);
-										}
-										else if (interactionTarget.gameObject.name == "rHand") {
-											interactionTarget.gameObject.SetActive (true);
-										}
-									}
+                                    if (interactionTarget.gameObject.name.StartsWith("lHand")) {
+                                        InteractionHelper.SetLeftHandTarget(agent, interactionTarget.transform);
+                                        agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
+                                    }
+                                    else if (interactionTarget.gameObject.name.StartsWith("rHand")) {
+                                        InteractionHelper.SetRightHandTarget(agent, interactionTarget.transform);
+                                        agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (args[0] is GameObject) {
+                            InteractionObject interactionObject = (args[0] as GameObject).GetComponent<InteractionObject>();
+                            Debug.Log(interactionObject);
+                            if (interactionObject != null) {
+                                if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) == leftGrasper) {
+                                    foreach (InteractionTarget interactionTarget in (args[0] as GameObject).GetComponentsInChildren<InteractionTarget>()) {
+                                        if (interactionTarget.gameObject.name.StartsWith("lHand")) {
+                                            interactionTarget.gameObject.SetActive(true);
+                                        }
+                                        else if (interactionTarget.gameObject.name.StartsWith("rHand")) {
+                                            interactionTarget.gameObject.SetActive(false);
+                                        }
+                                    }
 
-									Debug.Log (string.Format ("Starting {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
+                                    Debug.Log(string.Format("Starting {0} interaction with {1}", leftGrasper.name, (args[0] as GameObject).name));
 
-									InteractionHelper.SetRightHandTarget (agent, (arg as GameObject).GetComponentInChildren<InteractionTarget> ().transform);
-									agent.GetComponent<InteractionSystem> ().StartInteraction (FullBodyBipedEffector.RightHand, interactionObject, true);
-								}
-							}
-							else {
-								OutputHelper.PrintOutput (Role.Affector, "I can't interact with that object."); 
-							}
-						}
-					}
+                                    InteractionHelper.SetLeftHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
+                                    agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
+                                }
+                                else if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) == rightGrasper) {
+                                    foreach (InteractionTarget interactionTarget in (args[0] as GameObject).GetComponent<Voxeme>().interactionTargets) {
+                                        if (interactionTarget.gameObject.name.StartsWith("lHand")) {
+                                            interactionTarget.gameObject.SetActive(false);
+                                        }
+                                        else if (interactionTarget.gameObject.name.StartsWith("rHand")) {
+                                            interactionTarget.gameObject.SetActive(true);
+                                        }
+                                    }
+
+                                    Debug.Log(string.Format("Starting {0} interaction with {1}", rightGrasper.name, (args[0] as GameObject).name));
+
+                                    InteractionHelper.SetRightHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
+                                    agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+                                }
+                            }
+                            else {
+                                OutputHelper.PrintOutput(Role.Affector, "I can't interact with that object.");
+                            }
+                        }
+                    }
+					//}
 				}
 			}
 		}

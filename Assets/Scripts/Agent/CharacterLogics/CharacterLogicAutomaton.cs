@@ -122,7 +122,7 @@ namespace Agent
 		}
 	}
 
-	public delegate object FunctionDelegate(object args);
+    public delegate object FunctionDelegate(object args);
 
 	public class DelegateFactory {
 		object function;
@@ -220,11 +220,31 @@ namespace Agent
 			set { stateTransitionHistory = value; }
 		}
 
+        Dictionary<List<PDASymbol>, PDAStackOperation> learnableInstructions;  // TODO: not sure sure if it should map to PDAInstruction or another type
+        public Dictionary<List<PDASymbol>, PDAStackOperation> LearnableInstructions {
+            get { return learnableInstructions; }
+            set { learnableInstructions = value; }
+        }
+
+        public List<PDASymbol> GetLearnableInstructionKeyByName(string name) {
+            List<PDASymbol> instructionKey = new List<PDASymbol>();
+
+            foreach (List<PDASymbol> key in learnableInstructions.Keys) {
+                if (key.Contains(GetInputSymbolByName(name))) {
+                    instructionKey = key;
+                    break;
+                }
+            }
+
+            return instructionKey;
+        }
+
 		public virtual void Start() {
 			States = new List<PDAState> ();
 			InputSymbols = new List<PDASymbol> ();
 			StackSymbols = new List<PDASymbol> ();
 			TransitionRelation = new List<PDAInstruction> ();
+            LearnableInstructions = new Dictionary<List<PDASymbol>, PDAStackOperation> ();
 
 			Stack = new Stack<PDASymbol> ();
 			StateTransitionHistory = new Stack<Pair<PDASymbol,PDAState>> ();

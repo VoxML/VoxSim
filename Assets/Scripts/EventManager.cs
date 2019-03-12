@@ -1075,7 +1075,7 @@ public class EventManager : MonoBehaviour {
 							}
 						}
 						else if (pass == EvaluationPass.RelationsAndFunctions) {
-							if (methodToCall.ReturnType == typeof(Vector3)) {
+                            if ((methodToCall.ReturnType == typeof(Vector3)) || (methodToCall.ReturnType == typeof(object))) {
 								Debug.Log ("EvaluateSkolemConstants: invoke " + methodToCall.Name);
 								object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
 								Debug.Log (obj);

@@ -519,12 +519,22 @@ namespace Agent
 			return symbolList;
 		}
 
+        public List<PDASymbol> PushGraspOptions(object arg) {
+            List<PDASymbol> symbolList = Enumerable.Range(0, ActionOptions.Count).Select(s =>
+                GenerateStackSymbol(IndicatedObj, null, null, null,
+                ActionOptions.GetRange(ActionOptions.Count - 1 - s, s + 1),
+                new List<string>())).ToList();
+
+            return symbolList;
+        }
+
 		public List<string> GenerateGraspCommand (object arg) {
 			List<string> actionList = new List<string> (
 				new string[]{ "grasp({0})" });
 
 			return actionList;
 		}
+
 
 		public List<string> GeneratePutAtRegionCommand (object arg) {
 			List<string> actionList = new List<string> (
@@ -580,7 +590,7 @@ namespace Agent
 		public override void Start() {
 			// define the grammar
 			/*
-			  	// O: define the object
+			  // O: define the object
 			// A: define the action
 			// D: disambiguate
 			// d: deixis (G)
@@ -661,8 +671,14 @@ namespace Agent
 					GetState("Suggest"),
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 						new StackSymbolContent(null,null,null,null,null,null)))));
+            
+            States.Add(new PDAState("DisambiguateGrabPose",null));
+            States.Add(new PDAState("StartLearn", null));
+            States.Add(new PDAState("LearningSucceeded", null));
+            States.Add(new PDAState("LearnNewInstruction", null));
+            States.Add(new PDAState("LearningFailed", null));
 
-			States.Add(new PDAState("StartGrabMove",null));
+            States.Add(new PDAState("StartGrabMove",null));
 			States.Add(new PDAState("StopGrabMove",
 				new TransitionGate(
 					new FunctionDelegate(EpistemicallyCertain),
@@ -714,54 +730,24 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G wave stop"));
 			InputSymbols.Add(new PDASymbol("G left point start"));
 			InputSymbols.Add(new PDASymbol("G right point start"));
-			InputSymbols.Add(new PDASymbol("G left point high"));
-			InputSymbols.Add(new PDASymbol("G right point high"));
-			InputSymbols.Add(new PDASymbol("G left point low"));
-			InputSymbols.Add(new PDASymbol("G right point low"));
 			InputSymbols.Add(new PDASymbol("G left point stop"));
 			InputSymbols.Add(new PDASymbol("G right point stop"));
 			InputSymbols.Add(new PDASymbol("G posack start"));
 			InputSymbols.Add(new PDASymbol("G negack start"));
-			InputSymbols.Add(new PDASymbol("G posack high"));
-			InputSymbols.Add(new PDASymbol("G negack high"));
-			InputSymbols.Add(new PDASymbol("G posack low"));
-			InputSymbols.Add(new PDASymbol("G negack low"));
 			InputSymbols.Add(new PDASymbol("G posack stop"));
 			InputSymbols.Add(new PDASymbol("G negack stop"));
 			InputSymbols.Add(new PDASymbol("G grab start"));
-			InputSymbols.Add(new PDASymbol("G grab high"));
-			InputSymbols.Add(new PDASymbol("G grab low"));
 			InputSymbols.Add(new PDASymbol("G grab move left start"));
 			InputSymbols.Add(new PDASymbol("G grab move right start"));
 			InputSymbols.Add(new PDASymbol("G grab move front start"));
 			InputSymbols.Add(new PDASymbol("G grab move back start"));
 			InputSymbols.Add(new PDASymbol("G grab move up start"));
 			InputSymbols.Add(new PDASymbol("G grab move down start"));
-			InputSymbols.Add(new PDASymbol("G grab move left high"));
-			InputSymbols.Add(new PDASymbol("G grab move right high"));
-			InputSymbols.Add(new PDASymbol("G grab move front high"));
-			InputSymbols.Add(new PDASymbol("G grab move back high"));
-			InputSymbols.Add(new PDASymbol("G grab move up high"));
-			InputSymbols.Add(new PDASymbol("G grab move down high"));
-			InputSymbols.Add(new PDASymbol("G grab move left low"));
-			InputSymbols.Add(new PDASymbol("G grab move right low"));
-			InputSymbols.Add(new PDASymbol("G grab move front low"));
-			InputSymbols.Add(new PDASymbol("G grab move back low"));
-			InputSymbols.Add(new PDASymbol("G grab move up low"));
-			InputSymbols.Add(new PDASymbol("G grab move down low"));
 			InputSymbols.Add(new PDASymbol("G grab stop"));
 			InputSymbols.Add(new PDASymbol("G push left start"));
 			InputSymbols.Add(new PDASymbol("G push right start"));
 			InputSymbols.Add(new PDASymbol("G push front start"));
 			InputSymbols.Add(new PDASymbol("G push back start"));
-			InputSymbols.Add(new PDASymbol("G push left high"));
-			InputSymbols.Add(new PDASymbol("G push right high"));
-			InputSymbols.Add(new PDASymbol("G push front high"));
-			InputSymbols.Add(new PDASymbol("G push back high"));
-			InputSymbols.Add(new PDASymbol("G push left low"));
-			InputSymbols.Add(new PDASymbol("G push right low"));
-			InputSymbols.Add(new PDASymbol("G push front low"));
-			InputSymbols.Add(new PDASymbol("G push back low"));
 			InputSymbols.Add(new PDASymbol("G push left stop"));
 			InputSymbols.Add(new PDASymbol("G push right stop"));
 			InputSymbols.Add(new PDASymbol("G push front stop"));
@@ -779,16 +765,6 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G count three start"));
 			InputSymbols.Add(new PDASymbol("G count four start"));
 			InputSymbols.Add(new PDASymbol("G count five start"));
-			InputSymbols.Add(new PDASymbol("G count one high"));
-			InputSymbols.Add(new PDASymbol("G count two high"));
-			InputSymbols.Add(new PDASymbol("G count three high"));
-			InputSymbols.Add(new PDASymbol("G count four high"));
-			InputSymbols.Add(new PDASymbol("G count five high"));
-			InputSymbols.Add(new PDASymbol("G count one low"));
-			InputSymbols.Add(new PDASymbol("G count two low"));
-			InputSymbols.Add(new PDASymbol("G count three low"));
-			InputSymbols.Add(new PDASymbol("G count four low"));
-			InputSymbols.Add(new PDASymbol("G count five low"));
 			InputSymbols.Add(new PDASymbol("G count one stop"));
 			InputSymbols.Add(new PDASymbol("G count two stop"));
 			InputSymbols.Add(new PDASymbol("G count three stop"));
@@ -797,8 +773,38 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G nevermind start"));
 			InputSymbols.Add(new PDASymbol("G nevermind stop"));
 			InputSymbols.Add(new PDASymbol("G teaching start"));
-            InputSymbols.Add(new PDASymbol("G teaching suceeded"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded 1"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded 2"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded 3"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded 4"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded 5"));
+            InputSymbols.Add(new PDASymbol("G teaching succeeded 6"));
             InputSymbols.Add(new PDASymbol("G teaching stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 1 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 1 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 2 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 2 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 3 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 3 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 4 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 4 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 5 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 5 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 6 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 6 stop"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 1 start"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 1 stop"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 2 start"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 2 stop"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 3 start"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 3 stop"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 4 start"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 4 stop"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 5 start"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 5 stop"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 6 start"));
+            InputSymbols.Add(new PDASymbol("G rh gesture 6 stop"));
             InputSymbols.Add(new PDASymbol("G engage stop"));
 
             InputSymbols.Add(new PDASymbol("S YES"));
@@ -872,6 +878,30 @@ namespace Agent
 				"S NP white",
 				"S NP pink"
 			);
+
+            List<PDASymbol> learnedGesture = GetInputSymbolsByName(
+                "G teaching succeeded 1",
+                "G teaching succeeded 2",
+                "G teaching succeeded 3",
+                "G teaching succeeded 4",
+                "G teaching succeeded 5",
+                "G teaching succeeded 6"
+            );
+
+            List<PDASymbol> learnableSymbols = GetInputSymbolsByName(
+                "G lh gesture 1 start",
+                "G lh gesture 2 start",
+                "G lh gesture 3 start",
+                "G lh gesture 4 start",
+                "G lh gesture 5 start",
+                "G lh gesture 6 start",
+                "G rh gesture 1 start",
+                "G rh gesture 2 start",
+                "G rh gesture 3 start",
+                "G rh gesture 4 start",
+                "G rh gesture 5 start",
+                "G rh gesture 6 start"
+            );
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartState"),
@@ -2131,6 +2161,51 @@ namespace Agent
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
 
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("StartGrab"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o != null, (g) => g == null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 1)), null
+                ),
+                GetState("DisambiguateGrabPose"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new FunctionDelegate(PushGraspOptions))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateGrabPose"),
+                GetInputSymbolsByName("G posack start", "S YES", "S S yes"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
+                ),
+                GetState("StartLearn"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateGrabPose"),
+                GetInputSymbolsByName("G negack start", "S NO", "S S no"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 1)), null
+                ),
+                GetState("DisambiguateGrabPose"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateGrabPose"),
+                GetInputSymbolsByName("G negack start", "S NO", "S S no"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count == 1)), null
+                ),
+                GetState("Confusion"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrabMove"),
 				GetInputSymbolsByName("G grab move down high","G grab high","G grab move down start","G grab start","G grab stop"),
@@ -2204,6 +2279,28 @@ namespace Agent
 					new StackSymbolContent(null, null, null, null, 
 						new FunctionDelegate(GenerateDirectedSlideCommand), null))));
 
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("StartLearn"),
+                learnedGesture,
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
+                ),
+                GetState("LearningSucceeded"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("StartLearn"),
+                GetInputSymbolsByName("G teaching stop"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
+                ),
+                GetState("LearningFailed"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StopGrab"),
 				null,
@@ -2247,10 +2344,31 @@ namespace Agent
 				null,
 				GenerateStackSymbolFromConditions(
 					null, null, null, null, (a) => a.Count == 1, null
-				),	
+				),
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
 					new StackSymbolContent(null,null,null,null,null,null))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("LearningSucceeded"),
+                learnableSymbols,
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("LearnNewInstruction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("LearnNewInstruction"),
+                null,
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("LearningFailed"),
+                null,
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
@@ -2432,6 +2550,19 @@ namespace Agent
 			foreach (PDAInstruction instruction in gateInstructions) {
 				TransitionRelation.Add (instruction);
 			}
+
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 1 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 2 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 3 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 4 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 5 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 6 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 1 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 2 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 3 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 4 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 5 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 6 start"),null);
 
 			epistemicModel = GetComponent<EpistemicModel> ();
 			Debug.Log (epistemicModel);
@@ -2832,47 +2963,6 @@ namespace Agent
 			Dictionary<PDASymbol,List<Concept>> mapping = new Dictionary<PDASymbol,List<Concept>> ();
 
 			Debug.Log (epistemicModel.state);
-
-			mapping.Add(GetInputSymbolByName("G left point high"),
-				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
-			mapping.Add(GetInputSymbolByName("G right point high"),
-				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
-			mapping.Add(GetInputSymbolByName("G posack high"),
-				new Concept[]{epistemicModel.state.GetConcept("posack",ConceptType.ACTION, ConceptMode.G)}.ToList());
-			mapping.Add(GetInputSymbolByName("G negack high"),
-				new Concept[]{epistemicModel.state.GetConcept("negack",ConceptType.ACTION, ConceptMode.G)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab high"),
-				new Concept[]{epistemicModel.state.GetConcept("grab",ConceptType.ACTION, ConceptMode.G)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab move left high"),
-				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("LEFT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab move right high"),
-				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab move front high"),
-				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("FRONT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab move back high"),
-				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab move up high"),
-				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("UP", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G grab move down high"),
-				new Concept[]{epistemicModel.state.GetConcept("move", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("DOWN", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G push left high"),
-				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("LEFT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G push right high"),
-				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G push front high"),
-				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("FRONT", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
-			mapping.Add(GetInputSymbolByName("G push back high"),
-				new Concept[]{epistemicModel.state.GetConcept("push", ConceptType.ACTION, ConceptMode.G),
-					epistemicModel.state.GetConcept("BACK", ConceptType.PROPERTY, ConceptMode.L)}.ToList());
 
 			mapping.Add(GetInputSymbolByName("G left point start"),
 				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
