@@ -2462,6 +2462,13 @@ public class JointGestureDemo : AgentInteraction {
     }
 
     public void LearningFailed(object[] content) {
+        LookForward();
+        TurnForward();
+
+        if (interactionLogic.GraspedObj != null) {
+            ReturnHandsToDefault();
+        }
+
         RespondAndUpdate("Sorry, I didn't get that.");
 
         interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));

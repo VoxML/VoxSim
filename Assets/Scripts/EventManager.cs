@@ -200,103 +200,6 @@ public class EventManager : MonoBehaviour {
 	float recoverPhaseTime = 1f;
 	public bool startRecoverPhase = false;
 
-//	// Update is called once per frame
-//	void Update () {
-//		if (stayExecution) {
-//			stayExecution = false;
-//			return;
-//		}
-//
-//		if (startRecoverPhase) {
-//			if (recoverPhaseTime > 0) {
-//				recoverPhaseTime -= Time.deltaTime * 1f;
-//
-//				bodyIk.solver.rightHandEffector.positionWeight = recoverPhaseTime;
-//				bodyIk.solver.rightHandEffector.rotationWeight = recoverPhaseTime;
-//				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
-//				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
-//
-//				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
-//				lookAtIk.solver.IKPositionWeight = recoverPhaseTime;
-//			} else {
-//				recoverPhaseTime = 1f;
-//				startRecoverPhase = false;
-//				Debug.Log ("======= startRecoverPhase false ========");
-//			}
-//		}
-//
-//		if (startInitiatePhase) {
-//			if (initiatePhaseTime < 1) {
-//				initiatePhaseTime += Time.deltaTime * 1f;
-//
-//				bodyIk.solver.rightHandEffector.positionWeight = initiatePhaseTime;
-//				bodyIk.solver.rightHandEffector.rotationWeight = initiatePhaseTime;
-//				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
-//				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
-//
-//				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
-//				lookAtIk.solver.IKPositionWeight = initiatePhaseTime;
-//			} else {
-//				initiatePhaseTime = 0f;
-//				startInitiatePhase = false;
-//				Debug.Log ("======= startInitiatePhase false ========");
-//
-//
-//				if (events.Count > 0) {
-//					if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-//						ExecuteCommand (events [0]);
-//					}
-//					else {
-//						RemoveEvent (0);
-//					}
-//				}
-//			}
-//		} else {
-//			if (events.Count > 0) {
-//				bool q = SatisfactionTest.IsSatisfied (events [0]);
-//				Debug.Log ("q == " + q);
-//
-//				bodyIk.solver.rightHandEffector.positionWeight = 1f;
-//				bodyIk.solver.rightHandEffector.rotationWeight = 1f;
-//				bodyIk.solver.rightHandEffector.position = rightHandTarget.transform.position;
-//				bodyIk.solver.rightHandEffector.rotation = rightHandTarget.transform.rotation;
-//
-//				lookAtIk.solver.IKPosition = rightHandTarget.transform.position;
-//				lookAtIk.solver.IKPositionWeight = 1f;
-//
-//				if (q) {
-//					GameObject.Find ("VoxWorld").GetComponent<AStarSearch> ().path.Clear ();
-//					Debug.Log ("Satisfied " + events [0]);
-//
-//					for (int i = 0; i < events.Count - 1; i++) {
-//						events [i] = events [i + 1];
-//					}
-//					string completedEvent = events [events.Count - 1];
-//					RemoveEvent (events.Count - 1);
-//
-//					// Move hand back to the original posture
-//					startRecoverPhase = true;
-//					Debug.Log ("======= startRecoverPhase true ========");
-//
-//					//Debug.Log (events.Count);
-//
-//					if (events.Count > 0) {
-//						ExecuteNextCommand ();
-//					}
-//					else {
-//						if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
-//							//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-//							EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
-//							OnEventComplete (this, eventArgs);
-//						}
-//					}
-//				}
-//			}
-//			else {
-//			}
-//		}
-//	}
-
 	string completedEvent = "";
 
 	// Update is called once per frame
@@ -305,55 +208,6 @@ public class EventManager : MonoBehaviour {
 			stayExecution = false;
 			return;
 		}
-
-		/*if (bodyIk != null) {
-			if (interactionObject != null) {
-				if (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
-					if (isInitiatePhase) {
-						Debug.Log ("Done interaction, execute command");
-						// Only execute command once
-						isInitiatePhase = false;
-
-						// These don't work
-//				interactionSystem.manualResumeLookAt ();
-//				// I need to reset the lookAt target because otherwise it would be automatically reset to null
-//				interactionSystem.LookAtInteraction (FullBodyBipedEffector.RightHand, rightHandTarget);
-
-						if (events.Count > 0) {
-							if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-								ExecuteCommand (events [0]);
-							}
-							else {
-								RemoveEvent (0);
-							}
-						}
-					} else {
-						// Currently in movement
-						lookAt.ik.solver.IKPosition = interactionObject.transform.position;
-						lookAt.ik.solver.IKPositionWeight = 1f;
-					}
-				} else {
-					lookAt.ik.solver.IKPosition = interactionObject.transform.position;
-					if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) <= 0.5) {
-						lookAt.ik.solver.IKPositionWeight = interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) * 2;
-					} else if (interactionSystem.GetProgress (FullBodyBipedEffector.RightHand) < 1) {
-						lookAt.ik.solver.IKPositionWeight = (1 - interactionSystem.GetProgress (FullBodyBipedEffector.RightHand)) * 2;
-					} else {
-						lookAt.ik.solver.IKPositionWeight = 0;
-					}
-				}
-			}
-		}*/
-//		else {
-//			if (events.Count > 0) {
-//				if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-//					ExecuteCommand (events [0]);
-//				}
-//				else {
-//					RemoveEvent (0);
-//				}
-//			}
-//		}
 
 		if (events.Count > 0) {
 			bool q = SatisfactionTest.IsSatisfied (events [0]);
@@ -455,41 +309,12 @@ public class EventManager : MonoBehaviour {
 		Hashtable predArgs = Helper.ParsePredicate (events [0]);
 		String pred = Helper.GetTopPredicate (events [0]);
 
-//		if (bodyIk != null) {
-//			if (predArgs.Count > 0) {
-//				try {
-//					// Resolve interactionObject
-//					var objs = extractObjects (pred, (String)predArgs [pred]);
-//					if (objs.Count > 0 && objs [0] is GameObject) {
-//						interactionObject = ((GameObject)objs [0]).GetComponentInChildren<InteractionObject> ();
-//					}
-//					
-//
-////					if (interactionObject != null) {
-////						// Execute interaction	
-////						interactionSystem.StartInteraction (FullBodyBipedEffector.RightHand, interactionObject, true);
-////
-////						// TUAN
-////						// Before Executing event
-////						// Move hand to reach the target
-////						isInitiatePhase = true;
-////						Debug.Log ("======= isInitiatePhase true ========");
-////					}
-//				} catch (ArgumentNullException e) {
-//					return;
-//				}
-//			}
-//		}
-//		else {
-		/// NIKHIL: Instead of having isInitiatePhase here, all events w/ agent should insert a "grasp" precondition
-		/// This should be handled automatically in a VoxML interpreter
-			if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
-				ExecuteCommand (events [0]);
-			}
-			else {
-				RemoveEvent (0);
-			}
-//		}
+		if (SatisfactionTest.ComputeSatisfactionConditions (events [0])) {
+			ExecuteCommand (events [0]);
+		}
+		else {
+			RemoveEvent (0);
+		}
 	}
 
 	public bool EvaluateCommand(String command) {
@@ -518,15 +343,6 @@ public class EventManager : MonoBehaviour {
 		if (events.IndexOf (command) < 0) {
 			return false;
 		}
-
-//		Triple<String,String,String> triple = Helper.MakeRDFTriples(objectResolved);
-//		if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
-//			preds.rdfTriples.Add(triple);
-//			Helper.PrintRDFTriples(preds.rdfTriples);
-//		}
-//		else {
-//			Debug.Log ("Failed to make RDF triple");
-//		}
 
 		if (!EvaluateSkolemConstants (EvaluationPass.RelationsAndFunctions)) {
 			RemoveEvent (events.Count - 1);
