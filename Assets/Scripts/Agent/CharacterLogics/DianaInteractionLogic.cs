@@ -3239,8 +3239,9 @@ namespace Agent
                 GetInputSymbolsByName(instructionKey),                                          // when we get this message
                 GenerateStackSymbolFromConditions(
                     null, null, null, null, null, null                                          // and this is the top of the stack
-                ),                        
-                GetState("ConfirmEvent"),                                                       // go to this state
+                ),
+                Regex.IsMatch(((List<string>)((StackSymbolContent)stackOperation.Content).ActionOptions)[0],"grasp") ?
+                    GetState("StartGrab") : GetState("ConfirmEvent"),                           // go to this state
                 stackOperation));                                                               // with this operation
         }
 
