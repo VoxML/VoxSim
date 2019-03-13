@@ -18,294 +18,355 @@ using UnityEngine;
 
 namespace Agent
 {
-	public class StackSymbolContent : IEquatable<System.Object>
-	{
-		public object IndicatedObj{
-			get;
-			set;
-		}
+    public class StackSymbolContent : IEquatable<System.Object>
+    {
+        public object IndicatedObj
+        {
+            get;
+            set;
+        }
 
-		public object GraspedObj{
-			get;
-			set;
-		}
+        public object GraspedObj
+        {
+            get;
+            set;
+        }
 
-		public object IndicatedRegion{
-			get;
-			set;
-		}
+        public object IndicatedRegion
+        {
+            get;
+            set;
+        }
 
-		public object ObjectOptions{
-			get;
-			set;
-		}
+        public object ObjectOptions
+        {
+            get;
+            set;
+        }
 
-		public object ActionOptions{
-			get;
-			set;
-		}
+        public object ActionOptions
+        {
+            get;
+            set;
+        }
 
-		public object ActionSuggestions{
-			get;
-			set;
-		}
+        public object ActionSuggestions
+        {
+            get;
+            set;
+        }
 
-		public StackSymbolContent(object indicatedObj, object graspedObj, object indicatedRegion,
-			object objectOptions, object actionOptions, object actionSuggestions){
-			this.IndicatedObj = indicatedObj;
-			this.GraspedObj = graspedObj;
-			this.IndicatedRegion = indicatedRegion;
-			this.ObjectOptions = objectOptions;
-			this.ActionOptions = actionOptions;
-			this.ActionSuggestions = actionSuggestions;
-		}
+        public StackSymbolContent(object indicatedObj, object graspedObj, object indicatedRegion,
+            object objectOptions, object actionOptions, object actionSuggestions)
+        {
+            this.IndicatedObj = indicatedObj;
+            this.GraspedObj = graspedObj;
+            this.IndicatedRegion = indicatedRegion;
+            this.ObjectOptions = objectOptions;
+            this.ActionOptions = actionOptions;
+            this.ActionSuggestions = actionSuggestions;
+        }
 
-		public StackSymbolContent(StackSymbolContent clone){
-			this.IndicatedObj = (GameObject)clone.IndicatedObj;
-			this.GraspedObj = (GameObject)clone.GraspedObj;
-			this.IndicatedRegion = (clone.IndicatedRegion != null) ? new Region((Region)clone.IndicatedRegion) : null;
-			this.ObjectOptions = (clone.ObjectOptions != null) ? new List<GameObject>((List<GameObject>)clone.ObjectOptions) : null;
-			this.ActionOptions = (clone.ActionOptions != null) ? new List<string>((List<string>)clone.ActionOptions) : null;
-			this.ActionSuggestions = (clone.ActionSuggestions != null) ? new List<string>((List<string>)clone.ActionSuggestions) : null;
-		}
+        public StackSymbolContent(StackSymbolContent clone)
+        {
+            this.IndicatedObj = (GameObject)clone.IndicatedObj;
+            this.GraspedObj = (GameObject)clone.GraspedObj;
+            this.IndicatedRegion = (clone.IndicatedRegion != null) ? new Region((Region)clone.IndicatedRegion) : null;
+            this.ObjectOptions = (clone.ObjectOptions != null) ? new List<GameObject>((List<GameObject>)clone.ObjectOptions) : null;
+            this.ActionOptions = (clone.ActionOptions != null) ? new List<string>((List<string>)clone.ActionOptions) : null;
+            this.ActionSuggestions = (clone.ActionSuggestions != null) ? new List<string>((List<string>)clone.ActionSuggestions) : null;
+        }
 
-		public override bool Equals(object obj) {
-			if (obj == null || (obj as StackSymbolContent) == null) //if the object is null or the cast fails
-				return false;
-			else {
-				StackSymbolContent tuple = (StackSymbolContent)obj;
-				//				Debug.Log(string.Format("{0} == {1}:{2}",
-				//					(GameObject)IndicatedObj,(GameObject)tuple.IndicatedObj,(GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj));
-				//				Debug.Log(string.Format("{0} == {1}:{2}",
-				//					(GameObject)GraspedObj,(GameObject)tuple.GraspedObj,(GameObject)GraspedObj == (GameObject)tuple.GraspedObj));
-				//				Debug.Log(string.Format("{0} == {1}:{2}",
-				//					(Region)IndicatedRegion,(Region)tuple.IndicatedRegion,Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion)));
-				//				Debug.Log(string.Format("{0} == {1}:{2}",
-				//					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)ObjectOptions).Select (o => o.name).ToArray ())),
-				//					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)tuple.ObjectOptions).Select (o => o.name).ToArray ())),
-				//					((List<GameObject>)ObjectOptions).SequenceEqual((List<GameObject>)tuple.ObjectOptions)));
-				//				Debug.Log(string.Format("{0} == {1}:{2}",
-				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionOptions).ToArray ())),
-				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionOptions).ToArray ())),
-				//					((List<string>)ActionOptions).SequenceEqual((List<string>)tuple.ActionOptions)));
-				//				Debug.Log(string.Format("{0} == {1}:{2}",
-				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionSuggestions).ToArray ())),
-				//					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionSuggestions).ToArray ())),
-				//					((List<string>)ActionSuggestions).SequenceEqual((List<string>)tuple.ActionSuggestions)));
+        public override bool Equals(object obj)
+        {
+            if (obj == null || (obj as StackSymbolContent) == null) //if the object is null or the cast fails
+                return false;
+            else
+            {
+                StackSymbolContent tuple = (StackSymbolContent)obj;
+                //				Debug.Log(string.Format("{0} == {1}:{2}",
+                //					(GameObject)IndicatedObj,(GameObject)tuple.IndicatedObj,(GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj));
+                //				Debug.Log(string.Format("{0} == {1}:{2}",
+                //					(GameObject)GraspedObj,(GameObject)tuple.GraspedObj,(GameObject)GraspedObj == (GameObject)tuple.GraspedObj));
+                //				Debug.Log(string.Format("{0} == {1}:{2}",
+                //					(Region)IndicatedRegion,(Region)tuple.IndicatedRegion,Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion)));
+                //				Debug.Log(string.Format("{0} == {1}:{2}",
+                //					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)ObjectOptions).Select (o => o.name).ToArray ())),
+                //					string.Format ("[{0}]", String.Join (", ", ((List<GameObject>)tuple.ObjectOptions).Select (o => o.name).ToArray ())),
+                //					((List<GameObject>)ObjectOptions).SequenceEqual((List<GameObject>)tuple.ObjectOptions)));
+                //				Debug.Log(string.Format("{0} == {1}:{2}",
+                //					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionOptions).ToArray ())),
+                //					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionOptions).ToArray ())),
+                //					((List<string>)ActionOptions).SequenceEqual((List<string>)tuple.ActionOptions)));
+                //				Debug.Log(string.Format("{0} == {1}:{2}",
+                //					string.Format ("[{0}]", String.Join (", ", ((List<string>)ActionSuggestions).ToArray ())),
+                //					string.Format ("[{0}]", String.Join (", ", ((List<string>)tuple.ActionSuggestions).ToArray ())),
+                //					((List<string>)ActionSuggestions).SequenceEqual((List<string>)tuple.ActionSuggestions)));
 
-				return (GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj &&
-					(GameObject)GraspedObj == (GameObject)tuple.GraspedObj &&
-					Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion) &&
-					((List<GameObject>)ObjectOptions).SequenceEqual((List<GameObject>)tuple.ObjectOptions) &&
-					((List<string>)ActionOptions).SequenceEqual((List<string>)tuple.ActionOptions) &&
-					((List<string>)ActionSuggestions).SequenceEqual((List<string>)tuple.ActionSuggestions);
-			}
-		}
+                return (GameObject)IndicatedObj == (GameObject)tuple.IndicatedObj &&
+                    (GameObject)GraspedObj == (GameObject)tuple.GraspedObj &&
+                    Helper.RegionsEqual((Region)IndicatedRegion, (Region)tuple.IndicatedRegion) &&
+                    ((List<GameObject>)ObjectOptions).SequenceEqual((List<GameObject>)tuple.ObjectOptions) &&
+                    ((List<string>)ActionOptions).SequenceEqual((List<string>)tuple.ActionOptions) &&
+                    ((List<string>)ActionSuggestions).SequenceEqual((List<string>)tuple.ActionSuggestions);
+            }
+        }
 
-		public override int GetHashCode() {
-			return IndicatedObj.GetHashCode() ^ GraspedObj.GetHashCode() ^
-				IndicatedRegion.GetHashCode() ^ ObjectOptions.GetHashCode() ^
-				ActionOptions.GetHashCode() ^ ActionSuggestions.GetHashCode();
-		}
+        public override int GetHashCode()
+        {
+            return IndicatedObj.GetHashCode() ^ GraspedObj.GetHashCode() ^
+                IndicatedRegion.GetHashCode() ^ ObjectOptions.GetHashCode() ^
+                ActionOptions.GetHashCode() ^ ActionSuggestions.GetHashCode();
+        }
 
-		public static bool operator == (StackSymbolContent tuple1, StackSymbolContent tuple2) {
-			return tuple1.Equals (tuple2);
-		}
+        public static bool operator ==(StackSymbolContent tuple1, StackSymbolContent tuple2)
+        {
+            return tuple1.Equals(tuple2);
+        }
 
-		public static bool operator != (StackSymbolContent tuple1, StackSymbolContent tuple2) {
-			return !tuple1.Equals (tuple2);
-		}
-	}
+        public static bool operator !=(StackSymbolContent tuple1, StackSymbolContent tuple2)
+        {
+            return !tuple1.Equals(tuple2);
+        }
+    }
 
-	public class StackSymbolConditions : IEquatable<System.Object>
-	{
-		public Expression<Predicate<GameObject>> IndicatedObjCondition{
-			get;
-			set;
-		}
+    public class StackSymbolConditions : IEquatable<System.Object>
+    {
+        public Expression<Predicate<GameObject>> IndicatedObjCondition
+        {
+            get;
+            set;
+        }
 
-		public Expression<Predicate<GameObject>> GraspedObjCondition{
-			get;
-			set;
-		}
+        public Expression<Predicate<GameObject>> GraspedObjCondition
+        {
+            get;
+            set;
+        }
 
-		public Expression<Predicate<Region>> IndicatedRegionCondition{
-			get;
-			set;
-		}
+        public Expression<Predicate<Region>> IndicatedRegionCondition
+        {
+            get;
+            set;
+        }
 
-		public Expression<Predicate<List<GameObject>>> ObjectOptionsCondition{
-			get;
-			set;
-		}
+        public Expression<Predicate<List<GameObject>>> ObjectOptionsCondition
+        {
+            get;
+            set;
+        }
 
-		public Expression<Predicate<List<string>>> ActionOptionsCondition{
-			get;
-			set;
-		}
+        public Expression<Predicate<List<string>>> ActionOptionsCondition
+        {
+            get;
+            set;
+        }
 
-		public Expression<Predicate<List<string>>> ActionSuggestionsCondition{
-			get;
-			set;
-		}
+        public Expression<Predicate<List<string>>> ActionSuggestionsCondition
+        {
+            get;
+            set;
+        }
 
-		public StackSymbolConditions(Expression<Predicate<GameObject>> indicatedObjCondition, Expression<Predicate<GameObject>> graspedObjCondition,
-			Expression<Predicate<Region>> indicatedRegionCondition, Expression<Predicate<List<GameObject>>> objectOptionsCondition,
-			Expression<Predicate<List<string>>> actionOptionsCondition, Expression<Predicate<List<string>>> actionSuggestionsCondition){
-			this.IndicatedObjCondition = indicatedObjCondition;
-			this.GraspedObjCondition = graspedObjCondition;
-			this.IndicatedRegionCondition = indicatedRegionCondition;
-			this.ObjectOptionsCondition = objectOptionsCondition;
-			this.ActionOptionsCondition = actionOptionsCondition;
-			this.ActionSuggestionsCondition = actionSuggestionsCondition;
-		}
+        public StackSymbolConditions(Expression<Predicate<GameObject>> indicatedObjCondition, Expression<Predicate<GameObject>> graspedObjCondition,
+            Expression<Predicate<Region>> indicatedRegionCondition, Expression<Predicate<List<GameObject>>> objectOptionsCondition,
+            Expression<Predicate<List<string>>> actionOptionsCondition, Expression<Predicate<List<string>>> actionSuggestionsCondition)
+        {
+            this.IndicatedObjCondition = indicatedObjCondition;
+            this.GraspedObjCondition = graspedObjCondition;
+            this.IndicatedRegionCondition = indicatedRegionCondition;
+            this.ObjectOptionsCondition = objectOptionsCondition;
+            this.ActionOptionsCondition = actionOptionsCondition;
+            this.ActionSuggestionsCondition = actionSuggestionsCondition;
+        }
 
-		public bool SatisfiedBy(object obj) {
-			if (obj == null || (obj as StackSymbolContent) == null) //if the object is null or the cast fails
-				return false;
-			else {
-				StackSymbolContent tuple = (StackSymbolContent)obj;
+        public bool SatisfiedBy(object obj)
+        {
+            if (obj == null || (obj as StackSymbolContent) == null) //if the object is null or the cast fails
+                return false;
+            else
+            {
+                StackSymbolContent tuple = (StackSymbolContent)obj;
 
-				return ((IndicatedObjCondition == null) || (IndicatedObjCondition.Compile().Invoke((GameObject)tuple.IndicatedObj))) &&
-					((GraspedObjCondition == null) || (GraspedObjCondition.Compile().Invoke((GameObject)tuple.GraspedObj))) &&
-					((IndicatedRegionCondition == null) || (IndicatedRegionCondition.Compile().Invoke((Region)tuple.IndicatedRegion))) &&
-					((ObjectOptionsCondition == null) || (ObjectOptionsCondition.Compile().Invoke((List<GameObject>)tuple.ObjectOptions))) &&
-					((ActionOptionsCondition == null) || (ActionOptionsCondition.Compile().Invoke((List<string>)tuple.ActionOptions))) &&
-					((ActionSuggestionsCondition == null) || (ActionSuggestionsCondition.Compile().Invoke((List<string>)tuple.ActionSuggestions)));
-			}
-		}
+                return ((IndicatedObjCondition == null) || (IndicatedObjCondition.Compile().Invoke((GameObject)tuple.IndicatedObj))) &&
+                    ((GraspedObjCondition == null) || (GraspedObjCondition.Compile().Invoke((GameObject)tuple.GraspedObj))) &&
+                    ((IndicatedRegionCondition == null) || (IndicatedRegionCondition.Compile().Invoke((Region)tuple.IndicatedRegion))) &&
+                    ((ObjectOptionsCondition == null) || (ObjectOptionsCondition.Compile().Invoke((List<GameObject>)tuple.ObjectOptions))) &&
+                    ((ActionOptionsCondition == null) || (ActionOptionsCondition.Compile().Invoke((List<string>)tuple.ActionOptions))) &&
+                    ((ActionSuggestionsCondition == null) || (ActionSuggestionsCondition.Compile().Invoke((List<string>)tuple.ActionSuggestions)));
+            }
+        }
 
-		public override bool Equals(object obj) {
-			if (obj == null || (obj as StackSymbolConditions) == null) //if the object is null or the cast fails
-				return false;
-			else {				
-				StackSymbolConditions tuple = (StackSymbolConditions)obj;
+        public override bool Equals(object obj)
+        {
+            if (obj == null || (obj as StackSymbolConditions) == null) //if the object is null or the cast fails
+                return false;
+            else
+            {
+                StackSymbolConditions tuple = (StackSymbolConditions)obj;
 
-				//				Debug.Log (string.Format ("{0} == {1}?",
-				//					IndicatedObjCondition == null ? "Null" : System.Convert.ToString(IndicatedObjCondition),
-				//					tuple.IndicatedObjCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedObjCondition)));
-				//				Debug.Log (string.Format ("{0} == {1}?",
-				//					GraspedObjCondition == null ? "Null" : System.Convert.ToString(GraspedObjCondition),
-				//					tuple.GraspedObjCondition == null ? "Null" : System.Convert.ToString(tuple.GraspedObjCondition)));
-				//				Debug.Log (string.Format ("{0} == {1}?",
-				//					IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(IndicatedRegionCondition),
-				//					tuple.IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedRegionCondition)));
-				//				Debug.Log (string.Format ("{0} == {1}?",
-				//					ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(ObjectOptionsCondition),
-				//					tuple.ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ObjectOptionsCondition)));
-				//				Debug.Log (string.Format ("{0} == {1}?",
-				//					ActionOptionsCondition == null ? "Null" : System.Convert.ToString(ActionOptionsCondition),
-				//					tuple.ActionOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionOptionsCondition)));
-				//				Debug.Log (string.Format ("{0} == {1}?",
-				//					ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(ActionSuggestionsCondition),
-				//					tuple.ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionSuggestionsCondition)));
+                //				Debug.Log (string.Format ("{0} == {1}?",
+                //					IndicatedObjCondition == null ? "Null" : System.Convert.ToString(IndicatedObjCondition),
+                //					tuple.IndicatedObjCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedObjCondition)));
+                //				Debug.Log (string.Format ("{0} == {1}?",
+                //					GraspedObjCondition == null ? "Null" : System.Convert.ToString(GraspedObjCondition),
+                //					tuple.GraspedObjCondition == null ? "Null" : System.Convert.ToString(tuple.GraspedObjCondition)));
+                //				Debug.Log (string.Format ("{0} == {1}?",
+                //					IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(IndicatedRegionCondition),
+                //					tuple.IndicatedRegionCondition == null ? "Null" : System.Convert.ToString(tuple.IndicatedRegionCondition)));
+                //				Debug.Log (string.Format ("{0} == {1}?",
+                //					ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(ObjectOptionsCondition),
+                //					tuple.ObjectOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ObjectOptionsCondition)));
+                //				Debug.Log (string.Format ("{0} == {1}?",
+                //					ActionOptionsCondition == null ? "Null" : System.Convert.ToString(ActionOptionsCondition),
+                //					tuple.ActionOptionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionOptionsCondition)));
+                //				Debug.Log (string.Format ("{0} == {1}?",
+                //					ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(ActionSuggestionsCondition),
+                //					tuple.ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString(tuple.ActionSuggestionsCondition)));
 
-				bool equal = true;
+                bool equal = true;
 
-				if ((IndicatedObjCondition == null) && (tuple.IndicatedObjCondition == null)) {
-					equal &= true;
-				}
-				else if ((IndicatedObjCondition == null) && (tuple.IndicatedObjCondition != null)) {
-					equal &= false;
-				}
-				else if ((IndicatedObjCondition != null) && (tuple.IndicatedObjCondition == null)) {
-					equal &= false;
-				}
-				else {
-					// loath to do this but it should work for now
-					equal &= System.Convert.ToString(IndicatedObjCondition) == System.Convert.ToString(tuple.IndicatedObjCondition);
-					//equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedObjCondition, tuple.IndicatedObjCondition)).Compile()();
-				}
+                if ((IndicatedObjCondition == null) && (tuple.IndicatedObjCondition == null))
+                {
+                    equal &= true;
+                }
+                else if ((IndicatedObjCondition == null) && (tuple.IndicatedObjCondition != null))
+                {
+                    equal &= false;
+                }
+                else if ((IndicatedObjCondition != null) && (tuple.IndicatedObjCondition == null))
+                {
+                    equal &= false;
+                }
+                else
+                {
+                    // loath to do this but it should work for now
+                    equal &= System.Convert.ToString(IndicatedObjCondition) == System.Convert.ToString(tuple.IndicatedObjCondition);
+                    //equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedObjCondition, tuple.IndicatedObjCondition)).Compile()();
+                }
 
-				if ((GraspedObjCondition == null) && (tuple.GraspedObjCondition == null)) {
-					equal &= true;
-				}
-				else if ((GraspedObjCondition == null) && (tuple.GraspedObjCondition != null)) {
-					equal &= false;
-				}
-				else if ((GraspedObjCondition != null) && (tuple.GraspedObjCondition == null)) {
-					equal &= false;
-				}
-				else {
-					equal &= System.Convert.ToString(GraspedObjCondition) == System.Convert.ToString(tuple.GraspedObjCondition);
-					//equal &= Expression.Lambda<Func<bool>>(Expression.Equal(GraspedObjCondition, tuple.GraspedObjCondition)).Compile()();
-				}
+                if ((GraspedObjCondition == null) && (tuple.GraspedObjCondition == null))
+                {
+                    equal &= true;
+                }
+                else if ((GraspedObjCondition == null) && (tuple.GraspedObjCondition != null))
+                {
+                    equal &= false;
+                }
+                else if ((GraspedObjCondition != null) && (tuple.GraspedObjCondition == null))
+                {
+                    equal &= false;
+                }
+                else
+                {
+                    equal &= System.Convert.ToString(GraspedObjCondition) == System.Convert.ToString(tuple.GraspedObjCondition);
+                    //equal &= Expression.Lambda<Func<bool>>(Expression.Equal(GraspedObjCondition, tuple.GraspedObjCondition)).Compile()();
+                }
 
-				if ((IndicatedRegionCondition == null) && (tuple.IndicatedRegionCondition == null)) {
-					equal &= true;
-				}
-				else if ((IndicatedRegionCondition == null) && (tuple.IndicatedRegionCondition != null)) {
-					equal &= false;
-				}
-				else if ((IndicatedRegionCondition != null) && (tuple.IndicatedRegionCondition == null)) {
-					equal &= false;
-				}
-				else {
-					equal &= System.Convert.ToString(IndicatedRegionCondition) == System.Convert.ToString(tuple.IndicatedRegionCondition);
-					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedRegionCondition, tuple.IndicatedRegionCondition)).Compile()();
-				}
+                if ((IndicatedRegionCondition == null) && (tuple.IndicatedRegionCondition == null))
+                {
+                    equal &= true;
+                }
+                else if ((IndicatedRegionCondition == null) && (tuple.IndicatedRegionCondition != null))
+                {
+                    equal &= false;
+                }
+                else if ((IndicatedRegionCondition != null) && (tuple.IndicatedRegionCondition == null))
+                {
+                    equal &= false;
+                }
+                else
+                {
+                    equal &= System.Convert.ToString(IndicatedRegionCondition) == System.Convert.ToString(tuple.IndicatedRegionCondition);
+                    //					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedRegionCondition, tuple.IndicatedRegionCondition)).Compile()();
+                }
 
-				if ((ObjectOptionsCondition == null) && (tuple.ObjectOptionsCondition == null)) {
-					equal &= true;
-				}
-				else if ((ObjectOptionsCondition == null) && (tuple.ObjectOptionsCondition != null)) {
-					equal &= false;
-				}
-				else if ((ObjectOptionsCondition != null) && (tuple.ObjectOptionsCondition == null)) {
-					equal &= false;
-				}
-				else {
-					equal &= System.Convert.ToString(ObjectOptionsCondition) == System.Convert.ToString(tuple.ObjectOptionsCondition);
-					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ObjectOptionsCondition, tuple.ObjectOptionsCondition)).Compile()();
-				}
+                if ((ObjectOptionsCondition == null) && (tuple.ObjectOptionsCondition == null))
+                {
+                    equal &= true;
+                }
+                else if ((ObjectOptionsCondition == null) && (tuple.ObjectOptionsCondition != null))
+                {
+                    equal &= false;
+                }
+                else if ((ObjectOptionsCondition != null) && (tuple.ObjectOptionsCondition == null))
+                {
+                    equal &= false;
+                }
+                else
+                {
+                    equal &= System.Convert.ToString(ObjectOptionsCondition) == System.Convert.ToString(tuple.ObjectOptionsCondition);
+                    //					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ObjectOptionsCondition, tuple.ObjectOptionsCondition)).Compile()();
+                }
 
-				if ((ActionOptionsCondition == null) && (tuple.ActionOptionsCondition == null)) {
-					equal &= true;
-				}
-				else if ((ActionOptionsCondition == null) && (tuple.ActionOptionsCondition != null)) {
-					equal &= false;
-				}
-				else if ((ActionOptionsCondition != null) && (tuple.ActionOptionsCondition == null)) {
-					equal &= false;
-				}
-				else {
-					equal &= System.Convert.ToString(ActionOptionsCondition) == System.Convert.ToString(tuple.ActionOptionsCondition);
-					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionOptionsCondition, tuple.ActionOptionsCondition)).Compile()();
-				}
+                if ((ActionOptionsCondition == null) && (tuple.ActionOptionsCondition == null))
+                {
+                    equal &= true;
+                }
+                else if ((ActionOptionsCondition == null) && (tuple.ActionOptionsCondition != null))
+                {
+                    equal &= false;
+                }
+                else if ((ActionOptionsCondition != null) && (tuple.ActionOptionsCondition == null))
+                {
+                    equal &= false;
+                }
+                else
+                {
+                    equal &= System.Convert.ToString(ActionOptionsCondition) == System.Convert.ToString(tuple.ActionOptionsCondition);
+                    //					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionOptionsCondition, tuple.ActionOptionsCondition)).Compile()();
+                }
 
-				if ((ActionSuggestionsCondition == null) && (tuple.ActionSuggestionsCondition == null)) {
-					equal &= true;
-				}
-				else if ((ActionSuggestionsCondition == null) && (tuple.ActionSuggestionsCondition != null)) {
-					equal &= false;
-				}
-				else if ((ActionSuggestionsCondition != null) && (tuple.ActionSuggestionsCondition == null)) {
-					equal &= false;
-				}
-				else {
-					equal &= System.Convert.ToString(ActionSuggestionsCondition) == System.Convert.ToString(tuple.ActionSuggestionsCondition);
-					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionSuggestionsCondition, tuple.ActionSuggestionsCondition)).Compile()();
-				}
+                if ((ActionSuggestionsCondition == null) && (tuple.ActionSuggestionsCondition == null))
+                {
+                    equal &= true;
+                }
+                else if ((ActionSuggestionsCondition == null) && (tuple.ActionSuggestionsCondition != null))
+                {
+                    equal &= false;
+                }
+                else if ((ActionSuggestionsCondition != null) && (tuple.ActionSuggestionsCondition == null))
+                {
+                    equal &= false;
+                }
+                else
+                {
+                    equal &= System.Convert.ToString(ActionSuggestionsCondition) == System.Convert.ToString(tuple.ActionSuggestionsCondition);
+                    //					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionSuggestionsCondition, tuple.ActionSuggestionsCondition)).Compile()();
+                }
 
-				Debug.Log (equal);
-				return  equal;
-			}
-		}
+                Debug.Log(equal);
+                return equal;
+            }
+        }
 
-		public override int GetHashCode() {
-			return IndicatedObjCondition.GetHashCode() ^ GraspedObjCondition.GetHashCode() ^
-				IndicatedRegionCondition.GetHashCode() ^ ObjectOptionsCondition.GetHashCode() ^
-				ActionOptionsCondition.GetHashCode() ^ ActionSuggestionsCondition.GetHashCode();
-		}
+        public override int GetHashCode()
+        {
+            return IndicatedObjCondition.GetHashCode() ^ GraspedObjCondition.GetHashCode() ^
+                IndicatedRegionCondition.GetHashCode() ^ ObjectOptionsCondition.GetHashCode() ^
+                ActionOptionsCondition.GetHashCode() ^ ActionSuggestionsCondition.GetHashCode();
+        }
 
-		public static bool operator == (StackSymbolConditions tuple1, StackSymbolConditions tuple2) {
-			return tuple1.Equals(tuple2);
-		}
+        public static bool operator ==(StackSymbolConditions tuple1, StackSymbolConditions tuple2)
+        {
+            return tuple1.Equals(tuple2);
+        }
 
-		public static bool operator != (StackSymbolConditions tuple1, StackSymbolConditions tuple2) {
-			return !tuple1.Equals(tuple2);
-		}
-	}
+        public static bool operator !=(StackSymbolConditions tuple1, StackSymbolConditions tuple2)
+        {
+            return !tuple1.Equals(tuple2);
+        }
+    }
+
+    public class NewInstructionEventArgs : EventArgs
+    {
+        public string InstructionKey { get; set; }
+
+        public NewInstructionEventArgs(string instructionKey)
+        {
+            this.InstructionKey = instructionKey;
+        }
+    }
 
 	public class DianaInteractionLogic : CharacterLogicAutomaton
 	{
@@ -2182,7 +2243,8 @@ namespace Agent
                     ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
                 ),
                 GetState("StartLearn"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("DisambiguateGrabPose"),
@@ -2563,6 +2625,7 @@ namespace Agent
             LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 4 start"),null);
             LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 5 start"),null);
             LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 6 start"),null);
+            LearnedNewInstruction += AddNewInstruction;
 
 			epistemicModel = GetComponent<EpistemicModel> ();
 			Debug.Log (epistemicModel);
@@ -3166,6 +3229,20 @@ namespace Agent
 
 			return instructions;
 		}
+
+        void AddNewInstruction(object sender, EventArgs e) {
+            string instructionKey = ((NewInstructionEventArgs)e).InstructionKey;
+            PDAStackOperation stackOperation = LearnableInstructions[GetLearnableInstructionKeyByName(instructionKey)];
+
+            TransitionRelation.Add(new PDAInstruction(                                          // instruction operated by input signal
+                GetStates("Wait"),                                                              // in this state
+                GetInputSymbolsByName(instructionKey),                                          // when we get this message
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null, null, null                                          // and this is the top of the stack
+                ),                        
+                GetState("ConfirmEvent"),                                                       // go to this state
+                stackOperation));                                                               // with this operation
+        }
 
 		void MoveToState(PDAState state) {
 			Pair<PDASymbol, PDAState> symbolStatePair = new Pair<PDASymbol, PDAState> (GetLastInputSymbol (), state);

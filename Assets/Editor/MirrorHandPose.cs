@@ -104,7 +104,8 @@ public class MirrorHandPose : MonoBehaviour
         // Return false if no transform is selected.
         return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
             (((GameObject)Selection.activeGameObject).GetComponent<InteractionTarget>() != null) &&
-            (((GameObject)Selection.activeGameObject).name.EndsWith("Hand"));
+            ((((GameObject)Selection.activeGameObject).name.StartsWith("lHand")) ||
+                (((GameObject)Selection.activeGameObject).name.StartsWith("rHand")));
     }
 
     [MenuItem("VoxSim/Hand Poses/Flip Handedness %#h")]
@@ -190,6 +191,7 @@ public class MirrorHandPose : MonoBehaviour
         // Return false if no transform is selected.
         return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
             (((GameObject)Selection.activeGameObject).GetComponent<InteractionTarget>() != null) &&
-            (((GameObject)Selection.activeGameObject).name.EndsWith("Hand"));
+            ((((GameObject)Selection.activeGameObject).name.StartsWith("lHand")) || 
+                (((GameObject)Selection.activeGameObject).name.StartsWith("rHand")));
     }
 }

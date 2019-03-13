@@ -2182,7 +2182,7 @@ public class JointGestureDemo : AgentInteraction {
             eventPrompt = eventPrompt.Replace("*", "rHand");
         }
 
-        PromptEvent(string.Format("{0}", eventPrompt));
+        PromptEvent(eventPrompt);
 
         interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
             interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), interactionLogic.IndicatedObj, null, null, null, null)));
@@ -2372,8 +2372,7 @@ public class JointGestureDemo : AgentInteraction {
     public void StartLearn(object[] content) {
         RespondAndUpdate("What's the gesture for that?");
 
-        if (commBridge.KSIMClient != null)
-        {
+        if (commBridge.KSIMClient != null) {
             string command = "learn";
             byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
                                                Concat(BitConverter.GetBytes(command.Length)).Concat(Encoding.ASCII.GetBytes(command)).
@@ -2384,17 +2383,29 @@ public class JointGestureDemo : AgentInteraction {
 
     public void LearningSucceeded(object[] content) {
         RespondAndUpdate("OK, got it!");
+
+        String eventPrompt = interactionLogic.ActionOptions[0];
+
+        if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper)
+        {
+            eventPrompt = eventPrompt.Replace("*", "lHand");
+        }
+        else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper)
+        {
+            eventPrompt = eventPrompt.Replace("*", "rHand");
+        }
+
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
+            interactionLogic.GenerateStackSymbol(new StackSymbolContent(null, null, null, null, new List<string>() { eventPrompt }, null))));
     }
 
     public void LearnNewInstruction(object[] content) {
         // type check
-        if (!Helper.CheckAllObjectsOfType(content, typeof(string)))
-        {
+        if (!Helper.CheckAllObjectsOfType(content, typeof(string))) {
             return;
         }
 
-        switch (content.Length)
-        {
+        switch (content.Length) {
             case 0:
                 break;
 
@@ -2417,6 +2428,8 @@ public class JointGestureDemo : AgentInteraction {
                                 interactionLogic.StackSymbolToString(interactionLogic.LearnableInstructions[key].Content)));
                         }
                     }
+
+                    interactionLogic.OnLearnedNewInstruction(this, new NewInstructionEventArgs(message));
                 }
                 break;
 

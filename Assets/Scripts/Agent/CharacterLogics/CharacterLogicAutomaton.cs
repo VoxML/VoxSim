@@ -239,6 +239,16 @@ namespace Agent
             return instructionKey;
         }
 
+        public event EventHandler LearnedNewInstruction;
+
+        public void OnLearnedNewInstruction(object sender, EventArgs e)
+        {
+            if (LearnedNewInstruction != null)
+            {
+                LearnedNewInstruction(this, e);
+            }
+        } 
+
 		public virtual void Start() {
 			States = new List<PDAState> ();
 			InputSymbols = new List<PDASymbol> ();
