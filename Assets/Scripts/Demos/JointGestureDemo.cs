@@ -2179,7 +2179,13 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void StartGrab(object[] content) {
-        if (interactionLogic.IndicatedObj != null) {
+        // see if this object has a learned conventional grasp pose associated with it
+        List<PDAStackOperation> targetObjOps = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
+            ((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject)).ToList();
+
+        Debug.Log(targetObjOps.Count);
+
+        if ((interactionLogic.IndicatedObj != null) && (targetObjOps.Count == 0)) {
             int numGrabPoses = GetNumberOfGrabPoses(interactionLogic.IndicatedObj);
 
             if (numGrabPoses > 1)
@@ -2194,21 +2200,29 @@ public class JointGestureDemo : AgentInteraction {
         }
         else {
             if (interactionLogic.IndicatedObj != null) {
-                Debug.Log(interactionLogic.IndicatedObj);
+                string graspCmd = string.Format("grasp({0})", interactionLogic.IndicatedObj.name);
+                if (targetObjOps.Count == 1) {    // should only have one (for now)
+                    graspCmd = ((List<string>)((StackSymbolContent)targetObjOps[0].Content).ActionOptions)[0];
+                }
+
                 RespondAndUpdate("OK.");
-                PromptEvent(string.Format("grasp({0})", interactionLogic.IndicatedObj.name));
+                PromptEvent(graspCmd);
 
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                 interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
                     interactionLogic.IndicatedObj, null, null, null, null)));
             }
             else if (interactionLogic.ActionOptions.Count > 0) {
-                RespondAndUpdate("OK.");
-                PromptEvent(interactionLogic.ActionOptions[0]);
+                List<object> args = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]), 
+                    (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])]);
 
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-                        interactionLogic.IndicatedObj, null, null, new List<string>(), null)));
+                if ((args.Count > 0) && (args[0] is GameObject)) {
+                    RespondAndUpdate("OK.");
+                    PromptEvent(interactionLogic.ActionOptions[0]);
+
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, new List<string>(), null)));
+                }
             }
         }
 	}
@@ -2461,7 +2475,7 @@ public class JointGestureDemo : AgentInteraction {
                 if (interactionLogic.LearnableInstructions.ContainsKey(interactionLogic.GetLearnableInstructionKeyByName(message))) {
                     interactionLogic.LearnableInstructions[interactionLogic.GetLearnableInstructionKeyByName(message)] =
                         new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-                                              new StackSymbolContent(null, interactionLogic.GraspedObj, null, null, new List<string>() { interactionLogic.ActionOptions[0] }, null));
+                            new StackSymbolContent(null, interactionLogic.GraspedObj, null, null, new List<string>() { interactionLogic.ActionOptions[0] }, null));
 
                     foreach (List<PDASymbol> key in interactionLogic.LearnableInstructions.Keys) {
                         if (interactionLogic.LearnableInstructions[key] != null) {
@@ -2482,6 +2496,10 @@ public class JointGestureDemo : AgentInteraction {
     }
 
     public void LearningFailed(object[] content) {
+        if (interactionLogic.GraspedObj != null) {
+            PromptEvent(string.Format("ungrasp({0})", interactionLogic.GraspedObj.name));
+            ReturnHandsToDefault();
+        }
         LookForward();
         TurnForward();
 

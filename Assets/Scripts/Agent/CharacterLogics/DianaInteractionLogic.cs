@@ -2584,9 +2584,9 @@ namespace Agent
             LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 1 start"), null);
             LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 2 start"), null);
             LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 3 start"), null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 4 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 5 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 6 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 4 start"), null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 5 start"), null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 6 start"), null);
             LearnedNewInstruction += AddNewInstruction;
 
 			epistemicModel = GetComponent<EpistemicModel> ();

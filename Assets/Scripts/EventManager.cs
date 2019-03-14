@@ -401,30 +401,38 @@ public class EventManager : MonoBehaviour {
 							objs.Add (arg as String);
 						}
 						else {
+                            //Debug.Log(arg as String);
 							List<GameObject> matches = new List<GameObject> ();
 							foreach (Voxeme voxeme in objSelector.allVoxemes) {
-								if (voxeme.voxml.Lex.Pred.Equals (arg)) {
+								if (voxeme.voxml.Lex.Pred.Equals (arg as String)) {
 									matches.Add (voxeme.gameObject);
 								}
 							}
 							if (matches.Count <= 1) {
-								GameObject go = GameObject.Find (arg as String);
-								if (go == null) {
-									for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
-										if (objSelector.disabledObjects[j].name == (arg as String)) {
-											go = objSelector.disabledObjects[j];
-											break;
-										}
-									}
+                                if (!(arg as String).Contains('('))
+                                {
+                                    GameObject go = GameObject.Find(arg as String);
+                                    if (go == null)
+                                    {
+                                        for (int j = 0; j < objSelector.disabledObjects.Count; j++)
+                                        {
+                                            if (objSelector.disabledObjects[j].name == (arg as String))
+                                            {
+                                                go = objSelector.disabledObjects[j];
+                                                break;
+                                            }
+                                        }
 
-									if (go == null) {
-										OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+                                        if (go == null)
+                                        {
+                                            OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
 
-										throw new ArgumentNullException ("Couldn't resolve the object");
-										// abort
-									}
-								}
-								objs.Add (go);
+                                            throw new ArgumentNullException("Couldn't resolve the object");
+                                            // abort
+                                        }
+                                    }
+								    objs.Add (go);
+                                }
 							}
 							else {
 								//Debug.Log (string.Format ("Which {0}?", (arg as String)));
