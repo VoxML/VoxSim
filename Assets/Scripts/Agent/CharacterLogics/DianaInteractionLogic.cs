@@ -3218,7 +3218,7 @@ namespace Agent
                 stackOperation));
 
             // add new items to EpiSim
-            epistemicModel.AddNewConcept(new Concept(GetGestureContent(instructionKey,GetInputSymbolType(instructionKey)), ConceptType.ACTION, ConceptMode.G));
+            epistemicModel.AddNewConcept(new Concept(RemoveInputSymbolType(instructionKey,GetInputSymbolType(instructionKey)), ConceptType.ACTION, ConceptMode.G));
         }
 
 		void MoveToState(PDAState state) {
