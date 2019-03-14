@@ -535,6 +535,10 @@ namespace Agent
 			return null;
 		}
 
+        public object GraspedObject(object arg) {
+            return GraspedObj;
+        }
+
 		public List<string> GetActionOptionsIfNull(object arg) {
 			if (ActionSuggestions.Count == 0) {
 				return ActionOptions;
@@ -585,6 +589,13 @@ namespace Agent
                 GenerateStackSymbol(IndicatedObj, null, null, null,
                 ActionOptions.GetRange(ActionOptions.Count - 1 - s, s + 1),
                 new List<string>())).ToList();
+
+            return symbolList;
+        }
+
+        public List<PDASymbol> SwitchGraspedBackToIndicated(object arg) {
+            List<PDASymbol> symbolList = new List<PDASymbol>() { GenerateStackSymbol(IndicatedObj, new FunctionDelegate(NullObject),
+                null, null, null, null) };
 
             return symbolList;
         }
@@ -842,30 +853,18 @@ namespace Agent
             InputSymbols.Add(new PDASymbol("G teaching succeeded 5"));
             InputSymbols.Add(new PDASymbol("G teaching succeeded 6"));
             InputSymbols.Add(new PDASymbol("G teaching stop"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 1 start"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 1 stop"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 2 start"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 2 stop"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 3 start"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 3 stop"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 4 start"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 4 stop"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 5 start"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 5 stop"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 6 start"));
-            InputSymbols.Add(new PDASymbol("G lh gesture 6 stop"));
             InputSymbols.Add(new PDASymbol("G rh gesture 1 start"));
             InputSymbols.Add(new PDASymbol("G rh gesture 1 stop"));
             InputSymbols.Add(new PDASymbol("G rh gesture 2 start"));
             InputSymbols.Add(new PDASymbol("G rh gesture 2 stop"));
             InputSymbols.Add(new PDASymbol("G rh gesture 3 start"));
             InputSymbols.Add(new PDASymbol("G rh gesture 3 stop"));
-            InputSymbols.Add(new PDASymbol("G rh gesture 4 start"));
-            InputSymbols.Add(new PDASymbol("G rh gesture 4 stop"));
-            InputSymbols.Add(new PDASymbol("G rh gesture 5 start"));
-            InputSymbols.Add(new PDASymbol("G rh gesture 5 stop"));
-            InputSymbols.Add(new PDASymbol("G rh gesture 6 start"));
-            InputSymbols.Add(new PDASymbol("G rh gesture 6 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 4 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 4 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 5 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 5 stop"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 6 start"));
+            InputSymbols.Add(new PDASymbol("G lh gesture 6 stop"));
             InputSymbols.Add(new PDASymbol("G engage stop"));
 
             InputSymbols.Add(new PDASymbol("S YES"));
@@ -950,18 +949,12 @@ namespace Agent
             );
 
             List<PDASymbol> learnableSymbols = GetInputSymbolsByName(
-                "G lh gesture 1 start",
-                "G lh gesture 2 start",
-                "G lh gesture 3 start",
-                "G lh gesture 4 start",
-                "G lh gesture 5 start",
-                "G lh gesture 6 start",
                 "G rh gesture 1 start",
                 "G rh gesture 2 start",
                 "G rh gesture 3 start",
-                "G rh gesture 4 start",
-                "G rh gesture 5 start",
-                "G rh gesture 6 start"
+                "G lh gesture 4 start",
+                "G lh gesture 5 start",
+                "G lh gesture 6 start"
             );
 
 			TransitionRelation.Add(new PDAInstruction(
@@ -1240,8 +1233,19 @@ namespace Agent
                 null,
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
-                    (a) => a.Count == 1, null),
+                    (a) => ((a.Count == 1) &&
+                    (a.Where(aa => aa.Contains("grasp")).ToList().Count == 0)), null),
                 GetState("ConfirmEvent"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count == 1) &&
+                    (a.Where(aa => aa.Contains("grasp")).ToList().Count > 0)), null),
+                GetState("StartGrab"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
             
             TransitionRelation.Add(new PDAInstruction(
@@ -2161,7 +2165,7 @@ namespace Agent
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("ExecuteEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
-
+            
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ExecuteEvent"),
 				null,
@@ -2577,18 +2581,12 @@ namespace Agent
 				TransitionRelation.Add (instruction);
 			}
 
-            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 1 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 2 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 3 start"),null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 1 start"), null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 2 start"), null);
+            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 3 start"), null);
             LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 4 start"),null);
             LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 5 start"),null);
             LearnableInstructions.Add(GetInputSymbolsByName("G lh gesture 6 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 1 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 2 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 3 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 4 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 5 start"),null);
-            LearnableInstructions.Add(GetInputSymbolsByName("G rh gesture 6 start"),null);
             LearnedNewInstruction += AddNewInstruction;
 
 			epistemicModel = GetComponent<EpistemicModel> ();
@@ -3204,9 +3202,23 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     null, null, null, null, null, null                                          // and this is the top of the stack
                 ),
-                Regex.IsMatch(((List<string>)((StackSymbolContent)stackOperation.Content).ActionOptions)[0],"grasp") ?
+                Regex.IsMatch(((List<string>)((StackSymbolContent)stackOperation.Content).
+                    ActionOptions)[0],"grasp") ?
                     GetState("StartGrab") : GetState("ConfirmEvent"),                           // go to this state
                 stackOperation));                                                               // with this operation
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestObject"),
+                GetInputSymbolsByName(instructionKey),
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0), null),
+                GetState("StartGrab"),
+                stackOperation));
+
+            // add new items to EpiSim
+            epistemicModel.AddNewConcept(new Concept(GetGestureContent(instructionKey,GetInputSymbolType(instructionKey)), ConceptType.ACTION, ConceptMode.G));
         }
 
 		void MoveToState(PDAState state) {

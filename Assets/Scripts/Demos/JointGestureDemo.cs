@@ -1582,11 +1582,14 @@ public class JointGestureDemo : AgentInteraction {
 				message = String.Join (" ", splitMessage.ToArray ());
 			}
 			Debug.Log (message);
-            // do stuff here
+                // do stuff here
 
-            // do verb mapping
+                // do verb mapping
             if (message.StartsWith("pick up")) {
                 message = message.Replace("pick up", "lift");
+            }
+            else if (message.StartsWith("grab")) {
+                message = message.Replace("grab", "grasp");
             }
             else if (message.StartsWith("push")) {
                 message = message.Replace("push", "slide");
@@ -1596,6 +1599,19 @@ public class JointGestureDemo : AgentInteraction {
             if (message.Contains("one"))
             {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
                 message = message.Replace("one", "block");
+            }
+
+            if (message.Contains("it"))
+            {
+                object referent = eventManager.referents.stack.Peek();
+
+                if (referent.GetType() == typeof(String))
+                {
+                    GameObject voxObj = GameObject.Find(referent as String);
+                    if (voxObj != null) {
+                        message = message.Replace("it", voxObj.name);
+                    }
+                }
             }
 
 			if (message.Contains ("there")) {
@@ -2070,6 +2086,8 @@ public class JointGestureDemo : AgentInteraction {
 
 		LookForward ();
 
+        eventManager.referents.stack.Push(interactionLogic.IndicatedObj.name);
+        eventManager.OnEntityReferenced(this, new EventReferentArgs(interactionLogic.IndicatedObj));
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 	}
 
@@ -2166,6 +2184,7 @@ public class JointGestureDemo : AgentInteraction {
 
             if (numGrabPoses > 1)
             {
+                Debug.Log(numGrabPoses);
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
                     Enumerable.Range(0, numGrabPoses).Select(s => string.Format("grasp({0},with(*_{1}_{2}))", interactionLogic.IndicatedObj.name,
@@ -2175,6 +2194,7 @@ public class JointGestureDemo : AgentInteraction {
         }
         else {
             if (interactionLogic.IndicatedObj != null) {
+                Debug.Log(interactionLogic.IndicatedObj);
                 RespondAndUpdate("OK.");
                 PromptEvent(string.Format("grasp({0})", interactionLogic.IndicatedObj.name));
 

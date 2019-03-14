@@ -129,25 +129,6 @@ namespace Agent {
 			state.AddConcept(up);
 			state.AddConcept(down);
 
-
-			// now add more concepts (objects)
-			/*Concept yellowBlock = new Concept("block1", ConceptType.OBJECT, ConceptMode.G);
-			Concept smPurpleBlock = new Concept("block2", ConceptType.OBJECT, ConceptMode.G);
-			Concept blackBlock = new Concept("block3", ConceptType.OBJECT, ConceptMode.G);
-			Concept greenBlock = new Concept("block4", ConceptType.OBJECT, ConceptMode.G);
-			Concept orangeBlock = new Concept("block5", ConceptType.OBJECT, ConceptMode.G);
-			Concept lgPurpleBlock = new Concept("block7", ConceptType.OBJECT, ConceptMode.G);
-			Concept redBlock = new Concept("block6", ConceptType.OBJECT, ConceptMode.G);
-			Concept whiteBlock = new Concept("block8", ConceptType.OBJECT, ConceptMode.G);
-			state.AddConcept(yellowBlock);
-			state.AddConcept(smPurpleBlock);
-			state.AddConcept(blackBlock);
-			state.AddConcept(greenBlock);
-			state.AddConcept(orangeBlock);
-			state.AddConcept(redBlock);
-			state.AddConcept(lgPurpleBlock);
-			state.AddConcept(whiteBlock);*/
-
 			Debug.Log (state);
 			return state;
 		}
@@ -189,6 +170,9 @@ namespace Agent {
 
         // Update is called once per frame
         void Update() {
+        }
+
+        public void AddNewConcept(Concept concept) {
         }
 
 		void LoadUserModel(string path) {

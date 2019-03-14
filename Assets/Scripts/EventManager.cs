@@ -460,8 +460,10 @@ public class EventManager : MonoBehaviour {
                         else {  // not a program
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                             Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
-                            referents.stack.Push(obj);
-                            OnEntityReferenced(this, new EventReferentArgs(obj));
+                            if ((referents.stack.Count == 0) || (referents.stack.Peek() != obj)) {
+                                referents.stack.Push(obj);
+                                OnEntityReferenced(this, new EventReferentArgs(obj));
+                            }
                         }
 					}
 					else {
