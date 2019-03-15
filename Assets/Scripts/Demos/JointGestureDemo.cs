@@ -103,6 +103,10 @@ public class JointGestureDemo : AgentInteraction {
 	GenericLogger logger;
 	int logIndex;
 
+    bool logActionsOnly;
+    bool logFullState;
+    bool useTimestamps;
+
 	List<Pair<string,string>> receivedMessages = new List<Pair<string,string>>();
 
 	Region leftRegion;
@@ -136,7 +140,10 @@ public class JointGestureDemo : AgentInteraction {
 	});
 
 	List<string> knownPreables = new List<string> (new string[] {
-		"diana",
+        "now",  // connective, not preamble
+        "and",
+        "so",
+		"diana",    // begin actual preambles
 		"could you",
 		"would you",
 		"can you",
@@ -191,6 +198,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
+        eventManager.AntecedentComputed += AntecedentIndicated;
 
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
 
@@ -205,6 +213,9 @@ public class JointGestureDemo : AgentInteraction {
 		if (PlayerPrefs.GetInt ("Make Logs") == 1) {
 			logger.OpenLog (PlayerPrefs.GetString ("Logs Prefix"));
 		}
+
+        logActionsOnly = (PlayerPrefs.GetInt("Actions Only Logs") == 1);
+        logFullState = (PlayerPrefs.GetInt("Full State Info") == 1);
 
 		logIndex = 0;
 
@@ -507,10 +518,13 @@ public class JointGestureDemo : AgentInteraction {
 		string messageStr = splitMessage[1];
 		string messageTime = splitMessage[2];
 
-		logger.OnLogEvent (this, new LoggerArgs (string.Format("{0}\t{1}\t{2}",
-			(++logIndex).ToString(),
-			string.Format("{0}{1}","H",messageType),
-			messageStr)));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    string.Format("{0}{1}", "H", messageType),
+                    messageStr)));
+        }
 
 		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
@@ -1596,9 +1610,23 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void BeginInteraction(object[] content) {
-		RespondAndUpdate ("Hello.");
+        RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
+            "Hello.");
 		MoveToPerform ();
 		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
+
+        if (logFullState) {
+            foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                if ((voxeme.gameObject.activeInHierarchy) &&
+                    (!objSelector.disabledObjects.Contains(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject)))) {
+                    logger.OnLogEvent(this, new LoggerArgs(
+                        string.Format("{0}\t{1}\t{2}",
+                            logIndex.ToString(),
+                            "", string.Format("{0}:{1},{2}", voxeme.gameObject.name, Helper.VectorToParsable(voxeme.gameObject.transform.position),
+                                  Helper.VectorToParsable(voxeme.gameObject.transform.eulerAngles)))));
+                }
+            }
+        }
 
 		if (!interactionLogic.waveToStart) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
@@ -2357,12 +2385,18 @@ public class JointGestureDemo : AgentInteraction {
 							relation.Item2 = "on";
 						}
 					}
-					Debug.Log(string.Format("{0} {1} {2}",relationsInForce[0].Item1.Item1,relationsInForce[0].Item2,relationsInForce[0].Item1.Item2));
 
-					RespondAndUpdate (string.Format ("The {0} block is {1} the {2} block.",
-						relationsInForce[0].Item1.Item1.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value,
-						relationsInForce[0].Item2,
-						relationsInForce[0].Item1.Item2.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value));
+                    if (relationsInForce.Count > 0) {
+                        Debug.Log(string.Format("{0} {1} {2}", relationsInForce[0].Item1.Item1, relationsInForce[0].Item2, relationsInForce[0].Item1.Item2));
+
+                        RespondAndUpdate(string.Format("The {0} block is {1} the {2} block.",
+                            relationsInForce[0].Item1.Item1.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value,
+                            relationsInForce[0].Item2,
+                            relationsInForce[0].Item1.Item2.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value));
+                    }
+                    else {
+                        RespondAndUpdate(string.Format("Sorry, I don't know the answer to that."));
+                    }
 				}
 			}
 
@@ -2406,7 +2440,21 @@ public class JointGestureDemo : AgentInteraction {
 				message = String.Join (" ", splitMessage.ToArray ());
 			}
 			Debug.Log (message);
-			// do stuff here
+            // do stuff here
+
+            // do verb mapping
+            if (message.StartsWith("pick up")) {
+                message = message.Replace("pick up", "lift");
+            }
+            else if (message.StartsWith("push")) {
+                message = message.Replace("push", "slide");
+            }
+
+            // assume everything is a block
+            if (message.Contains("one"))
+            {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
+                message = message.Replace("one", "block");
+            }
 
 			if (message.Contains ("there")) {
 				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) {
@@ -2450,7 +2498,24 @@ public class JointGestureDemo : AgentInteraction {
 
 			}
 			Debug.Log (message);
-			// do stuff here
+
+            if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
+                if (regionHighlight.GetComponent<Renderer>().material.color.a == 1.0f) {
+                    interactionLogic.RewriteStack(
+                        new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null,
+                                new Region(highlightCenter, vectorConeRadius * highlightOscUpper * 2),
+                                null, null, null)));
+                }
+            }
+            else {
+                // assume everything is a block
+                if (message.EndsWith("one")) {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
+                    message = message.Replace("one", "block");
+                }
+
+                PromptEvent(commBridge.NLParse(message));
+            }
 
 			break;
 
@@ -2710,7 +2775,7 @@ public class JointGestureDemo : AgentInteraction {
 				if ((block.activeInHierarchy) || (objSelector.disabledObjects.Contains(block))) {
 					if ((block.GetComponent<AttributeSet> ().attributes.Contains (
 						interactionLogic.RemoveInputSymbolType(
-							content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ())) && 
+                            content[0].ToString(),interactionLogic.GetInputSymbolType(content[0].ToString())).ToLower ().Replace("np ", ""))) && 
 						(isKnown) && (SurfaceClear(block)) && (block != interactionLogic.IndicatedObj) &&
 						(block != interactionLogic.GraspedObj)){
 						objectOptions.Add (block);
@@ -3276,7 +3341,9 @@ public class JointGestureDemo : AgentInteraction {
 			LookForward ();
 			TurnForward ();
 		}
-	
+
+        eventManager.ClearEvents();
+
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 			interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
 				null, null, null)));
@@ -4308,11 +4375,13 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("look_at({0})",obj.name))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("look_at({0})", obj.name))));
+        }
 	}
 
 	void LookAt(Vector3 point) {
@@ -4322,11 +4391,13 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.0f;
 		Diana.GetComponent<LookAtIK> ().solver.headWeight = 1.0f;
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("look_at({0})",Helper.VectorToParsable(point)))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("look_at({0})", Helper.VectorToParsable(point)))));
+        }
 	}
 
 	void PointAt(Vector3 point, GameObject hand) {
@@ -4347,11 +4418,14 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		gestureController.PerformGesture (performGesture);
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("point({0},{1})",hand.name,Helper.VectorToParsable(point)))));
+
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("point({0},{1})", hand.name, Helper.VectorToParsable(point)))));
+        }
 	}
 
 	void TurnToward(GameObject obj) {
@@ -4571,11 +4645,13 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("reach({0})",Helper.VectorToParsable(coord)))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("reach({0})", Helper.VectorToParsable(coord)))));
+        }
 
 		LookForward ();
 	}
@@ -4601,13 +4677,15 @@ public class JointGestureDemo : AgentInteraction {
 			InteractionHelper.SetLeftHandTarget (Diana, ikControl.leftHandObj);
 		}
 
-		//LookAt (obj);
+        //LookAt (obj);
 
-		logger.OnLogEvent(this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				string.Format("reach({0})",obj.name))));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    string.Format("reach({0})", obj.name))));
+        }
 	}
 
 	public void StorePose() {
@@ -4686,11 +4764,13 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void RespondAndUpdate(string utterance) {
 		if (OutputHelper.GetCurrentOutputString(Role.Affector) != utterance) {
-		logger.OnLogEvent (this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AS",
-				string.Format("\"{0}\"",utterance))));
+            if (!logActionsOnly) {
+                logger.OnLogEvent(this, new LoggerArgs(
+                    string.Format("{0}\t{1}\t{2}",
+                        (++logIndex).ToString(),
+                        "AS",
+                        string.Format("\"{0}\"", utterance))));
+            }
 		}
 
 		OutputHelper.PrintOutput (Role.Affector, utterance);
@@ -4740,21 +4820,36 @@ public class JointGestureDemo : AgentInteraction {
 		eventManager.InsertEvent ("", 0);
 		eventManager.InsertEvent (eventStr, 1);
 
-		logger.OnLogEvent (this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AA",
-				eventStr)));
+        logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AA",
+                    eventStr)));
+        
+        if (logFullState) {
+            foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                if ((voxeme.gameObject.activeInHierarchy) && 
+                    (!objSelector.disabledObjects.Contains(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject)))) {
+                    logger.OnLogEvent(this, new LoggerArgs(
+                        string.Format("{0}\t{1}\t{2}",
+                            logIndex.ToString(),
+                            "", string.Format("{0}:{1},{2}", voxeme.gameObject.name, Helper.VectorToParsable(voxeme.gameObject.transform.position),
+                                  Helper.VectorToParsable(voxeme.gameObject.transform.eulerAngles)))));
+                }
+            }
+        }
 	}
 
 	void PerformAndLogGesture(AvatarGesture gesture) {
 		gestureController.PerformGesture (gesture);
 
-		logger.OnLogEvent (this, new LoggerArgs (
-			string.Format("{0}\t{1}\t{2}",
-				(++logIndex).ToString(),
-				"AG",
-				gesture.Name)));
+        if (!logActionsOnly) {
+            logger.OnLogEvent(this, new LoggerArgs(
+                string.Format("{0}\t{1}\t{2}",
+                    (++logIndex).ToString(),
+                    "AG",
+                    gesture.Name)));
+        }
 	}
 
 	void ReturnToRest(object sender, EventArgs e) {
@@ -4763,7 +4858,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (!interactionSystem.IsPaused (FullBodyBipedEffector.LeftHand) &&
 				!interactionSystem.IsPaused (FullBodyBipedEffector.RightHand)) {
 				TurnForward ();
-				LookForward ();
+                LookForward ();
 
 				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
 					interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
@@ -4773,7 +4868,13 @@ public class JointGestureDemo : AgentInteraction {
 				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
 					if ((interactionLogic.ActionOptions.Count > 0) &&
 					   (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift"))) {
-						interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
+                        GameObject graspedObject = null;
+                        if (((EventManagerArgs)e).EventString.Contains("lift")) {
+                            graspedObject = eventManager.ExtractObjects("lift", (String)Helper.ParsePredicate(((EventManagerArgs)e).EventString)["lift"])[0] as GameObject;
+                        }
+					    interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+                            interactionLogic.GenerateStackSymbol(null,graspedObject,
+                                null,null,null,null)));
 					}
 				}
 			}
@@ -4782,6 +4883,26 @@ public class JointGestureDemo : AgentInteraction {
 	//		Debug.Log (interactionSystem.IsPaused (FullBodyBipedEffector.RightHand));
 		}
 	}
+
+    void AntecedentIndicated(object sender, EventArgs e)
+    {
+        if (((EventAntecedentArgs)e).Antecendent is String)   // object
+        {
+            GameObject obj = GameObject.Find(((string)((EventAntecedentArgs)e).Antecendent).ToString());
+            if (obj != null)
+            {
+                if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
+                {
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
+                        interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                }
+            }
+        }
+        else if (((EventAntecedentArgs)e).Antecendent is Vector3) // location
+        {
+        }
+
+    }
 
 	void ConnectionLost(object sender, EventArgs e) {
 		LookForward();

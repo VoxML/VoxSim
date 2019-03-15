@@ -814,6 +814,7 @@ public class Predicates : MonoBehaviour {
 
 		if (args [0] is GameObject) {	// assume all inputs are of same type
 			int index = random.Next(args.Length);
+            Debug.Log(index);
 			objName = (args [index] as GameObject).name;
 		}
 

@@ -22,20 +22,8 @@ public class Launcher : FontManager {
 	[HideInInspector]
 	public string ipContent = "IP";
 
-//	[HideInInspector]
-//	public string csuUrl;
-//
-//	[HideInInspector]
-//	public string epiSimUrl;
-//
-//	[HideInInspector]
-//	public string parserUrl;
-
 	[HideInInspector]
 	public string inPort;
-
-//	[HideInInspector]
-//	public string sriUrl;
 
 	[HideInInspector]
 	public int numUrls = 0;
@@ -53,6 +41,15 @@ public class Launcher : FontManager {
 
 	[HideInInspector]
 	public string logsPrefix;
+
+    [HideInInspector]
+    public bool actionsOnly;
+
+    [HideInInspector]
+    public bool fullState;
+
+    [HideInInspector]
+    public bool logTimestamps;
 
 	[HideInInspector]
 	public bool captureVideo;
@@ -119,6 +116,7 @@ public class Launcher : FontManager {
 	
 	Vector2 masterScrollPosition;
 	Vector2 sceneBoxScrollPosition;
+    Vector2 logsPrefsBoxScrollPosition;
 	Vector2 urlBoxScrollPosition;
 	Vector2 videoPrefsBoxScrollPosition;
 	Vector2 paramPrefsBoxScrollPosition;
@@ -269,16 +267,43 @@ public class Launcher : FontManager {
 #endif
 
 #if !UNITY_IOS
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 65, 90*fontSizeModifier, 25*fontSizeModifier), "Make Logs");
-		makeLogs = GUI.Toggle (new Rect (bgLeft+100, bgTop+65, 25, 25*fontSizeModifier), makeLogs, string.Empty);
+		GUI.Label (new Rect (bgLeft + 10, bgTop + 60, 90*fontSizeModifier, 25*fontSizeModifier), "Make Logs");
+		makeLogs = GUI.Toggle (new Rect (bgLeft+100, bgTop+60, 25, 25*fontSizeModifier), makeLogs, string.Empty);
 
 		if (makeLogs) {
-			GUI.Label (new Rect (bgLeft + 135, bgTop + 65, 90*fontSizeModifier, 25*fontSizeModifier), "Prefix");
-			logsPrefix = GUI.TextField (new Rect (bgLeft+180, bgTop+65, 70, 25*fontSizeModifier), logsPrefix);
+            GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 85, 290 * fontSizeModifier, 45 * fontSizeModifier), GUI.skin.box);
+            logsPrefsBoxScrollPosition = GUILayout.BeginScrollView(logsPrefsBoxScrollPosition, false, false);
+            GUILayout.BeginVertical(GUI.skin.box);
+
+            //GUILayout.Label("Video Capture Mode", GUILayout.Width(GUI.skin.label.CalcSize(new GUIContent("Video Capture Mode")).x + 10));
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Prefix", GUILayout.Width(150 * fontSizeModifier));
+            logsPrefix = GUILayout.TextField (logsPrefix, GUILayout.Width(80 * fontSizeModifier));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Actions Only Logs", GUILayout.Width(150 * fontSizeModifier));
+            actionsOnly = GUILayout.Toggle(actionsOnly, string.Empty, GUILayout.Width(20 * fontSizeModifier));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Full State Info", GUILayout.Width(150 * fontSizeModifier));
+            fullState = GUILayout.Toggle(fullState, string.Empty, GUILayout.Width(20 * fontSizeModifier));
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Timestamps", GUILayout.Width(150 * fontSizeModifier));
+            logTimestamps = GUILayout.Toggle(logTimestamps, string.Empty, GUILayout.Width(20 * fontSizeModifier));
+            GUILayout.EndHorizontal();
+
+            GUILayout.EndVertical();
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
 		}
 #endif
 
-		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 95, 290*fontSizeModifier, 115*fontSizeModifier),GUI.skin.box);
+		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 135, 290*fontSizeModifier, 95*fontSizeModifier),GUI.skin.box);
 		urlBoxScrollPosition = GUILayout.BeginScrollView(urlBoxScrollPosition, false, false); 
 		GUILayout.BeginVertical(GUI.skin.box);
 
@@ -336,24 +361,24 @@ public class Launcher : FontManager {
 		GUILayout.EndArea();
 
 #if !UNITY_IOS
-		GUI.Label (new Rect (bgLeft + 10, bgTop + 210, 90*fontSizeModifier, 25*fontSizeModifier), "Capture Video");
-		captureVideo = GUI.Toggle (new Rect (bgLeft+100, bgTop+210, 20, 25*fontSizeModifier), captureVideo, string.Empty);
+		GUI.Label (new Rect (bgLeft + 10, bgTop + 230, 90*fontSizeModifier, 25*fontSizeModifier), "Capture Video");
+		captureVideo = GUI.Toggle (new Rect (bgLeft+100, bgTop+230, 20, 25*fontSizeModifier), captureVideo, string.Empty);
 
 		if (captureVideo) {
 			captureParams = false;
 		}
 
-		GUI.Label (new Rect (bgLeft + 135, bgTop + 210, 150*fontSizeModifier, 25*fontSizeModifier), "Capture Params");
-		captureParams = GUI.Toggle (new Rect (bgLeft+235, bgTop+210, 20, 25*fontSizeModifier), captureParams, string.Empty);
+		GUI.Label (new Rect (bgLeft + 135, bgTop + 230, 150*fontSizeModifier, 25*fontSizeModifier), "Capture Params");
+		captureParams = GUI.Toggle (new Rect (bgLeft+235, bgTop+230, 20, 25*fontSizeModifier), captureParams, string.Empty);
 
 		if (captureParams) {
 			captureVideo = false;
 		}
 
 		if (captureVideo) {
-			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 235, 
+			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 255, 
 				(((13*Screen.width/24)-20*fontSizeModifier)-bgLeft < 395*fontSizeModifier) ? ((13*Screen.width/24)-20*fontSizeModifier)-(bgLeft) : 395*fontSizeModifier,
-				(bgTop + bgHeight - 60)-(bgTop + 245) < 210*fontSizeModifier ? (bgTop + bgHeight - 60)-(bgTop + 245) : 210*fontSizeModifier), GUI.skin.box);
+				(bgTop + bgHeight - 80)-(bgTop + 245) < 210*fontSizeModifier ? (bgTop + bgHeight - 80)-(bgTop + 245) : 210*fontSizeModifier), GUI.skin.box);
 			videoPrefsBoxScrollPosition = GUILayout.BeginScrollView(videoPrefsBoxScrollPosition, false, false, GUILayout.ExpandWidth(true), GUILayout.MaxWidth((13*Screen.width/24)-20*fontSizeModifier)); 
 			GUILayout.BeginVertical(GUI.skin.box);
 
@@ -440,9 +465,9 @@ public class Launcher : FontManager {
 			GUILayout.EndArea();
 		}
 		else if (captureParams) {
-			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 235, 
+			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 255, 
 				(((13*Screen.width/24)-20*fontSizeModifier)-bgLeft < 380*fontSizeModifier) ? ((13*Screen.width/24)-20*fontSizeModifier)-(bgLeft) : 380*fontSizeModifier,
-				(bgTop + bgHeight - 60)-(bgTop + 245) < 190*fontSizeModifier ? (bgTop + bgHeight - 60)-(bgTop + 245) : 190*fontSizeModifier), GUI.skin.box);
+				(bgTop + bgHeight - 80)-(bgTop + 245) < 170*fontSizeModifier ? (bgTop + bgHeight - 80)-(bgTop + 245) : 170*fontSizeModifier), GUI.skin.box);
 			paramPrefsBoxScrollPosition = GUILayout.BeginScrollView(paramPrefsBoxScrollPosition, false, false); 
 			GUILayout.BeginVertical(GUI.skin.box);
 
@@ -559,6 +584,9 @@ public class Launcher : FontManager {
 		inPort = PlayerPrefs.GetString("Listener Port");
 		makeLogs = (PlayerPrefs.GetInt("Make Logs") == 1);
 		logsPrefix = PlayerPrefs.GetString("Logs Prefix");
+        actionsOnly = (PlayerPrefs.GetInt("Actions Only Logs") == 1);
+        fullState = (PlayerPrefs.GetInt("Full State Info") == 1);
+        logTimestamps = (PlayerPrefs.GetInt("Timestamps") == 1);
 
 		numUrls = 0;
 		string urlsString = PlayerPrefs.GetString("URLs");
@@ -570,10 +598,6 @@ public class Launcher : FontManager {
 			}
 		}
 
-//		csuUrl = PlayerPrefs.GetString("Fusion URL");
-//		epiSimUrl = PlayerPrefs.GetString("EpiSim URL");
-//		sriUrl = PlayerPrefs.GetString("SRI URL");
-//		parserUrl = PlayerPrefs.GetString("Parser URL");
 		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
 		captureParams = (PlayerPrefs.GetInt("Capture Params") == 1);
 		videoCaptureMode = (VideoCaptureMode)PlayerPrefs.GetInt("Video Capture Mode");
@@ -587,7 +611,6 @@ public class Launcher : FontManager {
 		captureDB = PlayerPrefs.GetString("Video Capture DB");
 		videoOutputDir = PlayerPrefs.GetString("Video Output Directory");
 		editableVoxemes = (PlayerPrefs.GetInt("Make Voxemes Editable") == 1);
-//		teachingAgent = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 		eulaAccepted = (PlayerPrefs.GetInt("EULA Accepted") == 1);
 	}
 	
@@ -603,6 +626,9 @@ public class Launcher : FontManager {
 		PlayerPrefs.SetString("Listener Port", inPort);
 		PlayerPrefs.SetInt("Make Logs", System.Convert.ToInt32(makeLogs));
 		PlayerPrefs.SetString("Logs Prefix", logsPrefix);	
+        PlayerPrefs.SetInt("Actions Only Logs", System.Convert.ToInt32(actionsOnly));
+        PlayerPrefs.SetInt("Full State Info", System.Convert.ToInt32(fullState));
+        PlayerPrefs.SetInt("Timestamps", System.Convert.ToInt32(logTimestamps));
 
 		string urlsString = string.Empty;
 		for (int i = 0; i < numUrls; i++) {
@@ -610,10 +636,6 @@ public class Launcher : FontManager {
 		}
 		PlayerPrefs.SetString("URLs", urlsString);
 
-		//		PlayerPrefs.SetString("Fusion URL", csuUrl);
-//		PlayerPrefs.SetString("EpiSim URL", epiSimUrl);
-//		PlayerPrefs.SetString("SRI URL", sriUrl);
-//		PlayerPrefs.SetString("Parser URL", parserUrl);
 		PlayerPrefs.SetInt("Capture Video", System.Convert.ToInt32(captureVideo));
 		PlayerPrefs.SetInt("Capture Params", System.Convert.ToInt32(captureParams));
 		PlayerPrefs.SetInt("Video Capture Mode", System.Convert.ToInt32(videoCaptureMode));
@@ -627,7 +649,6 @@ public class Launcher : FontManager {
 		PlayerPrefs.SetString("Video Capture DB", captureDB);
 		PlayerPrefs.SetString("Video Output Directory", videoOutputDir);
 		PlayerPrefs.SetInt("Make Voxemes Editable", System.Convert.ToInt32(editableVoxemes));
-//		PlayerPrefs.SetInt("Use Teaching Agent", System.Convert.ToInt32(teachingAgent));
 	}
 }
 

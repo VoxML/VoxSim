@@ -11,9 +11,13 @@ using Global;
 using Network;
 
 public class DianaOzStudies : MonoBehaviour {
+    void EventManager_EventComplete(object sender, EventArgs e)
+    {
+    }
+
 
 	class CommanderStatus {
-		public CommanderStatus(string _input, string _question, string _utter, string _anim, string _show, string _hide, string _clicked) {
+		public CommanderStatus(string _input, string _question, string _utter, string _anim, string _show, string _hide, string _clicked, string _state) {
 			input = _input;
 			question = _question;
 			utter = _utter;
@@ -21,6 +25,7 @@ public class DianaOzStudies : MonoBehaviour {
 			show = _show;
 			hide = _hide;
 			clicked = _clicked;
+            state = _state;
 		}
 
 		public string input;
@@ -30,6 +35,7 @@ public class DianaOzStudies : MonoBehaviour {
 		public string show;
 		public string hide;
 		public string clicked;
+        public string state;
 	}
 
 	GameObject restClient;
@@ -40,18 +46,22 @@ public class DianaOzStudies : MonoBehaviour {
 	float getInterval = 100;
 	bool get = false;
 
+    GameObject behaviorController;
 	JointGestureDemo world;
 	Predicates preds;
 	ObjectSelector objSelector;
+    EventManager eventManager;
 
 	// Use this for initialization
 	void Start () {
 		restClient = new GameObject("RestClient");
 		restClient.AddComponent<RestClient>();
 
+        behaviorController = GameObject.Find("BehaviorController");
 		world = GameObject.Find ("JointGestureDemo").GetComponent<JointGestureDemo> ();
-		preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
 		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+        preds = behaviorController.GetComponent<Predicates>();
+        eventManager = behaviorController.GetComponent<EventManager>();
 
 		if (PlayerPrefs.HasKey ("URLs")) {
 			string cmdrUrlString = string.Empty;
@@ -69,6 +79,7 @@ public class DianaOzStudies : MonoBehaviour {
 		restClient.GetComponent<RestClient>().GotData += ConsumeData;
 		world.ObjectSelected += BlockClicked;
 		world.PointSelected += PointClicked;
+        eventManager.EventComplete += EventCompleted;
 
 		// Create a timer
 		getTimer = new Timer();
@@ -163,13 +174,20 @@ public class DianaOzStudies : MonoBehaviour {
 
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
 			JsonUtility.ToJson(new CommanderStatus("","","","","","",
-				string.Format("the {0} block",color))),
+				string.Format("the {0} block",color),"")),
 				"okay", "error");
 	}
 
 	void PointClicked(object sender, EventArgs e) {
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","","","","",Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content))),
+			JsonUtility.ToJson(new CommanderStatus("","","","","","",
+                Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content),"")),
 				"okay", "error");
 	}
+
+    void EventCompleted(object sender, EventArgs e) {
+        restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
+            JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "","", "")),
+                "okay", "error");
+    }
 }

@@ -28,6 +28,16 @@ public class EventManagerArgs : EventArgs {
 	}
 }
 
+public class EventAntecedentArgs : EventArgs {
+
+    public object Antecendent { get; set; }
+
+    public EventAntecedentArgs(object antecendent)
+    {
+        this.Antecendent = antecendent;
+    }
+}
+
 public class EventManager : MonoBehaviour {
 	public FullBodyBipedIK bodyIk;
 	public InteractionLookAt lookAt = new InteractionLookAt();
@@ -45,6 +55,8 @@ public class EventManager : MonoBehaviour {
 	public Dictionary<String,String> evalOrig = new Dictionary<String, String>();
 	public Dictionary<String,String> evalResolved = new Dictionary<String, String>();
 	public Hashtable globalVars = new Hashtable();
+
+    public List<object> antecedents = new List<object>();
 
 	public double eventWaitTime = 2000.0;
 	Timer eventWaitTimer;
@@ -77,6 +89,16 @@ public class EventManager : MonoBehaviour {
 			ObjectsResolved(this, e);
 		}
 	}
+
+    public event EventHandler AntecedentComputed;
+
+    public void OnAntecedentComputed(object sender, EventArgs e)
+    {
+        if (AntecedentComputed != null)
+        {
+            AntecedentComputed(this, e);
+        }
+    }
 
 	public event EventHandler SatisfactionCalculated;
 
@@ -328,9 +350,14 @@ public class EventManager : MonoBehaviour {
 				}
 				else {
 					if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
-						//OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-						EventManagerArgs eventArgs = new EventManagerArgs (completedEvent);
-						OnEventComplete (this, eventArgs);
+                        //OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
+                        string pred = Helper.GetTopPredicate(completedEvent);
+                        MethodInfo method = preds.GetType().GetMethod(pred.ToUpper());
+                        if ((method != null) && (method.ReturnType == typeof(void))) {    // is a program
+                            Debug.Log(string.Format("Completed {0}", completedEvent));
+                            EventManagerArgs eventArgs = new EventManagerArgs(completedEvent);
+                            OnEventComplete(this, eventArgs);
+                        }
 					}
 				}
 			}
@@ -507,7 +534,7 @@ public class EventManager : MonoBehaviour {
 		return true;
 	}
 
-	List<object> ExtractObjects (String pred, String predArg)
+	public List<object> ExtractObjects (String pred, String predArg)
 	{
 		List<object> objs = new List<object> ();
 		Queue<String> argsStrings = new Queue<String> (predArg.Split (new char[] {
@@ -578,12 +605,20 @@ public class EventManager : MonoBehaviour {
 				var objs = ExtractObjects (pred, (String)predArgs [pred]);
 
 				if (preds.rdfTriples.Count > 0) {
-					if (methodToCall != null) {
-						Debug.Log("========================== ExecuteCommand ============================");
-						Debug.Log ("ExecuteCommand: invoke " + methodToCall.Name);
-						object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
-						Debug.Log (evaluatedCommand);
-						OnExecuteEvent (this, new EventManagerArgs (evaluatedCommand));
+                    if (methodToCall != null) { // found a method
+                        if (methodToCall.ReturnType == typeof(void)) { // is it a program?
+                            Debug.Log("========================== ExecuteCommand ============================");
+                            Debug.Log("ExecuteCommand: invoke " + methodToCall.Name);
+                            object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
+                            Debug.Log(evaluatedCommand);
+                            OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
+                        }
+                        else {  // not a program
+                            object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
+                            Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
+                            antecedents.Add(obj);
+                            OnAntecedentComputed(this, new EventAntecedentArgs(obj));
+                        }
 					}
 					else {
 						if (File.Exists (Data.voxmlDataPath + string.Format ("/programs/{0}.xml", pred))) {
@@ -593,7 +628,8 @@ public class EventManager : MonoBehaviour {
 						}
 					}
 				}
-			} catch (ArgumentNullException e){
+			}
+            catch (ArgumentNullException e){
 				return;
 			}
 		}
@@ -610,6 +646,8 @@ public class EventManager : MonoBehaviour {
 
 	public void ClearEvents() {
 		events.Clear ();
+        evalOrig.Clear();
+        evalResolved.Clear();
 		OnForceClear (this, null);
 	}
 

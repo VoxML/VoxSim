@@ -30,7 +30,7 @@ public class GenericLogger : MonoBehaviour {
 //
 //	protected InputController inputController;
 
-//	protected bool log;
+	protected bool logTimestamps;
 	StreamWriter logFile;
 
 	public Dictionary<string, Vector3> defaultState = new Dictionary<string, Vector3>();
@@ -47,8 +47,8 @@ public class GenericLogger : MonoBehaviour {
 
 	// Use this for initialization
 	public void Start () {
-//		log = (PlayerPrefs.GetInt ("Make Logs") == 1);
-//
+        logTimestamps = (PlayerPrefs.GetInt("Timestamps") == 1);
+        //
 //		// log default state
 //		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 //		foreach (GameObject o in allObjects) {
@@ -113,7 +113,7 @@ public class GenericLogger : MonoBehaviour {
 
 	protected void Log (string content) {
 		if (PlayerPrefs.GetInt("Make Logs") == 1) {
-			logFile.WriteLine(string.Format("{0}\t{1}",content,logTimer.ToString()));
+            logFile.WriteLine(string.Format("{0}\t{1}",content,logTimestamps ? logTimer.ToString() : string.Empty));
 		}
 	}
 

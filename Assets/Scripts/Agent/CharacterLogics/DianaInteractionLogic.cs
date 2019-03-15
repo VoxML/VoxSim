@@ -1094,21 +1094,24 @@ namespace Agent
 				GetInputSymbolsByName("S VP"),
 				GenerateStackSymbol(null, null, null, null, null, null),	
 				GetState("ParseVP"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S VP"),
 				GenerateStackSymbolFromConditions((o) => o != null, null, null, null, null, null),	
 				GetState("ParseVP"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S NP"),
 				GenerateStackSymbol(null, null, null, null, null, null),	
 				GetState("ParseNP"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -1117,13 +1120,35 @@ namespace Agent
 				GetState("ParsePP"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
-				GetStates("ParseVP"),
-				null,
-				GenerateStackSymbolFromConditions(null, null, null, null, 
-					(a) => a.Count == 1, null),	
-				GetState("ConfirmEvent"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => a.Count == 1, null),
+                GetState("ConfirmEvent"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+            
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null,
+                    (r) => r != null && r.max != r.min,
+                    null, null, null
+                ),  
+                GetState("InterpretDeixis"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o != null, null,
+                    null, null, null, null
+                ),
+                GetState("ConfirmObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			// if items have value, check and see if sentence is consistent with them
 //			TransitionRelation.Add(new PDAInstruction(
@@ -1139,6 +1164,41 @@ namespace Agent
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseQuestion"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseSentence"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParsePP"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("TrackPointing"),
