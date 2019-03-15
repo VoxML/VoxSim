@@ -1648,13 +1648,23 @@ public class JointGestureDemo : AgentInteraction {
 			break;
 
 		case 1:
-			string message = null;
+            string message = null;
 
-			if (content [0] != null) {
-				message = GetSpeechString(
-					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+            if (content[0] != null) {
+                message = GetSpeechString(
+                    interactionLogic.RemoveInputSymbolType((string)content[0], interactionLogic.GetInputSymbolType((string)content[0])), "S");
 
-			}
+                foreach (string preamble in knownPreables) {
+                    if (message.Contains(preamble)) {
+                        if (preamble.Contains(" ")) {
+                            message = message.Replace(preamble, preamble.Replace(" ", "_"));
+                        }
+                    }
+                }
+
+                List<string> splitMessage = message.Split().Where(m => (!knownDysfluencies.Contains(m) && !knownPreables.Contains(m))).ToList();
+                message = String.Join(" ", splitMessage.ToArray());
+            }
 			Debug.Log (message);
 
             if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
@@ -1695,11 +1705,22 @@ public class JointGestureDemo : AgentInteraction {
 		case 1:
 			string message = null;
 
-			if (content [0] != null) {
-				message = GetSpeechString(
-					interactionLogic.RemoveInputSymbolType((string)content [0],interactionLogic.GetInputSymbolType((string)content [0])), "S");
+            if (content[0] != null)
+            {
+                message = GetSpeechString(
+                    interactionLogic.RemoveInputSymbolType((string)content[0], interactionLogic.GetInputSymbolType((string)content[0])), "S");
 
-			}
+                foreach (string preamble in knownPreables) {
+                    if (message.Contains(preamble)) {
+                        if (preamble.Contains(" ")) {
+                            message = message.Replace(preamble, preamble.Replace(" ", "_"));
+                        }
+                    }
+                }
+
+                List<string> splitMessage = message.Split().Where(m => (!knownDysfluencies.Contains(m) && !knownPreables.Contains(m))).ToList();
+                message = String.Join(" ", splitMessage.ToArray());
+            }
 			Debug.Log (message);
 			// do stuff here
 
@@ -2061,6 +2082,41 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
+    public void IndexByGesture(object[] content) {
+        // type check
+        if (!Helper.CheckAllObjectsOfType(content, typeof(string))) {
+            return;
+        }
+
+        switch (content.Length) {
+            case 0:
+                break;
+
+            case 1:
+                string message = (string)content[0];
+                Debug.Log(message);
+                // find object associated with this conventional grasp pose
+                GameObject obj = null;
+                StackSymbolContent symbolContent = ((StackSymbolContent)interactionLogic.LearnableInstructions[
+                    interactionLogic.GetLearnableInstructionKeyByName(message)].Content);
+
+                if (((List<string>)symbolContent.ActionOptions).Count > 0) {
+                    string instructionCmd = ((List<string>)((StackSymbolContent)interactionLogic.LearnableInstructions[
+                        interactionLogic.GetLearnableInstructionKeyByName(message)].Content).ActionOptions)[0];
+
+                    obj = eventManager.ExtractObjects(Helper.GetTopPredicate(instructionCmd),
+                        (String)Helper.ParsePredicate(instructionCmd)[Helper.GetTopPredicate(instructionCmd)])[0] as GameObject;
+
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+
 	public void RegionAsGoal(object[] content) {
 		if ((interactionLogic.IndicatedObj != null) || (interactionLogic.GraspedObj != null)) {
 			RespondAndUpdate ("Should I place this here?");
@@ -2180,12 +2236,26 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void StartGrab(object[] content) {
         // see if this object has a learned conventional grasp pose associated with it
-        List<PDAStackOperation> targetObjOps = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
-            ((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject)).ToList();
+        GameObject obj = null;
 
-        Debug.Log(targetObjOps.Count);
+        if (interactionLogic.ActionOptions.Count > 0) {
+            obj = eventManager.ExtractObjects(
+                Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[
+                    Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0] as GameObject;
+        }
+        
+        List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
+            ((((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject) || 
+            (((StackSymbolContent)op.Content).GraspedObj as GameObject == obj)))).ToList();
 
-        if ((interactionLogic.IndicatedObj != null) && (targetObjOps.Count == 0)) {
+        //Debug.Log(eventManager.ExtractObjects(
+                //Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                //(String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[
+                //Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0]);
+        Debug.Log(learnedActionSymbols.Count);
+
+        if ((interactionLogic.IndicatedObj != null) && (learnedActionSymbols.Count == 0)) {
             int numGrabPoses = GetNumberOfGrabPoses(interactionLogic.IndicatedObj);
 
             if (numGrabPoses > 1)
@@ -2201,8 +2271,8 @@ public class JointGestureDemo : AgentInteraction {
         else {
             if (interactionLogic.IndicatedObj != null) {
                 string graspCmd = string.Format("grasp({0})", interactionLogic.IndicatedObj.name);
-                if (targetObjOps.Count == 1) {    // should only have one (for now)
-                    graspCmd = ((List<string>)((StackSymbolContent)targetObjOps[0].Content).ActionOptions)[0];
+                if (learnedActionSymbols.Count == 1) {    // should only have one (for now)
+                    graspCmd = ((List<string>)((StackSymbolContent)learnedActionSymbols[0].Content).ActionOptions)[0];
                 }
 
                 RespondAndUpdate("OK.");
@@ -2211,6 +2281,15 @@ public class JointGestureDemo : AgentInteraction {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                 interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
                     interactionLogic.IndicatedObj, null, null, null, null)));
+            }
+            else if (learnedActionSymbols.Count == 1)
+            {
+                RespondAndUpdate("OK.");
+                PromptEvent(((List<string>)((StackSymbolContent)learnedActionSymbols[0].Content).ActionOptions)[0]);
+
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                    obj, null, null, null, null)));
             }
             else if (interactionLogic.ActionOptions.Count > 0) {
                 List<object> args = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]), 
@@ -2496,14 +2575,11 @@ public class JointGestureDemo : AgentInteraction {
     }
 
     public void LearningFailed(object[] content) {
-        if (interactionLogic.GraspedObj != null) {
-            PromptEvent(string.Format("ungrasp({0})", interactionLogic.GraspedObj.name));
-            ReturnHandsToDefault();
-        }
         LookForward();
         TurnForward();
 
         if (interactionLogic.GraspedObj != null) {
+            PromptEvent(string.Format("ungrasp({0})", interactionLogic.GraspedObj.name));
             ReturnHandsToDefault();
         }
 
@@ -2557,7 +2633,7 @@ public class JointGestureDemo : AgentInteraction {
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 	}
 
-	public void BlockUnavailable(object[] content) {
+	public void ObjectUnavailable(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
 			if (interactionLogic.ActionOptions.Count > 0) {
 				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
@@ -2582,7 +2658,7 @@ public class JointGestureDemo : AgentInteraction {
 			TurnForward ();
 		}
 			
-		RespondAndUpdate ("Sorry, I can't find a block like that that I can use.");
+        RespondAndUpdate ("Sorry, I can't find an object like that that I can use.");
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,null));
 	}

@@ -401,7 +401,7 @@ public class EventManager : MonoBehaviour {
 							objs.Add (arg as String);
 						}
 						else {
-                            //Debug.Log(arg as String);
+                            Debug.Log(arg as String);
 							List<GameObject> matches = new List<GameObject> ();
 							foreach (Voxeme voxeme in objSelector.allVoxemes) {
 								if (voxeme.voxml.Lex.Pred.Equals (arg as String)) {
@@ -432,6 +432,15 @@ public class EventManager : MonoBehaviour {
                                         }
                                     }
 								    objs.Add (go);
+                                }
+                                else {
+                                    List<object> args = ExtractObjects(Helper.GetTopPredicate(arg as String),
+                                        (String)Helper.ParsePredicate(arg as String)[
+                                        Helper.GetTopPredicate(arg as String)]);
+
+                                    foreach (object o in args) {
+                                        objs.Add(o);
+                                    }
                                 }
 							}
 							else {

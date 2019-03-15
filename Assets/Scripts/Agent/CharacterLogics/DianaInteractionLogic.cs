@@ -731,6 +731,7 @@ namespace Agent
 			States.Add(new PDAState("IndexByColor",null));
 			States.Add(new PDAState("IndexBySize",null));
 			States.Add(new PDAState("IndexByRegion",null));
+            States.Add(new PDAState("IndexByGesture", null));
 			States.Add(new PDAState("RegionAsGoal",
 				new TransitionGate(
 					new FunctionDelegate(EpistemicallyCertain),
@@ -792,7 +793,7 @@ namespace Agent
 			States.Add(new PDAState("ConfirmEvent",null));
 			States.Add(new PDAState("ExecuteEvent",null));
 			States.Add(new PDAState("AbortAction",null));
-			States.Add(new PDAState("BlockUnavailable",null));
+			States.Add(new PDAState("ObjectUnavailable",null));
 			States.Add(new PDAState("Confusion",null));
 			States.Add(new PDAState("CleanUp",null));
 			States.Add(new PDAState("EndState",null));
@@ -1720,7 +1721,7 @@ namespace Agent
 					(o) => o == null, (g) => g == null, null,
 					(m) => m.Count == 0, null, null
 				),
-				GetState("BlockUnavailable"),
+				GetState("ObjectUnavailable"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
@@ -2458,7 +2459,7 @@ namespace Agent
 					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
 			TransitionRelation.Add(new PDAInstruction(
-				GetStates("BlockUnavailable"),
+				GetStates("ObjectUnavailable"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("Wait"),
@@ -3211,11 +3212,56 @@ namespace Agent
                 GetStates("RequestObject"),
                 GetInputSymbolsByName(instructionKey),
                 GenerateStackSymbolFromConditions(
-                    null, null, null, null,
+                    null, null, (r) => r == null, null,
                     (a) => ((a.Count > 0) &&
-                        (a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0), null),
-                GetState("StartGrab"),
+                        (a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0), null),
+                    GetState("StartGrab"), 
                 stackOperation));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestObject"),
+                GetInputSymbolsByName(instructionKey),
+                GenerateStackSymbolFromConditions(
+                    null, null, (r) => r != null, null,
+                    null, null),
+                GetState("IndexByGesture"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("IndexByGesture"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null,
+                    (m) => m.Count > 1, null, null
+                ),
+                GetState("DisambiguateObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("IndexByGesture"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o != null, null, null,
+                    null, null, null
+                ),
+                GetState("ComposeObjectAndAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, new List<GameObject>(),
+                        new FunctionDelegate(GeneratePutAtRegionCommand), new List<string>()))));
+
+            //TransitionRelation.Add(new PDAInstruction(
+                //GetStates("IndexByGesture"),
+                //null,
+                //GenerateStackSymbolFromConditions(
+                //    null, (g) => g != null, null,
+                //    (m) => m.Count == 1,
+                //    (a) => ((a.Count == 0) || ((a.Count > 0) &&
+                //        (a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0)),
+                //    null),
+                //GetState("ConfirmObject"),
+                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    //new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
+                        //new List<GameObject>(), null, null))));
 
             // add new items to EpiSim
             epistemicModel.AddNewConcept(new Concept(RemoveInputSymbolType(instructionKey,GetInputSymbolType(instructionKey)), ConceptType.ACTION, ConceptMode.G));
