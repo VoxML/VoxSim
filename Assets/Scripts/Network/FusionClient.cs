@@ -99,10 +99,7 @@ namespace Network
 			{
 				NetworkStream stream = _client.GetStream();
 				byte[] byteBuffer = new byte[IntSize];
-				if (stream.CanRead)
-					stream.Read(byteBuffer, 0, IntSize);
-				else
-					break;
+				stream.Read(byteBuffer, 0, IntSize);
 
 //				if (!BitConverter.IsLittleEndian)
 //				{
