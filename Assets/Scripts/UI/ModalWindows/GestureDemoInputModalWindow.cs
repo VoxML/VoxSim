@@ -40,7 +40,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 		if (fusionClient == null) {
 			fusionClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().FusionSocket;
 			if (fusionClient != null) {
-				fusionClient.GestureReceived += ReceivedGesture;
+				fusionClient.FusionReceived += ReceivedGesture;
 			}
 		}
 	}	
@@ -92,7 +92,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	}
 
 	void ReceivedGesture(object sender, EventArgs e) {
-		string msg = ((GestureEventArgs)e).Content;
+		string msg = ((FusionEventArgs)e).Content;
 		if (!IsInputPointing(msg))
 		{
 			bool showInModal = IsInputSpeech(msg) ? showSpeech : showGesture;

@@ -12,8 +12,10 @@ public class PluginImport : MonoBehaviour {
 	private CmdServer _cmdServer;
     private FusionSocket _fusionSocket;
     private EventLearningSocket _eventLearningSocket;
+    private StructureLearningSocket _structureLearningSocket;
     private CommanderSocket _commanderSocket;
     private KSIMSocket _ksimSocket;
+    private ADESocket _adeSocket;
 
 	public FusionSocket FusionSocket {
         get { return _fusionSocket; }
@@ -23,12 +25,20 @@ public class PluginImport : MonoBehaviour {
 		get { return _eventLearningSocket; }
 	}
 
+    public StructureLearningSocket StructureLearningSocket {
+        get { return _structureLearningSocket; }
+    }
+
 	public CommanderSocket CommanderSocket {
 		get { return _commanderSocket; }
 	}
 
     public KSIMSocket KSIMSocket {
         get { return _ksimSocket; }
+    }
+
+    public ADESocket ADESocket {
+        get { return _adeSocket; }
     }
 
 	// Make our calls from the Plugin
@@ -58,6 +68,14 @@ public class PluginImport : MonoBehaviour {
 		}
 
 		if (PlayerPrefs.HasKey ("URLs")) {
+
+            // TODO: Refactor generically
+
+            /**********/
+            /* FUSION */
+            /**********/
+            // CSU
+
 			string fusionUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
 				if (url.Split ('=') [0] == "Fusion URL") {
@@ -65,6 +83,25 @@ public class PluginImport : MonoBehaviour {
 					break;
 				}
 			}
+
+            string[] fusionUrl = fusionUrlString.Split(':');
+            string fusionAddress = fusionUrl[0];
+            if (fusionAddress != "") {
+                int fusionPort = Convert.ToInt32(fusionUrl[1]);
+                try {
+                    _fusionSocket = (FusionSocket)ConnectSocket(fusionAddress, fusionPort, typeof(FusionSocket));
+                }
+                catch (Exception e) {
+                    Debug.Log(e.Message);
+                }
+            }
+            else {
+                Debug.Log("Fusion socket is not specified.");
+            }
+
+            /******************/
+            /* EVENT LEARNING */
+            /******************/
 
 			string eventLearnerUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
@@ -74,6 +111,53 @@ public class PluginImport : MonoBehaviour {
 				}
 			}
 
+            string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
+            string eventLearnerAddress = eventLearnerUrl[0];
+            if (eventLearnerAddress != "") {
+                int eventLearnerPort = Convert.ToInt32(eventLearnerUrl[1]);
+                try {
+                    //_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
+                }
+                catch (Exception e) {
+                    Debug.Log(e.Message);
+                }
+            }
+            else {
+                Debug.Log("Event learner socket is not specified.");
+            }
+
+            /**********************/
+            /* STRUCTURE LEARNING */
+            /**********************/
+
+            string structureLearnerUrlString = string.Empty;
+            foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
+                if (url.Split('=')[0] == "Structure Learner URL") {
+                    structureLearnerUrlString = url.Split('=')[1];
+                    break;
+                }
+            }
+
+            string[] structureLearnerUrl = structureLearnerUrlString.Split(':');
+            string structureLearnerAddress = structureLearnerUrl[0];
+            if (structureLearnerAddress != "") {
+                int structureLearnerPort = Convert.ToInt32(structureLearnerUrl[1]);
+                try {
+                    _structureLearningSocket = (StructureLearningSocket)ConnectSocket (structureLearnerAddress, structureLearnerPort, typeof(StructureLearningSocket));
+                }
+                catch (Exception e) {
+                    Debug.Log(e.Message);
+                }
+            }
+            else {
+                Debug.Log("Structure learner socket is not specified.");
+            }
+
+            /*************/
+            /* COMMANDER */
+            /*************/
+            // Oz studies
+
 			string commanderUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
 				if (url.Split ('=') [0] == "Commander URL") {
@@ -81,6 +165,26 @@ public class PluginImport : MonoBehaviour {
 					break;
 				}
 			}
+
+            string[] commanderUrl = commanderUrlString.Split(':');
+            string commanderAddress = commanderUrl[0];
+            if (commanderAddress != "") {
+                int commanderPort = Convert.ToInt32(commanderUrl[1]);
+                try {
+                    _commanderSocket = (CommanderSocket)ConnectSocket(commanderAddress, commanderPort, typeof(CommanderSocket));
+                }
+                catch (Exception e) {
+                    Debug.Log(e.Message);
+                }
+            }
+            else {
+                Debug.Log("Commander socket is not specified.");
+            }
+
+            /********/
+            /* KSIM */
+            /********/
+            // CSU
 
             string ksimUrlString = string.Empty;
             foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
@@ -90,51 +194,6 @@ public class PluginImport : MonoBehaviour {
                     break;
                 }
             }
-
-            string[] fusionUrl = fusionUrlString.Split(':');
-            string fusionAddress = fusionUrl [0];
-			if (fusionAddress != "") {
-                int fusionPort = Convert.ToInt32 (fusionUrl [1]);
-				try {
-                    ConnectFusion (fusionAddress, fusionPort);
-				}
-				catch (Exception e) {
-					Debug.Log (e.Message);
-				}
-			}
-			else {
-				Debug.Log ("Fusion input is not specified.");
-			}
-
-			string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
-			string eventLearnerAddress = eventLearnerUrl [0];
-			if (eventLearnerAddress != "") {
-				int eventLearnerPort = Convert.ToInt32 (eventLearnerUrl [1]);
-				try {
-					//_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
-				}
-				catch (Exception e) {
-					Debug.Log (e.Message);
-				}
-			}
-			else {
-				Debug.Log ("Event learner input is not specified.");
-			}
-
-			string[] commanderUrl = commanderUrlString.Split(':');
-			string commanderAddress = commanderUrl [0];
-			if (commanderAddress != "") {
-				int commanderPort = Convert.ToInt32 (commanderUrl [1]);
-				try {
-					_commanderSocket = (CommanderSocket)ConnectSocket (commanderAddress, commanderPort, typeof(CommanderSocket));
-				}
-				catch (Exception e) {
-					Debug.Log (e.Message);
-				}
-			}
-			else {
-				Debug.Log ("Commander client is not specified.");
-			}
 
             string[] ksimUrl = ksimUrlString.Split(':');
             string ksimAddress = ksimUrl[0];
@@ -148,12 +207,47 @@ public class PluginImport : MonoBehaviour {
                 }
 
                 if (_ksimSocket != null) {
-                    byte[] bytes = BitConverter.GetBytes(1).Concat( new byte[] { 0x02 }).ToArray<byte>();
+                    byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] { 0x02 }).ToArray<byte>();
                     _ksimSocket.Write(bytes);
                 }
             }
             else {
-                Debug.Log("KSIM client is not specified.");
+                Debug.Log("KSIM socket is not specified.");
+            }
+
+            /*******/
+            /* ADE */
+            /*******/
+            // Tufts
+
+            string adeUrlString = string.Empty;
+            foreach (string url in PlayerPrefs.GetString("URLs").Split(';'))
+            {
+                if (url.Split('=')[0] == "ADE URL")
+                {
+                    adeUrlString = url.Split('=')[1];
+                    break;
+                }
+            }
+
+            string[] adeUrl = adeUrlString.Split(':');
+            string adeAddress = adeUrl[0];
+            if (adeAddress != "") {
+                int adePort = Convert.ToInt32(adeUrl[1]);
+                try {
+                    _adeSocket = (ADESocket)ConnectSocket(adeAddress, adePort, typeof(ADESocket));
+                }
+                catch (Exception e) {
+                    Debug.Log(e.Message);
+                }
+
+                if (_adeSocket != null) {
+                    byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] { 0x02 }).ToArray<byte>();
+                    _adeSocket.Write(bytes);
+                }
+            }
+            else {
+                Debug.Log("ADE socket is not specified.");
             }
 		}
 		else {
@@ -190,7 +284,7 @@ public class PluginImport : MonoBehaviour {
 				{
 					Debug.Log(inputFromFusion);
 					Debug.Log(_fusionSocket.HowManyLeft() + " messages left.");
-					_fusionSocket.OnGestureReceived(this, new GestureEventArgs(inputFromFusion));
+					_fusionSocket.OnGestureReceived(this, new FusionEventArgs(inputFromFusion));
 				}
 			}
 			else
@@ -222,21 +316,16 @@ public class PluginImport : MonoBehaviour {
 		}
 	}
 
-	public void ConnectFusion(string address, int port)
-	{
-		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
-        _fusionSocket = new FusionSocket();
-		_fusionSocket.Connect(address, port);
-		Debug.Log(string.Format("{2} :: Connected to Fusion @ {0}:{1}", address, port, _fusionSocket.IsConnected()));
-	}
-
 	public SocketConnection ConnectSocket(string address, int port, Type clientType)
-	{ // TODO: Abstract EventLearningClient and CSUClient to generic type inheritance
+	{
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
 
 		SocketConnection client = null;
 
-		if (clientType == typeof(CommanderSocket)) {
+        if (clientType == typeof(FusionSocket)) {
+            client = new FusionSocket();
+        }
+        if (clientType == typeof(CommanderSocket)) {
 			client = new CommanderSocket ();
 		}
 		else if (clientType == typeof(EventLearningSocket)) {
@@ -244,6 +333,9 @@ public class PluginImport : MonoBehaviour {
 		}
         else if (clientType == typeof(KSIMSocket)) {
             client = new KSIMSocket();
+        }
+        else if (clientType == typeof(ADESocket)) {
+            client = new ADESocket();
         }
 
 		if (client != null) {

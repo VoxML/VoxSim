@@ -36,12 +36,12 @@ namespace Network
 		protected Queue<string> _messages;
 		protected byte[] _ok = new byte[] { 0x20 };
 
-	    public bool IsConnected()
+        public virtual bool IsConnected()
 	    {
 	        return _client.Connected;
 	    }
 
-		public void Connect(string address, int port)
+        public virtual void Connect(string address, int port)
 		{
 			Debug.Log (string.Format("{0}:{1}",address,port));
 
@@ -66,7 +66,7 @@ namespace Network
 			" on port " + ((System.Net.IPEndPoint)_client.Client.LocalEndPoint).Port.ToString ());
 		}
 
-		protected void Loop()
+		protected virtual void Loop()
 		{
 			while (_client.Connected)
 			{
@@ -92,13 +92,13 @@ namespace Network
 			_client.Close();
 		}
 
-		public void Close()
+        public virtual void Close()
 		{
 			_t.Abort();
 			_client.Close();
 		}
 
-		protected string GetMessage(int len)
+		protected virtual string GetMessage(int len)
 		{
             byte[] byteBuffer = new byte[len];
 			NetworkStream stream = _client.GetStream();
@@ -110,7 +110,7 @@ namespace Network
 			return message;
 		}
 
-		protected int GetMessageLength()
+        protected virtual int GetMessageLength()
 		{
             byte[] byteBuffer = new byte[IntSize];
 			NetworkStream stream = _client.GetStream();
@@ -122,12 +122,12 @@ namespace Network
 			return BitConverter.ToInt32(byteBuffer, 0);
 		}
 
-		public int HowManyLeft()
+        public virtual int HowManyLeft()
 		{
 			return _messages.Count;
 		}
 
-		public string GetMessage()
+        public virtual string GetMessage()
 		{
 //			Debug.Log (_messages.Count);
 			if (_messages.Count > 0)

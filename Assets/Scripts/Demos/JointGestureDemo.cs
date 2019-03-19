@@ -243,7 +243,7 @@ public class JointGestureDemo : AgentInteraction {
         //TODO: What if there is no CSUClient address assigned?
         if (fusionClient != null)
         {
-            fusionClient.GestureReceived += ReceivedFusion;
+            fusionClient.FusionReceived += ReceivedFusion;
             fusionClient.ConnectionLost += ConnectionLost;
         }
 
@@ -537,10 +537,10 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	void ReceivedFusion(object sender, EventArgs e) {
-		string fusionMessage = ((GestureEventArgs)e).Content;
+		string fusionMessage = ((FusionEventArgs)e).Content;
 		//Debug.Log (fusionMessage);
 
-		string[] splitMessage = ((GestureEventArgs)e).Content.Split (';');
+		string[] splitMessage = ((FusionEventArgs)e).Content.Split (';');
 		string messageType = splitMessage[0];
 		string messageStr = splitMessage[1];
 		string messageTime = splitMessage[2];
