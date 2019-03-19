@@ -108,7 +108,7 @@ public class OutputController : FontManager {
 }
 
 public static class OutputHelper {
-	public static void PrintOutput(Role role, String str) {
+	public static void PrintOutput(Role role, String str, bool forceSpeak = false) {
 		OutputController[] outputs;
 		outputs = GameObject.Find ("IOController").GetComponents<OutputController>();
 
@@ -116,19 +116,22 @@ public static class OutputHelper {
 //			Debug.Log (str);
 //			Debug.Log (GetCurrentOutputString (role));
 //			Debug.Log (outputController.outputString);
-			if ((outputController.role == role) && (GetCurrentOutputString(role) != str)) {
-				outputController.outputString = str;
+            if (outputController.role == role) {
+                if (GetCurrentOutputString(role) != str) {
+                    outputController.outputString = str;
 
-				// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
-				VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
-				foreach (VoiceController voice in voices) 
-				{
-					if (voice.role == role)
-					{
-						Debug.Log (string.Format ("Speaking: \"{0}\"", str));
-						voice.Speak(str);
-					}
-				}
+                    // TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
+                    VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
+                    foreach (VoiceController voice in voices) {
+                        if (voice.role == role) {
+                            Debug.Log(string.Format("Speaking: \"{0}\"", str));
+                            voice.Speak(str);
+                        }
+                    }
+                }
+                else if (forceSpeak) {
+                    ForceRepeat(role);
+                }
 			}
 		}
 	}

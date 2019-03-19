@@ -215,7 +215,7 @@ public class AStarSearch : MonoBehaviour {
 		return spaceClear;
 	}
 
-	List<Vector3> getNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step){
+    List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step){
 		// In general 
 		// step * increment = size of object
 		var neighbors = new List<Vector3> ();
@@ -258,7 +258,7 @@ public class AStarSearch : MonoBehaviour {
 	/*
 	 * Check if the path from first to second with objBounds width is blocked
 	 */ 
-	bool isBlock(Bounds objBounds, Vector3 first, Vector3 second) {
+    bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
 		RaycastHit hitInfo;
 		Vector3 dir = (second - first);
 		float dist = dir.magnitude;
@@ -287,9 +287,9 @@ public class AStarSearch : MonoBehaviour {
 		// Compares by Length, Height, and Width.
 		public override int Compare(Vector3 x, Vector3 y)
 		{
-			if ( gScore[x] + hScore[x] < gScore[y] + hScore[y]) 
+			if (gScore[x] + hScore[x] < gScore[y] + hScore[y]) 
 				return -1;
-			if ( gScore[x] + hScore[x] > gScore[y] + hScore[y]) 
+			if (gScore[x] + hScore[x] > gScore[y] + hScore[y]) 
 				return 1;
 			return 0;
 		}
@@ -298,13 +298,12 @@ public class AStarSearch : MonoBehaviour {
 
 	public class BetterHeuristicOld : Comparer<PathNode> 
 	{
-		
 		// Compares by Length, Height, and Width.
 		public override int Compare(PathNode x, PathNode y)
 		{
-			if ( x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
+			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
 				return -1;
-			if ( x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
+			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
 				return 1;
 			return 0;
 		}
@@ -314,7 +313,7 @@ public class AStarSearch : MonoBehaviour {
 	/*
 	 * Look for closest point to goalPos that make a quantized distance to obj
 	 */ 
-	Vector3 lookForClosest( Vector3 goalPos, GameObject obj, Vector3 increment) {
+    Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
 		float dist = Mathf.Infinity;
 		Vector3 closest = goalPos;
 
@@ -325,21 +324,27 @@ public class AStarSearch : MonoBehaviour {
 		var quantizedDistanceY = (int)quantizedDistance.y;
 		var quantizedDistanceZ = (int)quantizedDistance.z;
 
-		for (int x = quantizedDistanceX; x <= quantizedDistanceX + 1; x++)
-			for (int y = quantizedDistanceY; y <= quantizedDistanceY + 1; y++)
-				for (int z = quantizedDistanceZ; z <= quantizedDistanceZ + 1; z++) {
-					var candidate = new Vector3 (x * increment.x + obj.transform.position.x, y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
+        for (int x = quantizedDistanceX; x <= quantizedDistanceX + 1; x++) {
+            for (int y = quantizedDistanceY; y <= quantizedDistanceY + 1; y++) {
+                for (int z = quantizedDistanceZ; z <= quantizedDistanceZ + 1; z++) {
+                    Vector3 candidate = new Vector3(x * increment.x + obj.transform.position.x, y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
 
-					if (testClear (obj, candidate)) {
-						float temp = (candidate - goalPos).magnitude;
+                    if (testClear(obj, candidate)) {
+                        float temp = (candidate - goalPos).magnitude;
 
-						if (dist > temp) {
-							dist = temp;
-							closest = candidate;
-						}
-					}
-				}
-		
+                        if (dist > temp) {
+                            dist = temp;
+                            closest = candidate;
+                        }
+                    }
+                }
+            }
+        }
+
+        //if ((closest - obj.transform.position).magnitude > distance.magnitude) {
+        //    closest = goalPos;
+        //}
+
 		return closest;
 	}
 
@@ -357,31 +362,31 @@ public class AStarSearch : MonoBehaviour {
 		return path;
 	}
 
-	float getGScore( Vector3 fromPoint, Vector3 explorePoint) {
+    float GetGScore(Vector3 fromPoint, Vector3 explorePoint) {
 		return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
 	}
 
-	float getHScore( Vector3 explorePoint, Vector3 goalPoint) {
+    float GetHScore(Vector3 explorePoint, Vector3 goalPoint) {
 		return (goalPoint - explorePoint).magnitude;
 	}
 
-	float getErgonomicScore( Vector3 point) {
+    float GetErgonomicScore(Vector3 point) {
 		return (bodyIk.solver.rightArmChain.nodes [0].transform.position - point).magnitude;
 	}
 
-	float getGScoreErgonomic( Vector3 fromPoint, Vector3 explorePoint) {
+    float GetGScoreErgonomic(Vector3 fromPoint, Vector3 explorePoint) {
 		if (bodyIk != null) {
-			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude * (1 + rigAttractionWeight * (getErgonomicScore (fromPoint) + getErgonomicScore (explorePoint)));
+			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude * (1 + rigAttractionWeight * (GetErgonomicScore (fromPoint) + GetErgonomicScore (explorePoint)));
 		}
 		else {
 			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude;
 		}
 	}
 
-	float getHScoreErgonomic( Vector3 explorePoint, Vector3 goalPoint) {
+    float GetHScoreErgonomic(Vector3 explorePoint, Vector3 goalPoint) {
 		// a discount factor of 2 so that the algorith would be faster
 		if (bodyIk != null) {
-			return (goalPoint - explorePoint).magnitude * (1 + rigAttractionWeight / 2 * (getErgonomicScore (goalPoint) + getErgonomicScore (explorePoint)));
+			return (goalPoint - explorePoint).magnitude * (1 + rigAttractionWeight / 2 * (GetErgonomicScore (goalPoint) + GetErgonomicScore (explorePoint)));
 		}
 		else {
 			return (goalPoint - explorePoint).magnitude;
@@ -458,16 +463,16 @@ public class AStarSearch : MonoBehaviour {
 				specialNodes.Add (specialPos);
 			}
 			else {
-				endPos = lookForClosest (goalPos, obj, increment);
+				endPos = LookForClosest (goalPos, obj, increment);
 			}
 		}
 		else {
-			endPos = lookForClosest (goalPos, obj, increment);
+			endPos = LookForClosest (goalPos, obj, increment);
 		}
 
 		gScore [startPos] = 0 ;
 		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
-		hScore [startPos] = getHScoreErgonomic( startPos, goalPos ) ;
+		hScore [startPos] = GetHScoreErgonomic(startPos, goalPos) ;
 
 		Debug.Log (" ========= obj.transform.position ======== " + obj.transform.position);
 		Debug.Log (" ======== start ====== " + startPos);
@@ -484,64 +489,82 @@ public class AStarSearch : MonoBehaviour {
 		float bestMagnitude = Mathf.Infinity;
 		Vector3 bestLastPos = new Vector3();
 
-		while (openSet.Count > 0 && counter < counterMax) {
-			// O(1)
-			curPos = openSet.TakeMin ();
+        if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude)
+        {
 
-			Debug.Log (counter + " ======== curNode ====== (" + curPos + ") " + gScore [curPos] + " " + hScore [curPos] + " " + (gScore[curPos] + hScore[curPos]) );
+            while (openSet.Count > 0 && counter < counterMax)
+            {
+                // O(1)
+                curPos = openSet.TakeMin();
 
-			float currentDistance = (curPos - endPos).magnitude;
-			if (currentDistance < bestMagnitude){
-				bestMagnitude = currentDistance;
-				bestLastPos = curPos;
-			}
+                Debug.Log(counter + " ======== curNode ====== (" + curPos + ") " + gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
 
-			// short cut
-			// if reached end node
-			if ((curPos - endPos).magnitude < Constants.EPSILON) {
-				Debug.Log ("=== counter === " + counter);
-				// extend path to goal node (goal position)
-				cameFrom[goalPos] = curPos;
-				path = ReconstructPath2 (startPos, goalPos);
-				Debug.Log ("====== path ===== ");
-				foreach (var point in path) {
-					Debug.Log (point);
-				}
-				return;
-			}
-				
-			closedSet.Add (curPos);
+                float currentDistance = (curPos - endPos).magnitude;
+                if (currentDistance < bestMagnitude)
+                {
+                    bestMagnitude = currentDistance;
+                    bestLastPos = curPos;
+                }
 
-			var neighbors = getNeighborNodes (obj, curPos, increment, step);
+                // short cut
+                // if reached end node
+                if ((curPos - endPos).magnitude < Constants.EPSILON)
+                {
+                    Debug.Log("=== counter === " + counter);
+                    // extend path to goal node (goal position)
+                    cameFrom[goalPos] = curPos;
+                    path = ReconstructPath2(startPos, goalPos);
+                    Debug.Log("====== path ===== ");
+                    foreach (var point in path)
+                    {
+                        Debug.Log(point);
+                    }
+                    return;
+                }
 
-			foreach (var neighbor in neighbors) {
-				if (!closedSet.Contains (neighbor) && !isBlock(objectBound, curPos, neighbor) ) {
-					float tentativeGScore = getGScoreErgonomic (curPos, neighbor);
+                closedSet.Add(curPos);
 
-					if (gScore.ContainsKey (neighbor) && tentativeGScore > gScore [neighbor])
-						continue;
+                var neighbors = GetNeighborNodes(obj, curPos, increment, step);
 
-					cameFrom[neighbor] = curPos;
-					gScore[neighbor] = tentativeGScore;
-					hScore[neighbor] = getHScoreErgonomic(neighbor, goalPos);
-					// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
+                foreach (var neighbor in neighbors)
+                {
+                    if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor))
+                    {
+                        float tentativeGScore = GetGScoreErgonomic(curPos, neighbor);
 
-					// If neighbor is not yet in openset 
-					// Add it
-					// Heap is automatically rearranged
-					if (!openSet.Has (neighbor)) {
-//						Debug.Log ("=== Add candidate === (" + neighbor + ")");
-						openSet.Add (neighbor);
-					} else {
-						// If neighbor is already there, update the heap
-//						Debug.Log ("=== Update candidate === (" + neighbor + ")");
-						openSet.Update (neighbor);
-					}
-				}
-			}
+                        if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
+                            continue;
 
-			counter += 1;
-		}
+                        cameFrom[neighbor] = curPos;
+                        gScore[neighbor] = tentativeGScore;
+                        hScore[neighbor] = GetHScoreErgonomic(neighbor, goalPos);
+                        // Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
+
+                        // If neighbor is not yet in openset 
+                        // Add it
+                        // Heap is automatically rearranged
+                        if (!openSet.Has(neighbor))
+                        {
+                            //						Debug.Log ("=== Add candidate === (" + neighbor + ")");
+                            openSet.Add(neighbor);
+                        }
+                        else
+                        {
+                            // If neighbor is already there, update the heap
+                            //						Debug.Log ("=== Update candidate === (" + neighbor + ")");
+                            openSet.Update(neighbor);
+                        }
+                    }
+                }
+
+                counter += 1;
+            }
+        }
+        else    // if the dist from startPos to goalPos < dist from goalPos to endPos (aka closest non-start node to endPos)
+        {
+            cameFrom[goalPos] = startPos;
+            bestLastPos = goalPos;
+        }
 
 		path = ReconstructPath2 (startPos, bestLastPos);
 		Debug.Log ("====== path ===== ");

@@ -140,6 +140,8 @@ namespace NLU
 		{
 			"the",
 			"a",
+            "this",
+            "that",
 			"two"
 		});
 

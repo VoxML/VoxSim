@@ -812,13 +812,10 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
         //System.Random random = new System.Random ();
 
-        if (args[0] is GameObject)
-        {   // assume all inputs are of same type
+        if (args[0] is GameObject) {   // assume all inputs are of same type
             //int index = random.Next(args.Length);
-            for (int index = 0; index < args.Length; index++)
-            {
-                if (args[index] is GameObject)
-                {
+            for (int index = 0; index < args.Length; index++) {
+                if (args[index] is GameObject) {
                     objNames.Add((args[index] as GameObject).name);
                 }
             }
@@ -834,13 +831,10 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
         //System.Random random = new System.Random ();
 
-        if (args[0] is GameObject)
-        {   // assume all inputs are of same type
+        if (args[0] is GameObject) {   // assume all inputs are of same type
             //int index = random.Next(args.Length);
-            for (int index = 0; index < args.Length; index++)
-            {
-                if (args[index] is GameObject)
-                {
+            for (int index = 0; index < args.Length; index++) {
+                if (args[index] is GameObject) {
                     objNames.Add((args[index] as GameObject).name);
                 }
             }
