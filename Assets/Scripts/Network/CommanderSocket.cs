@@ -17,7 +17,7 @@ namespace Network
 		}
 	}
 
-	public class CommanderClient : SocketClient
+	public class CommanderSocket : SocketConnection
 	{		
 		public event EventHandler ConnectionLost;
 

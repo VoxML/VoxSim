@@ -26,7 +26,7 @@ public class SelectionEventArgs : EventArgs {
 
 public class JointGestureDemo : AgentInteraction {
 
-    FusionClient fusionClient;
+    FusionSocket fusionClient;
 	EventManager eventManager;
 	ObjectSelector objSelector;
 	PluginImport commBridge;
@@ -239,7 +239,7 @@ public class JointGestureDemo : AgentInteraction {
             dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
         }
 
-        fusionClient = commBridge.GetComponent<PluginImport>().FusionClient;
+        fusionClient = commBridge.GetComponent<PluginImport>().FusionSocket;
         //TODO: What if there is no CSUClient address assigned?
         if (fusionClient != null)
         {
@@ -2621,12 +2621,12 @@ public class JointGestureDemo : AgentInteraction {
     public void StartLearn(object[] content) {
         RespondAndUpdate("What's the gesture for that?");
 
-        if (commBridge.KSIMClient != null) {
+        if (commBridge.KSIMSocket != null) {
             string command = "learn";
             byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
                                                Concat(BitConverter.GetBytes(command.Length)).Concat(Encoding.ASCII.GetBytes(command)).
                                                ToArray<byte>();
-            commBridge.KSIMClient.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+            commBridge.KSIMSocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
         }
     }
 

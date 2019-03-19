@@ -19,7 +19,7 @@ namespace Network
 		}
 	}
 
-	public class KSIMClient : SocketClient
+	public class KSIMSocket : SocketConnection
 	{		
 		public event EventHandler ConnectionLost;
 

@@ -17,7 +17,7 @@ namespace Network
 		}
 	}
 
-	public class EventLearningClient : SocketClient
+	public class EventLearningSocket : SocketConnection
 	{
 		
 	}

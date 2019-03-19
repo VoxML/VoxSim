@@ -42,8 +42,8 @@ public class StateExtractor : MonoBehaviour
         }
 
         if (commBridge != null) {
-            if (commBridge.CommanderClient != null) {
-                commBridge.CommanderClient.Write("");
+            if (commBridge.CommanderSocket != null) {
+                commBridge.CommanderSocket.Write("");
             }
         }
     }

@@ -10,25 +10,25 @@ public class PluginImport : MonoBehaviour {
 
 	private INLParser _parser;
 	private CmdServer _cmdServer;
-	private FusionClient _fusionClient;
-	private EventLearningClient _eventLearningClient;
-	private CommanderClient _commanderClient;
-    private KSIMClient _ksimClient;
+    private FusionSocket _fusionSocket;
+    private EventLearningSocket _eventLearningSocket;
+    private CommanderSocket _commanderSocket;
+    private KSIMSocket _ksimSocket;
 
-	public FusionClient FusionClient {
-        get { return _fusionClient; }
+	public FusionSocket FusionSocket {
+        get { return _fusionSocket; }
 	}
 
-	public EventLearningClient EventLearningClient {
-		get { return _eventLearningClient; }
+    public EventLearningSocket EventLearningSocket {
+		get { return _eventLearningSocket; }
 	}
 
-	public CommanderClient CommanderClient {
-		get { return _commanderClient; }
+	public CommanderSocket CommanderSocket {
+		get { return _commanderSocket; }
 	}
 
-    public KSIMClient KSIMClient {
-        get { return _ksimClient; }
+    public KSIMSocket KSIMSocket {
+        get { return _ksimSocket; }
     }
 
 	// Make our calls from the Plugin
@@ -126,7 +126,7 @@ public class PluginImport : MonoBehaviour {
 			if (commanderAddress != "") {
 				int commanderPort = Convert.ToInt32 (commanderUrl [1]);
 				try {
-					_commanderClient = (CommanderClient)ConnectSocket (commanderAddress, commanderPort, typeof(CommanderClient));
+					_commanderSocket = (CommanderSocket)ConnectSocket (commanderAddress, commanderPort, typeof(CommanderSocket));
 				}
 				catch (Exception e) {
 					Debug.Log (e.Message);
@@ -141,15 +141,15 @@ public class PluginImport : MonoBehaviour {
             if (ksimAddress != "") {
                 int ksimPort = Convert.ToInt32(ksimUrl[1]);
                 try {
-                    _ksimClient = (KSIMClient)ConnectSocket(ksimAddress, ksimPort, typeof(KSIMClient));
+                    _ksimSocket = (KSIMSocket)ConnectSocket(ksimAddress, ksimPort, typeof(KSIMSocket));
                 }
                 catch (Exception e) {
                     Debug.Log(e.Message);
                 }
 
-                if (_ksimClient != null) {
+                if (_ksimSocket != null) {
                     byte[] bytes = BitConverter.GetBytes(1).Concat( new byte[] { 0x02 }).ToArray<byte>();
-                    _ksimClient.Write(bytes);
+                    _ksimSocket.Write(bytes);
                 }
             }
             else {
@@ -181,23 +181,23 @@ public class PluginImport : MonoBehaviour {
 	}
 
 	void Update () {
-		if (_fusionClient != null)
+		if (_fusionSocket != null)
 		{
-			if (_fusionClient.IsConnected())
+			if (_fusionSocket.IsConnected())
 			{
-                string inputFromFusion = _fusionClient.GetMessage();
+                string inputFromFusion = _fusionSocket.GetMessage();
 				if (inputFromFusion != "")
 				{
 					Debug.Log(inputFromFusion);
-					Debug.Log(_fusionClient.HowManyLeft() + " messages left.");
-					_fusionClient.OnGestureReceived(this, new GestureEventArgs(inputFromFusion));
+					Debug.Log(_fusionSocket.HowManyLeft() + " messages left.");
+					_fusionSocket.OnGestureReceived(this, new GestureEventArgs(inputFromFusion));
 				}
 			}
 			else
 			{
 				Debug.LogError("Connection to Fusion server is lost!");
-				_fusionClient.OnConnectionLost(this, null);
-				_fusionClient = null;
+				_fusionSocket.OnConnectionLost(this, null);
+				_fusionSocket = null;
 			}
 		}
 
@@ -211,9 +211,9 @@ public class PluginImport : MonoBehaviour {
 			}
 		}
 
-		if (_commanderClient != null) {
+		if (_commanderSocket != null) {
 //			Debug.Log (_commanderClient.IsConnected ());
-			string inputFromCommander = _commanderClient.GetMessage();
+			string inputFromCommander = _commanderSocket.GetMessage();
 			if (inputFromCommander != "") {
 				Debug.Log (inputFromCommander);
 				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = inputFromCommander.Trim();
@@ -225,25 +225,25 @@ public class PluginImport : MonoBehaviour {
 	public void ConnectFusion(string address, int port)
 	{
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
-		_fusionClient = new FusionClient();
-		_fusionClient.Connect(address, port);
-		Debug.Log(string.Format("{2} :: Connected to Fusion @ {0}:{1}", address, port, _fusionClient.IsConnected()));
+        _fusionSocket = new FusionSocket();
+		_fusionSocket.Connect(address, port);
+		Debug.Log(string.Format("{2} :: Connected to Fusion @ {0}:{1}", address, port, _fusionSocket.IsConnected()));
 	}
 
-	public SocketClient ConnectSocket(string address, int port, Type clientType)
+	public SocketConnection ConnectSocket(string address, int port, Type clientType)
 	{ // TODO: Abstract EventLearningClient and CSUClient to generic type inheritance
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
 
-		SocketClient client = null;
+		SocketConnection client = null;
 
-		if (clientType == typeof(CommanderClient)) {
-			client = new CommanderClient ();
+		if (clientType == typeof(CommanderSocket)) {
+			client = new CommanderSocket ();
 		}
-		else if (clientType == typeof(EventLearningClient)) {
-			client = new EventLearningClient ();
+		else if (clientType == typeof(EventLearningSocket)) {
+			client = new EventLearningSocket ();
 		}
-        else if (clientType == typeof(KSIMClient)) {
-            client = new KSIMClient();
+        else if (clientType == typeof(KSIMSocket)) {
+            client = new KSIMSocket();
         }
 
 		if (client != null) {
@@ -290,16 +290,16 @@ public class PluginImport : MonoBehaviour {
 			_cmdServer = null;
 		}
 
-		if (_fusionClient != null && _fusionClient.IsConnected())
+		if (_fusionSocket != null && _fusionSocket.IsConnected())
 		{
-			_fusionClient.Close();
-			_fusionClient = null;
+			_fusionSocket.Close();
+			_fusionSocket = null;
 		}
 
-		if (_commanderClient != null && _commanderClient.IsConnected())
+		if (_commanderSocket != null && _commanderSocket.IsConnected())
 		{
-			_commanderClient.Close();
-			_commanderClient = null;
+			_commanderSocket.Close();
+			_commanderSocket = null;
 		}
 	}
 

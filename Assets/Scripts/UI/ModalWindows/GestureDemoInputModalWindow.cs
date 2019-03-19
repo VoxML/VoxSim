@@ -5,7 +5,7 @@ using Network;
 
 public class GestureDemoInputModalWindow : ModalWindow {
 
-	FusionClient fusionClient;
+    FusionSocket fusionClient;
 
 	public int fontSize = 12;
 
@@ -38,7 +38,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	// Update is called once per frame
 	void Update () {
 		if (fusionClient == null) {
-			fusionClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().FusionClient;
+			fusionClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().FusionSocket;
 			if (fusionClient != null) {
 				fusionClient.GestureReceived += ReceivedGesture;
 			}

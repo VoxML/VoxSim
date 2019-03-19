@@ -31,7 +31,7 @@ public class RelationExtractor : MonoBehaviour {
 
 	void QueueEmpty(object sender, EventArgs e) {
 		if (commBridge != null) {
-			if (commBridge.CommanderClient != null) {
+			if (commBridge.CommanderSocket != null) {
 				StringBuilder sb = new StringBuilder ();
 				foreach (string rel in relationTracker.relStrings) {
 					sb = sb.AppendFormat (string.Format ("{0}\n", rel));
@@ -49,7 +49,7 @@ public class RelationExtractor : MonoBehaviour {
 				foreach (GameObject go in objects) {
 					sb = sb.AppendFormat (string.Format ("{0} {1}\n", go.name, Helper.VectorToParsable(go.transform.eulerAngles)));
 				}
-				commBridge.CommanderClient.Write (sb.ToString());
+				commBridge.CommanderSocket.Write (sb.ToString());
 			}
 		}
 	}
