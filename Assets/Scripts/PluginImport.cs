@@ -618,6 +618,18 @@ public class PluginImport : MonoBehaviour {
 			_commanderSocket.Close();
 			_commanderSocket = null;
 		}
+
+        if (_ksimSocket != null && _ksimSocket.IsConnected())
+        {
+            _ksimSocket.Close();
+            _ksimSocket = null;
+        }
+
+        if (_adeSocket != null && _adeSocket.IsConnected())
+        {
+            _adeSocket.Close();
+            _adeSocket = null;
+        }
 	}
 
 	void OnApplicationQuit () {
