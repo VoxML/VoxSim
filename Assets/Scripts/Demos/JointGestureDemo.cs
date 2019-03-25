@@ -4171,17 +4171,20 @@ public class JointGestureDemo : AgentInteraction {
 
     void CompletedEventSequence(object sender, EventArgs e)
     {
-        string eventStr = ((EventManagerArgs)e).EventString;
+        if (e != null)
+        {
+            string eventStr = ((EventManagerArgs)e).EventString;
 
-        MethodInfo method = predicates.GetType().GetMethod(Helper.GetTopPredicate(eventStr).ToUpper());
+            MethodInfo method = predicates.GetType().GetMethod(Helper.GetTopPredicate(eventStr).ToUpper());
 
-        if (method.ReturnType == typeof(void))
-        { // is event
-            if (!eventStr.Contains("grasp") && !eventStr.Contains("ungrasp"))
-            {
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
-                        new List<string>() { eventStr }, null)));
+            if (method.ReturnType == typeof(void))
+            { // is event
+                if (!eventStr.Contains("grasp") && !eventStr.Contains("ungrasp"))
+                {
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                            new List<string>() { eventStr }, null)));
+                }
             }
         }
     }
