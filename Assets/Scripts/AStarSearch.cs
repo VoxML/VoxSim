@@ -454,6 +454,7 @@ public class AStarSearch : MonoBehaviour {
 		// if constraints contain a voxeme
 		Voxeme testTarget = constraints.OfType<Voxeme> ().FirstOrDefault ();
 		if (testTarget != null) {
+            Debug.Log(testTarget);
 			// if that object is concave (e.g. cup)
 			// if goalPos is within the bounds of target (e.g. in cup)
 			if (testTarget.voxml.Type.Concavity.Contains ("Concave") && Helper.GetObjectWorldSize (testTarget.gameObject).Contains (goalPos)) {
@@ -461,6 +462,7 @@ public class AStarSearch : MonoBehaviour {
 				var specialPos = new Vector3(goalPos.x, Helper.GetObjectWorldSize (testTarget.gameObject).max.y+size.y, goalPos.z);
 				endPos = specialPos;
 				specialNodes.Add (specialPos);
+                Debug.Log(" ======== special ====== " + Helper.VectorToParsable(specialPos));
 			}
 			else {
 				endPos = LookForClosest (goalPos, obj, increment);
@@ -474,10 +476,10 @@ public class AStarSearch : MonoBehaviour {
 		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
 		hScore [startPos] = GetHScoreErgonomic(startPos, goalPos) ;
 
-		Debug.Log (" ========= obj.transform.position ======== " + obj.transform.position);
-		Debug.Log (" ======== start ====== " + startPos);
-		Debug.Log (" ======== goal ====== " + goalPos);
-		Debug.Log (" ======== end ====== " + endPos);
+        Debug.Log (" ========= obj.transform.position ======== " + Helper.VectorToParsable(obj.transform.position));
+        Debug.Log (" ======== start ====== " + Helper.VectorToParsable(startPos));
+        Debug.Log (" ======== goal ====== " + Helper.VectorToParsable(goalPos));
+        Debug.Log (" ======== end ====== " + Helper.VectorToParsable(endPos));
 
 		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
 		// using best node found until endNode reached
@@ -491,13 +493,14 @@ public class AStarSearch : MonoBehaviour {
 
         if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude)
         {
-
+            Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(startPos), (goalPos - startPos).magnitude));
+            Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(endPos), (goalPos - endPos).magnitude));
             while (openSet.Count > 0 && counter < counterMax)
             {
                 // O(1)
                 curPos = openSet.TakeMin();
 
-                Debug.Log(counter + " ======== curNode ====== (" + curPos + ") " + gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
+                Debug.Log(counter + " ======== curNode ====== (" + Helper.VectorToParsable(curPos) + ") " + gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
 
                 float currentDistance = (curPos - endPos).magnitude;
                 if (currentDistance < bestMagnitude)
@@ -517,7 +520,7 @@ public class AStarSearch : MonoBehaviour {
                     Debug.Log("====== path ===== ");
                     foreach (var point in path)
                     {
-                        Debug.Log(point);
+                        Debug.Log(Helper.VectorToParsable(point));
                     }
                     return;
                 }
@@ -545,13 +548,13 @@ public class AStarSearch : MonoBehaviour {
                         // Heap is automatically rearranged
                         if (!openSet.Has(neighbor))
                         {
-                            //						Debug.Log ("=== Add candidate === (" + neighbor + ")");
+                            Debug.Log ("=== Add candidate === (" + Helper.VectorToParsable(neighbor) + ")");
                             openSet.Add(neighbor);
                         }
                         else
                         {
                             // If neighbor is already there, update the heap
-                            //						Debug.Log ("=== Update candidate === (" + neighbor + ")");
+                            Debug.Log ("=== Update candidate === (" + Helper.VectorToParsable(neighbor) + ")");
                             openSet.Update(neighbor);
                         }
                     }

@@ -107,6 +107,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	public bool allowDeixisByClick = false;
 
+    public float servoSpeed = .1f;
+
     public Region leftRegion;
     public Region rightRegion;
     public Region frontRegion;
@@ -128,6 +130,7 @@ public class JointGestureDemo : AgentInteraction {
 	Dictionary<Region,string> regionLabels = new Dictionary<Region, string> ();
 	Dictionary<string,string> directionPreds = new Dictionary<string, string> ();
 	Dictionary<string,string> directionLabels = new Dictionary<string, string> ();
+    Dictionary<string,Vector3> directionVectors = new Dictionary<string, Vector3>();
 	Dictionary<string,string> oppositeDir = new Dictionary<string, string> ();
 	Dictionary<string,string> relativeDir = new Dictionary<string, string> ();
 
@@ -314,6 +317,14 @@ public class JointGestureDemo : AgentInteraction {
 		directionLabels.Add ("right", "right of");
 		directionLabels.Add ("front", "in front of");
 		directionLabels.Add ("back", "behind");
+
+        // TODO: read in from VoxML
+        directionVectors.Add("left", Vector3.left);
+        directionVectors.Add("right", Vector3.right);
+        directionVectors.Add("front", Vector3.forward);
+        directionVectors.Add("back", Vector3.back);
+        directionVectors.Add("up", Vector3.up);
+        directionVectors.Add("down", Vector3.down);
 	}
 
 	// Update is called once per frame
@@ -2502,11 +2513,14 @@ public class JointGestureDemo : AgentInteraction {
 
                 Debug.Log(dir);
 
-
                 GameObject obj = (interactionLogic.GraspedObj == null) ?
                     interactionLogic.IndicatedObj : interactionLogic.GraspedObj;
 
-                string eventStr = string.Format("slidep({0},{1}({0}))", obj.name, oppositeDir[dir]);
+                Vector3 destCoord = obj.transform.position + (directionVectors[oppositeDir[dir]] * servoSpeed);
+                Debug.Log(Helper.VectorToParsable(obj.transform.position));
+                Debug.Log(Helper.VectorToParsable(destCoord));
+
+                string eventStr = string.Format("slidep({0},{1})", obj.name, Helper.VectorToParsable(destCoord));
 
                 //interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     //interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
