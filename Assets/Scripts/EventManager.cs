@@ -250,10 +250,22 @@ public class EventManager : MonoBehaviour {
 
 	public void RemoveEvent(int index) {
 		Debug.Log (string.Format("Removing event@{0}: {1}",index,events[index]));
+        EventManagerArgs lastEventArgs = null;
+
+        //Debug.Log(evalOrig.Count);
+        //if (evalOrig.Count > 0)
+        //{
+        //    Debug.Log(evalOrig.Keys.ToList()[0]);
+        //}
+        if (evalOrig.ContainsKey(events[index])) {
+            lastEventArgs = new EventManagerArgs(events[index]);
+            //Debug.Log(lastEventArgs.EventString);
+        }
+
 		events.RemoveAt (index);
 
 		if (events.Count == 0) {
-			OnQueueEmpty (this, null);
+            OnQueueEmpty (this, lastEventArgs);
 		}
 	}
 

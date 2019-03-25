@@ -21,7 +21,7 @@ namespace Network
 	{
 		public event EventHandler FusionReceived;
 
-		public void OnGestureReceived(object sender, EventArgs e)
+		public void OnFusionReceived(object sender, EventArgs e)
 		{
 			if (FusionReceived != null)
 			{
@@ -31,11 +31,18 @@ namespace Network
 
 		protected override void Loop()
 		{
-			while (_client.Connected)
+            while (IsConnected())
 			{
 				NetworkStream stream = _client.GetStream();
 				byte[] byteBuffer = new byte[IntSize];
-				stream.Read(byteBuffer, 0, IntSize);
+                try
+                {
+                    stream.Read(byteBuffer, 0, IntSize);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                }
 
 //				if (!BitConverter.IsLittleEndian)
 //				{
@@ -62,7 +69,8 @@ namespace Network
 //				Debug.Log (stream.DataAvailable);
 
 			}
-			_client.Close();
+
+			//_client.Close();
 		}
 
 	}

@@ -2081,7 +2081,7 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
 	// OUT: none
-	public void SLIDE(object[] args)
+    public void SLIDE(object[] args)
 	{
 		// look for agent
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
@@ -2578,6 +2578,510 @@ public class Predicates : MonoBehaviour {
 
 		return;
 	}
+
+    // IN: Objects
+    // OUT: none
+    public void SLIDEP(object[] args)
+    {
+        string originalEval = eventManager.events[0];
+
+        // look for agent
+        GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+        if (agent != null) {
+            // add preconditions
+            if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+                eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                if (args.Length > 2) {
+                    eventManager.InsertEvent (eventManager.evalOrig[string.Format("slidep({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 2);
+                }
+                else {
+                    eventManager.InsertEvent (eventManager.evalOrig[string.Format("slidep({0})", (args[0] as GameObject).name)], 2);
+                }
+                eventManager.RemoveEvent(2);
+                return;
+            }
+            //}
+
+            // add postconditions
+            //if (args[args.Length - 1] is bool)
+            //{
+            //    if ((bool)args[args.Length - 1] == true)
+            //    {
+            //        eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
+            //    }
+            //}
+        }
+
+        // override physics rigging
+        //if (agent != null) {
+        //    foreach (object arg in args) {
+        //        if (arg is GameObject) {
+        //            Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
+        //            if (rigging != null) {
+        //                rigging.ActivatePhysics(false);
+        //            }
+        //        }
+        //    }
+        //}
+
+        Vector3 targetPosition = Vector3.zero;
+        Vector3 translocDir = Vector3.zero;
+        float translocDist = 0.0f;
+        Vector3 relOffset = Vector3.zero;
+
+        Helper.PrintRDFTriples(rdfTriples);
+
+        string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("slidep", "") : "";
+
+        if (prep == "_behind") {   // fix for multiple RDF triples
+            if (args[0] is GameObject) {
+                if (args[1] is Vector3) {
+                    GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
+                    GameObject dest = GameObject.Find(rdfTriples[0].Item3); // get destination obj ("plate" in "put apple on plate")
+                    Voxeme voxComponent = theme.GetComponent<Voxeme>();
+
+                    Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+                    Bounds destBounds = Helper.GetObjectWorldSize(dest);    // bounds of dest obj => alter to get interior enumerated by VoxML structure
+
+                    GameObject mainCamera = GameObject.Find("Main Camera");
+                    float povDir = cameraRelativeDirections ? mainCamera.transform.eulerAngles.y : 0.0f;
+
+                    float zAdjust = (theme.transform.position.z - themeBounds.center.z);
+
+                    Vector3 rayStart = new Vector3(0.0f, 0.0f,
+                        Mathf.Abs(themeBounds.size.z));
+                    rayStart = Quaternion.Euler(0.0f, povDir + 180.0f, 0.0f) * rayStart;
+                    rayStart += theme.transform.position;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+
+                    Debug.Log("Z-adjust = " + zAdjust);
+                    Debug.Log("slidep_behind: " + Helper.VectorToParsable(contactPoint));
+
+                    Vector3 loc = ((Vector3)args[1]);   // coord of "behind"
+
+                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
+                    }
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool)args[args.Length - 1] == false)
+                        {   // compute satisfaction condition
+                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x),
+                                loc.y - (contactPoint.y - theme.transform.position.y),
+                                loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+
+                            targetPosition = dir + loc;
+                        }
+                        else {
+                            targetPosition = loc;
+                        }
+
+                        Debug.Log(Helper.VectorToParsable(targetPosition));
+
+                        if (voxComponent != null) {
+                            if (!voxComponent.enabled)
+                            {
+                                voxComponent.gameObject.transform.parent = null;
+                                voxComponent.enabled = true;
+                            }
+
+                            voxComponent.targetPosition = targetPosition;
+
+                            /*if (voxComponent.isGrasped) {
+                                voxComponent.targetPosition = voxComponent.targetPosition +
+                                (voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+                            }*/
+                        }
+                    }
+
+                    if (voxComponent.moveSpeed == 0.0f) {
+                        voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+                }
+            }
+        }
+        else if (prep == "_in_front") {   // fix for multiple RDF triples
+            if (args[0] is GameObject) {
+                if (args[1] is Vector3) {
+                    GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
+                    GameObject dest = GameObject.Find(rdfTriples[0].Item3); // get destination obj ("plate" in "put apple on plate")
+                    Voxeme voxComponent = theme.GetComponent<Voxeme>();
+
+                    Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+                    Bounds destBounds = Helper.GetObjectWorldSize(dest);    // bounds of dest obj => alter to get interior enumerated by VoxML structure
+
+                    GameObject mainCamera = GameObject.Find("Main Camera");
+                    float povDir = cameraRelativeDirections ? mainCamera.transform.eulerAngles.y : 0.0f;
+
+                    float zAdjust = (theme.transform.position.z - themeBounds.center.z);
+
+                    Vector3 rayStart = new Vector3(0.0f, 0.0f,
+                        Mathf.Abs(themeBounds.size.z));
+                    rayStart = Quaternion.Euler(0.0f, povDir, 0.0f) * rayStart;
+                    rayStart += theme.transform.position;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+
+                    Debug.Log("Z-adjust = " + zAdjust);
+                    Debug.Log("slidep_in_front: " + Helper.VectorToParsable(contactPoint));
+
+                    Vector3 loc = ((Vector3)args[1]);   // coord of "in front"
+
+                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
+                    }
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool)args[args.Length - 1] == false) {   // compute satisfaction condition
+                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x),
+                                loc.y - (contactPoint.y - theme.transform.position.y),
+                                loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+
+                            targetPosition = dir + loc;
+                        }
+                        else {
+                            targetPosition = loc;
+                        }
+
+                        Debug.Log(Helper.VectorToParsable(targetPosition));
+
+                        if (voxComponent != null) {
+                            if (!voxComponent.enabled) {
+                                voxComponent.gameObject.transform.parent = null;
+                                voxComponent.enabled = true;
+                            }
+
+                            voxComponent.targetPosition = targetPosition;
+
+                            /*if (voxComponent.isGrasped) {
+                                voxComponent.targetPosition = voxComponent.targetPosition +
+                                (voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+                            }*/
+                        }
+                    }
+
+                    if (voxComponent.moveSpeed == 0.0f) {
+                        voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+                }
+            }
+        }
+        else if (prep == "_left") {   // fix for multiple RDF triples
+            if (args[0] is GameObject) {
+                if (args[1] is Vector3) {
+                    GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
+                    GameObject dest = GameObject.Find(rdfTriples[0].Item3); // get destination obj ("plate" in "put apple on plate")
+                    Voxeme voxComponent = theme.GetComponent<Voxeme>();
+
+                    Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+                    Bounds destBounds = Helper.GetObjectWorldSize(dest);    // bounds of dest obj => alter to get interior enumerated by VoxML structure
+
+                    GameObject mainCamera = GameObject.Find("Main Camera");
+                    float povDir = cameraRelativeDirections ? mainCamera.transform.eulerAngles.y : 0.0f;
+
+                    float xAdjust = (theme.transform.position.x - themeBounds.center.x);
+
+                    Vector3 rayStart = new Vector3(0.0f, 0.0f,
+                        Mathf.Abs(themeBounds.size.z));
+                    rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
+                    rayStart += theme.transform.position;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+
+                    Debug.Log("X-adjust = " + xAdjust);
+                    Debug.Log("slidep_left: " + Helper.VectorToParsable(contactPoint));
+
+                    Vector3 loc = ((Vector3)args[1]);   // coord of "left"
+
+                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
+                    }
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool)args[args.Length - 1] == false) {   // compute satisfaction condition
+                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
+                                loc.y - (contactPoint.y - theme.transform.position.y),
+                                loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+
+                            targetPosition = dir + loc;
+                        }
+                        else {
+                            targetPosition = loc;
+                        }
+
+                        Debug.Log(Helper.VectorToParsable(targetPosition));
+
+                        if (voxComponent != null) {
+                            if (!voxComponent.enabled) {
+                                voxComponent.gameObject.transform.parent = null;
+                                voxComponent.enabled = true;
+                            }
+
+                            voxComponent.targetPosition = targetPosition;
+
+                            /*if (voxComponent.isGrasped) {
+                                voxComponent.targetPosition = voxComponent.targetPosition +
+                                (voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+                            }*/
+                        }
+                    }
+
+                    if (voxComponent.moveSpeed == 0.0f) {
+                        voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+                }
+            }
+        }
+        else if (prep == "_right") {   // fix for multiple RDF triples
+            if (args[0] is GameObject) {
+                if (args[1] is Vector3) {
+                    GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
+                    GameObject dest = GameObject.Find(rdfTriples[0].Item3); // get destination obj ("plate" in "put apple on plate")
+                    Voxeme voxComponent = theme.GetComponent<Voxeme>();
+
+                    Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+                    Bounds destBounds = Helper.GetObjectWorldSize(dest);    // bounds of dest obj => alter to get interior enumerated by VoxML structure
+
+                    GameObject mainCamera = GameObject.Find("Main Camera");
+                    float povDir = cameraRelativeDirections ? mainCamera.transform.eulerAngles.y : 0.0f;
+
+                    float xAdjust = (theme.transform.position.x - themeBounds.center.x);
+
+                    Vector3 rayStart = new Vector3(0.0f, 0.0f,
+                        Mathf.Abs(themeBounds.size.z));
+                    rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
+                    rayStart += theme.transform.position;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+
+                    Debug.Log("X-adjust = " + xAdjust);
+                    Debug.Log("slidep_right: " + Helper.VectorToParsable(contactPoint));
+
+                    Vector3 loc = ((Vector3)args[1]);   // coord of "left"
+
+                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
+                    }
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool)args[args.Length - 1] == false) {
+                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
+                                loc.y - (contactPoint.y - theme.transform.position.y),
+                                loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+
+                            targetPosition = dir + loc;
+                        }
+                        else {
+                            targetPosition = loc;
+                        }
+                        Debug.Log(Helper.VectorToParsable(targetPosition));
+
+                        if (voxComponent != null) {
+                            if (!voxComponent.enabled) {
+                                voxComponent.gameObject.transform.parent = null;
+                                voxComponent.enabled = true;
+                            }
+
+                            voxComponent.targetPosition = targetPosition;
+
+                            /*if (voxComponent.isGrasped) {
+                                voxComponent.targetPosition = voxComponent.targetPosition +
+                                (voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+                            }*/
+                        }
+                    }
+
+                    if (voxComponent.moveSpeed == 0.0f) {
+                        voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+                }
+            }
+        }
+        else if (prep == "_near") {   // fix for multiple RDF triples
+            if (args[0] is GameObject) {
+                if (args[1] is Vector3) {
+                    GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
+                    GameObject dest = GameObject.Find(rdfTriples[0].Item3); // get destination obj ("plate" in "put apple on plate")
+                    Voxeme voxComponent = theme.GetComponent<Voxeme>();
+
+                    Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+
+                    Vector3 loc = ((Vector3)args[1]);   // coord of "near"
+
+                    float yAdjust = (theme.transform.position.y - themeBounds.center.y);
+
+                    targetPosition = new Vector3(loc.x,
+                        loc.y + (themeBounds.center.y - themeBounds.min.y) + yAdjust,
+                        loc.z);
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool)args[args.Length - 1] == false) {
+                            targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y) + yAdjust,
+                                loc.z);
+                        }
+                        else {
+                            targetPosition = loc;
+                        }
+                        Debug.Log(Helper.VectorToParsable(targetPosition));
+
+                        if (voxComponent != null) {
+                            if (!voxComponent.enabled) {
+                                voxComponent.gameObject.transform.parent = null;
+                                voxComponent.enabled = true;
+                            }
+
+                            voxComponent.targetPosition = targetPosition;
+                        }
+                    }
+
+                    if (voxComponent.moveSpeed == 0.0f) {
+                        voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+
+                    translocDir = targetPosition - theme.transform.position;
+                    translocDist = Vector3.Magnitude(translocDir);
+                    relOffset = targetPosition - dest.transform.position;
+                }
+            }
+        }
+        else {
+            if (args[0] is GameObject) {
+                if (agent == null) {
+                    GameObject obj = (args[0] as GameObject);
+                    Voxeme voxComponent = obj.GetComponent<Voxeme>();
+                    if (voxComponent != null) {
+                        if (!voxComponent.enabled) {
+                            voxComponent.gameObject.transform.parent = null;
+                            voxComponent.enabled = true;
+                        }
+
+                        if (args[1] is Vector3) {
+                            targetPosition = (Vector3)args[1];
+                        }
+                        else {
+                            targetPosition = new Vector3(obj.transform.position.x + UnityEngine.Random.insideUnitSphere.x,
+                                obj.transform.position.y, obj.transform.position.z + UnityEngine.Random.insideUnitSphere.z);
+                        }
+
+                        voxComponent.targetPosition = targetPosition;
+                    }
+
+                    if (voxComponent.moveSpeed == 0.0f) {
+                        voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+                }
+                else {
+                    if (args[1] is Vector3) {
+                        GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
+                        Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+
+                        Vector3 loc = ((Vector3)args[1]);   // coord
+
+                        targetPosition = loc;
+                        //targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y), loc.z);
+
+                        Debug.Log(Helper.VectorToParsable(targetPosition));
+
+                        Voxeme voxComponent = theme.GetComponent<Voxeme>();
+                        if (voxComponent != null) {
+                            if (!voxComponent.enabled) {
+                                voxComponent.gameObject.transform.parent = null;
+                                voxComponent.enabled = true;
+                            }
+
+                            if (voxComponent.moveSpeed == 0.0f) {
+                                voxComponent.moveSpeed = RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                            }
+
+                            RaycastHit[] hits = Physics.RaycastAll(
+                                new Vector3(targetPosition.x, targetPosition.y + Constants.EPSILON,
+                                    targetPosition.z), -Constants.yAxis);
+                            List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[])hits);
+                            hits = hitList.OrderBy(h => h.distance).ToArray();
+
+                            GameObject supportingSurface = null;
+                            foreach (RaycastHit hit in hits) {
+                                if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
+                                    if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
+                                        (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
+                                        if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
+                                            Helper.GetObjectWorldSize(gameObject), true)) {
+                                            supportingSurface = hit.collider.gameObject;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (supportingSurface != null) {
+                                Debug.Log(targetPosition.y);
+                                Debug.Log((themeBounds.center.y - themeBounds.min.y));
+                                Debug.Log(Helper.GetObjectWorldSize(supportingSurface).max.y);
+                                Debug.Log(supportingSurface.name);
+                                if (targetPosition.y - (themeBounds.center.y - themeBounds.min.y) < Helper.GetObjectWorldSize(supportingSurface).max.y)
+                                {
+                                    targetPosition = new Vector3(targetPosition.x,
+                                        Helper.GetObjectWorldSize(supportingSurface).max.y + (themeBounds.center.y - themeBounds.min.y),
+                                        targetPosition.z);
+                                    Debug.Log(Helper.VectorToParsable(targetPosition));
+                                }
+                            }
+
+                            voxComponent.targetPosition = targetPosition;
+
+                            if (voxComponent.isGrasped) {
+                                voxComponent.targetPosition = voxComponent.targetPosition +
+                                    (voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // update evalOrig dict
+        string adjustedEval = "slidep(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+
+        if (!eventManager.evalOrig.ContainsKey(adjustedEval))
+        {
+            eventManager.evalOrig.Add(adjustedEval, eventManager.evalOrig[originalEval]);
+            eventManager.evalOrig.Remove(originalEval);
+            Debug.Log("Swapping " + originalEval + " for " + adjustedEval);
+        }
+
+        // add to events manager
+        if (args[args.Length - 1] is bool) {
+            if ((bool)args[args.Length - 1] == false) {
+                eventManager.events[0] = "slidep(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+                Debug.Log(eventManager.events[0]);
+            }
+            else {
+                // record parameter values
+                OnPrepareLog(this, new ParamsEventArgs("TranslocSpeed", (args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
+                OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
+                OnParamsCalculated(null, null);
+            }
+        }
+
+        // plan path to destination
+        if (!Helper.VectorIsNaN(targetPosition)) {
+            if (aStarSearch.path.Count == 0) {
+                Bounds surfaceBounds = Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
+                Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
+                Bounds embeddingSpaceBounds = new Bounds();
+                embeddingSpaceBounds.SetMinMax(new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y, surfaceBounds.min.z + (objBounds.size.z / 2)),
+                    new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
+
+                aStarSearch.start = (args[0] as GameObject).transform.position;
+                aStarSearch.goal = targetPosition;
+                aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path, (args[0] as GameObject),
+                    GameObject.Find(rdfTriples[0].Item3) != null ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>() : null, "Y");
+
+                foreach (Vector3 node in aStarSearch.path) {
+                    (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                }
+            }
+        }
+
+        return;
+    }
 
 	// IN: Objects, Location
 	// OUT: none

@@ -514,8 +514,8 @@ namespace Agent
 		Dictionary<PDASymbol,List<Concept>> symbolConceptMap;
 
         Timer servoTimer;
-        bool forceChangeState = false;
-        PDAState forceMoveToState = null;
+        public bool forceChangeState = false;
+        public PDAState forceMoveToState = null;
 
 		Timer repeatTimer;
 		bool forceRepeat = false;
@@ -690,6 +690,28 @@ namespace Agent
 			return actionList;
 		}
 
+        public List<string> GenerateDirectedServoCommand(object arg) {
+            List<string> actionList = (ActionSuggestions.Count > 0) ?
+                new List<string>(
+                    new string[]{ "slidep({0}" + string.Format (",{0})",
+                        GetGestureContent (
+                            RemoveInputSymbolType (
+                                RemoveGestureTrigger (
+                                    ActionSuggestions[0], GetGestureTrigger (ActionSuggestions[0])),
+                                GetInputSymbolType (ActionSuggestions[0])),
+                            "push servo").ToLower()) }) :
+                new List<string>(
+                    new string[]{ "slide({0}" + string.Format (",{0})",
+                        GetGestureContent (
+                            RemoveInputSymbolType (
+                                RemoveGestureTrigger (
+                                    ActionOptions[0], GetGestureTrigger (ActionOptions[0])),
+                                GetInputSymbolType (ActionOptions[0])),
+                            "push servo").ToLower()) });
+
+            return actionList;
+        }
+
 		public override void Start() {
 			// define the grammar
 			/*
@@ -728,7 +750,7 @@ namespace Agent
 
             ChangeState += HandleStateChange;
 
-			//interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
+            //interactionController.UseTeaching = (PlayerPrefs.GetInt("Use Teaching Agent") == 1);
 
 			States.Add(new PDAState("StartState",null));
 			States.Add(new PDAState("BeginInteraction",null));
@@ -808,7 +830,6 @@ namespace Agent
 						new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptions))))));
 
             States.Add(new PDAState("StartServo", null));
-            States.Add(new PDAState("WaitServo", null));
             States.Add(new PDAState("Servo",
                 new TransitionGate(
                     new FunctionDelegate(EpistemicallyCertain),
@@ -1186,9 +1207,38 @@ namespace Agent
                     "G push servo right start",
                     "G push servo front start",
                     "G push servo back start"),
-                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GenerateStackSymbolFromConditions(
+                    (o) => o != null, (g) => g == null, null, null, null, null
+                ),
                 GetState("StartServo"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("G push servo left start",
+                    "G push servo right start",
+                    "G push servo front start",
+                    "G push servo back start"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null, null, null, null, null
+                ),
+                GetState("StartServo"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(  // check this
+                GetStates("Wait"),
+                GetInputSymbolsByName("G push servo left start",
+                    "G push servo right start",
+                    "G push servo front start",
+                    "G push servo back start"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null,
+                    null, null, null, null
+                ),
+                GetState("RequestObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null,
+                        new FunctionDelegate(GenerateDirectedServoCommand), new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -2353,11 +2403,22 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("StartServo"),
-                null,
+                GetInputSymbolsByName(),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("Servo"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, null, null, null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("StartServo"),
+                GetInputSymbolsByName("G push servo left stop",
+                    "G push servo right stop",
+                    "G push servo front stop",
+                    "G push servo back stop",
+                    "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("StopServo"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("StartLearn"),
@@ -2383,12 +2444,12 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Servo"),
-                GetInputSymbolsByName("G push servo left stop",
-                    "G push servo right stop",
-                    "G push servo front stop",
-                    "G push servo back stop"),
-                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
-                GetState("StopServo"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => a.Count > 0, null
+                ),
+                GetState("StartServo"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
             
 			TransitionRelation.Add(new PDAInstruction(
@@ -2676,6 +2737,7 @@ namespace Agent
 				if ((OutputHelper.GetCurrentOutputString (Role.Affector) != "OK.") &&
 					(OutputHelper.GetCurrentOutputString (Role.Affector) != "OK, never mind.") &&
 					(OutputHelper.GetCurrentOutputString (Role.Affector) != "Bye!")) {
+                    Debug.Log("Repeating");
 					OutputHelper.ForceRepeat (Role.Affector);
 					forceRepeat = false;
 				}
@@ -2683,6 +2745,7 @@ namespace Agent
 
             if ((forceChangeState) && (forceMoveToState != null))  {
                 MoveToState(forceMoveToState);
+                ExecuteStateContent();
                 forceChangeState = false;
                 forceMoveToState = null;
             }
@@ -2882,7 +2945,103 @@ namespace Agent
 			else {
 				if (operation.Content != null) {
 					PDASymbol symbol = Stack.Pop ();
-					//Stack.Push ((PDASymbol)operation.Content);
+                    //Stack.Push ((PDASymbol)operation.Content);
+
+                    // if the symbol you just popped has a null parameter
+                    //  and the operation content has the same null parameter
+                    //  but the new stack symbol (before the rewrite -> push) does not have a null parameter there
+                    if (GetCurrentStackSymbol() != null)
+                    {
+                        if (operation.Content.GetType() == typeof(PDASymbol))
+                        {
+                            if ((((StackSymbolContent)symbol.Content).IndicatedObj == null) &&
+                                (((StackSymbolContent)((PDASymbol)operation.Content).Content).IndicatedObj == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).IndicatedObj != null))
+                            {
+                                ((StackSymbolContent)((PDASymbol)operation.Content).Content).IndicatedObj = new FunctionDelegate(NullObject);
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).GraspedObj == null) &&
+                                (((StackSymbolContent)((PDASymbol)operation.Content).Content).GraspedObj == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).GraspedObj != null))
+                            {
+                                ((StackSymbolContent)((PDASymbol)operation.Content).Content).GraspedObj = new FunctionDelegate(NullObject);
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).IndicatedRegion == null) &&
+                                (((StackSymbolContent)((PDASymbol)operation.Content).Content).IndicatedRegion == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).IndicatedRegion != null))
+                            {
+                                ((StackSymbolContent)((PDASymbol)operation.Content).Content).IndicatedRegion = new FunctionDelegate(NullObject);
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).ObjectOptions == null) &&
+                                (((StackSymbolContent)((PDASymbol)operation.Content).Content).ObjectOptions == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).ObjectOptions != null))
+                            {
+                                ((StackSymbolContent)((PDASymbol)operation.Content).Content).ObjectOptions = new List<string>();
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).ActionOptions == null) &&
+                                (((StackSymbolContent)((PDASymbol)operation.Content).Content).ActionOptions == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).ActionOptions != null))
+                            {
+                                ((StackSymbolContent)((PDASymbol)operation.Content).Content).ActionOptions = new List<string>();
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).ActionSuggestions == null) &&
+                                (((StackSymbolContent)((PDASymbol)operation.Content).Content).ActionSuggestions == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).ActionSuggestions != null))
+                            {
+                                ((StackSymbolContent)((PDASymbol)operation.Content).Content).ActionSuggestions = new List<string>();
+                            }
+                        }
+                        else if ((operation.Content is IList) && (operation.Content.GetType().IsGenericType) &&
+                                 (operation.Content.GetType().IsAssignableFrom(typeof(List<StackSymbolContent>)))) {
+                            if ((((StackSymbolContent)symbol.Content).IndicatedObj == null) &&
+                                (((List<StackSymbolContent>)operation.Content)[0].IndicatedObj == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).IndicatedObj != null))
+                            {
+                                ((List<StackSymbolContent>)operation.Content)[0].IndicatedObj = new FunctionDelegate(NullObject);
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).GraspedObj == null) &&
+                                (((List<StackSymbolContent>)operation.Content)[0].GraspedObj == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).GraspedObj != null))
+                            {
+                                ((List<StackSymbolContent>)operation.Content)[0].GraspedObj = new FunctionDelegate(NullObject);
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).IndicatedRegion == null) &&
+                                    (((List<StackSymbolContent>)operation.Content)[0].IndicatedRegion == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).IndicatedRegion != null))
+                            {
+                                ((List<StackSymbolContent>)operation.Content)[0].IndicatedRegion = new FunctionDelegate(NullObject);
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).ObjectOptions == null) &&
+                                (((List<StackSymbolContent>)((PDASymbol)operation.Content).Content)[0].ObjectOptions == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).ObjectOptions != null))
+                            {
+                                ((List<StackSymbolContent>)operation.Content)[0].ObjectOptions = new List<string>();
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).ActionOptions == null) &&
+                                (((List<StackSymbolContent>)((PDASymbol)operation.Content).Content)[0].ActionOptions == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).ActionOptions != null))
+                            {
+                                ((List<StackSymbolContent>)operation.Content)[0].ActionOptions = new List<string>();
+                            }
+
+                            if ((((StackSymbolContent)symbol.Content).ActionSuggestions == null) &&
+                                (((List<StackSymbolContent>)((PDASymbol)operation.Content).Content)[0].ActionSuggestions == null) &&
+                                (((StackSymbolContent)GetCurrentStackSymbol().Content).ActionSuggestions != null))
+                            {
+                                ((List<StackSymbolContent>)operation.Content)[0].ActionSuggestions = new List<string>();
+                            }
+                        }
+                    }
+
 					PerformStackOperation(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,operation.Content));
 				}
 
@@ -3230,7 +3389,7 @@ namespace Agent
 		List<PDAInstruction> GetApplicableInstructions(PDAState fromState, PDASymbol inputSymbol, object stackSymbol) {
 			Debug.Log (fromState.Name);
 			Debug.Log (inputSymbol == null ? "Null" : inputSymbol.Name);
-			Debug.Log (StackSymbolToString (stackSymbol));
+            Debug.Log (string.Format("Stack symbol: {0}",StackSymbolToString (stackSymbol)));
 			foreach (PDASymbol element in Stack) {
 				Debug.Log (StackSymbolToString (element));
 			}
@@ -3240,7 +3399,25 @@ namespace Agent
 			instructions = instructions.Where (i =>
 				(i.InputSymbols == null && inputSymbol == null) || (i.InputSymbols != null && i.InputSymbols.Contains(inputSymbol))).ToList();
 
-			Debug.Log (instructions.Count);
+            Debug.Log (string.Format("{0} instructions from {1} with {2}", instructions.Count, fromState.Name, inputSymbol == null ? "Null" : inputSymbol.Name));
+
+            foreach (PDAInstruction inst in instructions) {
+                Debug.Log(string.Format("{0},{1},{2},{3},{4}",
+                    (inst.FromStates == null) ? "Null" :
+                    string.Format("[{0}]",
+                        String.Join(", ", ((List<PDAState>)inst.FromStates).Select(s => s.Name).ToArray())),
+                    (inst.InputSymbols == null) ? "Null" :
+                    string.Format("[{0}]",
+                        String.Join(", ", ((List<PDASymbol>)inst.InputSymbols).Select(s => s.Content.ToString()).ToArray())),
+                    StackSymbolToString(inst.StackSymbol),
+                    inst.ToState.Name,
+                    string.Format("[{0},{1}]",
+                        inst.StackOperation.Type.ToString(),
+                        (inst.StackOperation.Content == null) ? "Null" : StackSymbolToString(inst.StackOperation.Content))));
+            }
+
+            Debug.Log(string.Format("{0} instructions before symbol + gate filtering", instructions.Count));
+            Debug.Log(stackSymbol.GetType());
 
 			if (stackSymbol.GetType () == typeof(StackSymbolContent)) {
 				//instructions = instructions.Where (i => (i.StackSymbol.Content.GetType() == typeof(StackSymbolContent))).ToList();
@@ -3261,6 +3438,8 @@ namespace Agent
 			//			}
 
 			//			Debug.Log (instructions.Count);
+
+            Debug.Log(string.Format("{0} instructions after symbol + gate filtering", instructions.Count));
 
 			return instructions;
 		}
@@ -3299,27 +3478,37 @@ namespace Agent
                 GetState("IndexByGesture"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-            TransitionRelation.Add(new PDAInstruction(
-                GetStates("IndexByGesture"),
-                null,
-                GenerateStackSymbolFromConditions(
-                    null, null, null,
-                    (m) => m.Count > 1, null, null
-                ),
-                GetState("DisambiguateObject"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+            if (GetApplicableInstructions(GetState("IndexByGesture"), null,
+                GenerateStackSymbolFromConditions((o) => o != null, null, null,
+                    null, null, null)).Count == 0)
+            {
+                TransitionRelation.Add(new PDAInstruction(
+                    GetStates("IndexByGesture"),
+                    null,
+                    GenerateStackSymbolFromConditions(
+                        (o) => o != null, null, null,
+                        null, null, null
+                    ),
+                    GetState("ComposeObjectAndAction"),
+                    new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                        new StackSymbolContent(null, null, null, new List<GameObject>(),
+                            new FunctionDelegate(GeneratePutAtRegionCommand), new List<string>()))));
+            }
 
-            TransitionRelation.Add(new PDAInstruction(
-                GetStates("IndexByGesture"),
-                null,
-                GenerateStackSymbolFromConditions(
-                    (o) => o != null, null, null,
-                    null, null, null
-                ),
-                GetState("ComposeObjectAndAction"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-                    new StackSymbolContent(null, null, null, new List<GameObject>(),
-                        new FunctionDelegate(GeneratePutAtRegionCommand), new List<string>()))));
+            if (GetApplicableInstructions(GetState("IndexByGesture"), null,
+                GenerateStackSymbolFromConditions(null, null, null,
+                    (m) => m.Count > 1, null, null)).Count == 0)
+            {
+                TransitionRelation.Add(new PDAInstruction(
+                    GetStates("IndexByGesture"),
+                    null,
+                    GenerateStackSymbolFromConditions(
+                        null, null, null,
+                        (m) => m.Count > 1, null, null
+                    ),
+                    GetState("DisambiguateObject"),
+                    new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+            }
 
             //TransitionRelation.Add(new PDAInstruction(
                 //GetStates("IndexByGesture"),
@@ -3528,11 +3717,12 @@ namespace Agent
 			if ((repeatAfterWait) && (repeatTimerTime > 0)) {
 				repeatTimer.Interval = repeatTimerTime;
 				forceRepeat = true;
-				Debug.Log ("Repeating");
 			}
 		}
 
         void MoveToServo(object sender, ElapsedEventArgs e) {
+            Debug.Log("MoveToServo");
+
             if (servoTimerTime > 0) {
                 servoTimer.Interval = servoTimerTime;
                 servoTimer.Enabled = false;
@@ -3545,8 +3735,14 @@ namespace Agent
             PDAState state = ((StateChangeEventArgs)e).State;
 
             if (state == GetState("StartServo")) {
+                servoTimer.Interval = servoTimerTime;
                 servoTimer.Enabled = true;
                 Debug.Log(string.Format("Start Servo Timer:{0}", servoTimer.Interval));
+            } 
+            else
+            {
+                servoTimer.Interval = servoTimerTime;
+                servoTimer.Enabled = false;
             }
         }
 	}

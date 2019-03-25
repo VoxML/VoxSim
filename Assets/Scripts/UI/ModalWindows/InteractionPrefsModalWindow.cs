@@ -60,6 +60,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 	public bool useTeachingAgent = false;
 	public bool showSyntheticVision = false;
 	public bool showVisualMemory = false;
+    public bool visualizeDialogueState = false;
     public bool connectionLostNotification = true;
 
     public bool linguisticReference = true;
@@ -72,7 +73,7 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		base.Start ();
 
 		actionButtonText = "Interaction Prefs";
-		windowTitle = "Gesture Interaction Prefs";
+		windowTitle = "Multimodal Interaction Prefs";
 		persistent = true;
 
 		fontSizeModifier = (int)(fontSize / defaultFontSize);
@@ -132,18 +133,6 @@ public class InteractionPrefsModalWindow : ModalWindow {
 		GUILayout.EndVertical();
 		GUILayout.EndVertical();
 
-		GUILayout.BeginHorizontal(GUI.skin.box);
-		useTeachingAgent = GUILayout.Toggle (useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth (true));
-		GUILayout.EndHorizontal();
-
-		GUILayout.BeginVertical(GUI.skin.box);
-		GUILayout.Label ("Agent Perception:");
-		GUILayout.BeginVertical(GUI.skin.box);
-		showSyntheticVision = GUILayout.Toggle (showSyntheticVision, "Show Synthetic Vision", GUILayout.ExpandWidth (true));
-		showVisualMemory = GUILayout.Toggle (showVisualMemory, "Show Visual Memory", GUILayout.ExpandWidth (true));
-		GUILayout.EndVertical();
-		GUILayout.EndVertical();
-
         GUILayout.BeginVertical(GUI.skin.box);
         GUILayout.Label("Referencing:");
         GUILayout.BeginVertical(GUI.skin.box);
@@ -152,8 +141,24 @@ public class InteractionPrefsModalWindow : ModalWindow {
         GUILayout.EndVertical();
         GUILayout.EndVertical();
 
+        GUILayout.BeginVertical(GUI.skin.box);
+        GUILayout.Label("Agent Perception:");
+        GUILayout.BeginVertical(GUI.skin.box);
+        showSyntheticVision = GUILayout.Toggle(showSyntheticVision, "Show Synthetic Vision", GUILayout.ExpandWidth(true));
+        showVisualMemory = GUILayout.Toggle(showVisualMemory, "Show Visual Memory", GUILayout.ExpandWidth(true));
+        GUILayout.EndVertical();
+        GUILayout.EndVertical();
+
+		GUILayout.BeginHorizontal(GUI.skin.box);
+		useTeachingAgent = GUILayout.Toggle (useTeachingAgent, "Use Teaching Agent", GUILayout.ExpandWidth (true));
+		GUILayout.EndHorizontal();
+
         GUILayout.BeginHorizontal(GUI.skin.box);
-        connectionLostNotification = GUILayout.Toggle(useTeachingAgent, "Connection Lost Notification", GUILayout.ExpandWidth(true));
+        useTeachingAgent = GUILayout.Toggle(visualizeDialogueState, "Visualize Dialogue State", GUILayout.ExpandWidth(true));
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal(GUI.skin.box);
+        connectionLostNotification = GUILayout.Toggle(connectionLostNotification, "Connection Lost Notification", GUILayout.ExpandWidth(true));
         GUILayout.EndHorizontal();
 
 		GUILayout.EndScrollView ();

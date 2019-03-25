@@ -26,11 +26,12 @@ public class SelectionEventArgs : EventArgs {
 
 public class JointGestureDemo : AgentInteraction {
 
-    FusionSocket fusionClient;
+    FusionSocket fusionSocket;
 	EventManager eventManager;
 	ObjectSelector objSelector;
 	PluginImport commBridge;
 	RelationTracker relationTracker;
+    Predicates predicates;
 
 	GameObject Diana;
 	GameObject leftGrasper;
@@ -174,8 +175,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	public bool useOrderingHeuristics;
 
-    public bool useSpeechGrammar;
-    public bool useServos;
+    //public bool useSpeechGrammar;
+    //public bool useServos;
 
 	Dictionary<string,string> confirmationTexts = new Dictionary<string, string>();
 
@@ -211,10 +212,13 @@ public class JointGestureDemo : AgentInteraction {
 
 		eventManager = GameObject.Find ("BehaviorController").GetComponent<EventManager> ();
 		eventManager.EventComplete += ReturnToRest;
+        eventManager.QueueEmpty += CompletedEventSequence;
         eventManager.EntityReferenced += ReferentIndicated;
         eventManager.DisambiguationError += Disambiguate;
 
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
+
+        predicates = GameObject.Find("BehaviorController").GetComponent<Predicates>();
 
 		interactionPrefs = gameObject.GetComponent<InteractionPrefsModalWindow> ();
 
@@ -239,12 +243,13 @@ public class JointGestureDemo : AgentInteraction {
             dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
         }
 
-        fusionClient = commBridge.GetComponent<PluginImport>().FusionSocket;
+        fusionSocket = commBridge.GetComponent<PluginImport>().FusionSocket;
         //TODO: What if there is no CSUClient address assigned?
-        if (fusionClient != null)
+        if (fusionSocket != null)
         {
-            fusionClient.FusionReceived += ReceivedFusion;
-            fusionClient.ConnectionLost += ConnectionLost;
+            fusionSocket.ConnectionMade += ConnectionMade;
+            fusionSocket.FusionReceived += ReceivedFusion;
+            fusionSocket.ConnectionLost += ConnectionLost;
         }
 
 		leftGrasper = Diana.GetComponent<FullBodyBipedIK> ().references.leftHand.gameObject;
@@ -566,73 +571,7 @@ public class JointGestureDemo : AgentInteraction {
 		Concept conceptG = null;
 		Relation relation = null;
 
-		if (messageType == "S") {	// speech message
-			Debug.Log (fusionMessage);
-			switch (messageStr.ToLower ()) {
-			case "yes":
-				break;
-			case "no":
-				break;
-			case "grab":
-				break;
-			case "left":
-				break;
-			case "right":
-				break;
-			case "this":
-			case "that":
-				break;
-			case "red":
-			case "green":
-			case "yellow":
-			case "orange":
-			case "black":
-			case "purple":
-			case "white":
-			case "pink":
-				break;
-			case "big":
-				break;
-			case "small":
-				break;
-			default:
-				Debug.Log ("Cannot recognize the message: " + messageStr);
-				break;
-			}
-		} 
-		else if (messageType == "G") {	// gesture message
-			Debug.Log (fusionMessage);
-			string[] messageComponents = messageStr.Split ();
-			//			foreach (string c in messageComponents) {
-			//				Debug.Log (c);
-			//			}
-			if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("start")) {	// start as trigger
-				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-			}
-			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("high")) {	// high as trigger
-				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-				if (messageStr.StartsWith ("grab")) {
-				}
-				else if (messageStr.StartsWith ("posack")) {
-				}
-				else if (messageStr.StartsWith ("negack")) {
-				}
-			}
-			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("low")) {	// low as trigger
-			} 
-			else if (messageComponents[messageComponents.Length-1].Split(',')[0].EndsWith ("stop")) {	// stop as trigger
-				messageStr = interactionLogic.RemoveGestureTrigger (messageStr, interactionLogic.GetGestureTrigger(messageStr));
-				string startSignal = FindStartSignal (messageStr);
-
-				if (messageStr.StartsWith ("engage")) {
-				} 
-				else if (messageStr.StartsWith ("push")) {
-				} 
-				else if (messageStr.StartsWith ("grab")) {
-				}
-			}
-		}
-		else if (messageType == "P") {	// continuous pointing message
+		if (messageType == "P") {	// continuous pointing message
 			if ((interactionLogic.CurrentState.Name != "Wait") && (interactionLogic.CurrentState.Name != "TrackPointing")) {
 				regionHighlight.GetComponent<Renderer> ().material = inactiveHighlightMaterial;
 			}
@@ -660,36 +599,6 @@ public class JointGestureDemo : AgentInteraction {
 				}
 			}
 		}
-	}
-
-	string FindStartSignal(string message) {
-		string startSignal = "";
-
-		foreach (Pair<string,string> m in receivedMessages.AsEnumerable().Reverse()) {
-			if ((m.Item2.StartsWith (message)) && (!m.Item2.EndsWith ("stop"))) {
-				startSignal = m.Item2;
-				break;
-			}
-		}
-
-		Debug.Log (startSignal);
-		return startSignal;
-	}
-
-	string FindPreviousMatch(string message) {
-		string prevMessage = "";
-		List<Pair<string,string>> previousMessages = receivedMessages.AsEnumerable ().Reverse ().ToList ();
-		previousMessages.RemoveAt (0);
-
-		foreach (Pair<string,string> m in previousMessages) {
-			if (m.Item2.Contains (message)) {
-				prevMessage = m.Item2;
-				break;
-			}
-		}
-
-		Debug.Log (prevMessage);
-		return prevMessage;
 	}
 
 	string GetSpeechString(string receivedData, string constituentTag) {
@@ -1668,7 +1577,8 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (message);
 
             if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
-                if (regionHighlight.GetComponent<Renderer>().material.color.a == 1.0f) {
+                if ((regionHighlight.GetComponent<Renderer>().material.color.a == 1.0f) &&
+                    (regionHighlight.transform.position.y > 0.0f)) {
                     interactionLogic.RewriteStack(
                         new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                             interactionLogic.GenerateStackSymbol(null, null,
@@ -2528,12 +2438,14 @@ public class JointGestureDemo : AgentInteraction {
                 break;
 
             case 1:
-                List<string> actionOptions = new List<string>();
-                actionOptions.Add(content[0].ToString());
+                if (content[0] != null) {
+                    List<string> actions = new List<string>();
+                    actions.Add(content[0].ToString());
 
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(null, null, null, null,
-                        actionOptions, null)));
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), interactionLogic.IndicatedObj, null, null,
+                            null, actions)));
+                }
 
                 break;
 
@@ -2555,9 +2467,16 @@ public class JointGestureDemo : AgentInteraction {
             case 1:
                 string message = null;
 
-                if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions).Count > 0) {
-                    message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions)[0];
+                if (content[0] == null) {
+                    if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionSuggestions).Count > 0) {
+                        message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionSuggestions)[0];
+                    }
                 }
+                //else {
+                //    if (((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions).Count > 0) {
+                //        message = ((List<string>)((StackSymbolContent)interactionLogic.CurrentStackSymbol.Content).ActionOptions)[0];
+                //    }
+                //}
 
                 Debug.Log(message);
                 string dir = string.Empty;
@@ -2587,11 +2506,11 @@ public class JointGestureDemo : AgentInteraction {
                 GameObject obj = (interactionLogic.GraspedObj == null) ?
                     interactionLogic.IndicatedObj : interactionLogic.GraspedObj;
 
-                string eventStr = string.Format("slide({0},{1}({0}))", obj.name, oppositeDir[dir]);
+                string eventStr = string.Format("slidep({0},{1}({0}))", obj.name, oppositeDir[dir]);
 
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
-                    new List<string>() { eventStr }, null)));
+                //interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    //interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                    //new List<string>() { eventStr }, null)));
 
                 PromptEvent(eventStr);
                 break;
@@ -2615,7 +2534,9 @@ public class JointGestureDemo : AgentInteraction {
             ReturnHandsToDefault();
         }
 
-        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
+            interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), 
+                null, null, new List<string>(), new List<string>())));
     }
 
     public void StartLearn(object[] content) {
@@ -4234,6 +4155,23 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
+    void CompletedEventSequence(object sender, EventArgs e)
+    {
+        string eventStr = ((EventManagerArgs)e).EventString;
+
+        MethodInfo method = predicates.GetType().GetMethod(Helper.GetTopPredicate(eventStr).ToUpper());
+
+        if (method.ReturnType == typeof(void))
+        { // is event
+            if (!eventStr.Contains("grasp") && !eventStr.Contains("ungrasp"))
+            {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                        new List<string>() { eventStr }, null)));
+            }
+        }
+    }
+
     void ReferentIndicated(object sender, EventArgs e)
     {
         if (((EventReferentArgs)e).Referent is String)   // object
@@ -4307,8 +4245,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	void ConnectionLost(object sender, EventArgs e) {
 		LookForward();
-        Debug.Log("Connection Lost");
-
+        //Debug.Log("Connection Lost");
 
         if (interactionPrefs.connectionLostNotification) {
             if (sessionCounter >= 1) {
@@ -4318,11 +4255,21 @@ public class JointGestureDemo : AgentInteraction {
             }
             else {
                 if (eventManager.events.Count == 0) {
-                    RespondAndUpdate("Anyone there?");
+                    if (interactionLogic.CurrentState.Name != "EndState")
+                    {
+                        fusionSocket.OnFusionReceived(this, new FusionEventArgs("G;engage stop;0.0"));
+                        RespondAndUpdate("Anyone there?");
+                    }
                 }
             }
         }
 	}
+
+    void ConnectionMade(object sender, EventArgs e)
+    {
+        LookForward();
+        RespondAndUpdate("");
+    }
 
 	void DisableHighlight(object sender, ElapsedEventArgs e) {
 		highlightTimeoutTimer.Enabled = false;

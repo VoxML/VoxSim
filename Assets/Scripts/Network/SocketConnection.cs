@@ -30,20 +30,46 @@ namespace Network
 			}
 		}
 
+        public event EventHandler ConnectionMade;
+
+        public void OnConnectionMade(object sender, EventArgs e)
+        {
+            if (ConnectionMade != null)
+            {
+                ConnectionMade(this, e);
+            }
+        }
+
 		protected const int IntSize = sizeof(Int32);
 		protected TcpClient _client;
 		protected Thread _t;
 		protected Queue<string> _messages;
 		protected byte[] _ok = new byte[] { 0x20 };
 
+        string _address;
+        public string Address
+        {
+            get { return _address; }
+            set { _address = value; }
+        }
+
+        int _port;
+        public int Port
+        {
+            get { return _port; }
+            set { _port = value; }
+        }
+
         public virtual bool IsConnected()
 	    {
-	        return _client.Connected;
+            return !((_client.Client.Poll(10, SelectMode.SelectRead) && (_client.Client.Available == 0)) || !_client.Client.Connected);
 	    }
 
         public virtual void Connect(string address, int port)
 		{
-			Debug.Log (string.Format("{0}:{1}",address,port));
+            _address = address;
+            _port = port;
+			//Debug.Log (string.Format("{0}:{1}",address,port));
 
 			_messages = new Queue<string>();
 			_client = new TcpClient();
@@ -68,11 +94,18 @@ namespace Network
 
 		protected virtual void Loop()
 		{
-			while (_client.Connected)
+            while (IsConnected())
 			{
 				NetworkStream stream = _client.GetStream();
 				byte[] byteBuffer = new byte[IntSize];
-				stream.Read(byteBuffer, 0, IntSize);
+                try
+                {
+                    stream.Read(byteBuffer, 0, IntSize);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                }
 
 				//				if (!BitConverter.IsLittleEndian)
 				//				{
@@ -89,7 +122,7 @@ namespace Network
 				//_messages.Enqueue (message);
 
 			}
-			_client.Close();
+			//_client.Close();
 		}
 
         public virtual void Close()

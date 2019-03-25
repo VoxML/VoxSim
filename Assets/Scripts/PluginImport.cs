@@ -1,13 +1,26 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Timers;
 using Network;
 using NLU;
 
-public class PluginImport : MonoBehaviour {
+public class SocketEventArgs : EventArgs
+{
+    public Type SocketType { get; set; }
 
+    public SocketEventArgs(Type type)
+    {
+        this.SocketType = type;
+    }
+}
+
+public class PluginImport : MonoBehaviour {
 	private INLParser _parser;
 	private CmdServer _cmdServer;
     private FusionSocket _fusionSocket;
@@ -41,6 +54,10 @@ public class PluginImport : MonoBehaviour {
         get { return _adeSocket; }
     }
 
+    List<SocketConnection> socketConnections = new List<SocketConnection>();
+    Dictionary<string, Type> tryAgain = new Dictionary<string, Type>();
+    List<string> connected = new List<string>();
+
 	// Make our calls from the Plugin
 	[DllImport ("CommunicationsBridge")]
 	public static extern IntPtr PythonCall(string scriptsPath, string module, string function, string[] args, int numArgs);
@@ -55,8 +72,19 @@ public class PluginImport : MonoBehaviour {
 		}
 	}
 
+    public int connectionRetryTimerTime = 1000;
+    Timer connectionRetryTimer;
+    bool retryConnections = false;
+
 	void Start()
 	{
+        connectionRetryTimer = new Timer(connectionRetryTimerTime);
+        connectionRetryTimer.Enabled = true;
+        connectionRetryTimer.Elapsed += RetryConnections;
+        //BackgroundWorker worker = new BackgroundWorker();
+        //worker.WorkerSupportsCancellation = true;
+        //worker.DoWork += new DoWorkEventHandler(RetryConnections);
+
 		string port = PlayerPrefs.GetString("Listener Port");
 		if (port != "")
 		{
@@ -66,6 +94,8 @@ public class PluginImport : MonoBehaviour {
 		{
 			Debug.Log ("No listener port specified. Skipping interface startup.");
 		}
+
+        InitParser();
 
 		if (PlayerPrefs.HasKey ("URLs")) {
 
@@ -90,9 +120,18 @@ public class PluginImport : MonoBehaviour {
                 int fusionPort = Convert.ToInt32(fusionUrl[1]);
                 try {
                     _fusionSocket = (FusionSocket)ConnectSocket(fusionAddress, fusionPort, typeof(FusionSocket));
+                    socketConnections.Add(_fusionSocket);
                 }
                 catch (Exception e) {
                     Debug.Log(e.Message);
+                }
+
+                if (!_fusionSocket.IsConnected())
+                {
+                    if (!tryAgain.ContainsKey(fusionUrlString))
+                    {
+                        tryAgain.Add(fusionUrlString, typeof(FusionSocket));
+                    }
                 }
             }
             else {
@@ -102,6 +141,7 @@ public class PluginImport : MonoBehaviour {
             /******************/
             /* EVENT LEARNING */
             /******************/
+            // Brandeis
 
 			string eventLearnerUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
@@ -129,6 +169,7 @@ public class PluginImport : MonoBehaviour {
             /**********************/
             /* STRUCTURE LEARNING */
             /**********************/
+            // Brandeis
 
             string structureLearnerUrlString = string.Empty;
             foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
@@ -156,7 +197,7 @@ public class PluginImport : MonoBehaviour {
             /*************/
             /* COMMANDER */
             /*************/
-            // Oz studies
+            // Oz studies (UF)
 
 			string commanderUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
@@ -201,14 +242,28 @@ public class PluginImport : MonoBehaviour {
                 int ksimPort = Convert.ToInt32(ksimUrl[1]);
                 try {
                     _ksimSocket = (KSIMSocket)ConnectSocket(ksimAddress, ksimPort, typeof(KSIMSocket));
+                    socketConnections.Add(_ksimSocket);
                 }
                 catch (Exception e) {
                     Debug.Log(e.Message);
                 }
 
                 if (_ksimSocket != null) {
-                    byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] { 0x02 }).ToArray<byte>();
-                    _ksimSocket.Write(bytes);
+                    if (!_ksimSocket.IsConnected())
+                    {
+                        Debug.Log("KSIM socket failed to connect.");
+
+                        if (!tryAgain.ContainsKey(ksimUrlString))
+                        {
+                            tryAgain.Add(ksimUrlString, typeof(KSIMSocket));
+                        }
+                    }
+                    else
+                    {
+                        // register VoxSim
+                        byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] { 0x02 }).ToArray<byte>();
+                        _ksimSocket.Write(bytes);
+                    }
                 }
             }
             else {
@@ -236,14 +291,27 @@ public class PluginImport : MonoBehaviour {
                 int adePort = Convert.ToInt32(adeUrl[1]);
                 try {
                     _adeSocket = (ADESocket)ConnectSocket(adeAddress, adePort, typeof(ADESocket));
+                    socketConnections.Add(_adeSocket);
                 }
                 catch (Exception e) {
                     Debug.Log(e.Message);
                 }
 
                 if (_adeSocket != null) {
-                    byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] { 0x02 }).ToArray<byte>();
-                    _adeSocket.Write(bytes);
+                    if (!_adeSocket.IsConnected())
+                    {
+                        Debug.Log("ADE socket failed to connect.");
+
+                        if (!tryAgain.ContainsKey(adeUrlString))
+                        {
+                            tryAgain.Add(adeUrlString, typeof(ADESocket));
+                        }
+                    }
+                    else {
+                        // try test message
+                        byte[] bytes = Encoding.ASCII.GetBytes("Hello, ADE!");
+                        _adeSocket.Write(bytes);
+                    }
                 }
             }
             else {
@@ -253,9 +321,6 @@ public class PluginImport : MonoBehaviour {
 		else {
 			Debug.Log ("No input URLs specified.");
 		}
-
-		InitParser();
-
 	}
 
 	public void InitParser() {
@@ -277,21 +342,24 @@ public class PluginImport : MonoBehaviour {
 	void Update () {
 		if (_fusionSocket != null)
 		{
-			if (_fusionSocket.IsConnected())
+            if (_fusionSocket.IsConnected())
 			{
                 string inputFromFusion = _fusionSocket.GetMessage();
 				if (inputFromFusion != "")
 				{
 					Debug.Log(inputFromFusion);
 					Debug.Log(_fusionSocket.HowManyLeft() + " messages left.");
-					_fusionSocket.OnGestureReceived(this, new FusionEventArgs(inputFromFusion));
+					_fusionSocket.OnFusionReceived(this, new FusionEventArgs(inputFromFusion));
 				}
 			}
 			else
 			{
-				Debug.LogError("Connection to Fusion server is lost!");
 				_fusionSocket.OnConnectionLost(this, null);
-				_fusionSocket = null;
+                string fusionAddress = string.Format("{0}:{1}", _fusionSocket.Address, _fusionSocket.Port);
+                if (!tryAgain.ContainsKey(fusionAddress))
+                {
+                    tryAgain.Add(fusionAddress, _fusionSocket.GetType());
+                }
 			}
 		}
 
@@ -314,40 +382,197 @@ public class PluginImport : MonoBehaviour {
 				((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(inputFromCommander.Trim());
 			}
 		}
+
+        if (_ksimSocket != null)
+        {
+            if (_ksimSocket.IsConnected())
+            {
+            }
+            else
+            {
+                _ksimSocket.OnConnectionLost(this, null);
+                string ksimAddress = string.Format("{0}:{1}", _ksimSocket.Address, _ksimSocket.Port);
+                if (!tryAgain.ContainsKey(ksimAddress))
+                {
+                    tryAgain.Add(ksimAddress, _ksimSocket.GetType());
+                }
+            }
+        }
+
+        if (_adeSocket != null)
+        {
+            if (_adeSocket.IsConnected())
+            {
+                // try test message
+                byte[] bytes = Encoding.ASCII.GetBytes("Hello, ADE!");
+                _adeSocket.Write(bytes);
+            }
+            else
+            {
+                _adeSocket.OnConnectionLost(this, null);
+                string adeAddress = string.Format("{0}:{1}", _adeSocket.Address, _adeSocket.Port);
+                if (!tryAgain.ContainsKey(adeAddress))
+                {
+                    tryAgain.Add(adeAddress, _adeSocket.GetType());
+                }
+            }
+        }
+
+        if ((retryConnections) && (tryAgain.Keys.Count > 0))
+        {
+            foreach (string connectionLabel in tryAgain.Keys)
+            {
+                if (tryAgain[connectionLabel] != null)
+                {
+                    SocketConnection socket = socketConnections.FirstOrDefault(s => s.GetType() == tryAgain[connectionLabel]);
+                    if (socket != null)
+                    {
+                        if (!socket.IsConnected())
+                        {
+                            Debug.Log(string.Format("Retrying connection {0}@{1}",tryAgain[connectionLabel],connectionLabel));
+                            // try again
+                            try
+                            {
+                                string[] url = connectionLabel.Split(':');
+                                string address = url[0];
+                                if (address != "")
+                                {
+                                    int port = Convert.ToInt32(url[1]);
+                                    try
+                                    {
+                                        Type socketType = tryAgain[connectionLabel];
+                                        TryReconnectSocket(address, port, socketType, ref socket);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Debug.Log(e.Message);
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Log(e.Message);
+                            }
+
+                            if (socket.IsConnected())
+                            {
+                                connected.Add(connectionLabel);
+                            }
+                            else
+                            {
+                                Debug.Log(string.Format("Connection to {0} is lost!",socket.GetType()));
+                            }
+
+                            if (tryAgain[connectionLabel] == typeof(FusionSocket))
+                            {
+                                _fusionSocket = (FusionSocket)socket;
+                                //Debug.Log(_fusionSocket.IsConnected());
+                            }
+                            else if (tryAgain[connectionLabel] == typeof(KSIMSocket))
+                            {
+                                _ksimSocket = (KSIMSocket)socket;
+
+                                if (_ksimSocket.IsConnected())
+                                {
+                                    // register VoxSim
+                                    byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] { 0x02 }).ToArray<byte>();
+                                    _ksimSocket.Write(bytes);
+                                }
+                            }
+                            else if (tryAgain[connectionLabel] == typeof(ADESocket))
+                            {
+                                _adeSocket = (ADESocket)socket;
+                                //Debug.Log(_fusionSocket.IsConnected());
+                            }
+                        }
+                    }
+                }
+            }
+
+            foreach (string label in connected)
+            {
+                if (tryAgain.ContainsKey(label))
+                {
+                    tryAgain.Remove(label);
+                }
+            }
+
+            connected.Clear();
+
+            retryConnections = false;
+        }
 	}
 
-	public SocketConnection ConnectSocket(string address, int port, Type clientType)
+    void RetryConnections(object sender, ElapsedEventArgs e)
+    {
+        connectionRetryTimer.Interval = connectionRetryTimerTime;
+        retryConnections = true;
+    }
+
+    public SocketConnection ConnectSocket(string address, int port, Type socketType)
 	{
 		Debug.Log(string.Format("Trying connection to {0}:{1}",address,port)); 
 
-		SocketConnection client = null;
+        SocketConnection socket = null;
 
-        if (clientType == typeof(FusionSocket)) {
-            client = new FusionSocket();
+        if (socketType == typeof(FusionSocket)) {
+            socket = new FusionSocket();
         }
-        if (clientType == typeof(CommanderSocket)) {
-			client = new CommanderSocket ();
+        if (socketType == typeof(CommanderSocket)) {
+			socket = new CommanderSocket ();
 		}
-		else if (clientType == typeof(EventLearningSocket)) {
-			client = new EventLearningSocket ();
+		else if (socketType == typeof(EventLearningSocket)) {
+			socket = new EventLearningSocket ();
 		}
-        else if (clientType == typeof(KSIMSocket)) {
-            client = new KSIMSocket();
+        else if (socketType == typeof(KSIMSocket)) {
+            socket = new KSIMSocket();
         }
-        else if (clientType == typeof(ADESocket)) {
-            client = new ADESocket();
+        else if (socketType == typeof(ADESocket)) {
+            socket = new ADESocket();
         }
 
-		if (client != null) {
-			client.Connect (address, port);
-			Debug.Log (string.Format ("{2} :: Connected to client @ {0}:{1} as {3}", address, port, client.IsConnected (), clientType.ToString()));
-		}
+        if (socket != null)
+        {
+            try
+            {
+                socket.Connect(address, port);
+                Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port, socket.IsConnected(), socketType.ToString()));
+                socket.OnConnectionMade(this, new SocketEventArgs(socketType));
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+        }
 		else {
 			Debug.Log ("Failed to create client");
+            //socket = null;
 		}
-			
-		return client;
+
+		return socket;
 	}
+
+    public void TryReconnectSocket(string address, int port, Type socketType, ref SocketConnection socket)
+    {
+        if (socket != null)
+        {
+            try
+            {
+                socket.Connect(address, port);
+                Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port, socket.IsConnected(), socketType.ToString()));
+                socket.OnConnectionMade(this, new SocketEventArgs(socketType));
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e.Message);
+            }
+        }
+        else
+        {
+            Debug.Log("Failed to create client");
+            //socket = null;
+        }
+    }
 
 	public void OpenPortInternal(string port) {
 		try
