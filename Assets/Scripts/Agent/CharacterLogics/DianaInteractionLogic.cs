@@ -494,13 +494,26 @@ namespace Agent
 
 				GUILayout.Label("State History", bold);
 				if (((DianaInteractionLogic)target).StateTransitionHistory != null) {
-					foreach (Pair<PDASymbol,PDAState> item in ((DianaInteractionLogic)target).StateTransitionHistory) {
+                    foreach (Triple<PDASymbol,PDAState,PDASymbol> item in ((DianaInteractionLogic)target).StateTransitionHistory) {
 						GUILayout.BeginHorizontal();
 						GUILayout.Label (item.Item1 == null ? "Null" : item.Item1.Name, GUILayout.Width(150));
-						GUILayout.Label (item.Item2 == null ? "Null" : item.Item2.Name);
+                        GUILayout.Label (item.Item2 == null ? "Null" : item.Item2.Name, GUILayout.Width(150));
+                        GUILayout.Label (item.Item3 == null ? "Null" : ((DianaInteractionLogic)target).StackSymbolToString(item.Item3));
 						GUILayout.EndHorizontal();
 					}
 				}
+
+                GUILayout.Label("Context Memory", bold);
+                if (((DianaInteractionLogic)target).ContextualMemory != null) {
+                    foreach (Triple<PDASymbol, PDAState, PDASymbol> item in ((DianaInteractionLogic)target).ContextualMemory)
+                    {
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label(item.Item1 == null ? "Null" : item.Item1.Name, GUILayout.Width(150));
+                        GUILayout.Label(item.Item2 == null ? "Null" : item.Item2.Name, GUILayout.Width(150));
+                        GUILayout.Label(item.Item3 == null ? "Null" : ((DianaInteractionLogic)target).StackSymbolToString(item.Item3));
+                        GUILayout.EndHorizontal();
+                    }
+                }
 			}
 		}
 #endif
@@ -530,30 +543,6 @@ namespace Agent
             }
         }
 
-		protected GameObject GetIndicatedObj(object arg) {
-			return IndicatedObj;
-		}
-
-		protected GameObject GetGraspedObj(object arg) {
-			return GraspedObj;
-		}
-
-		protected Region GetIndicatedRegion(object arg) {
-			return IndicatedRegion;
-		}
-
-		protected List<GameObject> GetObjectOptions(object arg) {
-			return ObjectOptions;
-		}
-
-		protected List<string> GetActionOptions(object arg) {
-			return ActionOptions;
-		}
-
-		protected List<string> GetActionSuggestions(object arg) {
-			return ActionSuggestions;
-		}
-
 		protected string GetMostRecentInputSymbolName(object arg) {
 			return GetLastInputSymbol ().Name;
 		}
@@ -566,8 +555,28 @@ namespace Agent
 			return null;
 		}
 
-        public object GraspedObject(object arg) {
+        public object GetIndicatedObj(object arg) {
+            return IndicatedObj;
+        }
+
+        public object GetGraspedObj(object arg) {
             return GraspedObj;
+        }
+
+        public object GetIndicatedRegion(object arg) {
+            return IndicatedRegion;
+        }
+
+        public object GetObjectOptions(object arg) {
+            return ObjectOptions;
+        }
+
+        public object GetActionOptions(object arg) {
+            return ActionOptions;
+        }
+
+        public object GetActionSuggestions(object arg) {
+            return ActionSuggestions;
         }
 
 		public List<string> GetActionOptionsIfNull(object arg) {
@@ -2283,7 +2292,7 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     (o) => o != null, (g) => g == null,
                     null, null, (a) => ((a.Count > 0) &&
-                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 1)), null
+                    ((a.Where(aa => aa.Contains(",with("))).ToList().Count > 1)), null
                 ),
                 GetState("DisambiguateGrabPose"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -2295,10 +2304,24 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null,
                     null, null, (a) => ((a.Count > 0) &&
-                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
+                    ((a.Where(aa => (aa.Contains(",with(") && 
+                        aa.Contains("0")))).ToList().Count == 0)), null
                 ),
                 GetState("StartLearn"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
+                    new StackSymbolContent(null, null, null, null, null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateGrabPose"),
+                GetInputSymbolsByName("G posack start", "S YES", "S S yes"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g != null,
+                    null, null, (a) => ((a.Count > 0) &&
+                    ((a.Where(aa => (aa.Contains(",with(") &&
+                        aa.Contains("0")))).ToList().Count > 0)), null
+                ),
+                GetState("StartGrab"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, null, null, null, null))));
 
             TransitionRelation.Add(new PDAInstruction(
@@ -2307,7 +2330,7 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null,
                     null, null, (a) => ((a.Count > 0) &&
-                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 1)), null
+                    ((a.Where(aa => aa.Contains(",with("))).ToList().Count > 1)), null
                 ),
                 GetState("DisambiguateGrabPose"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
@@ -2318,10 +2341,17 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null,
                     null, null, (a) => ((a.Count > 0) &&
-                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count == 1)), null
+                    ((a.Where(aa => aa.Contains(",with("))).ToList().Count == 1)), null
                 ),
                 GetState("Confusion"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateGrabPose"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrabMove"),
@@ -2426,7 +2456,7 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null,
                     null, null, (a) => ((a.Count > 0) &&
-                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
+                    ((a.Where(aa => aa.Contains(",with("))).ToList().Count > 0)), null
                 ),
                 GetState("LearningSucceeded"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
@@ -2437,9 +2467,16 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null,
                     null, null, (a) => ((a.Count > 0) &&
-                    ((a.Where(aa => aa.Contains(",with(*"))).ToList().Count > 0)), null
+                    ((a.Where(aa => aa.Contains(",with("))).ToList().Count > 0)), null
                 ),
                 GetState("LearningFailed"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("StartLearn"),
+                GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("AbortAction"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
@@ -2577,13 +2614,14 @@ namespace Agent
 				GetState("AbortAction"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-			TransitionRelation.Add(new PDAInstruction(
-				GetStates("AbortAction"),
-				null,
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
-				GetState("Wait"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
-					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("AbortAction"),
+                null,
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, GetState("Wait"))));
+				//new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
+					//new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ObjectUnavailable"),
@@ -2723,8 +2761,11 @@ namespace Agent
 
 			symbolConceptMap = MapInputSymbolsToConcepts (InputSymbols);
 
-			MoveToState(GetState ("StartState"));
-			Stack.Push (GenerateStackSymbol (null, null, null, null, null, null));
+            PerformStackOperation(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                GenerateStackSymbol(null, null, null, null, null, null)));
+            //StateTransitionHistory.Push(new Triple<PDASymbol, PDAState, PDASymbol>(null, GetState("StartState"),
+                //GenerateStackSymbol(null, null, null, null, null, null)));
+            MoveToState(GetState ("StartState"));
 			ExecuteStateContent ();
 
 			if (interactionController != null) {
@@ -2901,6 +2942,9 @@ namespace Agent
 						content.ActionOptionsCondition == null ? "Null" : System.Convert.ToString (content.ActionOptionsCondition),
 						content.ActionSuggestionsCondition == null ? "Null" : System.Convert.ToString (content.ActionSuggestionsCondition));
 				}
+                else if (symbol.Content.GetType() == typeof(PDAState)) {
+                    return ((PDAState)symbol.Content).Name;
+                }
 			}
 			else if (stackSymbol.GetType () == typeof(StackSymbolContent)) {
 				StackSymbolContent content = (StackSymbolContent)stackSymbol;
@@ -3066,9 +3110,11 @@ namespace Agent
 								String.Join (", ", ((List<PDASymbol>)inst.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
 							StackSymbolToString (inst.StackSymbol),
 							inst.ToState.Name,
-							string.Format ("[{0},{1}]",
-								inst.StackOperation.Type.ToString (),
-								(inst.StackOperation.Content == null) ? "Null" : StackSymbolToString (inst.StackOperation.Content))));
+                            string.Format("[{0},{1}]",
+                                inst.StackOperation.Type.ToString(),
+                                (inst.StackOperation.Content == null) ? "Null" :
+                                    (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
+                                          (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
 					}
 					return;
 				}
@@ -3083,9 +3129,11 @@ namespace Agent
 							String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
 						StackSymbolToString (instruction.StackSymbol),
 						instruction.ToState.Name,
-						string.Format ("[{0},{1}]",
-							instruction.StackOperation.Type.ToString (),
-							(instruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (instruction.StackOperation.Content))));
+                        string.Format("[{0},{1}]",
+                            instruction.StackOperation.Type.ToString(),
+                            (instruction.StackOperation.Content == null) ? "Null" :
+                                (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
+                                      (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));
 				}
 				else if (instructions.Count < 1) {
 					Debug.Log ("Zero instruction condition.  Aborting.");
@@ -3150,10 +3198,11 @@ namespace Agent
 							String.Join (", ", ((List<PDASymbol>)inst.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
 						StackSymbolToString (inst.StackSymbol),
 						inst.ToState.Name,
-						string.Format ("[{0},{1}]",
-							inst.StackOperation.Type.ToString (),
-							(inst.StackOperation.Content == null) ? "Null" : StackSymbolToString (inst.StackOperation.Content))));
-				}
+                        string.Format("[{0},{1}]",
+                            inst.StackOperation.Type.ToString(),
+                            (inst.StackOperation.Content == null) ? "Null" :
+                                (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
+                                      (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));				}
 				return;
 			}
 			else if (instructions.Count == 1) {
@@ -3167,10 +3216,11 @@ namespace Agent
 						String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
 					StackSymbolToString (instruction.StackSymbol),
 					instruction.ToState.Name,
-					string.Format ("[{0},{1}]",
-						instruction.StackOperation.Type.ToString (),
-						(instruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (instruction.StackOperation.Content))));
-			}
+                    string.Format("[{0},{1}]",
+                        instruction.StackOperation.Type.ToString(),
+                        (instruction.StackOperation.Content == null) ? "Null" :
+                            (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
+                                  (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));			}
 			else if (instructions.Count < 1) {
 				Debug.Log ("Zero instruction condition.  Aborting.");
 				return;
@@ -3314,7 +3364,28 @@ namespace Agent
 				break;
 
 			case PDAStackOperation.PDAStackOperationType.Pop:
-				PDASymbol result = Stack.Pop ();
+                if ((operation.Content == null) || (operation.Content.GetType() != typeof(PDAState))) {
+                    Stack.Pop();
+                    ContextualMemory.Pop();
+                }
+                else {
+                    PDASymbol popUntilSymbol = ContextualMemory.Last().Item3;
+                    foreach (Triple<PDASymbol, PDAState, PDASymbol> symbolStateTriple in ContextualMemory.ToList().GetRange(1,ContextualMemory.Count-2)) {
+                        Debug.Log(string.Format("{0} {1}", symbolStateTriple.Item3.Name, StackSymbolToString(symbolStateTriple.Item3)));
+                        if (symbolStateTriple.Item2 == (PDAState)operation.Content) {
+                            popUntilSymbol = symbolStateTriple.Item3;
+                            break;
+                        }
+                    }
+
+                    Debug.Log(string.Format(StackSymbolToString(popUntilSymbol)));
+                    while (!((StackSymbolContent)GetCurrentStackSymbol().Content).Equals((StackSymbolContent)popUntilSymbol.Content)) {
+                        Debug.Log(string.Format("Popping {0} until {1}",
+                            StackSymbolToString(GetCurrentStackSymbol()), StackSymbolToString(popUntilSymbol)));
+                        Stack.Pop();
+                        ContextualMemory.Pop();
+                    }
+                }
 				break;
 
 			case PDAStackOperation.PDAStackOperationType.Push:
@@ -3368,6 +3439,10 @@ namespace Agent
 					if (operation.Content.GetType () == typeof(StackSymbolContent)) {
 						Stack.Clear ();
 						Stack.Push (GenerateStackSymbol ((StackSymbolContent)operation.Content));
+                        ContextualMemory.Clear ();
+                        ContextualMemory.Push(
+                            new Triple<PDASymbol,PDAState,PDASymbol>(GetLastInputSymbol(),CurrentState,
+                                 GenerateStackSymbol((StackSymbolContent)operation.Content)));
 					}
 				}
 				else {
@@ -3375,7 +3450,11 @@ namespace Agent
 						null, GraspedObj, null, null, null, null);	// keep GraspedObj because it is a physical state, not a mental one
 					Stack.Clear ();
 					Stack.Push (GenerateStackSymbol (persistentContent));
-				}
+                    ContextualMemory.Clear();
+                    ContextualMemory.Push(
+                        new Triple<PDASymbol, PDAState, PDASymbol>(GetLastInputSymbol(), CurrentState,
+                            GenerateStackSymbol(persistentContent)));				
+                    }
 
 				break;
 
@@ -3413,7 +3492,9 @@ namespace Agent
                     inst.ToState.Name,
                     string.Format("[{0},{1}]",
                         inst.StackOperation.Type.ToString(),
-                        (inst.StackOperation.Content == null) ? "Null" : StackSymbolToString(inst.StackOperation.Content))));
+                        (inst.StackOperation.Content == null) ? "Null" : 
+                            (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
+                                  (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
             }
 
             Debug.Log(string.Format("{0} instructions before symbol + gate filtering", instructions.Count));
@@ -3529,7 +3610,7 @@ namespace Agent
         }
 
 		void MoveToState(PDAState state) {
-			Pair<PDASymbol, PDAState> symbolStatePair = new Pair<PDASymbol, PDAState> (GetLastInputSymbol (), state);
+            Triple<PDASymbol, PDAState, PDASymbol> symbolStateTriple = new Triple<PDASymbol, PDAState, PDASymbol> (GetLastInputSymbol (), state, GetCurrentStackSymbol ());
 
 			if (CurrentState != null) {
 				if (TransitionRelation.Where (i => (i.FromStates.Contains(CurrentState)) && (i.ToState == state)).ToList ().Count == 0) {
@@ -3537,31 +3618,37 @@ namespace Agent
 					return;
 				}
 					
-				if (state.Name == "BeginInteraction") {
+                if (state.Name == "BeginInteraction") {
 					epistemicModel.state.InitiateEpisim ();
-					StateTransitionHistory.Push (symbolStatePair);
+					StateTransitionHistory.Push (symbolStateTriple);
+                    ContextualMemory.Push (symbolStateTriple);
 				}
 				else if (state.Name == "Wait") {
 					if (CurrentState.Name != "TrackPointing") {
-						StateTransitionHistory.Push (symbolStatePair);
+						StateTransitionHistory.Push (symbolStateTriple);
+                        ContextualMemory.Push(symbolStateTriple);
 					}
 				}
 				else if (state.Name == "TrackPointing") {
 					if (StateTransitionHistory.Peek ().Item2.Name != "TrackPointing") {
-						StateTransitionHistory.Push (symbolStatePair);
+						StateTransitionHistory.Push (symbolStateTriple);
+                        ContextualMemory.Push(symbolStateTriple);
 					}
 				}
 				else if (state.Name == "EndState") {
 					Debug.Log ("Disengaging EpiSim");
 					epistemicModel.state.DisengageEpisim ();
-					StateTransitionHistory.Push (symbolStatePair);
+					StateTransitionHistory.Push (symbolStateTriple);
+                    ContextualMemory.Push(symbolStateTriple);
 				}
 				else {
-					StateTransitionHistory.Push (symbolStatePair);
+					StateTransitionHistory.Push (symbolStateTriple);
+                    ContextualMemory.Push(symbolStateTriple);
 				}
 			}
 			else {
-				StateTransitionHistory.Push (symbolStatePair);
+				StateTransitionHistory.Push (symbolStateTriple);
+                ContextualMemory.Push(symbolStateTriple);
 			}
 
 			CurrentState = state;

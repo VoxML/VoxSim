@@ -456,7 +456,8 @@ public class JointGestureDemo : AgentInteraction {
 
 //		Debug.Log ("=======" + regionHighlight.GetComponent<Renderer> ().material.GetColor ("_Color").a);
 
-		if (regionHighlight.GetComponent<Renderer> ().material.color.a > 0.0f) {
+        if ((regionHighlight.GetComponent<Renderer> ().material.color.a > 0.0f) &&
+            (regionHighlight.transform.position.y > 0.0f)) {
 			regionHighlight.transform.eulerAngles = new Vector3 (regionHighlight.transform.eulerAngles.x,
 				regionHighlight.transform.eulerAngles.y + Time.deltaTime * highlightTurnSpeed, regionHighlight.transform.eulerAngles.z);
 
@@ -1514,7 +1515,9 @@ public class JointGestureDemo : AgentInteraction {
             else if (message.StartsWith("push")) {
                 message = message.Replace("push", "slide");
             }
-
+            else if (message.StartsWith("pull")) {
+                message = message.Replace("pull", "slide");
+            }
             // assume everything is a block
             if (message.Contains("one"))
             {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
@@ -1535,7 +1538,8 @@ public class JointGestureDemo : AgentInteraction {
             }
 
 			if (message.Contains ("there")) {
-				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) {
+                if ((regionHighlight.GetComponent<Renderer> ().material == activeHighlightMaterial) &&
+                    (regionHighlight.transform.position.y > 0.0f)) {
 					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
 						interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
@@ -1588,13 +1592,16 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (message);
 
             if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
-                if ((regionHighlight.GetComponent<Renderer>().material.color.a == 1.0f) &&
+                if ((regionHighlight.GetComponent<Renderer>().material == activeHighlightMaterial) &&
                     (regionHighlight.transform.position.y > 0.0f)) {
                     interactionLogic.RewriteStack(
                         new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                             interactionLogic.GenerateStackSymbol(null, null,
                                 new Region(highlightCenter, vectorConeRadius * highlightOscUpper * 2),
                                 null, null, null)));
+                }
+                else {
+                    PromptEvent(commBridge.NLParse(message));  
                 }
             }
             else {
@@ -1744,7 +1751,8 @@ public class JointGestureDemo : AgentInteraction {
 			else if ((interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THIS")) ||
 				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THAT")) ||
 				(interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("THERE"))) {
-				if (regionHighlight.GetComponent<Renderer> ().material.color.a == 1.0f) {
+                if ((regionHighlight.GetComponent<Renderer> ().material == activeHighlightMaterial) &&
+                    (regionHighlight.transform.position.y > 0.0f)) {
 					if (Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
 						interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
@@ -2161,11 +2169,19 @@ public class JointGestureDemo : AgentInteraction {
         // see if this object has a learned conventional grasp pose associated with it
         GameObject obj = null;
 
-        if (interactionLogic.ActionOptions.Count > 0) {
-            obj = eventManager.ExtractObjects(
-                Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
-                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[
-                    Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0] as GameObject;
+        if ((interactionLogic.GraspedObj != null) && (interactionLogic.ActionOptions.Count > 0)) {
+            string grabStr = string.Empty;
+            if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper)
+            {
+                grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
+            }
+            else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper)
+            {
+                grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
+            }
+
+            obj = eventManager.ExtractObjects(Helper.GetTopPredicate(grabStr),
+                (String)Helper.ParsePredicate(grabStr)[Helper.GetTopPredicate(grabStr)])[0] as GameObject;
         }
         
         List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
@@ -2179,15 +2195,16 @@ public class JointGestureDemo : AgentInteraction {
         Debug.Log(learnedActionSymbols.Count);
 
         if ((interactionLogic.IndicatedObj != null) && (learnedActionSymbols.Count == 0)) {
-            int numGrabPoses = GetNumberOfGrabPoses(interactionLogic.IndicatedObj);
+            List<GameObject> grabPoses = GetGrabPoses(interactionLogic.IndicatedObj,
+                InteractionHelper.GetCloserHand(Diana,interactionLogic.IndicatedObj));
 
-            if (numGrabPoses > 1)
+            if (grabPoses.Count > 1)
             {
-                Debug.Log(numGrabPoses);
+                Debug.Log(grabPoses.Count);
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
-                    Enumerable.Range(0, numGrabPoses).Select(s => string.Format("grasp({0},with(*_{1}_{2}))", interactionLogic.IndicatedObj.name,
-                        interactionLogic.IndicatedObj.name, s.ToString())).ToList(),
+                        Enumerable.Range(0, grabPoses.Count).Select(s => string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
+                                                                                       grabPoses[s].name)).ToList(),
                     null)));
             }
             else
@@ -2224,12 +2241,22 @@ public class JointGestureDemo : AgentInteraction {
                     obj, null, null, null, null)));
             }
             else if (interactionLogic.ActionOptions.Count > 0) {
-                List<object> args = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]), 
-                    (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])]);
+                string grabStr = string.Empty;
+                if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper)
+                {
+                    grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
+                }
+                else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper)
+                {
+                    grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
+                }
+
+                List<object> args = eventManager.ExtractObjects(Helper.GetTopPredicate(grabStr), 
+                    (String)Helper.ParsePredicate(grabStr)[Helper.GetTopPredicate(grabStr)]);
 
                 if ((args.Count > 0) && (args[0] is GameObject)) {
                     RespondAndUpdate("OK.");
-                    PromptEvent(interactionLogic.ActionOptions[0]);
+                    PromptEvent(grabStr);
 
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, new List<string>(), null)));
@@ -2633,7 +2660,9 @@ public class JointGestureDemo : AgentInteraction {
 
         RespondAndUpdate("Sorry, I didn't get that.");
 
-        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
+            interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+            null, null, null, null)));
     }
 
 	public void AbortAction(object[] content) {
@@ -2862,61 +2891,61 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<LookAtIK> ().solver.bodyWeight = 0.8f;
 	}
 
-	void TrackPointing(List<float> vector) {
-		highlightTimeoutTimer.Enabled = true;
-		regionHighlight.GetComponent<Renderer> ().material.color = new Color (0.0f, 1.0f, 0.0f,
-			regionHighlight.GetComponent<Renderer> ().material.color.a);
+	//void TrackPointing(List<float> vector) {
+	//	highlightTimeoutTimer.Enabled = true;
+	//	regionHighlight.GetComponent<Renderer> ().material.color = new Color (0.0f, 1.0f, 0.0f,
+	//		regionHighlight.GetComponent<Renderer> ().material.color.a);
 
-		if (eventManager.events.Count > 0) {
-			return;
-		}
+	//	if (eventManager.events.Count > 0) {
+	//		return;
+	//	}
 
-		// TODO: output timeout timer
-		//		if ((indicatedObj == null) && (graspedObj == null)) {
-		//			OutputHelper.PrintOutput (Role.Affector, "");
-		//		}
+	//	// TODO: output timeout timer
+	//	//		if ((indicatedObj == null) && (graspedObj == null)) {
+	//	//			OutputHelper.PrintOutput (Role.Affector, "");
+	//	//		}
 
-		Region region = null;
+	//	Region region = null;
 
-		highlightCenter = TransformToSurface (vector);
+	//	highlightCenter = TransformToSurface (vector);
 
-		//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
-		//Debug.Log (highlightCenter);
+	//	//		Debug.Log (string.Format("({0},{1};{2},{3})",vector[0],vector[1],vector[2],vector[4]));
+	//	//Debug.Log (highlightCenter);
 
-		// jump from origin on first update
-		if (regionHighlight.transform.position.sqrMagnitude <= Constants.EPSILON) {
-			MoveHighlight (highlightCenter);
-			regionHighlight.transform.position = highlightCenter;
-		}
+	//	// jump from origin on first update
+	//	if (regionHighlight.transform.position.sqrMagnitude <= Constants.EPSILON) {
+	//		MoveHighlight (highlightCenter);
+	//		regionHighlight.transform.position = highlightCenter;
+	//	}
 
-		if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
-			Vector3 offset = MoveHighlight (highlightCenter);
+	//	if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
+	//		Vector3 offset = MoveHighlight (highlightCenter);
 
-			if (offset.sqrMagnitude <= Constants.EPSILON) {
-				regionHighlight.transform.position = highlightCenter;
-			}
-		}
+	//		if (offset.sqrMagnitude <= Constants.EPSILON) {
+	//			regionHighlight.transform.position = highlightCenter;
+	//		}
+	//	}
 
-		//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
-		//		Ray ray = new Ray(origin,
-		//				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
-		//
-		//		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
-		//		//float width = height * Screen.width / Screen.height;
-		//		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
-		//		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
-		//			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
-		//			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
-		//
-		//		float distance;
-		//		if (cameraPlane.Raycast (ray, out distance)) {
-		//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
-		//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
-		//		}
+	//	//		Vector3 origin = new Vector3 (vector [0], Helper.GetObjectWorldSize (demoSurface).max.y, vector [1]);
+	//	//		Ray ray = new Ray(origin,
+	//	//				new Vector3(vector[2]*vectorScaleFactor.x,Camera.main.transform.position.y,vector[4])-origin);
+	//	//
+	//	//		//float height = 2.0 * Mathf.Tan(0.5 * Camera.main.fieldOfView * Mathf.Deg2Rad) * Camera.main.nearClipPlane;
+	//	//		//float width = height * Screen.width / Screen.height;
+	//	//		//Vector3 cameraOrigin = Camera.main.ScreenToWorldPoint (0.0f, 0.0f, Camera.main.nearClipPlane);
+	//	//		Plane cameraPlane = new Plane(Camera.main.ScreenToWorldPoint (new Vector3(0.0f, 0.0f, Camera.main.nearClipPlane)),
+	//	//			Camera.main.ScreenToWorldPoint (new Vector3(0.0f, Screen.height, Camera.main.nearClipPlane)),
+	//	//			Camera.main.ScreenToWorldPoint (new Vector3(Screen.width, Screen.height, Camera.main.nearClipPlane)));
+	//	//
+	//	//		float distance;
+	//	//		if (cameraPlane.Raycast (ray, out distance)) {
+	//	//			Vector3 screenPoint = Camera.main.WorldToScreenPoint (ray.GetPoint (distance));
+	//	//			Debug.Log(string.Format("{0};{1}",ray.GetPoint (distance),screenPoint));
+	//	//		}
 
-		//TurnForward ();
-		//LookAt (cube.transform.position);
-	}
+	//	//TurnForward ();
+	//	//LookAt (cube.transform.position);
+	//}
 
 	Vector3 MoveHighlight(Vector3 highlightCenter, float variance = 0.0f) {
 		Vector3 offset = regionHighlight.transform.position - highlightCenter;
@@ -3643,17 +3672,26 @@ public class JointGestureDemo : AgentInteraction {
 		return fits;
 	}
 
-    public int GetNumberOfGrabPoses(GameObject obj) {
-        int numPoses = 0;
+    public List<GameObject> GetGrabPoses(GameObject obj, GameObject hand) {
+        List<GameObject> poseList = new List<GameObject>();
+
+        FullBodyBipedEffector effectorType = FullBodyBipedEffector.Body;
+        if (hand == leftGrasper) {
+            effectorType = FullBodyBipedEffector.LeftHand;
+        }
+        else if (hand == rightGrasper) {
+            effectorType = FullBodyBipedEffector.RightHand;
+        }
 
         InteractionTarget[] poses = obj.GetComponentsInChildren<InteractionTarget>();
-        numPoses = (poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count ==
-                    poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count) ?
-            poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count :
-                 Math.Min(poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count,
-                          poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count);
+        poseList = poses.ToList().Where(p => p.effectorType == effectorType).ToList().Select(p => p.gameObject).ToList();
+            //        .Count ==
+            //        poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count) ?
+            //poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList() :
+                 //Math.Min(poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList().Count,
+                          //poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count);
 
-        return numPoses;
+        return poseList;
     }
 
 	public void ReachFor(Vector3 coord) {

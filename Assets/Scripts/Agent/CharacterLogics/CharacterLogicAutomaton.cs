@@ -214,11 +214,17 @@ namespace Agent
 			set { stack = value; }
 		}
 
-		Stack<Pair<PDASymbol,PDAState>> stateTransitionHistory;
-		public Stack<Pair<PDASymbol,PDAState>> StateTransitionHistory {
+        Stack<Triple<PDASymbol,PDAState,PDASymbol>> stateTransitionHistory;
+        public Stack<Triple<PDASymbol,PDAState, PDASymbol>> StateTransitionHistory {
 			get { return stateTransitionHistory; }
 			set { stateTransitionHistory = value; }
 		}
+
+        Stack<Triple<PDASymbol, PDAState, PDASymbol>> contextualMemory;
+        public Stack<Triple<PDASymbol, PDAState, PDASymbol>> ContextualMemory {
+            get { return contextualMemory; }
+            set { contextualMemory = value; }
+        }
 
         Dictionary<List<PDASymbol>, PDAStackOperation> learnableInstructions;  // TODO: not sure sure if it should map to PDAInstruction or another type
         public Dictionary<List<PDASymbol>, PDAStackOperation> LearnableInstructions {
@@ -257,7 +263,8 @@ namespace Agent
             LearnableInstructions = new Dictionary<List<PDASymbol>, PDAStackOperation> ();
 
 			Stack = new Stack<PDASymbol> ();
-			StateTransitionHistory = new Stack<Pair<PDASymbol,PDAState>> ();
+            StateTransitionHistory = new Stack<Triple<PDASymbol,PDAState,PDASymbol>> ();
+            ContextualMemory = new Stack<Triple<PDASymbol, PDAState, PDASymbol>>();
 		}
 
 		public virtual void Update() {
