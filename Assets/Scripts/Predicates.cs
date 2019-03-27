@@ -296,15 +296,16 @@ public class Predicates : MonoBehaviour {
 
 			Bounds bounds = new Bounds ();
 
-			bounds = Helper.GetObjectWorldSize (obj);
+            bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
 			GameObject camera = GameObject.Find ("Main Camera");
 			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
 			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 				Mathf.Abs(bounds.size.z));
 			rayStart = Quaternion.Euler (0.0f, povDir, 0.0f) * rayStart;
-			rayStart += obj.transform.position;
-			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+            rayStart += bounds.center;
+            outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
 			Debug.Log ("behind: " + Helper.VectorToParsable (outValue));
 		}
@@ -325,15 +326,16 @@ public class Predicates : MonoBehaviour {
 
 			Bounds bounds = new Bounds ();
 
-			bounds = Helper.GetObjectWorldSize (obj);
+            bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
 			GameObject camera = GameObject.Find ("Main Camera");
 			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
 			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 				Mathf.Abs(bounds.size.z));
 			rayStart = Quaternion.Euler (0.0f, povDir+180.0f, 0.0f) * rayStart;
-			rayStart += obj.transform.position;
-			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+            rayStart += bounds.center;
+            outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
 			Debug.Log ("in_front: " + Helper.VectorToParsable (outValue));
 		}
@@ -354,15 +356,16 @@ public class Predicates : MonoBehaviour {
 
 			Bounds bounds = new Bounds ();
 
-			bounds = Helper.GetObjectWorldSize (obj);
+            bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
 			GameObject camera = GameObject.Find ("Main Camera");
 			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
 			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 				Mathf.Abs(bounds.size.z));
 			rayStart = Quaternion.Euler (0.0f, povDir+270.0f, 0.0f) * rayStart;
-			rayStart += obj.transform.position;
-			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+            rayStart += bounds.center;
+            outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
 			Debug.Log ("left: " + Helper.VectorToParsable (outValue));
 		}
@@ -383,15 +386,16 @@ public class Predicates : MonoBehaviour {
 
 			Bounds bounds = new Bounds ();
 
-			bounds = Helper.GetObjectWorldSize (obj);
+            bounds = Helper.GetObjectWorldSize (obj, obj.GetComponentsInChildren<Voxeme>().Where(
+                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
 			GameObject camera = GameObject.Find ("Main Camera");
 			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
 			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 				Mathf.Abs(bounds.size.z));
 			rayStart = Quaternion.Euler (0.0f, povDir+90.0f, 0.0f) * rayStart;
-			rayStart += obj.transform.position;
-			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+            rayStart += bounds.center;
+            outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
 			Debug.Log ("left: " + Helper.VectorToParsable (outValue));
 		}
@@ -412,15 +416,16 @@ public class Predicates : MonoBehaviour {
 
 			Bounds bounds = new Bounds ();
 
-			bounds = Helper.GetObjectWorldSize (obj);
+            bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
 			GameObject camera = GameObject.Find ("Main Camera");
 			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
 			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 				Mathf.Abs(bounds.size.z));
 			rayStart = Quaternion.Euler (0.0f, povDir+270.0f, 0.0f) * rayStart;
-			rayStart += obj.transform.position;
-			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+            rayStart += bounds.center;
+            outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
 			Debug.Log ("left-dc: " + Helper.VectorToParsable (outValue));
 		}
@@ -441,15 +446,16 @@ public class Predicates : MonoBehaviour {
 
 			Bounds bounds = new Bounds ();
 
-			bounds = Helper.GetObjectWorldSize (obj);
+            bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
 			GameObject camera = GameObject.Find ("Main Camera");
 			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
 			Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 				Mathf.Abs(bounds.size.z));
 			rayStart = Quaternion.Euler (0.0f, povDir+90.0f, 0.0f) * rayStart;
-			rayStart += obj.transform.position;
-			outValue = Helper.RayIntersectionPoint (rayStart, obj.transform.position-rayStart);
+            rayStart += bounds.center;
+            outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
 			Debug.Log ("left-dc: " + Helper.VectorToParsable (outValue));
 		}
@@ -1372,23 +1378,27 @@ public class Predicates : MonoBehaviour {
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 						                   Mathf.Abs (themeBounds.size.z));
 					rayStart = Quaternion.Euler (0.0f, povDir + 180.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("Z-adjust = " + zAdjust);
 					Debug.Log ("put_behind: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "behind"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+					//if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
+					//	loc = new Vector3 (loc.x,voxComponent.minYBound + themeBounds.extents.y,loc.z);
+					//}
+                    //else if (loc.y - themeBounds.extents.y > voxComponent.minYBound) {
+                    //    loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
+                    //}
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
-								              loc.y - (contactPoint.y - theme.transform.position.y),
-								              loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						}
@@ -1437,23 +1447,21 @@ public class Predicates : MonoBehaviour {
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 						                   Mathf.Abs (themeBounds.size.z));
 					rayStart = Quaternion.Euler (0.0f, povDir, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("Z-adjust = " + zAdjust);
 					Debug.Log ("put_in_front: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "in front"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
-								              loc.y - (contactPoint.y - theme.transform.position.y),
-								              loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						}
@@ -1500,25 +1508,23 @@ public class Predicates : MonoBehaviour {
 					float xAdjust = (theme.transform.position.x - themeBounds.center.x);
 
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
-						                   Mathf.Abs (themeBounds.size.z));
+						                   Mathf.Abs (themeBounds.size.x));
 					rayStart = Quaternion.Euler (0.0f, povDir + 90.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("X-adjust = " + xAdjust);
 					Debug.Log ("put_left: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-								              loc.y - (contactPoint.y - theme.transform.position.y),
-								              loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -1566,25 +1572,23 @@ public class Predicates : MonoBehaviour {
 						(RandomHelper.RandomFloat(0.0f,1.0f)*(themeBounds.size.x*0.5f));
 
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
-						Mathf.Abs (themeBounds.size.z));
+						Mathf.Abs (themeBounds.size.x));
 					rayStart = Quaternion.Euler (0.0f, povDir + 90.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+					rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("X-adjust = " + xAdjust);
 					Debug.Log ("put_leftdc: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-								loc.y - (contactPoint.y - theme.transform.position.y),
-								loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -1631,25 +1635,25 @@ public class Predicates : MonoBehaviour {
 					float xAdjust = (theme.transform.position.x - themeBounds.center.x);
 
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
-						                   Mathf.Abs (themeBounds.size.z));
+						                   Mathf.Abs (themeBounds.size.x));
 					rayStart = Quaternion.Euler (0.0f, povDir + 270.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    //Debug.Log(Helper.VectorToParsable(rayStart));
+                    //Debug.Log(theme.transform.position.x + themeBounds.size.x);
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("X-adjust = " + xAdjust);
 					Debug.Log ("put_right: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc)+themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-								              loc.y - (contactPoint.y - theme.transform.position.y),
-								              loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -1696,25 +1700,23 @@ public class Predicates : MonoBehaviour {
 						(RandomHelper.RandomFloat(0.0f,1.0f)*(themeBounds.size.x*0.5f));
 
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
-						Mathf.Abs (themeBounds.size.z));
+						Mathf.Abs (themeBounds.size.x));
 					rayStart = Quaternion.Euler (0.0f, povDir + 270.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("X-adjust = " + xAdjust);
 					Debug.Log ("put_rightdc: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-								loc.y - (contactPoint.y - theme.transform.position.y),
-								loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -2160,23 +2162,21 @@ public class Predicates : MonoBehaviour {
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 						Mathf.Abs (themeBounds.size.z));
 					rayStart = Quaternion.Euler (0.0f, povDir + 180.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("Z-adjust = " + zAdjust);
 					Debug.Log ("put_behind: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "behind"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc)+themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
-								loc.y - (contactPoint.y - theme.transform.position.y),
-								loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						}
@@ -2225,23 +2225,21 @@ public class Predicates : MonoBehaviour {
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
 						Mathf.Abs (themeBounds.size.z));
 					rayStart = Quaternion.Euler (0.0f, povDir, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("Z-adjust = " + zAdjust);
 					Debug.Log ("put_in_front: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "in front"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc)+themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
-								loc.y - (contactPoint.y - theme.transform.position.y),
-								loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						}
@@ -2288,25 +2286,23 @@ public class Predicates : MonoBehaviour {
 					float xAdjust = (theme.transform.position.x - themeBounds.center.x);
 
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
-						Mathf.Abs (themeBounds.size.z));
+						Mathf.Abs (themeBounds.size.x));
 					rayStart = Quaternion.Euler (0.0f, povDir + 90.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+					rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("X-adjust = " + xAdjust);
 					Debug.Log ("put_left: " + Helper.VectorToParsable (contactPoint));
 
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
-					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
-					}
+                    loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc)+themeBounds.extents.y,loc.z);
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {	// compute satisfaction condition
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-								loc.y - (contactPoint.y - theme.transform.position.y),
-								loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -2353,10 +2349,10 @@ public class Predicates : MonoBehaviour {
 					float xAdjust = (theme.transform.position.x - themeBounds.center.x);
 
 					Vector3 rayStart = new Vector3 (0.0f, 0.0f,
-						Mathf.Abs (themeBounds.size.z));
+						Mathf.Abs (themeBounds.size.x));
 					rayStart = Quaternion.Euler (0.0f, povDir + 270.0f, 0.0f) * rayStart;
-					rayStart += theme.transform.position;
-					Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, theme.transform.position-rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint (rayStart, themeBounds.center-rayStart);
 
 					Debug.Log ("X-adjust = " + xAdjust);
 					Debug.Log ("put_right: " + Helper.VectorToParsable (contactPoint));
@@ -2364,14 +2360,14 @@ public class Predicates : MonoBehaviour {
 					Vector3 loc = ((Vector3)args [1]);	// coord of "left"
 
 					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-						loc = new Vector3 (loc.x,voxComponent.minYBound+themeBounds.extents.y,loc.z);
+                        loc = new Vector3 (loc.x,Helper.GetMinYBoundAtTarget(theme, loc)+themeBounds.extents.y,loc.z);
 					}
 
 					if (args [args.Length - 1] is bool) {
 						if ((bool)args [args.Length - 1] == false) {
-							Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-								loc.y - (contactPoint.y - theme.transform.position.y),
-								loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3 (loc.x - (contactPoint.x - theme.transform.position.x),
+                                                       loc.y - (contactPoint.y - theme.transform.position.y),
+                                                       loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
 							targetPosition = dir + loc;
 						} 
@@ -2651,24 +2647,22 @@ public class Predicates : MonoBehaviour {
                     Vector3 rayStart = new Vector3(0.0f, 0.0f,
                         Mathf.Abs(themeBounds.size.z));
                     rayStart = Quaternion.Euler(0.0f, povDir + 180.0f, 0.0f) * rayStart;
-                    rayStart += theme.transform.position;
-                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
                     Debug.Log("Z-adjust = " + zAdjust);
                     Debug.Log("slidep_behind: " + Helper.VectorToParsable(contactPoint));
 
                     Vector3 loc = ((Vector3)args[1]);   // coord of "behind"
 
-                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
-                    }
+                    loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
                     if (args[args.Length - 1] is bool) {
                         if ((bool)args[args.Length - 1] == false)
                         {   // compute satisfaction condition
                             Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x),
-                                loc.y - (contactPoint.y - theme.transform.position.y),
-                                loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+                                                      loc.y - (contactPoint.y - theme.transform.position.y),
+                                                      loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
                             targetPosition = dir + loc;
                         }
@@ -2718,23 +2712,21 @@ public class Predicates : MonoBehaviour {
                     Vector3 rayStart = new Vector3(0.0f, 0.0f,
                         Mathf.Abs(themeBounds.size.z));
                     rayStart = Quaternion.Euler(0.0f, povDir, 0.0f) * rayStart;
-                    rayStart += theme.transform.position;
-                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
                     Debug.Log("Z-adjust = " + zAdjust);
                     Debug.Log("slidep_in_front: " + Helper.VectorToParsable(contactPoint));
 
                     Vector3 loc = ((Vector3)args[1]);   // coord of "in front"
 
-                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
-                    }
+                    loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
                     if (args[args.Length - 1] is bool) {
                         if ((bool)args[args.Length - 1] == false) {   // compute satisfaction condition
                             Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x),
-                                loc.y - (contactPoint.y - theme.transform.position.y),
-                                loc.z - (contactPoint.z - theme.transform.position.z) + zAdjust) - loc;
+                                                      loc.y - (contactPoint.y - theme.transform.position.y),
+                                                      loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
                             targetPosition = dir + loc;
                         }
@@ -2781,25 +2773,23 @@ public class Predicates : MonoBehaviour {
                     float xAdjust = (theme.transform.position.x - themeBounds.center.x);
 
                     Vector3 rayStart = new Vector3(0.0f, 0.0f,
-                        Mathf.Abs(themeBounds.size.z));
+                        Mathf.Abs(themeBounds.size.x));
                     rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
-                    rayStart += theme.transform.position;
-                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
                     Debug.Log("X-adjust = " + xAdjust);
                     Debug.Log("slidep_left: " + Helper.VectorToParsable(contactPoint));
 
                     Vector3 loc = ((Vector3)args[1]);   // coord of "left"
 
-                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
-                    }
+                    loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
                     if (args[args.Length - 1] is bool) {
                         if ((bool)args[args.Length - 1] == false) {   // compute satisfaction condition
-                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-                                loc.y - (contactPoint.y - theme.transform.position.y),
-                                loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x),
+                                                      loc.y - (contactPoint.y - theme.transform.position.y),
+                                                      loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
                             targetPosition = dir + loc;
                         }
@@ -2846,25 +2836,23 @@ public class Predicates : MonoBehaviour {
                     float xAdjust = (theme.transform.position.x - themeBounds.center.x);
 
                     Vector3 rayStart = new Vector3(0.0f, 0.0f,
-                        Mathf.Abs(themeBounds.size.z));
+                        Mathf.Abs(themeBounds.size.x));
                     rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
-                    rayStart += theme.transform.position;
-                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, theme.transform.position - rayStart);
+                    rayStart += themeBounds.center;
+                    Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
                     Debug.Log("X-adjust = " + xAdjust);
                     Debug.Log("slidep_right: " + Helper.VectorToParsable(contactPoint));
 
                     Vector3 loc = ((Vector3)args[1]);   // coord of "left"
 
-                    if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-                        loc = new Vector3(loc.x, voxComponent.minYBound + themeBounds.extents.y, loc.z);
-                    }
+                    loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme,loc) + themeBounds.extents.y, loc.z);
 
                     if (args[args.Length - 1] is bool) {
                         if ((bool)args[args.Length - 1] == false) {
-                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x) + xAdjust,
-                                loc.y - (contactPoint.y - theme.transform.position.y),
-                                loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
+                            Vector3 dir = new Vector3(loc.x - (contactPoint.x - theme.transform.position.x),
+                                                      loc.y - (contactPoint.y - theme.transform.position.y),
+                                                      loc.z - (contactPoint.z - theme.transform.position.z)) - loc;
 
                             targetPosition = dir + loc;
                         }

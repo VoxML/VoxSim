@@ -620,7 +620,7 @@ namespace Global {
 				
 			RaycastHit closestHit = hits [0];
 
-			foreach (RaycastHit hit in hits) {
+            foreach (RaycastHit hit in hits) {
 				if (hit.distance < closestHit.distance) {
 					closestHit = hit;
 				}
@@ -1304,6 +1304,67 @@ namespace Global {
 
 			return objs;
 		}
+
+        public static float GetMinYBoundAtTarget(GameObject obj, Vector3 targetPoint) {
+            float minYBound = 0.0f;
+
+            Bounds objBounds = Helper.GetObjectWorldSize(obj);
+
+            Debug.Log(Helper.VectorToParsable(targetPoint));
+            Vector3 rayStartX = new Vector3(objBounds.min.x - Constants.EPSILON,
+                objBounds.min.y + Constants.EPSILON, objBounds.center.z);
+            Vector3 contactPointX = Helper.RayIntersectionPoint(rayStartX, Vector3.right);
+            //contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
+
+            Vector3 rayStartZ = new Vector3(objBounds.center.x,
+                objBounds.min.y + Constants.EPSILON, objBounds.min.z - Constants.EPSILON);
+            Vector3 contactPointZ = Helper.RayIntersectionPoint(rayStartZ, Vector3.forward);
+
+            //Debug.Log(Helper.VectorToParsable(rayStartX));
+            //Debug.Log(Helper.VectorToParsable(rayStartZ));
+            //Debug.Log(Helper.VectorToParsable(contactPointX));
+            //Debug.Log(Helper.VectorToParsable(contactPointZ));
+            //Debug.Log(Helper.VectorToParsable(contactPointX - objBounds.center));
+            //Debug.Log(Helper.VectorToParsable(contactPointZ - objBounds.center));
+            //Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
+            //new Vector3((contactPointZ.x-objBounds.center.x) + (targetPoint.x-objBounds.center.x),
+            //    targetPoint.y, (contactPointZ.z-objBounds.center.z + (targetPoint.z-objBounds.center.z))) :
+            //new Vector3((contactPointX.x-objBounds.center.x) + (targetPoint.x - objBounds.center.x),
+            //targetPoint.y, (contactPointX.z-objBounds.center.z + (targetPoint.z - objBounds.center.z)));
+            Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
+                targetPoint + (contactPointZ - objBounds.center) : targetPoint + (contactPointX - objBounds.center);
+            contactPoint = new Vector3(contactPoint.x, targetPoint.y, contactPoint.z);
+            Debug.Log(Helper.VectorToParsable(contactPoint));
+
+            RaycastHit[] hits;
+
+            //      hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
+            hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
+            List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[])hits);
+            hits = hitList.OrderBy(h => h.distance).ToArray();
+            foreach (RaycastHit hit in hits)
+            {
+                if (hit.collider.gameObject.GetComponent<BoxCollider>() != null)
+                {
+                    Debug.Log(hit.collider.gameObject);
+                    if (!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger)
+                    {
+                        Debug.Log(hit.collider.gameObject);
+                        if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
+                            Helper.GetObjectWorldSize(obj), true))
+                        {
+                            Debug.Log(hit.collider.gameObject);
+                            GameObject supportingSurface = hit.collider.gameObject;
+                            minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
+                                     
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return minYBound;
+        }
 	}
 
 

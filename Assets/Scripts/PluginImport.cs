@@ -72,7 +72,7 @@ public class PluginImport : MonoBehaviour {
 		}
 	}
 
-    public int connectionRetryTimerTime = 1000;
+    public int connectionRetryTimerTime = 3000;
     Timer connectionRetryTimer;
     bool retryConnections = false;
 

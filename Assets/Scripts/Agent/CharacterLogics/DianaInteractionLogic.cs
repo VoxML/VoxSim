@@ -543,11 +543,11 @@ namespace Agent
             }
         }
 
-		protected string GetMostRecentInputSymbolName(object arg) {
+        protected string GetLastInputSymbolName(object arg) {
 			return GetLastInputSymbol ().Name;
 		}
 
-		protected List<string> GetMostRecentInputSymbolNameAsList(object arg) {
+        protected List<string> GetLastInputSymbolNameAsList(object arg) {
 			return new List<string>(new string[]{GetLastInputSymbol ().Name});
 		}
 
@@ -710,7 +710,7 @@ namespace Agent
                                 GetInputSymbolType (ActionSuggestions[0])),
                             "push servo").ToLower()) }) :
                 new List<string>(
-                    new string[]{ "slide({0}" + string.Format (",{0})",
+                    new string[]{ "slidep({0}" + string.Format (",{0})",
                         GetGestureContent (
                             RemoveInputSymbolType (
                                 RemoveGestureTrigger (
@@ -1186,7 +1186,7 @@ namespace Agent
 				GetState("StopGrabMove"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
 					new StackSymbolContent(null, null, null, null, 
-						new FunctionDelegate(GetMostRecentInputSymbolNameAsList), null))));
+						new FunctionDelegate(GetLastInputSymbolNameAsList), null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -1208,7 +1208,7 @@ namespace Agent
 				GetState("StopPush"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
 					new StackSymbolContent(null, null, null, null, 
-						new FunctionDelegate(GetMostRecentInputSymbolNameAsList), null))));
+						new FunctionDelegate(GetLastInputSymbolNameAsList), null))));
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Wait"),
