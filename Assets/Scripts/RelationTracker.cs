@@ -110,7 +110,8 @@ public class RelationTracker : MonoBehaviour {
 			}
 		}
 		catch (Exception e) {
-			Debug.Log (e.Message);
+            // TODO: fix
+			//Debug.Log (e.Message);
 		}
 			
 		foreach (List<GameObject> key in relations.Keys) {

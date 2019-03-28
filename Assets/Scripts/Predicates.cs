@@ -397,7 +397,7 @@ public class Predicates : MonoBehaviour {
             rayStart += bounds.center;
             outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
-			Debug.Log ("left: " + Helper.VectorToParsable (outValue));
+			Debug.Log ("right: " + Helper.VectorToParsable (outValue));
 		}
 		else if (args [0] is Vector3) {	// right of a location
 			outValue = (Vector3)args[0];
@@ -457,7 +457,7 @@ public class Predicates : MonoBehaviour {
             rayStart += bounds.center;
             outValue = Helper.RayIntersectionPoint (rayStart, bounds.center-rayStart);
 
-			Debug.Log ("left-dc: " + Helper.VectorToParsable (outValue));
+			Debug.Log ("right-dc: " + Helper.VectorToParsable (outValue));
 		}
 		else if (args [0] is Vector3) {	// right of a location
 			outValue = (Vector3)args[0];

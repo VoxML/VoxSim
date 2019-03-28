@@ -128,6 +128,7 @@ namespace Network
         public virtual void Close()
 		{
 			_t.Abort();
+            _client.GetStream().Close();
 			_client.Close();
 		}
 

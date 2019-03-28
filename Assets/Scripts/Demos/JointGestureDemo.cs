@@ -4264,7 +4264,7 @@ public class JointGestureDemo : AgentInteraction {
             {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
                 {
-                    if (interactionLogic.GraspedObj != obj)
+                    if ((interactionLogic.IndicatedObj == null) && (interactionLogic.GraspedObj != obj)) 
                     {
                         interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                             interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));

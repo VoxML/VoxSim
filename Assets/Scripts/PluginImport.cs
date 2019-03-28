@@ -604,7 +604,7 @@ public class PluginImport : MonoBehaviour {
 		if (_fusionSocket != null && _fusionSocket.IsConnected())
 		{
 			_fusionSocket.Close();
-			_fusionSocket = null;
+            _fusionSocket = null;
 		}
 
 		if (_commanderSocket != null && _commanderSocket.IsConnected())
