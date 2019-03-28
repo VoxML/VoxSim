@@ -923,6 +923,10 @@ namespace Agent
             InputSymbols.Add(new PDASymbol("G teaching succeeded 4"));
             InputSymbols.Add(new PDASymbol("G teaching succeeded 5"));
             InputSymbols.Add(new PDASymbol("G teaching succeeded 6"));
+            InputSymbols.Add(new PDASymbol("G teaching failed used"));
+            InputSymbols.Add(new PDASymbol("G teaching failed moved"));
+            InputSymbols.Add(new PDASymbol("G teaching failed low"));
+            InputSymbols.Add(new PDASymbol("G teaching failed other"));
             InputSymbols.Add(new PDASymbol("G teaching stop"));
             InputSymbols.Add(new PDASymbol("G rh gesture 1 start"));
             InputSymbols.Add(new PDASymbol("G rh gesture 1 stop"));
