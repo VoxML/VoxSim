@@ -240,7 +240,6 @@ namespace NLU
 				else if (tokens[cur].StartsWith("v@"))
 				{
 					form += "," + tokens [cur].ToUpper();
-					Debug.Log (form);
 					cur++;
 				}
 				else
@@ -249,7 +248,12 @@ namespace NLU
 				}
 			}
 			form = MatchParens(form);
-//			form += string.Concat(Enumerable.Repeat(")", opens - closes));
+            //			form += string.Concat(Enumerable.Repeat(")", opens - closes));
+
+            Debug.Log(form);
+            if (form.EndsWith("()")) {
+                form = form.Replace("()","");
+            }
 			return form;
 		}
 

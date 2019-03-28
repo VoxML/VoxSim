@@ -3378,26 +3378,30 @@ namespace Agent
 				break;
 
 			case PDAStackOperation.PDAStackOperationType.Pop:
-                if ((operation.Content == null) || (operation.Content.GetType() != typeof(PDAState))) {
+                if ((operation.Content == null) || (operation.Content.GetType() != typeof(PDAState)))
+                {
                     Stack.Pop();
                     ContextualMemory.Pop();
                 }
                 else {
-                    PDASymbol popUntilSymbol = ContextualMemory.Last().Item3;
-                    foreach (Triple<PDASymbol, PDAState, PDASymbol> symbolStateTriple in ContextualMemory.ToList().GetRange(1,ContextualMemory.Count-2)) {
+                    PDASymbol popUntilSymbol = ContextualMemory.First().Item3;
+                    foreach (Triple<PDASymbol, PDAState, PDASymbol> symbolStateTriple in ContextualMemory.ToList().GetRange(1, ContextualMemory.Count - 2)) {
                         Debug.Log(string.Format("{0} {1}", symbolStateTriple.Item3.Name, StackSymbolToString(symbolStateTriple.Item3)));
-                        if (symbolStateTriple.Item2 == (PDAState)operation.Content) {
+                        if ((symbolStateTriple.Item2 == (PDAState)operation.Content) &&
+                            (symbolStateTriple.Item3 != GetCurrentStackSymbol())) {   // if state == operation content && stack symbol != current stack symbol
                             popUntilSymbol = symbolStateTriple.Item3;
                             break;
                         }
                     }
 
                     Debug.Log(string.Format(StackSymbolToString(popUntilSymbol)));
-                    while (!((StackSymbolContent)GetCurrentStackSymbol().Content).Equals((StackSymbolContent)popUntilSymbol.Content)) {
-                        Debug.Log(string.Format("Popping {0} until {1}",
-                            StackSymbolToString(GetCurrentStackSymbol()), StackSymbolToString(popUntilSymbol)));
-                        Stack.Pop();
-                        ContextualMemory.Pop();
+                    if (Stack.Count > 1) {
+                        while (!((StackSymbolContent)GetCurrentStackSymbol().Content).Equals((StackSymbolContent)popUntilSymbol.Content)) {
+                            Debug.Log(string.Format("Popping {0} until {1}",
+                                StackSymbolToString(GetCurrentStackSymbol()), StackSymbolToString(popUntilSymbol)));
+                            Stack.Pop();
+                            ContextualMemory.Pop();
+                        }
                     }
                 }
 				break;
@@ -3453,10 +3457,10 @@ namespace Agent
 					if (operation.Content.GetType () == typeof(StackSymbolContent)) {
 						Stack.Clear ();
 						Stack.Push (GenerateStackSymbol ((StackSymbolContent)operation.Content));
-                        ContextualMemory.Clear ();
-                        ContextualMemory.Push(
-                            new Triple<PDASymbol,PDAState,PDASymbol>(GetLastInputSymbol(),CurrentState,
-                                 GenerateStackSymbol((StackSymbolContent)operation.Content)));
+                        //ContextualMemory.Clear ();
+                        //ContextualMemory.Push(
+                            //new Triple<PDASymbol,PDAState,PDASymbol>(GetLastInputSymbol(),CurrentState,
+                                 //GenerateStackSymbol((StackSymbolContent)operation.Content)));
 					}
 				}
 				else {
@@ -3464,10 +3468,10 @@ namespace Agent
 						null, GraspedObj, null, null, null, null);	// keep GraspedObj because it is a physical state, not a mental one
 					Stack.Clear ();
 					Stack.Push (GenerateStackSymbol (persistentContent));
-                    ContextualMemory.Clear();
-                    ContextualMemory.Push(
-                        new Triple<PDASymbol, PDAState, PDASymbol>(GetLastInputSymbol(), CurrentState,
-                            GenerateStackSymbol(persistentContent)));				
+                    //ContextualMemory.Clear();
+                    //ContextualMemory.Push(
+                        //new Triple<PDASymbol, PDAState, PDASymbol>(GetLastInputSymbol(), CurrentState,
+                            //GenerateStackSymbol(persistentContent)));				
                     }
 
 				break;

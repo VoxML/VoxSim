@@ -308,9 +308,6 @@ public class PluginImport : MonoBehaviour {
                         }
                     }
                     else {
-                        // try test message
-                        byte[] bytes = Encoding.ASCII.GetBytes("Hello, ADE!");
-                        _adeSocket.Write(bytes);
                     }
                 }
             }
@@ -403,9 +400,6 @@ public class PluginImport : MonoBehaviour {
         {
             if (_adeSocket.IsConnected())
             {
-                // try test message
-                byte[] bytes = Encoding.ASCII.GetBytes("Hello, ADE!");
-                _adeSocket.Write(bytes);
             }
             else
             {

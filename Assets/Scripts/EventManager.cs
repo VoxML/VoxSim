@@ -499,8 +499,17 @@ public class EventManager : MonoBehaviour {
                         else {  // not a program
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                             Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
-                            if ((referents.stack.Count == 0) || (referents.stack.Peek() != obj)) {
-                                referents.stack.Push(obj);
+                            if (obj.ToString() == string.Empty)
+                            {
+                                OnNonexistentEntityError(this,
+                                    new EventReferentArgs(new Pair<string, List<object>>(pred, objs.GetRange(0,objs.Count-1))));
+                            }
+                            else
+                            {
+                                if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj)))
+                                {
+                                    referents.stack.Push(obj);
+                                }
                                 OnEntityReferenced(this, new EventReferentArgs(obj));
                             }
                         }
@@ -813,7 +822,7 @@ public class EventManager : MonoBehaviour {
 												if (go == null) {
 													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
                                                     OnNonexistentEntityError(this,
-                                                                             new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
+                                                        new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
 													return false;	// abort
 												}
 											}
@@ -936,9 +945,14 @@ public class EventManager : MonoBehaviour {
                                     if ((obj as String).Length == 0) {
                                         OnNonexistentEntityError(this,
                                             new EventReferentArgs(new Pair<string, List<object>>(pred, objs)));
+                                        return false;
                                     }
-                                }
 
+                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+                                        referents.stack.Push(obj);
+                                    }
+                                    OnEntityReferenced(this, new EventReferentArgs(obj));
+                                }
 								temp [kv.Key] = obj;
 							}
 						}

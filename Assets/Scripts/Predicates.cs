@@ -602,7 +602,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("brown"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -617,7 +623,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("blue"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -632,7 +644,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("black"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -647,7 +665,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("green"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -662,7 +686,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("yellow"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -677,7 +707,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0,args.Length-1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("red"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -692,7 +728,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("orange"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -707,7 +749,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("pink"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -722,7 +770,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("white"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -737,7 +791,13 @@ public class Predicates : MonoBehaviour {
         List<String> objNames = new List<String>();
 
         if (args[0] is GameObject) {   // assume all inputs are of same type
-            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
             List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("gray"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
@@ -751,14 +811,20 @@ public class Predicates : MonoBehaviour {
 	public String PURPLE(object[] args) {
         List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("purple"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("purple"));
 
             for (int index = 0; index < attrObjs.Count; index++) {
                 objNames.Add(attrObjs[0].name);
-			}
-		}
+            }
+        }
 
         return string.Join(",", objNames.ToArray());
 	}
