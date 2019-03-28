@@ -1364,6 +1364,16 @@ namespace Agent
                 GetState("ConfirmObject"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (r) => r == null,
+                    null, null, null, null
+                ),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
 			// if items have value, check and see if sentence is consistent with them
 //			TransitionRelation.Add(new PDAInstruction(
 //				GetStates("Wait"),

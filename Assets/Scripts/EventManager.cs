@@ -117,6 +117,16 @@ public class EventManager : MonoBehaviour {
         }
     }
 
+    public event EventHandler NonexistentEntityError;
+
+    public void OnNonexistentEntityError(object sender, EventArgs e)
+    {
+        if (NonexistentEntityError != null)
+        {
+            NonexistentEntityError(this, e);
+        }
+    }
+
     public event EventHandler DisambiguationError;
 
     public void OnDisambiguationError(object sender, EventArgs e)
@@ -801,7 +811,9 @@ public class EventManager : MonoBehaviour {
 												}
 
 												if (go == null) {
-													OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+                                                    OnNonexistentEntityError(this,
+                                                                             new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
 													return false;	// abort
 												}
 											}
@@ -820,7 +832,9 @@ public class EventManager : MonoBehaviour {
 												}
 
 												if (go == null) {
-													OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+                                                    OnNonexistentEntityError(this,
+                                                                             new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
 													return false;	// abort
 												}
 											}
@@ -917,6 +931,13 @@ public class EventManager : MonoBehaviour {
 								Debug.Log ("EvaluateSkolemConstants: invoke " + methodToCall.Name);
 								object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
 								Debug.Log (obj);
+
+                                if (obj is String) {
+                                    if ((obj as String).Length == 0) {
+                                        OnNonexistentEntityError(this,
+                                            new EventReferentArgs(new Pair<string, List<object>>(pred, objs)));
+                                    }
+                                }
 
 								temp [kv.Key] = obj;
 							}

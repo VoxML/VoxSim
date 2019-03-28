@@ -599,168 +599,168 @@ public class Predicates : MonoBehaviour {
 	// IN: String
 	// OUT: String
 	public String BROWN(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("brown"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("brown"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String BLUE(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("blue"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("blue"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String BLACK(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("black"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("black"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String GREEN(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("green"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("green"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String YELLOW(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("yellow"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("yellow"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String RED(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("red"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("red"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
-	
-		return objName;
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
+
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String ORANGE(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("orange"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("orange"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String PINK(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("pink"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("pink"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String WHITE(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("white"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("white"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String GRAY(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
-		if (args [0] is GameObject) {	// assume all inputs are of same type
-			List<GameObject> objs = args.Cast<GameObject>().ToList();
-			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("gray"));
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = args.Cast<GameObject>().ToList();
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("gray"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
-			}
-		}
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String PURPLE(object[] args) {
-		String objName = "";
+        List<String> objNames = new List<String>();
 
 		if (args [0] is GameObject) {	// assume all inputs are of same type
 			List<GameObject> objs = args.Cast<GameObject>().ToList();
 			List<GameObject> attrObjs = objs.FindAll (o => o.GetComponent<AttributeSet> ().attributes.Contains ("purple"));
 
-			if (attrObjs.Count > 0) {
-				objName = attrObjs [0].name;
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
 			}
 		}
 
-		return objName;
+        return string.Join(",", objNames.ToArray());
 	}
 
 	public String BIG(object[] args) {
@@ -813,8 +813,7 @@ public class Predicates : MonoBehaviour {
 
     // IN: Objects
     // OUT: String
-    public String THAT(object[] args)
-    {
+    public String THAT(object[] args) {
         List<String> objNames = new List<String>();
         //System.Random random = new System.Random ();
 
@@ -832,8 +831,7 @@ public class Predicates : MonoBehaviour {
 
     // IN: Objects
     // OUT: String
-    public String THIS(object[] args)
-    {
+    public String THIS(object[] args) {
         List<String> objNames = new List<String>();
         //System.Random random = new System.Random ();
 
@@ -851,8 +849,7 @@ public class Predicates : MonoBehaviour {
 
     // IN: Objects
 	// OUT: String
-	public String THE(object[] args)
-	{
+	public String THE(object[] args) {
 		List<String> objNames = new List<String>();
 		//System.Random random = new System.Random ();
 
@@ -870,8 +867,7 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
 	// OUT: String
-	public String A(object[] args)
-	{
+	public String A(object[] args) {
 		String objName = "";
 		System.Random random = new System.Random ();
 
@@ -886,8 +882,7 @@ public class Predicates : MonoBehaviour {
 
 	// IN: Objects
     // OUT: String TODO: List<String>
-	public String TWO(object[] args)
-	{
+	public String TWO(object[] args) {
 		//Debug.Log (args.Length);
 		List<String> objNames = new List<String>();
 		System.Random random = new System.Random ();
@@ -982,25 +977,30 @@ public class Predicates : MonoBehaviour {
 		// look for agent
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 
-		// add agent-dependent preconditions
-		if (agent != null) {
-			// add preconditions
-//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-//				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-//				eventManager.RemoveEvent (3);
-//				return;
-//			}
-//			else {
-				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
-					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-					eventManager.RemoveEvent (2);
-					return;
-				}
-//			}
-		}
+        // add agent-dependent preconditions
+        if (agent != null)
+        {
+            if (args[0] is GameObject)
+            {
+                // add preconditions
+                //			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+                //				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+                //				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+                //				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
+                //				eventManager.RemoveEvent (3);
+                //				return;
+                //			}
+                //			else {
+                if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name)))
+                {
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                    eventManager.InsertEvent(eventManager.evalOrig[string.Format("put({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 1);
+                    eventManager.RemoveEvent(2);
+                    return;
+                }
+                //			}
+            }
+        }
 
 		// add agent-independent preconditions
 		if (prep == "_under") {
@@ -1872,29 +1872,36 @@ public class Predicates : MonoBehaviour {
 
 		// add to events manager
 		if (args[args.Length-1] is bool) {
-			if ((bool)args[args.Length-1] == false) {
-				//eventManager.eventsStatus.Add ("put("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetPosition)+")", false);
-				eventManager.events[0] = "put("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetPosition)+")";
-			}
-			else{
-				// record parameter values
-				OnPrepareLog (this, new ParamsEventArgs ("TranslocSpeed", (args [0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    //eventManager.eventsStatus.Add ("put("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetPosition)+")", false);
+                    eventManager.events[0] = "put(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+                }
+                else
+                {
+                    // record parameter values
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocSpeed", (args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
 
-				if (Vector3.Magnitude(translocDir) > 0.0f) {
-					OnPrepareLog (this, new ParamsEventArgs ("TranslocDir", Helper.VectorToParsable (translocDir)));
-					OnPrepareLog (this, new ParamsEventArgs ("RelOffset", Helper.VectorToParsable (relOffset)));
-				}
+                    if (Vector3.Magnitude(translocDir) > 0.0f)
+                    {
+                        OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(translocDir)));
+                        OnPrepareLog(this, new ParamsEventArgs("RelOffset", Helper.VectorToParsable(relOffset)));
+                    }
 
-				//				Debug.Log (eventManager.events [0]);
-				//				Debug.Log (eventManager.evalOrig [eventManager.events [0]]);
-				//if (eventManager.evalOrig.ContainsKey (eventManager.events [0])) {
-				if ((Helper.GetTopPredicate(eventManager.lastParse) == Helper.GetTopPredicate(eventManager.events [0])) ||
-					(PredicateParameters.IsSpecificationOf(Helper.GetTopPredicate(eventManager.events [0]),
-						Helper.GetTopPredicate(eventManager.lastParse)))){
-					OnParamsCalculated (null, null);
-				}
-				//}
-			}
+                    //				Debug.Log (eventManager.events [0]);
+                    //				Debug.Log (eventManager.evalOrig [eventManager.events [0]]);
+                    //if (eventManager.evalOrig.ContainsKey (eventManager.events [0])) {
+                    if ((Helper.GetTopPredicate(eventManager.lastParse) == Helper.GetTopPredicate(eventManager.events[0])) ||
+                        (PredicateParameters.IsSpecificationOf(Helper.GetTopPredicate(eventManager.events[0]),
+                            Helper.GetTopPredicate(eventManager.lastParse))))
+                    {
+                        OnParamsCalculated(null, null);
+                    }
+                    //}
+                }
+            }
 		}
 
 		Debug.Log ("========== Before plan ========= " + targetPosition);
@@ -1974,31 +1981,34 @@ public class Predicates : MonoBehaviour {
 		// look for agent
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 		if (agent != null) {
-			// add preconditions
-//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-//				if (args.Length > 2) {
-//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-//				}
-//				else {
-//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0})", (args [0] as GameObject).name)], 1);
-//				}
-//				eventManager.RemoveEvent (3);
-//				return;
-//			}
-//			else {
-				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
-					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
-					if (args.Length > 2) {
-						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-					}
-					else {
-						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0})", (args [0] as GameObject).name)], 1);
-					}
-					eventManager.RemoveEvent (2);
-					return;
-				}
+            if (args[0] is GameObject)
+            {
+            // add preconditions
+            //			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+            //				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+            //				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+            //				if (args.Length > 2) {
+            //					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
+            //				}
+            //				else {
+            //					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("lift({0})", (args [0] as GameObject).name)], 1);
+            //				}
+            //				eventManager.RemoveEvent (3);
+            //				return;
+            //			}
+            //			else {
+                if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                    if (args.Length > 2) {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("lift({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 1);
+                    }
+                    else {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("lift({0})", (args[0] as GameObject).name)], 1);
+                    }
+                    eventManager.RemoveEvent(2);
+                    return;
+                }
+            }
 //			}
 
 			// add postconditions
@@ -2064,19 +2074,25 @@ public class Predicates : MonoBehaviour {
 		}
 
 
-		// add to events manager
-		if (args[args.Length-1] is bool) {
-			if ((bool)args [args.Length - 1] == false) {
-				eventManager.events [0] = "lift(" + (args [0] as GameObject).name + "," + Helper.VectorToParsable (targetPosition) + ")";
-				Debug.Log (eventManager.events [0]);
-			}
-			else {
-				// record parameter values
-				OnPrepareLog (this, new ParamsEventArgs ("TranslocSpeed", (args [0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
-				OnPrepareLog (this, new ParamsEventArgs ("TranslocDir", Helper.VectorToParsable(targetPosition-(args [0] as GameObject).transform.position)));
-				OnParamsCalculated (null, null);
-			}
-		}
+        // add to events manager
+        if (args[args.Length - 1] is bool)
+        {
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    eventManager.events[0] = "lift(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+                    Debug.Log(eventManager.events[0]);
+                }
+                else
+                {
+                    // record parameter values
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocSpeed", (args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
+                    OnParamsCalculated(null, null);
+                }
+            }
+        }
 
 		return;
 	}
@@ -2087,41 +2103,50 @@ public class Predicates : MonoBehaviour {
 	{
 		// look for agent
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-		if (agent != null) {
-			// add preconditions
-//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-//				if (args.Length > 2) {
-//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-//				}
-//				else {
-//					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0})", (args [0] as GameObject).name)], 2);
-//				}
-//				eventManager.RemoveEvent (3);
-//				return;
-//			}
-//			else {
-				if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
-					eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
-					if (args.Length > 2) {
-						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-					}
-					else {
-						eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0})", (args [0] as GameObject).name)], 2);
-					}
-					eventManager.RemoveEvent (2);
-					return;
-				}
-			//}
+        if (agent != null)
+        {
+            if (args[0] is GameObject)
+            {
+                // add preconditions
+                //			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+                //				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+                //				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+                //				if (args.Length > 2) {
+                //					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
+                //				}
+                //				else {
+                //					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("slide({0})", (args [0] as GameObject).name)], 2);
+                //				}
+                //				eventManager.RemoveEvent (3);
+                //				return;
+                //			}
+                //			else {
+                if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name)))
+                {
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                    if (args.Length > 2)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("slide({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 2);
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("slide({0})", (args[0] as GameObject).name)], 2);
+                    }
+                    eventManager.RemoveEvent(2);
+                    return;
+                }
+                //}
 
-			// add postconditions
-			if (args [args.Length - 1] is bool) {
-				if ((bool)args [args.Length - 1] == true) {
-					eventManager.InsertEvent (string.Format ("ungrasp({0})", (args [0] as GameObject).name), 1);
-				}
-			}
-		}
+                // add postconditions
+                if (args[args.Length - 1] is bool)
+                {
+                    if ((bool)args[args.Length - 1] == true)
+                    {
+                        eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
+                    }
+                }
+            }
+        }
 
 		// override physics rigging
 		if (agent != null) {
@@ -2540,16 +2565,21 @@ public class Predicates : MonoBehaviour {
 
 		// add to events manager
 		if (args[args.Length-1] is bool) {
-			if ((bool)args [args.Length - 1] == false) {
-				eventManager.events [0] = "slide(" + (args [0] as GameObject).name + "," + Helper.VectorToParsable (targetPosition) + ")";
-				Debug.Log (eventManager.events [0]);
-			}
-			else {
-				// record parameter values
-				OnPrepareLog (this, new ParamsEventArgs ("TranslocSpeed", (args [0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
-				OnPrepareLog (this, new ParamsEventArgs ("TranslocDir", Helper.VectorToParsable (targetPosition-(args [0] as GameObject).transform.position)));
-				OnParamsCalculated (null, null);
-			}
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    eventManager.events[0] = "slide(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+                    Debug.Log(eventManager.events[0]);
+                }
+                else
+                {
+                    // record parameter values
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocSpeed", (args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
+                    OnParamsCalculated(null, null);
+                }
+            }
 		}
 
 		// plan path to destination
@@ -2583,29 +2613,36 @@ public class Predicates : MonoBehaviour {
 
         // look for agent
         GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        if (agent != null) {
-            // add preconditions
-            if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
-                eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
-                if (args.Length > 2) {
-                    eventManager.InsertEvent (eventManager.evalOrig[string.Format("slidep({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 2);
+        if (agent != null)
+        {
+            if (args[0] is GameObject)
+            {
+                // add preconditions
+                if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name)))
+                {
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                    if (args.Length > 2)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("slidep({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 2);
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("slidep({0})", (args[0] as GameObject).name)], 2);
+                    }
+                    eventManager.RemoveEvent(2);
+                    return;
                 }
-                else {
-                    eventManager.InsertEvent (eventManager.evalOrig[string.Format("slidep({0})", (args[0] as GameObject).name)], 2);
-                }
-                eventManager.RemoveEvent(2);
-                return;
-            }
-            //}
+                //}
 
-            // add postconditions
-            //if (args[args.Length - 1] is bool)
-            //{
-            //    if ((bool)args[args.Length - 1] == true)
-            //    {
-            //        eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
-            //    }
-            //}
+                // add postconditions
+                //if (args[args.Length - 1] is bool)
+                //{
+                //    if ((bool)args[args.Length - 1] == true)
+                //    {
+                //        eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
+                //    }
+                //}
+            }
         }
 
         // override physics rigging
@@ -3035,16 +3072,22 @@ public class Predicates : MonoBehaviour {
         }
 
         // add to events manager
-        if (args[args.Length - 1] is bool) {
-            if ((bool)args[args.Length - 1] == false) {
-                eventManager.events[0] = "slidep(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
-                Debug.Log(eventManager.events[0]);
-            }
-            else {
-                // record parameter values
-                OnPrepareLog(this, new ParamsEventArgs("TranslocSpeed", (args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
-                OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
-                OnParamsCalculated(null, null);
+        if (args[args.Length - 1] is bool)
+        {
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    eventManager.events[0] = "slidep(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+                    Debug.Log(eventManager.events[0]);
+                }
+                else
+                {
+                    // record parameter values
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocSpeed", (args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
+                    OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
+                    OnParamsCalculated(null, null);
+                }
             }
         }
 
@@ -3078,30 +3121,42 @@ public class Predicates : MonoBehaviour {
 		// look for agent
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 
-		// add agent-dependent preconditions
-		if (agent != null) {
-			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-				if (args.Length > 2) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("roll({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-				} else {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("roll({0})", (args [0] as GameObject).name)], 1);
-				}
-				eventManager.RemoveEvent (3);
-				return;
-			}
-			else if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
-				if (args.Length > 2) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("roll({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 1);
-				} else {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("roll({0})", (args [0] as GameObject).name)], 1);
-				}
-				eventManager.RemoveEvent (2);
-				return;
-			}
-		}
+        // add agent-dependent preconditions
+        if (agent != null)
+        {
+            if (args[0] is GameObject)
+            {
+                if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name)))
+                {
+                    eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
+                    if (args.Length > 2)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("roll({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 1);
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("roll({0})", (args[0] as GameObject).name)], 1);
+                    }
+                    eventManager.RemoveEvent(3);
+                    return;
+                }
+                else if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name)))
+                {
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                    if (args.Length > 2)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("roll({0},{1})", (args[0] as GameObject).name, Helper.VectorToParsable((Vector3)args[1]))], 1);
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("roll({0})", (args[0] as GameObject).name)], 1);
+                    }
+                    eventManager.RemoveEvent(2);
+                    return;
+                }
+            }
+        }
 
 		// check and see if rigidbody orientations and main body orientations are getting out of sync
 		// due to physics effects
@@ -3408,10 +3463,14 @@ public class Predicates : MonoBehaviour {
 
 		// add to events manager
 		if (args[args.Length-1] is bool) {
-			if ((bool)args[args.Length-1] == false) {
-				eventManager.events[0] = "roll("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetPosition)+")";
-				//Debug.Log (eventManager.events [0]);
-			}
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    eventManager.events[0] = "roll(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+                    //Debug.Log (eventManager.events [0]);
+                }
+            }
 		}
 
 		return;
@@ -3548,38 +3607,44 @@ public class Predicates : MonoBehaviour {
 			}
 		}
 
-		// add to events manager
-		if (args[args.Length-1] is bool) {
-			if ((bool)args[args.Length-1] == false) {
-				//eventManager.eventsStatus.Add ("flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")", false);
-				//eventManager.events[0] = "flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
-				eventManager.events [0] = string.Format ("turn({0},{1},{2},{3})", (args [0] as GameObject).name,
-					Helper.VectorToParsable (worldAxis),
-					Helper.VectorToParsable ((args [0] as GameObject).transform.rotation * targetDir),
-					Helper.VectorToParsable ((args [0] as GameObject).transform.rotation * worldRotAxis));
-					//flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
+        // add to events manager
+        if (args[args.Length - 1] is bool)
+        {
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    //eventManager.eventsStatus.Add ("flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")", false);
+                    //eventManager.events[0] = "flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
+                    eventManager.events[0] = string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
+                        Helper.VectorToParsable(worldAxis),
+                        Helper.VectorToParsable((args[0] as GameObject).transform.rotation * targetDir),
+                        Helper.VectorToParsable((args[0] as GameObject).transform.rotation * worldRotAxis));
+                    //flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
 
-				// record parameter values
-				Dictionary<string,string> paramValues = PredicateParameters.InitPredicateParametersCollection();
-				Debug.Log (Helper.VectorToParsable (objAxis));
-				Debug.Log (Helper.VectorToParsable (objRotAxis));
-				Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, -Constants.xAxis)));
-				Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, Constants.xAxis)));
-				Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, -Constants.zAxis)));
-				Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, Constants.zAxis)));
-				Debug.Log(Mathf.Rad2Deg * Constants.EPSILON);
-				OnPrepareLog (this, new ParamsEventArgs ("SymmetryAxis", Constants.Axes.FirstOrDefault (a => 
-					(Helper.AngleCloseEnough(objAxis,a.Value) || Helper.AngleCloseEnough(-objAxis,a.Value))).Key.ToString()));
-				KeyValuePair<string,Vector3> rotAxis = Constants.Axes.FirstOrDefault (a => 
-					(Helper.AngleCloseEnough (objRotAxis, a.Value) || Helper.AngleCloseEnough (-objRotAxis, a.Value)));
-				if (rotAxis.Value == Vector3.zero) {
-					rotAxis = Constants.Axes.FirstOrDefault(a => a.Value == Constants.xAxis);
-				}
-				OnPrepareLog (this, new ParamsEventArgs ("RotAxis", rotAxis.Key.ToString()));
-				OnParamsCalculated (null, null);
-				return;
-			}
-		}
+                    // record parameter values
+                    Dictionary<string, string> paramValues = PredicateParameters.InitPredicateParametersCollection();
+                    Debug.Log(Helper.VectorToParsable(objAxis));
+                    Debug.Log(Helper.VectorToParsable(objRotAxis));
+                    Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, -Constants.xAxis)));
+                    Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, Constants.xAxis)));
+                    Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, -Constants.zAxis)));
+                    Debug.Log(Mathf.Abs(Vector3.Angle(objRotAxis, Constants.zAxis)));
+                    Debug.Log(Mathf.Rad2Deg * Constants.EPSILON);
+                    OnPrepareLog(this, new ParamsEventArgs("SymmetryAxis", Constants.Axes.FirstOrDefault(a =>
+                     (Helper.AngleCloseEnough(objAxis, a.Value) || Helper.AngleCloseEnough(-objAxis, a.Value))).Key.ToString()));
+                    KeyValuePair<string, Vector3> rotAxis = Constants.Axes.FirstOrDefault(a =>
+                        (Helper.AngleCloseEnough(objRotAxis, a.Value) || Helper.AngleCloseEnough(-objRotAxis, a.Value)));
+                    if (rotAxis.Value == Vector3.zero)
+                    {
+                        rotAxis = Constants.Axes.FirstOrDefault(a => a.Value == Constants.xAxis);
+                    }
+                    OnPrepareLog(this, new ParamsEventArgs("RotAxis", rotAxis.Key.ToString()));
+                    OnParamsCalculated(null, null);
+                    return;
+                }
+            }
+        }
 
 		return;
 	}
@@ -3598,28 +3663,36 @@ public class Predicates : MonoBehaviour {
 		// look for agent
 		GameObject agent = null;//GameObject.FindGameObjectWithTag("Agent");
 		if (agent != null) {
-			// add preconditions
-			if (!SatisfactionTest.IsSatisfied (string.Format ("grasp({0})", (args [0] as GameObject).name))) {
-				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 0);
-				if (args.Length > 4) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1},{2},{3})", (args [0] as GameObject).name, 
-						Helper.VectorToParsable ((Vector3)args [1]), Helper.VectorToParsable ((Vector3)args [2]),
-						Helper.VectorToParsable ((Vector3)args [3]))], 1);
-				}
-				else if (args.Length > 3) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1},{2})", (args [0] as GameObject).name, 
-						Helper.VectorToParsable ((Vector3)args [1]), Helper.VectorToParsable ((Vector3)args [2]))], 1);
-				}
-				else if (args.Length > 2) {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0},{1})", (args [0] as GameObject).name, 
-						Helper.VectorToParsable ((Vector3)args [1]))], 1);
-				}
-				else {
-					eventManager.InsertEvent (eventManager.evalOrig [string.Format ("turn({0})", (args [0] as GameObject).name)], 1);
-				}	
-				eventManager.RemoveEvent (2);
-				return;
-			}
+            if (args[0] is GameObject)
+            {
+                // add preconditions
+                if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name)))
+                {
+                    eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                    if (args.Length > 4)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
+                            Helper.VectorToParsable((Vector3)args[1]), Helper.VectorToParsable((Vector3)args[2]),
+                            Helper.VectorToParsable((Vector3)args[3]))], 1);
+                    }
+                    else if (args.Length > 3)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
+                            Helper.VectorToParsable((Vector3)args[1]), Helper.VectorToParsable((Vector3)args[2]))], 1);
+                    }
+                    else if (args.Length > 2)
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1})", (args[0] as GameObject).name,
+                            Helper.VectorToParsable((Vector3)args[1]))], 1);
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0})", (args[0] as GameObject).name)], 1);
+                    }
+                    eventManager.RemoveEvent(2);
+                    return;
+                }
+            }
 //			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
 //				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
 //				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
@@ -3775,46 +3848,57 @@ public class Predicates : MonoBehaviour {
 
 		// add to events manager
 		if (args[args.Length-1] is bool) {
-			if ((bool)args[args.Length-1] == false) {
-				if (args [1] is Vector3 && args [2] is Vector3) {
-					if (args [3] is Vector3) {
-						eventManager.events [0] = "turn(" + (args [0] as GameObject).name + "," + Helper.VectorToParsable ((Vector3)args [1]) +
-							"," + Helper.VectorToParsable ((Vector3)args [2]) + "," + Helper.VectorToParsable ((Vector3)args [3]) + ")";
-					}
-					else {
-						eventManager.events [0] = "turn(" + (args [0] as GameObject).name + "," + Helper.VectorToParsable ((Vector3)args [1]) +
-							"," + Helper.VectorToParsable ((Vector3)args [2]) + ")";
-					}
-				}
-				else {
-					eventManager.events [0] = "turn(" + (args [0] as GameObject).name + "," +
-						Helper.VectorToParsable ((args [0] as GameObject).transform.rotation * Constants.yAxis) + "," +
-						Helper.VectorToParsable ((args [0] as GameObject).transform.rotation * Quaternion.Euler(targetRotation) * Constants.yAxis) + ")";
-				}
-				Debug.Log (eventManager.events [0]);
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    if (args[1] is Vector3 && args[2] is Vector3)
+                    {
+                        if (args[3] is Vector3)
+                        {
+                            eventManager.events[0] = "turn(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable((Vector3)args[1]) +
+                                "," + Helper.VectorToParsable((Vector3)args[2]) + "," + Helper.VectorToParsable((Vector3)args[3]) + ")";
+                        }
+                        else
+                        {
+                            eventManager.events[0] = "turn(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable((Vector3)args[1]) +
+                                "," + Helper.VectorToParsable((Vector3)args[2]) + ")";
+                        }
+                    }
+                    else
+                    {
+                        eventManager.events[0] = "turn(" + (args[0] as GameObject).name + "," +
+                            Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis) + "," +
+                            Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Quaternion.Euler(targetRotation) * Constants.yAxis) + ")";
+                    }
+                    Debug.Log(eventManager.events[0]);
 
-				// record parameter values
-				OnPrepareLog (this, new ParamsEventArgs ("RotSpeed", (args [0] as GameObject).GetComponent<Voxeme>().turnSpeed.ToString()));
+                    // record parameter values
+                    OnPrepareLog(this, new ParamsEventArgs("RotSpeed", (args[0] as GameObject).GetComponent<Voxeme>().turnSpeed.ToString()));
 
-				if (angle > 0.0f) {
-					OnPrepareLog (this, new ParamsEventArgs ("RotAngle", angle.ToString()));
-					OnPrepareLog (this, new ParamsEventArgs ("RotDir", sign.ToString ()));
-				}
+                    if (angle > 0.0f)
+                    {
+                        OnPrepareLog(this, new ParamsEventArgs("RotAngle", angle.ToString()));
+                        OnPrepareLog(this, new ParamsEventArgs("RotDir", sign.ToString()));
+                    }
 
-				if (rotAxis != string.Empty) {
-					OnPrepareLog (this, new ParamsEventArgs ("RotAxis", rotAxis));
-				}
+                    if (rotAxis != string.Empty)
+                    {
+                        OnPrepareLog(this, new ParamsEventArgs("RotAxis", rotAxis));
+                    }
 
-				Debug.Log (eventManager.events [0]);
+                    Debug.Log(eventManager.events[0]);
 
-				//if (eventManager.evalOrig.ContainsKey (eventManager.events [0])) {
-					if ((Helper.GetTopPredicate(eventManager.lastParse) == Helper.GetTopPredicate(eventManager.events [0])) ||
-						(PredicateParameters.IsSpecificationOf(Helper.GetTopPredicate(eventManager.events [0]),
-						Helper.GetTopPredicate(eventManager.lastParse)))){
-						OnParamsCalculated (null, null);
-					}
-				//}
-			}
+                    //if (eventManager.evalOrig.ContainsKey (eventManager.events [0])) {
+                    if ((Helper.GetTopPredicate(eventManager.lastParse) == Helper.GetTopPredicate(eventManager.events[0])) ||
+                        (PredicateParameters.IsSpecificationOf(Helper.GetTopPredicate(eventManager.events[0]),
+                        Helper.GetTopPredicate(eventManager.lastParse))))
+                    {
+                        OnParamsCalculated(null, null);
+                    }
+                    //}
+                }
+            }
 		}
 
 		return;
@@ -4920,44 +5004,52 @@ public class Predicates : MonoBehaviour {
 
 		// add to events manager
 		if (args[args.Length-1] is bool) {
-			if ((bool)args [args.Length - 1] == false) {
-				GameObject movingComponent = null;
-				float motionSpeed = 0.0f;
-				string mannerString = string.Empty;
-				if (!hasInteriorComponent) {
-					if (lids.Count > 0) {
-						eventManager.InsertEvent (string.Format ("put({0},on({1}))", lids [0].name, (args [0] as GameObject).name), 1);
-						mannerString = string.Format ("put({0},on({1}))", lids [0].name, (args [0] as GameObject).name);
-						movingComponent = lids [0];
-						motionSpeed = movingComponent.GetComponent<Voxeme> ().moveSpeed = 
-							RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    GameObject movingComponent = null;
+                    float motionSpeed = 0.0f;
+                    string mannerString = string.Empty;
+                    if (!hasInteriorComponent)
+                    {
+                        if (lids.Count > 0)
+                        {
+                            eventManager.InsertEvent(string.Format("put({0},on({1}))", lids[0].name, (args[0] as GameObject).name), 1);
+                            mannerString = string.Format("put({0},on({1}))", lids[0].name, (args[0] as GameObject).name);
+                            movingComponent = lids[0];
+                            motionSpeed = movingComponent.GetComponent<Voxeme>().moveSpeed =
+                                RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
 
-						eventManager.OnSatisfactionCalculated (eventManager, new EventManagerArgs (eventManager.events [1]));
-					}
-					else {
-						eventManager.InsertEvent (string.Format ("flip({0})", (args [0] as GameObject).name), 1);
-						mannerString = string.Format ("flip({0})", (args [0] as GameObject).name);
-						movingComponent = (args [0] as GameObject);
-						motionSpeed = movingComponent.GetComponent<Voxeme> ().turnSpeed = 
-							RandomHelper.RandomFloat (0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
-					}
-				}
-				else {
-					eventManager.InsertEvent (string.Format ("turn({0},{1},{2},{3})", cover.name,
-						Helper.VectorToParsable (Constants.xAxis),
-						Helper.VectorToParsable ((args [0] as GameObject).transform.rotation * Constants.xAxis),
-						Helper.VectorToParsable ((args [0] as GameObject).transform.rotation * Constants.yAxis)), 1);
-					mannerString = string.Format ("turn({0})", cover.name);
-					movingComponent = cover;
-					motionSpeed = movingComponent.GetComponent<Voxeme> ().turnSpeed = 
-						RandomHelper.RandomFloat (0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
-				}
-					
-				// record parameter values
-				OnPrepareLog (this, new ParamsEventArgs ("MotionManner", mannerString));
-				OnPrepareLog (this, new ParamsEventArgs ("MotionSpeed", motionSpeed.ToString ()));
-				OnParamsCalculated (null, null);
-			}
+                            eventManager.OnSatisfactionCalculated(eventManager, new EventManagerArgs(eventManager.events[1]));
+                        }
+                        else
+                        {
+                            eventManager.InsertEvent(string.Format("flip({0})", (args[0] as GameObject).name), 1);
+                            mannerString = string.Format("flip({0})", (args[0] as GameObject).name);
+                            movingComponent = (args[0] as GameObject);
+                            motionSpeed = movingComponent.GetComponent<Voxeme>().turnSpeed =
+                                RandomHelper.RandomFloat(0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                        }
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(string.Format("turn({0},{1},{2},{3})", cover.name,
+                            Helper.VectorToParsable(Constants.xAxis),
+                            Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.xAxis),
+                            Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis)), 1);
+                        mannerString = string.Format("turn({0})", cover.name);
+                        movingComponent = cover;
+                        motionSpeed = movingComponent.GetComponent<Voxeme>().turnSpeed =
+                            RandomHelper.RandomFloat(0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                    }
+
+                    // record parameter values
+                    OnPrepareLog(this, new ParamsEventArgs("MotionManner", mannerString));
+                    OnPrepareLog(this, new ParamsEventArgs("MotionSpeed", motionSpeed.ToString()));
+                    OnParamsCalculated(null, null);
+                }
+            }
 		}
 
 		return;
@@ -5117,58 +5209,68 @@ public class Predicates : MonoBehaviour {
 
 		// add to events manager
 		if (args[args.Length-1] is bool) {
-			if ((bool)args[args.Length-1] == false) {
-				GameObject movingComponent = null;
-				float motionSpeed = 0.0f;
-				Vector3 translocDir = Vector3.zero;
-				float translocDist = 0.0f;
-				float rotAngle = 0.0f;
-				string mannerString = string.Empty;
-				if (!hasInteriorComponent) {
-					if (lid != null) {
-						eventManager.InsertEvent (string.Format ("put({0},{1})", lid.name, Helper.VectorToParsable(removeLocation)), 1);
-						mannerString = string.Format ("move({0})", lid.name);
-						movingComponent = lid;
-						motionSpeed = movingComponent.GetComponent<Voxeme> ().moveSpeed = 
-							RandomHelper.RandomFloat (0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
-						translocDir = removeLocation - movingComponent.transform.position;
+            if (args[0] is GameObject)
+            {
+                if ((bool)args[args.Length - 1] == false)
+                {
+                    GameObject movingComponent = null;
+                    float motionSpeed = 0.0f;
+                    Vector3 translocDir = Vector3.zero;
+                    float translocDist = 0.0f;
+                    float rotAngle = 0.0f;
+                    string mannerString = string.Empty;
+                    if (!hasInteriorComponent)
+                    {
+                        if (lid != null)
+                        {
+                            eventManager.InsertEvent(string.Format("put({0},{1})", lid.name, Helper.VectorToParsable(removeLocation)), 1);
+                            mannerString = string.Format("move({0})", lid.name);
+                            movingComponent = lid;
+                            motionSpeed = movingComponent.GetComponent<Voxeme>().moveSpeed =
+                                RandomHelper.RandomFloat(0.0f, 5.0f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                            translocDir = removeLocation - movingComponent.transform.position;
 
-						eventManager.OnSatisfactionCalculated (eventManager, new EventManagerArgs (eventManager.events [1]));
-					} 
-					else {
-						eventManager.InsertEvent (string.Format ("flip({0})", (args [0] as GameObject).name), 1);
-						mannerString = string.Format ("flip({0})", (args [0] as GameObject).name);
-						movingComponent = (args [0] as GameObject);
-						motionSpeed = movingComponent.GetComponent<Voxeme> ().turnSpeed = 
-							RandomHelper.RandomFloat (0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
-						rotAngle = 180.0f;
-					}
-				} 
-				else {
-					eventManager.InsertEvent (string.Format ("turn({0},{1},{2},{3})", cover.name,
-						Helper.VectorToParsable(Constants.xAxis),
-						Helper.VectorToParsable(targetRotation * Constants.xAxis),
-						Helper.VectorToParsable((args [0] as GameObject).transform.rotation * Constants.yAxis)), 1);
-					mannerString = string.Format ("turn({0})", cover.name);
-					movingComponent = cover;
-					motionSpeed = movingComponent.GetComponent<Voxeme> ().turnSpeed = 
-						RandomHelper.RandomFloat (0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
-					rotAngle = Quaternion.Angle(movingComponent.transform.rotation,targetRotation);
-				}
-					
-				// record parameter values						
-				OnPrepareLog (this, new ParamsEventArgs ("MotionManner", mannerString));
-				OnPrepareLog (this, new ParamsEventArgs ("MotionSpeed", motionSpeed.ToString()));
+                            eventManager.OnSatisfactionCalculated(eventManager, new EventManagerArgs(eventManager.events[1]));
+                        }
+                        else
+                        {
+                            eventManager.InsertEvent(string.Format("flip({0})", (args[0] as GameObject).name), 1);
+                            mannerString = string.Format("flip({0})", (args[0] as GameObject).name);
+                            movingComponent = (args[0] as GameObject);
+                            motionSpeed = movingComponent.GetComponent<Voxeme>().turnSpeed =
+                                RandomHelper.RandomFloat(0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                            rotAngle = 180.0f;
+                        }
+                    }
+                    else
+                    {
+                        eventManager.InsertEvent(string.Format("turn({0},{1},{2},{3})", cover.name,
+                            Helper.VectorToParsable(Constants.xAxis),
+                            Helper.VectorToParsable(targetRotation * Constants.xAxis),
+                            Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis)), 1);
+                        mannerString = string.Format("turn({0})", cover.name);
+                        movingComponent = cover;
+                        motionSpeed = movingComponent.GetComponent<Voxeme>().turnSpeed =
+                            RandomHelper.RandomFloat(0.0f, 12.5f, (int)RandomHelper.RangeFlags.MaxInclusive);
+                        rotAngle = Quaternion.Angle(movingComponent.transform.rotation, targetRotation);
+                    }
 
-				if (Vector3.Magnitude(translocDir) > 0.0f) {
-					OnPrepareLog (this, new ParamsEventArgs ("TranslocDir", Helper.VectorToParsable(translocDir)));
-				}
+                    // record parameter values						
+                    OnPrepareLog(this, new ParamsEventArgs("MotionManner", mannerString));
+                    OnPrepareLog(this, new ParamsEventArgs("MotionSpeed", motionSpeed.ToString()));
 
-				if (rotAngle > 0.0f) {
-					OnPrepareLog (this, new ParamsEventArgs ("RotAngle", rotAngle.ToString()));
-				}
-				OnParamsCalculated (null, null);
-			}
+                    if (Vector3.Magnitude(translocDir) > 0.0f)
+                    {
+                        OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(translocDir)));
+                    }
+
+                    if (rotAngle > 0.0f)
+                    {
+                        OnPrepareLog(this, new ParamsEventArgs("RotAngle", rotAngle.ToString()));
+                    }
+                    OnParamsCalculated(null, null);
+                }
+            }
 		}
 
 		return;

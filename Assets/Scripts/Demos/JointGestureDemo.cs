@@ -217,6 +217,7 @@ public class JointGestureDemo : AgentInteraction {
 		eventManager.EventComplete += ReturnToRest;
         eventManager.QueueEmpty += CompletedEventSequence;
         eventManager.EntityReferenced += ReferentIndicated;
+        eventManager.NonexistentEntityError += NonexistentReferent;
         eventManager.DisambiguationError += Disambiguate;
 
 		relationTracker = GameObject.Find ("BehaviorController").GetComponent<RelationTracker>();
@@ -2583,7 +2584,7 @@ public class JointGestureDemo : AgentInteraction {
     public void StartLearn(object[] content) {
         RespondAndUpdate("What's the gesture for that?");
 
-        if (commBridge.KSIMSocket != null) {
+        if ((commBridge.KSIMSocket != null) && (commBridge.KSIMSocket.IsConnected())) {
             string command = "learn";
             byte[] bytes = new byte[] { 0x03 }.Concat(new byte[] { 0x01 }).Concat(BitConverter.GetBytes(64 | 128)).
                                                Concat(BitConverter.GetBytes(command.Length)).Concat(Encoding.ASCII.GetBytes(command)).
@@ -3798,6 +3799,15 @@ public class JointGestureDemo : AgentInteraction {
 
         //LookAt (obj);
 
+        if ((commBridge.ADESocket != null) && (commBridge.ADESocket.IsConnected()))
+        {
+            string goalSemantics = string.Format("moveToObject(self, {0}(X)^{1}(X)",
+                                                    obj.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value,
+                                                    obj.GetComponent<Voxeme>().voxml.Lex.Pred);
+            byte[] bytes = BitConverter.GetBytes(goalSemantics.Length).Concat(Encoding.ASCII.GetBytes(goalSemantics)).ToArray<byte>();
+            commBridge.ADESocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+        }
+
         if (!logActionsOnly) {
             logger.OnLogEvent(this, new LoggerArgs(
                 string.Format("{0}\t{1}\t{2}",
@@ -4236,13 +4246,39 @@ public class JointGestureDemo : AgentInteraction {
             {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
                 {
-                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
-                        interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                    if (interactionLogic.GraspedObj != obj)
+                    {
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                    }
                 }
             }
         }
         else if (((EventReferentArgs)e).Referent is Vector3) // location
         {
+        }
+
+    }
+
+    void NonexistentReferent(object sender, EventArgs e)
+    {
+        if (((EventReferentArgs)e).Referent is Pair<string,List<object>>)   // pair of predicate and object list
+        {
+            string pred = ((Pair<string, List<object>>)((EventReferentArgs)e).Referent).Item1;
+            List<object> objs = ((Pair<string, List<object>>)((EventReferentArgs)e).Referent).Item2;
+
+            if (objs.Count > 0)
+            {
+                if (!objs.Any(o => (o == null) || (o.GetType() != typeof(GameObject))))  // if all objects are game objects
+                {
+                    if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
+                    {
+                        Debug.Log(string.Format("{0} {1} does not exist!", pred, (objs[0] as GameObject).GetComponent<Voxeme>().voxml.Lex.Pred));
+                        RespondAndUpdate(string.Format("There is no {0} {1} here.", pred, (objs[0] as GameObject).GetComponent<Voxeme>().voxml.Lex.Pred));
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+                    }
+                }
+            }
         }
 
     }
