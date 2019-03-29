@@ -371,6 +371,14 @@ public class Voxeme : MonoBehaviour {
 			new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z) : 
 			new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
 
+        bool grasped = false;
+        InteractionObject interactionObject = gameObject.GetComponent<InteractionObject>();
+        if ((interactionObject != null) && (interactionObject.lastUsedInteractionSystem != null))
+        {
+            grasped = interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
+                interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.RightHand);
+        }
+
 		RaycastHit[] hits;
 
 		//		hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
@@ -385,7 +393,7 @@ public class Voxeme : MonoBehaviour {
 						Helper.GetObjectWorldSize (gameObject), true)) {
 						supportingSurface = hit.collider.gameObject;
 
-						if (!isGrasped) {
+                        if (!grasped) {
 							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme (gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
 							bool themeIsUpright = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
 							bool themeIsUpsideDown = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) < -0.5f);

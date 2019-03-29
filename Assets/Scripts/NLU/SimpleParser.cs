@@ -138,11 +138,11 @@ namespace NLU
 
 		private List<string> _determiners = new List<string>(new[]
 		{
-			"the",
-			"a",
+            "the",
+            "a",
             "this",
             "that",
-			"two"
+            "two"
 		});
 
 		private List<string> _exclude = new List<string>();
@@ -234,7 +234,7 @@ namespace NLU
 				{
 					lastObj = tokens[cur];
 					form += lastObj;
-					form = MatchParens(form);
+					//form = MatchParens(form);
 					cur++;
 				}
 				else if (tokens[cur].StartsWith("v@"))
@@ -246,15 +246,18 @@ namespace NLU
 				{
 					cur++;
 				}
+
+                //Debug.Log(cur);
+                //Debug.Log(form);
 			}
 			form = MatchParens(form);
             //			form += string.Concat(Enumerable.Repeat(")", opens - closes));
 
-            Debug.Log(form);
             if (form.EndsWith("()")) {
                 form = form.Replace("()","");
             }
-			return form;
+            Debug.Log(form);
+            return form;
 		}
 
 		private string MatchParens(string input)
@@ -284,11 +287,14 @@ namespace NLU
 				{
 					lastObj = restOfSent[cur];
 				    parsed += lastObj;
+                    //Debug.Log(parsed);
 				    for (var i = 0; i < openParen; i++)
 				    {
                         parsed += ")";
+                        //Debug.Log(parsed);
 				    }
                     parsed += ")";
+                    //Debug.Log(parsed);
 					cur++;
 				}
 				else if (restOfSent[cur] == "and")
@@ -298,10 +304,12 @@ namespace NLU
 				}
 				else
 				{
+                    //Debug.Log(parsed);
 					MatchParens(parsed);
+                    //Debug.Log(parsed);
 					break;
 				}
-			}
+   			}
 			return ++cur;
 		}
 

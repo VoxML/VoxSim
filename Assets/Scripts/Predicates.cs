@@ -5582,6 +5582,7 @@ public class Predicates : MonoBehaviour {
 
                                     InteractionHelper.SetLeftHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
+                                    //(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
                                 }
                                 else if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) == rightGrasper) {
                                     foreach (InteractionTarget interactionTarget in (args[0] as GameObject).GetComponent<Voxeme>().interactionTargets) {
@@ -5597,6 +5598,7 @@ public class Predicates : MonoBehaviour {
 
                                     InteractionHelper.SetRightHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+                                    //(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
                                 }
                             }
                             else {
@@ -5697,7 +5699,8 @@ public class Predicates : MonoBehaviour {
 									InteractionHelper.SetLeftHandTarget (agent, null);
 									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 0.0f, 0.0f);
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
-								}
+                                    //(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;
+                                }
 								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand)) {
 									Debug.Log (string.Format ("Ending {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
 
@@ -5707,6 +5710,7 @@ public class Predicates : MonoBehaviour {
 									InteractionHelper.SetRightHandTarget (agent, null);
 									ik.solver.SetEffectorWeights (FullBodyBipedEffector.RightHand, 0.0f, 0.0f);
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.RightHand);
+                                    //(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;
 
 //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight);
 //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight);
