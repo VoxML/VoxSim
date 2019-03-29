@@ -104,6 +104,8 @@ public class JointGestureDemo : AgentInteraction {
 	public Vector2 receivedPointingVariance = Vector2.zero;
 	public Vector2 screenPoint = Vector2.zero;
 	public Vector3 varianceScaleFactor = Vector2.zero;
+	public Vector2 leftArmScreenPointingBias = Vector2.zero;
+	public Vector2 rightArmScreenPointingBias = Vector2.zero;
 
 	public bool allowDeixisByClick = false;
 
@@ -593,21 +595,21 @@ public class JointGestureDemo : AgentInteraction {
 
 			if (messageStr.StartsWith ("l")) {
 				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
-					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l")),
+					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "l"), leftArmScreenPointingBias),
 						GetVectorVariance (GetGestureVector (messageStr, "l")));
 
 					if (offset.sqrMagnitude <= Constants.EPSILON) {
-						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "l"));
+						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "l"), leftArmScreenPointingBias);
 					}
 				}
 			}
 			else if (messageStr.StartsWith ("r")) {
 				if ((regionHighlight.transform.position - highlightCenter).magnitude > highlightQuantum) {
-					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "r")),
+					Vector3 offset = MoveHighlight (TransformToSurface (GetGestureVector (messageStr, "r"), rightArmScreenPointingBias),
 						GetVectorVariance (GetGestureVector (messageStr, "r")));
 
 					if (offset.sqrMagnitude <= Constants.EPSILON) {
-						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "r"));
+						regionHighlight.transform.position = TransformToSurface (GetGestureVector (messageStr, "r"), rightArmScreenPointingBias);
 					}
 				}
 			}
@@ -748,7 +750,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("left point")) {
 				Vector3 highlightCenter = TransformToSurface (
 					GetGestureVector (interactionLogic.RemoveInputSymbolType(
-						message,interactionLogic.GetInputSymbolType(message)), "left point"));
+						message,interactionLogic.GetInputSymbolType(message)), "left point"), leftArmScreenPointingBias);
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
@@ -802,7 +804,7 @@ public class JointGestureDemo : AgentInteraction {
 			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("right point")) {
 				Vector3 highlightCenter = TransformToSurface (
 					GetGestureVector (interactionLogic.RemoveInputSymbolType(
-						message,interactionLogic.GetInputSymbolType(message)), "right point"));
+						message,interactionLogic.GetInputSymbolType(message)), "right point"), rightArmScreenPointingBias);
 				
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
@@ -1267,13 +1269,13 @@ public class JointGestureDemo : AgentInteraction {
 			if (interactionLogic.RemoveInputSymbolType ((string)content [0],
 				interactionLogic.GetInputSymbolType ((string)content [0])).StartsWith ("l")) {
 				highlightCenter = TransformToSurface (GetGestureVector (interactionLogic.RemoveInputSymbolType (
-					(string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "l"));
+					(string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "l"), leftArmScreenPointingBias);
 				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 			}
 			else if (interactionLogic.RemoveInputSymbolType ((string)content [0],
 				interactionLogic.GetInputSymbolType ((string)content [0])).StartsWith ("r")) {
 				highlightCenter = TransformToSurface (GetGestureVector (interactionLogic.RemoveInputSymbolType (
-					(string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "r"));
+					(string)content [0], interactionLogic.GetInputSymbolType ((string)content [0])), "r"), rightArmScreenPointingBias);
 				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 			}
 
@@ -1690,7 +1692,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("left point")) {
 				Vector3 highlightCenter = TransformToSurface (
 					GetGestureVector (interactionLogic.RemoveInputSymbolType(
-						message,interactionLogic.GetInputSymbolType(message)), "left point"));
+						message,interactionLogic.GetInputSymbolType(message)), "left point"), leftArmScreenPointingBias);
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
@@ -1721,7 +1723,7 @@ public class JointGestureDemo : AgentInteraction {
 			else if (interactionLogic.RemoveInputSymbolType(message,interactionLogic.GetInputSymbolType(message)).StartsWith ("right point")) {
 				Vector3 highlightCenter = TransformToSurface (GetGestureVector (
 					interactionLogic.RemoveInputSymbolType(
-						message,interactionLogic.GetInputSymbolType(message)), "right point"));
+						message,interactionLogic.GetInputSymbolType(message)), "right point"), rightArmScreenPointingBias);
 
 				MoveHighlight (highlightCenter);
 				regionHighlight.transform.position = highlightCenter;
@@ -3558,14 +3560,15 @@ public class JointGestureDemo : AgentInteraction {
 		Diana.GetComponent<IKControl>().targetRotation = Quaternion.LookRotation (offset,Vector3.up).eulerAngles;
 	}
 
-	Vector3 TransformToSurface(List<float> vector) {
+	Vector3 TransformToSurface(List<float> vector, Vector2 bias) {
 		Vector3 coord = Vector3.zero;
-		receivedPointingCoord = new Vector2 (vector [0], vector [1]);
+		vector[0] += bias.x;
+		vector[1] += bias.y;
 
 		if (transformToScreenPointing) {
 			screenPoint = new Vector3 (
-				((Screen.width * vector [0] * vectorScaleFactor.x) / tableSize.x) + (Screen.width / 2.0f),
-				((Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y)) + (Screen.height / 2.0f)),
+				(Screen.width * vector [0] * vectorScaleFactor.x / tableSize.x) + (Screen.width / 2.0f),
+				(Screen.height * vector [1] / (kinectToSurfaceHeight*vectorScaleFactor.y)) + (Screen.height / 2.0f),
 				0.0f);
 
 			Ray ray = Camera.main.ScreenPointToRay (screenPoint);
