@@ -2590,9 +2590,11 @@ namespace Agent
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("LearningFailed"),
                 null,
-                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
-                GetState("Wait"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+                GenerateStackSymbolFromConditions(null, null, null, null,
+                    (a) => a.Count > 0, null),
+                GetState("StartLearn"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),
@@ -3480,6 +3482,8 @@ namespace Agent
                     else if (operation.Content.GetType() == typeof(PDAState)) {
                         if (((PDAState)operation.Content) == GetState("EndState"))
                         {
+                            Stack.Clear();
+                            Stack.Push(GenerateStackSymbol(null, null, null, null, null, null));
                             ContextualMemory.Clear();
                             ContextualMemory.Push(new Triple<PDASymbol, PDAState, PDASymbol>(null, GetState("StartState"),
                                 GenerateStackSymbol(null,null,null,null,null,null)));

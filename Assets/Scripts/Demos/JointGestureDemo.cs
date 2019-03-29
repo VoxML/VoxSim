@@ -2660,19 +2660,22 @@ public class JointGestureDemo : AgentInteraction {
     }
 
     public void LearningFailed(object[] content) {
-        LookForward();
-        TurnForward();
+        //LookForward();
+        //TurnForward();
 
-        if (interactionLogic.GraspedObj != null) {
-            PromptEvent(string.Format("ungrasp({0})", interactionLogic.GraspedObj.name));
-            ReturnHandsToDefault();
-        }
+        //if (interactionLogic.GraspedObj != null) {
+        //    PromptEvent(string.Format("ungrasp({0})", interactionLogic.GraspedObj.name));
+        //    //ReturnHandsToDefault();
+        //    ReachFor(interactionLogic.GraspedObj);
+        //}
 
-        RespondAndUpdate("Sorry, I didn't get that.");
+        String eventPrompt = interactionLogic.ActionOptions[0];
+
+        RespondAndUpdate("Sorry, could you show me again?");
 
         interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
-            interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-            null, null, null, null)));
+            interactionLogic.GenerateStackSymbol(null, null,
+            null, null, new List<string>() { eventPrompt }, null)));
     }
 
 	public void AbortAction(object[] content) {
@@ -2807,9 +2810,8 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void CleanUp(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
-			if (interactionLogic.ActionOptions.Count > 0) {
-				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
-					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
+            if (!RCC8.EC(Helper.GetObjectWorldSize(interactionLogic.GraspedObj),
+                Helper.GetObjectWorldSize(interactionLogic.GraspedObj.GetComponent<Voxeme>().supportingSurface))) {
 					RaycastHit hitInfo;
 
 					if ((!Physics.Raycast (new Ray (interactionLogic.GraspedObj.transform.position, Vector3.down), out hitInfo)) ||
@@ -2827,21 +2829,17 @@ public class JointGestureDemo : AgentInteraction {
 								Helper.GetObjectWorldSize (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject)).max.y,
 								interactionLogic.GraspedObj.transform.position.z))));
 					}
-				}
+                }
 				else {
 					PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
 				}
-			}
-			else {
-				PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
-			}
 		}
 		else {
 			LookForward ();
 			TurnForward ();
 		}
 
-        eventManager.ClearEvents();
+        //eventManager.ClearEvents();
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 			interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
@@ -2850,8 +2848,15 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void EndState(object[] content) {
         ReturnHandsToDefault();
+        eventManager.referents.stack.Clear();
         epistemicModel.SaveUserModel(epistemicModel.userID);
 		RespondAndUpdate ("Bye!");
+
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+            interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                new List<GameObject> (), new List<string>(), new List<string>())));
 	}
 
 	public void MoveToPerform() {
@@ -4257,26 +4262,22 @@ public class JointGestureDemo : AgentInteraction {
 
     void ReferentIndicated(object sender, EventArgs e)
     {
-        if (((EventReferentArgs)e).Referent is String)   // object
-        {
+        if (((EventReferentArgs)e).Referent is String) {  // object
             GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Referent).ToString());
-            if (obj != null)
-            {
-                if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
-                {
-                    if ((interactionLogic.IndicatedObj != GameObject.Find(((string)eventManager.referents.stack.Peek())) &&
-                        (interactionLogic.GraspedObj != obj)))
-                    {
-                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                            interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+            if (obj != null) {
+                if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
+                    if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
+                        (interactionLogic.GraspedObj != obj)) {
+                        if (interactionLogic.CurrentState.Name != "EndState") {
+                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                        }
                     }
                 }
             }
         }
-        else if (((EventReferentArgs)e).Referent is Vector3) // location
-        {
+        else if (((EventReferentArgs)e).Referent is Vector3) { // location
         }
-
     }
 
     void NonexistentReferent(object sender, EventArgs e)

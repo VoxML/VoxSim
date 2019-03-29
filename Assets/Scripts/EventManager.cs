@@ -489,10 +489,12 @@ public class EventManager : MonoBehaviour {
 
                 foreach (var obj in objs) {
                     if (obj is GameObject) {
-                        if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
-                            referents.stack.Push(((GameObject)obj).name);
+                        if ((obj as GameObject).GetComponent<Voxeme>() != null) {
+                            if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
+                                referents.stack.Push(((GameObject)obj).name);
+                            }
+                            OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
                         }
-                        OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
                     }
                 }
 
