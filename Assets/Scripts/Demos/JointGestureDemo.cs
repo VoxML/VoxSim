@@ -1852,26 +1852,26 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if ((interactionLogic.GraspedObj == null) &&
 			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate (string.Format ("Do you mean the {0}{1}?", (allOptionsSameType || anyGlobalSameType) ? string.Format("{0} ",attribute) : "",
-                    interactionLogic.IndicatedObj.GetComponent<Voxeme>().voxml.Lex.Pred));
+                RespondAndUpdate (string.Format ("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
+                    interactionLogic.ObjectOptions.Cast<object>().ToList())));
 				ReachFor (interactionLogic.IndicatedObj);
 				LookForward ();
 			}
 			else if ((interactionLogic.IndicatedObj != null) &&
 					(!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate (string.Format ("Should I put the {0}{1} on the {2}{3}?",
-                    allOptionsSameType ? string.Format("{0} ",interactionLogic.IndicatedObj.GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value) :
-                    "", interactionLogic.IndicatedObj.GetComponent<Voxeme>().voxml.Lex.Pred, 
-                    allOptionsSameType ? string.Format("{0} ", attribute) : "",
-                    interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count-1].GetComponent<Voxeme>().voxml.Lex.Pred));
-				LookForward ();
+                RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                    GenerateReferringExpression(interactionLogic.IndicatedObj,
+                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
+                    GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
+        		LookForward ();
 			}
 			else if (interactionLogic.GraspedObj != null) {
-                RespondAndUpdate (string.Format ("Should I put the {0}{1} on the {2}{3}?",
-                    allOptionsSameType ? string.Format("{0} ", interactionLogic.GraspedObj.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value) :
-                    "", interactionLogic.GraspedObj.GetComponent<Voxeme>().voxml.Lex.Pred,
-                    allOptionsSameType ? string.Format("{0} ", attribute) : "",
-                    interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1].GetComponent<Voxeme>().voxml.Lex.Pred));
+                RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                    GenerateReferringExpression(interactionLogic.GraspedObj,
+                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
+                    GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
 				LookForward ();
 			}
 		}
@@ -2071,6 +2071,7 @@ public class JointGestureDemo : AgentInteraction {
 		}
 
 		if (interactionLogic.GraspedObj == null) {
+            ReturnHandsToDefault();
 			ReachFor (interactionLogic.IndicatedObj);
 		}
 
@@ -4132,8 +4133,10 @@ public class JointGestureDemo : AgentInteraction {
         if ((context != null) && (context.Count > 0)) {
             foreach (object contextObj in context) {
                 if (contextObj is GameObject) {
-                    if ((contextObj as GameObject).GetComponent<Voxeme>() != null) {
-                        contextVoxemes.Add((contextObj as GameObject).GetComponent<Voxeme>());
+                    if ((contextObj as GameObject) != targetObj) {
+                        if ((contextObj as GameObject).GetComponent<Voxeme>() != null) {
+                            contextVoxemes.Add((contextObj as GameObject).GetComponent<Voxeme>());
+                        }
                     }
                 }
             }
@@ -4289,11 +4292,11 @@ public class JointGestureDemo : AgentInteraction {
             GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Referent).ToString());
             if (obj != null) {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
-                    if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
-                        (interactionLogic.GraspedObj != obj)) {
-                        if (interactionLogic.CurrentState.Name != "EndState") {
-                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                                interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                    if (interactionLogic.CurrentState.Name != "EndState") {
+                        if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
+                            (interactionLogic.GraspedObj != obj)) {
+                                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                    interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
                         }
                     }
                 }

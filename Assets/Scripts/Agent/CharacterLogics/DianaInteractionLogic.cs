@@ -940,10 +940,10 @@ namespace Agent
             InputSymbols.Add(new PDASymbol("G teaching succeeded 4"));
             InputSymbols.Add(new PDASymbol("G teaching succeeded 5"));
             InputSymbols.Add(new PDASymbol("G teaching succeeded 6"));
-            InputSymbols.Add(new PDASymbol("G teaching failed used"));
-            InputSymbols.Add(new PDASymbol("G teaching failed moved"));
-            InputSymbols.Add(new PDASymbol("G teaching failed low"));
-            InputSymbols.Add(new PDASymbol("G teaching failed other"));
+            InputSymbols.Add(new PDASymbol("G teaching failed"));
+            InputSymbols.Add(new PDASymbol("G teaching failed"));
+            InputSymbols.Add(new PDASymbol("G teaching failed"));
+            InputSymbols.Add(new PDASymbol("G teaching failed"));
             InputSymbols.Add(new PDASymbol("G teaching stop"));
             InputSymbols.Add(new PDASymbol("G rh gesture 1 start"));
             InputSymbols.Add(new PDASymbol("G rh gesture 1 stop"));
@@ -2509,7 +2509,7 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("StartLearn"),
-                GetInputSymbolsByName("G teaching stop"),
+                GetInputSymbolsByName("G teaching stop","G teaching failed"),
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null,
                     null, null, (a) => ((a.Count > 0) &&
