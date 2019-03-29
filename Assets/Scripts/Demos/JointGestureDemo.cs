@@ -107,7 +107,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	public bool allowDeixisByClick = false;
 
-    public float servoSpeed = .1f;
+    public float servoSpeed = .05f;
 
     public Region leftRegion;
     public Region rightRegion;
@@ -2560,10 +2560,17 @@ public class JointGestureDemo : AgentInteraction {
                 string eventStr = string.Format("slidep({0},{1})", obj.name, Helper.VectorToParsable(destCoord));
 
                 //interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    //interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
-                    //new List<string>() { eventStr }, null)));
+                //interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                //new List<string>() { eventStr }, null)));
 
-                PromptEvent(eventStr);
+                if (eventManager.events.Count == 0) {
+                    PromptEvent(eventStr);
+                }
+                else {
+                    eventManager.InsertEvent(eventStr, 1);
+                    eventManager.events.RemoveAt(1);
+                }
+
                 break;
 
             default:
@@ -2573,6 +2580,7 @@ public class JointGestureDemo : AgentInteraction {
 
     public void StopServo(object[] content) {
         RespondAndUpdate("OK.");
+        eventManager.ClearEvents();
 
         if (interactionLogic.GraspedObj != null) {
             PromptEvent(string.Format("ungrasp({0})", interactionLogic.GraspedObj.name));
@@ -4250,16 +4258,20 @@ public class JointGestureDemo : AgentInteraction {
 
             MethodInfo method = predicates.GetType().GetMethod(Helper.GetTopPredicate(eventStr).ToUpper());
 
-            if (method.ReturnType == typeof(void))
-            { // is event
-                if (!eventStr.Contains("grasp") && !eventStr.Contains("ungrasp"))
-                {
-                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                        interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
-                            new List<string>() { eventStr }, null)));
+            if (method.ReturnType == typeof(void)) { // is event
+                if ((!eventStr.Contains("grasp")) && (!eventStr.Contains("ungrasp"))) {
+                    if ((eventStr.Contains("slidep") && (!interactionLogic.inServoLoop))) {
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                                new List<string>(), null)));
+                    }
+                    else {
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                                new List<string>() { eventStr }, null)));
+                    }
                 }
-                else if (eventStr.Contains("ungrasp"))
-                {
+                else if (eventStr.Contains("ungrasp")) {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
                             null, null, null, null)));

@@ -420,7 +420,8 @@ namespace Agent
 		public bool useEpistemicModel;
 		public bool repeatAfterWait;
 		public double repeatTimerTime = 10000;
-        public double servoTimerTime = 500;
+        public double servoWaitTimerTime = 500;
+        public double servoLoopTimerTime = 10;
 
 		public AgentInteraction interactionController;
 
@@ -470,8 +471,14 @@ namespace Agent
 
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Servo Wait Time", bold, GUILayout.Width(150));
-                ((DianaInteractionLogic)target).servoTimerTime = System.Convert.ToDouble(
-                    GUILayout.TextField(((DianaInteractionLogic)target).servoTimerTime.ToString(), GUILayout.Width(50)));
+                ((DianaInteractionLogic)target).servoWaitTimerTime = System.Convert.ToDouble(
+                    GUILayout.TextField(((DianaInteractionLogic)target).servoWaitTimerTime.ToString(), GUILayout.Width(50)));
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Servo Loop Time", bold, GUILayout.Width(150));
+                ((DianaInteractionLogic)target).servoLoopTimerTime = System.Convert.ToDouble(
+                    GUILayout.TextField(((DianaInteractionLogic)target).servoLoopTimerTime.ToString(), GUILayout.Width(50)));
                 GUILayout.EndHorizontal();
 
 				GUILayout.BeginHorizontal();
@@ -526,7 +533,11 @@ namespace Agent
 			
 		Dictionary<PDASymbol,List<Concept>> symbolConceptMap;
 
-        Timer servoTimer;
+        Timer servoWaitTimer;
+        Timer servoLoopTimer;
+
+        public bool inServoLoop = false;
+
         public bool forceChangeState = false;
         public PDAState forceMoveToState = null;
 
@@ -751,10 +762,16 @@ namespace Agent
 				repeatTimer.Elapsed += RepeatUtterance;
 			}
 
-            if (servoTimerTime > 0) {
-                servoTimer = new Timer(servoTimerTime);
-                servoTimer.Enabled = false;
-                servoTimer.Elapsed += MoveToServo;
+            if (servoWaitTimerTime > 0) {
+                servoWaitTimer = new Timer(servoWaitTimerTime);
+                servoWaitTimer.Enabled = false;
+                servoWaitTimer.Elapsed += MoveToServo;
+            }
+
+            if (servoLoopTimerTime > 0) {
+                servoLoopTimer = new Timer(servoLoopTimerTime);
+                servoLoopTimer.Enabled = false;
+                servoLoopTimer.Elapsed += MoveToServo;
             }
 
             ChangeState += HandleStateChange;
@@ -2510,6 +2527,17 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Servo"),
+                GetInputSymbolsByName("G push servo left stop",
+                    "G push servo right stop",
+                    "G push servo front stop",
+                    "G push servo back stop",
+                    "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("StopServo"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Servo"),
                 null,
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
@@ -3856,11 +3884,12 @@ namespace Agent
         void MoveToServo(object sender, ElapsedEventArgs e) {
             Debug.Log("MoveToServo");
 
-            if (servoTimerTime > 0) {
-                servoTimer.Interval = servoTimerTime;
-                servoTimer.Enabled = false;
+            if (servoWaitTimerTime > 0) {
+                servoWaitTimer.Interval = servoWaitTimerTime;
+                servoWaitTimer.Enabled = false;
                 forceMoveToState = GetState("Servo");
                 forceChangeState = true;
+                inServoLoop = true;
             }
         }
 
@@ -3868,14 +3897,25 @@ namespace Agent
             PDAState state = ((StateChangeEventArgs)e).State;
 
             if (state == GetState("StartServo")) {
-                servoTimer.Interval = servoTimerTime;
-                servoTimer.Enabled = true;
-                Debug.Log(string.Format("Start Servo Timer:{0}", servoTimer.Interval));
+                if (!inServoLoop) {
+                    servoWaitTimer.Interval = servoWaitTimerTime;
+                    servoWaitTimer.Enabled = true;
+                    Debug.Log(string.Format("Start Servo Wait Timer:{0}", servoLoopTimer.Interval));
+                }
+                else {
+                    servoLoopTimer.Interval = servoLoopTimerTime;
+                    servoLoopTimer.Enabled = true;
+                    Debug.Log(string.Format("Start Servo Loop Timer:{0}", servoWaitTimer.Interval));
+                }
             } 
-            else
-            {
-                servoTimer.Interval = servoTimerTime;
-                servoTimer.Enabled = false;
+            else if ((state == GetState("StopServo")) || (state == GetState("AbortAction"))) {
+                servoWaitTimer.Interval = servoWaitTimerTime;
+                servoWaitTimer.Enabled = false;
+
+                servoLoopTimer.Interval = servoLoopTimerTime;
+                servoLoopTimer.Enabled = false;
+
+                inServoLoop = false;
             }
         }
 	}
