@@ -487,6 +487,15 @@ public class EventManager : MonoBehaviour {
 			try {
 				var objs = ExtractObjects (pred, (String)predArgs [pred]);
 
+                foreach (var obj in objs) {
+                    if (obj is GameObject) {
+                        if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
+                            referents.stack.Push(((GameObject)obj).name);
+                        }
+                        OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
+                    }
+                }
+
 				if (preds.rdfTriples.Count > 0) {
                     if (methodToCall != null) { // found a method
                         if (methodToCall.ReturnType == typeof(void)) { // is it a program?
@@ -499,19 +508,16 @@ public class EventManager : MonoBehaviour {
                         else {  // not a program
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                             Debug.Log(string.Format("{0}:{1}",obj.ToString(),obj.GetType().ToString()));
-                            if (obj.ToString() == string.Empty)
-                            {
+                            if (obj.ToString() == string.Empty) {
                                 OnNonexistentEntityError(this,
                                     new EventReferentArgs(new Pair<string, List<object>>(pred, objs.GetRange(0,objs.Count-1))));
                             }
-                            else
-                            {
-                                if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj)))
-                                {
-                                    referents.stack.Push(obj);
-                                }
-                                OnEntityReferenced(this, new EventReferentArgs(obj));
-                            }
+                            //else {
+                            //    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+                            //        referents.stack.Push(obj);
+                            //    }
+                            //    OnEntityReferenced(this, new EventReferentArgs(obj));
+                            //}
                         }
 					}
 					else {
@@ -948,10 +954,10 @@ public class EventManager : MonoBehaviour {
                                         return false;
                                     }
 
-                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
-                                        referents.stack.Push(obj);
-                                    }
-                                    OnEntityReferenced(this, new EventReferentArgs(obj));
+                                    //if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+                                    //    referents.stack.Push(obj);
+                                    //}
+                                    //OnEntityReferenced(this, new EventReferentArgs(obj));
                                 }
 								temp [kv.Key] = obj;
 							}

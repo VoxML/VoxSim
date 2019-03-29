@@ -1311,7 +1311,7 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S NP"),
-				GenerateStackSymbol(null, null, null, null, null, null),	
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("ParseNP"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, null, null, null, null))));
@@ -1329,7 +1329,7 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
-                    (a.Where(aa => aa.Contains("grasp")).ToList().Count == 0)), null),
+                        (a.Where(aa => aa.Contains("grasp")).ToList().Count == 0)), null),
                 GetState("ConfirmEvent"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
@@ -1339,7 +1339,7 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
-                    (a.Where(aa => aa.Contains("grasp")).ToList().Count > 0)), null),
+                        (a.Where(aa => aa.Contains("grasp")).ToList().Count > 0)), null),
                 GetState("StartGrab"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
             
@@ -1368,7 +1368,7 @@ namespace Agent
                 GetStates("ParseNP"),
                 null,
                 GenerateStackSymbolFromConditions(
-                    (o) => o == null, (r) => r == null,
+                    (o) => o == null, null,
                     null, null, null, null
                 ),
                 GetState("Wait"),
@@ -2264,10 +2264,25 @@ namespace Agent
 					new StackSymbolContent(new FunctionDelegate(NullObject), null, 
 						new FunctionDelegate(NullObject), new List<GameObject>(), null, null))));
 
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ConfirmEvent"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count > 0)), null
+                ),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmEvent"),
 				null,
-				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count == 0)), null
+                ),	
 				GetState("ExecuteEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
             
@@ -2686,7 +2701,7 @@ namespace Agent
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
 				GetState("EndState"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, GetState("EndState"))));
 
 			TransitionRelation.Add (new PDAInstruction(
 				GetStates("EndState"),
@@ -3454,14 +3469,23 @@ namespace Agent
 
 			case PDAStackOperation.PDAStackOperationType.Flush:
 				if (operation.Content != null) {
-					if (operation.Content.GetType () == typeof(StackSymbolContent)) {
-						Stack.Clear ();
-						Stack.Push (GenerateStackSymbol ((StackSymbolContent)operation.Content));
+                    if (operation.Content.GetType() == typeof(StackSymbolContent)) {
+                        Stack.Clear();
+                        Stack.Push(GenerateStackSymbol((StackSymbolContent)operation.Content));
                         //ContextualMemory.Clear ();
                         //ContextualMemory.Push(
-                            //new Triple<PDASymbol,PDAState,PDASymbol>(GetLastInputSymbol(),CurrentState,
-                                 //GenerateStackSymbol((StackSymbolContent)operation.Content)));
-					}
+                        //new Triple<PDASymbol,PDAState,PDASymbol>(GetLastInputSymbol(),CurrentState,
+                        //GenerateStackSymbol((StackSymbolContent)operation.Content)));
+                    }
+                    else if (operation.Content.GetType() == typeof(PDAState)) {
+                        if (((PDAState)operation.Content) == GetState("EndState"))
+                        {
+                            ContextualMemory.Clear();
+                            ContextualMemory.Push(new Triple<PDASymbol, PDAState, PDASymbol>(null, GetState("StartState"),
+                                GenerateStackSymbol(null,null,null,null,null,null)));
+                        //GenerateStackSymbol((StackSymbolContent)operation.Content)));
+                        }
+                    }
 				}
 				else {
 					StackSymbolContent persistentContent = new StackSymbolContent (
@@ -3644,29 +3668,29 @@ namespace Agent
 				else if (state.Name == "Wait") {
 					if (CurrentState.Name != "TrackPointing") {
 						StateTransitionHistory.Push (symbolStateTriple);
-                        ContextualMemory.Push(symbolStateTriple);
+                        ContextualMemory.Push (symbolStateTriple);
 					}
 				}
 				else if (state.Name == "TrackPointing") {
 					if (StateTransitionHistory.Peek ().Item2.Name != "TrackPointing") {
 						StateTransitionHistory.Push (symbolStateTriple);
-                        ContextualMemory.Push(symbolStateTriple);
+                        ContextualMemory.Push (symbolStateTriple);
 					}
 				}
 				else if (state.Name == "EndState") {
 					Debug.Log ("Disengaging EpiSim");
 					epistemicModel.state.DisengageEpisim ();
 					StateTransitionHistory.Push (symbolStateTriple);
-                    ContextualMemory.Push(symbolStateTriple);
+                    ContextualMemory.Push (symbolStateTriple);
 				}
 				else {
 					StateTransitionHistory.Push (symbolStateTriple);
-                    ContextualMemory.Push(symbolStateTriple);
+                    ContextualMemory.Push (symbolStateTriple);
 				}
 			}
 			else {
 				StateTransitionHistory.Push (symbolStateTriple);
-                ContextualMemory.Push(symbolStateTriple);
+                ContextualMemory.Push (symbolStateTriple);
 			}
 
 			CurrentState = state;
