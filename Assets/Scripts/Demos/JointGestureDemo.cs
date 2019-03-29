@@ -3202,7 +3202,8 @@ public class JointGestureDemo : AgentInteraction {
 				}
 
 				if (!confirmationTexts.ContainsKey (string.Format ("lift({0})", theme.name))) {
-					confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block", themeAttr));
+                    confirmationTexts.Add (string.Format ("lift({0})", theme.name),
+                                    string.Format ("lift {0}", GenerateReferringExpression(theme, new List<object>())));
 				}
 			}
 			else if (certainty == CertaintyMode.Suggest) {
@@ -3211,7 +3212,8 @@ public class JointGestureDemo : AgentInteraction {
 				}
 
 				if (!confirmationTexts.ContainsKey (string.Format ("lift({0})", theme.name))) {
-					confirmationTexts.Add (string.Format ("lift({0})", theme.name), string.Format ("lift the {0} block", themeAttr));
+                    confirmationTexts.Add(string.Format("lift({0})", theme.name),
+                                    string.Format("lift {0}", GenerateReferringExpression(theme, new List<object>())));
 				}
 			}
 		} 
@@ -3229,8 +3231,9 @@ public class JointGestureDemo : AgentInteraction {
 
 					if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)))) {
-						confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), string.Format ("put the {0} block down", themeAttr));
+                        confirmationTexts.Add(string.Format("put({0},{1})", theme.name,
+                            Helper.VectorToParsable(target)),
+                                    string.Format("put {0} down", GenerateReferringExpression(theme, new List<object>())));
 					}
 				}
 				else if (certainty == CertaintyMode.Suggest) {
@@ -3241,8 +3244,9 @@ public class JointGestureDemo : AgentInteraction {
 
 					if (!confirmationTexts.ContainsKey (string.Format ("put({0},{1})", theme.name,
 						Helper.VectorToParsable (target)))) {
-						confirmationTexts.Add (string.Format ("put({0},{1})", theme.name,
-							Helper.VectorToParsable (target)), string.Format ("put the {0} block down", themeAttr));
+                        confirmationTexts.Add(string.Format("put({0},{1})", theme.name,
+                            Helper.VectorToParsable(target)),
+                                    string.Format("put {0} down", GenerateReferringExpression(theme, new List<object>())));
 					}
 				}
 			}
@@ -3314,8 +3318,9 @@ public class JointGestureDemo : AgentInteraction {
 							}
 
 							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
-								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
-									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+								confirmationTexts.Add(string.Format("slide({0},{1}({2}))", theme.name, directionPreds[relativeDir[dir]], obj.name),
+                                    string.Format("push {0} {1} {2}", GenerateReferringExpression(theme, new List<object>() { obj }), directionLabels [relativeDir[dir]],
+                                    GenerateReferringExpression(obj, new List<object>(){ theme })));
 							}
 						}
 						else if (certainty == CertaintyMode.Suggest) {
@@ -3324,8 +3329,9 @@ public class JointGestureDemo : AgentInteraction {
 							}
 
 							if (!confirmationTexts.ContainsKey (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name))) {
-								confirmationTexts.Add (string.Format ("slide({0},{1}({2}))", theme.name, directionPreds [relativeDir [dir]], obj.name),
-									string.Format ("push the {0} block {1} the {2} block", themeAttr, directionLabels [oppositeDir [relativeDir [dir]]], objAttr));
+                                confirmationTexts.Add(string.Format("slide({0},{1}({2}))", theme.name, directionPreds[relativeDir[dir]], obj.name),
+                                    string.Format("push {0} {1} {2}", GenerateReferringExpression(theme, new List<object>() { obj }), directionLabels[relativeDir[dir]],
+                                    GenerateReferringExpression(obj, new List<object>() { theme })));
 							}
 						}
 					}
@@ -3352,7 +3358,8 @@ public class JointGestureDemo : AgentInteraction {
 						foreach (Region region in orthogonalRegions) {
 							if (region.Contains (target)) {
 								confirmationTexts.Add (string.Format ("slide({0},{1})", theme.name, Helper.VectorToParsable (target)),
-									string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+                                    string.Format ("push {0} to the table's {1} {2} part",
+                                    GenerateReferringExpression(theme, new List<object>()), regionLabels [region], dir));
 							}
 						}
 					}
@@ -3365,8 +3372,9 @@ public class JointGestureDemo : AgentInteraction {
 
 						foreach (Region region in orthogonalRegions) {
 							if (region.Contains (target)) {
-								confirmationTexts.Add (string.Format ("slide({0},{1})", theme.name, Helper.VectorToParsable (target)),
-									string.Format ("push the {0} block to the table's {1} {2} part", themeAttr, regionLabels [region], dir));
+                                confirmationTexts.Add(string.Format("slide({0},{1})", theme.name, Helper.VectorToParsable(target)),
+                                    string.Format("push {0} to the table's {1} {2} part",
+                                    GenerateReferringExpression(theme, new List<object>()), regionLabels[region], dir));
 							}
 						}
 					}
