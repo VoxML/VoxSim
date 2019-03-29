@@ -161,3 +161,4 @@ packages*
 **/tags
 
 /.vs/VoxSim/v15/Server/sqlite3
+/EpiSim/UserModels/*
