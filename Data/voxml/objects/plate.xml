@@ -9,7 +9,7 @@
     <Head>sheet[1]</Head>
     <Components>
       <Component Value="base" />
-      <Component Value="top[1]" />
+      <Component Value="top" />
     </Components>
     <Concavity>Concave</Concavity>
     <RotatSym>Y</RotatSym>
