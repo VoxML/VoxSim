@@ -833,10 +833,12 @@ namespace Agent
 						new StackSymbolContent(null,null,null,null,null,null)))));
             
             States.Add(new PDAState("DisambiguateGrabPose",null));
+            States.Add(new PDAState("PromptLearn", null));
             States.Add(new PDAState("StartLearn", null));
             States.Add(new PDAState("LearningSucceeded", null));
             States.Add(new PDAState("LearnNewInstruction", null));
             States.Add(new PDAState("LearningFailed", null));
+            States.Add(new PDAState("RetryLearn", null));
 
             States.Add(new PDAState("StartGrabMove",null));
 			States.Add(new PDAState("StopGrabMove",
@@ -2357,7 +2359,7 @@ namespace Agent
                     ((a.Where(aa => (aa.Contains(",with(") && 
                         aa.Contains("0")))).ToList().Count == 0)), null
                 ),
-                GetState("StartLearn"),
+                GetState("PromptLearn"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, 
                     new StackSymbolContent(null, null, null, null, null, null))));
 
@@ -2501,6 +2503,13 @@ namespace Agent
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
+                GetStates("PromptLearn"),
+                null,
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("StartLearn"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+            
+            TransitionRelation.Add(new PDAInstruction(
                 GetStates("StartLearn"),
                 learnedGesture,
                 GenerateStackSymbolFromConditions(
@@ -2624,9 +2633,16 @@ namespace Agent
                 null,
                 GenerateStackSymbolFromConditions(null, null, null, null,
                     (a) => a.Count > 0, null),
-                GetState("StartLearn"),
+                GetState("RetryLearn"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, null, null, null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RetryLearn"),
+                null,
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("StartLearn"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateEvent"),

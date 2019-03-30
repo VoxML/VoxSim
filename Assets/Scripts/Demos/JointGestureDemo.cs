@@ -2601,8 +2601,12 @@ public class JointGestureDemo : AgentInteraction {
                 null, null, new List<string>(), new List<string>())));
     }
 
-    public void StartLearn(object[] content) {
+    public void PromptLearn(object[] content) {
         RespondAndUpdate("What's the gesture for that?");
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+    }
+
+    public void StartLearn(object[] content) {
 
         if ((commBridge.KSIMSocket != null) && (commBridge.KSIMSocket.IsConnected())) {
             string command = "learn";
@@ -2686,11 +2690,15 @@ public class JointGestureDemo : AgentInteraction {
 
         String eventPrompt = interactionLogic.ActionOptions[0];
 
-        RespondAndUpdate("Sorry, could you show me again?");
+        RespondAndUpdate("Sorry, could you show me again?", true);
 
         interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, 
             interactionLogic.GenerateStackSymbol(null, null,
             null, null, new List<string>() { eventPrompt }, null)));
+    }
+
+    public void RetryLearn(object[] content) {
+        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
     }
 
 	public void AbortAction(object[] content) {
