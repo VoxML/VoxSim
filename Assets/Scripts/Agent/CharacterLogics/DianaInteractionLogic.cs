@@ -957,6 +957,10 @@ namespace Agent
             InputSymbols.Add(new PDASymbol("G lh gesture 5 stop"));
             InputSymbols.Add(new PDASymbol("G lh gesture 6 start"));
             InputSymbols.Add(new PDASymbol("G lh gesture 6 stop"));
+            InputSymbols.Add(new PDASymbol("G attentive start"));
+            InputSymbols.Add(new PDASymbol("G inattentive left"));
+            InputSymbols.Add(new PDASymbol("G inattentive right"));
+            InputSymbols.Add(new PDASymbol("G attentive stop"));
             InputSymbols.Add(new PDASymbol("G engage stop"));
 
             InputSymbols.Add(new PDASymbol("S YES"));

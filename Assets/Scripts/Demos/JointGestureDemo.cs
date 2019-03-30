@@ -2614,8 +2614,6 @@ public class JointGestureDemo : AgentInteraction {
     }
 
     public void LearningSucceeded(object[] content) {
-        RespondAndUpdate("OK, got it!");
-
         String eventPrompt = interactionLogic.ActionOptions[0];
 
         if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper) {
@@ -2658,6 +2656,12 @@ public class JointGestureDemo : AgentInteraction {
                                 interactionLogic.StackSymbolToString(interactionLogic.LearnableInstructions[key].Content)));
                         }
                     }
+
+                    string learnedInstructionString = string.Format("{0} the {1}",
+                        Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                            ((GameObject)eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0]).name);
+                    RespondAndUpdate(string.Format("Got it!  Do that with your {0} and I'll {1} like this.", message.Contains("lh") ? "left hand" : "right hand", learnedInstructionString));
 
                     interactionLogic.OnLearnedNewInstruction(this, new NewInstructionEventArgs(message));
                 }
