@@ -1167,8 +1167,8 @@ public class Predicates : MonoBehaviour {
 					GameObject dest = GameObject.Find (rdfTriples [0].Item3);	// get destination obj ("plate" in "put apple on plate")
 					Voxeme voxComponent = theme.GetComponent<Voxeme> ();
 
-					//Renderer[] renderers = obj.GetComponentsInChildren<Renderer> ();
-					/*Bounds bounds = new Bounds ();
+                    //Renderer[] renderers = obj.GetComponentsInChildren<Renderer> ();
+                    /*Bounds bounds = new Bounds ();
 					
 					foreach (Renderer renderer in renderers) {
 						if (renderer.bounds.min.y - renderer.bounds.center.y < bounds.min.y - bounds.center.y) {
@@ -1176,8 +1176,16 @@ public class Predicates : MonoBehaviour {
 						}
 					}*/
 
-					Bounds themeBounds = Helper.GetObjectWorldSize (theme);	// bounds of theme obj
-					Bounds destBounds = Helper.GetObjectWorldSize (dest);	// bounds of dest obj => alter to get interior enumerated by VoxML structure
+                    List<GameObject> themeChildren = theme.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != theme)).Select(v => v.gameObject).ToList();
+
+                    List<GameObject> destChildren = dest.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != dest)).Select(v => v.gameObject).ToList();
+
+                    Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(theme).size));
+                    Bounds themeBounds = Helper.GetObjectWorldSize (theme, themeChildren);	// bounds of theme obj
+                    Bounds destBounds = Helper.GetObjectWorldSize (dest);	// bounds of dest obj => alter to get interior enumerated by VoxML structure
+                    Debug.Log(Helper.VectorToParsable(themeBounds.size));
 
 					//Debug.Log (Helper.VectorToParsable(bounds.center));
 					//Debug.Log (Helper.VectorToParsable(bounds.min));

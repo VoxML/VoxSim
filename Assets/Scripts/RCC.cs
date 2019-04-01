@@ -131,14 +131,16 @@ namespace RCC
 						Debug.Log (Helper.VectorToParsable(x.Center));
 						Debug.Log (Helper.VectorToParsable(y.Center));
 						foreach (Vector3 point in x.Points.Where(p => p.y <= x.Center.y).ToList()) {
-							Debug.Log(point);
+                            Debug.Log(Helper.VectorToParsable(point));
 							RaycastHit hitInfo;
                             Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
                                                           (Mathf.Abs(point.x-x.Max (MajorAxis.X).x) <= Constants.EPSILON) ? point.x - Constants.EPSILON : point.x, 
                                                           point.y+Constants.EPSILON, (Mathf.Abs(point.z-x.Min (MajorAxis.Z).z) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
                                                           (Mathf.Abs(point.z-x.Max (MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON : point.z);
 							bool hit = Physics.Raycast (origin, -Vector3.up, out hitInfo);
-							//Debug.Log (hitInfo.collider.gameObject);
+                            if (hit) {
+                                Debug.Log(hitInfo.collider.gameObject);
+                            }
 							//if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
 							//	Debug.Log (hitInfo.collider.gameObject);
 							//	Debug.Log (hitInfo.distance);
