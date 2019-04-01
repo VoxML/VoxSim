@@ -409,11 +409,12 @@ namespace Satisfaction {
                     if (methodToCall.ReturnType == typeof(void)) { // is it a program?
                         //Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
                         object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
-                    }
-                    else {  // not a program
-                        //Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
-                            methodToCall.Name,methodToCall.ReturnType.ToString()));
-                    }
+					}
+					//else
+					//{  // not a program
+					//	Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
+					//	methodToCall.Name, methodToCall.ReturnType.ToString()));
+					//}
 				}
 				else {
 					// no coded-behavior
