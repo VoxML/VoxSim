@@ -54,7 +54,11 @@ namespace Network
         }
 
         int _port;
-        public int Port
+		private bool isDisposed;
+
+		public bool IsDisposed => isDisposed;
+
+		public int Port
         {
             get { return _port; }
             set { _port = value; }
@@ -62,7 +66,9 @@ namespace Network
 
         public virtual bool IsConnected()
 	    {
-            return !((_client.Client.Poll(10, SelectMode.SelectRead) && (_client.Client.Available == 0)) || !_client.Client.Connected);
+			if (!isDisposed)
+				return !((_client.Client.Poll(10, SelectMode.SelectRead) && (_client.Client.Available == 0)) || !_client.Client.Connected);
+			return false;
 	    }
 
         public virtual void Connect(string address, int port)
@@ -100,6 +106,7 @@ namespace Network
                 catch (Exception e)
                 {
                     Debug.LogError(e.Message);
+					break;
                 }
 
 				//				if (!BitConverter.IsLittleEndian)
@@ -117,14 +124,17 @@ namespace Network
 				//_messages.Enqueue (message);
 
 			}
-			//_client.Close();
+			Close();
 		}
 
         public virtual void Close()
-		{
-			_t.Abort();
-            _client.GetStream().Close();
-			_client.Close();
+		{	if (!isDisposed)
+			{
+				if (_client.Client.Connected)
+					_client.GetStream().Close();
+				_client.Close();
+				isDisposed = true;
+			}
 		}
 
 		protected virtual string GetMessage(int len)
