@@ -435,7 +435,7 @@ public class PluginImport : MonoBehaviour {
                                     try
                                     {
                                         Type socketType = tryAgain[connectionLabel];
-                                        TryReconnectSocket(address, port, socketType, ref socket);
+                                        socket = ConnectSocket(address, port, socketType);
                                     }
                                     catch (Exception e)
                                     {
@@ -545,28 +545,6 @@ public class PluginImport : MonoBehaviour {
 
 		return socket;
 	}
-
-    public void TryReconnectSocket(string address, int port, Type socketType, ref SocketConnection socket)
-    {
-        if (socket != null)
-        {
-            try
-            {
-                socket.Connect(address, port);
-                Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port, socket.IsConnected(), socketType.ToString()));
-                socket.OnConnectionMade(this, new SocketEventArgs(socketType));
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e.Message);
-            }
-        }
-        else
-        {
-            Debug.Log("Failed to create client");
-            //socket = null;
-        }
-    }
 
 	public void OpenPortInternal(string port) {
 		try
