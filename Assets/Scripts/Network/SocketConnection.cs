@@ -72,17 +72,12 @@ namespace Network
 			//Debug.Log (string.Format("{0}:{1}",address,port));
 
 			_messages = new Queue<string>();
-			_client = new TcpClient();
-
-			var result = _client.BeginConnect(address, port, null, null);
-			var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1));
-
-			if (!success)
+			_client = new TcpClient
 			{
-				throw new Exception("Failed to connect.");
-				return;
-			}
-			_client.EndConnect(result);
+				//ReceiveTimeout = 1000
+			};
+			_client.Connect(address, port);
+
 			//_client.Connect(address, port);
 			_t = new Thread (Loop);
 			_t.Start ();
