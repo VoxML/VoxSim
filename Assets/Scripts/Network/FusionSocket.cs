@@ -42,7 +42,7 @@ namespace Network
                 catch (Exception e)
                 {
                     Debug.LogError(e);
-                    Debug.LogError(e.Message);
+					break;
                 }
 
 //				if (!BitConverter.IsLittleEndian)
@@ -71,7 +71,7 @@ namespace Network
 
 			}
 
-			//_client.Close();
+			Close();
 		}
 
 	}
