@@ -3302,7 +3302,7 @@ namespace Agent
 				//                              (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));			
 			}
 			else if (instructions.Count < 1) {
-				Debug.Log ("Zero instruction condition.  Aborting.");
+				//Debug.Log ("Zero instruction condition.  Aborting.");
 				return;
 			}
 
@@ -3475,9 +3475,9 @@ namespace Agent
 			case PDAStackOperation.PDAStackOperationType.Push:
 				if (operation.Content.GetType () == typeof(FunctionDelegate)) {
 					object content = ((FunctionDelegate)operation.Content).Invoke (null);
-					Debug.Log (content.GetType ());
+					//Debug.Log (content.GetType ());
 					foreach (PDASymbol symbol in (List<PDASymbol>)content) {
-						Debug.Log (StackSymbolToString ((PDASymbol)symbol));
+						//Debug.Log (StackSymbolToString ((PDASymbol)symbol));
 					}
 
 					if (content.GetType () == typeof(PDASymbol)) {
