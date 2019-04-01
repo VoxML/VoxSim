@@ -470,13 +470,13 @@ namespace Satisfaction {
 
 			List<GameObject> components = objSelector.allVoxemes.SelectMany((v, c) => v.opVox.Type.Components.Where(comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList();
 
-			foreach (GameObject go in components) {
-				Debug.Log (go);
-			}
+			//foreach (GameObject go in components) {
+			//	//Debug.Log (go);
+			//}
 
-			foreach (Voxeme v in allVoxemes) {
-				Debug.Log (v);
-			}
+			//foreach (Voxeme v in allVoxemes) {
+			//	//Debug.Log (v);
+			//}
 //			objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)
 			
 //				UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => 
@@ -556,7 +556,7 @@ namespace Satisfaction {
 									//if (TestHabitat (test.gameObject, testHabitat)) {	// test habitats
 										for (int i = 0; i < test.opVox.Affordance.Affordances[testHabitat].Count; i++) {	// condition/event/result list for this habitat index
 											string ev = test.opVox.Affordance.Affordances[testHabitat][i].Item2.Item1;
-											Debug.Log (ev);
+											//Debug.Log (ev);
 											if (ev.Contains (program) || ev.Contains ("put")) {	// TODO: resultant states should persist
 //												Debug.Break ();
 //												Debug.Log (ev);
@@ -795,7 +795,7 @@ namespace Satisfaction {
 					//flip(cup1);put(ball,under(cup1))
 				}
 			}
-			Debug.Log (string.Format ("H[{0}]:{1}", habitatIndex,r));
+			//Debug.Log (string.Format ("H[{0}]:{1}", habitatIndex,r));
 			return r;
 		}
 
@@ -892,10 +892,10 @@ namespace Satisfaction {
 						case "Y":
 //							Debug.Log (obj1);
 //							Debug.Log (obj2);
-							Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,Vector3.Distance (
-								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-								obj2.gameObject.transform.position)));
-							Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,RCC8.EC (Helper.GetObjectOrientedSize (obj1, true), Helper.GetObjectOrientedSize (obj2, true))));
+							//Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,Vector3.Distance (
+							//	new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+							//	obj2.gameObject.transform.position)));
+							//Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,RCC8.EC (Helper.GetObjectOrientedSize (obj1, true), Helper.GetObjectOrientedSize (obj2, true))));
 							r = (Vector3.Distance (
 								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
 								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
@@ -918,20 +918,20 @@ namespace Satisfaction {
 				if ((Helper.GetMostImmediateParentVoxeme (obj2.gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains("Concave")) &&
 					(Concavity.IsEnabled(obj2))) {
 					if (Helper.FitsIn (bounds1, bounds2)) {
-						Debug.Log (obj1);
-						Debug.Log (obj2);
-						Debug.Log (bounds1);
-						Debug.Log (bounds2);
+						//Debug.Log (obj1);
+						//Debug.Log (obj2);
+						//Debug.Log (bounds1);
+						//Debug.Log (bounds2);
 						r = RCC8.PO (bounds1, bounds2) || RCC8.ProperPart (bounds1, bounds2);
 					}
 				}
 				else {
 					if (Helper.FitsIn (bounds1, bounds2)) {
 						//Debug.Break ();
-						Debug.Log (obj1);
-						Debug.Log (obj2);
-						Debug.Log (bounds1);
-						Debug.Log (bounds2);
+						//Debug.Log (obj1);
+						//Debug.Log (obj2);
+						//Debug.Log (bounds1);
+						//Debug.Log (bounds2);
 						r = RCC8.PO (bounds1, bounds2) || RCC8.ProperPart (bounds1, bounds2);
 					}
 				}

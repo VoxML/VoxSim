@@ -46,7 +46,7 @@ public class UIButtonManager : MonoBehaviour {
 	}
 
 	public void RegisterButton(UIButton button) {
-		Debug.Log (string.Format("Register {0}:{1}",this,button.id));
+		//Debug.Log (string.Format("Register {0}:{1}",this,button.id));
 		buttonManager.Add(button.id,button);
 	}
 

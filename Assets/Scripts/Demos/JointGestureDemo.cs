@@ -347,7 +347,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
-			Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
+			//Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
 			leftRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			leftRegionHighlight.name = "LeftRegionHighlight";
 			leftRegionHighlight.transform.position = leftRegion.center;
@@ -365,7 +365,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
-			Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
+			//Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
 			rightRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			rightRegionHighlight.name = "RightRegionHighlight";
 			rightRegionHighlight.transform.position = rightRegion.center;

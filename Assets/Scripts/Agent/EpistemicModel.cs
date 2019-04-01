@@ -129,7 +129,7 @@ namespace Agent {
 			state.AddConcept(up);
 			state.AddConcept(down);
 
-			Debug.Log (state);
+			//Debug.Log (state);
 			return state;
 		}
 		
@@ -150,7 +150,7 @@ namespace Agent {
 
             if (state == null) {
                 state = initModel();
-                Debug.Log(state);
+                //Debug.Log(state);
             }
 
 
@@ -188,49 +188,51 @@ namespace Agent {
             List<Concept> gestureConcepts = new List<Concept>();
             List<Concept> linguisticConcepts = new List<Concept>();
 
-            foreach (Concepts conceptsByMode in state.GetAllConcepts()) {
-                if (conceptsByMode.GetConcepts().ContainsKey(ConceptMode.G)) {
-                    gestureConcepts = conceptsByMode.GetConcepts()[ConceptMode.G];
-                }
+			if (state != null) { 
+				foreach (Concepts conceptsByMode in state.GetAllConcepts()) {
+					if (conceptsByMode.GetConcepts().ContainsKey(ConceptMode.G)) {
+						gestureConcepts = conceptsByMode.GetConcepts()[ConceptMode.G];
+					}
 
-                if (conceptsByMode.GetConcepts().ContainsKey(ConceptMode.L)) {
-                    linguisticConcepts = conceptsByMode.GetConcepts()[ConceptMode.L];
-                }
+					if (conceptsByMode.GetConcepts().ContainsKey(ConceptMode.L)) {
+						linguisticConcepts = conceptsByMode.GetConcepts()[ConceptMode.L];
+					}
 
-                foreach (Concept gestureConcept in gestureConcepts) {
-                    if (!stateConcepts.Contains(gestureConcept)) {
-                        stateConcepts.Add(gestureConcept);
+					foreach (Concept gestureConcept in gestureConcepts) {
+						if (!stateConcepts.Contains(gestureConcept)) {
+							stateConcepts.Add(gestureConcept);
 
-                        foreach (Concept relatedConcept in state.GetRelated(gestureConcept)) {
-                            Relation relation = state.GetRelation(gestureConcept, relatedConcept);
-                            if (!stateRelations.Contains(relation)) {
-                                stateRelations.Add(relation);
-                            }
-                        }
-                    }
-                }
+							foreach (Concept relatedConcept in state.GetRelated(gestureConcept)) {
+								Relation relation = state.GetRelation(gestureConcept, relatedConcept);
+								if (!stateRelations.Contains(relation)) {
+									stateRelations.Add(relation);
+								}
+							}
+						}
+					}
 
-                foreach (Concept linguisticConcept in linguisticConcepts) {
-                    if (!stateConcepts.Contains(linguisticConcept)){
-                        stateConcepts.Add(linguisticConcept);
+					foreach (Concept linguisticConcept in linguisticConcepts) {
+						if (!stateConcepts.Contains(linguisticConcept)){
+							stateConcepts.Add(linguisticConcept);
 
-                        foreach (Concept relatedConcept in state.GetRelated(linguisticConcept)) {
-                            Relation relation = state.GetRelation(linguisticConcept, relatedConcept);
-                            if (!stateRelations.Contains(relation)) {
-                                stateRelations.Add(relation);
-                            }
-                        }
-                    }
-                }
-            }
+							foreach (Concept relatedConcept in state.GetRelated(linguisticConcept)) {
+								Relation relation = state.GetRelation(linguisticConcept, relatedConcept);
+								if (!stateRelations.Contains(relation)) {
+									stateRelations.Add(relation);
+								}
+							}
+						}
+					}
+				}
 
-            string jsonifiedCertaintyState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
-            Debug.Log(jsonifiedCertaintyState);
+				string jsonifiedCertaintyState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
+				//Debug.Log(jsonifiedCertaintyState);
 
 
-            using (StreamWriter sw = new StreamWriter(GetUserModelPath(userID))) {
-                sw.Write(jsonifiedCertaintyState);
-            }
+				using (StreamWriter sw = new StreamWriter(GetUserModelPath(userID))) {
+					sw.Write(jsonifiedCertaintyState);
+				}
+			}
         }
 
         string GetUserModelPath(string username) {

@@ -105,8 +105,8 @@ namespace RCC
 //				(Mathf.Abs (x.Center.z - y.Center.z) * 2 < ((x.Max (MajorAxis.Z).z - x.Center.z) * 2 + (y.Max (MajorAxis.Z).z - y.Center.z) * 2))) {
 				//if (x.Center.x <= y.Center.x) {
 					if (x.Center.y <= y.Min(MajorAxis.Y).y) {
-						Debug.Log (Helper.VectorToParsable(x.Center));
-						Debug.Log (Helper.VectorToParsable(y.Center));
+						//Debug.Log (Helper.VectorToParsable(x.Center));
+						//Debug.Log (Helper.VectorToParsable(y.Center));
 						foreach (Vector3 point in x.Points.Where(p => p.y >= x.Center.y).ToList()) {
 							RaycastHit hitInfo;
                             Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
@@ -122,16 +122,16 @@ namespace RCC
 //							}
 							if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) &&
 								(hitInfo.distance <= Constants.EPSILON * 3)) {
-								Debug.Log (string.Format ("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
+								//Debug.Log (string.Format ("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
 								ec = true;
 							}
 						}
 					}
 					else if (x.Center.y >= y.Max(MajorAxis.Y).y) {
-						Debug.Log (Helper.VectorToParsable(x.Center));
-						Debug.Log (Helper.VectorToParsable(y.Center));
+						//Debug.Log (Helper.VectorToParsable(x.Center));
+						//Debug.Log (Helper.VectorToParsable(y.Center));
 						foreach (Vector3 point in x.Points.Where(p => p.y <= x.Center.y).ToList()) {
-							Debug.Log(point);
+							//Debug.Log(point);
 							RaycastHit hitInfo;
                             Vector3 origin = new Vector3 ((Mathf.Abs(point.x-x.Min (MajorAxis.X).x) <= Constants.EPSILON) ? point.x + Constants.EPSILON : 
                                                           (Mathf.Abs(point.x-x.Max (MajorAxis.X).x) <= Constants.EPSILON) ? point.x - Constants.EPSILON : point.x, 
@@ -147,7 +147,7 @@ namespace RCC
 							//}
 							if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform.position)) &&
 								(hitInfo.distance <= Constants.EPSILON * 3)) {
-								Debug.Log (string.Format ("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
+								//Debug.Log (string.Format ("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
 								ec = true;
 							}
 						}

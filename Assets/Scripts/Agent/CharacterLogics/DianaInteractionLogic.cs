@@ -2793,29 +2793,29 @@ namespace Agent
 									((TransitionGate)instruction.ToState.Content).RejectState,
 									new PDAStackOperation (PDAStackOperation.PDAStackOperationType.None, null));
 								gateInstructions.Add (newInstruction);
-								Debug.Log (string.Format ("Adding gate instruction {0} because {1} ToState {2} has TransitionGate to RejectState {3}",
-									string.Format ("{0},{1},{2},{3},{4}",
-										(newInstruction.FromStates == null) ? "Null" :
-										String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
-										(newInstruction.InputSymbols == null) ? "Null" :
-										String.Join (", ", ((List<PDASymbol>)newInstruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
-										StackSymbolToString (newInstruction.StackSymbol),
-										newInstruction.ToState.Name,
-										string.Format ("[{0},{1}]",
-											newInstruction.StackOperation.Type.ToString (),
-											(newInstruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (newInstruction.StackOperation.Content))),
-									string.Format ("{0},{1},{2},{3},{4}", 
-										(newInstruction.FromStates == null) ? "Null" :
-										String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
-										(instruction.InputSymbols == null) ? "Null" :
-										String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
-										StackSymbolToString (instruction.StackSymbol),
-										instruction.ToState.Name,
-										string.Format ("[{0},{1}]",
-											instruction.StackOperation.Type.ToString (),
-											(instruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (instruction.StackOperation.Content))),
-									instruction.ToState.Name,
-									newInstruction.ToState.Name));
+								//Debug.Log (string.Format ("Adding gate instruction {0} because {1} ToState {2} has TransitionGate to RejectState {3}",
+								//	string.Format ("{0},{1},{2},{3},{4}",
+								//		(newInstruction.FromStates == null) ? "Null" :
+								//		String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
+								//		(newInstruction.InputSymbols == null) ? "Null" :
+								//		String.Join (", ", ((List<PDASymbol>)newInstruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
+								//		StackSymbolToString (newInstruction.StackSymbol),
+								//		newInstruction.ToState.Name,
+								//		string.Format ("[{0},{1}]",
+								//			newInstruction.StackOperation.Type.ToString (),
+								//			(newInstruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (newInstruction.StackOperation.Content))),
+								//	string.Format ("{0},{1},{2},{3},{4}", 
+								//		(newInstruction.FromStates == null) ? "Null" :
+								//		String.Join (", ", ((List<PDAState>)newInstruction.FromStates).Select (s => s.Name).ToArray ()),
+								//		(instruction.InputSymbols == null) ? "Null" :
+								//		String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString ()).ToArray ()),
+								//		StackSymbolToString (instruction.StackSymbol),
+								//		instruction.ToState.Name,
+								//		string.Format ("[{0},{1}]",
+								//			instruction.StackOperation.Type.ToString (),
+								//			(instruction.StackOperation.Content == null) ? "Null" : StackSymbolToString (instruction.StackOperation.Content))),
+								//	instruction.ToState.Name,
+								//	newInstruction.ToState.Name));
 							}
 						}
 					}
@@ -2835,8 +2835,8 @@ namespace Agent
             LearnedNewInstruction += AddNewInstruction;
 
 			epistemicModel = GetComponent<EpistemicModel> ();
-			Debug.Log (epistemicModel);
-			Debug.Log (epistemicModel.state);
+			//Debug.Log (epistemicModel);
+			//Debug.Log (epistemicModel.state);
 
 			symbolConceptMap = MapInputSymbolsToConcepts (InputSymbols);
 
@@ -3168,7 +3168,7 @@ namespace Agent
 					PerformStackOperation(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,operation.Content));
 				}
 
-				Debug.Log (string.Format("RewriteStack: {0} result {1}", operation.Type,StackSymbolToString (GetCurrentStackSymbol ())));
+				//Debug.Log (string.Format("RewriteStack: {0} result {1}", operation.Type,StackSymbolToString (GetCurrentStackSymbol ())));
 
 				// handle state transitions on stack rewrite
 
@@ -3178,44 +3178,44 @@ namespace Agent
 				PDAInstruction instruction = null;
 
 				if (instructions.Count > 1) {
-					Debug.Log (string.Format("Multiple instruction condition ({0}).  Aborting.",instructions.Count));
-					foreach (PDAInstruction inst in instructions) {
-						Debug.Log(string.Format ("{0},{1},{2},{3},{4}", 
-							(inst.FromStates == null) ? "Null" :
-							string.Format("[{0}]", 
-								String.Join (", ", ((List<PDAState>)inst.FromStates).Select (s => s.Name).ToArray ())),
-							(inst.InputSymbols == null) ? "Null" :
-							string.Format("[{0}]",
-								String.Join (", ", ((List<PDASymbol>)inst.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
-							StackSymbolToString (inst.StackSymbol),
-							inst.ToState.Name,
-                            string.Format("[{0},{1}]",
-                                inst.StackOperation.Type.ToString(),
-                                (inst.StackOperation.Content == null) ? "Null" :
-                                    (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
-                                          (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
-					}
+					//Debug.Log (string.Format("Multiple instruction condition ({0}).  Aborting.",instructions.Count));
+					//foreach (PDAInstruction inst in instructions) {
+					//	Debug.Log(string.Format ("{0},{1},{2},{3},{4}", 
+					//		(inst.FromStates == null) ? "Null" :
+					//		string.Format("[{0}]", 
+					//			String.Join (", ", ((List<PDAState>)inst.FromStates).Select (s => s.Name).ToArray ())),
+					//		(inst.InputSymbols == null) ? "Null" :
+					//		string.Format("[{0}]",
+					//			String.Join (", ", ((List<PDASymbol>)inst.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
+					//		StackSymbolToString (inst.StackSymbol),
+					//		inst.ToState.Name,
+     //                       string.Format("[{0},{1}]",
+     //                           inst.StackOperation.Type.ToString(),
+     //                           (inst.StackOperation.Content == null) ? "Null" :
+     //                               (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
+     //                                     (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
+					//}
 					return;
 				}
 				else if (instructions.Count == 1) {
 					instruction = instructions [0];
-					Debug.Log (string.Format ("{0},{1},{2},{3},{4}", 
-						(instruction.FromStates == null) ? "Null" :
-						string.Format("[{0}]", 
-							String.Join (", ", ((List<PDAState>)instruction.FromStates).Select (s => s.Name).ToArray ())),
-						(instruction.InputSymbols == null) ? "Null" :
-						string.Format("[{0}]", 
-							String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
-						StackSymbolToString (instruction.StackSymbol),
-						instruction.ToState.Name,
-                        string.Format("[{0},{1}]",
-                            instruction.StackOperation.Type.ToString(),
-                            (instruction.StackOperation.Content == null) ? "Null" :
-                                (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
-                                      (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));
+					//Debug.Log (string.Format ("{0},{1},{2},{3},{4}", 
+					//	(instruction.FromStates == null) ? "Null" :
+					//	string.Format("[{0}]", 
+					//		String.Join (", ", ((List<PDAState>)instruction.FromStates).Select (s => s.Name).ToArray ())),
+					//	(instruction.InputSymbols == null) ? "Null" :
+					//	string.Format("[{0}]", 
+					//		String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
+					//	StackSymbolToString (instruction.StackSymbol),
+					//	instruction.ToState.Name,
+     //                   string.Format("[{0},{1}]",
+     //                       instruction.StackOperation.Type.ToString(),
+     //                       (instruction.StackOperation.Content == null) ? "Null" :
+     //                           (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
+     //                                 (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));
 				}
 				else if (instructions.Count < 1) {
-					Debug.Log ("Zero instruction condition.  Aborting.");
+					//Debug.Log ("Zero instruction condition.  Aborting.");
 					return;
 				}
 
@@ -3253,8 +3253,8 @@ namespace Agent
 
 		void ReadInputSymbol (object sender, EventArgs e) {
 			if (!((CharacterLogicEventArgs)e).InputSymbolName.StartsWith ("P")) {
-				Debug.Log (((CharacterLogicEventArgs)e).InputSymbolName);
-				Debug.Log (((CharacterLogicEventArgs)e).InputSymbolContent);
+				//Debug.Log (((CharacterLogicEventArgs)e).InputSymbolName);
+				//Debug.Log (((CharacterLogicEventArgs)e).InputSymbolContent);
 			}
 
 			LastInputSymbol = GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName);
@@ -3286,20 +3286,21 @@ namespace Agent
 			}
 			else if (instructions.Count == 1) {
 				instruction = instructions [0];
-				Debug.Log (string.Format ("{0},{1},{2},{3},{4}", 
-					(instruction.FromStates == null) ? "Null" :
-					string.Format("[{0}]", 
-						String.Join (", ", ((List<PDAState>)instruction.FromStates).Select (s => s.Name).ToArray ())),
-					(instruction.InputSymbols == null) ? "Null" :
-					string.Format("[{0}]", 
-						String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
-					StackSymbolToString (instruction.StackSymbol),
-					instruction.ToState.Name,
-                    string.Format("[{0},{1}]",
-                        instruction.StackOperation.Type.ToString(),
-                        (instruction.StackOperation.Content == null) ? "Null" :
-                            (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
-                                  (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));			}
+				//Debug.Log (string.Format ("{0},{1},{2},{3},{4}", 
+				//	(instruction.FromStates == null) ? "Null" :
+				//	string.Format("[{0}]", 
+				//		String.Join (", ", ((List<PDAState>)instruction.FromStates).Select (s => s.Name).ToArray ())),
+				//	(instruction.InputSymbols == null) ? "Null" :
+				//	string.Format("[{0}]", 
+				//		String.Join (", ", ((List<PDASymbol>)instruction.InputSymbols).Select (s => s.Content.ToString()).ToArray ())),
+				//	StackSymbolToString (instruction.StackSymbol),
+				//	instruction.ToState.Name,
+				//                string.Format("[{0},{1}]",
+				//                    instruction.StackOperation.Type.ToString(),
+				//                    (instruction.StackOperation.Content == null) ? "Null" :
+				//                        (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
+				//                              (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));			
+			}
 			else if (instructions.Count < 1) {
 				Debug.Log ("Zero instruction condition.  Aborting.");
 				return;
@@ -3311,8 +3312,8 @@ namespace Agent
 					UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, ((CharacterLogicEventArgs)e).InputSymbolContent as string, EpistemicCertaintyOperation.Increase);
 				}
 
-				Debug.Log (interactionController.UseTeaching);
-				Debug.Log (useEpistemicModel);
+				//Debug.Log (interactionController.UseTeaching);
+				//Debug.Log (useEpistemicModel);
 				if ((interactionController.UseTeaching) && (instruction.ToState.Content != null)) {
 					object stateContent = instruction.ToState.Content;
 
@@ -3323,8 +3324,8 @@ namespace Agent
 								(GetInputSymbolByName(ActionOptions[0]) == GetInputSymbolByName(ActionSuggestions[0])))) ? 
 							evaluateCondition (((CharacterLogicEventArgs)e).InputSymbolName) :
 							evaluateCondition (ActionOptions[0]);
-						Debug.Log (result.GetType ());
-						Debug.Log (result);
+						//Debug.Log (result.GetType ());
+						//Debug.Log (result);
 
 						if (!(bool)result) {
 							MoveToState (((TransitionGate)stateContent).RejectState);
@@ -3348,7 +3349,7 @@ namespace Agent
 		Dictionary<PDASymbol,List<Concept>> MapInputSymbolsToConcepts(List<PDASymbol> symbols) {
 			Dictionary<PDASymbol,List<Concept>> mapping = new Dictionary<PDASymbol,List<Concept>> ();
 
-			Debug.Log (epistemicModel.state);
+			//Debug.Log (epistemicModel.state);
 
 			mapping.Add(GetInputSymbolByName("G left point start"),
 				new Concept[]{epistemicModel.state.GetConcept("point",ConceptType.ACTION, ConceptMode.G)}.ToList());
@@ -3430,7 +3431,7 @@ namespace Agent
 
 			foreach (PDASymbol symbol in symbols) {
 				if (!mapping.ContainsKey (symbol)) {
-					Debug.Log (string.Format ("MapInputSymbolsToConcepts: no mapping for symbol \"{0}\"", symbol.Name));
+					//Debug.Log (string.Format ("MapInputSymbolsToConcepts: no mapping for symbol \"{0}\"", symbol.Name));
 				}
 			}
 
@@ -3556,43 +3557,43 @@ namespace Agent
 				break;
 			}
 
-			Debug.Log (string.Format("PerformStackOperation: {0} result {1}", operation.Type,StackSymbolToString (GetCurrentStackSymbol ())));
+			//Debug.Log (string.Format("PerformStackOperation: {0} result {1}", operation.Type,StackSymbolToString (GetCurrentStackSymbol ())));
 		}
 
 		List<PDAInstruction> GetApplicableInstructions(PDAState fromState, PDASymbol inputSymbol, object stackSymbol) {
-			Debug.Log (fromState.Name);
-			Debug.Log (inputSymbol == null ? "Null" : inputSymbol.Name);
-            Debug.Log (string.Format("Stack symbol: {0}",StackSymbolToString (stackSymbol)));
-			foreach (PDASymbol element in Stack) {
-				Debug.Log (StackSymbolToString (element));
-			}
+			//Debug.Log (fromState.Name);
+			//Debug.Log (inputSymbol == null ? "Null" : inputSymbol.Name);
+   //         Debug.Log (string.Format("Stack symbol: {0}",StackSymbolToString (stackSymbol)));
+			//foreach (PDASymbol element in Stack) {
+			//	Debug.Log (StackSymbolToString (element));
+			//}
 
 			List<PDAInstruction> instructions = TransitionRelation.Where (i => 
 				(i.FromStates == null && fromState == null) || (i.FromStates != null && i.FromStates.Contains(fromState))).ToList();
 			instructions = instructions.Where (i =>
 				(i.InputSymbols == null && inputSymbol == null) || (i.InputSymbols != null && i.InputSymbols.Contains(inputSymbol))).ToList();
 
-            Debug.Log (string.Format("{0} instructions from {1} with {2}", instructions.Count, fromState.Name, inputSymbol == null ? "Null" : inputSymbol.Name));
+            //Debug.Log (string.Format("{0} instructions from {1} with {2}", instructions.Count, fromState.Name, inputSymbol == null ? "Null" : inputSymbol.Name));
 
-            foreach (PDAInstruction inst in instructions) {
-                Debug.Log(string.Format("{0},{1},{2},{3},{4}",
-                    (inst.FromStates == null) ? "Null" :
-                    string.Format("[{0}]",
-                        String.Join(", ", ((List<PDAState>)inst.FromStates).Select(s => s.Name).ToArray())),
-                    (inst.InputSymbols == null) ? "Null" :
-                    string.Format("[{0}]",
-                        String.Join(", ", ((List<PDASymbol>)inst.InputSymbols).Select(s => s.Content.ToString()).ToArray())),
-                    StackSymbolToString(inst.StackSymbol),
-                    inst.ToState.Name,
-                    string.Format("[{0},{1}]",
-                        inst.StackOperation.Type.ToString(),
-                        (inst.StackOperation.Content == null) ? "Null" : 
-                            (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
-                                  (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
-            }
+            //foreach (PDAInstruction inst in instructions) {
+            //    Debug.Log(string.Format("{0},{1},{2},{3},{4}",
+            //        (inst.FromStates == null) ? "Null" :
+            //        string.Format("[{0}]",
+            //            String.Join(", ", ((List<PDAState>)inst.FromStates).Select(s => s.Name).ToArray())),
+            //        (inst.InputSymbols == null) ? "Null" :
+            //        string.Format("[{0}]",
+            //            String.Join(", ", ((List<PDASymbol>)inst.InputSymbols).Select(s => s.Content.ToString()).ToArray())),
+            //        StackSymbolToString(inst.StackSymbol),
+            //        inst.ToState.Name,
+            //        string.Format("[{0},{1}]",
+            //            inst.StackOperation.Type.ToString(),
+            //            (inst.StackOperation.Content == null) ? "Null" : 
+            //                (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
+            //                      (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
+            //}
 
-            Debug.Log(string.Format("{0} instructions before symbol + gate filtering", instructions.Count));
-            Debug.Log(stackSymbol.GetType());
+            //Debug.Log(string.Format("{0} instructions before symbol + gate filtering", instructions.Count));
+            //Debug.Log(stackSymbol.GetType());
 
 			if (stackSymbol.GetType () == typeof(StackSymbolContent)) {
 				//instructions = instructions.Where (i => (i.StackSymbol.Content.GetType() == typeof(StackSymbolContent))).ToList();
@@ -3614,7 +3615,7 @@ namespace Agent
 
 			//			Debug.Log (instructions.Count);
 
-            Debug.Log(string.Format("{0} instructions after symbol + gate filtering", instructions.Count));
+            //Debug.Log(string.Format("{0} instructions after symbol + gate filtering", instructions.Count));
 
 			return instructions;
 		}
@@ -3753,26 +3754,26 @@ namespace Agent
 				repeatTimer.Enabled = true;
 			}
 
-			Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
-				StackSymbolToString(GetCurrentStackSymbol())));
+			//Debug.Log (string.Format("Entering state: {0}.  Stack symbol: {1}",CurrentState.Name,
+			//	StackSymbolToString(GetCurrentStackSymbol())));
 		}
 
 		void ExecuteStateContent(object tempMessage = null) {
-			Debug.Log (interactionController);
-			Debug.Log (interactionController.GetType ());
-			Debug.Log (CurrentState.Name);
-			Debug.Log (interactionController.GetType().GetMethod (CurrentState.Name));
+			//Debug.Log (interactionController);
+			//Debug.Log (interactionController.GetType ());
+			//Debug.Log (CurrentState.Name);
+			//Debug.Log (interactionController.GetType().GetMethod (CurrentState.Name));
 			MethodInfo methodToCall = interactionController.GetType ().GetMethod (CurrentState.Name);
 			List<object> contentMessages = new List<object> ();
 
 			contentMessages.Add (tempMessage);
 
 			if (methodToCall != null) {
-				Debug.Log ("MoveToState: invoke " + methodToCall.Name);
+				//Debug.Log ("MoveToState: invoke " + methodToCall.Name);
 				object obj = methodToCall.Invoke (interactionController, new object[]{ contentMessages.ToArray() });
 			}
 			else {
-				Debug.Log(string.Format("No method of name {0} on object {1}", CurrentState.Name, interactionController));
+				//Debug.Log(string.Format("No method of name {0} on object {1}", CurrentState.Name, interactionController));
 			}
 		}
 

@@ -56,7 +56,7 @@ public class RelationTracker : MonoBehaviour {
 			}
 		}
 		catch (Exception e) {
-			Debug.Log (e.Message);
+			//Debug.Log (e.Message);
 		}
 
 		foreach (List<GameObject> key in relations.Keys) {
@@ -84,11 +84,11 @@ public class RelationTracker : MonoBehaviour {
 			}
 		}
 
-        try{
-            Debug.Log(string.Format("Adding {0} {1} {2}", relation, objs[0], objs[1]));
-        }
-        catch (Exception e) {
-        }
+        //try{
+        //    Debug.Log(string.Format("Adding {0} {1} {2}", relation, objs[0], objs[1]));
+        //}
+        //catch (Exception e) {
+        //}
 
 		relations.Add(objs,relation);	// add key-val pair or modify value if key already exists
 
