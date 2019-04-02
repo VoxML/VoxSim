@@ -328,10 +328,10 @@ namespace Satisfaction {
 			if (predArgs.Count > 0) {
 				Queue<String> argsStrings = new Queue<String> (((String)predArgs [pred]).Split (new char[] { ',' }));
 				List<object> objs = new List<object> ();
-				MethodInfo methodToCall;
-				Predicates preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
-
-				while (argsStrings.Count > 0) {
+                Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
+                MethodInfo methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                
+                while (argsStrings.Count > 0) {
 					object arg = argsStrings.Dequeue ();
 				
 					if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
@@ -390,10 +390,14 @@ namespace Satisfaction {
 										}
 									}
 									else {
-										//if (!em.evalOrig.ContainsKey(command)){
-											Debug.Log (string.Format ("Which {0}?", (arg as String)));
-											OutputHelper.PrintOutput (Role.Affector,string.Format("Which {0}?", (arg as String)));
-											return false;	// abort
+                                        if (methodToCall != null) {  // found a method
+                                            if (methodToCall.ReturnType == typeof(void)) {
+                                                //if (!em.evalOrig.ContainsKey(command)){
+                                                Debug.Log(string.Format("Which {0}?", (arg as String)));
+                                                OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
+                                                return false;   // abort
+                                            }
+                                        }
 										//}
 									}
 								}
@@ -405,7 +409,6 @@ namespace Satisfaction {
 				}
 
 				objs.Add (false);
-				methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
                 if (methodToCall != null) {  // found a method
                     if (methodToCall.ReturnType == typeof(void)) { // is it a program?

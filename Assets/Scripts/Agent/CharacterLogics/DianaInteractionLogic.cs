@@ -2313,7 +2313,7 @@ namespace Agent
 				null,
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
-                    (a) => ((a.Count > 1) &&
+                    (a) => ((a.Count > 0) &&
                         (a.Where(aa => aa.Contains("{0}")).ToList().Count == 0)), null
                 ),	
 				GetState("ExecuteEvent"),
