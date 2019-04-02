@@ -118,9 +118,8 @@ public class GenericLogger : MonoBehaviour {
 	}
 
 	public void CloseLog() {
-//		if (!log) {
-//			return;
-//		}
+		if (logFile == null)
+			return;
 
 		try {
 			logFile.Close ();
