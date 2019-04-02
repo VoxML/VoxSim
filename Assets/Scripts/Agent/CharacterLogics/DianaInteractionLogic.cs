@@ -3259,9 +3259,14 @@ namespace Agent
 
 			LastInputSymbol = GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName);
 
+			var curStackSymbol = GetCurrentStackSymbol();
+
+			if (curStackSymbol == null)
+				return;
+
 			List<PDAInstruction> instructions =  GetApplicableInstructions (CurrentState,
 				GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName),
-				GetCurrentStackSymbol ().Content);
+				curStackSymbol.Content);
 
 			PDAInstruction instruction = null;
 
@@ -3460,13 +3465,11 @@ namespace Agent
                     }
 
                     Debug.Log(string.Format(StackSymbolToString(popUntilSymbol)));
-                    if (Stack.Count > 1) {
-                        while (!((StackSymbolContent)GetCurrentStackSymbol().Content).Equals((StackSymbolContent)popUntilSymbol.Content)) {
-                            Debug.Log(string.Format("Popping {0} until {1}",
-                                StackSymbolToString(GetCurrentStackSymbol()), StackSymbolToString(popUntilSymbol)));
-                            Stack.Pop();
-                            ContextualMemory.Pop();
-                        }
+                    while (Stack.Count > 1 && !((StackSymbolContent)GetCurrentStackSymbol().Content).Equals((StackSymbolContent)popUntilSymbol.Content)) {
+                        Debug.Log(string.Format("Popping {0} until {1}",
+                            StackSymbolToString(GetCurrentStackSymbol()), StackSymbolToString(popUntilSymbol)));
+                        Stack.Pop();
+                        ContextualMemory.Pop();
                     }
                 }
 				break;
