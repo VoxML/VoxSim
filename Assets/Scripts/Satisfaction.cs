@@ -373,8 +373,15 @@ namespace Satisfaction {
 												return false;	// abort
 											}
 										}
-									}
-									else if (matches.Count == 1) {
+                                        else {
+                                            if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(go.name))) {
+                                                em.referents.stack.Push(go.name);
+                                            }
+                                            em.OnEntityReferenced(null, new EventReferentArgs(go.name));
+                                        }
+                                        objs.Add(go);
+                                    }
+                                    else if (matches.Count == 1) {
 										go = matches[0];
 										for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
 											if (objSelector.disabledObjects[j].name == (arg as String)) {
@@ -388,8 +395,9 @@ namespace Satisfaction {
                                             em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
 											return false;	// abort
 										}
-									}
-									else {
+                                        objs.Add(go);
+                                    }
+                                    else {
                                         if (methodToCall != null) {  // found a method
                                             if (methodToCall.ReturnType == typeof(void)) {
                                                 //if (!em.evalOrig.ContainsKey(command)){
@@ -397,11 +405,15 @@ namespace Satisfaction {
                                                 OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
                                                 return false;   // abort
                                             }
+                                            else {
+                                                foreach (GameObject match in matches) {
+                                                    objs.Add(match);
+                                                }
+                                            }
                                         }
 										//}
 									}
 								}
-								objs.Add (go);
 	//							objs.Add (GameObject.Find (arg as String));
 							}
 						}
@@ -409,6 +421,11 @@ namespace Satisfaction {
 				}
 
 				objs.Add (false);
+
+                foreach (object o in objs)
+                {
+                    Debug.Log(o);
+                }
 
                 if (methodToCall != null) {  // found a method
                     if (methodToCall.ReturnType == typeof(void)) { // is it a program?
@@ -418,6 +435,20 @@ namespace Satisfaction {
                     else {  // not a program
                         Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
                             methodToCall.Name,methodToCall.ReturnType.ToString()));
+                        object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
+                        if (obj is String) {
+                            Debug.Log(obj as String);
+                            if (GameObject.Find(obj as String) == null) {
+                                em.OnNonexistentEntityError(null, new EventReferentArgs(
+                                    new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
+                            }
+                            else {
+                                if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
+                                    em.referents.stack.Push(obj);
+                                }
+                                em.OnEntityReferenced(null, new EventReferentArgs(obj));
+                            }
+                        }
                     }
 				}
 				else {

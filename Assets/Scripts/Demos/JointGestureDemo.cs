@@ -2162,7 +2162,8 @@ public class JointGestureDemo : AgentInteraction {
 	public void ExecuteEvent(object[] content) {
 		if ((interactionLogic.ActionOptions.Count > 0) && 
 			((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "grasp")) ||
-				(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put")))) {
+            (Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
+            (Regex.IsMatch(interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1], "put")))) {
 			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, null));
 		}
 
