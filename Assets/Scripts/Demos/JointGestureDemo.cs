@@ -2269,10 +2269,14 @@ public class JointGestureDemo : AgentInteraction {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, new List<string>(), null)));
                 }
-                else {
+                else if (!(args[0] is bool)) {
                     RespondAndUpdate("OK.");
                     PromptEvent(interactionLogic.ActionOptions[0]);
 
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
+                }
+                else {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
                 }
@@ -4278,30 +4282,31 @@ public class JointGestureDemo : AgentInteraction {
 
             MethodInfo method = predicates.GetType().GetMethod(Helper.GetTopPredicate(eventStr).ToUpper());
 
-            if (method.ReturnType == typeof(void)) { // is event
-                if ((!eventStr.Contains("grasp")) && (!eventStr.Contains("ungrasp"))) {
-                    if ((eventStr.Contains("slidep") && (!interactionLogic.inServoLoop))) {
-                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                            interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
-                                new List<string>(), null)));
+            if (method != null) {
+                if (method.ReturnType == typeof(void)) { // is event
+                    if ((!eventStr.Contains("grasp")) && (!eventStr.Contains("ungrasp"))) {
+                        if ((eventStr.Contains("slidep") && (!interactionLogic.inServoLoop))) {
+                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                                    new List<string>(), null)));
+                        }
+                        else {
+                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
+                                    new List<string>() { eventStr }, null)));
+                        }
                     }
-                    else {
+                    else if (eventStr.Contains("ungrasp")) {
                         interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                            interactionLogic.GenerateStackSymbol(null, null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null,
-                                new List<string>() { eventStr }, null)));
+                            interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                                null, null, null, null)));
                     }
-                }
-                else if (eventStr.Contains("ungrasp")) {
-                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                        interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-                            null, null, null, null)));
                 }
             }
         }
     }
 
-    void ReferentIndicated(object sender, EventArgs e)
-    {
+    void ReferentIndicated(object sender, EventArgs e) {
         if (((EventReferentArgs)e).Referent is String) {  // object
             GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Referent).ToString());
             if (obj != null) {
@@ -4328,27 +4333,40 @@ public class JointGestureDemo : AgentInteraction {
         }
     }
 
-    void NonexistentReferent(object sender, EventArgs e)
-    {
-        if (((EventReferentArgs)e).Referent is Pair<string,List<object>>)   // pair of predicate and object list
-        {
+    void NonexistentReferent(object sender, EventArgs e) {
+        if (((EventReferentArgs)e).Referent is Pair<string,List<object>>) {   // pair of predicate and object list 
+            // (present type - common type of object list, of absent attribute - predicate)
             string pred = ((Pair<string, List<object>>)((EventReferentArgs)e).Referent).Item1;
             List<object> objs = ((Pair<string, List<object>>)((EventReferentArgs)e).Referent).Item2;
 
-            if (objs.Count > 0)
-            {
-                if (!objs.Any(o => (o == null) || (o.GetType() != typeof(GameObject))))  // if all objects are game objects
-                {
-                    if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled))
-                    {
+            if (objs.Count > 0) {
+                if (!objs.Any(o => (o == null) || (o.GetType() != typeof(GameObject)))) {  // if all objects are game objects
+                    if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
                         Debug.Log(string.Format("{0} {1} does not exist!", pred, (objs[0] as GameObject).GetComponent<Voxeme>().voxml.Lex.Pred));
                         RespondAndUpdate(string.Format("There is no {0} {1} here.", pred, (objs[0] as GameObject).GetComponent<Voxeme>().voxml.Lex.Pred));
-                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+                        if (interactionLogic.IndicatedObj != null) {
+                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, null, new List<string>(), null)));
+                        }
+                        else if (interactionLogic.GraspedObj != null) {
+                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, new List<string>(), null)));
+                        }
                     }
                 }
             }
         }
-
+        else if (((EventReferentArgs)e).Referent is string) {   // absent object type - string
+            RespondAndUpdate(string.Format("There is no {0} here.", ((EventReferentArgs)e).Referent as string));
+            if (interactionLogic.IndicatedObj != null) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, null, new List<string>(), null)));
+            }
+            else if (interactionLogic.GraspedObj != null) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, new List<string>(), null)));
+            }
+        }
     }
 
     void Disambiguate(object sender, EventArgs e) {

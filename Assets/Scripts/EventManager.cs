@@ -447,9 +447,10 @@ public class EventManager : MonoBehaviour {
 
                                         if (go == null)
                                         {
-                                            OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
-
-                                            throw new ArgumentNullException("Couldn't resolve the object");
+                                            //OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
+                                            OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
+                                            return objs;
+                                            //throw new ArgumentNullException("Couldn't resolve the object");
                                             // abort
                                         }
                                     }
@@ -460,8 +461,10 @@ public class EventManager : MonoBehaviour {
                                         (String)Helper.ParsePredicate(arg as String)[
                                         Helper.GetTopPredicate(arg as String)]);
 
-                                    foreach (object o in args) {
-                                        objs.Add(o);
+                                    if (args != null) {
+                                        foreach (object o in args) {
+                                            objs.Add(o);
+                                        }
                                     }
                                 }
 							}

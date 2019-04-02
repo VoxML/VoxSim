@@ -368,7 +368,8 @@ namespace Satisfaction {
 											}
 
 											if (go == null) {
-												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+												//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+                                                em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
 												return false;	// abort
 											}
 										}
@@ -383,7 +384,8 @@ namespace Satisfaction {
 										}
 
 										if (go == null) {
-											OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+											//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+                                            em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
 											return false;	// abort
 										}
 									}
