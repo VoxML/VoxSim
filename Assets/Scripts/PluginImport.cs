@@ -130,6 +130,7 @@ public class PluginImport : MonoBehaviour {
                 {
                     if (!tryAgain.ContainsKey(fusionUrlString))
                     {
+						// TODO this was commented out on networking fix (cleanup branch), make sure this doesn't break the fix
                         tryAgain.Add(fusionUrlString, typeof(FusionSocket));
                     }
                 }
