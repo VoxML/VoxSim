@@ -2074,8 +2074,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		LookForward ();
 
-        if ((eventManager.referents.stack.Count == 0) || (!eventManager.referents.stack.Peek().Equals(interactionLogic.IndicatedObj.name)))
-        {
+        if ((eventManager.referents.stack.Count == 0) || (!eventManager.referents.stack.Peek().Equals(interactionLogic.IndicatedObj.name))) {
             eventManager.referents.stack.Push(interactionLogic.IndicatedObj.name);
         }
         eventManager.OnEntityReferenced(this, new EventReferentArgs(interactionLogic.IndicatedObj.name));
@@ -2743,9 +2742,9 @@ public class JointGestureDemo : AgentInteraction {
 			TurnForward ();
 		}
 
-        if (interactionLogic.GraspedObj != null) {
+        //if (interactionLogic.GraspedObj != null) {
             ReturnHandsToDefault();
-        }
+        //}
 
 		RespondAndUpdate ("OK, never mind.");
 

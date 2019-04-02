@@ -490,8 +490,8 @@ public class EventManager : MonoBehaviour {
 			try {
 				var objs = ExtractObjects (pred, (String)predArgs [pred]);
 
-                if (methodToCall != null) { // found a method
-                    if (methodToCall.ReturnType == typeof(void)) { // is it a program?
+                //if (methodToCall != null) { // found a method
+                //    if (methodToCall.ReturnType == typeof(void)) { // is it a program?
                         foreach (var obj in objs) {
                             if (obj is GameObject) {
                                 if ((obj as GameObject).GetComponent<Voxeme>() != null) {
@@ -502,8 +502,8 @@ public class EventManager : MonoBehaviour {
                                 }
                             }
                         }
-                    }
-                }
+                   //}
+                //}
 
 				if (preds.rdfTriples.Count > 0) {
                     if (methodToCall != null) { // found a method
