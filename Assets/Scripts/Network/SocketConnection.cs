@@ -54,11 +54,7 @@ namespace Network
         }
 
         int _port;
-		private bool isDisposed;
-
-		public bool IsDisposed => isDisposed;
-
-		public int Port
+        public int Port
         {
             get { return _port; }
             set { _port = value; }
@@ -66,9 +62,7 @@ namespace Network
 
         public virtual bool IsConnected()
 	    {
-			if (!isDisposed)
-				return !((_client.Client.Poll(10, SelectMode.SelectRead) && (_client.Client.Available == 0)) || !_client.Client.Connected);
-			return false;
+            return !((_client.Client.Poll(10, SelectMode.SelectRead) && (_client.Client.Available == 0)) || !_client.Client.Connected);
 	    }
 
         public virtual void Connect(string address, int port)
@@ -78,12 +72,17 @@ namespace Network
 			//Debug.Log (string.Format("{0}:{1}",address,port));
 
 			_messages = new Queue<string>();
-			_client = new TcpClient
-			{
-				//ReceiveTimeout = 1000
-			};
-			_client.Connect(address, port);
+			_client = new TcpClient();
 
+			var result = _client.BeginConnect(address, port, null, null);
+			var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1));
+
+			if (!success)
+			{
+				throw new Exception("Failed to connect.");
+				return;
+			}
+			_client.EndConnect(result);
 			//_client.Connect(address, port);
 			_t = new Thread (Loop);
 			_t.Start ();
@@ -106,7 +105,6 @@ namespace Network
                 catch (Exception e)
                 {
                     Debug.LogError(e.Message);
-					break;
                 }
 
 				//				if (!BitConverter.IsLittleEndian)
@@ -124,17 +122,14 @@ namespace Network
 				//_messages.Enqueue (message);
 
 			}
-			Close();
+			//_client.Close();
 		}
 
         public virtual void Close()
-		{	if (!isDisposed)
-			{
-				if (_client.Client.Connected)
-					_client.GetStream().Close();
-				_client.Close();
-				isDisposed = true;
-			}
+		{
+			_t.Abort();
+            _client.GetStream().Close();
+			_client.Close();
 		}
 
 		protected virtual string GetMessage(int len)

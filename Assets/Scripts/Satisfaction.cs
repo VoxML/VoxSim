@@ -429,8 +429,24 @@ namespace Satisfaction {
 				}
 			}
 			else {
-				OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
-				return false;
+                List<object> objs = em.ExtractObjects(string.Empty, pred);
+                if (objs.Count > 0) {
+                    foreach (var obj in objs) {
+                        if (obj is GameObject) {
+                            if ((obj as GameObject).GetComponent<Voxeme>() != null) {
+                                if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(((GameObject)obj).name))) {
+                                    em.referents.stack.Push(((GameObject)obj).name);
+                                }
+                                em.OnEntityReferenced(null, new EventReferentArgs(((GameObject)obj).name));
+                            }
+                        }
+                    }
+                }
+                else {
+                    em.OnNonexistentEntityError(null, new EventReferentArgs(pred));
+                    //OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
+                    return false;
+                }
 			}
 
 			return true;

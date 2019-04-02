@@ -490,13 +490,17 @@ public class EventManager : MonoBehaviour {
 			try {
 				var objs = ExtractObjects (pred, (String)predArgs [pred]);
 
-                foreach (var obj in objs) {
-                    if (obj is GameObject) {
-                        if ((obj as GameObject).GetComponent<Voxeme>() != null) {
-                            if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
-                                referents.stack.Push(((GameObject)obj).name);
+                if (methodToCall != null) { // found a method
+                    if (methodToCall.ReturnType == typeof(void)) { // is it a program?
+                        foreach (var obj in objs) {
+                            if (obj is GameObject) {
+                                if ((obj as GameObject).GetComponent<Voxeme>() != null) {
+                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
+                                        referents.stack.Push(((GameObject)obj).name);
+                                    }
+                                    OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
+                                }
                             }
-                            OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
                         }
                     }
                 }
@@ -820,8 +824,11 @@ public class EventManager : MonoBehaviour {
                                     Debug.Log(string.Format("{0} matches", matches.Count));
 
 									if (matches.Count == 0) {
-										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
+                                        Debug.Log(arg as String);
+                                        Debug.Log(preds.GetType().GetMethod(pred.ToUpper()).ReturnType);
+                                        //if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 											GameObject go = GameObject.Find (arg as String);
+                                            Debug.Log(go);
 											if (go == null) {
 												for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
 													if (objSelector.disabledObjects[i].name == (arg as String)) {
@@ -830,15 +837,15 @@ public class EventManager : MonoBehaviour {
 													}
 												}
 
-												if (go == null) {
+                                                Debug.Log(go);
+                                                if (go == null) {
 													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-                                                    OnNonexistentEntityError(this,
-                                                        new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
+                                                    OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
 													return false;	// abort
 												}
 											}
 											objs.Add (go);
-										}
+										//}
 									}
 									else if (matches.Count == 1) {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
@@ -854,7 +861,7 @@ public class EventManager : MonoBehaviour {
 												if (go == null) {
 													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
                                                     OnNonexistentEntityError(this,
-                                                                             new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
+                                                        new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
 													return false;	// abort
 												}
 											}

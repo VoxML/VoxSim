@@ -1849,8 +1849,8 @@ public class JointGestureDemo : AgentInteraction {
 		else {
 			if ((interactionLogic.GraspedObj == null) &&
 			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate (string.Format ("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
-                    interactionLogic.ObjectOptions.Cast<object>().ToList())));
+                RespondAndUpdate(string.Format("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
+                    availableObjs.Cast<object>().ToList())));
 				ReachFor (interactionLogic.IndicatedObj);
 				LookForward ();
 			}
@@ -4334,11 +4334,12 @@ public class JointGestureDemo : AgentInteraction {
     }
 
     void NonexistentReferent(object sender, EventArgs e) {
+        Debug.Log(((EventReferentArgs)e).Referent is Pair<string, List<object>>);
         if (((EventReferentArgs)e).Referent is Pair<string,List<object>>) {   // pair of predicate and object list 
             // (present type - common type of object list, of absent attribute - predicate)
             string pred = ((Pair<string, List<object>>)((EventReferentArgs)e).Referent).Item1;
             List<object> objs = ((Pair<string, List<object>>)((EventReferentArgs)e).Referent).Item2;
-
+            Debug.Log(objs.Count);
             if (objs.Count > 0) {
                 if (!objs.Any(o => (o == null) || (o.GetType() != typeof(GameObject)))) {  // if all objects are game objects
                     if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
@@ -4351,6 +4352,10 @@ public class JointGestureDemo : AgentInteraction {
                         else if (interactionLogic.GraspedObj != null) {
                             interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                                 interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, new List<string>(), null)));
+                        }
+                        else {
+                            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                interactionLogic.GenerateStackSymbol(null, null, null, null, new List<string>(), null)));
                         }
                     }
                 }
@@ -4365,6 +4370,10 @@ public class JointGestureDemo : AgentInteraction {
             else if (interactionLogic.GraspedObj != null) {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)), null, null, new List<string>(), null)));
+            }
+            else {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null, new List<string>(), null)));
             }
         }
     }
