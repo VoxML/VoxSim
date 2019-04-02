@@ -914,14 +914,14 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G push right stop"));
 			InputSymbols.Add(new PDASymbol("G push front stop"));
 			InputSymbols.Add(new PDASymbol("G push back stop"));
-            InputSymbols.Add(new PDASymbol("G push servo left start"));
-            InputSymbols.Add(new PDASymbol("G push servo right start"));
-            InputSymbols.Add(new PDASymbol("G push servo front start"));
-            InputSymbols.Add(new PDASymbol("G push servo back start"));
-            InputSymbols.Add(new PDASymbol("G push servo left stop"));
-            InputSymbols.Add(new PDASymbol("G push servo right stop"));
-            InputSymbols.Add(new PDASymbol("G push servo front stop"));
-            InputSymbols.Add(new PDASymbol("G push servo back stop"));
+            InputSymbols.Add(new PDASymbol("G servo left start"));
+            InputSymbols.Add(new PDASymbol("G servo right start"));
+            InputSymbols.Add(new PDASymbol("G servo front start"));
+            InputSymbols.Add(new PDASymbol("G servo back start"));
+            InputSymbols.Add(new PDASymbol("G servo left stop"));
+            InputSymbols.Add(new PDASymbol("G servo right stop"));
+            InputSymbols.Add(new PDASymbol("G servo front stop"));
+            InputSymbols.Add(new PDASymbol("G servo back stop"));
 			InputSymbols.Add(new PDASymbol("G count one start"));
 			InputSymbols.Add(new PDASymbol("G count two start"));
 			InputSymbols.Add(new PDASymbol("G count three start"));
@@ -1239,10 +1239,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Wait"),
-                GetInputSymbolsByName("G push servo left start",
-                    "G push servo right start",
-                    "G push servo front start",
-                    "G push servo back start"),
+                GetInputSymbolsByName("G servo left start",
+                    "G servo right start",
+                    "G servo front start",
+                    "G servo back start"),
                 GenerateStackSymbolFromConditions(
                     (o) => o != null, (g) => g == null, null, null, null, null
                 ),
@@ -1251,10 +1251,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Wait"),
-                GetInputSymbolsByName("G push servo left start",
-                    "G push servo right start",
-                    "G push servo front start",
-                    "G push servo back start"),
+                GetInputSymbolsByName("G servo left start",
+                    "G servo right start",
+                    "G servo front start",
+                    "G servo back start"),
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null, null, null, null, null
                 ),
@@ -1263,10 +1263,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(  // check this
                 GetStates("Wait"),
-                GetInputSymbolsByName("G push servo left start",
-                    "G push servo right start",
-                    "G push servo front start",
-                    "G push servo back start"),
+                GetInputSymbolsByName("G servo left start",
+                    "G servo right start",
+                    "G servo front start",
+                    "G servo back start"),
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g == null,
                     null, null, null, null
@@ -2313,7 +2313,7 @@ namespace Agent
 				null,
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
-                    (a) => ((a.Count == 1) &&
+                    (a) => ((a.Count > 1) &&
                         (a.Where(aa => aa.Contains("{0}")).ToList().Count == 0)), null
                 ),	
 				GetState("ExecuteEvent"),
@@ -2513,10 +2513,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("StartServo"),
-                GetInputSymbolsByName("G push servo left stop",
-                    "G push servo right stop",
-                    "G push servo front stop",
-                    "G push servo back stop",
+                GetInputSymbolsByName("G servo left stop",
+                    "G servo right stop",
+                    "G servo front stop",
+                    "G servo back stop",
                     "G nevermind start"),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("StopServo"),
@@ -2560,10 +2560,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Servo"),
-                GetInputSymbolsByName("G push servo left stop",
-                    "G push servo right stop",
-                    "G push servo front stop",
-                    "G push servo back stop",
+                GetInputSymbolsByName("G servo left stop",
+                    "G servo right stop",
+                    "G servo front stop",
+                    "G servo back stop",
                     "G nevermind start"),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("StopServo"),
