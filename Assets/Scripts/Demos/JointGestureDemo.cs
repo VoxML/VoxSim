@@ -1522,17 +1522,14 @@ public class JointGestureDemo : AgentInteraction {
                 message = message.Replace("pull", "slide");
             }
             // assume everything is a block
-            if (message.Contains("one"))
-            {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
+            if (message.Split().Contains("one")) {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
                 message = message.Replace("one", "block");
             }
 
-            if (message.Contains("it"))
-            {
+            if (message.Split().Contains("it")) {
                 object referent = eventManager.referents.stack.Peek();
 
-                if (referent.GetType() == typeof(String))
-                {
+                if (referent.GetType() == typeof(String)) {
                     GameObject voxObj = GameObject.Find(referent as String);
                     if (voxObj != null) {
                         message = message.Replace("it", voxObj.name);
@@ -2259,12 +2256,10 @@ public class JointGestureDemo : AgentInteraction {
                     (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])]);
 
                 if ((args.Count > 0) && (args[0] is GameObject)) {
-                    if (InteractionHelper.GetCloserHand(Diana, (args[0] as GameObject)) == leftGrasper)
-                    {
+                    if (InteractionHelper.GetCloserHand(Diana, (args[0] as GameObject)) == leftGrasper) {
                         grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
                     }
-                    else if (InteractionHelper.GetCloserHand(Diana, (args[0] as GameObject)) == rightGrasper)
-                    {
+                    else if (InteractionHelper.GetCloserHand(Diana, (args[0] as GameObject)) == rightGrasper) {
                         grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
                     }
 
@@ -2273,6 +2268,13 @@ public class JointGestureDemo : AgentInteraction {
 
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, new List<string>(), null)));
+                }
+                else {
+                    RespondAndUpdate("OK.");
+                    PromptEvent(interactionLogic.ActionOptions[0]);
+
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
                 }
             }
         }
@@ -2703,34 +2705,34 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void AbortAction(object[] content) {
 		if (interactionLogic.GraspedObj != null) {
-			if (interactionLogic.ActionOptions.Count > 0) {
-				if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
-					(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
+			//if (interactionLogic.ActionOptions.Count > 0) {
+				//if ((Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "lift")) ||
+					//(Regex.IsMatch (interactionLogic.ActionOptions [interactionLogic.ActionOptions.Count - 1], "put"))) {
 					RaycastHit hitInfo;
 
 					if ((!Physics.Raycast (new Ray (interactionLogic.GraspedObj.transform.position, Vector3.down), out hitInfo)) ||
-						(hitInfo.collider.gameObject == demoSurfaceCollider.gameObject)){
+						(hitInfo.collider.gameObject == demoSurfaceCollider.gameObject)) {
 						PromptEvent (string.Format ("put({0},{1})", 
 							interactionLogic.GraspedObj.name,
 							Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
-								Helper.GetObjectWorldSize (demoSurface).max.y,
+                                Helper.GetObjectWorldSize(demoSurface).max.y+
+                                Helper.GetObjectWorldSize(interactionLogic.GraspedObj).extents.y,
 								interactionLogic.GraspedObj.transform.position.z))));
 					}
 					else {
-						PromptEvent (string.Format ("put({0},{1})", 
-							interactionLogic.GraspedObj.name,
-							Helper.VectorToParsable (new Vector3 (interactionLogic.GraspedObj.transform.position.x,
-								Helper.GetObjectWorldSize (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject)).max.y,
-								interactionLogic.GraspedObj.transform.position.z))));
+                        PromptEvent (string.Format ("put({0},on({1}))", 
+							interactionLogic.GraspedObj.name,Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).name));
 					}
-				}
-				else {
-					PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
-				}
-			}
-			else {
-				PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
-			}
+                //}
+				//else {
+				//	PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
+    //                ReturnHandsToDefault();
+				//}
+			//}
+			//else {
+			//	PromptEvent (string.Format ("ungrasp({0})", interactionLogic.GraspedObj.name));
+   //             ReturnHandsToDefault();
+			//}
 		}
 		else {
 			LookForward ();
@@ -4307,8 +4309,16 @@ public class JointGestureDemo : AgentInteraction {
                     if (interactionLogic.CurrentState.Name != "EndState") {
                         if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
                             (interactionLogic.GraspedObj != obj)) {
+                            if ((interactionLogic.ActionOptions.Count > 0) &&
+                                ((interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].StartsWith("lift")) ||
+                                 (interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].StartsWith("grasp")))) {
+                                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                                    interactionLogic.GenerateStackSymbol(null, obj, null, null, null, null)));
+                            }
+                            else {
                                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                                     interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
+                            }
                         }
                     }
                 }

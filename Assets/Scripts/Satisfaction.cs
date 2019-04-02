@@ -920,10 +920,11 @@ namespace Satisfaction {
                             Bounds b2 = new Bounds(new Vector3(objBounds1.Center.x, objBounds2.Min(MajorAxis.Y).y, objBounds1.Center.z),
                                 new Vector3(objBounds2.Max(MajorAxis.X).x - objBounds2.Min(MajorAxis.X).x, 0.0f,
                                 objBounds2.Max(MajorAxis.Z).z - objBounds2.Min(MajorAxis.Z).z));
-                            //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.center), Helper.VectorToParsable(b2.center)));
-                            //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.size), Helper.VectorToParsable(b2.size)));
-                            r = b1.Intersects(b2);
-                            //Debug.Log(r);
+                                //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.center), Helper.VectorToParsable(b2.center)));
+                                //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.size), Helper.VectorToParsable(b2.size)));
+                            r = (b1.Intersects(b2) && ((objBounds2.Max(MajorAxis.Y).y-objBounds1.Min(MajorAxis.Y).y) <= Constants.EPSILON));
+                            //r = b1.Intersects(b2);
+                            Debug.Log(r);
 							//r = (Vector3.Distance (
                                 //new Vector3 (objBounds1.Center.x, objBounds2.Center.y, objBounds1.Center.z),
                                 //objBounds2.Center) <= Constants.EPSILON * 3); // works with 10
