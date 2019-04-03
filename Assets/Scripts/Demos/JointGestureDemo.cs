@@ -1512,6 +1512,9 @@ public class JointGestureDemo : AgentInteraction {
             if (message.StartsWith("pick up")) {
                 message = message.Replace("pick up", "lift");
             }
+            else if (message.StartsWith("pick") && (message.EndsWith("up"))) {
+                message = message.Replace("pick", "lift").Replace("up", "");
+            }
             else if (message.StartsWith("grab")) {
                 message = message.Replace("grab", "grasp");
             }
