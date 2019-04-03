@@ -1391,21 +1391,33 @@ namespace Agent
                 GetStates("ParseNP"),
                 null,
                 GenerateStackSymbolFromConditions(
-                    (o) => o == null, null,
+                    (o) => o == null, (g) => g == null,
                     null, null, null, null
                 ),
                 GetState("Wait"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-			// if items have value, check and see if sentence is consistent with them
-//			TransitionRelation.Add(new PDAInstruction(
-//				GetStates("Wait"),
-//				GetInputSymbolsByName("S S"),
-//				GenerateStackSymbol(null, null, null, null, null, null),	
-//				GetState("InterpretSentence"),
-//				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, (g) => g != null,
+                    null, null, null, null
+                ),
+                GetState("ComposeObjectAndAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
+                        new List<GameObject>(), null, null))));
 
-			TransitionRelation.Add(new PDAInstruction(
+            // if items have value, check and see if sentence is consistent with them
+            //			TransitionRelation.Add(new PDAInstruction(
+            //				GetStates("Wait"),
+            //				GetInputSymbolsByName("S S"),
+            //				GenerateStackSymbol(null, null, null, null, null, null),	
+            //				GetState("InterpretSentence"),
+            //				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("ParseQuestion"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
@@ -2232,7 +2244,7 @@ namespace Agent
 					null, null,
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}") || 
-							aa.Contains("slide"))).ToList().Count == 0),
+							(aa.Contains("slide")) || aa.Contains("grasp")).ToList().Count == 0)),
 					null),	
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
@@ -2249,7 +2261,18 @@ namespace Agent
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ComposeObjectAndAction"),
+                null,
+                GenerateStackSymbolFromConditions((o) => o != null, null,
+                    null, null,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("grasp"))).ToList().Count > 0),
+                    null),
+                GetState("StartGrab"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("ComposeObjectAndAction"),
 				null,
 				GenerateStackSymbolFromConditions((o) => o != null, null,

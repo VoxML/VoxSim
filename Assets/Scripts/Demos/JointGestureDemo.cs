@@ -4321,8 +4321,9 @@ public class JointGestureDemo : AgentInteraction {
                         if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
                             (interactionLogic.GraspedObj != obj)) {
                             if ((interactionLogic.ActionOptions.Count > 0) &&
-                                ((interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].StartsWith("lift")) ||
-                                 (interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].StartsWith("grasp")))) {
+                                (((interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].StartsWith("lift")) ||
+                                 (interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].StartsWith("grasp")))) &&
+                                    (!interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1].Contains("{0}"))) {
                                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                                     interactionLogic.GenerateStackSymbol(null, obj, null, null, null, null)));
                             }
