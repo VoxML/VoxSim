@@ -3069,7 +3069,11 @@ public class Predicates : MonoBehaviour {
                 else {
                     if (args[1] is Vector3) {
                         GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
-                        Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+
+                        List<GameObject> themeChildren = theme.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != theme)).Select(v => v.gameObject).ToList();
+                            
+                        Bounds themeBounds = Helper.GetObjectWorldSize(theme, themeChildren);  // bounds of theme obj
 
                         Vector3 loc = ((Vector3)args[1]);   // coord
 
