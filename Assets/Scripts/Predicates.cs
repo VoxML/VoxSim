@@ -5590,6 +5590,12 @@ public class Predicates : MonoBehaviour {
 
                                     InteractionHelper.SetLeftHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
+
+                                    // get parent obj
+                                    if ((args[0] as GameObject).transform.parent != null)
+                                    {
+                                        RiggingHelper.UnRig((args[0] as GameObject), (args[0] as GameObject).transform.parent.gameObject);
+                                    }
                                     //(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
                                 }
                                 else if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) == rightGrasper) {
@@ -5606,6 +5612,11 @@ public class Predicates : MonoBehaviour {
 
                                     InteractionHelper.SetRightHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+
+                                    // get parent obj
+                                    if ((args[0] as GameObject).transform.parent != null) {
+                                        RiggingHelper.UnRig((args[0] as GameObject), (args[0] as GameObject).transform.parent.gameObject);
+                                    }
                                     //(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
                                 }
                             }
