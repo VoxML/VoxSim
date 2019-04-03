@@ -375,10 +375,12 @@ namespace Satisfaction {
 											}
 										}
                                         else {
-                                            if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(go.name))) {
-                                                em.referents.stack.Push(go.name);
+                                            if (go.GetComponent<Voxeme>() != null) {
+                                                if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(go.name))) {
+                                                    em.referents.stack.Push(go.name);
+                                                }
+                                                em.OnEntityReferenced(null, new EventReferentArgs(go.name));
                                             }
-                                            em.OnEntityReferenced(null, new EventReferentArgs(go.name));
                                         }
                                         objs.Add(go);
                                     }
@@ -449,10 +451,12 @@ namespace Satisfaction {
                                     new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
                             }
                             else {
-                                if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
-                                    em.referents.stack.Push(obj);
+                                if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
+                                    if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
+                                        em.referents.stack.Push(obj);
+                                    }
+                                    em.OnEntityReferenced(null, new EventReferentArgs(obj));
                                 }
-                                em.OnEntityReferenced(null, new EventReferentArgs(obj));
                             }
                         }
                     }

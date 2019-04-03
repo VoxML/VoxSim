@@ -3650,7 +3650,7 @@ namespace Agent
                 GetStates("Wait"),                                                              // in this state
                 GetInputSymbolsByName(instructionKey),                                          // when we get this message
                 GenerateStackSymbolFromConditions(
-                    null, null, null, null, null, null                                          // and this is the top of the stack
+                    null, (g) => g == null, null, null, null, null                              // and this is the top of the stack
                 ),
                 Regex.IsMatch(((List<string>)((StackSymbolContent)stackOperation.Content).
                     ActionOptions)[0],"grasp") ?
