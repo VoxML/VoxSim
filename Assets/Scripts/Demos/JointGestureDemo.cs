@@ -4316,7 +4316,7 @@ public class JointGestureDemo : AgentInteraction {
             GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Referent).ToString());
             if (obj != null) {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
-                    if (interactionLogic.CurrentState.Name != "EndState") {
+                    if ((interactionLogic.CurrentState.Name == "ParseNP") || (interactionLogic.CurrentState.Name == "ParseVP")) {
                         if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
                             (interactionLogic.GraspedObj != obj)) {
                             if ((interactionLogic.ActionOptions.Count > 0) &&

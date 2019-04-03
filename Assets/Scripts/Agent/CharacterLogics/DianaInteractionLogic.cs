@@ -2741,9 +2741,9 @@ namespace Agent
                 null,
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("Wait"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, GetState("Wait"))));
-				//new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
-					//new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
+                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, GetState("Wait"))));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
+					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ObjectUnavailable"),
