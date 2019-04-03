@@ -176,25 +176,52 @@ namespace Agent
 				Transform t = obj.transform.GetChild(i);
 				if (t.name == obj.name + "*")
 				{
-					clone = Instantiate(t.gameObject);
-					// obj = original blockX with `voxeme` attached
-					// t = blockX* with physics
-					clone.transform.SetParent(t.gameObject.transform);
-					clone.transform.localScale = obj.transform.localScale;
-					clone.transform.position = t.transform.position;
-					Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
-					originalColor.a = 0.3f;
-					Renderer rend = clone.GetComponent<Renderer>();
-					SetRenderingModeToTransparent(rend.material);
-					rend.material.color = originalColor;
-					clone.AddComponent<BoundBox>();
-					Destroy(clone.GetComponent<Collider>());
-					Destroy(clone.GetComponent<Rigidbody>());
-					clone.layer = 11;
+					makeVisualClone(t, obj.transform.localScale, t.transform.rotation);
 					break;
 				}
 			}
 			return clone;
+		}
+
+		private void makeVisualClone(Transform t, Vector3 scale, Quaternion rotation)
+		{
+			// obj = original blockX with `voxeme` attached
+			// t = blockX* with physics
+			List<Transform> candidates = new List<Transform>();
+			if (t.GetComponent(typeof(Renderer)) != null)
+			{
+				candidates.Add(t);
+			}
+			else
+			{
+				foreach (Transform childT in t.GetComponentInChildren<Transform>())
+				{
+					if (childT.GetComponent(typeof(Renderer)) != null)
+					{
+						candidates.Add(childT);
+					}
+				}
+			}
+
+			foreach (Transform t2Clone in candidates)
+			{
+				GameObject clone = Instantiate(t2Clone.gameObject);
+				clone.transform.SetParent(t2Clone.gameObject.transform);
+				clone.transform.rotation = t2Clone.transform.rotation;
+				clone.transform.localScale = scale;
+				clone.transform.position = t2Clone.transform.position;
+				Color originalColor = t2Clone.gameObject.GetComponent<Renderer>().material.color;
+				originalColor.a = 0.3f;
+				Renderer rend = clone.GetComponent<Renderer>();
+				SetRenderingModeToTransparent(rend.material);
+				rend.material.color = originalColor;
+				clone.AddComponent<BoundBox>();
+				Destroy(clone.GetComponent<FixedJoint>());
+				Destroy(clone.GetComponent<Collider>());
+				Destroy(clone.GetComponent<Rigidbody>());
+				clone.layer = 11;
+
+			}
 		}
 
 		public bool IsKnown(Voxeme v)
