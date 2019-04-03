@@ -4410,9 +4410,14 @@ public class JointGestureDemo : AgentInteraction {
 
             string ambiguityStr = ((EventDisambiguationArgs)e).AmbiguityStr;
             string ambiguityVar = ((EventDisambiguationArgs)e).AmbiguityVar;
-            interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                interactionLogic.GenerateStackSymbol(null, null, null, null,
-                    new List<string>() { ((EventDisambiguationArgs)e).Event.Replace(ambiguityStr, ambiguityVar) }, null)));
+            if ((ambiguityStr != string.Empty) && (ambiguityVar != string.Empty)) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>() { ((EventDisambiguationArgs)e).Event.Replace(ambiguityStr, ambiguityVar) }, null)));
+            }
+            else {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite, null));
+            }
         }
         else {
             Debug.Log(string.Format("Referent found: {0}",((GameObject)referentMatches[0]).name));

@@ -12,6 +12,7 @@ using Global;
 using MajorAxes;
 using RCC;
 using RootMotion.FinalIK;
+using Vox;
 
 namespace Satisfaction {
 	public static class SatisfactionTest {
@@ -356,8 +357,8 @@ namespace Satisfaction {
 									}
 
 									Debug.Log (matches.Count);
-
-									if (matches.Count == 0) {
+									
+                                    if (matches.Count == 0) {
 										go = GameObject.Find (arg as String);
 										if (go == null) {
 											for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
@@ -399,12 +400,22 @@ namespace Satisfaction {
                                     }
                                     else {
                                         if (methodToCall != null) {  // found a method
-                                            if (methodToCall.ReturnType == typeof(void)) {
+                                            String path = string.Empty;
+                                            Debug.Log(pred);
+                                            if (File.Exists(Data.voxmlDataPath + string.Format("/attributes/{0}.xml", pred))) {
+                                                path = string.Format("/attributes/{0}.xml", pred);
+                                            }
+
+                                            if (path == string.Empty) {
+                                                //if (methodToCall.ReturnType == typeof(void)) {
                                                 //if (!em.evalOrig.ContainsKey(command)){
                                                 Debug.Log(string.Format("Which {0}?", (arg as String)));
-                                                OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
+                                                //OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
+                                                em.OnDisambiguationError(null, new EventDisambiguationArgs(command, string.Empty, string.Empty,
+                                                    matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
                                                 return false;   // abort
                                             }
+                                            //}
                                             else {
                                                 foreach (GameObject match in matches) {
                                                     objs.Add(match);
@@ -421,11 +432,6 @@ namespace Satisfaction {
 				}
 
 				objs.Add (false);
-
-                foreach (object o in objs)
-                {
-                    Debug.Log(o);
-                }
 
                 if (methodToCall != null) {  // found a method
                     if (methodToCall.ReturnType == typeof(void)) { // is it a program?

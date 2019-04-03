@@ -327,7 +327,6 @@ public class EventManager : MonoBehaviour {
 			return;
 		}
 
-
 		Hashtable predArgs = Helper.ParsePredicate (events [0]);
 		String pred = Helper.GetTopPredicate (events [0]);
 
@@ -344,14 +343,14 @@ public class EventManager : MonoBehaviour {
 		ClearSkolems ();
 		ParseCommand (command);
 
-		string globalsApplied = ApplyGlobals (command);
+        string globalsApplied = ApplyGlobals (command);
 
-		FinishSkolemization ();
-		skolemized = Skolemize (globalsApplied);
+        FinishSkolemization();
+        skolemized = Skolemize (globalsApplied);
 		Debug.Log ("Skolemized command: " + skolemized);
-		//EvaluateSkolemizedCommand(skolemized);
+        //EvaluateSkolemizedCommand(skolemized);
 
-		if (!EvaluateSkolemConstants (EvaluationPass.Attributes)) {
+        if (!EvaluateSkolemConstants (EvaluationPass.Attributes)) {
 			RemoveEvent (events.Count - 1);
 			return false;
 		}
@@ -660,21 +659,26 @@ public class EventManager : MonoBehaviour {
 				if (kkv.Key != kv.Key) {
 					//Debug.Log ("FinishSkolemization: "+kv.Key+ " " +kkv.Key);
 					if (!temp.Contains (kkv.Key)) {
-						if (((String)kkv.Value).Contains ((String)kv.Value)) {
-							//Debug.Log ("FinishSkolemization: " + kv.Value + " found in " + kkv.Value);
-							//Debug.Log ("FinishSkolemization: " + kkv.Key + " : " + ((String)kkv.Value).Replace ((String)kv.Value, (String)kv.Key));
+						if (((String)kkv.Value).Contains ((String)kv.Value) && 
+                            ((((String)kkv.Value).Count(f => f == '(') + ((String)kkv.Value).Count(f => f == ')')) - 
+                            (((String)kv.Value).Count(f => f == '(') + ((String)kv.Value).Count(f => f == ')')) == 2)) {
+							Debug.Log ("FinishSkolemization: " + kv.Value + " found in " + kkv.Value);
+							Debug.Log ("FinishSkolemization: " + kkv.Key + " : " + ((String)kkv.Value).Replace ((String)kv.Value, (String)kv.Key));
 							temp [kkv.Key] = ((String)kkv.Value).Replace ((String)kv.Value, (String)kv.Key);
-						}
-					}
+                            Debug.Log("FinishSkolemization: " + temp[kkv.Key]);
+                        }
+                    }
 				}
 			}
 		}
 
 		foreach (DictionaryEntry kv in temp) {
-			skolems[kv.Key] = temp[kv.Key];
-		}
+            Debug.Log("FinishSkolemization: " + temp[kv.Key]);
+            skolems[kv.Key] = temp[kv.Key];
+            Debug.Log("FinishSkolemization: " + skolems[kv.Key]);
+        }
 
-		Helper.PrintKeysAndValues(skolems);
+        Helper.PrintKeysAndValues(skolems);
 	}
 
 	public String Skolemize(String inString) {
@@ -683,9 +687,10 @@ public class EventManager : MonoBehaviour {
 
 		int parenCount = temp.Count(f => f == '(') + 
 			temp.Count(f => f == ')');
-		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+		Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
-		do{
+        do
+        {
 			foreach (DictionaryEntry kv in skolems) {
 				outString = (String)outString.Replace((String)kv.Value,(String)kv.Key);
 				//Debug.Log (outString);
