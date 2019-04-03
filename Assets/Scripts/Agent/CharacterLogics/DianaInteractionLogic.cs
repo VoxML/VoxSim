@@ -3966,12 +3966,12 @@ namespace Agent
                 if (!inServoLoop) {
                     servoWaitTimer.Interval = servoWaitTimerTime;
                     servoWaitTimer.Enabled = true;
-                    Debug.Log(string.Format("Start Servo Wait Timer:{0}", servoLoopTimer.Interval));
+                    Debug.Log(string.Format("Start Servo Loop Timer:{0}", servoLoopTimer.Interval));
                 }
                 else {
                     servoLoopTimer.Interval = servoLoopTimerTime;
                     servoLoopTimer.Enabled = true;
-                    Debug.Log(string.Format("Start Servo Loop Timer:{0}", servoWaitTimer.Interval));
+                    Debug.Log(string.Format("Start Servo Wait Timer:{0}", servoWaitTimer.Interval));
                 }
             } 
             else if ((state == GetState("StopServo")) || (state == GetState("AbortAction"))) {

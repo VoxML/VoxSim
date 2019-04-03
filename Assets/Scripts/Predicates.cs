@@ -5713,7 +5713,8 @@ public class Predicates : MonoBehaviour {
 						if (arg is GameObject) {
 							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
 							if (interactionObject != null) {
-								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) {
+								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
+                                    interactionSystem.IsInInteraction(FullBodyBipedEffector.LeftHand)) {
 									Debug.Log (string.Format ("Ending {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
 
 									//InteractionHelper.SetLeftHandTarget (agent, null);
@@ -5724,7 +5725,8 @@ public class Predicates : MonoBehaviour {
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
                                     //(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;
                                 }
-								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand)) {
+								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand) || 
+                                    interactionSystem.IsInInteraction(FullBodyBipedEffector.RightHand)) {
 									Debug.Log (string.Format ("Ending {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
 
 									//InteractionHelper.SetRightHandTarget (agent, null);

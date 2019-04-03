@@ -2213,8 +2213,7 @@ public class JointGestureDemo : AgentInteraction {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
                         Enumerable.Range(0, grabPoses.Count).Select(s => string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
-                                                                                       grabPoses[s].name)).ToList(),
-                    null)));
+                            grabPoses[s].name)).ToList(), null)));
             }
             else
             {
@@ -2227,7 +2226,7 @@ public class JointGestureDemo : AgentInteraction {
             }
         }
         else {
-            if (interactionLogic.IndicatedObj != null)
+            if ((interactionLogic.IndicatedObj != null) && (interactionLogic.IndicatedObj == obj))
             {
                 string graspCmd = string.Format("grasp({0})", interactionLogic.IndicatedObj.name);
                 if (learnedActionSymbols.Count == 1)
