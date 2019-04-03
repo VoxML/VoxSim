@@ -854,7 +854,7 @@ namespace Global {
 
 			foreach (Renderer renderer in renderers) {
 				if (!exclude.Contains (renderer.transform.gameObject)) {
-					Debug.Log (renderer.transform.gameObject.name);
+					//Debug.Log (renderer.transform.gameObject.name);
 					combinedBounds.Encapsulate (renderer.bounds);
 				}
 			}

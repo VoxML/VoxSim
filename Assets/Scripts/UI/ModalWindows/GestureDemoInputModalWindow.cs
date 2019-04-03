@@ -96,7 +96,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 		if (!IsInputPointing(msg))
 		{
 			bool showInModal = IsInputSpeech(msg) ? showSpeech : showGesture;
-            Debug.Log (string.Format("\"{0}\", shown in scene: {1}", msg, showInModal));
+            //Debug.Log (string.Format("\"{0}\", shown in scene: {1}", msg, showInModal));
 			if (showInModal)
 			{
 				inputs.Add (string.Format ("{0} {1}", msg.Split (';') [0], msg.Split (';') [1]));

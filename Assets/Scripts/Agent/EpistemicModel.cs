@@ -129,7 +129,7 @@ namespace Agent {
 			state.AddConcept(up);
 			state.AddConcept(down);
 
-			Debug.Log (state);
+			//Debug.Log (state);
 			return state;
 		}
 		
@@ -150,7 +150,7 @@ namespace Agent {
 
             if (state == null) {
                 state = initModel();
-                Debug.Log(state);
+                //Debug.Log(state);
             }
 
 
@@ -188,7 +188,7 @@ namespace Agent {
             List<Concept> gestureConcepts = new List<Concept>();
             List<Concept> linguisticConcepts = new List<Concept>();
 
-			if (state != null) {
+			if (state != null) { 
 				foreach (Concepts conceptsByMode in state.GetAllConcepts()) {
 					if (conceptsByMode.GetConcepts().ContainsKey(ConceptMode.G)) {
 						gestureConcepts = conceptsByMode.GetConcepts()[ConceptMode.G];
@@ -226,7 +226,7 @@ namespace Agent {
 				}
 
 				string jsonifiedCertaintyState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
-				Debug.Log(jsonifiedCertaintyState);
+				//Debug.Log(jsonifiedCertaintyState);
 
 
 				using (StreamWriter sw = new StreamWriter(GetUserModelPath(userID))) {

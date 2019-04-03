@@ -1038,7 +1038,7 @@ public class Predicates : MonoBehaviour {
 		Vector3 relOffset = Vector3.zero;
 
 		string prep = rdfTriples.Count > 0 ? rdfTriples [0].Item2.Replace ("put", "") : "";
-		Debug.Log (prep);
+		//Debug.Log (prep);
 
 		// look for agent
 		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
@@ -1191,8 +1191,8 @@ public class Predicates : MonoBehaviour {
 					//Debug.Log (Helper.VectorToParsable(bounds.min));
 
 					float yAdjust = (theme.transform.position.y - themeBounds.center.y);
-					Debug.Log ("Y-size = " + (themeBounds.center.y - themeBounds.min.y));
-					Debug.Log ("put_on: " + (theme.transform.position.y - themeBounds.min.y).ToString ());
+					//Debug.Log ("Y-size = " + (themeBounds.center.y - themeBounds.min.y));
+					//Debug.Log ("put_on: " + (theme.transform.position.y - themeBounds.min.y).ToString ());
 
 					// compose computed on(a) into put(x,y) formula
 					// if the glove don't fit, you must acquit! (recompute)
@@ -1941,7 +1941,7 @@ public class Predicates : MonoBehaviour {
 		if (!eventManager.evalOrig.ContainsKey (adjustedEval)) {
 			eventManager.evalOrig.Add (adjustedEval, eventManager.evalOrig [originalEval]);
 			eventManager.evalOrig.Remove (originalEval);
-			Debug.Log("Swapping " + originalEval + " for " + adjustedEval);
+			//Debug.Log("Swapping " + originalEval + " for " + adjustedEval);
 		}
 
 		// add to events manager
@@ -5590,7 +5590,7 @@ public class Predicates : MonoBehaviour {
                                         }
                                     }
 
-                                    Debug.Log(string.Format("Starting {0} interaction with {1}", leftGrasper.name, (args[0] as GameObject).name));
+                                    //Debug.Log(string.Format("Starting {0} interaction with {1}", leftGrasper.name, (args[0] as GameObject).name));
 
                                     InteractionHelper.SetLeftHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);

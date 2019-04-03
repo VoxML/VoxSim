@@ -138,9 +138,9 @@ public class Voxeme : MonoBehaviour {
 			}
 		}
 
-		Debug.Log (gameObject);
-		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).min));
-		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).max));
+		//Debug.Log (gameObject);
+		//Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).min));
+		//Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).max));
 	}
 		
 	// Update is called once per frame
@@ -829,7 +829,7 @@ public class Voxeme : MonoBehaviour {
 				attrSet.attributes.Clear ();
 				for (int i = 0; i < voxml.Attributes.Attrs.Count; i++) {
 					attrSet.attributes.Add (voxml.Attributes.Attrs [i].Value);
-					Debug.Log (attrSet.attributes[i]);
+					//Debug.Log (attrSet.attributes[i]);
 				}
 			}
 		}

@@ -118,6 +118,7 @@ public class GenericLogger : MonoBehaviour {
 	}
 
 	public void CloseLog() {
+
 		if (logFile == null)
 			return;
 

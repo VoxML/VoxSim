@@ -12,7 +12,6 @@ using Global;
 using MajorAxes;
 using RCC;
 using RootMotion.FinalIK;
-using Vox;
 
 namespace Satisfaction {
 	public static class SatisfactionTest {
@@ -329,10 +328,10 @@ namespace Satisfaction {
 			if (predArgs.Count > 0) {
 				Queue<String> argsStrings = new Queue<String> (((String)predArgs [pred]).Split (new char[] { ',' }));
 				List<object> objs = new List<object> ();
-                Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-                MethodInfo methodToCall = preds.GetType().GetMethod(pred.ToUpper());
-                
-                while (argsStrings.Count > 0) {
+				MethodInfo methodToCall;
+				Predicates preds = GameObject.Find ("BehaviorController").GetComponent<Predicates> ();
+
+				while (argsStrings.Count > 0) {
 					object arg = argsStrings.Dequeue ();
 				
 					if (Helper.v.IsMatch ((String)arg)) {	// if arg is vector form
@@ -357,8 +356,8 @@ namespace Satisfaction {
 									}
 
 									Debug.Log (matches.Count);
-									
-                                    if (matches.Count == 0) {
+
+									if (matches.Count == 0) {
 										go = GameObject.Find (arg as String);
 										if (go == null) {
 											for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
@@ -369,22 +368,12 @@ namespace Satisfaction {
 											}
 
 											if (go == null) {
-												//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-                                                em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
+												OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
 												return false;	// abort
 											}
 										}
-                                        else {
-                                            if (go.GetComponent<Voxeme>() != null) {
-                                                if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(go.name))) {
-                                                    em.referents.stack.Push(go.name);
-                                                }
-                                                em.OnEntityReferenced(null, new EventReferentArgs(go.name));
-                                            }
-                                        }
-                                        objs.Add(go);
-                                    }
-                                    else if (matches.Count == 1) {
+									}
+									else if (matches.Count == 1) {
 										go = matches[0];
 										for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
 											if (objSelector.disabledObjects[j].name == (arg as String)) {
@@ -394,39 +383,19 @@ namespace Satisfaction {
 										}
 
 										if (go == null) {
-											//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-                                            em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
+											OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
 											return false;	// abort
 										}
-                                        objs.Add(go);
-                                    }
-                                    else {
-                                        if (methodToCall != null) {  // found a method
-                                            String path = string.Empty;
-                                            Debug.Log(pred);
-                                            if (File.Exists(Data.voxmlDataPath + string.Format("/attributes/{0}.xml", pred))) {
-                                                path = string.Format("/attributes/{0}.xml", pred);
-                                            }
-
-                                            if (path == string.Empty) {
-                                                //if (methodToCall.ReturnType == typeof(void)) {
-                                                //if (!em.evalOrig.ContainsKey(command)){
-                                                Debug.Log(string.Format("Which {0}?", (arg as String)));
-                                                //OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
-                                                em.OnDisambiguationError(null, new EventDisambiguationArgs(command, string.Empty, string.Empty,
-                                                    matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
-                                                return false;   // abort
-                                            }
-                                            //}
-                                            else {
-                                                foreach (GameObject match in matches) {
-                                                    objs.Add(match);
-                                                }
-                                            }
-                                        }
+									}
+									else {
+										//if (!em.evalOrig.ContainsKey(command)){
+											Debug.Log (string.Format ("Which {0}?", (arg as String)));
+											OutputHelper.PrintOutput (Role.Affector,string.Format("Which {0}?", (arg as String)));
+											return false;	// abort
 										//}
 									}
 								}
+								objs.Add (go);
 	//							objs.Add (GameObject.Find (arg as String));
 							}
 						}
@@ -434,32 +403,18 @@ namespace Satisfaction {
 				}
 
 				objs.Add (false);
+				methodToCall = preds.GetType ().GetMethod (pred.ToUpper());
 
                 if (methodToCall != null) {  // found a method
                     if (methodToCall.ReturnType == typeof(void)) { // is it a program?
-                        Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
+                        //Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
                         object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
-                    }
-                    else {  // not a program
-                        Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
-                            methodToCall.Name,methodToCall.ReturnType.ToString()));
-                        object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
-                        if (obj is String) {
-                            Debug.Log(obj as String);
-                            if (GameObject.Find(obj as String) == null) {
-                                em.OnNonexistentEntityError(null, new EventReferentArgs(
-                                    new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
-                            }
-                            else {
-                                if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
-                                    if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
-                                        em.referents.stack.Push(obj);
-                                    }
-                                    em.OnEntityReferenced(null, new EventReferentArgs(obj));
-                                }
-                            }
-                        }
-                    }
+					}
+					//else
+					//{  // not a program
+					//	Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
+					//	methodToCall.Name, methodToCall.ReturnType.ToString()));
+					//}
 				}
 				else {
 					// no coded-behavior
@@ -473,24 +428,8 @@ namespace Satisfaction {
 				}
 			}
 			else {
-                List<object> objs = em.ExtractObjects(string.Empty, pred);
-                if (objs.Count > 0) {
-                    foreach (var obj in objs) {
-                        if (obj is GameObject) {
-                            if ((obj as GameObject).GetComponent<Voxeme>() != null) {
-                                if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(((GameObject)obj).name))) {
-                                    em.referents.stack.Push(((GameObject)obj).name);
-                                }
-                                em.OnEntityReferenced(null, new EventReferentArgs(((GameObject)obj).name));
-                            }
-                        }
-                    }
-                }
-                else {
-                    em.OnNonexistentEntityError(null, new EventReferentArgs(pred));
-                    //OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
-                    return false;
-                }
+				OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
+				return false;
 			}
 
 			return true;
@@ -498,8 +437,8 @@ namespace Satisfaction {
 
 		public static void ReasonFromAffordances(String program, Voxeme obj) {
 			Regex reentrancyForm = new Regex (@"\[[0-9]+\]");
-			Regex groundComponentFirst = new Regex (@".*(\[[0-9]+\], .*x.*)");	// check the order of the arguments
-			Regex groundComponentSecond = new Regex (@".*(x, .*\[[0-9]+\].*)");
+			Regex themeFirst = new Regex (@".*(\[[0-9]+\], .*x.*)");	// check the order of the arguments
+			Regex themeSecond = new Regex (@".*(x, .*\[[0-9]+\].*)");
 			List<string> supportedRelations = new List<string> (
 				new string[]{	// list of supported relations
 					@"on\(.*\)",	
@@ -520,9 +459,7 @@ namespace Satisfaction {
 			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 
 			// get bounds of theme object of program
-            List<GameObject> excludeChildren = obj.gameObject.GetComponentsInChildren<Renderer>().Where(
-                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj.gameObject)).Select(v => v.gameObject).ToList();
-            Bounds objBounds = Helper.GetObjectWorldSize(obj.gameObject, excludeChildren);
+			Bounds objBounds = Helper.GetObjectWorldSize(obj.gameObject);
 
 			// get list of all voxeme entities that are not components of other voxemes
 //			Voxeme[] allVoxemes = objSelector.allVoxemes.Where(a => // where there does not exist another voxeme that has this voxeme as a component
@@ -534,13 +471,13 @@ namespace Satisfaction {
 
 			List<GameObject> components = objSelector.allVoxemes.SelectMany((v, c) => v.opVox.Type.Components.Where(comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList();
 
-			foreach (GameObject go in components) {
-				Debug.Log (go);
-			}
+			//foreach (GameObject go in components) {
+			//	//Debug.Log (go);
+			//}
 
-			foreach (Voxeme v in allVoxemes) {
-				Debug.Log (v);
-			}
+			//foreach (Voxeme v in allVoxemes) {
+			//	//Debug.Log (v);
+			//}
 //			objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)
 			
 //				UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => 
@@ -561,7 +498,7 @@ namespace Satisfaction {
 			//Debug.Log (relationTracker.relations.Count);
 			foreach (DictionaryEntry relation in relationTracker.relations) {
 				if (((String)relation.Value).Contains("support") || ((String)relation.Value).Contains("contain")){
-                    Debug.Log (string.Format("==== {0} {1} {2} ====",((List<GameObject>)relation.Key)[0],((String)relation.Value),((List<GameObject>)relation.Key)[1]));
+//					Debug.Log (((List<GameObject>)relation.Key) [0]);
 //					Debug.Log (((List<GameObject>)relation.Key) [1]);
 //					Debug.Log (obj.gameObject);
 //					Debug.Log (((List<GameObject>)relation.Key) [1] == obj.gameObject);
@@ -620,7 +557,7 @@ namespace Satisfaction {
 									//if (TestHabitat (test.gameObject, testHabitat)) {	// test habitats
 										for (int i = 0; i < test.opVox.Affordance.Affordances[testHabitat].Count; i++) {	// condition/event/result list for this habitat index
 											string ev = test.opVox.Affordance.Affordances[testHabitat][i].Item2.Item1;
-											Debug.Log (ev);
+											//Debug.Log (ev);
 											if (ev.Contains (program) || ev.Contains ("put")) {	// TODO: resultant states should persist
 //												Debug.Break ();
 //												Debug.Log (ev);
@@ -633,7 +570,6 @@ namespace Satisfaction {
 													Regex r = new Regex (rel);
 													if (r.Match (ev).Length > 0) {	// found a relation that might apply between these objects
 														string relation = r.Match(ev).Groups[0].Value.Split('(')[0];
-                                                        Debug.Log (relation);
 
 														MatchCollection matches = reentrancyForm.Matches(ev);
 														foreach (Match m in matches) {
@@ -643,19 +579,19 @@ namespace Satisfaction {
 																//Debug.Log (componentIndex);
 																if (test.opVox.Type.Components.FindIndex (c => c.Item3 == componentIndex) != -1) {
 																	Triple<string, GameObject, int> component = test.opVox.Type.Components.First (c => c.Item3 == componentIndex);
-																	Debug.Log (ev.Replace(g.Value,component.Item2.name));
-																	Debug.Log (string.Format ("Is {0} {1} {2}?", obj.gameObject.name, relation, component.Item2.name));
+																	//Debug.Log (ev.Replace(g.Value,component.Item2.name));
+																	//Debug.Log (string.Format ("Is {0} {1} {2} {3}?", obj.gameObject.name, relation, component.Item2.name, component.Item1));
 																	
 																	//bool relationSatisfied = false;	// this used to be here
 
-																	//NOTE: These relations use the *test* object as theme
-                                                                    if (groundComponentFirst.Match (ev).Length > 0) {
+																	//NOTE: These relations are used the *test* object as theme
+																	if (themeFirst.Match (ev).Length > 0) {
 																		relationSatisfied = TestRelation (test.gameObject, relation, obj.gameObject);
 																		//Debug.Break ();
 																		//Debug.Log (test);
 																		//Debug.Log (obj);
 																	}
-                                                                    else if (groundComponentSecond.Match (ev).Length > 0) {
+																	else if (themeSecond.Match (ev).Length > 0) {
 																		relationSatisfied = TestRelation (obj.gameObject, relation, test.gameObject);
 																	}
 
@@ -666,23 +602,14 @@ namespace Satisfaction {
 
 																		// things are getting a little ad hoc here
 																		if (relation == "on") {
-                                                                            Debug.Log(Helper.GetMostImmediateParentVoxeme(test.gameObject).GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
-                                                                            Debug.Log(Helper.VectorToParsable(objBounds.size));
-                                                                            Debug.Log(Helper.VectorToParsable(testBounds.size));
-                                                                            Debug.Log(Helper.FitsIn(objBounds, testBounds));
-                                                                            if (!((Helper.GetMostImmediateParentVoxeme(test.gameObject).GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave")) &&
-                                                                               (Helper.FitsIn(objBounds, testBounds))))
-                                                                            {
-                                                                            //if (obj.enabled) {
-                                                                            //	obj.gameObject.GetComponent<Rigging> ().ActivatePhysics (true);
-                                                                            //}
-                                                                                obj.minYBound = testBounds.max.y;
-                                                                            //																				Debug.Log (test);
-                                                                            }
-                                                                            else {
-                                                                                reactivatePhysics = false;
-                                                                                obj.minYBound = objBounds.min.y;
-                                                                            }
+																			if (!((Helper.GetMostImmediateParentVoxeme (test.gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains("Concave")) &&
+																			   (Helper.FitsIn (objBounds, testBounds)))) {
+																				//if (obj.enabled) {
+																				//	obj.gameObject.GetComponent<Rigging> ().ActivatePhysics (true);
+																				//}
+																				obj.minYBound = testBounds.max.y;
+//																				Debug.Log (test);
+																			}
 																		}
 																		else if (relation == "in") {
 																			reactivatePhysics = false;
@@ -705,30 +632,30 @@ namespace Satisfaction {
 																			result = Helper.GetTopPredicate (result);
 
 																			// TODO: maybe switch object order here below => passivize relation?
-																			if (groundComponentFirst.Match (ev).Length > 0) {
+																			if (themeFirst.Match (ev).Length > 0) {
 																				relationTracker.AddNewRelation (new List<GameObject>{ obj.gameObject, test.gameObject }, result);
 																				Debug.Log (string.Format ("{0}: {1} {2}.3sg {3}",
 																					test.opVox.Affordance.Affordances [testHabitat] [i].Item2.Item1, obj.gameObject.name, result, test.gameObject.name));
 																			}
-																			else if (groundComponentSecond.Match (ev).Length > 0) {
+																			else if (themeSecond.Match (ev).Length > 0) {
 																				relationTracker.AddNewRelation (new List<GameObject>{ test.gameObject, obj.gameObject }, result);
 																				Debug.Log (string.Format ("{0}: {1} {2}.3sg {3}",
 																					test.opVox.Affordance.Affordances [testHabitat] [i].Item2.Item1, test.gameObject.name, result, obj.gameObject.name));
 																			}
 
 																			if (result == "support") {
-																				if (groundComponentFirst.Match (ev).Length > 0) {
+																				if (themeFirst.Match (ev).Length > 0) {
 																					RiggingHelper.RigTo (test.gameObject, obj.gameObject);
 																				}
-																				else if (groundComponentSecond.Match (ev).Length > 0) {
+																				else if (themeSecond.Match (ev).Length > 0) {
 																					RiggingHelper.RigTo (obj.gameObject, test.gameObject);
 																				}
 																			}
 																			else if (result == "contain") {
-																				if (groundComponentFirst.Match (ev).Length > 0) {
+																				if (themeFirst.Match (ev).Length > 0) {
 																					RiggingHelper.RigTo (test.gameObject, obj.gameObject);
 																				}
-																				else if (groundComponentSecond.Match (ev).Length > 0) {
+																				else if (themeSecond.Match (ev).Length > 0) {
 																					RiggingHelper.RigTo (obj.gameObject, test.gameObject);
 																				}
 																			}
@@ -869,13 +796,12 @@ namespace Satisfaction {
 					//flip(cup1);put(ball,under(cup1))
 				}
 			}
-			Debug.Log (string.Format ("H[{0}]:{1}", habitatIndex,r));
+			//Debug.Log (string.Format ("H[{0}]:{1}", habitatIndex,r));
 			return r;
 		}
 
 		public static bool TestRelation(GameObject obj1, string relation, GameObject obj2) {
 			bool r = false;
-
 			Bounds bounds1 = Helper.GetObjectWorldSize (obj1);
 			Bounds bounds2 = Helper.GetObjectWorldSize (obj2);
 
@@ -902,29 +828,26 @@ namespace Satisfaction {
 //					Debug.Log (obj2);
 //					Debug.Log (Concavity.IsEnabled(obj1));
 //					Debug.Log (Helper.GetMostImmediateParentVoxeme (obj1.gameObject));
-                    List<GameObject> excludeChildren = obj1.GetComponentsInChildren<Renderer>().Where(
-                            o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj1)).Select(v => v.gameObject).ToList();
-                    Bounds adjustedBounds1 = Helper.GetObjectWorldSize(obj1, excludeChildren);
 					if ((Helper.GetMostImmediateParentVoxeme (obj2.gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave")) &&
-                        (Concavity.IsEnabled (obj2)) && (Helper.FitsIn(adjustedBounds1, bounds2))) {	// if ground object is concave and figure object would fit inside
+					    (Concavity.IsEnabled (obj2)) && (Helper.FitsIn (bounds1, bounds2))) {	// if ground object is concave and figure object would fit inside
 						switch (axis) {
 						case "X":
-                            r = (Vector3.Distance(
-                                new Vector3(obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-                                obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
+							r = (Vector3.Distance (
+								new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						case "Y":
-                            r = (Vector3.Distance(
-                                new Vector3(obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-                                obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
-                            r &= (obj1.gameObject.transform.position.y > obj2.gameObject.transform.position.y);
+							r = (Vector3.Distance (
+								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
+							r &= (obj1.gameObject.transform.position.y > obj2.gameObject.transform.position.y);
 							break;
 
 						case "Z":
-                            r = (Vector3.Distance(
-                                new Vector3(obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
-                                obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
+							r = (Vector3.Distance (
+								new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						default:
@@ -968,28 +891,15 @@ namespace Satisfaction {
 							break;
 
 						case "Y":
-                            ObjBounds objBounds1 = Helper.GetObjectOrientedSize(obj1, true);
-                            ObjBounds objBounds2 = Helper.GetObjectOrientedSize(obj2, true);
-                            //Debug.Log(Helper.VectorToParsable(objBounds1.Center));
-                            //Debug.Log(Helper.VectorToParsable(objBounds2.Center));
-                            //Debug.Log (string.Format("XZ_off({0},{1}) = {2}",obj1,obj2,Vector3.Distance (
-                                //new Vector3 (objBounds1.Center.x, objBounds2.Center.y, objBounds1.Center.z),
-                                //objBounds2.Center)));
-                            Debug.Log (string.Format("EC_Y({0},{1}):{2}",obj1,obj2,RCC8.EC (objBounds1, objBounds2)));
-                            Bounds b1 = new Bounds(new Vector3(objBounds1.Center.x, objBounds2.Min(MajorAxis.Y).y, objBounds1.Center.z),
-                                new Vector3(objBounds1.Max(MajorAxis.X).x - objBounds1.Min(MajorAxis.X).x, 0.0f,
-                                objBounds1.Max(MajorAxis.Z).z - objBounds1.Min(MajorAxis.Z).z));
-                            Bounds b2 = new Bounds(new Vector3(objBounds1.Center.x, objBounds2.Min(MajorAxis.Y).y, objBounds1.Center.z),
-                                new Vector3(objBounds2.Max(MajorAxis.X).x - objBounds2.Min(MajorAxis.X).x, 0.0f,
-                                objBounds2.Max(MajorAxis.Z).z - objBounds2.Min(MajorAxis.Z).z));
-                                //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.center), Helper.VectorToParsable(b2.center)));
-                                //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.size), Helper.VectorToParsable(b2.size)));
-                            r = (b1.Intersects(b2) && ((objBounds2.Max(MajorAxis.Y).y-objBounds1.Min(MajorAxis.Y).y) <= Constants.EPSILON));
-                            //r = b1.Intersects(b2);
-                            Debug.Log(r);
-							//r = (Vector3.Distance (
-                                //new Vector3 (objBounds1.Center.x, objBounds2.Center.y, objBounds1.Center.z),
-                                //objBounds2.Center) <= Constants.EPSILON * 3); // works with 10
+//							Debug.Log (obj1);
+//							Debug.Log (obj2);
+							//Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,Vector3.Distance (
+							//	new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+							//	obj2.gameObject.transform.position)));
+							//Debug.Log (string.Format("{0}:{1}:{2}",obj1,obj2,RCC8.EC (Helper.GetObjectOrientedSize (obj1, true), Helper.GetObjectOrientedSize (obj2, true))));
+							r = (Vector3.Distance (
+								new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+								obj2.gameObject.transform.position) <= Constants.EPSILON * 3);
 							break;
 
 						case "Z":
@@ -1009,20 +919,20 @@ namespace Satisfaction {
 				if ((Helper.GetMostImmediateParentVoxeme (obj2.gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains("Concave")) &&
 					(Concavity.IsEnabled(obj2))) {
 					if (Helper.FitsIn (bounds1, bounds2)) {
-						Debug.Log (obj1);
-						Debug.Log (obj2);
-						Debug.Log (bounds1);
-						Debug.Log (bounds2);
+						//Debug.Log (obj1);
+						//Debug.Log (obj2);
+						//Debug.Log (bounds1);
+						//Debug.Log (bounds2);
 						r = RCC8.PO (bounds1, bounds2) || RCC8.ProperPart (bounds1, bounds2);
 					}
 				}
 				else {
 					if (Helper.FitsIn (bounds1, bounds2)) {
 						//Debug.Break ();
-						Debug.Log (obj1);
-						Debug.Log (obj2);
-						Debug.Log (bounds1);
-						Debug.Log (bounds2);
+						//Debug.Log (obj1);
+						//Debug.Log (obj2);
+						//Debug.Log (bounds1);
+						//Debug.Log (bounds2);
 						r = RCC8.PO (bounds1, bounds2) || RCC8.ProperPart (bounds1, bounds2);
 					}
 				}
@@ -1141,7 +1051,7 @@ namespace Satisfaction {
 			else {
 			}
 
-            Debug.Log (string.Format("{0}:{1}",relation,r));
+//			Debug.Log (r);
 			return r;
 		}
 

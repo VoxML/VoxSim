@@ -63,7 +63,7 @@ public class Rigging : MonoBehaviour {
 		}
 		else {
 			// make this object affected by default physics rigging
-			Debug.Log (gameObject.name + ": activating physics");
+			//Debug.Log (gameObject.name + ": activating physics");
 
 			// enable colliders
 			BoxCollider[] colliders = gameObject.GetComponentsInChildren<BoxCollider> ();

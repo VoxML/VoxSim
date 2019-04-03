@@ -371,7 +371,7 @@ public class EventManager : MonoBehaviour {
 		}
 
 		evaluated = ApplySkolems (skolemized);
-		Debug.Log (string.Format("Evaluated command@{0}: {1}", events.IndexOf(command), evaluated));
+		//Debug.Log (string.Format("Evaluated command@{0}: {1}", events.IndexOf(command), evaluated));
 		if (!evalOrig.ContainsKey (evaluated)) {
 			evalOrig.Add (evaluated, command);
 		}
@@ -382,9 +382,9 @@ public class EventManager : MonoBehaviour {
 		events [events.IndexOf (command)] = evaluated;
 
 		Triple<String,String,String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
-		Debug.Log(evalOrig[evaluated]);
-		Debug.Log(evalResolved[evaluated]);
-		Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
+		//Debug.Log(evalOrig[evaluated]);
+		//Debug.Log(evalResolved[evaluated]);
+		//Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 
 		if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
 			preds.rdfTriples.Add(triple);
@@ -797,14 +797,14 @@ public class EventManager : MonoBehaviour {
 		Triple<String,String,String> replaceSkolems = null;
 
 		foreach (DictionaryEntry kv in skolems) {
-			Debug.Log (kv.Key + " : " + kv.Value); 
+			//Debug.Log (kv.Key + " : " + kv.Value); 
 			objs.Clear ();
 			if (kv.Value is String) {
-				Debug.Log (kv.Value); 
+				//Debug.Log (kv.Value); 
 				argsMatch = regex.Match ((String)kv.Value);
-				Debug.Log (argsMatch); 
+				//Debug.Log (argsMatch); 
 				if (argsMatch.Groups [0].Value.Length == 0) {	// matched an empty string = no match
-					Debug.Log (kv.Value);
+					//Debug.Log (kv.Value);
 					predArgs = Helper.ParsePredicate ((String)kv.Value);
 					String pred = Helper.GetTopPredicate ((String)kv.Value);
 					if (((String)kv.Value).Count (f => f == '(') +	// make sure actually a predicate
@@ -832,7 +832,7 @@ public class EventManager : MonoBehaviour {
                                             }
                                         }
                                     }
-                                    Debug.Log(string.Format("{0} matches", matches.Count));
+                                    //Debug.Log(string.Format("{0} matches", matches.Count));
 
 									if (matches.Count == 0) {
                                         Debug.Log(arg as String);
@@ -987,9 +987,9 @@ public class EventManager : MonoBehaviour {
 						}
 						else if (pass == EvaluationPass.RelationsAndFunctions) {
                             if ((methodToCall.ReturnType == typeof(Vector3)) || (methodToCall.ReturnType == typeof(object))) {
-								Debug.Log ("EvaluateSkolemConstants: invoke " + methodToCall.Name);
+								//Debug.Log ("EvaluateSkolemConstants: invoke " + methodToCall.Name);
 								object obj = methodToCall.Invoke (preds, new object[]{ objs.ToArray () });
-								Debug.Log (obj);
+								//Debug.Log (obj);
 
 								temp [kv.Key] = obj;
 							}
@@ -1051,7 +1051,7 @@ public class EventManager : MonoBehaviour {
 
 		int newEvaluations = 0;
 		foreach (DictionaryEntry kv in skolems) {
-			Debug.Log(kv.Key + " : " + kv.Value);
+			//Debug.Log(kv.Key + " : " + kv.Value);
 			if (kv.Value is String) {
 				argsMatch = r.Match ((String)kv.Value);
 

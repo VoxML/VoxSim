@@ -347,7 +347,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).max.x-Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
-			Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
+			//Debug.Log (string.Format ("{0}: {1},{2},{3}", leftRegion, leftRegion.center, leftRegion.min, leftRegion.max));
 			leftRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			leftRegionHighlight.name = "LeftRegionHighlight";
 			leftRegionHighlight.transform.position = leftRegion.center;
@@ -365,7 +365,7 @@ public class JointGestureDemo : AgentInteraction {
 				new Vector3 (Helper.GetObjectWorldSize(demoSurface).center.x,
 					Helper.GetObjectWorldSize(demoSurface).max.y+Constants.EPSILON,
 					Helper.GetObjectWorldSize(demoSurface).max.z-Constants.EPSILON));
-			Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
+			//Debug.Log (string.Format ("{0}: {1},{2},{3}", rightRegion, rightRegion.center, rightRegion.min, rightRegion.max));
 			rightRegionHighlight = GameObject.CreatePrimitive(PrimitiveType.Plane);
 			rightRegionHighlight.name = "RightRegionHighlight";
 			rightRegionHighlight.transform.position = rightRegion.center;
@@ -3631,7 +3631,7 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	bool SurfaceClear(GameObject block) {
-		Debug.Log (block);
+		//Debug.Log (block);
 		bool surfaceClear = true;
 		List<GameObject> excludeChildren = block.GetComponentsInChildren<Renderer>().Where(
 			o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != block) || 
@@ -3640,10 +3640,10 @@ public class JointGestureDemo : AgentInteraction {
 			Debug.Log (go);
 		}
 		Bounds blockBounds = Helper.GetObjectWorldSize (block, excludeChildren);
-		Debug.Log (blockBounds);
-		Debug.Log (Helper.GetObjectWorldSize (block).max.y);
-		Debug.Log (Helper.GetObjectWorldSize (block,excludeChildren).max.y);
-		Debug.Log (blockBounds.max.y);
+		//Debug.Log (blockBounds);
+		//Debug.Log (Helper.GetObjectWorldSize (block).max.y);
+		//Debug.Log (Helper.GetObjectWorldSize (block,excludeChildren).max.y);
+		//Debug.Log (blockBounds.max.y);
 		foreach (GameObject otherBlock in availableObjs) {
 			excludeChildren = otherBlock.GetComponentsInChildren<Renderer>().Where(
 				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != otherBlock) || 
@@ -3652,23 +3652,23 @@ public class JointGestureDemo : AgentInteraction {
 				Debug.Log (go);
 			}
 			Bounds otherBounds = Helper.GetObjectWorldSize (otherBlock,excludeChildren);
-			Debug.Log (otherBlock);
-			Debug.Log (otherBounds);
-			Debug.Log (Helper.GetObjectWorldSize (otherBlock).min.y);
-			Debug.Log (Helper.GetObjectWorldSize (otherBlock,excludeChildren).min.y);
-			Debug.Log (otherBounds.min.y);
+			//Debug.Log (otherBlock);
+			//Debug.Log (otherBounds);
+			//Debug.Log (Helper.GetObjectWorldSize (otherBlock).min.y);
+			//Debug.Log (Helper.GetObjectWorldSize (otherBlock,excludeChildren).min.y);
+			//Debug.Log (otherBounds.min.y);
 			Region blockMax = new Region (new Vector3 (blockBounds.min.x, blockBounds.max.y, blockBounds.min.z),
 				new Vector3 (blockBounds.max.x, blockBounds.max.y, blockBounds.max.z));
 			Region otherMin = new Region (new Vector3 (otherBounds.min.x, blockBounds.max.y, otherBounds.min.z),
 				new Vector3 (otherBounds.max.x, blockBounds.max.y, otherBounds.max.z));
 //			if ((QSR.QSR.Above (otherBounds, blockBounds)) && (!QSR.QSR.Left (otherBounds, blockBounds)) &&
 //				(!QSR.QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
-			Debug.Log(Helper.RegionToString(blockMax));
-			Debug.Log(Helper.RegionToString(otherMin));
-			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y)));
-			Debug.Log(QSR.QSR.Above (otherBounds, blockBounds));
-			Debug.Log(((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area())));
-			Debug.Log(RCC8.EC (otherBounds, blockBounds));
+			//Debug.Log(Helper.RegionToString(blockMax));
+			//Debug.Log(Helper.RegionToString(otherMin));
+			//Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y)));
+			//Debug.Log(QSR.QSR.Above (otherBounds, blockBounds));
+			//Debug.Log(((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area())));
+			//Debug.Log(RCC8.EC (otherBounds, blockBounds));
 			if ((QSR.QSR.Above (otherBounds, blockBounds)) && 
 				((Helper.RegionOfIntersection(blockMax,otherMin,MajorAxes.MajorAxis.Y).Area()/blockMax.Area()) > 0.25f) &&
 				(RCC8.EC (otherBounds, blockBounds))) {
@@ -3677,7 +3677,7 @@ public class JointGestureDemo : AgentInteraction {
 			}
 		}
 
-		Debug.Log (surfaceClear);
+		//Debug.Log (surfaceClear);
 		return surfaceClear;
 	}
 
@@ -3984,10 +3984,10 @@ public class JointGestureDemo : AgentInteraction {
 		if (!leftGrasping) {
             if (leftTargetStored == new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)) {
                 leftTargetStored = ikControl.leftHandObj.transform.position;
-                Debug.Log(string.Format("Storing pose {0} {1} {2}",
-                                 Helper.VectorToParsable(ikControl.leftHandObj.transform.position),
-                                 Helper.VectorToParsable(ikControl.rightHandObj.transform.position),
-                                 Helper.VectorToParsable(ikControl.lookObj.transform.position)));
+                //Debug.Log(string.Format("Storing pose {0} {1} {2}",
+                //                 Helper.VectorToParsable(ikControl.leftHandObj.transform.position),
+                //                 Helper.VectorToParsable(ikControl.rightHandObj.transform.position),
+                //                 Helper.VectorToParsable(ikControl.lookObj.transform.position)));
             }
 		}
 		else {
@@ -3997,10 +3997,10 @@ public class JointGestureDemo : AgentInteraction {
 		if (!rightGrasping) {
             if (rightTargetStored == new Vector3(float.MaxValue, float.MaxValue, float.MaxValue)) {
                 rightTargetStored = ikControl.rightHandObj.transform.position;
-                Debug.Log(string.Format("Storing pose {0} {1} {2}",
-                                 Helper.VectorToParsable(ikControl.leftHandObj.transform.position),
-                                 Helper.VectorToParsable(ikControl.rightHandObj.transform.position),
-                                 Helper.VectorToParsable(ikControl.lookObj.transform.position)));
+                //Debug.Log(string.Format("Storing pose {0} {1} {2}",
+                //                 Helper.VectorToParsable(ikControl.leftHandObj.transform.position),
+                //                 Helper.VectorToParsable(ikControl.rightHandObj.transform.position),
+                //                 Helper.VectorToParsable(ikControl.lookObj.transform.position)));
             }
 		}
 		else {
@@ -4011,10 +4011,10 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
 	public void ReturnToPose() {
-        Debug.Log(string.Format("Returning to pose {0} {1} {2}",
-                                Helper.VectorToParsable(leftTargetStored),
-                                Helper.VectorToParsable(rightTargetStored),
-                                Helper.VectorToParsable(headTargetStored)));
+        //Debug.Log(string.Format("Returning to pose {0} {1} {2}",
+        //                        Helper.VectorToParsable(leftTargetStored),
+        //                        Helper.VectorToParsable(rightTargetStored),
+        //                        Helper.VectorToParsable(headTargetStored)));
         bool animPlaying = false;
 		for (int i = 0; i < Diana.GetComponent<Animator> ().layerCount; i++) {
             if (Diana.GetComponent<Animator> ().GetCurrentAnimatorClipInfo(i)[0].clip != null) {

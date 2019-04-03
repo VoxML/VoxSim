@@ -52,8 +52,8 @@ public class AStarSearch : MonoBehaviour {
 	void Start () {
 		Renderer r = embeddingSpace.GetComponent<Renderer> ();
 		embeddingSpaceBounds = r.bounds;
-		Debug.Log (embeddingSpaceBounds.min);
-		Debug.Log (embeddingSpaceBounds.max);
+		//Debug.Log (embeddingSpaceBounds.min);
+		//Debug.Log (embeddingSpaceBounds.max);
 	}
 	
 	// Update is called once per frame
@@ -500,7 +500,7 @@ public class AStarSearch : MonoBehaviour {
                 // O(1)
                 curPos = openSet.TakeMin();
 
-                Debug.Log(counter + " ======== curNode ====== (" + Helper.VectorToParsable(curPos) + ") " + gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
+                //Debug.Log(counter + " ======== curNode ====== (" + Helper.VectorToParsable(curPos) + ") " + gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
 
                 float currentDistance = (curPos - endPos).magnitude;
                 if (currentDistance < bestMagnitude)
@@ -548,13 +548,13 @@ public class AStarSearch : MonoBehaviour {
                         // Heap is automatically rearranged
                         if (!openSet.Has(neighbor))
                         {
-                            Debug.Log ("=== Add candidate === (" + Helper.VectorToParsable(neighbor) + ")");
+                            //Debug.Log ("=== Add candidate === (" + Helper.VectorToParsable(neighbor) + ")");
                             openSet.Add(neighbor);
                         }
                         else
                         {
                             // If neighbor is already there, update the heap
-                            Debug.Log ("=== Update candidate === (" + Helper.VectorToParsable(neighbor) + ")");
+                            //Debug.Log ("=== Update candidate === (" + Helper.VectorToParsable(neighbor) + ")");
                             openSet.Update(neighbor);
                         }
                     }

@@ -130,8 +130,7 @@ public class PluginImport : MonoBehaviour {
                 {
                     if (!tryAgain.ContainsKey(fusionUrlString))
                     {
-						// TODO this was commented out on networking fix (cleanup branch), make sure this doesn't break the fix
-                        tryAgain.Add(fusionUrlString, typeof(FusionSocket));
+                        //tryAgain.Add(fusionUrlString, typeof(FusionSocket));
                     }
                 }
             }
@@ -345,8 +344,8 @@ public class PluginImport : MonoBehaviour {
                 string inputFromFusion = _fusionSocket.GetMessage();
 				if (inputFromFusion != "")
 				{
-					Debug.Log(inputFromFusion);
-					Debug.Log(_fusionSocket.HowManyLeft() + " messages left.");
+					//Debug.Log(inputFromFusion);
+					//Debug.Log(_fusionSocket.HowManyLeft() + " messages left.");
 					_fusionSocket.OnFusionReceived(this, new FusionEventArgs(inputFromFusion));
 				}
 			}

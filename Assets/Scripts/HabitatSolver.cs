@@ -41,11 +41,11 @@ public class HabitatSolver : MonoBehaviour {
 			}
 		}
 
-		Debug.Log (string.Format ("{0}.align({1},{2})", obj.name, axis1, axis2));
+		//Debug.Log (string.Format ("{0}.align({1},{2})", obj.name, axis1, axis2));
 		//Debug.Log (Vector3.Dot(axis1,axis2));
 
 		bool r = Mathf.Abs (Mathf.Abs (Vector3.Dot (axis1, axis2)) - 1) < Constants.EPSILON;
-		Debug.Log (r);
+		//Debug.Log (r);
 		return r;
 	}
 
@@ -71,11 +71,11 @@ public class HabitatSolver : MonoBehaviour {
 			}
 		}
 
-		Debug.Log (obj.transform.up);
+		//Debug.Log (obj.transform.up);
 
-		Debug.Log (string.Format ("{0}.top({1})", obj.name, axis));
+		//Debug.Log (string.Format ("{0}.top({1})", obj.name, axis));
 		bool r = Mathf.Abs (Vector3.Dot (obj.transform.up, axis) - 1) < Constants.EPSILON;
-		Debug.Log (r);
+		//Debug.Log (r);
 		return r;
 	}
 }
