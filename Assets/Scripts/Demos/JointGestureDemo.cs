@@ -2182,12 +2182,10 @@ public class JointGestureDemo : AgentInteraction {
 
         if ((interactionLogic.GraspedObj != null) && (interactionLogic.ActionOptions.Count > 0)) {
             string grabStr = string.Empty;
-            if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper)
-            {
+            if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper) {
                 grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
             }
-            else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper)
-            {
+            else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper) {
                 grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
             }
 
@@ -2881,6 +2879,7 @@ public class JointGestureDemo : AgentInteraction {
 	public void EndState(object[] content) {
         ReturnHandsToDefault();
         eventManager.referents.stack.Clear();
+        interactionLogic.LearnableInstructions.Clear();
         epistemicModel.SaveUserModel(epistemicModel.userID);
 		RespondAndUpdate ("Bye!");
 
