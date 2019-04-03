@@ -1261,20 +1261,20 @@ namespace Agent
                 GetState("StartServo"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-            TransitionRelation.Add(new PDAInstruction(  // check this
-                GetStates("Wait"),
-                GetInputSymbolsByName("G servo left start",
-                    "G servo right start",
-                    "G servo front start",
-                    "G servo back start"),
-                GenerateStackSymbolFromConditions(
-                    (o) => o == null, (g) => g == null,
-                    null, null, null, null
-                ),
-                GetState("RequestObject"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-                    new StackSymbolContent(null, null, null, null,
-                        new FunctionDelegate(GenerateDirectedServoCommand), new List<string>()))));
+            //TransitionRelation.Add(new PDAInstruction(  // check this
+                //GetStates("Wait"),
+                //GetInputSymbolsByName("G servo left start",
+                //    "G servo right start",
+                //    "G servo front start",
+                //    "G servo back start"),
+                //GenerateStackSymbolFromConditions(
+                //    (o) => o == null, (g) => g == null,
+                //    null, null, null, null
+                //),
+                //GetState("RequestObject"),
+                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    //new StackSymbolContent(null, null, null, null,
+                        //new FunctionDelegate(GenerateDirectedServoCommand), new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
