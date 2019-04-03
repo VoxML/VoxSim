@@ -2879,7 +2879,11 @@ public class JointGestureDemo : AgentInteraction {
 	public void EndState(object[] content) {
         ReturnHandsToDefault();
         eventManager.referents.stack.Clear();
-        interactionLogic.LearnableInstructions.Clear();
+        Dictionary<List<PDASymbol>, PDAStackOperation> temp = new Dictionary<List<PDASymbol>, PDAStackOperation>();
+        foreach (List<PDASymbol> key in interactionLogic.LearnableInstructions.Keys) {
+            temp.Add(key, null);
+        }
+        interactionLogic.LearnableInstructions = temp;
         epistemicModel.SaveUserModel(epistemicModel.userID);
 		RespondAndUpdate ("Bye!");
 
