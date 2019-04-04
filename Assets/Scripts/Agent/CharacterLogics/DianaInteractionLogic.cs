@@ -378,7 +378,17 @@ namespace Agent
         }
     }
 
-	public class DianaInteractionLogic : CharacterLogicAutomaton
+    public class AttentionShiftEventArgs : EventArgs
+    {
+        public PDASymbol Symbol { get; set; }
+
+        public AttentionShiftEventArgs(PDASymbol symbol)
+        {
+            this.Symbol = symbol;
+        }
+    }
+
+    public class DianaInteractionLogic : CharacterLogicAutomaton
 	{
 		public GameObject IndicatedObj {
 			get { return GetCurrentStackSymbol() == null ? null : 
@@ -544,6 +554,9 @@ namespace Agent
 		Timer repeatTimer;
 		bool forceRepeat = false;
 
+        List<PDASymbol> attentionInputSymbols = new List<PDASymbol>();
+        List<PDASymbol> inattentionInputSymbols = new List<PDASymbol>();
+
         public event EventHandler ChangeState;
 
         public void OnChangeState(object sender, EventArgs e)
@@ -551,6 +564,16 @@ namespace Agent
             if (ChangeState != null)
             {
                 ChangeState(this, e);
+            }
+        }
+
+        public event EventHandler AttentionShift;
+
+        public void OnAttentionShift(object sender, EventArgs e)
+        {
+            if (AttentionShift != null)
+            {
+                AttentionShift(this, e);
             }
         }
 
@@ -1019,7 +1042,17 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("P l"));
 			InputSymbols.Add(new PDASymbol("P r"));
 
-			List<PDASymbol> colors = GetInputSymbolsByName (
+            attentionInputSymbols = GetInputSymbolsByName(
+                "G attentive start",
+                "G attentive stop"
+            );
+
+            inattentionInputSymbols = GetInputSymbolsByName(
+                "G inattentive left",
+                "G inattentive right"
+            );
+
+            List<PDASymbol> colors = GetInputSymbolsByName (
 				"S RED",
 				"S GREEN",
 				"S YELLOW",
@@ -1056,7 +1089,7 @@ namespace Agent
                 "G lh gesture 6 start"
             );
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartState"),
 				GetInputSymbolsByName("G engage start"),
 				GenerateStackSymbol(null, null, null, null, null, null),
@@ -3356,6 +3389,11 @@ namespace Agent
 			}
 
 			LastInputSymbol = GetInputSymbolByName (((CharacterLogicEventArgs)e).InputSymbolName);
+
+            if (inattentionInputSymbols.Contains(LastInputSymbol) || attentionInputSymbols.Contains(LastInputSymbol))
+            {
+                OnAttentionShift(this, new AttentionShiftEventArgs(LastInputSymbol));
+            }
 
 			var curStackSymbol = GetCurrentStackSymbol();
 

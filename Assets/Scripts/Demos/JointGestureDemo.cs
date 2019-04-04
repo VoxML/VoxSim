@@ -243,6 +243,7 @@ public class JointGestureDemo : AgentInteraction {
 		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
+        interactionLogic.AttentionShift += AttentionShift;
 
         if (GameObject.Find("DianaMemory") != null)
         {
@@ -3000,7 +3001,26 @@ public class JointGestureDemo : AgentInteraction {
                 new List<GameObject> (), new List<string>(), new List<string>())));
 	}
 
-	public void MoveToPerform() {
+    void AttentionShift(object sender, EventArgs e) {
+        if (((AttentionShiftEventArgs)e).Symbol != null) {
+            string symbol = ((AttentionShiftEventArgs)e).Symbol.Name;
+            symbol = interactionLogic.RemoveInputSymbolType(symbol, interactionLogic.GetInputSymbolType(symbol));
+            if (symbol.StartsWith("inattentive")) {
+                if (symbol.EndsWith("left")) {
+                    LookAt(new Vector3(headTargetDefault.x + 2.0f, headTargetDefault.y, headTargetDefault.z));
+                }
+                else if (symbol.EndsWith("right")) {
+                    LookAt(new Vector3(headTargetDefault.x - 2.0f, headTargetDefault.y, headTargetDefault.z));
+                }
+            }
+            else if (symbol.StartsWith("attentive")) {
+                RespondAndUpdate("");
+                LookForward();
+            }
+        }
+    }
+
+    public void MoveToPerform() {
 		bool leftGrasping = false;
 		bool rightGrasping = false;
 
@@ -4551,7 +4571,7 @@ public class JointGestureDemo : AgentInteraction {
         //Debug.Log(interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
     }
 
-	void ConnectionLost(object sender, EventArgs e) {
+    void ConnectionLost(object sender, EventArgs e) {
 		LookForward();
         //Debug.Log("Connection Lost");
 
