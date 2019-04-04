@@ -666,11 +666,20 @@ public class JointGestureDemo : AgentInteraction {
             interactionPrefs.userName = epistemicModel.userID;
         }
 
-        RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
-            "Hello.");
-		MoveToPerform ();
-		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
+        sessionCounter++;
 
+        if (sessionCounter == 1) {
+            RespondAndUpdate(interactionPrefs.userName != "" ? string.Format("Hello, {0}.", interactionPrefs.userName) :
+                "Hello.");
+        }
+        else if (sessionCounter > 1) {
+            RespondAndUpdate(interactionPrefs.userName != "" ? string.Format("Welcome back, {0}.", interactionPrefs.userName) :
+                "Welcome back.");
+        }
+
+		MoveToPerform ();
+        gestureController.PerformGesture(AvatarGesture.RARM_WAVE);
+        
         if (logFullState) {
             foreach (Voxeme voxeme in objSelector.allVoxemes) {
                 if ((voxeme.gameObject.activeInHierarchy) &&
@@ -1566,18 +1575,51 @@ public class JointGestureDemo : AgentInteraction {
                 message = message.Replace("one", "block");
             }
 
-            if (message.Split().Contains("it")) {
-                object referent = eventManager.referents.stack.Peek();
+            if (message.Split().Contains("it") || (message.Split().Contains("them"))) {
+                if (eventManager.referents.stack.Count > 0) {
+                    object referent = eventManager.referents.stack.Peek();
 
-                if (referent.GetType() == typeof(String)) {
-                    GameObject voxObj = GameObject.Find(referent as String);
-                    if (voxObj != null) {
-                        message = message.Replace("it", voxObj.name);
+                    if (referent.GetType() == typeof(String)) {
+                        GameObject voxObj = GameObject.Find(referent as String);
+                        if (voxObj != null) {
+                            if (message.Split().Contains("it")) {
+                                message = message.Replace("it", voxObj.name);
+                            }
+                            else if (message.Split().Contains("them")) {
+                                message = message.Replace("them", voxObj.name);
+                            }
+                        }
+                        else {
+                            if (message.Split().Contains("it")) {
+                                message = message.Replace("it", "{0}");
+                            }
+                            else if (message.Split().Contains("them")) {
+                                message = message.Replace("them", "{0}");
+                            }
+                        }
+                    }
+                    else {
+                        if (message.Split().Contains("it")) {
+                            message = message.Replace("it", "{0}");
+                        }
+                        else if (message.Split().Contains("them")) {
+                            message = message.Replace("them", "{0}");
+                        }
+                    }
+                }
+                else {
+                    if (message.Split().Contains("it")) {
+                        message = message.Replace("it", "{0}");
+                    }
+                    else if (message.Split().Contains("them")) {
+                        message = message.Replace("them", "{0}");
                     }
                 }
             }
 
-			if (message.Contains ("there")) {
+            Debug.Log(message);
+
+            if (message.Contains ("there")) {
                 if ((regionHighlight.GetComponent<Renderer> ().material == activeHighlightMaterial) &&
                     (regionHighlight.transform.position.y > 0.0f)) {
 					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
@@ -1836,7 +1878,15 @@ public class JointGestureDemo : AgentInteraction {
 		objectOptions = objectOptions.OrderBy (o => (o.transform.position - highlightCenter).magnitude).ToList();
 
 		if (objectOptions.Count > 0) {
-			interactionLogic.RewriteStack (
+
+            if (interactionLogic.IndicatedObj != null) {
+                objectOptions = objectOptions.Where(o => !o.transform.IsChildOf(interactionLogic.IndicatedObj.transform)).ToList();
+            }
+            else if (interactionLogic.GraspedObj != null) {
+                objectOptions = objectOptions.Where(o => !o.transform.IsChildOf(interactionLogic.GraspedObj.transform)).ToList();
+            }
+
+            interactionLogic.RewriteStack (
 				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 					interactionLogic.GenerateStackSymbol (null, null, null, objectOptions, null, null)));
 		}
@@ -2137,7 +2187,10 @@ public class JointGestureDemo : AgentInteraction {
 			if ((new Regex(@"grasp\(\{0\}\)")).IsMatch (interactionLogic.ActionOptions [0])) {
 				RespondAndUpdate ("What should I grab?");
 			}
-			else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch (interactionLogic.ActionOptions [0])) {
+            else if ((new Regex(@"lift\(\{0\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                RespondAndUpdate("What should I lift?");
+            }
+            else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch (interactionLogic.ActionOptions [0])) {
 				RespondAndUpdate ("What should I put there?");
 			}
 			else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch (interactionLogic.ActionOptions [0])) ||
@@ -4416,6 +4469,10 @@ public class JointGestureDemo : AgentInteraction {
             }
         }
         else if (((EventReferentArgs)e).Referent is string) {   // absent object type - string
+            if (((EventReferentArgs)e).Referent as string == "{0}") {
+                return;
+            }
+
             RespondAndUpdate(string.Format("There is no {0} here.", ((EventReferentArgs)e).Referent as string));
             if (interactionLogic.IndicatedObj != null) {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,

@@ -621,7 +621,8 @@ namespace Agent
 		}
 
 		public List<PDASymbol> PushPutOptions (object arg) {
-			List<PDASymbol> symbolList = Enumerable.Range (0, ObjectOptions.Count).Select (s => 
+			List<PDASymbol> symbolList = Enumerable.Range (0,
+                ObjectOptions.Count).Select (s => 
 				GenerateStackSymbol (IndicatedObj,
 					null, null, 
                     (IndicatedRegion != null) ? ObjectOptions.OrderByDescending(
@@ -1368,8 +1369,18 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
-                        (a.Where(aa => aa.Contains("grasp")).ToList().Count == 0)), null),
+                        (a.Where(aa => (aa.Contains("grasp") || aa.Contains("{0}"))).ToList().Count == 0)), null),
                 GetState("ConfirmEvent"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count > 0)), null),
+                GetState("RequestObject"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
