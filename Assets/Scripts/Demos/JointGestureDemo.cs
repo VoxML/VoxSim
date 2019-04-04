@@ -2179,18 +2179,18 @@ public class JointGestureDemo : AgentInteraction {
 	public void StartGrab(object[] content) {
         // see if this object has a learned conventional grasp pose associated with it
         GameObject obj = null;
+        if (interactionLogic.ActionOptions.Count > 0) {
+            obj = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0] as GameObject;
 
-        if ((interactionLogic.GraspedObj != null) && (interactionLogic.ActionOptions.Count > 0)) {
-            string grabStr = string.Empty;
-            if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper) {
-                grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
-            }
-            else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper) {
-                grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
-            }
-
-            obj = eventManager.ExtractObjects(Helper.GetTopPredicate(grabStr),
-                (String)Helper.ParsePredicate(grabStr)[Helper.GetTopPredicate(grabStr)])[0] as GameObject;
+            //if ((obj != null) && (interactionLogic.ActionOptions.Count > 0)) {
+            //    if (InteractionHelper.GetCloserHand(Diana, obj) == leftGrasper) {
+            //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
+            //    }
+            //    else if (InteractionHelper.GetCloserHand(Diana, obj) == rightGrasper) {
+            //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
+            //    }
+            //}
         }
         
         List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
@@ -2274,11 +2274,11 @@ public class JointGestureDemo : AgentInteraction {
                     PromptEvent(interactionLogic.ActionOptions[0]);
 
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                        interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
+                        interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, null, null)));
                 }
                 else {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                        interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
+                        interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, null, null)));
                 }
             }
         }

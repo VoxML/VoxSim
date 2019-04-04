@@ -1201,7 +1201,8 @@ namespace Agent
 					null, null, null, null
 				),	
 				GetState("StartGrabMove"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -1331,7 +1332,15 @@ namespace Agent
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, null, null, null, null))));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("S VP"),
+                GenerateStackSymbolFromConditions(null, (g) => g != null, null, null, null, null),
+                GetState("ParseVP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S NP"),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
