@@ -1364,12 +1364,20 @@ namespace Agent
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("S PP"),
+                GenerateStackSymbolFromConditions((o) => o == null, (g) => g == null, null, null, null, null),
+                GetState("ParsePP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
                 GetStates("ParseVP"),
                 null,
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
-                        (a.Where(aa => (aa.Contains("grasp") || aa.Contains("{0}"))).ToList().Count == 0)), null),
+                        (a.Where(aa => (aa.Contains("grasp") || 
+                            aa.Contains("{0}"))).ToList().Count == 0)), null),
                 GetState("ConfirmEvent"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
@@ -1441,7 +1449,18 @@ namespace Agent
                null,
                GenerateStackSymbolFromConditions(
                    null, null, null, null,
-                   (a) => a.Count == 1, null),
+                   (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count > 0)), null),
+               GetState("RequestObject"),
+               new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+               GetStates("ParsePP"),
+               null,
+               GenerateStackSymbolFromConditions(
+                   null, null, null, null,
+                   (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count == 0)), null),
                GetState("ConfirmEvent"),
                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 

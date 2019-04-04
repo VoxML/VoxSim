@@ -1742,10 +1742,16 @@ public class JointGestureDemo : AgentInteraction {
             else if (interactionLogic.GraspedObj != null) {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
-                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.IndicatedObj.name, message)) }), null)));
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.GraspedObj.name, message)) }), null)));
+            }
+            else {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", "{0}", message)) }), null)));
+
             }
 
-			break;
+            break;
 
 		default:
 			break;
@@ -4550,16 +4556,13 @@ public class JointGestureDemo : AgentInteraction {
         //Debug.Log("Connection Lost");
 
         if (interactionPrefs.connectionLostNotification) {
-            if (sessionCounter >= 1) {
-                if (eventManager.events.Count == 0) {
-                    RespondAndUpdate("Hey, where'd you go?");
-                }
-            }
-            else {
-                if (eventManager.events.Count == 0) {
-                    if (interactionLogic.CurrentState.Name != "EndState")
-                    {
-                        fusionSocket.OnFusionReceived(this, new FusionEventArgs("G;engage stop;0.0"));
+            if (eventManager.events.Count == 0) {
+                if (interactionLogic.CurrentState.Name != "EndState") {
+                    fusionSocket.OnFusionReceived(this, new FusionEventArgs("G;engage stop;0.0"));
+                    if (sessionCounter >= 1) {
+                        RespondAndUpdate("Hey, where'd you go?");
+                    }
+                    else {
                         RespondAndUpdate("Anyone there?");
                     }
                 }
