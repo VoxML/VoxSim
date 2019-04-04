@@ -327,7 +327,6 @@ public class EventManager : MonoBehaviour {
 			return;
 		}
 
-
 		Hashtable predArgs = Helper.ParsePredicate (events [0]);
 		String pred = Helper.GetTopPredicate (events [0]);
 
@@ -344,14 +343,14 @@ public class EventManager : MonoBehaviour {
 		ClearSkolems ();
 		ParseCommand (command);
 
-		string globalsApplied = ApplyGlobals (command);
+        string globalsApplied = ApplyGlobals (command);
 
-		FinishSkolemization ();
-		skolemized = Skolemize (globalsApplied);
+        FinishSkolemization();
+        skolemized = Skolemize (globalsApplied);
 		Debug.Log ("Skolemized command: " + skolemized);
-		//EvaluateSkolemizedCommand(skolemized);
+        //EvaluateSkolemizedCommand(skolemized);
 
-		if (!EvaluateSkolemConstants (EvaluationPass.Attributes)) {
+        if (!EvaluateSkolemConstants (EvaluationPass.Attributes)) {
 			RemoveEvent (events.Count - 1);
 			return false;
 		}
@@ -447,9 +446,10 @@ public class EventManager : MonoBehaviour {
 
                                         if (go == null)
                                         {
-                                            OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
-
-                                            throw new ArgumentNullException("Couldn't resolve the object");
+                                            //OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
+                                            OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
+                                            return objs;
+                                            //throw new ArgumentNullException("Couldn't resolve the object");
                                             // abort
                                         }
                                     }
@@ -459,8 +459,16 @@ public class EventManager : MonoBehaviour {
                                     List<object> args = ExtractObjects(Helper.GetTopPredicate(arg as String),
                                         (String)Helper.ParsePredicate(arg as String)[
                                         Helper.GetTopPredicate(arg as String)]);
-
+                                            
                                     foreach (object o in args) {
+                                        if (o is GameObject) {
+                                            if ((o as GameObject).GetComponent<Voxeme>() != null) {
+                                                if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)o).name))) {
+                                                    referents.stack.Push(((GameObject)o).name);
+                                                }
+                                                OnEntityReferenced(this, new EventReferentArgs(((GameObject)o).name));
+                                            }
+                                        }
                                         objs.Add(o);
                                     }
                                 }
@@ -487,15 +495,19 @@ public class EventManager : MonoBehaviour {
 			try {
 				var objs = ExtractObjects (pred, (String)predArgs [pred]);
 
-                foreach (var obj in objs) {
-                    if (obj is GameObject) {
-                        if ((obj as GameObject).GetComponent<Voxeme>() != null) {
-                            if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
-                                referents.stack.Push(((GameObject)obj).name);
+                if (methodToCall != null) { // found a method
+                    if (methodToCall.ReturnType == typeof(void)) { // is it a program?
+                        foreach (var obj in objs) {
+                            if (obj is GameObject) {
+                                if ((obj as GameObject).GetComponent<Voxeme>() != null) {
+                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)obj).name))) {
+                                        referents.stack.Push(((GameObject)obj).name);
+                                    }
+                                    OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
+                                }
                             }
-                            OnEntityReferenced(this, new EventReferentArgs(((GameObject)obj).name));
                         }
-                    }
+                   }
                 }
 
 				if (preds.rdfTriples.Count > 0) {
@@ -647,21 +659,26 @@ public class EventManager : MonoBehaviour {
 				if (kkv.Key != kv.Key) {
 					//Debug.Log ("FinishSkolemization: "+kv.Key+ " " +kkv.Key);
 					if (!temp.Contains (kkv.Key)) {
-						if (((String)kkv.Value).Contains ((String)kv.Value)) {
-							//Debug.Log ("FinishSkolemization: " + kv.Value + " found in " + kkv.Value);
-							//Debug.Log ("FinishSkolemization: " + kkv.Key + " : " + ((String)kkv.Value).Replace ((String)kv.Value, (String)kv.Key));
+						if (((String)kkv.Value).Contains ((String)kv.Value) && 
+                            ((((String)kkv.Value).Count(f => f == '(') + ((String)kkv.Value).Count(f => f == ')')) - 
+                            (((String)kv.Value).Count(f => f == '(') + ((String)kv.Value).Count(f => f == ')')) == 2)) {
+							Debug.Log ("FinishSkolemization: " + kv.Value + " found in " + kkv.Value);
+							Debug.Log ("FinishSkolemization: " + kkv.Key + " : " + ((String)kkv.Value).Replace ((String)kv.Value, (String)kv.Key));
 							temp [kkv.Key] = ((String)kkv.Value).Replace ((String)kv.Value, (String)kv.Key);
-						}
-					}
+                            Debug.Log("FinishSkolemization: " + temp[kkv.Key]);
+                        }
+                    }
 				}
 			}
 		}
 
 		foreach (DictionaryEntry kv in temp) {
-			skolems[kv.Key] = temp[kv.Key];
-		}
+            Debug.Log("FinishSkolemization: " + temp[kv.Key]);
+            skolems[kv.Key] = temp[kv.Key];
+            Debug.Log("FinishSkolemization: " + skolems[kv.Key]);
+        }
 
-		Helper.PrintKeysAndValues(skolems);
+        Helper.PrintKeysAndValues(skolems);
 	}
 
 	public String Skolemize(String inString) {
@@ -670,9 +687,10 @@ public class EventManager : MonoBehaviour {
 
 		int parenCount = temp.Count(f => f == '(') + 
 			temp.Count(f => f == ')');
-		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+		Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
-		do{
+        do
+        {
 			foreach (DictionaryEntry kv in skolems) {
 				outString = (String)outString.Replace((String)kv.Value,(String)kv.Key);
 				//Debug.Log (outString);
@@ -817,8 +835,11 @@ public class EventManager : MonoBehaviour {
                                     //Debug.Log(string.Format("{0} matches", matches.Count));
 
 									if (matches.Count == 0) {
-										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
+                                        Debug.Log(arg as String);
+                                        Debug.Log(preds.GetType().GetMethod(pred.ToUpper()).ReturnType);
+                                        //if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
 											GameObject go = GameObject.Find (arg as String);
+                                            Debug.Log(go);
 											if (go == null) {
 												for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
 													if (objSelector.disabledObjects[i].name == (arg as String)) {
@@ -827,15 +848,15 @@ public class EventManager : MonoBehaviour {
 													}
 												}
 
-												if (go == null) {
+                                                Debug.Log(go);
+                                                if (go == null) {
 													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-                                                    OnNonexistentEntityError(this,
-                                                        new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
+                                                    OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
 													return false;	// abort
 												}
 											}
 											objs.Add (go);
-										}
+										//}
 									}
 									else if (matches.Count == 1) {
 										if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {	// if predicate not going to return string (as in "AS")
@@ -851,7 +872,7 @@ public class EventManager : MonoBehaviour {
 												if (go == null) {
 													//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
                                                     OnNonexistentEntityError(this,
-                                                                             new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
+                                                        new EventReferentArgs(new Pair<string, List<GameObject>>(pred, matches)));
 													return false;	// abort
 												}
 											}

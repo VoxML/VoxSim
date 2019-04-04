@@ -129,7 +129,38 @@ public static class RiggingHelper {
 		}
 
 		child.transform.parent = parent.transform;
-		Debug.Log (child.name + " rigged to " + parent.name);
+		Debug.LogWarning (child.name + " rigged to " + parent.name);
+
+        if (!child.GetComponent<Rigging>().usePhysicsRig) {
+            if (parent.transform.Find(string.Format("{0}_collision_clone", child.name)) == null) {
+                GameObject childCollisionClone = GameObject.Instantiate(child, child.transform.position, child.transform.rotation);
+                foreach (Renderer renderer in childCollisionClone.GetComponentsInChildren<Renderer>()) {
+                    renderer.enabled = false;
+                }
+
+                childCollisionClone.transform.parent = parent.transform;
+                BoxCollider[] colliders = childCollisionClone.GetComponentsInChildren<BoxCollider>();
+                foreach (BoxCollider collider in colliders) {
+                    if (collider.gameObject != childCollisionClone) {
+                        if (collider != null) {
+                            collider.isTrigger = false;
+                        }
+                    }
+                }
+
+                FixedJoint[] fixedJoints = childCollisionClone.GetComponentsInChildren<FixedJoint>();
+                foreach (FixedJoint fixedJoint in fixedJoints) {
+                    Object.Destroy(fixedJoint);
+                }
+
+                Rigidbody[] rigidbodies = childCollisionClone.GetComponentsInChildren<Rigidbody>();
+                foreach (Rigidbody rigidbody in rigidbodies) {
+                    Object.Destroy(rigidbody);
+                }
+
+                childCollisionClone.name = childCollisionClone.name.Replace("(Clone)", "_collision_clone");
+            }
+        }
 	}
 
 	public static void UnRig(GameObject child, GameObject parent) {
@@ -140,5 +171,10 @@ public static class RiggingHelper {
 		}
 
 		child.transform.parent = null;
+
+        Transform childCollisionClone = parent.transform.Find(string.Format("{0}_collision_clone", child.name));
+        if (childCollisionClone != null) {
+            Object.Destroy(childCollisionClone.gameObject);
+        }
 	}
 }

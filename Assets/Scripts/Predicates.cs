@@ -1167,8 +1167,8 @@ public class Predicates : MonoBehaviour {
 					GameObject dest = GameObject.Find (rdfTriples [0].Item3);	// get destination obj ("plate" in "put apple on plate")
 					Voxeme voxComponent = theme.GetComponent<Voxeme> ();
 
-					//Renderer[] renderers = obj.GetComponentsInChildren<Renderer> ();
-					/*Bounds bounds = new Bounds ();
+                    //Renderer[] renderers = obj.GetComponentsInChildren<Renderer> ();
+                    /*Bounds bounds = new Bounds ();
 					
 					foreach (Renderer renderer in renderers) {
 						if (renderer.bounds.min.y - renderer.bounds.center.y < bounds.min.y - bounds.center.y) {
@@ -1176,8 +1176,16 @@ public class Predicates : MonoBehaviour {
 						}
 					}*/
 
-					Bounds themeBounds = Helper.GetObjectWorldSize (theme);	// bounds of theme obj
-					Bounds destBounds = Helper.GetObjectWorldSize (dest);	// bounds of dest obj => alter to get interior enumerated by VoxML structure
+                    List<GameObject> themeChildren = theme.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != theme)).Select(v => v.gameObject).ToList();
+
+                    List<GameObject> destChildren = dest.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != dest)).Select(v => v.gameObject).ToList();
+
+                    Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(theme).size));
+                    Bounds themeBounds = Helper.GetObjectWorldSize (theme, themeChildren);	// bounds of theme obj
+                    Bounds destBounds = Helper.GetObjectWorldSize (dest);	// bounds of dest obj => alter to get interior enumerated by VoxML structure
+                    Debug.Log(Helper.VectorToParsable(themeBounds.size));
 
 					//Debug.Log (Helper.VectorToParsable(bounds.center));
 					//Debug.Log (Helper.VectorToParsable(bounds.min));
@@ -3061,7 +3069,11 @@ public class Predicates : MonoBehaviour {
                 else {
                     if (args[1] is Vector3) {
                         GameObject theme = args[0] as GameObject;   // get theme obj ("apple" in "put apple on plate")
-                        Bounds themeBounds = Helper.GetObjectWorldSize(theme);  // bounds of theme obj
+
+                        List<GameObject> themeChildren = theme.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != theme)).Select(v => v.gameObject).ToList();
+                            
+                        Bounds themeBounds = Helper.GetObjectWorldSize(theme, themeChildren);  // bounds of theme obj
 
                         Vector3 loc = ((Vector3)args[1]);   // coord
 
@@ -5582,6 +5594,12 @@ public class Predicates : MonoBehaviour {
 
                                     InteractionHelper.SetLeftHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
+
+                                    // get parent obj
+                                    if ((args[0] as GameObject).transform.parent != null)
+                                    {
+                                        RiggingHelper.UnRig((args[0] as GameObject), (args[0] as GameObject).transform.parent.gameObject);
+                                    }
                                     //(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
                                 }
                                 else if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) == rightGrasper) {
@@ -5598,6 +5616,11 @@ public class Predicates : MonoBehaviour {
 
                                     InteractionHelper.SetRightHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
+
+                                    // get parent obj
+                                    if ((args[0] as GameObject).transform.parent != null) {
+                                        RiggingHelper.UnRig((args[0] as GameObject), (args[0] as GameObject).transform.parent.gameObject);
+                                    }
                                     //(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
                                 }
                             }
@@ -5690,7 +5713,8 @@ public class Predicates : MonoBehaviour {
 						if (arg is GameObject) {
 							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject> ();
 							if (interactionObject != null) {
-								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) {
+								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
+                                    interactionSystem.IsInInteraction(FullBodyBipedEffector.LeftHand)) {
 									Debug.Log (string.Format ("Ending {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
 
 									//InteractionHelper.SetLeftHandTarget (agent, null);
@@ -5701,7 +5725,8 @@ public class Predicates : MonoBehaviour {
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
                                     //(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;
                                 }
-								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand)) {
+								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand) || 
+                                    interactionSystem.IsInInteraction(FullBodyBipedEffector.RightHand)) {
 									Debug.Log (string.Format ("Ending {0} interaction with {1}", rightGrasper.name, (arg as GameObject).name));
 
 									//InteractionHelper.SetRightHandTarget (agent, null);

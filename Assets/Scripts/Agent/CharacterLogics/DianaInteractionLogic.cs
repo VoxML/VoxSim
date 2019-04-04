@@ -621,7 +621,8 @@ namespace Agent
 		}
 
 		public List<PDASymbol> PushPutOptions (object arg) {
-			List<PDASymbol> symbolList = Enumerable.Range (0, ObjectOptions.Count).Select (s => 
+			List<PDASymbol> symbolList = Enumerable.Range (0,
+                ObjectOptions.Count).Select (s => 
 				GenerateStackSymbol (IndicatedObj,
 					null, null, 
                     (IndicatedRegion != null) ? ObjectOptions.OrderByDescending(
@@ -905,7 +906,7 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G grab move back start"));
 			InputSymbols.Add(new PDASymbol("G grab move up start"));
 			InputSymbols.Add(new PDASymbol("G grab move down start"));
-			InputSymbols.Add(new PDASymbol("G grab stop"));
+            InputSymbols.Add(new PDASymbol("G grab stop"));
 			InputSymbols.Add(new PDASymbol("G push left start"));
 			InputSymbols.Add(new PDASymbol("G push right start"));
 			InputSymbols.Add(new PDASymbol("G push front start"));
@@ -914,14 +915,14 @@ namespace Agent
 			InputSymbols.Add(new PDASymbol("G push right stop"));
 			InputSymbols.Add(new PDASymbol("G push front stop"));
 			InputSymbols.Add(new PDASymbol("G push back stop"));
-            InputSymbols.Add(new PDASymbol("G push servo left start"));
-            InputSymbols.Add(new PDASymbol("G push servo right start"));
-            InputSymbols.Add(new PDASymbol("G push servo front start"));
-            InputSymbols.Add(new PDASymbol("G push servo back start"));
-            InputSymbols.Add(new PDASymbol("G push servo left stop"));
-            InputSymbols.Add(new PDASymbol("G push servo right stop"));
-            InputSymbols.Add(new PDASymbol("G push servo front stop"));
-            InputSymbols.Add(new PDASymbol("G push servo back stop"));
+            InputSymbols.Add(new PDASymbol("G servo left start"));
+            InputSymbols.Add(new PDASymbol("G servo right start"));
+            InputSymbols.Add(new PDASymbol("G servo front start"));
+            InputSymbols.Add(new PDASymbol("G servo back start"));
+            InputSymbols.Add(new PDASymbol("G servo left stop"));
+            InputSymbols.Add(new PDASymbol("G servo right stop"));
+            InputSymbols.Add(new PDASymbol("G servo front stop"));
+            InputSymbols.Add(new PDASymbol("G servo back stop"));
 			InputSymbols.Add(new PDASymbol("G count one start"));
 			InputSymbols.Add(new PDASymbol("G count two start"));
 			InputSymbols.Add(new PDASymbol("G count three start"));
@@ -1201,7 +1202,8 @@ namespace Agent
 					null, null, null, null
 				),	
 				GetState("StartGrabMove"),
-				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -1239,10 +1241,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Wait"),
-                GetInputSymbolsByName("G push servo left start",
-                    "G push servo right start",
-                    "G push servo front start",
-                    "G push servo back start"),
+                GetInputSymbolsByName("G servo left start",
+                    "G servo right start",
+                    "G servo front start",
+                    "G servo back start"),
                 GenerateStackSymbolFromConditions(
                     (o) => o != null, (g) => g == null, null, null, null, null
                 ),
@@ -1251,30 +1253,30 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Wait"),
-                GetInputSymbolsByName("G push servo left start",
-                    "G push servo right start",
-                    "G push servo front start",
-                    "G push servo back start"),
+                GetInputSymbolsByName("G servo left start",
+                    "G servo right start",
+                    "G servo front start",
+                    "G servo back start"),
                 GenerateStackSymbolFromConditions(
                     (o) => o == null, (g) => g != null, null, null, null, null
                 ),
                 GetState("StartServo"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-            TransitionRelation.Add(new PDAInstruction(  // check this
-                GetStates("Wait"),
-                GetInputSymbolsByName("G push servo left start",
-                    "G push servo right start",
-                    "G push servo front start",
-                    "G push servo back start"),
-                GenerateStackSymbolFromConditions(
-                    (o) => o == null, (g) => g == null,
-                    null, null, null, null
-                ),
-                GetState("RequestObject"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-                    new StackSymbolContent(null, null, null, null,
-                        new FunctionDelegate(GenerateDirectedServoCommand), new List<string>()))));
+            //TransitionRelation.Add(new PDAInstruction(  // check this
+                //GetStates("Wait"),
+                //GetInputSymbolsByName("G servo left start",
+                //    "G servo right start",
+                //    "G servo front start",
+                //    "G servo back start"),
+                //GenerateStackSymbolFromConditions(
+                //    (o) => o == null, (g) => g == null,
+                //    null, null, null, null
+                //),
+                //GetState("RequestObject"),
+                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    //new StackSymbolContent(null, null, null, null,
+                        //new FunctionDelegate(GenerateDirectedServoCommand), new List<string>()))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
@@ -1331,7 +1333,15 @@ namespace Agent
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, null, null, null, null))));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("S VP"),
+                GenerateStackSymbolFromConditions(null, (g) => g != null, null, null, null, null),
+                GetState("ParseVP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, null, null, null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S NP"),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
@@ -1342,9 +1352,23 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S PP"),
-				GenerateStackSymbol(null, null, null, null, null, null),	
+				GenerateStackSymbolFromConditions((o) => o != null, null, null, null, null, null),	
 				GetState("ParsePP"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("S PP"),
+                GenerateStackSymbolFromConditions(null, (g) => g != null, null, null, null, null),
+                GetState("ParsePP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("S PP"),
+                GenerateStackSymbolFromConditions((o) => o == null, (g) => g == null, null, null, null, null),
+                GetState("ParsePP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("ParseVP"),
@@ -1352,8 +1376,19 @@ namespace Agent
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
-                        (a.Where(aa => aa.Contains("grasp")).ToList().Count == 0)), null),
+                        (a.Where(aa => (aa.Contains("grasp") || 
+                            aa.Contains("{0}"))).ToList().Count == 0)), null),
                 GetState("ConfirmEvent"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count > 0)), null),
+                GetState("RequestObject"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
@@ -1391,21 +1426,53 @@ namespace Agent
                 GetStates("ParseNP"),
                 null,
                 GenerateStackSymbolFromConditions(
-                    (o) => o == null, null,
+                    (o) => o == null, (g) => g == null,
                     null, null, null, null
                 ),
                 GetState("Wait"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-			// if items have value, check and see if sentence is consistent with them
-//			TransitionRelation.Add(new PDAInstruction(
-//				GetStates("Wait"),
-//				GetInputSymbolsByName("S S"),
-//				GenerateStackSymbol(null, null, null, null, null, null),	
-//				GetState("InterpretSentence"),
-//				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseNP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, (g) => g != null,
+                    null, null, null, null
+                ),
+                GetState("ComposeObjectAndAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
+                        new List<GameObject>(), null, null))));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+               GetStates("ParsePP"),
+               null,
+               GenerateStackSymbolFromConditions(
+                   null, null, null, null,
+                   (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count > 0)), null),
+               GetState("RequestObject"),
+               new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+               GetStates("ParsePP"),
+               null,
+               GenerateStackSymbolFromConditions(
+                   null, null, null, null,
+                   (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{0}")).ToList().Count == 0)), null),
+               GetState("ConfirmEvent"),
+               new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            // if items have value, check and see if sentence is consistent with them
+            //			TransitionRelation.Add(new PDAInstruction(
+            //				GetStates("Wait"),
+            //				GetInputSymbolsByName("S S"),
+            //				GenerateStackSymbol(null, null, null, null, null, null),	
+            //				GetState("InterpretSentence"),
+            //				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("ParseQuestion"),
 				null,
 				GenerateStackSymbolFromConditions(null, null, null, null, null, null),	
@@ -2232,7 +2299,7 @@ namespace Agent
 					null, null,
 					(a) => ((a.Count > 0) &&
 						(a.Where(aa => aa.Contains("{0}") || 
-							aa.Contains("slide"))).ToList().Count == 0),
+							(aa.Contains("slide")) || aa.Contains("grasp")).ToList().Count == 0)),
 					null),	
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
@@ -2249,7 +2316,18 @@ namespace Agent
 				GetState("ConfirmEvent"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ComposeObjectAndAction"),
+                null,
+                GenerateStackSymbolFromConditions((o) => o != null, null,
+                    null, null,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("grasp"))).ToList().Count > 0),
+                    null),
+                GetState("StartGrab"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("ComposeObjectAndAction"),
 				null,
 				GenerateStackSymbolFromConditions((o) => o != null, null,
@@ -2291,6 +2369,16 @@ namespace Agent
                 GetStates("ConfirmEvent"),
                 null,
                 GenerateStackSymbolFromConditions(
+                    (o) => o == null, null, null, null,
+                    (a) => a.Count == 0, null
+                ),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ConfirmEvent"),
+                null,
+                GenerateStackSymbolFromConditions(
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
                         (a.Where(aa => aa.Contains("{0}")).ToList().Count > 0)), null
@@ -2303,7 +2391,7 @@ namespace Agent
 				null,
                 GenerateStackSymbolFromConditions(
                     null, null, null, null,
-                    (a) => ((a.Count == 1) &&
+                    (a) => ((a.Count > 0) &&
                         (a.Where(aa => aa.Contains("{0}")).ToList().Count == 0)), null
                 ),	
 				GetState("ExecuteEvent"),
@@ -2328,7 +2416,17 @@ namespace Agent
 				GetState("Wait"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("StartGrab"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null,
+                    null, (a) => a.Count == 0, null, null
+                ),
+                GetState("Wait"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("StartGrab"),
 				null,
 				GenerateStackSymbolFromConditions(
@@ -2493,10 +2591,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("StartServo"),
-                GetInputSymbolsByName("G push servo left stop",
-                    "G push servo right stop",
-                    "G push servo front stop",
-                    "G push servo back stop",
+                GetInputSymbolsByName("G servo left stop",
+                    "G servo right stop",
+                    "G servo front stop",
+                    "G servo back stop",
                     "G nevermind start"),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("StopServo"),
@@ -2540,10 +2638,10 @@ namespace Agent
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("Servo"),
-                GetInputSymbolsByName("G push servo left stop",
-                    "G push servo right stop",
-                    "G push servo front stop",
-                    "G push servo back stop",
+                GetInputSymbolsByName("G servo left stop",
+                    "G servo right stop",
+                    "G servo front stop",
+                    "G servo back stop",
                     "G nevermind start"),
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("StopServo"),
@@ -2698,9 +2796,9 @@ namespace Agent
                 null,
                 GenerateStackSymbolFromConditions(null, null, null, null, null, null),
                 GetState("Wait"),
-                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, GetState("Wait"))));
-				//new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
-					//new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
+                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, GetState("Wait"))));
+				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Flush,
+					new StackSymbolContent(null,new FunctionDelegate(NullObject),null,null,null,null))));
 
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("ObjectUnavailable"),
@@ -3631,7 +3729,7 @@ namespace Agent
                 GetStates("Wait"),                                                              // in this state
                 GetInputSymbolsByName(instructionKey),                                          // when we get this message
                 GenerateStackSymbolFromConditions(
-                    null, null, null, null, null, null                                          // and this is the top of the stack
+                    null, (g) => g == null, null, null, null, null                              // and this is the top of the stack
                 ),
                 Regex.IsMatch(((List<string>)((StackSymbolContent)stackOperation.Content).
                     ActionOptions)[0],"grasp") ?
@@ -3924,12 +4022,12 @@ namespace Agent
                 if (!inServoLoop) {
                     servoWaitTimer.Interval = servoWaitTimerTime;
                     servoWaitTimer.Enabled = true;
-                    Debug.Log(string.Format("Start Servo Wait Timer:{0}", servoLoopTimer.Interval));
+                    Debug.Log(string.Format("Start Servo Loop Timer:{0}", servoLoopTimer.Interval));
                 }
                 else {
                     servoLoopTimer.Interval = servoLoopTimerTime;
                     servoLoopTimer.Enabled = true;
-                    Debug.Log(string.Format("Start Servo Loop Timer:{0}", servoWaitTimer.Interval));
+                    Debug.Log(string.Format("Start Servo Wait Timer:{0}", servoWaitTimer.Interval));
                 }
             } 
             else if ((state == GetState("StopServo")) || (state == GetState("AbortAction"))) {
