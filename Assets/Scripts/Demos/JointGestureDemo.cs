@@ -1518,12 +1518,49 @@ public class JointGestureDemo : AgentInteraction {
             else if (message.StartsWith("grab")) {
                 message = message.Replace("grab", "grasp");
             }
+            else if (message.StartsWith("move")) {
+                message = message.Replace("move", "put");
+            }
             else if (message.StartsWith("push")) {
                 message = message.Replace("push", "slide");
             }
             else if (message.StartsWith("pull")) {
                 message = message.Replace("pull", "slide");
             }
+
+            // do noun mapping
+            if (message.Split().Contains("box")) {
+                message = message.Replace("box", "block");
+            }
+            else if (message.Split().Contains("boxes")) {
+                message = message.Replace("boxes", "blocks");
+            }
+            else if (message.Split().Contains("mug")) {
+                message = message.Replace("mug", "cup");
+            }
+            else if (message.Split().Contains("mugs")) {
+                message = message.Replace("mugs", "cups");
+            }
+
+            // get rid of "on/to the" before PP
+            // on the top of, on top of -> on
+            // to back of, to the back of -> behind
+            if ((message.Contains("to the left")) || (message.Contains("to the right"))) {
+                message = message.Replace("to the", "");
+            }
+            else if (message.Contains("to back of")) {
+                message = message.Replace("to back of", "behind");
+            }
+            else if (message.Contains("to the back of")) {
+                message = message.Replace("to the back of", "behind");
+            }
+            else if (message.Contains("on top of")) {
+                message = message.Replace("on top of", "on");
+            }
+            else if (message.Contains("on the top of")) {
+                message = message.Replace("on the top of", "on");
+            }
+
             // assume everything is a block
             if (message.Split().Contains("one")) {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
                 message = message.Replace("one", "block");
@@ -1653,7 +1690,18 @@ public class JointGestureDemo : AgentInteraction {
                 message = String.Join(" ", splitMessage.ToArray());
             }
 			Debug.Log (message);
-			// do stuff here
+            // do stuff here
+
+            if (interactionLogic.IndicatedObj != null) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.IndicatedObj.name,message)) }), null)));
+            }
+            else if (interactionLogic.GraspedObj != null) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.IndicatedObj.name, message)) }), null)));
+            }
 
 			break;
 

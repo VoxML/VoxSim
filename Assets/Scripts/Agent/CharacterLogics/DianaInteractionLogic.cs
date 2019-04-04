@@ -1351,9 +1351,16 @@ namespace Agent
 			TransitionRelation.Add(new PDAInstruction(
 				GetStates("Wait"),
 				GetInputSymbolsByName("S PP"),
-				GenerateStackSymbol(null, null, null, null, null, null),	
+				GenerateStackSymbolFromConditions((o) => o != null, null, null, null, null, null),	
 				GetState("ParsePP"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None,null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("Wait"),
+                GetInputSymbolsByName("S PP"),
+                GenerateStackSymbolFromConditions(null, (g) => g != null, null, null, null, null),
+                GetState("ParsePP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("ParseVP"),
@@ -1417,6 +1424,15 @@ namespace Agent
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
                         new List<GameObject>(), null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
+               GetStates("ParsePP"),
+               null,
+               GenerateStackSymbolFromConditions(
+                   null, null, null, null,
+                   (a) => a.Count == 1, null),
+               GetState("ConfirmEvent"),
+               new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
             // if items have value, check and see if sentence is consistent with them
             //			TransitionRelation.Add(new PDAInstruction(
