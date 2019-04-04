@@ -3873,7 +3873,38 @@ namespace Agent
 					epistemicModel.state.DisengageEpisim ();
 					StateTransitionHistory.Push (symbolStateTriple);
                     ContextualMemory.Push (symbolStateTriple);
-				}
+
+                    List<PDAInstruction> instructionsToRemove = GetApplicableInstructions(GetState("IndexByGesture"), null,
+                        GenerateStackSymbolFromConditions(null, null, null, null, null, null));
+
+                    foreach (List<PDASymbol> learnedInstructionKey in LearnableInstructions.Keys) {
+                        foreach (PDASymbol symbol in learnedInstructionKey) {
+                            instructionsToRemove = instructionsToRemove.Concat(GetApplicableInstructions(GetState("Wait"), symbol,
+                                GenerateStackSymbolFromConditions(null, null, null, null, null, null))).ToList();
+                            instructionsToRemove = instructionsToRemove.Concat(GetApplicableInstructions(GetState("RequestObject"), symbol,
+                                GenerateStackSymbolFromConditions(null, null, null, null, null, null))).ToList();
+                        }
+                    }
+
+                    foreach (PDAInstruction inst in instructionsToRemove) {
+                        Debug.Log("Removing " +
+                            string.Format("{0},{1},{2},{3},{4}",
+                                (inst.FromStates == null) ? "Null" :
+                                string.Format("[{0}]",
+                                    String.Join(", ", ((List<PDAState>)inst.FromStates).Select(s => s.Name).ToArray())),
+                                (inst.InputSymbols == null) ? "Null" :
+                                string.Format("[{0}]",
+                                    String.Join(", ", ((List<PDASymbol>)inst.InputSymbols).Select(s => s.Content.ToString()).ToArray())),
+                                StackSymbolToString(inst.StackSymbol),
+                                inst.ToState.Name,
+                                string.Format("[{0},{1}]",
+                                    inst.StackOperation.Type.ToString(),
+                                    (inst.StackOperation.Content == null) ? "Null" :
+                                        (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
+                                              (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
+                        TransitionRelation.Remove(inst);
+                    }
+                }
 				else {
 					StateTransitionHistory.Push (symbolStateTriple);
                     ContextualMemory.Push (symbolStateTriple);

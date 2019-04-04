@@ -3004,17 +3004,23 @@ public class JointGestureDemo : AgentInteraction {
     void AttentionShift(object sender, EventArgs e) {
         if (((AttentionShiftEventArgs)e).Symbol != null) {
             string symbol = ((AttentionShiftEventArgs)e).Symbol.Name;
+            Debug.Log(string.Format("Attention symbol: {0}", symbol));
             symbol = interactionLogic.RemoveInputSymbolType(symbol, interactionLogic.GetInputSymbolType(symbol));
             if (symbol.StartsWith("inattentive")) {
                 if (symbol.EndsWith("left")) {
+                    Debug.Log("Looking left");
                     LookAt(new Vector3(headTargetDefault.x + 2.0f, headTargetDefault.y, headTargetDefault.z));
                 }
                 else if (symbol.EndsWith("right")) {
-                    LookAt(new Vector3(headTargetDefault.x - 2.0f, headTargetDefault.y, headTargetDefault.z));
+                    Debug.Log("Looking right");
+                     LookAt(new Vector3(headTargetDefault.x - 2.0f, headTargetDefault.y, headTargetDefault.z));
                 }
             }
             else if (symbol.StartsWith("attentive")) {
-                RespondAndUpdate("");
+                Debug.Log("Looking forward");
+                if (interactionLogic.CurrentState.Name != "BeginInteraction") {
+                    RespondAndUpdate("");
+                }
                 LookForward();
             }
         }
@@ -3628,7 +3634,8 @@ public class JointGestureDemo : AgentInteraction {
 		// not moving on top of another object
 		foreach (Region region in orthogonalRegions) {
 			if (region.Contains (theme)) {	// stay in this region
-				target = Helper.FindClearRegion (demoSurface, new Region[]{ thisRegion, region }, theme).center;
+				target = Helper.FindClearRegion (demoSurface, new Region[]{ thisRegion, region }, theme).center+
+                    theme.transform.position-(Helper.GetObjectWorldSize(theme).center);
 				placementOptions.Add (target);
 			}
 		}
