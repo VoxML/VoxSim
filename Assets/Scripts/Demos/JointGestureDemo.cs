@@ -157,6 +157,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	List<string> knownPreables = new List<string> (new string[] {
         "now",  // connective, not preamble
+        "then",
         "and",
         "so",
 		"diana",    // begin actual preambles
@@ -2337,10 +2338,10 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void StartGrab(object[] content) {
         // see if this object has a learned conventional grasp pose associated with it
-        GameObject obj = null;
+        List<object> objs = new List<object>();
         if (interactionLogic.ActionOptions.Count > 0) {
-            obj = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
-                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0] as GameObject;
+            objs = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])]);
 
             //if ((obj != null) && (interactionLogic.ActionOptions.Count > 0)) {
             //    if (InteractionHelper.GetCloserHand(Diana, obj) == leftGrasper) {
@@ -2350,11 +2351,24 @@ public class JointGestureDemo : AgentInteraction {
             //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
             //    }
             //}
+
+            if ((interactionLogic.IndicatedObj == null) && (interactionLogic.GraspedObj == null)) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol((objs[0] as GameObject), null, null, null, null, null)));
+            }
+
+            if (objs.Count > 1) {   // the second would be a grasp pose
+                if (objs[1] is GameObject) {
+                    if ((objs[0] as GameObject).GetComponent<Voxeme>() != null) {
+                        (objs[0] as GameObject).GetComponent<Voxeme>().graspConvention = objs[1] as GameObject;
+                    }
+                }
+            }
         }
         
         List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
             ((((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject) || 
-            (((StackSymbolContent)op.Content).GraspedObj as GameObject == obj)))).ToList();
+            (((StackSymbolContent)op.Content).GraspedObj as GameObject == objs[0])))).ToList();
 
         //Debug.Log(eventManager.ExtractObjects(
                 //Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
@@ -2364,32 +2378,127 @@ public class JointGestureDemo : AgentInteraction {
 
         if ((interactionLogic.IndicatedObj != null) && (learnedActionSymbols.Count == 0)) {
             List<GameObject> grabPoses = GetGrabPoses(interactionLogic.IndicatedObj,
-                InteractionHelper.GetCloserHand(Diana,interactionLogic.IndicatedObj));
+                InteractionHelper.GetCloserHand(Diana, interactionLogic.IndicatedObj));
 
-            if (grabPoses.Count > 1)
-            {
-                // disambiguate grasp pose
-                // are all poses available? -> for now, is the default pose (0) available?
-                // default pose is available if indicatedObj has no children who !FitsIn(child,indicatedObj,threeDimensional=true)
-                Debug.Log(grabPoses.Count);
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(null, null, null, null,
-                        Enumerable.Range(0, grabPoses.Count).Select(s => string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
-                            grabPoses[s].name)).ToList(), null)));
+            if (interactionLogic.IndicatedObj.GetComponent<Voxeme>().graspConvention == null) {
+                if (grabPoses.Count > 1) {
+                    // disambiguate grasp pose
+                    // are all poses available? -> for now, is the default pose (0) available?
+                    // default pose is available if indicatedObj has no children who !FitsIn(child,indicatedObj,threeDimensional=true)
+                    bool conventionAvailable = true;
+                    List<GameObject> excludeChildren = interactionLogic.IndicatedObj.GetComponentsInChildren<Renderer>().Where(
+                            o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != interactionLogic.IndicatedObj)).Select(v => v.gameObject).ToList();
+                    foreach (GameObject child in excludeChildren) {
+                        //Debug.Log(child);
+                        //Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(child.gameObject).size));
+                        //Debug.Log(Helper.VectorToParsable(
+                            //Helper.GetObjectWorldSize(interactionLogic.IndicatedObj, excludeChildren).size));
+                        if (!Helper.FitsIn(Helper.GetObjectWorldSize(child.gameObject),
+                            Helper.GetObjectWorldSize(interactionLogic.IndicatedObj, excludeChildren), true)) {
+                            //Debug.Log(child);
+                            conventionAvailable = false;
+                        }
+                    }
+
+                    Debug.Log(conventionAvailable);
+                    if (!conventionAvailable) {
+                        List<GameObject> toRemove = grabPoses.Where(p => p.name.EndsWith("0")).ToList();
+                        foreach (GameObject pose in toRemove) {
+                            //Debug.Log(pose.name);
+                            grabPoses.Remove(pose);
+                        }
+                    }
+                    Debug.Log(grabPoses.Count);
+
+                    if (grabPoses.Count > 1) {
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null, null, null,
+                                Enumerable.Range(0, grabPoses.Count).Select(s => string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
+                                    grabPoses[s].name)).ToList(), null)));
+                    }
+                    else {
+                        string graspCmd = string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
+                                    grabPoses[0].name);
+                        RespondAndUpdate("OK.");
+                        PromptEvent(string.Format(graspCmd, interactionLogic.IndicatedObj.name));
+
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                                interactionLogic.IndicatedObj, null, null, null, null)));
+                    }
+                }
+                else {
+                    RespondAndUpdate("OK.");
+                    PromptEvent(string.Format("grasp({0})", interactionLogic.IndicatedObj.name));
+
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                            interactionLogic.IndicatedObj, null, null, null, null)));
+                }
             }
-            else
-            {
-                RespondAndUpdate("OK.");
-                PromptEvent(string.Format("grasp({0})", interactionLogic.IndicatedObj.name));
+            else {
+                // is the default pose (0) available?
+                // default pose is available if indicatedObj has no children who !FitsIn(child,indicatedObj,threeDimensional=true)
+                bool conventionAvailable = true;
+                List<GameObject> excludeChildren = interactionLogic.IndicatedObj.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != interactionLogic.IndicatedObj)).Select(v => v.gameObject).ToList();
+                foreach (GameObject child in excludeChildren)
+                {
+                    //Debug.Log(child);
+                    //Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(child.gameObject).size));
+                    //Debug.Log(Helper.VectorToParsable(
+                    //Helper.GetObjectWorldSize(interactionLogic.IndicatedObj, excludeChildren).size));
+                    if (!Helper.FitsIn(Helper.GetObjectWorldSize(child.gameObject),
+                        Helper.GetObjectWorldSize(interactionLogic.IndicatedObj, excludeChildren), true))
+                    {
+                        //Debug.Log(child);
+                        conventionAvailable = false;
+                    }
+                }
 
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-                        interactionLogic.IndicatedObj, null, null, null, null)));
+                Debug.Log(conventionAvailable);
+                if (!conventionAvailable)
+                {
+                    List<GameObject> toRemove = grabPoses.Where(p => p.name.EndsWith("0")).ToList();
+                    foreach (GameObject pose in toRemove)
+                    {
+                        //Debug.Log(pose.name);
+                        grabPoses.Remove(pose);
+                    }
+
+                    if (grabPoses.Count > 1) {
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null, null, null,
+                                Enumerable.Range(0, grabPoses.Count).Select(s => string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
+                                    grabPoses[s].name)).ToList(), null)));
+                    }
+                    else {
+                        string graspCmd = string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
+                                    grabPoses[0].name);
+                        RespondAndUpdate("OK.");
+                        PromptEvent(string.Format(graspCmd, interactionLogic.IndicatedObj.name));
+
+                        interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                                interactionLogic.IndicatedObj, null, null, null, null)));
+                    }
+                }
+                else { 
+                    string graspCmd = string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
+                        interactionLogic.IndicatedObj.GetComponent<Voxeme>().graspConvention.name);
+                    RespondAndUpdate("OK.");
+                    PromptEvent(string.Format(graspCmd, interactionLogic.IndicatedObj.name));
+
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
+                            interactionLogic.IndicatedObj, null, null, null, null)));
+                }
             }
         }
         else {
-            if ((interactionLogic.IndicatedObj != null) && (interactionLogic.IndicatedObj == obj))
+            if (interactionLogic.IndicatedObj != null)
             {
+                //if ((objs.Count > 0) && (interactionLogic.IndicatedObj == objs[0])) {
                 string graspCmd = string.Format("grasp({0})", interactionLogic.IndicatedObj.name);
                 if (learnedActionSymbols.Count == 1)
                 {    // should only have one (for now)
@@ -2410,7 +2519,7 @@ public class JointGestureDemo : AgentInteraction {
 
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                 interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-                    obj, null, null, null, null)));
+                    objs[0], null, null, null, null)));
             }
             else if (interactionLogic.ActionOptions.Count > 0) {
                 string grabStr = string.Empty;
@@ -3040,11 +3149,20 @@ public class JointGestureDemo : AgentInteraction {
 	public void EndState(object[] content) {
         ReturnHandsToDefault();
         eventManager.referents.stack.Clear();
+
         Dictionary<List<PDASymbol>, PDAStackOperation> temp = new Dictionary<List<PDASymbol>, PDAStackOperation>();
         foreach (List<PDASymbol> key in interactionLogic.LearnableInstructions.Keys) {
             temp.Add(key, null);
         }
         interactionLogic.LearnableInstructions = temp;
+
+        foreach (GameObject obj in availableObjs) {
+            Voxeme voxeme = obj.GetComponent<Voxeme>();
+            if (voxeme != null) {
+                voxeme.graspConvention = null;
+            }
+        }
+
         epistemicModel.SaveUserModel(epistemicModel.userID);
 		RespondAndUpdate ("Bye!");
 
@@ -3930,7 +4048,9 @@ public class JointGestureDemo : AgentInteraction {
         }
 
         InteractionTarget[] poses = obj.GetComponentsInChildren<InteractionTarget>();
-        poseList = poses.ToList().Where(p => p.effectorType == effectorType).ToList().Select(p => p.gameObject).ToList();
+        poseList = poses.ToList().Where(
+            p => Helper.GetMostImmediateParentVoxeme(p.gameObject) == obj).ToList().Where(
+            p => p.effectorType == effectorType).ToList().Select(p => p.gameObject).ToList();
             //        .Count ==
             //        poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.RightHand).ToList().Count) ?
             //poses.ToList().Where(p => p.effectorType == FullBodyBipedEffector.LeftHand).ToList() :

@@ -30,6 +30,8 @@ public class Voxeme : MonoBehaviour {
 
 	Rigging rigging;
 
+    public GameObject graspConvention = null;
+
 	public List<InteractionTarget> interactionTargets = new List<InteractionTarget> ();
 
 	public Queue<Vector3> interTargetPositions = new Queue<Vector3> ();
