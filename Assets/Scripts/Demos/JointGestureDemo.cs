@@ -2260,7 +2260,7 @@ public class JointGestureDemo : AgentInteraction {
                         GenerateReferringExpression(theme as GameObject, availableObjs.Cast<object>().ToList())));
                 }
 
-                if (interactionLogic.IndicatedObj == null) {
+                if ((interactionLogic.IndicatedObj == null) && (interactionLogic.GraspedObj != (theme as GameObject))) {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol((theme as GameObject), null, null, null, null, null)));
                 }
@@ -2367,8 +2367,8 @@ public class JointGestureDemo : AgentInteraction {
         }
         
         List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
-            ((((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject) || 
-            (((StackSymbolContent)op.Content).GraspedObj as GameObject == objs[0])))).ToList();
+            ((((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject) ||
+            ((objs.Count > 0) && (((StackSymbolContent)op.Content).GraspedObj as GameObject == objs[0]))))).ToList();
 
         //Debug.Log(eventManager.ExtractObjects(
                 //Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
