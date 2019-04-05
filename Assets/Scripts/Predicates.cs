@@ -5591,8 +5591,18 @@ public class Predicates : MonoBehaviour {
                                     }
 
                                     //Debug.Log(string.Format("Starting {0} interaction with {1}", leftGrasper.name, (args[0] as GameObject).name));
-
-                                    InteractionHelper.SetLeftHandTarget(agent, (args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
+									if (args[0] != null)
+									{
+										var go = (args[0] as GameObject);
+										if (go != null)
+										{
+											var component = go.GetComponentInChildren<InteractionTarget>();
+											if (component != null)
+											{
+												InteractionHelper.SetLeftHandTarget(agent, component.transform);
+											}
+										}
+									}
                                     agent.GetComponent<InteractionSystem>().StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
 
                                     // get parent obj
