@@ -91,7 +91,7 @@ namespace Agent
             List<GameObject> excludeChildren = obj.GetComponentsInChildren<Renderer>().Where(
                         o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
             int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj, excludeChildren), obj, sensor.transform.position);
-			Debug.Log(obj + "=============================================================== " + visibility);
+			//Debug.Log(obj + "=============================================================== " + visibility);
 			return visibility > 0;
 		}
 
@@ -131,10 +131,10 @@ namespace Agent
 //					}
 				}
 				else {
-					Debug.Log(string.Format("Ray from {0} collides with {1} at {2}",
-						Helper.VectorToParsable(rotatedVertex),
-						Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
-						Helper.VectorToParsable(hitInfo.point)));
+					//Debug.Log(string.Format("Ray from {0} collides with {1} at {2}",
+						//Helper.VectorToParsable(rotatedVertex),
+						//Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
+						//Helper.VectorToParsable(hitInfo.point)));
 				}
 			}
 
