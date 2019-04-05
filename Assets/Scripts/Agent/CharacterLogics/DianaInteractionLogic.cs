@@ -1940,6 +1940,32 @@ namespace Agent
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
                     new FunctionDelegate(PushObjectTargetOptions))));
 
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("InterpretDeixis"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, (g) => g != null, null,
+                    (m) => m.Count > 0,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null
+                ),
+                GetState("DisambiguateObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new FunctionDelegate(PushObjectTargetOptions))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("InterpretDeixis"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, (g) => g != null, null,
+                    (m) => m.Count > 0,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("slide"))).ToList().Count > 0), null
+                ),
+                GetState("DisambiguateObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new FunctionDelegate(PushObjectTargetOptions))));
+
             //TransitionRelation.Add(new PDAInstruction(
             //    GetStates("InterpretDeixis"),
             //    null,

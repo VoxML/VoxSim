@@ -1553,6 +1553,13 @@ public class JointGestureDemo : AgentInteraction {
                 message = message.Replace("mugs", "cups");
             }
 
+            if (message.Split().Contains("these")) {
+                message = message.Replace("these", "this");
+            }
+            else if (message.Split().Contains("those")) {
+                message = message.Replace("those", "that");
+            }
+
             // get rid of "on/to the" before PP
             // on the top of, on top of -> on
             // to back of, to the back of -> behind
@@ -1680,6 +1687,13 @@ public class JointGestureDemo : AgentInteraction {
                 message = String.Join(" ", splitMessage.ToArray());
             }
 			Debug.Log (message);
+
+            if (message.Split().Contains("these")) {
+                message = message.Replace("these", "this");
+            }
+            else if (message.Split().Contains("those")) {
+                message = message.Replace("those", "that");
+            }
 
             if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
                 if ((regionHighlight.GetComponent<Renderer>().material == activeHighlightMaterial) &&
@@ -1995,7 +2009,7 @@ public class JointGestureDemo : AgentInteraction {
     				LookForward ();
     			}
             }
-            else if ((interactionLogic.IndicatedObj != null) && (interactionLogic.ActionOptions[0].Contains("put"))) {
+            else if (interactionLogic.ActionOptions[0].Contains("put")) {
                 object theme = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
                    (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0];
 
@@ -2008,6 +2022,7 @@ public class JointGestureDemo : AgentInteraction {
                     LookForward();
                 }
             }
+
         }
 	}
 

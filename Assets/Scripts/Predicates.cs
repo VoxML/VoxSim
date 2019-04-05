@@ -829,7 +829,28 @@ public class Predicates : MonoBehaviour {
         return string.Join(",", objNames.ToArray());
 	}
 
-	public String BIG(object[] args) {
+    public String SILVER(object[] args) {
+        List<String> objNames = new List<String>();
+
+        if (args[0] is GameObject) {   // assume all inputs are of same type
+            List<GameObject> objs = new List<GameObject>();
+            if (args[args.Length - 1] is bool) { // except last
+                objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+            }
+            else {
+                objs = args.Cast<GameObject>().ToList();
+            }
+            List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("silver"));
+
+            for (int index = 0; index < attrObjs.Count; index++) {
+                objNames.Add(attrObjs[0].name);
+            }
+        }
+
+        return string.Join(",", objNames.ToArray());
+    }
+
+    public String BIG(object[] args) {
 		String objName = "";
 		GameObject obj = null;
 
