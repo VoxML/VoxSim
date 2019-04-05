@@ -426,13 +426,16 @@ public class EventManager : MonoBehaviour {
 							List<GameObject> matches = new List<GameObject> ();
 							foreach (Voxeme voxeme in objSelector.allVoxemes) {
 								if (voxeme.voxml.Lex.Pred.Equals (arg as String)) {
-									matches.Add (voxeme.gameObject);
+                                    Debug.Log(voxeme.gameObject);
+                                    matches.Add (voxeme.gameObject);
 								}
 							}
 							if (matches.Count <= 1) {
+                                Debug.Log(arg as String);
                                 if (!(arg as String).Contains('('))
                                 {
                                     GameObject go = GameObject.Find(arg as String);
+                                    Debug.Log(go);
                                     if (go == null)
                                     {
                                         for (int j = 0; j < objSelector.disabledObjects.Count; j++)
@@ -453,7 +456,17 @@ public class EventManager : MonoBehaviour {
                                             // abort
                                         }
                                     }
-								    objs.Add (go);
+                                    else {
+                                        if (go is GameObject) {
+                                            if ((go as GameObject).GetComponent<Voxeme>() != null) {
+                                                if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(((GameObject)go).name))) {
+                                                    referents.stack.Push(((GameObject)go).name);
+                                                }
+                                                OnEntityReferenced(this, new EventReferentArgs(((GameObject)go).name));
+                                            }
+                                        }
+                                    }
+                                    objs.Add (go);
                                 }
                                 else {
                                     List<object> args = ExtractObjects(Helper.GetTopPredicate(arg as String),
