@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Timers;
 using Global;
 using UnityEngine.UI;
@@ -87,7 +88,9 @@ namespace Agent
 			{
 				return false;
 			}
-			int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj), obj, sensor.transform.position);
+            List<GameObject> excludeChildren = obj.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
+            int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj, excludeChildren), obj, sensor.transform.position);
 			Debug.Log(obj + "=============================================================== " + visibility);
 			return visibility > 0;
 		}
