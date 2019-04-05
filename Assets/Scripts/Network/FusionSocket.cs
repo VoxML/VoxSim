@@ -44,31 +44,22 @@ namespace Network
                     Debug.LogError(e);
 					break;
                 }
-
-//				if (!BitConverter.IsLittleEndian)
-//				{
-//					Array.Reverse(byteBuffer);
-//				}
+				
 				int len = BitConverter.ToInt32(byteBuffer, 0);
-
-				//Debug.Log (len);
+				
 
 				byteBuffer = new byte[len];
 				int numBytesRead = stream.Read(byteBuffer, 0, len);
-				//Debug.Log (numBytesRead);
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
 				if (message.StartsWith ("P")) {
-					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
+					if ((HowManyLeft() != 0) && (!_messages.Peek().StartsWith ("P"))) {
 						_messages.Enqueue (message);
 					}
 				}
 				else {
 					_messages.Enqueue (message);
 				}
-				//_messages.Enqueue (message);
-//				Debug.Log (stream.DataAvailable);
-
 			}
 
 			Close();
