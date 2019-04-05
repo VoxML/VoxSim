@@ -87,8 +87,9 @@ namespace Agent
 			{
 				return false;
 			}
-//			Debug.Log (obj);
-			return GetVisibleVertices(Helper.GetObjectWorldSize(obj), obj, sensor.transform.position) > 0;
+			int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj), obj, sensor.transform.position);
+			Debug.Log(obj + "=============================================================== " + visibility);
+			return visibility > 0;
 		}
 
 		private int GetVisibleVertices(Bounds bounds, GameObject rotatedObj, Vector3 origin)
@@ -109,7 +110,8 @@ namespace Agent
 			foreach (Vector3 vertex in vertices)
 			{
 //            Quaternion rot = Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
-				Vector3 rotatedVertex = Helper.GetMostImmediateParentVoxeme(rotatedObj).transform.rotation * vertex + rotatedObj.transform.position;
+//				Vector3 rotatedVertex = Helper.GetMostImmediateParentVoxeme(rotatedObj).transform.rotation * vertex + rotatedObj.transform.position;
+				Vector3 rotatedVertex = vertex;
 				RaycastHit hitInfo;
 				bool hit = Physics.Raycast (
 							   rotatedVertex, Vector3.Normalize (origin - rotatedVertex),
