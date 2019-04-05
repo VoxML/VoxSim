@@ -1968,31 +1968,46 @@ public class JointGestureDemo : AgentInteraction {
 			LookForward ();
 		}
 		else {
-			if ((interactionLogic.GraspedObj == null) &&
-			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate(string.Format("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
-                    availableObjs.Cast<object>().ToList())));
-				ReachFor (interactionLogic.IndicatedObj);
-				LookForward ();
-			}
-			else if ((interactionLogic.IndicatedObj != null) &&
-					(!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate(string.Format("Should I put {0} on {1}?",
-                    GenerateReferringExpression(interactionLogic.IndicatedObj,
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
-                    GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
-        		LookForward ();
-			}
-			else if (interactionLogic.GraspedObj != null) {
-                RespondAndUpdate(string.Format("Should I put {0} on {1}?",
-                    GenerateReferringExpression(interactionLogic.GraspedObj,
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
-                    GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
-				LookForward ();
-			}
-		}
+            if (interactionLogic.ActionOptions.Count == 0) {
+    			if ((interactionLogic.GraspedObj == null) &&
+    			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+                    RespondAndUpdate(string.Format("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
+                        availableObjs.Cast<object>().ToList())));
+    				ReachFor (interactionLogic.IndicatedObj);
+    				LookForward ();
+    			}
+    			else if ((interactionLogic.IndicatedObj != null) &&
+    					(!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+                    RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                        GenerateReferringExpression(interactionLogic.IndicatedObj,
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
+                        GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
+            		LookForward ();
+    			}
+    			else if (interactionLogic.GraspedObj != null) {
+                    RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                        GenerateReferringExpression(interactionLogic.GraspedObj,
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
+                        GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
+    				LookForward ();
+    			}
+            }
+            else if ((interactionLogic.IndicatedObj != null) && (interactionLogic.ActionOptions[0].Contains("put"))) {
+                object theme = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                   (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0];
+
+                if (theme is GameObject) {
+                    RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                        GenerateReferringExpression((theme as GameObject),
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { (theme as GameObject) }).Cast<object>().ToList()),
+                        GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { (theme as GameObject) }).Cast<object>().ToList())));
+                    LookForward();
+                }
+            }
+        }
 	}
 
 	public void IndexByColor(object[] content) {
@@ -2230,9 +2245,24 @@ public class JointGestureDemo : AgentInteraction {
 	}
 
     public void RequestLocation(object[] content) {
-        if (interactionLogic.ActionOptions.Count > 0){
-            if ((new Regex(@"put\([a-z\(\)]+,\{1\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
-                RespondAndUpdate("Where should I put it?");
+        object theme = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+            (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0];
+
+        if (theme is GameObject) {
+            if (interactionLogic.ActionOptions.Count > 0) {
+                if ((new Regex(@"put\([a-z\(\)]+,\{1\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                    RespondAndUpdate(string.Format("Where should I put {0}?",
+                        GenerateReferringExpression(theme as GameObject, availableObjs.Cast<object>().ToList())));
+                }
+                else if ((new Regex(@"slide\([a-z\(\)]+,\{1\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                    RespondAndUpdate(string.Format("Where should I move {0}?",
+                        GenerateReferringExpression(theme as GameObject, availableObjs.Cast<object>().ToList())));
+                }
+
+                if (interactionLogic.IndicatedObj == null) {
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol((theme as GameObject), null, null, null, null, null)));
+                }
             }
         }
     }
@@ -2338,6 +2368,9 @@ public class JointGestureDemo : AgentInteraction {
 
             if (grabPoses.Count > 1)
             {
+                // disambiguate grasp pose
+                // are all poses available? -> for now, is the default pose (0) available?
+                // default pose is available if indicatedObj has no children who !FitsIn(child,indicatedObj,threeDimensional=true)
                 Debug.Log(grabPoses.Count);
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
@@ -4523,7 +4556,7 @@ public class JointGestureDemo : AgentInteraction {
             }
         }
         else if (((EventReferentArgs)e).Referent is string) {   // absent object type - string
-            if (((EventReferentArgs)e).Referent as string == "{0}") {
+            if (Regex.IsMatch(((EventReferentArgs)e).Referent as string,@"\{.\}")) {
                 return;
             }
 

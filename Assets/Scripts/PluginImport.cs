@@ -352,7 +352,9 @@ public class PluginImport : MonoBehaviour {
 			}
 			else
 			{
-				_fusionSocket.OnConnectionLost(this, null);
+                //SocketConnection _retry = socketConnections.FirstOrDefault(s => s.GetType() == typeof(FusionSocket));
+                //TryReconnectSocket(_fusionSocket.Address, _fusionSocket.Port, typeof(FusionSocket), ref _retry);
+				//_fusionSocket.OnConnectionLost(this, null);
                 string fusionAddress = string.Format("{0}:{1}", _fusionSocket.Address, _fusionSocket.Port);
                 if (!tryAgain.ContainsKey(fusionAddress))
                 {
@@ -555,6 +557,7 @@ public class PluginImport : MonoBehaviour {
                 socket.OnConnectionMade(this, new SocketEventArgs(socketType));
             }
             catch (Exception e) {
+                socket.OnConnectionLost(this, null);
                 Debug.Log(e.Message);
             }
         }

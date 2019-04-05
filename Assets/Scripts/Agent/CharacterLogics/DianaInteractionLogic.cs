@@ -643,7 +643,24 @@ namespace Agent
 			return symbolList;
 		}
 
-		public List<PDASymbol> PushPutOptions (object arg) {
+        public List<PDASymbol> PushObjectTargetOptions(object arg) {
+            List<PDASymbol> symbolList = ((ObjectOptions.Count == 1) && (IndicatedRegion == null)) ?
+                Enumerable.Range(0, ObjectOptions.Count).Select(s =>
+                    GenerateStackSymbol(null, null, null,
+                        new List<GameObject>(),
+                        null, null)).ToList() :
+                Enumerable.Range(0, ObjectOptions.Count).Select(s =>
+                    GenerateStackSymbol(null, null, null,
+                        (IndicatedRegion == null) ? ObjectOptions.GetRange(0, s + 1) : ObjectOptions.OrderByDescending(
+                            m => (m.transform.position - IndicatedRegion.center).magnitude).ToList().GetRange(0, s + 1),
+                        (IndicatedRegion == null) ? ObjectOptions.GetRange(0, s + 1).Select(m => ActionOptions[0].Replace("{1}",string.Format("on({0})", m.name))).ToList() :
+                            ObjectOptions.OrderByDescending(m => (m.transform.position - IndicatedRegion.center).magnitude).ToList().GetRange(0, s + 1).Select(m => ActionOptions[0].Replace("{1}", string.Format("on({0})", m.name))).ToList(),
+                                null)).ToList();
+
+            return symbolList;
+        }
+
+        public List<PDASymbol> PushPutOptions (object arg) {
 			List<PDASymbol> symbolList = Enumerable.Range (0,
                 ObjectOptions.Count).Select (s => 
 				GenerateStackSymbol (IndicatedObj,
@@ -1140,7 +1157,8 @@ namespace Agent
 				GetInputSymbolsByName("G left point start","G right point start",
 					"S THIS","S THAT","S THERE","S NP this","S NP that","S PP there"),
 				GenerateStackSymbolFromConditions(
-					(o) => o != null, null, null, null, null, null
+					(o) => o != null, null, null, null,
+                    (a) => (a.Count == 0) || (!a[0].Contains("{0}") && !a[0].Contains("{1}")), null
 				),
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1151,7 +1169,8 @@ namespace Agent
 				GetInputSymbolsByName("G left point start","G right point start",
 					"S THIS","S THAT","S THERE","S NP this","S NP that","S PP there"),
 				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, null, null, null, null
+					null, (g) => g != null, null, null,
+                    (a) => (a.Count == 0) || (!a[0].Contains("{0}") && !a[0].Contains("{1}")), null
 				),
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1163,7 +1182,7 @@ namespace Agent
 					"S THIS","S THAT","S THERE","S NP this","S NP that","S PP there"),
 				GenerateStackSymbolFromConditions(
 					null, null, null, null, 
-					(a) => (a.Count > 0) && (a[0].Contains("{0}")), null
+					(a) => (a.Count > 0) && (a[0].Contains("{0}") || a[0].Contains("{1}")), null
 				),
 				GetState("SituateDeixis"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1455,7 +1474,7 @@ namespace Agent
                 GetStates("ParseNP"),
                 null,
                 GenerateStackSymbolFromConditions(
-                    null, null,
+                    (o) => o == null, null,
                     (r) => r != null && r.max != r.min,
                     null, null, null
                 ),  
@@ -1867,7 +1886,7 @@ namespace Agent
 				null,
 				GenerateStackSymbolFromConditions(
 					(o) => o == null, (g) => g == null, null,
-					(m) => m.Count > 0, null, null
+					(m) => m.Count > 0, (a) => a.Count == 0, null
 				),	
 				GetState("DisambiguateObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1878,7 +1897,7 @@ namespace Agent
 				null,
 				GenerateStackSymbolFromConditions(
 					(o) => o != null, null, null,
-					(m) => m.Count > 0, null, null
+					(m) => m.Count > 0, (a) => a.Count == 0, null
 				),	
 				GetState("DisambiguateObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
@@ -1889,13 +1908,76 @@ namespace Agent
 				null,
 				GenerateStackSymbolFromConditions(
 					null, (g) => g != null, null,
-					(m) => m.Count > 0, null, null
+					(m) => m.Count > 0, (a) => a.Count == 0, null
 				),	
 				GetState("DisambiguateObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 					new FunctionDelegate(PushPutOptions))));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("InterpretDeixis"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o != null, null, null,
+                    (m) => m.Count > 0,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null
+                ),
+                GetState("DisambiguateObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new FunctionDelegate(PushObjectTargetOptions))));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("InterpretDeixis"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    (o) => o != null, null, null,
+                    (m) => m.Count > 0,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("slide"))).ToList().Count > 0), null
+                ),
+                GetState("DisambiguateObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new FunctionDelegate(PushObjectTargetOptions))));
+
+            //TransitionRelation.Add(new PDAInstruction(
+            //    GetStates("InterpretDeixis"),
+            //    null,
+            //    GenerateStackSymbolFromConditions(
+            //        null, (g) => g != null, null,
+            //        (m) => m.Count > 0,
+            //        (a) => ((a.Count > 0) &&
+            //            (a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null
+            //    ),
+            //    GetState("DisambiguateEvent"),
+            //    new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+            //        new FunctionDelegate(PushPutOptions))));
+
+            //TransitionRelation.Add(new PDAInstruction(
+            //    GetStates("InterpretDeixis"),
+            //    null,
+            //    GenerateStackSymbolFromConditions(
+            //        (o) => o != null, null, null,
+            //        (m) => m.Count > 0,
+            //        (a) => ((a.Count > 0) &&
+            //            (a.Where(aa => aa.Contains("slide"))).ToList().Count > 0), null
+            //    ),
+            //    GetState("DisambiguateEvent"),
+            //    new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, null)));
+
+            //TransitionRelation.Add(new PDAInstruction(
+            //GetStates("InterpretDeixis"),
+            //null,
+            //GenerateStackSymbolFromConditions(
+            //    null, (g) => g != null, null,
+            //    (m) => m.Count > 0,
+            //    (a) => ((a.Count > 0) &&
+            //        (a.Where(aa => aa.Contains("slide"))).ToList().Count > 0), null
+            //),
+            //GetState("DisambiguateEvent"),
+            //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("IndexByColor"),
 				null,
 				GenerateStackSymbolFromConditions(
@@ -2068,7 +2150,21 @@ namespace Agent
 					new StackSymbolContent(null,null,new FunctionDelegate(NullObject),
 						new List<GameObject>(),null,null))));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateObject"),
+                GetInputSymbolsByName("G posack start", "S YES", "S S yes"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null, null,
+                    (m) => m.Count > 0,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("{0}"))).ToList().Count == 0),
+                    null),
+                GetState("ConfirmEvent"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
+                        new List<GameObject>(), null, null))));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G negack start","S NO","S S no"),
 				GenerateStackSymbolFromConditions(
@@ -2088,7 +2184,17 @@ namespace Agent
 				GetState("DisambiguateObject"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateObject"),
+                GetInputSymbolsByName("G negack start", "S NO", "S S no"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null, null,
+                    (m) => m.Count > 1, null, null
+                ),
+                GetState("DisambiguateObject"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G negack start","S NO","S S no"),
 				GenerateStackSymbolFromConditions(
@@ -2108,7 +2214,17 @@ namespace Agent
 				GetState("RegionAsGoal"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateObject"),
+                GetInputSymbolsByName("G negack start", "S NO", "S S no"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null, (r) => r != null && r.max != r.min,
+                    (m) => m.Count == 1, null, null
+                ),
+                GetState("RegionAsGoal"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("G negack start","S NO","S S no"),
 				GenerateStackSymbolFromConditions(
@@ -2128,7 +2244,17 @@ namespace Agent
 				GetState("Confusion"),
 				new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop,null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("DisambiguateObject"),
+                GetInputSymbolsByName("G negack start", "S NO", "S S no"),
+                GenerateStackSymbolFromConditions(
+                    (o) => o == null, (g) => g == null, (r) => r == null,
+                    (m) => m.Count == 1, null, null
+                ),
+                GetState("Confusion"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Pop, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("DisambiguateObject"),
 				GetInputSymbolsByName("S NEVERMIND", "S S never mind", "G nevermind start"),
 				GenerateStackSymbolFromConditions(null, null ,null, null, 
@@ -2304,8 +2430,7 @@ namespace Agent
                 GetStates("RequestLocation"),
                 GetInputSymbolsByName("S NOTHING", "S NEVERMIND", "S S nothing", "S S never mind", "G nevermind start"),
                 GenerateStackSymbolFromConditions(null, null, null, null,
-                    (a) => ((a.Count > 0) &&
-                        (a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null),
+                    (a) => (a.Count > 0), null),
                 GetState("AbortAction"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
@@ -3385,7 +3510,8 @@ namespace Agent
                                 inst.StackOperation.Type.ToString(),
                                 (inst.StackOperation.Content == null) ? "Null" :
                                     (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(inst.StackOperation.Content) :
-                                          (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name : string.Empty)));
+                                          (inst.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)inst.StackOperation.Content).Name :
+                                                (inst.StackOperation.Content.GetType() == typeof(FunctionDelegate)) ? ((FunctionDelegate)inst.StackOperation.Content).Method.Name : string.Empty)));
 					}
 					return;
 				}
@@ -3404,8 +3530,9 @@ namespace Agent
                             instruction.StackOperation.Type.ToString(),
                             (instruction.StackOperation.Content == null) ? "Null" :
                                 (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent)) ? StackSymbolToString(instruction.StackOperation.Content) :
-                                      (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name : string.Empty)));
-				}
+                                      (instruction.StackOperation.Content.GetType() == typeof(PDAState)) ? ((PDAState)instruction.StackOperation.Content).Name :
+                                            (instruction.StackOperation.Content.GetType() == typeof(FunctionDelegate)) ? ((FunctionDelegate)instruction.StackOperation.Content).Method.Name : string.Empty)));
+                }
 				else if (instructions.Count < 1) {
 					Debug.Log ("Zero instruction condition.  Aborting.");
 					return;
