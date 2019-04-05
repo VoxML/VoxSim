@@ -126,7 +126,12 @@ namespace NLU
 			"against"
 		});
 
-		private List<string> _attribs = new List<string>(new[]
+        private List<string> _relationVars = new List<string>(new[]
+        {
+            "{1}"
+        });
+
+        private List<string> _attribs = new List<string>(new[]
 		{
 			"brown",
 			"blue",
@@ -228,7 +233,12 @@ namespace NLU
 					}
 					cur += 1;
 				}
-				else if (_determiners.Contains(tokens[cur]))
+                else if (_relationVars.Contains(tokens[cur]))
+                {
+                    form += "," + tokens[cur];
+                    cur += 1;
+                }
+                else if (_determiners.Contains(tokens[cur]))
 				{
 					form += tokens[cur] + "(";
 					cur += ParseNextNP(tokens.Skip(cur+1).ToArray(), ref form, ref lastObj);

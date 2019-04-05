@@ -1623,19 +1623,25 @@ public class JointGestureDemo : AgentInteraction {
             if (message.Contains ("there")) {
                 if ((regionHighlight.GetComponent<Renderer> ().material == activeHighlightMaterial) &&
                     (regionHighlight.transform.position.y > 0.0f)) {
-					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
-						interactionLogic.RewriteStack (
+					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {   // non-empty region or null
+                        interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 								interactionLogic.GenerateStackSymbol (null, null,
 									new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
-									null, null, null)));
+									null, new List<string>(new string[] { commBridge.NLParse(message.Replace("there", "{1}")) }), null)));
 					}
 				}
+                else {
+                    interactionLogic.RewriteStack(
+                        new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null, null,
+                                null, new List<string>(new string[] { commBridge.NLParse(message.Replace("there", "{1}")) }), null)));
+                }
 			}
 			else {
-				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+                interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 					interactionLogic.GenerateStackSymbol (null, null, null,
-						null, new List<string> (new string[]{ commBridge.NLParse (message) }), null)));
+						null, new List<string> (new string[]{ commBridge.NLParse(message) }), null)));
 			}
 			break;
 
@@ -1745,11 +1751,18 @@ public class JointGestureDemo : AgentInteraction {
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
                         new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.GraspedObj.name, message)) }), null)));
             }
+            else if (interactionLogic.ActionOptions.Count > 0) {
+                if (interactionLogic.ActionOptions[0].Contains("{1}")) {
+                    Debug.Log(interactionLogic.ActionOptions[0].Replace("{1}", commBridge.NLParse(message)));
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(null, null, null, null,
+                            new List<string>(new string[] { interactionLogic.ActionOptions[0].Replace("{1}", commBridge.NLParse(message)) }), null)));
+                }
+            }
             else {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
                         new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", "{0}", message)) }), null)));
-
             }
 
             break;
@@ -2216,7 +2229,15 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
-	public void PlaceInRegion(object[] content) {
+    public void RequestLocation(object[] content) {
+        if (interactionLogic.ActionOptions.Count > 0){
+            if ((new Regex(@"put\([a-z\(\)]+,\{1\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                RespondAndUpdate("Where should I put it?");
+            }
+        }
+    }
+
+    public void PlaceInRegion(object[] content) {
 		RespondAndUpdate("OK.");
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,

@@ -898,7 +898,14 @@ namespace Agent
 					new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
 						new StackSymbolContent(null,null,null,null,null,new FunctionDelegate(GetActionOptionsIfNull))))));
 
-			States.Add(new PDAState("PlaceInRegion",null));
+            States.Add(new PDAState("RequestLocation",
+                new TransitionGate(
+                    new FunctionDelegate(EpistemicallyCertain),
+                    GetState("Suggest"),
+                    new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                        new StackSymbolContent(null, null, null, null, null, new FunctionDelegate(GetActionOptionsIfNull))))));
+
+            States.Add(new PDAState("PlaceInRegion",null));
 			States.Add(new PDAState("RequestAction",null));
 			States.Add(new PDAState("ComposeObjectAndAction",null));
 			States.Add(new PDAState("DisambiguateEvent",null));
@@ -1410,7 +1417,7 @@ namespace Agent
                     null, null, null, null,
                     (a) => ((a.Count == 1) &&
                         (a.Where(aa => (aa.Contains("grasp") || 
-                            aa.Contains("{0}"))).ToList().Count == 0)), null),
+                            aa.Contains("{0}") || aa.Contains("{1}"))).ToList().Count == 0)), null),
                 GetState("ConfirmEvent"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
@@ -1433,7 +1440,17 @@ namespace Agent
                         (a.Where(aa => aa.Contains("grasp")).ToList().Count > 0)), null),
                 GetState("StartGrab"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
-            
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("ParseVP"),
+                null,
+                GenerateStackSymbolFromConditions(
+                    null, null, null, null,
+                    (a) => ((a.Count == 1) &&
+                        (a.Where(aa => aa.Contains("{1}")).ToList().Count > 0)), null),
+                GetState("RequestLocation"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
             TransitionRelation.Add(new PDAInstruction(
                 GetStates("ParseNP"),
                 null,
@@ -2283,7 +2300,51 @@ namespace Agent
                 GetState("ParseNP"),
                 new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
 
-			TransitionRelation.Add(new PDAInstruction(
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestLocation"),
+                GetInputSymbolsByName("S NOTHING", "S NEVERMIND", "S S nothing", "S S never mind", "G nevermind start"),
+                GenerateStackSymbolFromConditions(null, null, null, null,
+                    (a) => ((a.Count > 0) &&
+                        (a.Where(aa => aa.Contains("put"))).ToList().Count > 0), null),
+                GetState("AbortAction"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestLocation"),
+                GetInputSymbolsByName("P l", "P r"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("TrackPointing"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestLocation"),
+                GetInputSymbolsByName("G left point start", "G right point start"),
+                GenerateStackSymbolFromConditions(null, null, null, null, null, null),
+                GetState("SituateDeixis"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+                    new StackSymbolContent(null, null, new Region(), null, null, null))));
+
+            //TransitionRelation.Add(new PDAInstruction(
+                //GetStates("RequestLocation"),
+                //GetInputSymbolsByName("S NP"),
+                //GenerateStackSymbolFromConditions(
+                //        null, null, null, null,
+                //        (a) => ((a.Count > 0) &&
+                //            (a.Where(aa => aa.Contains("{1}"))).ToList().Count > 0), null),
+                //GetState("ParseNP"),
+                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
+                GetStates("RequestLocation"),
+                GetInputSymbolsByName("S PP"),
+                GenerateStackSymbolFromConditions(
+                        null, null, null, null,
+                        (a) => ((a.Count > 0) &&
+                            (a.Where(aa => aa.Contains("{1}"))).ToList().Count > 0), null),
+                GetState("ParsePP"),
+                new PDAStackOperation(PDAStackOperation.PDAStackOperationType.None, null)));
+
+            TransitionRelation.Add(new PDAInstruction(
 				GetStates("ConfirmObject"),
 				null,
 				GenerateStackSymbolFromConditions((o) => o != null, (g) => g == null, 
