@@ -2649,7 +2649,7 @@ namespace Agent
 				GetStates("StartGrab"),
 				null,
 				GenerateStackSymbolFromConditions(
-					null, (g) => g != null, 
+					(o) => o == null, (g) => g != null, 
 					null, null, null, null
 				),	
 				GetState("Wait"),
