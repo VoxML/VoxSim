@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Timers;
 using Global;
 using UnityEngine.UI;
@@ -81,22 +82,20 @@ namespace Agent
 			return visibleObjects.Contains(voxeme);
 		}
 
-		public bool IsVisible(Bounds bounds)
-		{
-			return GetVisibleVertices(bounds, sensor.transform.position) > 0;
-		}
-
 		public bool IsVisible(GameObject obj)
 		{
 			if (objSelector.disabledObjects.Contains(obj))
 			{
 				return false;
 			}
-//			Debug.Log (obj);
-			return IsVisible(Helper.GetObjectWorldSize(obj));
+            List<GameObject> excludeChildren = obj.GetComponentsInChildren<Renderer>().Where(
+                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
+            int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj, excludeChildren), obj, sensor.transform.position);
+			//Debug.Log(obj + "=============================================================== " + visibility);
+			return visibility > 0;
 		}
 
-		private int GetVisibleVertices(Bounds bounds, Vector3 origin)
+		private int GetVisibleVertices(Bounds bounds, GameObject rotatedObj, Vector3 origin)
 		{
 			float c = 1.0f;
 			List<Vector3> vertices = new List<Vector3> {
@@ -111,13 +110,17 @@ namespace Agent
 			};
 
 			int numVisibleVertices = 0;
-			foreach (Vector3 vertex in vertices) {
+			foreach (Vector3 vertex in vertices)
+			{
+//            Quaternion rot = Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
+//				Vector3 rotatedVertex = Helper.GetMostImmediateParentVoxeme(rotatedObj).transform.rotation * vertex + rotatedObj.transform.position;
+				Vector3 rotatedVertex = vertex;
 				RaycastHit hitInfo;
 				bool hit = Physics.Raycast (
-							   vertex, Vector3.Normalize (origin - vertex),
+							   rotatedVertex, Vector3.Normalize (origin - rotatedVertex),
 							   out hitInfo,
-							   Vector3.Magnitude (origin - vertex));
-				bool visible = (!hit) || ((hitInfo.point-vertex).magnitude < Constants.EPSILON);
+							   Vector3.Magnitude (origin - rotatedVertex));
+				bool visible = (!hit) || ((hitInfo.point-rotatedVertex).magnitude < Constants.EPSILON);
 //				if ((visible) || 
 //					(new Bounds(bounds.center,new Vector3(bounds.size.x+Constants.EPSILON,
 //						bounds.size.y+Constants.EPSILON,
@@ -128,10 +131,10 @@ namespace Agent
 //					}
 				}
 				else {
-//					Debug.Log(string.Format("Ray from {0} collides with {1} at {2}",
-//						Helper.VectorToParsable(vertex),
-//						Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
-//						Helper.VectorToParsable(hitInfo.point)));
+					//Debug.Log(string.Format("Ray from {0} collides with {1} at {2}",
+						//Helper.VectorToParsable(rotatedVertex),
+						//Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
+						//Helper.VectorToParsable(hitInfo.point)));
 				}
 			}
 

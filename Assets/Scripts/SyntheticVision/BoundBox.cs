@@ -159,23 +159,30 @@ namespace VisionViz
 
         void setPoints()
         {
-
-            bound = Helper.GetObjectWorldSize(gameObject);
-            boundOffset = meshBoundOffset;
+            bound = Helper.GetObjectWorldSize(Helper.GetMostImmediateParentVoxeme(gameObject));
+            boundOffset = bound.center - transform.position;
 
             // this makes bounds scaled down to blockX*'s local scale - and Diana shouldn't make blocks smaller or bigger at runtime
-//            bound.size = new Vector3(bound.size.x * transform.localScale.x / startingScale.x, bound.size.y * transform.localScale.y / startingScale.y, bound.size.z * transform.localScale.z / startingScale.z);
-//            boundOffset = new Vector3(boundOffset.x * transform.localScale.x / startingScale.x, boundOffset.y * transform.localScale.y / startingScale.y, boundOffset.z * transform.localScale.z / startingScale.z);
+            //            bound.size = new Vector3(bound.size.x * transform.localScale.x / startingScale.x, bound.size.y * transform.localScale.y / startingScale.y, bound.size.z * transform.localScale.z / startingScale.z);
+            //            boundOffset = new Vector3(boundOffset.x * transform.localScale.x / startingScale.x, boundOffset.y * transform.localScale.y / startingScale.y, boundOffset.z * transform.localScale.z / startingScale.z);
 
 
             bottomBackLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, -1, -1));
+            bottomBackLeft = Helper.RotatePointAroundPivot(bottomBackLeft, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             bottomFrontLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, -1, 1));
+            bottomFrontLeft = Helper.RotatePointAroundPivot(bottomFrontLeft, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             topBackLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, 1, -1));
+            topBackLeft = Helper.RotatePointAroundPivot(topBackLeft, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             topFrontLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, 1, 1));
+            topFrontLeft = Helper.RotatePointAroundPivot(topFrontLeft, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             bottomBackRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, -1, -1));
+            bottomBackRight = Helper.RotatePointAroundPivot(bottomBackRight, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             bottomFrontRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, -1, 1));
+            bottomFrontRight = Helper.RotatePointAroundPivot(bottomFrontRight, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             topBackRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, 1, -1));
+            topBackRight = Helper.RotatePointAroundPivot(topBackRight, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             topFrontRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, 1, 1));
+            topFrontRight = Helper.RotatePointAroundPivot(topFrontRight, Vector3.zero, Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
 
             corners = new[] { topFrontRight, topFrontLeft, topBackLeft, topBackRight, bottomFrontRight, bottomFrontLeft, bottomBackLeft, bottomBackRight };
 
@@ -184,7 +191,7 @@ namespace VisionViz
         void setLines()
         {
 
-            Quaternion rot = transform.rotation;
+            Quaternion rot = Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
             Vector3 pos = transform.position;
 
             List<Vector3[]> _lines = new List<Vector3[]>();

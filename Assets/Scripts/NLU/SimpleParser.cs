@@ -43,6 +43,7 @@ namespace NLU
 			"cups",
 			"disc",
 			"spoon",
+            "fork",
 			"book",
 			"blackboard",
 			"bottle",
@@ -71,7 +72,13 @@ namespace NLU
 			"cork",
 		});
 
-		private Dictionary<string,string> shittyPorterStemmer = new Dictionary<string, string> () {
+        private List<string> _objectVars = new List<string>(new[]
+        {
+            "{0}"
+        });
+
+
+        private Dictionary<string,string> shittyPorterStemmer = new Dictionary<string, string> () {
 			// not even a goddamn stemmer
 			{"blocks","block"},
 			{"balls","ball"},
@@ -79,7 +86,8 @@ namespace NLU
 			{"cups","cup"},
 			{"discs","disc"},
 			{"spoons","spoon"},
-			{"books","book"},
+            {"forks","fork"},
+            {"books","book"},
 			{"blackboards","blackboard"},
 			{"bottles","bottle"},
 			{"grapes","grape"},
@@ -118,7 +126,12 @@ namespace NLU
 			"against"
 		});
 
-		private List<string> _attribs = new List<string>(new[]
+        private List<string> _relationVars = new List<string>(new[]
+        {
+            "{1}"
+        });
+
+        private List<string> _attribs = new List<string>(new[]
 		{
 			"brown",
 			"blue",
@@ -220,7 +233,12 @@ namespace NLU
 					}
 					cur += 1;
 				}
-				else if (_determiners.Contains(tokens[cur]))
+                else if (_relationVars.Contains(tokens[cur]))
+                {
+                    form += "," + tokens[cur];
+                    cur += 1;
+                }
+                else if (_determiners.Contains(tokens[cur]))
 				{
 					form += tokens[cur] + "(";
 					cur += ParseNextNP(tokens.Skip(cur+1).ToArray(), ref form, ref lastObj);
@@ -237,7 +255,14 @@ namespace NLU
 					//form = MatchParens(form);
 					cur++;
 				}
-				else if (tokens[cur].StartsWith("v@"))
+                else if (_objectVars.Contains(tokens[cur]))
+                {
+                    lastObj = tokens[cur];
+                    form += lastObj;
+                    //form = MatchParens(form);
+                    cur++;
+                }
+                else if (tokens[cur].StartsWith("v@"))
 				{
 					form += "," + tokens [cur].ToUpper();
 					cur++;
@@ -297,7 +322,21 @@ namespace NLU
                     //Debug.Log(parsed);
 					cur++;
 				}
-				else if (restOfSent[cur] == "and")
+                else if (_objectVars.Contains(restOfSent[cur]))
+                {
+                    lastObj = restOfSent[cur];
+                    parsed += lastObj;
+                    //Debug.Log(parsed);
+                    for (var i = 0; i < openParen; i++)
+                    {
+                        parsed += ")";
+                        //Debug.Log(parsed);
+                    }
+                    parsed += ")";
+                    //Debug.Log(parsed);
+                    cur++;
+                }
+                else if (restOfSent[cur] == "and")
 				{
 					parsed += ",";
 					cur++;

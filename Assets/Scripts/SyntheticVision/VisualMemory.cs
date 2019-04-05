@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using System.Timers;
 using UnityEngine.UI;
 using VisionViz;
@@ -12,7 +13,7 @@ namespace Agent
 
 		public SyntheticVision _vision;
 		private JointGestureDemo _world;
-		public Dictionary<Voxeme, GameObject> _memorized;
+		public Dictionary<Voxeme, List<GameObject>> _memorized;
 		private InteractionPrefsModalWindow _interactionPrefs;
 		private ObjectSelector _objectSelector;
 
@@ -50,7 +51,7 @@ namespace Agent
 			_reactionTimer.Enabled = false;
 
 			_perceivingInitialConfiguration = true;
-			_memorized = new Dictionary<Voxeme, GameObject>();
+			_memorized = new Dictionary<Voxeme, List<GameObject>>();
 			gameObject.GetComponent<Camera>().targetTexture = (RenderTexture) MemoryCanvas.GetComponentInChildren<RawImage>().texture;
 		}
 
@@ -69,14 +70,14 @@ namespace Agent
 			{
 				Voxeme voxeme = obj.GetComponent<Voxeme>();
 //				Debug.Log(voxeme + " is visible?");
-				GameObject clone = null;
+				List<GameObject> clones = null;
 				if (_vision.IsVisible(voxeme))
 				{
 //					Debug.Log(voxeme + " is");
 					if (!_memorized.ContainsKey(voxeme))
 					{
-						clone = GetVisualClone(obj.gameObject);
-						_memorized.Add(voxeme, clone);
+						clones = GetVisualClone(obj.gameObject);
+						_memorized.Add(voxeme, clones);
 
 						if (!_perceivingInitialConfiguration)
 						{
@@ -85,14 +86,17 @@ namespace Agent
 							// surprise!
 							// todo _surpriseArgs can be plural
 							_surpriseArgs = new VisionEventArgs(voxeme, InconsistencyType.Present);
-							StartCoroutine(clone.GetComponent<BoundBox>().Flash(10));
+							foreach (var clone in clones)
+							{
+								StartCoroutine(clone.GetComponent<BoundBox>().Flash(10));
+							}
 							Debug.Log(string.Format("{0} Surprise!", voxeme));
 							_reactionTimer.Enabled = true;
 						}
 					}
 					else
 					{
-						clone = _memorized[voxeme];
+						clones = _memorized[voxeme];
 
 					}
 				}
@@ -103,19 +107,17 @@ namespace Agent
 					// but I know about it
 					if (_memorized.ContainsKey(voxeme))
 					{
-						// but can't see where it should be
-						if (!_vision.IsVisible(_memorized[voxeme]))
+						clones = _memorized[voxeme];
+						// but I see it's not where it supposed to be!
+						if (clones.All(clone => _vision.IsVisible(clone)))
 						{
-							clone = _memorized[voxeme];
-						}
-						// or I see it's not where it supposed to be!
-						else
-						{
-							clone = _memorized[voxeme];
 							// surprise!
 							_surpriseArgs = new VisionEventArgs(voxeme, InconsistencyType.Missing);
-							StartCoroutine(clone.GetComponent<BoundBox>().Flash(10));
-							Destroy(_memorized[voxeme], 3);
+							foreach (var clone in clones)
+							{
+								StartCoroutine(clone.GetComponent<BoundBox>().Flash(10));
+								Destroy(clone, 3);
+							}
 							_memorized.Remove(voxeme);
 							Debug.Log(string.Format("{0} Surprise!", voxeme));
 							_reactionTimer.Enabled = true;
@@ -123,26 +125,29 @@ namespace Agent
 					}
 				}
 
-				if (clone == null) continue;
+				if (clones == null || clones.Count == 0) continue;
 
-				if (_objectSelector.disabledObjects.Contains(voxeme.gameObject))
+				foreach (var clone in clones)
 				{
-					clone.transform.parent = null;
-					clone.SetActive(true);
-				}
-				else if (clone.transform.parent != null)
-				{
-					clone.transform.SetParent(voxeme.gameObject.transform);
-				}
+					if (_objectSelector.disabledObjects.Contains(voxeme.gameObject))
+					{
+						clone.transform.parent = null;
+						clone.SetActive(true);
+					}
+					else if (clone.transform.parent != null)
+					{
+						clone.transform.SetParent(voxeme.gameObject.transform);
+					}
 
-				BoundBox highlighter = clone.GetComponent<BoundBox>();
-				if (_vision.IsVisible(voxeme))
-				{
-					highlighter.lineColor = new Color(0.0f, 1.0f, 0.0f, 0.2f);
-				}
-				else
-				{
-					highlighter.lineColor = new Color(1.0f, 0.0f, 0.0f, 0.8f);
+					BoundBox highlighter = clone.GetComponent<BoundBox>();
+					if (_vision.IsVisible(voxeme))
+					{
+						highlighter.lineColor = new Color(0.0f, 1.0f, 0.0f, 0.2f);
+					}
+					else
+					{
+						highlighter.lineColor = new Color(1.0f, 0.0f, 0.0f, 0.8f);
+					}
 				}
 			}
 			if (_memorized.Count > 0 && _perceivingInitialConfiguration) {
@@ -167,34 +172,63 @@ namespace Agent
 			mat.renderQueue = 3000;
 		}
 
-		private GameObject GetVisualClone(GameObject obj)
+		private List<GameObject> GetVisualClone(GameObject obj)
 		{
 
-			GameObject clone = null;
+			List<GameObject> clones = new List<GameObject>();
 			for (int i=0; i < obj.transform.childCount; i++)
 			{
 				Transform t = obj.transform.GetChild(i);
 				if (t.name == obj.name + "*")
 				{
-					clone = Instantiate(t.gameObject);
-					// obj = original blockX with `voxeme` attached
-					// t = blockX* with physics
-					clone.transform.SetParent(t.gameObject.transform);
-					clone.transform.localScale = obj.transform.localScale;
-					clone.transform.position = t.transform.position;
-					Color originalColor = t.gameObject.GetComponent<Renderer>().material.color;
-					originalColor.a = 0.3f;
-					Renderer rend = clone.GetComponent<Renderer>();
-					SetRenderingModeToTransparent(rend.material);
-					rend.material.color = originalColor;
-					clone.AddComponent<BoundBox>();
-					Destroy(clone.GetComponent<Collider>());
-					Destroy(clone.GetComponent<Rigidbody>());
-					clone.layer = 11;
+					clones = makeVisualClone(t, obj.transform.localScale, t.transform.rotation);
 					break;
 				}
 			}
-			return clone;
+			return clones;
+		}
+
+		private List<GameObject> makeVisualClone(Transform t, Vector3 scale, Quaternion rotation)
+		{
+			// obj = original blockX with `voxeme` attached
+			// t = blockX* with physics
+			List<Transform> candidates = new List<Transform>();
+			List<GameObject> clones = new List<GameObject>();
+			if (t.GetComponent(typeof(Renderer)) != null)
+			{
+				candidates.Add(t);
+			}
+			else
+			{
+				foreach (Transform childT in t.GetComponentInChildren<Transform>())
+				{
+					if (childT.GetComponent(typeof(Renderer)) != null)
+					{
+						candidates.Add(childT);
+					}
+				}
+			}
+
+			foreach (Transform t2Clone in candidates)
+			{
+				GameObject clone = Instantiate(t2Clone.gameObject);
+				clone.transform.SetParent(t2Clone.gameObject.transform);
+				clone.transform.rotation = t2Clone.transform.rotation;
+				clone.transform.localScale = scale;
+				clone.transform.position = t2Clone.transform.position;
+				Color originalColor = t2Clone.gameObject.GetComponent<Renderer>().material.color;
+				originalColor.a = 0.3f;
+				Renderer rend = clone.GetComponent<Renderer>();
+				SetRenderingModeToTransparent(rend.material);
+				rend.material.color = originalColor;
+				clone.AddComponent<BoundBox>();
+				Destroy(clone.GetComponent<FixedJoint>());
+				Destroy(clone.GetComponent<Collider>());
+				Destroy(clone.GetComponent<Rigidbody>());
+				clone.layer = 11;
+				clones.Add(clone);
+			}
+			return clones;
 		}
 
 		public bool IsKnown(Voxeme v)

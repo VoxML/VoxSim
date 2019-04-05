@@ -243,6 +243,7 @@ public class JointGestureDemo : AgentInteraction {
 		UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel> ();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic> ();
+        interactionLogic.AttentionShift += AttentionShift;
 
         if (GameObject.Find("DianaMemory") != null)
         {
@@ -666,11 +667,20 @@ public class JointGestureDemo : AgentInteraction {
             interactionPrefs.userName = epistemicModel.userID;
         }
 
-        RespondAndUpdate (interactionPrefs.userName != "" ? string.Format("Hello, {0}.",interactionPrefs.userName) : 
-            "Hello.");
-		MoveToPerform ();
-		gestureController.PerformGesture (AvatarGesture.RARM_WAVE);
+        sessionCounter++;
 
+        if (sessionCounter == 1) {
+            RespondAndUpdate(interactionPrefs.userName != "" ? string.Format("Hello, {0}.", interactionPrefs.userName) :
+                "Hello.");
+        }
+        else if (sessionCounter > 1) {
+            RespondAndUpdate(interactionPrefs.userName != "" ? string.Format("Welcome back, {0}.", interactionPrefs.userName) :
+                "Welcome back.");
+        }
+
+		MoveToPerform ();
+        gestureController.PerformGesture(AvatarGesture.RARM_WAVE);
+        
         if (logFullState) {
             foreach (Voxeme voxeme in objSelector.allVoxemes) {
                 if ((voxeme.gameObject.activeInHierarchy) &&
@@ -1518,44 +1528,120 @@ public class JointGestureDemo : AgentInteraction {
             else if (message.StartsWith("grab")) {
                 message = message.Replace("grab", "grasp");
             }
+            else if (message.StartsWith("move")) {
+                message = message.Replace("move", "put");
+            }
             else if (message.StartsWith("push")) {
                 message = message.Replace("push", "slide");
             }
             else if (message.StartsWith("pull")) {
                 message = message.Replace("pull", "slide");
             }
+
+            // do noun mapping
+            if (message.Split().Contains("box")) {
+                message = message.Replace("box", "block");
+            }
+            else if (message.Split().Contains("boxes")) {
+                message = message.Replace("boxes", "blocks");
+            }
+            else if (message.Split().Contains("mug")) {
+                message = message.Replace("mug", "cup");
+            }
+            else if (message.Split().Contains("mugs")) {
+                message = message.Replace("mugs", "cups");
+            }
+
+            // get rid of "on/to the" before PP
+            // on the top of, on top of -> on
+            // to back of, to the back of -> behind
+            if ((message.Contains("to the left")) || (message.Contains("to the right"))) {
+                message = message.Replace("to the", "");
+            }
+            else if (message.Contains("to back of")) {
+                message = message.Replace("to back of", "behind");
+            }
+            else if (message.Contains("to the back of")) {
+                message = message.Replace("to the back of", "behind");
+            }
+            else if (message.Contains("on top of")) {
+                message = message.Replace("on top of", "on");
+            }
+            else if (message.Contains("on the top of")) {
+                message = message.Replace("on the top of", "on");
+            }
+
             // assume everything is a block
             if (message.Split().Contains("one")) {  // for non-blocks world situations, we need anaphora resolution (cf. "it" handling)
                 message = message.Replace("one", "block");
             }
 
-            if (message.Split().Contains("it")) {
-                object referent = eventManager.referents.stack.Peek();
+            if (message.Split().Contains("it") || (message.Split().Contains("them"))) {
+                if (eventManager.referents.stack.Count > 0) {
+                    object referent = eventManager.referents.stack.Peek();
 
-                if (referent.GetType() == typeof(String)) {
-                    GameObject voxObj = GameObject.Find(referent as String);
-                    if (voxObj != null) {
-                        message = message.Replace("it", voxObj.name);
+                    if (referent.GetType() == typeof(String)) {
+                        GameObject voxObj = GameObject.Find(referent as String);
+                        if (voxObj != null) {
+                            if (message.Split().Contains("it")) {
+                                message = message.Replace("it", voxObj.name);
+                            }
+                            else if (message.Split().Contains("them")) {
+                                message = message.Replace("them", voxObj.name);
+                            }
+                        }
+                        else {
+                            if (message.Split().Contains("it")) {
+                                message = message.Replace("it", "{0}");
+                            }
+                            else if (message.Split().Contains("them")) {
+                                message = message.Replace("them", "{0}");
+                            }
+                        }
+                    }
+                    else {
+                        if (message.Split().Contains("it")) {
+                            message = message.Replace("it", "{0}");
+                        }
+                        else if (message.Split().Contains("them")) {
+                            message = message.Replace("them", "{0}");
+                        }
+                    }
+                }
+                else {
+                    if (message.Split().Contains("it")) {
+                        message = message.Replace("it", "{0}");
+                    }
+                    else if (message.Split().Contains("them")) {
+                        message = message.Replace("them", "{0}");
                     }
                 }
             }
 
-			if (message.Contains ("there")) {
+            Debug.Log(message);
+
+            if (message.Contains ("there")) {
                 if ((regionHighlight.GetComponent<Renderer> ().material == activeHighlightMaterial) &&
                     (regionHighlight.transform.position.y > 0.0f)) {
-					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {	// empty region
-						interactionLogic.RewriteStack (
+					if (!Helper.RegionsEqual (interactionLogic.IndicatedRegion, new Region ())) {   // non-empty region or null
+                        interactionLogic.RewriteStack (
 							new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 								interactionLogic.GenerateStackSymbol (null, null,
 									new Region (highlightCenter, vectorConeRadius * highlightOscUpper * 2),
-									null, null, null)));
+									null, new List<string>(new string[] { commBridge.NLParse(message.Replace("there", "{1}")) }), null)));
 					}
 				}
+                else {
+                    interactionLogic.RewriteStack(
+                        new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                            interactionLogic.GenerateStackSymbol(null, null, null,
+                                null, new List<string>(new string[] { commBridge.NLParse(message.Replace("there", "{1}")) }), null)));
+                }
 			}
 			else {
-				interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
+                interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 					interactionLogic.GenerateStackSymbol (null, null, null,
-						null, new List<string> (new string[]{ commBridge.NLParse (message) }), null)));
+						null, new List<string> (new string[]{ commBridge.NLParse(message) }), null)));
 			}
 			break;
 
@@ -1653,9 +1739,33 @@ public class JointGestureDemo : AgentInteraction {
                 message = String.Join(" ", splitMessage.ToArray());
             }
 			Debug.Log (message);
-			// do stuff here
+            // do stuff here
 
-			break;
+            if (interactionLogic.IndicatedObj != null) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.IndicatedObj.name,message)) }), null)));
+            }
+            else if (interactionLogic.GraspedObj != null) {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", interactionLogic.GraspedObj.name, message)) }), null)));
+            }
+            else if (interactionLogic.ActionOptions.Count > 0) {
+                if (interactionLogic.ActionOptions[0].Contains("{1}")) {
+                    Debug.Log(interactionLogic.ActionOptions[0].Replace("{1}", commBridge.NLParse(message)));
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol(null, null, null, null,
+                            new List<string>(new string[] { interactionLogic.ActionOptions[0].Replace("{1}", commBridge.NLParse(message)) }), null)));
+                }
+            }
+            else {
+                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                    interactionLogic.GenerateStackSymbol(null, null, null, null,
+                        new List<string>(new string[] { commBridge.NLParse(string.Format("put {0} {1}", "{0}", message)) }), null)));
+            }
+
+            break;
 
 		default:
 			break;
@@ -1788,7 +1898,15 @@ public class JointGestureDemo : AgentInteraction {
 		objectOptions = objectOptions.OrderBy (o => (o.transform.position - highlightCenter).magnitude).ToList();
 
 		if (objectOptions.Count > 0) {
-			interactionLogic.RewriteStack (
+
+            if (interactionLogic.IndicatedObj != null) {
+                objectOptions = objectOptions.Where(o => !o.transform.IsChildOf(interactionLogic.IndicatedObj.transform)).ToList();
+            }
+            else if (interactionLogic.GraspedObj != null) {
+                objectOptions = objectOptions.Where(o => !o.transform.IsChildOf(interactionLogic.GraspedObj.transform)).ToList();
+            }
+
+            interactionLogic.RewriteStack (
 				new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
 					interactionLogic.GenerateStackSymbol (null, null, null, objectOptions, null, null)));
 		}
@@ -1850,31 +1968,46 @@ public class JointGestureDemo : AgentInteraction {
 			LookForward ();
 		}
 		else {
-			if ((interactionLogic.GraspedObj == null) &&
-			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate(string.Format("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
-                    availableObjs.Cast<object>().ToList())));
-				ReachFor (interactionLogic.IndicatedObj);
-				LookForward ();
-			}
-			else if ((interactionLogic.IndicatedObj != null) &&
-					(!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
-                RespondAndUpdate(string.Format("Should I put {0} on {1}?",
-                    GenerateReferringExpression(interactionLogic.IndicatedObj,
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
-                    GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
-        		LookForward ();
-			}
-			else if (interactionLogic.GraspedObj != null) {
-                RespondAndUpdate(string.Format("Should I put {0} on {1}?",
-                    GenerateReferringExpression(interactionLogic.GraspedObj,
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
-                    GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
-                        interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
-				LookForward ();
-			}
-		}
+            if (interactionLogic.ActionOptions.Count == 0) {
+    			if ((interactionLogic.GraspedObj == null) &&
+    			   (interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+                    RespondAndUpdate(string.Format("Do you mean {0}?", GenerateReferringExpression(interactionLogic.IndicatedObj,
+                        availableObjs.Cast<object>().ToList())));
+    				ReachFor (interactionLogic.IndicatedObj);
+    				LookForward ();
+    			}
+    			else if ((interactionLogic.IndicatedObj != null) &&
+    					(!interactionLogic.ObjectOptions.Contains (interactionLogic.IndicatedObj))) {
+                    RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                        GenerateReferringExpression(interactionLogic.IndicatedObj,
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
+                        GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
+            		LookForward ();
+    			}
+    			else if (interactionLogic.GraspedObj != null) {
+                    RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                        GenerateReferringExpression(interactionLogic.GraspedObj,
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList()),
+                        GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { interactionLogic.IndicatedObj }).Cast<object>().ToList())));
+    				LookForward ();
+    			}
+            }
+            else if ((interactionLogic.IndicatedObj != null) && (interactionLogic.ActionOptions[0].Contains("put"))) {
+                object theme = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                   (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0];
+
+                if (theme is GameObject) {
+                    RespondAndUpdate(string.Format("Should I put {0} on {1}?",
+                        GenerateReferringExpression((theme as GameObject),
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { (theme as GameObject) }).Cast<object>().ToList()),
+                        GenerateReferringExpression(interactionLogic.ObjectOptions[interactionLogic.ObjectOptions.Count - 1],
+                            interactionLogic.ObjectOptions.Concat(new List<GameObject>() { (theme as GameObject) }).Cast<object>().ToList())));
+                    LookForward();
+                }
+            }
+        }
 	}
 
 	public void IndexByColor(object[] content) {
@@ -2089,7 +2222,10 @@ public class JointGestureDemo : AgentInteraction {
 			if ((new Regex(@"grasp\(\{0\}\)")).IsMatch (interactionLogic.ActionOptions [0])) {
 				RespondAndUpdate ("What should I grab?");
 			}
-			else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch (interactionLogic.ActionOptions [0])) {
+            else if ((new Regex(@"lift\(\{0\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                RespondAndUpdate("What should I lift?");
+            }
+            else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch (interactionLogic.ActionOptions [0])) {
 				RespondAndUpdate ("What should I put there?");
 			}
 			else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch (interactionLogic.ActionOptions [0])) ||
@@ -2108,7 +2244,30 @@ public class JointGestureDemo : AgentInteraction {
 		}
 	}
 
-	public void PlaceInRegion(object[] content) {
+    public void RequestLocation(object[] content) {
+        object theme = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+            (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0];
+
+        if (theme is GameObject) {
+            if (interactionLogic.ActionOptions.Count > 0) {
+                if ((new Regex(@"put\([a-z\(\)]+,\{1\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                    RespondAndUpdate(string.Format("Where should I put {0}?",
+                        GenerateReferringExpression(theme as GameObject, availableObjs.Cast<object>().ToList())));
+                }
+                else if ((new Regex(@"slide\([a-z\(\)]+,\{1\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                    RespondAndUpdate(string.Format("Where should I move {0}?",
+                        GenerateReferringExpression(theme as GameObject, availableObjs.Cast<object>().ToList())));
+                }
+
+                if (interactionLogic.IndicatedObj == null) {
+                    interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
+                        interactionLogic.GenerateStackSymbol((theme as GameObject), null, null, null, null, null)));
+                }
+            }
+        }
+    }
+
+    public void PlaceInRegion(object[] content) {
 		RespondAndUpdate("OK.");
 
 		interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite,
@@ -2179,18 +2338,18 @@ public class JointGestureDemo : AgentInteraction {
 	public void StartGrab(object[] content) {
         // see if this object has a learned conventional grasp pose associated with it
         GameObject obj = null;
+        if (interactionLogic.ActionOptions.Count > 0) {
+            obj = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
+                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0] as GameObject;
 
-        if ((interactionLogic.GraspedObj != null) && (interactionLogic.ActionOptions.Count > 0)) {
-            string grabStr = string.Empty;
-            if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == leftGrasper) {
-                grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
-            }
-            else if (InteractionHelper.GetCloserHand(Diana, interactionLogic.GraspedObj) == rightGrasper) {
-                grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
-            }
-
-            obj = eventManager.ExtractObjects(Helper.GetTopPredicate(grabStr),
-                (String)Helper.ParsePredicate(grabStr)[Helper.GetTopPredicate(grabStr)])[0] as GameObject;
+            //if ((obj != null) && (interactionLogic.ActionOptions.Count > 0)) {
+            //    if (InteractionHelper.GetCloserHand(Diana, obj) == leftGrasper) {
+            //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
+            //    }
+            //    else if (InteractionHelper.GetCloserHand(Diana, obj) == rightGrasper) {
+            //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
+            //    }
+            //}
         }
         
         List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
@@ -2209,12 +2368,14 @@ public class JointGestureDemo : AgentInteraction {
 
             if (grabPoses.Count > 1)
             {
+                // disambiguate grasp pose
+                // are all poses available? -> for now, is the default pose (0) available?
+                // default pose is available if indicatedObj has no children who !FitsIn(child,indicatedObj,threeDimensional=true)
                 Debug.Log(grabPoses.Count);
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                     interactionLogic.GenerateStackSymbol(null, null, null, null,
                         Enumerable.Range(0, grabPoses.Count).Select(s => string.Format("grasp({0},with({1}))", interactionLogic.IndicatedObj.name,
-                                                                                       grabPoses[s].name)).ToList(),
-                    null)));
+                            grabPoses[s].name)).ToList(), null)));
             }
             else
             {
@@ -2227,7 +2388,7 @@ public class JointGestureDemo : AgentInteraction {
             }
         }
         else {
-            if (interactionLogic.IndicatedObj != null)
+            if ((interactionLogic.IndicatedObj != null) && (interactionLogic.IndicatedObj == obj))
             {
                 string graspCmd = string.Format("grasp({0})", interactionLogic.IndicatedObj.name);
                 if (learnedActionSymbols.Count == 1)
@@ -2275,11 +2436,11 @@ public class JointGestureDemo : AgentInteraction {
                     PromptEvent(interactionLogic.ActionOptions[0]);
 
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                        interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
+                        interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, null, null)));
                 }
                 else {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                        interactionLogic.GenerateStackSymbol(null, null, null, null, null, null)));
+                        interactionLogic.GenerateStackSymbol(null, args[0] as GameObject, null, null, null, null)));
                 }
             }
         }
@@ -2894,7 +3055,32 @@ public class JointGestureDemo : AgentInteraction {
                 new List<GameObject> (), new List<string>(), new List<string>())));
 	}
 
-	public void MoveToPerform() {
+    void AttentionShift(object sender, EventArgs e) {
+        if (((AttentionShiftEventArgs)e).Symbol != null) {
+            string symbol = ((AttentionShiftEventArgs)e).Symbol.Name;
+            Debug.Log(string.Format("Attention symbol: {0}", symbol));
+            symbol = interactionLogic.RemoveInputSymbolType(symbol, interactionLogic.GetInputSymbolType(symbol));
+            if (symbol.StartsWith("inattentive")) {
+                if (symbol.EndsWith("left")) {
+                    Debug.Log("Looking left");
+                    LookAt(new Vector3(headTargetDefault.x + 2.0f, headTargetDefault.y, headTargetDefault.z));
+                }
+                else if (symbol.EndsWith("right")) {
+                    Debug.Log("Looking right");
+                     LookAt(new Vector3(headTargetDefault.x - 2.0f, headTargetDefault.y, headTargetDefault.z));
+                }
+            }
+            else if (symbol.StartsWith("attentive")) {
+                Debug.Log("Looking forward");
+                if (interactionLogic.CurrentState.Name != "BeginInteraction") {
+                    RespondAndUpdate("");
+                }
+                LookForward();
+            }
+        }
+    }
+
+    public void MoveToPerform() {
 		bool leftGrasping = false;
 		bool rightGrasping = false;
 
@@ -3502,7 +3688,8 @@ public class JointGestureDemo : AgentInteraction {
 		// not moving on top of another object
 		foreach (Region region in orthogonalRegions) {
 			if (region.Contains (theme)) {	// stay in this region
-				target = Helper.FindClearRegion (demoSurface, new Region[]{ thisRegion, region }, theme).center;
+				target = Helper.FindClearRegion (demoSurface, new Region[]{ thisRegion, region }, theme).center+
+                    theme.transform.position-(Helper.GetObjectWorldSize(theme).center);
 				placementOptions.Add (target);
 			}
 		}
@@ -4317,7 +4504,7 @@ public class JointGestureDemo : AgentInteraction {
             GameObject obj = GameObject.Find(((string)((EventReferentArgs)e).Referent).ToString());
             if (obj != null) {
                 if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
-                    if (interactionLogic.CurrentState.Name != "EndState") {
+                    if ((interactionLogic.CurrentState.Name == "ParseNP") || (interactionLogic.CurrentState.Name == "ParseVP")) {
                         if ((interactionLogic.IndicatedObj != GameObject.Find((string)eventManager.referents.stack.Peek())) &&
                             (interactionLogic.GraspedObj != obj)) {
                             if ((interactionLogic.ActionOptions.Count > 0) &&
@@ -4369,6 +4556,10 @@ public class JointGestureDemo : AgentInteraction {
             }
         }
         else if (((EventReferentArgs)e).Referent is string) {   // absent object type - string
+            if (Regex.IsMatch(((EventReferentArgs)e).Referent as string,@"\{.\}")) {
+                return;
+            }
+
             RespondAndUpdate(string.Format("There is no {0} here.", ((EventReferentArgs)e).Referent as string));
             if (interactionLogic.IndicatedObj != null) {
                 interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
@@ -4441,21 +4632,18 @@ public class JointGestureDemo : AgentInteraction {
         //Debug.Log(interactionLogic.StackSymbolToString(interactionLogic.CurrentStackSymbol));
     }
 
-	void ConnectionLost(object sender, EventArgs e) {
+    void ConnectionLost(object sender, EventArgs e) {
 		LookForward();
         //Debug.Log("Connection Lost");
 
         if (interactionPrefs.connectionLostNotification) {
-            if (sessionCounter >= 1) {
-                if (eventManager.events.Count == 0) {
-                    RespondAndUpdate("Hey, where'd you go?");
-                }
-            }
-            else {
-                if (eventManager.events.Count == 0) {
-                    if (interactionLogic.CurrentState.Name != "EndState")
-                    {
-                        fusionSocket.OnFusionReceived(this, new FusionEventArgs("G;engage stop;0.0"));
+            if (eventManager.events.Count == 0) {
+                if (interactionLogic.CurrentState.Name != "EndState") {
+                    fusionSocket.OnFusionReceived(this, new FusionEventArgs("G;engage stop;0.0"));
+                    if (sessionCounter >= 1) {
+                        RespondAndUpdate("Hey, where'd you go?");
+                    }
+                    else {
                         RespondAndUpdate("Anyone there?");
                     }
                 }
