@@ -358,7 +358,7 @@ public class Voxeme : MonoBehaviour {
 
 	}
 
-	void AdjustToSupportingSurface() {
+    void AdjustToSupportingSurface() {
 		Vector3 rayStartX = new Vector3 (Helper.GetObjectWorldSize(gameObject).min.x-Constants.EPSILON,
 			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).center.z);
 		Vector3 contactPointX = Helper.RayIntersectionPoint (rayStartX, Vector3.right);

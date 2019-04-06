@@ -1400,8 +1400,14 @@ namespace Global {
 		public static void ResolveAllPhysicsDiscrepancies(bool macroEventSatisfied) {
 			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                //Debug.Log(string.Format("{0}: {1} {2}", voxeme,
+                    //Helper.VectorToParsable(voxeme.transform.position), 
+                    //Helper.VectorToParsable(voxeme.transform.eulerAngles)));
 				ResolvePhysicsDiscrepancies (voxeme.gameObject, macroEventSatisfied);
-			}
+                //Debug.Log(string.Format("{0}: {1} {2}", voxeme,
+                    //Helper.VectorToParsable(voxeme.transform.position),
+                    //Helper.VectorToParsable(voxeme.transform.eulerAngles)));
+            }
 		}
 
 		public static void ResolvePhysicsDiscrepancies(GameObject obj, bool macroEventSatisfied) {
@@ -1546,17 +1552,19 @@ namespace Global {
 			Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody> ();
 			//Debug.Log (obj.name);
 			foreach (Rigidbody rigidbody in rigidbodies) {
-				if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
-				//	if (rigidbody.transform.localPosition.magnitude > voxComponent.displacement [rigidbody.gameObject].magnitude+Constants.EPSILON) {
-					if (rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude < displacement) {
-	//					Debug.Log (rigidbody.name);
-	//					Debug.Log (Helper.VectorToParsable (obj.transform.position));
-	//					Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
-						displacement = rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude;
-					}
-				//	}
-				}
-			}
+                if (Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject) == obj) {
+    				if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
+    				//	if (rigidbody.transform.localPosition.magnitude > voxComponent.displacement [rigidbody.gameObject].magnitude+Constants.EPSILON) {
+    					if (rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude < displacement) {
+    	//					Debug.Log (rigidbody.name);
+    	//					Debug.Log (Helper.VectorToParsable (obj.transform.position));
+    	//					Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
+    						displacement = rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude;
+    					}
+    				//	}
+    				}
+    			}
+            }
 
 			if (displacement == float.MaxValue) {
 				displacement = 0.0f;
@@ -1584,10 +1592,17 @@ namespace Global {
 						//Debug.Log (Helper.VectorToParsable (voxComponent.displacement [rigidbodies[0].name]));
 
 						foreach (Rigidbody rigidbody in rigidbodies) {
-							if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
-								//								Debug.Log (rigidbody.name);
-								rigidbody.transform.localPosition = voxComponent.displacement [rigidbody.gameObject];
-							}
+                            if (Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject) == obj) {
+                                if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
+    								//Debug.Log(string.Format("{0}: {1} {2}",rigidbody.name, 
+                                        //Helper.VectorToParsable(rigidbody.transform.localPosition),
+                                        //Helper.VectorToParsable(rigidbody.transform.position)));
+    								rigidbody.transform.localPosition = voxComponent.displacement [rigidbody.gameObject];
+                                    //Debug.Log(string.Format("{0}: {1} {2}", rigidbody.name,
+                                        //Helper.VectorToParsable(rigidbody.transform.localPosition),
+                                        //Helper.VectorToParsable(rigidbody.transform.position)));
+                                }
+                            }
 						}
 					}
 				}
@@ -1609,7 +1624,7 @@ namespace Global {
 					}
 				}
 			}
-		}
+   		}
 
 		public static float GetConcavityMinimum(GameObject obj) {
 			Bounds bounds = Helper.GetObjectSize (obj);

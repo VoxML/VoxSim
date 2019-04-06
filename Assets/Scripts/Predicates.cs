@@ -2752,7 +2752,18 @@ public class Predicates : MonoBehaviour {
         //    }
         //}
 
-        Vector3 targetPosition = Vector3.zero;
+        if (agent != null) {
+            foreach (object arg in args) {
+                if (arg is GameObject) {
+                    Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
+                    if (rigging != null) {
+                        rigging.ActivateGravity(false);
+                    }
+                }
+            }
+        }
+
+            Vector3 targetPosition = Vector3.zero;
         Vector3 translocDir = Vector3.zero;
         float translocDist = 0.0f;
         Vector3 relOffset = Vector3.zero;
@@ -3102,6 +3113,8 @@ public class Predicates : MonoBehaviour {
                         //targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y), loc.z);
 
                         Debug.Log(Helper.VectorToParsable(targetPosition));
+                        Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(theme).size));
+                        Debug.Log(Helper.VectorToParsable(themeBounds.size));
 
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         if (voxComponent != null) {
@@ -3124,9 +3137,9 @@ public class Predicates : MonoBehaviour {
                             foreach (RaycastHit hit in hits) {
                                 if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
                                     if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
-                                        (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
+                                        (!hit.collider.gameObject.transform.IsChildOf(theme.gameObject.transform))) {
                                         if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-                                            Helper.GetObjectWorldSize(gameObject), true)) {
+                                            Helper.GetObjectWorldSize(theme), true)) {
                                             supportingSurface = hit.collider.gameObject;
                                             break;
                                         }
@@ -5769,6 +5782,11 @@ public class Predicates : MonoBehaviour {
 							else {
 								OutputHelper.PrintOutput (Role.Affector, "I can't interact with that object."); 
 							}
+
+                            //Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
+                            //if (rigging != null) {
+                            //    rigging.ActivateGravity(true);
+                            //}
 						}
 					}
 				}

@@ -575,9 +575,15 @@ public class JointGestureDemo : AgentInteraction {
                     messageStr)));
         }
 
-		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
+        receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
-		OnCharacterLogicInput (this, new CharacterLogicEventArgs (string.Format ("{0} {1}", messageType, messageStr.Split (',') [0]),
+        if (interactionLogic.attentionStatus != CharacterLogicAutomaton.AttentionStatus.Attentive) {
+            if (messageType == "S") {   // ignore speech on inattention
+                return;
+            }
+        }
+
+        OnCharacterLogicInput (this, new CharacterLogicEventArgs (string.Format ("{0} {1}", messageType, messageStr.Split (',') [0]),
 			string.Format ("{0} {1}", messageType, messageStr)));
 
 		if (!epistemicModel.engaged) {
@@ -2847,10 +2853,14 @@ public class JointGestureDemo : AgentInteraction {
 
                 GameObject obj = (interactionLogic.GraspedObj == null) ?
                     interactionLogic.IndicatedObj : interactionLogic.GraspedObj;
-
+                    
                 Vector3 destCoord = obj.transform.position + (directionVectors[oppositeDir[dir]] * servoSpeed);
                 Debug.Log(Helper.VectorToParsable(obj.transform.position));
                 Debug.Log(Helper.VectorToParsable(destCoord));
+                //if (destCoord.y < obj.GetComponent<Voxeme>().minYBound) {
+                //    destCoord = new Vector3(destCoord.x,
+                //        obj.GetComponent<Voxeme>().minYBound + (obj.transform.position.y - Helper.GetObjectWorldSize(obj).min.y), destCoord.z);
+                //}
 
                 string eventStr = string.Format("slidep({0},{1})", obj.name, Helper.VectorToParsable(destCoord));
 
@@ -3194,16 +3204,18 @@ public class JointGestureDemo : AgentInteraction {
             Debug.Log(string.Format("Attention symbol: {0}", symbol));
             symbol = interactionLogic.RemoveInputSymbolType(symbol, interactionLogic.GetInputSymbolType(symbol));
             if (symbol.StartsWith("inattentive")) {
+                interactionLogic.attentionStatus = CharacterLogicAutomaton.AttentionStatus.Inattentive;
                 if (symbol.EndsWith("left")) {
                     Debug.Log("Looking left");
                     LookAt(new Vector3(headTargetDefault.x + 2.0f, headTargetDefault.y, headTargetDefault.z));
                 }
                 else if (symbol.EndsWith("right")) {
                     Debug.Log("Looking right");
-                     LookAt(new Vector3(headTargetDefault.x - 2.0f, headTargetDefault.y, headTargetDefault.z));
+                    LookAt(new Vector3(headTargetDefault.x - 2.0f, headTargetDefault.y, headTargetDefault.z));
                 }
             }
             else if (symbol.StartsWith("attentive")) {
+                interactionLogic.attentionStatus = CharacterLogicAutomaton.AttentionStatus.Attentive;
                 Debug.Log("Looking forward");
                 if (interactionLogic.CurrentState.Name != "BeginInteraction") {
                     RespondAndUpdate("");

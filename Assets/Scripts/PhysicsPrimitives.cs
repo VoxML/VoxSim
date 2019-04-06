@@ -57,7 +57,7 @@ public class PhysicsPrimitives : MonoBehaviour {
 				// which predicates result in affordance-based consequence?
 				if ((predString == "ungrasp") || (predString == "lift") || 
 					(predString == "turn") || (predString == "roll") ||
-					(predString == "slide") || (predString == "put")) {
+					(predString == "slide") || (predString == "slidep") || (predString == "put")) {
 					Satisfaction.SatisfactionTest.ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 				}
 			}

@@ -19,14 +19,14 @@
     <Intrinsic>
       <Intr Name="UP[3]" Value="align(Y,E_y)" />
       <Intr Name="TOP[3]" Value="top(+Y)" />
-      <Intr Name="CONSTR[3]" Value="Y[1] &lt;&lt; Z[1], Y[1] &lt;&lt; X[1]" />
-      <Intr Name="CONSTR[3]" Value="Y[2] &gt;&gt; X[2], Y[2] &gt;&gt; Z[2]" />
+      <!--<Intr Name="CONSTR[3]" Value="Y[1] &lt;&lt; Z[1], Y[1] &lt;&lt; X[1]" />
+      <Intr Name="CONSTR[3]" Value="Y[2] &gt;&gt; X[2], Y[2] &gt;&gt; Z[2]" />-->
     </Intrinsic>
     <Extrinsic />
   </Habitat>
   <Afford_Str>
     <Affordances>
-        <Affordance Formula="H[3]-&gt;[put(x,on([1]))]support([1],x)" />
+        <Affordance Formula="H-&gt;[put(x,on([1]))]support([1],x)" />
     </Affordances>
   </Afford_Str>
   <Embodiment>

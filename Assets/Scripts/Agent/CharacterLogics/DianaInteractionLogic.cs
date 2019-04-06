@@ -420,11 +420,8 @@ namespace Agent
 				(List<string>)((StackSymbolContent)GetCurrentStackSymbol ().Content).ActionSuggestions; }
 		}
 
-		public string eventConfirmation = "";
-
-		public GameObject objectConfirmation = null;
-
-		public bool useOrderingHeuristics;
+        public AttentionStatus attentionStatus;
+        public bool useOrderingHeuristics;
 		public bool humanRelativeDirections;
 		public bool waveToStart;
 		public bool useEpistemicModel;
@@ -441,9 +438,16 @@ namespace Agent
 			public override void OnInspectorGUI() {
 
 				var bold = new GUIStyle(); 
-				bold.fontStyle = FontStyle.Bold; 
+				bold.fontStyle = FontStyle.Bold;
 
-				GUILayout.BeginHorizontal();
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Attention Status", bold, GUILayout.Width(150));
+                ((DianaInteractionLogic)target).attentionStatus =
+                    (AttentionStatus)GUILayout.SelectionGrid((int)((DianaInteractionLogic)target).attentionStatus,
+                    new string[] { "Inattentive", "Attentive" }, 1, GUILayout.ExpandWidth(true));
+                GUILayout.EndHorizontal(); 
+
+                GUILayout.BeginHorizontal();
 				GUILayout.Label("Use Ordering Heuristics", bold, GUILayout.Width(150));
 				((DianaInteractionLogic)target).useOrderingHeuristics =
 					GUILayout.Toggle (((DianaInteractionLogic)target).useOrderingHeuristics, "");
@@ -3207,6 +3211,7 @@ namespace Agent
 			}
 
             if ((forceChangeState) && (forceMoveToState != null))  {
+                Debug.Log(string.Format("Move to state {0}",forceMoveToState.Name));
                 MoveToState(forceMoveToState);
                 ExecuteStateContent();
                 forceChangeState = false;
@@ -4286,8 +4291,6 @@ namespace Agent
 		}
 
         void MoveToServo(object sender, ElapsedEventArgs e) {
-            Debug.Log("MoveToServo");
-
             if (servoWaitTimerTime > 0) {
                 servoWaitTimer.Interval = servoWaitTimerTime;
                 servoWaitTimer.Enabled = false;

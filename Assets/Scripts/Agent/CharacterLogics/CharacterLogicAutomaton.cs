@@ -245,6 +245,12 @@ namespace Agent
             return instructionKey;
         }
 
+        public enum AttentionStatus
+        {
+            Inattentive,
+            Attentive
+        }
+
         public event EventHandler LearnedNewInstruction;
 
         public void OnLearnedNewInstruction(object sender, EventArgs e)

@@ -62,10 +62,10 @@ namespace Satisfaction {
 					}
 				}
 			}
-			else if (predString == "slide") {	// satisfy slide
+			else if ((predString == "slide") || (predString == "slidep")) {	// satisfy slide
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
 				if (theme != null) {
-					//Debug.Log(Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
+					Debug.Log(Helper.VectorToParsable(theme.transform.position) + " " + (String)argsStrings[1]);
 					//Debug.Log(obj.transform.position);
 					//Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
 					Voxeme voxComponent = theme.GetComponent<Voxeme>();
@@ -549,27 +549,34 @@ namespace Satisfaction {
 
 			// reactivate physics by default
 			//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
-			bool reactivatePhysics = true;
-			//if (Helper.IsTopmostVoxemeInHierarchy(obj.gameObject)){
-			//	obj.minYBound = objBounds.min.y;	//TODO: did removing this really fix the bug where
-			//}										// a turned object would go through the supporting surface?
-													// did that cause any other bugs?
+			bool reactivateColliders = true;
+            bool reactivateGravity = true;
+            //if (Helper.IsTopmostVoxemeInHierarchy(obj.gameObject)){
+            //	obj.minYBound = objBounds.min.y;	//TODO: did removing this really fix the bug where
+            //}										// a turned object would go through the supporting surface?
+            // did that cause any other bugs?
 
 
-			// check existing relations
-			// if obj is in support or containment relation w/ concave obj
-			//Debug.Log (relationTracker.relations.Count);
-			foreach (DictionaryEntry relation in relationTracker.relations) {
+            // check existing relations
+            // if obj is supported or contained by concave obj
+            //Debug.Log (relationTracker.relations.Count);
+            foreach (DictionaryEntry relation in relationTracker.relations) {
 				if (((String)relation.Value).Contains("support") || ((String)relation.Value).Contains("contain")){
-                    Debug.Log (string.Format("==== {0} {1} {2} ====",((List<GameObject>)relation.Key)[0],((String)relation.Value),((List<GameObject>)relation.Key)[1]));
-//					Debug.Log (((List<GameObject>)relation.Key) [1]);
+                    GameObject figure = ((List<GameObject>)relation.Key)[0];    // remember, these are support/contain relations
+                    GameObject ground = ((List<GameObject>)relation.Key)[1];    // so the "figure" is actually the supporter/container
+                    Debug.Log (string.Format("==== {0} {1} {2} ====", figure, ((String)relation.Value), ground));
+                    //Debug.Log (ground);
 //					Debug.Log (obj.gameObject);
 //					Debug.Log (((List<GameObject>)relation.Key) [1] == obj.gameObject);
-					if (((List<GameObject>)relation.Key)[0] == obj.gameObject) {
-						if (TestRelation(((List<GameObject>)relation.Key)[1],"on",obj.gameObject) ||
-							TestRelation(((List<GameObject>)relation.Key)[1],"in",obj.gameObject)) {
-							reactivatePhysics = false;
-							break;
+                    // if cup on plate -> deactivate all physics on cup (colliders and gravity)
+                    //  -> deactivate colliders on plate (would pop cup out of concavity)
+                    //  -> activate gravity on plate
+					if (figure == obj.gameObject) {
+						if (TestRelation(ground, "on", obj.gameObject) ||
+							TestRelation(ground, "in", obj.gameObject)) {
+                            reactivateColliders = false;
+                            reactivateGravity = false;
+                            break;
 						}
 					}
 				}
@@ -680,13 +687,15 @@ namespace Satisfaction {
                                                                             //																				Debug.Log (test);
                                                                             }
                                                                             else {
-                                                                                reactivatePhysics = false;
+                                                                                reactivateColliders = false;
+                                                                                reactivateGravity = false;
                                                                                 obj.minYBound = objBounds.min.y;
                                                                             }
 																		}
 																		else if (relation == "in") {
-																			reactivatePhysics = false;
-																			obj.minYBound = objBounds.min.y;
+                                                                            reactivateColliders = false;
+                                                                            reactivateGravity = false;
+                                                                            obj.minYBound = objBounds.min.y;
 																		}
 //																		else if (relation == "under") {
 //																			GameObject voxObj = Helper.GetMostImmediateParentVoxeme (test.gameObject);
@@ -784,7 +793,8 @@ namespace Satisfaction {
 									}
 									//Debug.Break ();
 									if (result == "hold") {
-										reactivatePhysics = false;
+										reactivateColliders = true;
+                                        reactivateGravity = false;
 									}
 								}
 							}
@@ -793,18 +803,31 @@ namespace Satisfaction {
 				}
 			}
 
-			if (reactivatePhysics) {
+			if (reactivateColliders) {
 				if (obj.enabled) {
 //					Debug.Log(obj.name);
 //					Debug.Break ();
 					Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
 					if (rigging != null) {
 						//TODO:reenable
-						rigging.ActivatePhysics (true);
+						rigging.ActivateColliders (true);
 					}
 					//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
 				}
 			}
+
+            if (reactivateGravity) {
+                if (obj.enabled) {
+//                  Debug.Log(obj.name);
+//                  Debug.Break ();
+                    Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
+                    if (rigging != null) {
+                        //TODO:reenable
+                        rigging.ActivateGravity (true);
+                    }
+                    //PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
+                }
+            }
 		}
 
 		public static bool TestHabitat(GameObject obj, int habitatIndex) {

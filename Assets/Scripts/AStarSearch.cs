@@ -572,7 +572,7 @@ public class AStarSearch : MonoBehaviour {
 		path = ReconstructPath2 (startPos, bestLastPos);
 		Debug.Log ("====== path ===== ");
 		foreach (var point in path) {
-			Debug.Log (point);
+			Debug.Log (Helper.VectorToParsable(point));
 		}
 	}
 
