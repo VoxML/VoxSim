@@ -577,7 +577,13 @@ public class JointGestureDemo : AgentInteraction {
 
 		receivedMessages.Add (new Pair<string,string> (messageTime, messageStr));
 
-		OnCharacterLogicInput (this, new CharacterLogicEventArgs (string.Format ("{0} {1}", messageType, messageStr.Split (',') [0]),
+        if (interactionLogic.attentionStatus != CharacterLogicAutomaton.AttentionStatus.Attentive) {
+            if (messageType == "S") {   // ignore speech on inattention
+                return;
+            }
+        }
+
+        OnCharacterLogicInput (this, new CharacterLogicEventArgs (string.Format ("{0} {1}", messageType, messageStr.Split (',') [0]),
 			string.Format ("{0} {1}", messageType, messageStr)));
 
 		if (!epistemicModel.engaged) {
@@ -3194,6 +3200,7 @@ public class JointGestureDemo : AgentInteraction {
             Debug.Log(string.Format("Attention symbol: {0}", symbol));
             symbol = interactionLogic.RemoveInputSymbolType(symbol, interactionLogic.GetInputSymbolType(symbol));
             if (symbol.StartsWith("inattentive")) {
+                interactionLogic.attentionStatus = CharacterLogicAutomaton.AttentionStatus.Inattentive;
                 if (symbol.EndsWith("left")) {
                     Debug.Log("Looking left");
                     LookAt(new Vector3(headTargetDefault.x + 2.0f, headTargetDefault.y, headTargetDefault.z));
@@ -3204,6 +3211,7 @@ public class JointGestureDemo : AgentInteraction {
                 }
             }
             else if (symbol.StartsWith("attentive")) {
+                interactionLogic.attentionStatus = CharacterLogicAutomaton.AttentionStatus.Attentive;
                 Debug.Log("Looking forward");
                 if (interactionLogic.CurrentState.Name != "BeginInteraction") {
                     RespondAndUpdate("");
