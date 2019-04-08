@@ -1553,6 +1553,13 @@ public class JointGestureDemo : AgentInteraction {
                 message = message.Replace("mugs", "cups");
             }
 
+            if (message.Split().Contains("these")) {
+                message = message.Replace("these", "this");
+            }
+            else if (message.Split().Contains("those")) {
+                message = message.Replace("those", "that");
+            }
+
             // get rid of "on/to the" before PP
             // on the top of, on top of -> on
             // to back of, to the back of -> behind
@@ -1680,6 +1687,13 @@ public class JointGestureDemo : AgentInteraction {
                 message = String.Join(" ", splitMessage.ToArray());
             }
 			Debug.Log (message);
+
+            if (message.Split().Contains("these")) {
+                message = message.Replace("these", "this");
+            }
+            else if (message.Split().Contains("those")) {
+                message = message.Replace("those", "that");
+            }
 
             if ((message.StartsWith("this")) || (message.StartsWith("that"))) {
                 if ((regionHighlight.GetComponent<Renderer>().material == activeHighlightMaterial) &&
@@ -1995,7 +2009,7 @@ public class JointGestureDemo : AgentInteraction {
     				LookForward ();
     			}
             }
-            else if ((interactionLogic.IndicatedObj != null) && (interactionLogic.ActionOptions[0].Contains("put"))) {
+            else if (interactionLogic.ActionOptions[0].Contains("put")) {
                 object theme = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
                    (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])])[0];
 
@@ -2008,6 +2022,7 @@ public class JointGestureDemo : AgentInteraction {
                     LookForward();
                 }
             }
+
         }
 	}
 
@@ -2260,7 +2275,7 @@ public class JointGestureDemo : AgentInteraction {
                         GenerateReferringExpression(theme as GameObject, availableObjs.Cast<object>().ToList())));
                 }
 
-                if (interactionLogic.IndicatedObj == null) {
+                if ((interactionLogic.IndicatedObj == null) && (interactionLogic.GraspedObj != (theme as GameObject))) {
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol((theme as GameObject), null, null, null, null, null)));
                 }
@@ -2367,8 +2382,8 @@ public class JointGestureDemo : AgentInteraction {
         }
         
         List<PDAStackOperation> learnedActionSymbols = interactionLogic.LearnableInstructions.Values.Where(op => ((op != null) &&
-            ((((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject) || 
-            (((StackSymbolContent)op.Content).GraspedObj as GameObject == objs[0])))).ToList();
+            ((((StackSymbolContent)op.Content).GraspedObj as GameObject == interactionLogic.IndicatedObj as GameObject) ||
+            ((objs.Count > 0) && (((StackSymbolContent)op.Content).GraspedObj as GameObject == objs[0]))))).ToList();
 
         //Debug.Log(eventManager.ExtractObjects(
                 //Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
