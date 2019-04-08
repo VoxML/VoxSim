@@ -549,8 +549,8 @@ namespace Satisfaction {
 
 			// reactivate physics by default
 			//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
-			bool reactivateColliders = true;
-            bool reactivateGravity = true;
+			//bool reactivateColliders = true;
+            //bool reactivateGravity = true;
             //if (Helper.IsTopmostVoxemeInHierarchy(obj.gameObject)){
             //	obj.minYBound = objBounds.min.y;	//TODO: did removing this really fix the bug where
             //}										// a turned object would go through the supporting surface?
@@ -568,14 +568,21 @@ namespace Satisfaction {
                     //Debug.Log (ground);
 //					Debug.Log (obj.gameObject);
 //					Debug.Log (((List<GameObject>)relation.Key) [1] == obj.gameObject);
-                    // if cup on plate -> deactivate all physics on cup (colliders and gravity)
+                    // if cup ("ground") on plate ("figure") -> plate support cup
+                    //  -> deactivate all physics on cup (colliders and gravity)
                     //  -> deactivate colliders on plate (would pop cup out of concavity)
                     //  -> activate gravity on plate
 					if (figure == obj.gameObject) {
 						if (TestRelation(ground, "on", obj.gameObject) ||
 							TestRelation(ground, "in", obj.gameObject)) {
-                            reactivateColliders = false;
-                            reactivateGravity = false;
+                            ground.GetComponent<Voxeme>().deactivateCollidersFlag = true;
+                            ground.GetComponent<Voxeme>().deactivateGravityFlag = true;
+                            figure.GetComponent<Voxeme>().activateCollidersFlag = true;
+                            figure.GetComponent<Voxeme>().activateGravityFlag = true;
+                            //Debug.Log(string.Format("{0} deactivate colliders: {1}", ground, ground.GetComponent<Voxeme>().deactivateCollidersFlag));
+                            //Debug.Log(string.Format("{0} deactivate gravity: {1}", ground, ground.GetComponent<Voxeme>().deactivateGravityFlag));
+                            //Debug.Log(string.Format("{0} deactivate colliders: {1}", figure, figure.GetComponent<Voxeme>().activateCollidersFlag));
+                            //Debug.Log(string.Format("{0} deactivate gravity: {1}", figure, figure.GetComponent<Voxeme>().activateGravityFlag));
                             break;
 						}
 					}
@@ -687,14 +694,14 @@ namespace Satisfaction {
                                                                             //																				Debug.Log (test);
                                                                             }
                                                                             else {
-                                                                                reactivateColliders = false;
-                                                                                reactivateGravity = false;
+                                                                                obj.GetComponent<Voxeme>().deactivateCollidersFlag = true;
+                                                                                obj.GetComponent<Voxeme>().deactivateGravityFlag = true;
                                                                                 obj.minYBound = objBounds.min.y;
                                                                             }
 																		}
 																		else if (relation == "in") {
-                                                                            reactivateColliders = false;
-                                                                            reactivateGravity = false;
+                                                                            obj.GetComponent<Voxeme>().deactivateCollidersFlag = true;
+                                                                            obj.GetComponent<Voxeme>().deactivateGravityFlag = true;
                                                                             obj.minYBound = objBounds.min.y;
 																		}
 //																		else if (relation == "under") {
@@ -793,8 +800,8 @@ namespace Satisfaction {
 									}
 									//Debug.Break ();
 									if (result == "hold") {
-										reactivateColliders = true;
-                                        reactivateGravity = false;
+                                        obj.GetComponent<Voxeme>().activateCollidersFlag = true;
+                                        obj.GetComponent<Voxeme>().deactivateGravityFlag = true;
 									}
 								}
 							}
@@ -803,31 +810,31 @@ namespace Satisfaction {
 				}
 			}
 
-			if (reactivateColliders) {
-				if (obj.enabled) {
-//					Debug.Log(obj.name);
-//					Debug.Break ();
-					Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
-					if (rigging != null) {
-						//TODO:reenable
-						rigging.ActivateColliders (true);
-					}
-					//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
-				}
-			}
+//			if (reactivateColliders) {
+//				if (obj.enabled) {
+////					Debug.Log(obj.name);
+////					Debug.Break ();
+//					Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
+//					if (rigging != null) {
+//						//TODO:reenable
+//						rigging.ActivateColliders (true);
+//					}
+//					//PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
+//				}
+//			}
 
-            if (reactivateGravity) {
-                if (obj.enabled) {
-//                  Debug.Log(obj.name);
-//                  Debug.Break ();
-                    Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
-                    if (rigging != null) {
-                        //TODO:reenable
-                        rigging.ActivateGravity (true);
-                    }
-                    //PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
-                }
-            }
+//            if (reactivateGravity) {
+//                if (obj.enabled) {
+////                  Debug.Log(obj.name);
+////                  Debug.Break ();
+            //        Rigging rigging = obj.gameObject.GetComponent<Rigging> ();
+            //        if (rigging != null) {
+            //            //TODO:reenable
+            //            rigging.ActivateGravity (true);
+            //        }
+            //        //PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
+            //    }
+            //}
 		}
 
 		public static bool TestHabitat(GameObject obj, int habitatIndex) {
@@ -1210,7 +1217,10 @@ namespace Satisfaction {
 										else {
 											if (RCC8.EC (objBounds, Helper.GetObjectWorldSize (test))) {	// otherwise EC = support
 												if (voxeme.enabled) {
-													obj.GetComponent<Rigging> ().ActivatePhysics (true);
+                                                    voxeme.activateCollidersFlag = true;
+                                                    voxeme.activateGravityFlag = true;
+
+                                                    //obj.GetComponent<Rigging> ().ActivatePhysics (true);
 												}
 												obj.GetComponent<Voxeme>().minYBound = Helper.GetObjectWorldSize(test).max.y;
 												RiggingHelper.RigTo (obj, test);	// setup parent-child rig

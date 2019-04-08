@@ -1170,16 +1170,25 @@ public class Predicates : MonoBehaviour {
 		}
 
 		// override physics rigging
-		foreach (object arg in args) {
-			if (arg is GameObject) {
-				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-				if (rigging != null) {
-					rigging.ActivatePhysics (false);
-				}
-			}
-		}
+		//foreach (object arg in args) {
+		//	if (arg is GameObject) {
+		//		Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+		//		if (rigging != null) {
+		//			rigging.ActivatePhysics (false);
+		//		}
+		//	}
+		//}
 
-		Helper.PrintRDFTriples (rdfTriples);
+        foreach (object arg in args) {
+            if (arg is GameObject) {
+                if ((arg as GameObject).GetComponent<Voxeme>() != null) {
+                    (arg as GameObject).GetComponent<Voxeme>().deactivateCollidersFlag = true;
+                    (arg as GameObject).GetComponent<Voxeme>().deactivateGravityFlag = true;
+                }
+            }
+        }
+
+        Helper.PrintRDFTriples (rdfTriples);
 
 		if (prep == "_on") {	// fix for multiple RDF triples
 			if (args [0] is GameObject) {
@@ -2115,17 +2124,26 @@ public class Predicates : MonoBehaviour {
 		}
 
 		// override physics rigging
-		foreach (object arg in args) {
-			if (arg is GameObject) {
-				Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-				if (rigging != null) {
-					rigging.ActivatePhysics (false);
-				}
-			}
-		}
+		//foreach (object arg in args) {
+		//	if (arg is GameObject) {
+		//		Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+		//		if (rigging != null) {
+		//			rigging.ActivatePhysics (false);
+		//		}
+		//	}
+		//}
 
-		// unrig contained-but-not-supported objects
-		foreach (DictionaryEntry pair in relationTracker.relations)
+        foreach (object arg in args) {
+            if (arg is GameObject) {
+                if ((arg as GameObject).GetComponent<Voxeme>() != null) {
+                    (arg as GameObject).GetComponent<Voxeme>().deactivateCollidersFlag = true;
+                    (arg as GameObject).GetComponent<Voxeme>().deactivateGravityFlag = true;
+                }
+            }
+        }
+
+        // unrig contained-but-not-supported objects
+        foreach (DictionaryEntry pair in relationTracker.relations)
 		{
 			// support,contain cup1 ball
 			if ((pair.Value as string).Contains ("contain") && (!(pair.Value as string).Contains ("support"))) {
@@ -2243,17 +2261,26 @@ public class Predicates : MonoBehaviour {
             }
         }
 
-		// override physics rigging
 		if (agent != null) {
-			foreach (object arg in args) {
-				if (arg is GameObject) {
-					Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-					if (rigging != null) {
-						rigging.ActivatePhysics (false);
-					}
-				}
-			}
-		}
+            // override physics rigging
+   //         foreach (object arg in args) {
+			//	if (arg is GameObject) {
+			//		Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
+			//		if (rigging != null) {
+			//			rigging.ActivatePhysics (false);
+			//		}
+			//	}
+			//}
+
+            foreach (object arg in args) {
+                if (arg is GameObject) {
+                    if ((arg as GameObject).GetComponent<Voxeme>() != null) {
+                        (arg as GameObject).GetComponent<Voxeme>().deactivateCollidersFlag = true;
+                        (arg as GameObject).GetComponent<Voxeme>().deactivateGravityFlag = true;
+                    }
+                }
+            }
+        }
 
 		Vector3 targetPosition = Vector3.zero;
 		Vector3 translocDir = Vector3.zero;

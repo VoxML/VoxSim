@@ -47,24 +47,34 @@ public class Rigging : MonoBehaviour {
             BoxCollider[] colliders = gameObject.GetComponentsInChildren<BoxCollider> ();
             foreach (BoxCollider collider in colliders) {
                 if (collider.gameObject != gameObject) {
+                    Debug.Log(string.Format("{0} IsChildOf {1}:{2}", collider, gameObject, collider.transform.IsChildOf(gameObject.transform)));
+                    Debug.Log(string.Format("{0} ParentVoxeme = {1}", collider, Helper.GetMostImmediateParentVoxeme(collider.gameObject)));
+                    Debug.Log(string.Format("{0} is concave: {1}", gameObject, gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave")));
+                    Debug.Log(string.Format("{0} {1} {2}", collider, collider.gameObject.name, Helper.GetMostImmediateParentVoxeme(collider.gameObject).name));
+                    Debug.Log(string.Format("{0} ^ {1} ^ {2}", collider.transform.IsChildOf(gameObject.transform),
+                        Helper.GetMostImmediateParentVoxeme(collider.gameObject) == gameObject,
+                        gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave")));
+                    Debug.Log(string.Format("{0}", (collider.transform.IsChildOf(gameObject.transform) &&
+                        Helper.GetMostImmediateParentVoxeme(collider.gameObject) == gameObject &&
+                        gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"))));
                     // don't reactivate physics on rigged children
                     // if this object is concave
                     // and other physics special cases
-//                  Debug.Log(collider.name);
-//                  Debug.Log(collider.transform.IsChildOf (gameObject.transform));
-//                  Debug.Log(collider.gameObject.GetComponent<Voxeme> ());
-//                  Debug.Log(gameObject.GetComponent<Voxeme> ().voxml.Type.Concavity);
+                    //                  Debug.Log(collider.name);
+                    //                  Debug.Log(collider.transform.IsChildOf (gameObject.transform));
+                    //                  Debug.Log(collider.gameObject.GetComponent<Voxeme> ());
+                    //                  Debug.Log(gameObject.GetComponent<Voxeme> ().voxml.Type.Concavity);
                     //Debug.Log ((collider.transform.IsChildOf (gameObject.transform) && collider.gameObject.GetComponent<Voxeme> () != null &&
                     //gameObject.GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave")));
-                    if ((!(collider.transform.IsChildOf (gameObject.transform) && collider.gameObject.GetComponent<Voxeme> () != null &&
-                        gameObject.GetComponent<Voxeme> ().voxml.Type.Concavity.Contains("Concave"))) ||
-                        (gameObject.GetComponent<Voxeme> ().isGrasped)){
+                    if ((collider.transform.IsChildOf(gameObject.transform)) &&
+                        (Helper.GetMostImmediateParentVoxeme(collider.gameObject) == gameObject)) {
                         //if (!(collider.transform.IsChildOf(gameObject.transform) && gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave") &&
                         //  !RCC8.ProperPart(Helper.GetObjectWorldSize(collider.gameObject),Helper.GetObjectWorldSize(gameObject))) {
                         //if (!((collider.transform.IsChildOf(gameObject.transform) &&
                         //  gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave" &&
                         //  relationTracker.relations[new List<GameObject>(new GameObject[]{gameObject,collider.gameObject})] == "contain"))) {
                         if (collider != null) {
+                            Debug.Log(collider.name + ": activating colliders");
                             collider.isTrigger = false;
                         }
                     }
@@ -93,17 +103,27 @@ public class Rigging : MonoBehaviour {
             Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
             foreach (Rigidbody rigidbody in rigidbodies) {
                 if (rigidbody.gameObject != gameObject) {
+                    Debug.Log(string.Format("{0} IsChildOf {1}:{2}", rigidbody, gameObject, rigidbody.transform.IsChildOf(gameObject.transform)));
+                    Debug.Log(string.Format("{0} ParentVoxeme = {1}", rigidbody, Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject)));
+                    Debug.Log(string.Format("{0} is concave: {1}", gameObject, gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave")));
+                    Debug.Log(string.Format("{0} {1} {2}", rigidbody, rigidbody.gameObject.name, Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject).name));
+                    Debug.Log(string.Format("{0} ^ {1} ^ {2}",rigidbody.transform.IsChildOf(gameObject.transform), 
+                        Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject) == gameObject,
+                        gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave")));
+                    Debug.Log(string.Format("{0}", (rigidbody.transform.IsChildOf(gameObject.transform) &&
+                        Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject) == gameObject &&
+                        gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"))));
                     // don't reactivate physics on rigged children
                     // if this object is concave
                     // and other physics special cases
-                    if ((!(rigidbody.transform.IsChildOf(gameObject.transform) && rigidbody.gameObject.GetComponent<Voxeme>() != null &&
-                        gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"))) ||
-                        (gameObject.GetComponent<Voxeme>().isGrasped)) {                        //if (!(rigidbody.transform.IsChildOf(gameObject.transform) && gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave") &&
+                    if ((rigidbody.transform.IsChildOf(gameObject.transform)) &&
+                        (Helper.GetMostImmediateParentVoxeme(rigidbody.gameObject) == gameObject)) {
                         //  !RCC8.ProperPart(Helper.GetObjectWorldSize(rigidbody.gameObject),Helper.GetObjectWorldSize(gameObject))) {
                         //if (!((rigidbody.transform.IsChildOf(gameObject.transform) &&
                         //  gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave" &&
                         //  relationTracker.relations[new List<GameObject>(new GameObject[]{gameObject,rigidbody.gameObject})] == "contain"))) {
                         if (rigidbody != null) {
+                            Debug.Log(rigidbody.name + ": activating gravity");
                             rigidbody.useGravity = true;
                             rigidbody.isKinematic = false;
                         }

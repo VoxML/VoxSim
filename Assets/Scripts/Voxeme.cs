@@ -78,7 +78,12 @@ public class Voxeme : MonoBehaviour {
 	public Vector3 startRotation;
 	public Vector3 startScale;
 
-	public event EventHandler VoxMLLoaded;
+    public bool deactivateCollidersFlag;
+    public bool activateCollidersFlag;
+    public bool deactivateGravityFlag;
+    public bool activateGravityFlag;
+
+    public event EventHandler VoxMLLoaded;
 
 	public void OnVoxMLLoaded(object sender, EventArgs e)
 	{
@@ -446,7 +451,35 @@ public class Voxeme : MonoBehaviour {
 		}
 	}
 
-	public void Reset() {
+    void LateUpdate() {
+        if (activateCollidersFlag) {
+            if (rigging != null) {
+                rigging.ActivateColliders(true);
+                activateCollidersFlag = false;
+            }
+        }
+        else if (deactivateCollidersFlag) {
+            if (rigging != null) {
+                rigging.ActivateColliders(false);
+                deactivateCollidersFlag = false;
+            }
+        }
+
+        if (activateGravityFlag) {
+            if (rigging != null) {
+                rigging.ActivateGravity(true);
+                activateGravityFlag = false;
+            }
+        }
+        else if (deactivateGravityFlag) {
+            if (rigging != null) {
+                rigging.ActivateGravity(false);
+                deactivateGravityFlag = false;
+            }
+        }
+    }
+
+    public void Reset() {
 		if (gameObject.transform.parent != null) {
 			GameObject parent = gameObject.transform.parent.gameObject;
 			Voxeme parentVox = Helper.GetMostImmediateParentVoxeme (parent).GetComponent<Voxeme> ();
