@@ -158,7 +158,13 @@ public class VoxemeInit : MonoBehaviour {
 
 					if (!usePhysicsRigging) {
 						container.GetComponent<Rigging> ().ActivatePhysics (false);
-					}
+                        container.GetComponent<Voxeme>().collidersActive = false;
+                        container.GetComponent<Voxeme>().gravityActive = false;
+                    }
+                    else {
+                        container.GetComponent<Voxeme>().collidersActive = true;
+                        container.GetComponent<Voxeme>().gravityActive = true;
+                    }
 
 					// add to master voxeme list
 					objSelector.allVoxemes.Add (container.GetComponent<Voxeme> ());

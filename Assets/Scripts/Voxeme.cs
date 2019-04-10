@@ -83,6 +83,9 @@ public class Voxeme : MonoBehaviour {
     public bool deactivateGravityFlag;
     public bool activateGravityFlag;
 
+    public bool collidersActive;
+    public bool gravityActive;
+
     public event EventHandler VoxMLLoaded;
 
 	public void OnVoxMLLoaded(object sender, EventArgs e)
@@ -453,29 +456,41 @@ public class Voxeme : MonoBehaviour {
 
     void LateUpdate() {
         if (activateCollidersFlag) {
-            if (rigging != null) {
-                rigging.ActivateColliders(true);
-                activateCollidersFlag = false;
-            }
+            //if (!collidersActive) {
+                if (rigging != null) {
+                    rigging.ActivateColliders(true);
+                    collidersActive = true;
+                    activateCollidersFlag = false;
+                }
+            //}
         }
         else if (deactivateCollidersFlag) {
-            if (rigging != null) {
-                rigging.ActivateColliders(false);
-                deactivateCollidersFlag = false;
-            }
+            //if (collidersActive) {
+                if (rigging != null) {
+                    rigging.ActivateColliders(false);
+                    collidersActive = false;
+                    deactivateCollidersFlag = false;
+                }
+            //}
         }
 
         if (activateGravityFlag) {
-            if (rigging != null) {
-                rigging.ActivateGravity(true);
-                activateGravityFlag = false;
-            }
+            //if (!gravityActive) {
+                if (rigging != null) {
+                    rigging.ActivateGravity(true);
+                    gravityActive = true;
+                    activateGravityFlag = false;
+                }
+            //}
         }
         else if (deactivateGravityFlag) {
-            if (rigging != null) {
-                rigging.ActivateGravity(false);
-                deactivateGravityFlag = false;
-            }
+            //if (gravityActive) {
+                if (rigging != null) {
+                    rigging.ActivateGravity(false);
+                    gravityActive = false;
+                    deactivateGravityFlag = false;
+                }
+            //}
         }
     }
 

@@ -2782,15 +2782,17 @@ public class Predicates : MonoBehaviour {
         if (agent != null) {
             foreach (object arg in args) {
                 if (arg is GameObject) {
-                    Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
-                    if (rigging != null) {
-                        rigging.ActivateGravity(false);
+                    if ((arg as GameObject).GetComponent<Voxeme>().gravityActive) {
+                        Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
+                        if (rigging != null) {
+                            rigging.ActivateGravity(false);
+                        }
                     }
                 }
             }
         }
 
-            Vector3 targetPosition = Vector3.zero;
+        Vector3 targetPosition = Vector3.zero;
         Vector3 translocDir = Vector3.zero;
         float translocDist = 0.0f;
         Vector3 relOffset = Vector3.zero;
