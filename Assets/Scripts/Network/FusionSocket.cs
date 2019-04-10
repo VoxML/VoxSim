@@ -53,7 +53,9 @@ namespace Network
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
 				if (message.StartsWith ("P")) {
-					if ((HowManyLeft() != 0) && (!_messages.Peek().StartsWith ("P"))) {
+					//if ((HowManyLeft() != 0) && (!_messages.Peek().StartsWith ("P"))) {
+					if (HowManyLeft() == 0)
+					{
 						_messages.Enqueue (message);
 					}
 				}
