@@ -126,6 +126,15 @@ namespace Episteme
 			_restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimUpdateRoute, "0","okay", "error");
 		}
 
+		public void UpdateEpisimNewGesture(string gestureId, string gestureLabel)
+		{
+			if ((client != null) && (client.isConnected))
+			{
+                _restClient.GetComponent<RestClient>().Post(_episimUrl + EpisimUpdateRoute,
+					string.Format("{{\"l\": [ {{ \"id\": \"{0}\", \"str\": \"{1}\" }} ] }}", gestureId, gestureLabel),
+					"okay", "error");
+			}
+		}
 
 		public void UpdateEpisim(Concept[] updatedConcepts, Relation[] updatedRelations)
 		{
