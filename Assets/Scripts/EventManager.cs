@@ -220,7 +220,7 @@ public class EventManager : MonoBehaviour {
 		}
 
 		if (events.Count > 0) {
-			bool q = SatisfactionTest.IsSatisfied (events [0]);
+            bool q = SatisfactionTest.IsSatisfied (events [0]);
 
 			if (q) {
 				GameObject.Find ("VoxWorld").GetComponent<AStarSearch> ().path.Clear ();
@@ -239,8 +239,8 @@ public class EventManager : MonoBehaviour {
 
 				if (events.Count > 0) {
 					ExecuteNextCommand ();
-				}
-				else {
+                }
+                else {
 					if (OutputHelper.GetCurrentOutputString (Role.Affector) != "I'm sorry, I can't do that.") {
                         //OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
                         string pred = Helper.GetTopPredicate(completedEvent);
@@ -281,7 +281,7 @@ public class EventManager : MonoBehaviour {
 
 	public void InsertEvent(String commandString, int before) {
 		//Debug.Break ();
-		Debug.Log ("Inserting: " + commandString);
+		Debug.Log (string.Format("Inserting@{0}: {1}",before,commandString));
 		events.Insert(before,commandString);
 	}
 
@@ -336,9 +336,9 @@ public class EventManager : MonoBehaviour {
 		else {
 			RemoveEvent (0);
 		}
-	}
+    }
 
-	public bool EvaluateCommand(String command) {
+    public bool EvaluateCommand(String command) {
 		ClearRDFTriples ();
 		ClearSkolems ();
 		ParseCommand (command);
@@ -526,10 +526,10 @@ public class EventManager : MonoBehaviour {
 				if (preds.rdfTriples.Count > 0) {
                     if (methodToCall != null) { // found a method
                         if (methodToCall.ReturnType == typeof(void)) { // is it a program?
-                            Debug.Log("========================== ExecuteCommand ============================");
+                            Debug.Log("========================== ExecuteCommand ============================ " + evaluatedCommand);
                             Debug.Log("ExecuteCommand: invoke " + methodToCall.Name);
+                            Debug.Log(string.Format("{0} : {1}", evaluatedCommand, Helper.VectorToParsable((objs[0] as GameObject).GetComponent<Voxeme>().targetPosition)));
                             object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
-                            Debug.Log(evaluatedCommand);
                             OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
                         }
                         else {  // not a program
@@ -555,14 +555,14 @@ public class EventManager : MonoBehaviour {
 						}
 					}
 				}
-			}
+            }
             catch (ArgumentNullException e){
 				return;
 			}
 		}
-	}
+    }
 
-	public void AbortEvent() {
+    public void AbortEvent() {
 		if (events.Count > 0) {
 			//InsertEvent ("satisfy()", 0);
 			InsertEvent ("", 0);
