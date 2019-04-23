@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class EpisemeClientTest : MonoBehaviour
+public class EpistemeSocketTest : MonoBehaviour
 {
 	private EpistemicState model;
 

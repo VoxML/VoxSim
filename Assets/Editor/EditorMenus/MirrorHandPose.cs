@@ -6,6 +6,27 @@ using UnityEditor;
 using Global;
 using RootMotion.FinalIK;
 
+/// <summary>
+/// This class creates custom menu items (under VoxSim >> Hand Poses) in the Unity editor.  These items are
+///  used to clone or modify existing hand poses (usually "grasp poses") on an object for use with the opposite hand
+///  or to change labels appropriately so that the hand poses is used with the correct hand given its geometric
+///  layout.
+/// 
+/// Mirror Selected Hand Pose takes the selected hand pose, if any, and creates a clone of it
+///  with the scale and position inverted along the X-axis and rotated 180° around the Y- and Z- axes
+///  (hence flipping handedness or chirality of the hand pose).  In child objects of the newly-mirrored
+///  pose, label and effector types are switched (Left->Right/l->r or vice versa) and InteractionTarget-
+///  related parameters are inverted along the X-axis.
+///  
+/// Flip Label Handedness does the same on a hand pose where the orientation is correct but the labeling is wrong
+///  (such as if you created what you believe to be a left hand hand pose but it turns out its spatial properties
+///  actually make it a right hand hand pose that is mislabeled).
+/// 
+/// Both of these methods will only be enabled if a valid hand pose is currently selected.
+///  "Valid hand pose" is here defined as an object that contains an InteractionTarget component
+///   and whose name begins with "[lr]Hand."
+/// </summary>
+
 public class MirrorHandPose : MonoBehaviour
 {
     [MenuItem("VoxSim/Hand Poses/Mirror Selected Hand Pose %#m")]
@@ -56,11 +77,6 @@ public class MirrorHandPose : MonoBehaviour
                 interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                     interactionTarget.twistAxis.z);
             }
-
-            //if (Mathf.Abs(interactionTarget.twistAxis.z) > Constants.EPSILON) {
-            //    interactionTarget.twistAxis = new Vector3(interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
-            //        -interactionTarget.twistAxis.z);
-            //}
         }
         else if (clone.name.StartsWith("l")) {
             clone.name = "r" + clone.name.Remove(0, 1);
@@ -90,11 +106,6 @@ public class MirrorHandPose : MonoBehaviour
                 interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                     interactionTarget.twistAxis.z);
             }
-
-            //if (Mathf.Abs(interactionTarget.twistAxis.z) > Constants.EPSILON) {
-            //    interactionTarget.twistAxis = new Vector3(interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
-            //        -interactionTarget.twistAxis.z);
-            //}
         }
     }
 
@@ -108,8 +119,8 @@ public class MirrorHandPose : MonoBehaviour
                 (((GameObject)Selection.activeGameObject).name.StartsWith("rHand")));
     }
 
-    [MenuItem("VoxSim/Hand Poses/Flip Handedness %#h")]
-    static void FlipHandedness()
+    [MenuItem("VoxSim/Hand Poses/Flip Label Handedness %#h")]
+    static void FlipLabelHandedness()
     {
         GameObject obj = Selection.activeGameObject;
         InteractionTarget interactionTarget = obj.GetComponent<InteractionTarget>();
@@ -143,11 +154,6 @@ public class MirrorHandPose : MonoBehaviour
                 interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                     interactionTarget.twistAxis.z);
             }
-
-            //if (Mathf.Abs(interactionTarget.twistAxis.z) < Constants.EPSILON) {
-            //    interactionTarget.twistAxis = new Vector3(interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
-            //        -interactionTarget.twistAxis.z);
-            //}
         }
         else if (obj.name.StartsWith("l")) {
             obj.name = "r" + obj.name.Remove(0, 1);
@@ -177,15 +183,10 @@ public class MirrorHandPose : MonoBehaviour
                 interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                     interactionTarget.twistAxis.z);
             }
-
-            //if (Mathf.Abs(interactionTarget.twistAxis.z) < Constants.EPSILON) {
-            //    interactionTarget.twistAxis = new Vector3(interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
-            //        -interactionTarget.twistAxis.z);
-            //}
         }
     }
 
-    [MenuItem("VoxSim/Hand Poses/Flip Handedness %#h", true)]
+    [MenuItem("VoxSim/Hand Poses/Flip Label Handedness %#h", true)]
     static bool ValidateSelectedHandPoseToRename()
     {
         // Return false if no transform is selected.
