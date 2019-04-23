@@ -35,14 +35,7 @@ public class Voxeme : MonoBehaviour {
 	public List<InteractionTarget> interactionTargets = new List<InteractionTarget> ();
 
 	public Queue<Vector3> interTargetPositions = new Queue<Vector3> ();
-    private Vector3 _targetPosition;
-	public Vector3 targetPosition {
-        get { return _targetPosition; }
-        set {
-            OnTargetPositionChanged(_targetPosition,value);
-            _targetPosition = value;
-        }
-    }
+	public Vector3 targetPosition;
 	public Queue<Vector3> interTargetRotations = new Queue<Vector3> ();
 	public Vector3 targetRotation;
 	public Vector3 targetScale;
@@ -158,7 +151,7 @@ public class Voxeme : MonoBehaviour {
 			if (!Helper.VectorIsNaN (targetPosition)) {	// has valid destination
 				if (!isGrasped) {
 					if (transform.position != targetPosition) {
-                        Vector3 offset = MoveToward (targetPosition);
+						Vector3 offset = MoveToward (targetPosition);
 
 						if (offset.sqrMagnitude <= Constants.EPSILON) {
 							transform.position = targetPosition;
@@ -200,8 +193,8 @@ public class Voxeme : MonoBehaviour {
 		else {
 			Vector3 interimTarget = interTargetPositions.Peek ();
 			if (!isGrasped) {
-                //if (transform.position != interimTarget) {
-                Vector3 offset = MoveToward (interimTarget);
+				//if (transform.position != interimTarget) {
+					Vector3 offset = MoveToward (interimTarget);
 
 					if (offset.sqrMagnitude <= Constants.EPSILON) {
 						transform.position = interimTarget;
@@ -216,9 +209,9 @@ public class Voxeme : MonoBehaviour {
 						}
 						interTargetPositions.Dequeue ();
 					}
-                //}
-            }
-            else {
+				//}
+			}
+			else {
 				GraspScript graspController = grasperCoord.root.gameObject.GetComponent<GraspScript> ();
 				//if (graspTracker.transform.position != interimTarget+graspController.graspTrackerOffset) {
 				Vector3 offset = MoveToward (interimTarget+graspController.graspTrackerOffset);
@@ -361,11 +354,11 @@ public class Voxeme : MonoBehaviour {
 			}*/
 		}
 
-        // check relationships
+		// check relationships
 
-    }
+	}
 
-    void AdjustToSupportingSurface() {
+	void AdjustToSupportingSurface() {
 		Vector3 rayStartX = new Vector3 (Helper.GetObjectWorldSize(gameObject).min.x-Constants.EPSILON,
 			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).center.z);
 		Vector3 contactPointX = Helper.RayIntersectionPoint (rayStartX, Vector3.right);
@@ -477,7 +470,7 @@ public class Voxeme : MonoBehaviour {
 	}
 
 	Vector3 MoveToward(Vector3 target) {
-		//Debug.Log (string.Format("{0}: {1}",gameObject.name,Helper.VectorToParsable(target)));
+//		Debug.Log (gameObject);
 		if (!isGrasped) {
 			Vector3 offset = transform.position - target;
 			Vector3 normalizedOffset = Vector3.Normalize (offset);
@@ -506,9 +499,9 @@ public class Voxeme : MonoBehaviour {
 				}
 			}
 
-            //GameObject.Find ("ReachObject").transform.position = transform.position;
+			//GameObject.Find ("ReachObject").transform.position = transform.position;
 
-            return offset;
+			return offset;
 		}
 		else {
 			Vector3 offset = graspTracker.transform.position - target;
@@ -596,10 +589,6 @@ public class Voxeme : MonoBehaviour {
 
 		return offset;
 	}
-
-    void OnTargetPositionChanged(Vector3 oldVal, Vector3 newVal) {
-        Debug.Log(string.Format("==================== Target position changed ==================== {0}: {1}->{2}", gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
-    }
 
 	void OnCollisionEnter(Collision other) {
 		if (other.gameObject.tag == "MainCamera") {

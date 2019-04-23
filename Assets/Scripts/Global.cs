@@ -339,10 +339,10 @@ namespace Global {
 		public static Regex l = new Regex ("[\'\"].*[\'\"]");
 
 		// DATA METHODS
-		public static Hashtable ParsePredicate(String predicateString) {
+		public static Hashtable ParsePredicate(String predicate) {
 			Hashtable predArgs = new Hashtable ();
 			
-			Queue<String> split = new Queue<String>(predicateString.Split (new char[] {'('},2,StringSplitOptions.None));
+			Queue<String> split = new Queue<String>(predicate.Split (new char[] {'('},2,StringSplitOptions.None));
 			if (split.Count > 1) {
 				String pred = split.ElementAt (0);
 				String args = split.ElementAt (1);

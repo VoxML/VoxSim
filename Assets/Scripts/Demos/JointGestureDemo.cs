@@ -2192,10 +2192,10 @@ public class JointGestureDemo : AgentInteraction {
                 if (((List<string>)symbolContent.ActionOptions).Count > 0) {
                     string instructionCmd = ((List<string>)((StackSymbolContent)interactionLogic.LearnableInstructions[
                         interactionLogic.GetLearnableInstructionKeyByName(message)].Content).ActionOptions)[0];
-                        
+
                     obj = eventManager.ExtractObjects(Helper.GetTopPredicate(instructionCmd),
                         (String)Helper.ParsePredicate(instructionCmd)[Helper.GetTopPredicate(instructionCmd)])[0] as GameObject;
-                        
+
                     interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
                         interactionLogic.GenerateStackSymbol(obj, null, null, null, null, null)));
                 }
@@ -2307,7 +2307,7 @@ public class JointGestureDemo : AgentInteraction {
 
 	public void ComposeObjectAndAction(object[] content) {
 		if (interactionLogic.IndicatedObj != null) {
-            interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
 				interactionLogic.GenerateStackSymbol (null, null, null, null, 
 					new List<string> (new string[]{ string.Format (interactionLogic.ActionOptions [0], interactionLogic.IndicatedObj.name) }),
 					null)));
@@ -2337,16 +2337,9 @@ public class JointGestureDemo : AgentInteraction {
             }
 		}
 		else {
-            if (interactionLogic.IndicatedObj != null) {
-                interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
-                    interactionLogic.GenerateStackSymbol(new DelegateFactory(new FunctionDelegate(interactionLogic.NullObject)),
-                        null, null, null, null, null)));
-            }
-            else if (interactionLogic.GraspedObj != null) {
-                interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
-    				interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate (interactionLogic.NullObject)),
-    					null, null, null, null)));
-            }
+			interactionLogic.RewriteStack (new PDAStackOperation (PDAStackOperation.PDAStackOperationType.Rewrite, 
+				interactionLogic.GenerateStackSymbol (null, new DelegateFactory(new FunctionDelegate (interactionLogic.NullObject)),
+					null, null, null, null)));
 		}
 	}
 

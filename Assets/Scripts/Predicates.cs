@@ -1903,7 +1903,6 @@ public class Predicates : MonoBehaviour {
 
 					Voxeme voxComponent = theme.GetComponent<Voxeme> ();
 					if (voxComponent != null) {
-                        Debug.Log(Helper.VectorToParsable(voxComponent.targetPosition));
 						if (!voxComponent.enabled) {
 							voxComponent.gameObject.transform.parent = null;
 							voxComponent.enabled = true;
@@ -1948,13 +1947,12 @@ public class Predicates : MonoBehaviour {
 
 						voxComponent.targetPosition = targetPosition;
 
-                        if (voxComponent.isGrasped) {
+						if (voxComponent.isGrasped) {
 							voxComponent.targetPosition = voxComponent.targetPosition +
 								(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
 						}
-                        Debug.Log(Helper.VectorToParsable(voxComponent.targetPosition));
-                    }
-                }
+					}
+				}
 			}
 		}
 
@@ -2001,22 +1999,23 @@ public class Predicates : MonoBehaviour {
             }
 		}
 
-		Debug.Log ("========== Before plan ========= " + Helper.VectorToParsable(targetPosition));
-        // plan path to destination
-        if (!Helper.VectorIsNaN (targetPosition)) { 
+		Debug.Log ("========== Before plan ========= " + targetPosition);
+
+		// plan path to destination
+		if (!Helper.VectorIsNaN (targetPosition)) { 
 			if (aStarSearch.path.Count == 0) {
 				aStarSearch.start = (args [0] as GameObject).transform.position;
 				aStarSearch.goal = targetPosition;
 				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path, (args [0] as GameObject), 
 					GameObject.Find (rdfTriples [0].Item3) != null ? GameObject.Find (rdfTriples [0].Item3).GetComponent<Voxeme>() : null);
 
-                foreach (Vector3 node in aStarSearch.path) {
+				foreach (Vector3 node in aStarSearch.path) {
 					(args [0] as GameObject).GetComponent<Voxeme> ().interTargetPositions.Enqueue (node);
 				}
-            }
-        }
+			}
+		}
 
-        return;
+		return;
 	}
 
 	// IN: Objects, Location
@@ -5738,11 +5737,11 @@ public class Predicates : MonoBehaviour {
 								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
                                     interactionSystem.IsInInteraction(FullBodyBipedEffector.LeftHand)) {
 									Debug.Log (string.Format ("Ending {0} interaction with {1}", leftGrasper.name, (arg as GameObject).name));
-                                    Debug.Log(Helper.VectorToParsable((arg as GameObject).GetComponent<Voxeme>().targetPosition));
-                                    //InteractionHelper.SetLeftHandTarget (agent, null);
 
-                                    //InteractionHelper.SetLeftHandTarget (agent, ikControl.leftHandObj);
-                                    InteractionHelper.SetLeftHandTarget (agent, null);
+									//InteractionHelper.SetLeftHandTarget (agent, null);
+
+									//InteractionHelper.SetLeftHandTarget (agent, ikControl.leftHandObj);
+									InteractionHelper.SetLeftHandTarget (agent, null);
 									ik.solver.SetEffectorWeights (FullBodyBipedEffector.LeftHand, 0.0f, 0.0f);
 									agent.GetComponent<InteractionSystem> ().StopInteraction (FullBodyBipedEffector.LeftHand);
                                     //(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;

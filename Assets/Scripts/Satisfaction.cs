@@ -32,14 +32,20 @@ namespace Satisfaction {
 //				return false;
 //			}
 
-            //Debug.Log (test);
+			foreach (DictionaryEntry entry in predArgs) {
+				predString = (String)entry.Key;
+				argsStrings = ((String)entry.Value).Split (new char[] {','});
+			}
 
-            if (predString == "put") {	// satisfy put
+			//Debug.Log (test);
+
+			if (predString == "put") {	// satisfy put
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
 				if (theme != null) {
 					//Debug.Log(Helper.VectorToParsable(theme.transform.position) + " " + (String)argsStrings[1]);
 					//Debug.Log(obj.transform.position);
 					Voxeme voxComponent = theme.GetComponent<Voxeme>();
+					//Debug.Log (voxComponent);
 					Vector3 testLocation = voxComponent.isGrasped ? voxComponent.graspTracker.transform.position : theme.transform.position;
 
 					if (Helper.CloseEnough (testLocation, Helper.ParsableToVector ((String)argsStrings [1]))) {
@@ -50,11 +56,11 @@ namespace Satisfaction {
 							theme.transform.rotation = Quaternion.identity;
 						}
 						satisfied = true;
-                        //obj.GetComponent<Rigging> ().ActivatePhysics (true);
-                        //ReevaluateRelationships (predString, theme);	// we need to talk (do physics reactivation in here?)
-                        //						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
-                    }
-                }
+						//obj.GetComponent<Rigging> ().ActivatePhysics (true);
+						//ReevaluateRelationships (predString, theme);	// we need to talk (do physics reactivation in here?)
+//						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+					}
+				}
 			}
 			else if (predString == "slide") {	// satisfy slide
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
@@ -305,7 +311,6 @@ namespace Satisfaction {
                 if ((method != null) && (method.ReturnType == typeof(void))) {    // is a program
                     Debug.Log(predString);
                     EventManagerArgs eventArgs = new EventManagerArgs(test, isMacroEvent);
-                    Debug.Log(string.Format("{0} : {1}", predString, Helper.VectorToParsable(GameObject.Find(argsStrings[0] as String).GetComponent<Voxeme>().targetPosition)));
                     em.OnEventComplete(em, eventArgs);
                     //				ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 
@@ -381,9 +386,7 @@ namespace Satisfaction {
                                     }
                                     else if (matches.Count == 1) {
 										go = matches[0];
-                                        Debug.Log(Helper.VectorToParsable(go.GetComponent<Voxeme>().targetPosition));
-
-                                        for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
+										for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
 											if (objSelector.disabledObjects[j].name == (arg as String)) {
 												go = objSelector.disabledObjects[j];
 												break;
@@ -434,7 +437,6 @@ namespace Satisfaction {
 
                 if (methodToCall != null) {  // found a method
                     if (methodToCall.ReturnType == typeof(void)) { // is it a program?
-                        Debug.Log("========================== ComputeSatisfactionConditions ============================ " + command);
                         Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
                         object obj = methodToCall.Invoke(preds, new object[] { objs.ToArray() });
                     }
