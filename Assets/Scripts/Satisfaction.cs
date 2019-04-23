@@ -61,7 +61,7 @@ namespace Satisfaction {
 //						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 					}
 				}
-			}
+			}   
 			else if (predString == "slide") {	// satisfy slide
 				GameObject theme = GameObject.Find (argsStrings [0] as String);
 				if (theme != null) {
