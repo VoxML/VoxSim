@@ -420,8 +420,12 @@ namespace Agent
 				(List<string>)((StackSymbolContent)GetCurrentStackSymbol ().Content).ActionSuggestions; }
 		}
 
+		public string eventConfirmation = "";
+
+		public GameObject objectConfirmation = null;
+
         public AttentionStatus attentionStatus;
-        public bool useOrderingHeuristics;
+		public bool useOrderingHeuristics;
 		public bool humanRelativeDirections;
 		public bool waveToStart;
 		public bool useEpistemicModel;
@@ -445,7 +449,7 @@ namespace Agent
                 ((DianaInteractionLogic)target).attentionStatus =
                     (AttentionStatus)GUILayout.SelectionGrid((int)((DianaInteractionLogic)target).attentionStatus,
                     new string[] { "Inattentive", "Attentive" }, 1, GUILayout.ExpandWidth(true));
-                GUILayout.EndHorizontal(); 
+                GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal();
 				GUILayout.Label("Use Ordering Heuristics", bold, GUILayout.Width(150));
@@ -3211,7 +3215,6 @@ namespace Agent
 			}
 
             if ((forceChangeState) && (forceMoveToState != null))  {
-                Debug.Log(string.Format("Move to state {0}",forceMoveToState.Name));
                 MoveToState(forceMoveToState);
                 ExecuteStateContent();
                 forceChangeState = false;
@@ -3594,7 +3597,8 @@ namespace Agent
 		}
 
 		public string GetGestureContent(string receivedData, string gestureCode) {
-			return receivedData.Replace (gestureCode, "").Split () [1];
+            // TODO: GetGestureContent -> RemoveInputSymbolType + RemoveGestureTrigger, return result
+            return receivedData.Replace (gestureCode, "").Split () [1];
 		}
 
 		string RemoveInputSymbolContent(string inputSymbol) {
@@ -3667,7 +3671,7 @@ namespace Agent
 
 			if (instruction != null) {
 				// update epistemic model
-				if ((interactionController.UseTeaching) && (useEpistemicModel)) {
+				if (useEpistemicModel) {
 					UpdateEpistemicModel (((CharacterLogicEventArgs)e).InputSymbolName, ((CharacterLogicEventArgs)e).InputSymbolContent as string, EpistemicCertaintyOperation.Increase);
 				}
 
@@ -4044,21 +4048,23 @@ namespace Agent
             }
 
             //TransitionRelation.Add(new PDAInstruction(
-                //GetStates("IndexByGesture"),
-                //null,
-                //GenerateStackSymbolFromConditions(
-                //    null, (g) => g != null, null,
-                //    (m) => m.Count == 1,
-                //    (a) => ((a.Count == 0) || ((a.Count > 0) &&
-                //        (a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0)),
-                //    null),
-                //GetState("ConfirmObject"),
-                //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
-                    //new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
-                        //new List<GameObject>(), null, null))));
+            //GetStates("IndexByGesture"),
+            //null,
+            //GenerateStackSymbolFromConditions(
+            //    null, (g) => g != null, null,
+            //    (m) => m.Count == 1,
+            //    (a) => ((a.Count == 0) || ((a.Count > 0) &&
+            //        (a.Where(aa => aa.Contains("{0}"))).ToList().Count > 0)),
+            //    null),
+            //GetState("ConfirmObject"),
+            //new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Push,
+            //new StackSymbolContent(null, null, new FunctionDelegate(NullObject),
+            //new List<GameObject>(), null, null))));
 
             // add new items to EpiSim
-            epistemicModel.AddNewConcept(new Concept(RemoveInputSymbolType(instructionKey,GetInputSymbolType(instructionKey)), ConceptType.ACTION, ConceptMode.G));
+            epistemicModel.state.UpdateEpisimNewGesture(RemoveInputSymbolType(
+                RemoveGestureTrigger(instructionKey,GetGestureTrigger(instructionKey)),
+                GetInputSymbolType(instructionKey)), ((List<string>)((StackSymbolContent)stackOperation.Content).ActionOptions)[0].Replace(",",", "));
         }
 
 		void MoveToState(PDAState state) {
@@ -4190,7 +4196,7 @@ namespace Agent
 					foreach (Concept concept in linguisticConcepts) {
 //						Debug.Log (inputContent.ToLower ());
 //						Debug.Log (concept.Name.ToLower ());
-						if (inputContent.ToLower ().Contains (concept.Name.ToLower ())) {
+						if (inputContent.ToLower().Split(new char[] { ',', ' ' }).Contains (concept.Name.ToLower ())) {
 							Debug.Log(string.Format("{1} in {0}",inputContent.ToLower (),concept.Name.ToLower ()));
 							if (GetInputSymbolType (inputSymbol) == 'S') {
 								Debug.Log(inputSymbol);
@@ -4218,8 +4224,8 @@ namespace Agent
 
 					foreach (Concept concept in concepts) {
 						if (GetInputSymbolType (inputSymbol) == 'G') {
-							concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ?
-							(concept.Certainty < 0.5) ? 0.5 : 1.0 : 0.0;
+                            concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ?
+                            (interactionController.UseTeaching) ? (concept.Certainty < 0.5) ? 0.5 : 1.0 : 1.0 : 0.0;
 						}
 						else if (GetInputSymbolType (inputSymbol) == 'S') {
 							concept.Certainty = (certaintyOperation == EpistemicCertaintyOperation.Increase) ? 1.0 : 0.0;
@@ -4291,6 +4297,8 @@ namespace Agent
 		}
 
         void MoveToServo(object sender, ElapsedEventArgs e) {
+            Debug.Log("MoveToServo");
+
             if (servoWaitTimerTime > 0) {
                 servoWaitTimer.Interval = servoWaitTimerTime;
                 servoWaitTimer.Enabled = false;
