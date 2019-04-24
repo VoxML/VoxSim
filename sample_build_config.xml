@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxSimBuildConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <ScenesList>
+        <SceneFile Path="VoxSimMenu.unity" />
+    </ScenesList>
+</VoxSimBuildConfig>

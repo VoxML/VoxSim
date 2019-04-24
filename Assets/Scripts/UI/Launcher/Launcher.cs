@@ -191,13 +191,13 @@ public class Launcher : FontManager {
 
 		string[] scenes = scenesList.text.Split ('\n');
 		foreach (string s in scenes) {
-			if (s.Length > 0) {
+			if ((s.Length > 0) && (!s.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name))) {
 				availableScenes.Add(s);
 			}
 		}
 #endif
 
-		listItems = availableScenes.ToArray ();
+        listItems = availableScenes.ToArray ();
 
 		// get IP address
 #if !UNITY_IOS

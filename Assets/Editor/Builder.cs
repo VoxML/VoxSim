@@ -2,178 +2,208 @@
 using UnityEditor;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Xml;
+using System.Xml.Serialization;
 
 using Global;
 
-[CustomEditor(typeof(Builder))]
-public class Builder : Editor {
+namespace StandaloneBuild {
 
-	public string buildName = "VoxSim";
-	List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+    public class VoxSimBuildConfig
+    {
+        [XmlArray("ScenesList")]
+        [XmlArrayItem("SceneFile")]
+        public List<SceneFile> Scenes = new List<SceneFile>();
+    }
 
-	bool buildMac,buildWindows,buildIOS,buildAll;
-	bool build;
+    public class SceneFile
+    {
+        [XmlAttribute]
+        public string Path { get; set; }
+    }
 
-	public override void OnInspectorGUI ()
-	{
-		base.OnInspectorGUI();
-		buildMac = GUILayout.Button ("Build Mac", GUILayout.Height (30));
-		buildWindows = GUILayout.Button ("Build Windows", GUILayout.Height (30));
-		buildIOS = GUILayout.Button ("Build iOS", GUILayout.Height (30));
-		buildAll = GUILayout.Button ("Build All", GUILayout.Height (30));
-		build = (buildMac || buildWindows || buildIOS || buildAll);
+    public static class AutoBuilder {
 
-		if (build) {
-			using (System.IO.StreamWriter file =
-				new System.IO.StreamWriter(@"Assets/Resources/ScenesList.txt"))
-			{
-				string scenesDirPath = Application.dataPath + "/Scenes/";
-				string [] fileEntries = Directory.GetFiles(Application.dataPath+"/Scenes/","*.unity");
-				foreach (string s in fileEntries) {
-					string sceneName = s.Remove(0,Application.dataPath.Length-"Assets".Length);
-					if (!scenes.Contains(sceneName)) {
-						scenes.Add(sceneName);
-						file.WriteLine(sceneName.Split ('/')[2].Replace (".unity",""));
-					}
-				}
-			}
+        public static void ProcessBuildConfig(string path) {
+            XmlSerializer serializer = new XmlSerializer(typeof(VoxSimBuildConfig));
+            using (var stream = new FileStream(path, FileMode.Open)) {
+                VoxSimBuildConfig config = serializer.Deserialize(stream) as VoxSimBuildConfig;
 
-			//Debug.Log(@"Build/mac/VoxSim/Contents".Remove (@"Build/mac/VoxSim/Contents".LastIndexOf('/', @"Build/mac/VoxSim/Contents".LastIndexOf('/') - 1)) + string.Format ("/Data/voxml"));
-			//Debug.Log(@"Build/win/VoxSim_Data".Remove (@"Build/win/VoxSim_Data".LastIndexOf('/') + 1) + string.Format ("Data/voxml"));
+                using (StreamWriter file = new StreamWriter(@"Assets/Resources/ScenesList.txt")) {
+                    foreach (SceneFile s in config.Scenes) {
+                        string scenePath = Application.dataPath + "/Scenes/" + s.Path;
+                        if (File.Exists(scenePath)) {
+                            string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
+                            file.WriteLine(s.Path.Replace(".unity", ""));
+                        }
+                        else {
+                            Debug.Log(string.Format("ProcessBuildConfig: Scene file {0} does not exist!", scenePath));
+                        }
+                    }
+                }
+            }
+        }
 
-			Debug.Log (Data.voxmlDataPath);
+    	public static void BuildMac() {
+    		string buildName = System.Environment.GetCommandLineArgs()[5];
+            string buildConfig = System.Environment.GetCommandLineArgs()[6];
+            Debug.Log (string.Format("Building target {0} for OSX with configuration {1}", buildName, buildConfig));
 
-			// TODO: Migrate away from this in favor of build scripts
-			if (buildMac || buildAll) {
-				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
-				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSX, BuildOptions.None);
-			}
+            ProcessBuildConfig(buildConfig);
 
-			if (buildWindows || buildAll) {
-				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
-				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
-			}
+    		List<string> scenes = new List<string>();
 
-			if (buildIOS || buildAll) {
-				BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
-					BuildOptions.AcceptExternalModificationsToPlayer));
-				AutoBuilder.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
-			}
+            try {
+        		using (StreamReader scenesListfile = new StreamReader (@"Assets/Resources/ScenesList.txt")) {
+                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\n').ToList();
+                    string scenesDirPath = Application.dataPath + "/Scenes/";
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
+                    foreach (string s in scenesList) {
+                        if (s != string.Empty) {
+                            string scenePath = scenesDirPath + s + ".unity";
+                            if (fileEntries.Contains(scenePath)) {
+                                Debug.Log(string.Format("Adding scene {0} at relative path {1}", s, scenePath));
+                                if (!scenes.Contains (scenePath)) {
+                					scenes.Add (scenePath);
+                				}
+                            }
+                            else {
+                                Debug.Log(string.Format("BuildMac: No file {0} found!  Skipping.", scenePath));
+                            }
+                        }
+                    }
+        		}
+    			
+        		Data.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
+        		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSX, BuildOptions.None);
+            }
+            catch (FileNotFoundException e) {
+                Debug.Log(string.Format("BuildMac: File {0} not found!", e.FileName));
+            }
+    	}
 
-			//if (buildWeb) {
-			//	BuildPipeline.BuildPlayer(scenes.ToArray(),"Build/web/"+buildName,BuildTarget.WebPlayer,BuildOptions.None);
-			//}
-		}
-	}
-}
+        public static void BuildWindows() {
+            string buildName = System.Environment.GetCommandLineArgs()[5];
+            string buildConfig = System.Environment.GetCommandLineArgs()[6];
+            Debug.Log (string.Format("Building target {0} for Windows with configuration {1}", buildName, buildConfig));
 
-public static class AutoBuilder {
+            ProcessBuildConfig(buildConfig);
 
-	public static void BuildMac() {
-		string buildName = System.Environment.GetCommandLineArgs()[5];
-		Debug.Log (buildName);
+            List<string> scenes = new List<string>();
 
-		List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+            try {
+                using (StreamReader scenesListfile = new StreamReader (@"Assets/Resources/ScenesList.txt")) {
+                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\n').ToList();
+                    string scenesDirPath = Application.dataPath + "/Scenes/";
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
+                    foreach (string s in scenesList) {
+                        if (s != string.Empty) {
+                            string scenePath = scenesDirPath + s + ".unity";
+                            if (fileEntries.Contains(scenePath)) {
+                                Debug.Log(string.Format("Adding scene {0} at relative path {1}", s, scenePath));
+                                if (!scenes.Contains (scenePath)) {
+                                    scenes.Add (scenePath);
+                                }
+                            }
+                            else {
+                                Debug.Log(string.Format("BuildMac: No file {0} found!  Skipping.", scenePath));
+                            }
+                        }
+                    }
+                }
+                
+                Data.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+                BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName, BuildTarget.StandaloneWindows, BuildOptions.None);
+            }
+            catch (FileNotFoundException e) {
+                Debug.Log(string.Format("BuildMac: File {0} not found!", e.FileName));
+            }
+        }
 
-		using (System.IO.StreamWriter file =
-		    new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
-			string scenesDirPath = Application.dataPath + "/Scenes/";
-			string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
-			foreach (string s in fileEntries) {
-				string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
-				if (!scenes.Contains (sceneName)) {
-					scenes.Add (sceneName);
-					file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
-				}
-			}
-		}
-			
-		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
-		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSX, BuildOptions.None);
-	}
+    	//public static void BuildWindows() {
+    	//	string buildName = System.Environment.GetCommandLineArgs()[5];
+     //       Debug.Log(string.Format("Building target {0} for Windows", buildName));
 
-	public static void BuildWindows() {
-		string buildName = System.Environment.GetCommandLineArgs()[5];
-		Debug.Log (buildName);
+     //       List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
 
-		List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+    	//	using (System.IO.StreamWriter file =
+    	//		new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
+    	//		string scenesDirPath = Application.dataPath + "/Scenes/";
+    	//		string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
+    	//		foreach (string s in fileEntries) {
+    	//			string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
+    	//			if (!scenes.Contains (sceneName)) {
+    	//				scenes.Add (sceneName);
+    	//				file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
+    	//			}
+    	//		}
+    	//	}
 
-		using (System.IO.StreamWriter file =
-			new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
-			string scenesDirPath = Application.dataPath + "/Scenes/";
-			string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
-			foreach (string s in fileEntries) {
-				string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
-				if (!scenes.Contains (sceneName)) {
-					scenes.Add (sceneName);
-					file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
-				}
-			}
-		}
+    	//	DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+    	//	BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
+    	//}
 
-		DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
-		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
-	}
+        public static void BuildIOS() {
+            string buildName = System.Environment.GetCommandLineArgs()[5];
+            string buildConfig = System.Environment.GetCommandLineArgs()[6];
+            Debug.Log (string.Format("Building target {0} for iOS with configuration {1}", buildName, buildConfig));
 
-	public static void BuildIOS() {
-		string buildName = System.Environment.GetCommandLineArgs()[5];
-		Debug.Log (buildName);
+            ProcessBuildConfig(buildConfig);
 
-		List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
+            List<string> scenes = new List<string>();
 
-		using (System.IO.StreamWriter file =
-			new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
-			string scenesDirPath = Application.dataPath + "/Scenes/";
-			string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
-			foreach (string s in fileEntries) {
-				string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
-				if (!scenes.Contains (sceneName)) {
-					scenes.Add (sceneName);
-					file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
-				}
-			}
-		}
+            try {
+                using (StreamReader scenesListfile = new StreamReader (@"Assets/Resources/ScenesList.txt")) {
+                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\n').ToList();
+                    string scenesDirPath = Application.dataPath + "/Scenes/";
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
+                    foreach (string s in scenesList) {
+                        if (s != string.Empty) {
+                            string scenePath = scenesDirPath + s + ".unity";
+                            if (fileEntries.Contains(scenePath)) {
+                                Debug.Log(string.Format("Adding scene {0} at relative path {1}", s, scenePath));
+                                if (!scenes.Contains (scenePath)) {
+                                    scenes.Add (scenePath);
+                                }
+                            }
+                            else {
+                                Debug.Log(string.Format("BuildMac: No file {0} found!  Skipping.", scenePath));
+                            }
+                        }
+                    }
+                }
+                
+                BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
+                    BuildOptions.AcceptExternalModificationsToPlayer));
+            }
+            catch (FileNotFoundException e) {
+                Debug.Log(string.Format("BuildMac: File {0} not found!", e.FileName));
+            }
+        }
 
-		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
-			BuildOptions.AcceptExternalModificationsToPlayer));
-		//DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
-	}
+    	//public static void BuildIOS() {
+    	//	string buildName = System.Environment.GetCommandLineArgs()[5];
+     //       Debug.Log(string.Format("Building target {0} for iOS", buildName));
 
-	public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-	{
-		// Get the subdirectories for the specified directory.
-		DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+     //       List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
 
-		if (!dir.Exists)
-		{
-			throw new DirectoryNotFoundException(
-				"Source directory does not exist or could not be found: "
-				+ sourceDirName);
-		}
+    	//	using (System.IO.StreamWriter file =
+    	//		new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
+    	//		string scenesDirPath = Application.dataPath + "/Scenes/";
+    	//		string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
+    	//		foreach (string s in fileEntries) {
+    	//			string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
+    	//			if (!scenes.Contains (sceneName)) {
+    	//				scenes.Add (sceneName);
+    	//				file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
+    	//			}
+    	//		}
+    	//	}
 
-		DirectoryInfo[] dirs = dir.GetDirectories();
-		// If the destination directory doesn't exist, create it.
-		if (!Directory.Exists(destDirName))
-		{
-			Directory.CreateDirectory(destDirName);
-		}
-
-		// Get the files in the directory and copy them to the new location.
-		FileInfo[] files = dir.GetFiles();
-		foreach (FileInfo file in files)
-		{
-			string temppath = Path.Combine(destDirName, file.Name);
-			file.CopyTo(temppath, true);
-		}
-
-		// If copying subdirectories, copy them and their contents to new location.
-		if (copySubDirs)
-		{
-			foreach (DirectoryInfo subdir in dirs)
-			{
-				string temppath = Path.Combine(destDirName, subdir.Name);
-				DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-			}
-		}
-	}
+    	//	BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
+    	//		BuildOptions.AcceptExternalModificationsToPlayer));
+    	//	//DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
+    	//}
+    }
 }
