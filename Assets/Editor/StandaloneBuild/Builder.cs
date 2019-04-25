@@ -50,7 +50,7 @@ namespace StandaloneBuild {
             using (var stream = new FileStream(path, FileMode.Open)) {
                 VoxSimBuildConfig config = serializer.Deserialize(stream) as VoxSimBuildConfig;
 
-                using (StreamWriter file = File.AppendText(@"Assets/Resources/ScenesList.txt")) {
+                using (StreamWriter file = new StreamWriter(@"Assets/Resources/ScenesList.txt")) {
                     foreach (SceneFile s in config.Scenes) {
                         string scenePath = Application.dataPath + "/Scenes/" + s.Path;
                         if (File.Exists(scenePath)) {
