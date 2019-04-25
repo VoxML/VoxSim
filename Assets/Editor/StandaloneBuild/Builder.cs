@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,6 +10,10 @@ using Global;
 
 namespace StandaloneBuild {
 
+    /// <summary>
+    /// Class into which the contents of a build config file is deserialized.
+    /// An example build config file is provided parallel to the Assets folder (sample_build_config.xml).
+    /// </summary>
     public class VoxSimBuildConfig
     {
         [XmlArray("ScenesList")]
@@ -18,20 +21,36 @@ namespace StandaloneBuild {
         public List<SceneFile> Scenes = new List<SceneFile>();
     }
 
+    /// <summary>
+    /// Scene file node in build config contains a Path parameter, which is the path to a scene to include in the build.
+    /// All included scenes must be in the Scenes folder, though subfolders within it are allowed.
+    /// </summary>
     public class SceneFile
     {
         [XmlAttribute]
         public string Path { get; set; }
     }
 
+    /// <summary>
+    /// This class handles the build pipelines for various platforms that can be initiated through a build script (e.g.,
+    ///  build_[mac,win,ios].sh.
+    /// </summary>
     public static class AutoBuilder {
 
+        /// <summary>
+        /// Processes the build config.
+        /// 
+        /// Produces ScenesList.txt in the process and stores this in Assets/Resources.  This file is bundled into the 
+        ///  build to populate the menu in the launcher, if VoxSimMenu is included in the build.
+        /// </summary>
+        // IN: string: path to the build config file
+        // OUT: none
         public static void ProcessBuildConfig(string path) {
             XmlSerializer serializer = new XmlSerializer(typeof(VoxSimBuildConfig));
             using (var stream = new FileStream(path, FileMode.Open)) {
                 VoxSimBuildConfig config = serializer.Deserialize(stream) as VoxSimBuildConfig;
 
-                using (StreamWriter file = new StreamWriter(@"Assets/Resources/ScenesList.txt")) {
+                using (StreamWriter file = File.AppendText(@"Assets/Resources/ScenesList.txt")) {
                     foreach (SceneFile s in config.Scenes) {
                         string scenePath = Application.dataPath + "/Scenes/" + s.Path;
                         if (File.Exists(scenePath)) {

@@ -7,6 +7,7 @@ using Global;
 using RootMotion.FinalIK;
 
 namespace EditorMenus {
+
     /// <summary>
     /// This class creates custom menu items (under VoxSim >> Hand Poses) in the Unity editor.  These items are
     ///  used to clone or modify existing hand poses (usually "grasp poses") on an object for use with the opposite hand
@@ -27,7 +28,6 @@ namespace EditorMenus {
     ///  "Valid hand pose" is here defined as an object that contains an InteractionTarget component
     ///   and whose name begins with "[lr]Hand."
     /// </summary>
-
     public class MirrorHandPose : MonoBehaviour
     {
         /// <summary>
