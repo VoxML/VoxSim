@@ -181,6 +181,7 @@ public class Launcher : FontManager {
 		foreach (string s in fileEntries) {
 			string sceneName = s.Remove(0,scenesDirPath.Length).Replace(".unity","");
 			if (!sceneName.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name)) {
+                Debug.Log(string.Format("Launcher.Start: Adding scene {0} to available scenes", sceneName));
 				availableScenes.Add(sceneName);
 			}
 		}
@@ -192,6 +193,7 @@ public class Launcher : FontManager {
 		string[] scenes = scenesList.text.Split ('\r','\n');
 		foreach (string s in scenes) {
 			if ((s.Length > 0) && (!s.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name))) {
+                Debug.Log(string.Format("Launcher.Start: Adding scene {0} to available scenes", s));
 				availableScenes.Add(s);
 			}
 		}
