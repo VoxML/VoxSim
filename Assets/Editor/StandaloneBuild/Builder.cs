@@ -71,6 +71,7 @@ namespace StandaloneBuild {
             Debug.Log (string.Format("Building target {0} for OSX with configuration {1}", buildName, buildConfig));
 
             ProcessBuildConfig(buildConfig);
+            AssetDatabase.Refresh();
 
     		List<string> scenes = new List<string>();
 
@@ -115,6 +116,7 @@ namespace StandaloneBuild {
             Debug.Log (string.Format("Building target {0} for Windows with configuration {1}", buildName, buildConfig));
 
             ProcessBuildConfig(buildConfig);
+            AssetDatabase.Refresh();
 
             List<string> scenes = new List<string>();
 
@@ -152,36 +154,14 @@ namespace StandaloneBuild {
                 Debug.Log(string.Format("BuildWindows: File {0} not found!", e.FileName));
             }
         }
-
-    	//public static void BuildWindows() {
-    	//	string buildName = System.Environment.GetCommandLineArgs()[5];
-     //       Debug.Log(string.Format("Building target {0} for Windows", buildName));
-
-     //       List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
-
-    	//	using (System.IO.StreamWriter file =
-    	//		new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
-    	//		string scenesDirPath = Application.dataPath + "/Scenes/";
-    	//		string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
-    	//		foreach (string s in fileEntries) {
-    	//			string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
-    	//			if (!scenes.Contains (sceneName)) {
-    	//				scenes.Add (sceneName);
-    	//				file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
-    	//			}
-    	//		}
-    	//	}
-
-    	//	DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
-    	//	BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
-    	//}
-
+           
         public static void BuildIOS() {
             string buildName = System.Environment.GetCommandLineArgs()[5];
             string buildConfig = System.Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for iOS with configuration {1}", buildName, buildConfig));
 
             ProcessBuildConfig(buildConfig);
+            AssetDatabase.Refresh();
 
             List<string> scenes = new List<string>();
 
