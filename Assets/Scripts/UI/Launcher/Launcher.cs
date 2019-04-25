@@ -188,8 +188,6 @@ public class Launcher : FontManager {
 #elif UNITY_STANDALONE || UNITY_IOS || UNITY_WEBPLAYER
 		// What if ScenesList has been deleted?
 		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
-		Debug.Log (scenesList);
-
 		string[] scenes = scenesList.text.Split ('\r','\n');
 		foreach (string s in scenes) {
 			if ((s.Length > 0) && (!s.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name))) {
@@ -308,26 +306,6 @@ public class Launcher : FontManager {
 		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 135, 290*fontSizeModifier, 95*fontSizeModifier),GUI.skin.box);
 		urlBoxScrollPosition = GUILayout.BeginScrollView(urlBoxScrollPosition, false, false); 
 		GUILayout.BeginVertical(GUI.skin.box);
-
-//		GUILayout.BeginHorizontal(GUI.skin.box);
-//		GUILayout.Label ("Fusion URL",GUILayout.Width(80*fontSizeModifier));
-//		csuUrl = GUILayout.TextField(csuUrl,GUILayout.Width(140*fontSizeModifier));
-//		GUILayout.EndHorizontal();
-//
-//		GUILayout.BeginHorizontal(GUI.skin.box);
-//		GUILayout.Label ("EpiSim URL",GUILayout.Width(80*fontSizeModifier));
-//		epiSimUrl = GUILayout.TextField(epiSimUrl,GUILayout.Width(140*fontSizeModifier));
-//		GUILayout.EndHorizontal();
-//
-//		GUILayout.BeginHorizontal(GUI.skin.box);
-//		GUILayout.Label ("SRI URL",GUILayout.Width(80*fontSizeModifier));
-//		sriUrl = GUILayout.TextField(sriUrl,GUILayout.Width(140*fontSizeModifier));
-//		GUILayout.EndHorizontal();
-//
-//		GUILayout.BeginHorizontal(GUI.skin.box);
-//		GUILayout.Label ("Parser URL",GUILayout.Width(80*fontSizeModifier));
-//		parserUrl = GUILayout.TextField(parserUrl,GUILayout.Width(140*fontSizeModifier));
-//		GUILayout.EndHorizontal();
 
 		for (int i = 0; i < urls.Count; i++) {
 			GUILayout.BeginHorizontal(GUI.skin.box);
