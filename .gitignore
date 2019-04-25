@@ -147,8 +147,8 @@ Assets/Editor\ Default\ Resources/crosstales*
 # ignore UntrackedScenes folder
 Assets/UntrackedScenes*
 
-# ignore ScenesLists file
-Assets/Resources/ScenesList.txt
+# ignore ScenesLists file (and metafile)
+Assets/Resources/ScenesList.txt*
 
 # ignore Logs folder
 Logs*
