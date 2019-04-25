@@ -15,6 +15,11 @@ done
 if [ ! -f "$CONFIG" ]; then
     echo "No file named '$CONFIG' exists"
 else
-    osascript -e 'quit app "Unity"'
-    /Applications/Unity/Unity.app/Contents/MacOS/Unity -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        osascript -e 'quit app "Unity"'
+        /Applications/Unity/Unity.app/Contents/MacOS/Unity -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+    elif [[ "$OSTYLE" == "msys" ]]; then
+        taskkill //F //IM Unity.exe //T
+        C:\Program Files\Unity\Editor\Unity.exe -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+    fi
 fi

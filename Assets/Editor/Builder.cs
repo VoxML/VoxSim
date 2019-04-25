@@ -107,7 +107,7 @@ namespace StandaloneBuild {
                                 }
                             }
                             else {
-                                Debug.Log(string.Format("BuildMac: No file {0} found!  Skipping.", scenePath));
+                                Debug.Log(string.Format("BuildWindows: No file {0} found!  Skipping.", scenePath));
                             }
                         }
                     }
@@ -117,7 +117,7 @@ namespace StandaloneBuild {
                 BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName, BuildTarget.StandaloneWindows, BuildOptions.None);
             }
             catch (FileNotFoundException e) {
-                Debug.Log(string.Format("BuildMac: File {0} not found!", e.FileName));
+                Debug.Log(string.Format("BuildWindows: File {0} not found!", e.FileName));
             }
         }
 
@@ -168,7 +168,7 @@ namespace StandaloneBuild {
                                 }
                             }
                             else {
-                                Debug.Log(string.Format("BuildMac: No file {0} found!  Skipping.", scenePath));
+                                Debug.Log(string.Format("BuildIOS: No file {0} found!  Skipping.", scenePath));
                             }
                         }
                     }
@@ -178,7 +178,7 @@ namespace StandaloneBuild {
                     BuildOptions.AcceptExternalModificationsToPlayer));
             }
             catch (FileNotFoundException e) {
-                Debug.Log(string.Format("BuildMac: File {0} not found!", e.FileName));
+                Debug.Log(string.Format("BuildIOS: File {0} not found!", e.FileName));
             }
         }
 
