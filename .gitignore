@@ -153,6 +153,12 @@ Assets/Resources/ScenesList.txt*
 # ignore Logs folder
 Logs*
 
+# ignore EpiSim user models folder
+EpiSim/UserModels*
+
+# include local configurations folder
+local_config
+
 # ignore NuGet packages (e.g. Nunit)
 packages*
 
@@ -161,4 +167,3 @@ packages*
 **/tags
 
 /.vs/VoxSim/v15/Server/sqlite3
-/EpiSim/UserModels/*
