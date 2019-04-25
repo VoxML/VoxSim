@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,7 +57,13 @@ namespace StandaloneBuild {
 
             try {
         		using (StreamReader scenesListfile = new StreamReader (@"Assets/Resources/ScenesList.txt")) {
-                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\n').ToList();
+                    // Read each scene name from the ScenesList file constructed by ProcessBuildConfig
+                    // Use both Win32 and Unix line endings so we can run this on both Win and Unix systems
+                    // On Unix, lines only end in \n (\r\n on Windows)
+                    // If somehow a Unix system ends up with a ScenesList file created on a Windows system
+                    //  it should split on \r and \n and end up with some lines of 0 length, which are then skipped below
+                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\r', '\n').ToList();
+
                     string scenesDirPath = Application.dataPath + "/Scenes/";
                     List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
                     foreach (string s in scenesList) {
@@ -94,7 +101,13 @@ namespace StandaloneBuild {
 
             try {
                 using (StreamReader scenesListfile = new StreamReader (@"Assets/Resources/ScenesList.txt")) {
-                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\n').ToList();
+                    // Read each scene name from the ScenesList file constructed by ProcessBuildConfig
+                    // Use both Win32 and Unix line endings so we can run this on both Win and Unix systems
+                    // On Unix, lines only end in \n (\r\n on Windows)
+                    // If somehow a Unix system ends up with a ScenesList file created on a Windows system
+                    //  it should split on \r and \n and end up with some lines of 0 length, which are then skipped below
+                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\r', '\n').ToList();
+
                     string scenesDirPath = Application.dataPath + "/Scenes/";
                     List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
                     foreach (string s in scenesList) {
@@ -114,7 +127,7 @@ namespace StandaloneBuild {
                 }
                 
                 Data.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
-                BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName, BuildTarget.StandaloneWindows, BuildOptions.None);
+                BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
             }
             catch (FileNotFoundException e) {
                 Debug.Log(string.Format("BuildWindows: File {0} not found!", e.FileName));
@@ -155,7 +168,13 @@ namespace StandaloneBuild {
 
             try {
                 using (StreamReader scenesListfile = new StreamReader (@"Assets/Resources/ScenesList.txt")) {
-                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\n').ToList();
+                    // Read each scene name from the ScenesList file constructed by ProcessBuildConfig
+                    // Use both Win32 and Unix line endings so we can run this on both Win and Unix systems
+                    // On Unix, lines only end in \n (\r\n on Windows)
+                    // If somehow a Unix system ends up with a ScenesList file created on a Windows system
+                    //  it should split on \r and \n and end up with some lines of 0 length, which are then skipped below
+                    List<string> scenesList = scenesListfile.ReadToEnd().Split('\r','\n').ToList();
+
                     string scenesDirPath = Application.dataPath + "/Scenes/";
                     List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
                     foreach (string s in scenesList) {

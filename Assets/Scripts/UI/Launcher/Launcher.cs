@@ -189,7 +189,7 @@ public class Launcher : FontManager {
 		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
 		Debug.Log (scenesList);
 
-		string[] scenes = scenesList.text.Split ('\n');
+		string[] scenes = scenesList.text.Split ('\r','\n');
 		foreach (string s in scenes) {
 			if ((s.Length > 0) && (!s.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name))) {
 				availableScenes.Add(s);
