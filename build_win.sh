@@ -1,6 +1,9 @@
 #!/bin/bash
-# On Mac, builds VoxSim for Windows platform
+# Builds VoxSim for Windows platform
+# Requires MinGW to run on Windows
 # Pass -b with a build configuration XML file (required)
+# Pass -a with a path to Unity (optional: defaults to assumed known location in Applications on OSX or Program Files on Windows)
+#  use this if you have Hub installed and need to make sure to build VoxSim with a particular version of Unity
 # You must have Unity Windows build support installed
 # Clean quits Unity if already open
 # Quits Unity when complete
