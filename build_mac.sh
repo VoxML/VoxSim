@@ -18,7 +18,7 @@ else
     if [[ "$OSTYPE" == "darwin"* ]]; then
         osascript -e 'quit app "Unity"'
         /Applications/Unity/Unity.app/Contents/MacOS/Unity -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
-    elif [[ "$OSTYLE" == "msys" ]]; then
+    elif [[ "$OSTYPE" == "msys" ]]; then
         taskkill //F //IM Unity.exe //T
         C:\Program Files\Unity\Editor\Unity.exe -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
     fi
