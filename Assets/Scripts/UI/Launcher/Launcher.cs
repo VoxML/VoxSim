@@ -503,7 +503,8 @@ public class Launcher : FontManager {
 		selected = GUILayout.SelectionGrid(selected, listItems, 1, customStyle, GUILayout.ExpandWidth(true));
 		
 		if (selected >= 0) {
-			sceneSelected = listItems [selected];
+            // extract the scene name (alone) from the path that's displayed in the scene selection list
+            sceneSelected = listItems [selected].Split('/').Last();
 		}
 		
 		GUILayout.EndVertical();
@@ -534,6 +535,7 @@ public class Launcher : FontManager {
 				SavePrefs ();
 
 				if (eulaAccepted) {
+                    Debug.Log(string.Format("Launching scene {0}", sceneSelected));
 					StartCoroutine (SceneHelper.LoadScene (sceneSelected));
 				}
 				else {

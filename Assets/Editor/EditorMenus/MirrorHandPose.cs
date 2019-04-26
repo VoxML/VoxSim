@@ -37,23 +37,30 @@ namespace EditorMenus {
         // OUT: none
         [MenuItem("VoxSim/Hand Poses/Mirror Selected Hand Pose %#m")]
         static void MirrorSelectedHandPose() {
+            // get the selected game object
             GameObject obj = Selection.activeGameObject;
 
+            // clone it, parent it to the same object as the original, and apply the requisite transformations
             GameObject clone = Instantiate(obj);
             clone.transform.parent = obj.transform.parent;
+            // mirror along the X-axis
             clone.transform.localScale = new Vector3(-obj.transform.localScale.x,
                 obj.transform.localScale.y,obj.transform.localScale.z);
+            // mirror its local position across the YZ-plane (along the X-axis)
             clone.transform.localPosition = new Vector3(-obj.transform.localPosition.x,
                 obj.transform.localPosition.y, obj.transform.localPosition.z);
+            // reverse its rotation around the Y- and Z-axes
             clone.transform.localEulerAngles = Quaternion.Euler(new Vector3(0.0f, 180.0f, 180.0f)) * obj.transform.localEulerAngles;
 
+            // remove "(Clone)" from name
             clone.name = clone.name.Replace("(Clone)", "");
 
+            // Get the InteractionTarget component and transforms of all children
             InteractionTarget interactionTarget = clone.GetComponent<InteractionTarget>();
-
             Transform[] allChildren = clone.GetComponentsInChildren<Transform>();
 
             if (clone.name.StartsWith("r")) {
+                // replace right-hand labels with left-hand labels
                 clone.name = "l" + clone.name.Remove(0, 1);
 
                 foreach (Transform child in allChildren) {
@@ -70,6 +77,7 @@ namespace EditorMenus {
                     }
                 }
 
+                // switch handedness of effector type
                 if (interactionTarget.effectorType == FullBodyBipedEffector.RightHand) {
                     interactionTarget.effectorType = FullBodyBipedEffector.LeftHand;
                 }
@@ -77,12 +85,14 @@ namespace EditorMenus {
                     interactionTarget.effectorType = FullBodyBipedEffector.LeftShoulder;
                 }
 
+                // invert the twist axis
                 if (Mathf.Abs(interactionTarget.twistAxis.x) > Constants.EPSILON) {
                     interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                         interactionTarget.twistAxis.z);
                 }
             }
             else if (clone.name.StartsWith("l")) {
+                // replace left-hand labels with right-hand labels
                 clone.name = "r" + clone.name.Remove(0, 1);
 
                 foreach (Transform child in allChildren) {
@@ -99,6 +109,7 @@ namespace EditorMenus {
                     }
                 }
 
+                // switch handedness of effector type
                 if (interactionTarget.effectorType == FullBodyBipedEffector.LeftHand) {
                     interactionTarget.effectorType = FullBodyBipedEffector.RightHand;
                 }
@@ -106,6 +117,7 @@ namespace EditorMenus {
                     interactionTarget.effectorType = FullBodyBipedEffector.RightShoulder;
                 }
 
+                // invert the twist axis
                 if (Mathf.Abs(interactionTarget.twistAxis.x) > Constants.EPSILON) {
                     interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                         interactionTarget.twistAxis.z);
@@ -137,11 +149,13 @@ namespace EditorMenus {
         [MenuItem("VoxSim/Hand Poses/Flip Label Handedness %#h")]
         static void FlipLabelHandedness()
         {
+            // get the selected game object, its InteractionTarget and transforms of all children
             GameObject obj = Selection.activeGameObject;
             InteractionTarget interactionTarget = obj.GetComponent<InteractionTarget>();
             Transform[] allChildren = obj.GetComponentsInChildren<Transform>();
 
             if (obj.name.StartsWith("r")) {
+                // replace right-hand labels with left-hand labels
                 obj.name = "l" + obj.name.Remove(0, 1);
 
                 foreach (Transform child in allChildren) {
@@ -158,6 +172,7 @@ namespace EditorMenus {
                     }
                 }
 
+                // switch handedness of effector type
                 if (interactionTarget.effectorType == FullBodyBipedEffector.RightHand) {
                     interactionTarget.effectorType = FullBodyBipedEffector.LeftHand;
                 }
@@ -165,12 +180,14 @@ namespace EditorMenus {
                     interactionTarget.effectorType = FullBodyBipedEffector.LeftShoulder;
                 }
 
+                // invert the twist axis
                 if (Mathf.Abs(interactionTarget.twistAxis.x) < Constants.EPSILON) {
                     interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                         interactionTarget.twistAxis.z);
                 }
             }
             else if (obj.name.StartsWith("l")) {
+                // replace left-hand labels with right-hand labels
                 obj.name = "r" + obj.name.Remove(0, 1);
 
                 foreach (Transform child in allChildren) {
@@ -187,6 +204,7 @@ namespace EditorMenus {
                     }
                 }
 
+                // switch handedness of effector type
                 if (interactionTarget.effectorType == FullBodyBipedEffector.LeftHand) {
                     interactionTarget.effectorType = FullBodyBipedEffector.RightHand;
                 }
@@ -194,6 +212,7 @@ namespace EditorMenus {
                     interactionTarget.effectorType = FullBodyBipedEffector.RightShoulder;
                 }
 
+                // invert the twist axis
                 if (Mathf.Abs(interactionTarget.twistAxis.x) < Constants.EPSILON) {
                     interactionTarget.twistAxis = new Vector3(-interactionTarget.twistAxis.x, interactionTarget.twistAxis.y,
                         interactionTarget.twistAxis.z);

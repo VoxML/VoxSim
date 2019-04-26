@@ -33,27 +33,35 @@ namespace StandaloneBuild {
 
     /// <summary>
     /// This class handles the build pipelines for various platforms that can be initiated through a build script (e.g.,
-    ///  build_[mac,win,ios].sh.
+    ///  build_[mac,win,ios].sh.  These scripts can be run natively on Unix systems or through MinGW/Gitbash on Windows.
+    ///  As of April 2019, these have been tested on Windows and OSX.  See "Build Scripts" in the documentation for more.
     /// </summary>
     public static class AutoBuilder {
 
         /// <summary>
-        /// Processes the build config.
-        /// 
-        /// Produces ScenesList.txt in the process and stores this in Assets/Resources.  This file is bundled into the 
-        ///  build to populate the menu in the launcher, if VoxSimMenu is included in the build.
+        /// Processes the build config.  Produces ScenesList.txt in the process and stores this in Assets/Resources.
+        /// This file is bundled into the build to populate the menu in the launcher, if VoxSimMenu is included in the build.
+        /// VoxSimMenu does not have to be included but if it is, it provides the default level of customizability and a tidy
+        ///  way to switch between scenes.
         /// </summary>
         // IN: string: path to the build config file
         // OUT: none
         public static void ProcessBuildConfig(string path) {
+            // read in the build config file and deserialize it to an instance of VoxSimBuildConfig
             XmlSerializer serializer = new XmlSerializer(typeof(VoxSimBuildConfig));
             using (var stream = new FileStream(path, FileMode.Open)) {
                 VoxSimBuildConfig config = serializer.Deserialize(stream) as VoxSimBuildConfig;
 
+                // create a new SceneList.txt file in Resources (overwrite if it already exists)
                 using (StreamWriter file = new StreamWriter(@"Assets/Resources/ScenesList.txt")) {
                     foreach (SceneFile s in config.Scenes) {
+                        // for each scene extracted from build config
+                        //  see if a scene by that name exists in Assets/Scenes
+                        // all scenes specified in build config must be in the Scenes folder
                         string scenePath = Application.dataPath + "/Scenes/" + s.Path;
-                        if (File.Exists(scenePath)) {
+                        if (File.Exists(scenePath)) {   // found a file
+                            // write the name of the scene to ScenesList
+                            // no other path information, no file extension
                             string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
                             file.WriteLine(s.Path.Replace(".unity", ""));
                         }
@@ -66,13 +74,16 @@ namespace StandaloneBuild {
         }
 
     	public static void BuildMac() {
+            // buildName is element 5 in the build script build command, the build config path is element 6
     		string buildName = System.Environment.GetCommandLineArgs()[5];
             string buildConfig = System.Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for OSX with configuration {1}", buildName, buildConfig));
 
+            // process the build config and refresh the assets database afterwards to get ScenesList into Resources
             ProcessBuildConfig(buildConfig);
             AssetDatabase.Refresh();
 
+            // the list of scenes to populate
     		List<string> scenes = new List<string>();
 
             try {
@@ -84,14 +95,26 @@ namespace StandaloneBuild {
                     //  it should split on \r and \n and end up with some lines of 0 length, which are then skipped below
                     List<string> scenesList = scenesListfile.ReadToEnd().Split('\r', '\n').ToList();
 
+                    // get the editor build setting so we can add any config-specified scenes missing from it
+                    List<EditorBuildSettingsScene> editorBuildSettingsScenes = EditorBuildSettings.scenes.ToList();
+
+                    // all scenes included in the build must be in Scenes folder, but subdirectiories are OK as long as the paths
+                    //  match what is in the build config
+                    //  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
+                    //  "Agents/Diana.unity" in the build config to include it
                     string scenesDirPath = Application.dataPath + "/Scenes/";
-                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList();
                     foreach (string s in scenesList) {
-                        if (s != string.Empty) {
+                        if (s != string.Empty) {    // scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
                             string scenePath = scenesDirPath + s + ".unity";
-                            if (fileEntries.Contains(scenePath)) {
-                                Debug.Log(string.Format("Adding scene {0} at relative path {1}", s, scenePath));
-                                if (!scenes.Contains (scenePath)) {
+                            if (fileEntries.Contains(scenePath)) {  // if the list of files in Scenes contains a config-specified scene
+                                if (!scenes.Contains (scenePath)) { // if that scene hasn't already been added to the list of scenes to build
+                                    Debug.Log(string.Format("Adding scene {0} at path {1}", s, scenePath));
+                                    // don't double-add scenes to editor build settings
+                                    if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/Scenes/" + s + ".unity")) {
+                                        Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/Scenes/" + s + ".unity"));
+                                        editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/Scenes/" + s + ".unity", true));
+                                    }
                 					scenes.Add (scenePath);
                 				}
                             }
@@ -100,10 +123,15 @@ namespace StandaloneBuild {
                             }
                         }
                     }
+
+                    // save the editor build settings
+                    EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
         		}
     			
+                // copy external Data folder to target location
         		Data.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
-        		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName, BuildTarget.StandaloneOSX, BuildOptions.None);
+                // build with the specified scenes
+        		BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/mac/" + buildName + ".app", BuildTarget.StandaloneOSX, BuildOptions.None);
             }
             catch (FileNotFoundException e) {
                 Debug.Log(string.Format("BuildMac: File {0} not found!", e.FileName));
@@ -129,14 +157,26 @@ namespace StandaloneBuild {
                     //  it should split on \r and \n and end up with some lines of 0 length, which are then skipped below
                     List<string> scenesList = scenesListfile.ReadToEnd().Split('\r', '\n').ToList();
 
+                    // get the editor build setting so we can add any config-specified scenes missing from it
+                    List<EditorBuildSettingsScene> editorBuildSettingsScenes = EditorBuildSettings.scenes.ToList();
+
+                    // all scenes included in the build must be in Scenes folder, but subdirectiories are OK as long as the paths
+                    //  match what is in the build config
+                    //  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
+                    //  "Agents/Diana.unity" in the build config to include it
                     string scenesDirPath = Application.dataPath + "/Scenes/";
-                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList();
                     foreach (string s in scenesList) {
-                        if (s != string.Empty) {
+                        if (s != string.Empty) {    // scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
                             string scenePath = scenesDirPath + s + ".unity";
-                            if (fileEntries.Contains(scenePath)) {
-                                Debug.Log(string.Format("Adding scene {0} at relative path {1}", s, scenePath));
-                                if (!scenes.Contains (scenePath)) {
+                            if (fileEntries.Contains(scenePath)) {  // if the list of files in Scenes contains a config-specified scene
+                                if (!scenes.Contains (scenePath)) { // if that scene hasn't already been added to the list of scenes to build
+                                    Debug.Log(string.Format("Adding scene {0} at path {1}", s, scenePath));
+                                    // don't double-add scenes to editor build settings
+                                    if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/Scenes/" + s + ".unity")) {
+                                        Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/Scenes/" + s + ".unity"));
+                                        editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/Scenes/" + s + ".unity", true));
+                                    }
                                     scenes.Add (scenePath);
                                 }
                             }
@@ -145,9 +185,14 @@ namespace StandaloneBuild {
                             }
                         }
                     }
+
+                    // save the editor build settings
+                    EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
                 }
                 
+                // copy external Data folder to target location
                 Data.DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+                // build with the specified scenes
                 BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
             }
             catch (FileNotFoundException e) {
@@ -174,14 +219,26 @@ namespace StandaloneBuild {
                     //  it should split on \r and \n and end up with some lines of 0 length, which are then skipped below
                     List<string> scenesList = scenesListfile.ReadToEnd().Split('\r','\n').ToList();
 
+                    // get the editor build setting so we can add any config-specified scenes missing from it
+                    List<EditorBuildSettingsScene> editorBuildSettingsScenes = EditorBuildSettings.scenes.ToList();
+
+                    // all scenes included in the build must be in Scenes folder, but subdirectiories are OK as long as the paths
+                    //  match what is in the build config
+                    //  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
+                    //  "Agents/Diana.unity" in the build config to include it
                     string scenesDirPath = Application.dataPath + "/Scenes/";
-                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity").ToList();
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList();
                     foreach (string s in scenesList) {
-                        if (s != string.Empty) {
+                        if (s != string.Empty) {    // scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
                             string scenePath = scenesDirPath + s + ".unity";
-                            if (fileEntries.Contains(scenePath)) {
-                                Debug.Log(string.Format("Adding scene {0} at relative path {1}", s, scenePath));
-                                if (!scenes.Contains (scenePath)) {
+                            if (fileEntries.Contains(scenePath)) {  // if the list of files in Scenes contains a config-specified scene
+                                if (!scenes.Contains (scenePath)) { // if that scene hasn't already been added to the list of scenes to build
+                                    Debug.Log(string.Format("Adding scene {0} at path {1}", s, scenePath));
+                                    // don't double-add scenes to editor build settings
+                                    if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/Scenes/" + s + ".unity")) {
+                                        Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/Scenes/" + s + ".unity"));
+                                        editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/Scenes/" + s + ".unity", true));
+                                    }
                                     scenes.Add (scenePath);
                                 }
                             }
@@ -190,8 +247,12 @@ namespace StandaloneBuild {
                             }
                         }
                     }
+
+                    // save the editor build settings
+                    EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
                 }
                 
+                // build with the specified scenes
                 BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
                     BuildOptions.AcceptExternalModificationsToPlayer));
             }
