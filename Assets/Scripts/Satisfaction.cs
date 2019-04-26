@@ -458,6 +458,7 @@ namespace Satisfaction {
 													matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
 												return false; // abort
 											}
+
 											//}
 											foreach (GameObject match in matches) {
 												objs.Add(match);
@@ -583,9 +584,9 @@ namespace Satisfaction {
 //				objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)).ToArray();
 			Voxeme[] allVoxemes = objSelector.allVoxemes.Where(a =>
 					!objSelector.allVoxemes.SelectMany(
-						(v, c) => v.opVox.Type.Components.Where(
-							comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList()
-					.Contains(a.gameObject))
+							(v, c) => v.opVox.Type.Components.Where(
+								comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList()
+						.Contains(a.gameObject))
 				.ToArray();
 
 			List<GameObject> components = objSelector.allVoxemes.SelectMany((v, c) =>

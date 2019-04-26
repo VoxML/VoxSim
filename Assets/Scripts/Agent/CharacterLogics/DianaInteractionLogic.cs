@@ -12,6 +12,7 @@ using UnityEngine;
 using Object = System.Object;
 #if UNITY_EDITOR
 using UnityEditor;
+
 #endif
 
 namespace Agent {
@@ -636,10 +637,8 @@ namespace Agent {
 							m => (m.transform.position - IndicatedRegion.center).magnitude).ToList().GetRange(0, s + 1)
 						: ObjectOptions,
 					Enumerable.Range(0, s + 1).Select(a => string.Format("put({0},on({1}))", (IndicatedObj != null)
-							?
-							IndicatedObj.name
-							:
-							(GraspedObj != null)
+							? IndicatedObj.name
+							: (GraspedObj != null)
 								? GraspedObj.name
 								: "{0}",
 						ObjectOptions.OrderByDescending(
@@ -3246,59 +3245,43 @@ namespace Agent {
 				new StackSymbolContent(
 					indicatedObj == null
 						? (GameObject) GetIndicatedObj(null)
-						:
-						indicatedObj.GetType() == typeof(DelegateFactory)
+						: indicatedObj.GetType() == typeof(DelegateFactory)
 							? ((DelegateFactory) indicatedObj).Function
-							:
-							indicatedObj.GetType() == typeof(FunctionDelegate)
-								?
-								(GameObject) ((FunctionDelegate) indicatedObj).Invoke(null)
+							: indicatedObj.GetType() == typeof(FunctionDelegate)
+								? (GameObject) ((FunctionDelegate) indicatedObj).Invoke(null)
 								: (GameObject) indicatedObj,
 					graspedObj == null
 						? (GameObject) GetGraspedObj(null)
-						:
-						graspedObj.GetType() == typeof(DelegateFactory)
+						: graspedObj.GetType() == typeof(DelegateFactory)
 							? ((DelegateFactory) graspedObj).Function
-							:
-							graspedObj.GetType() == typeof(FunctionDelegate)
-								?
-								(GameObject) ((FunctionDelegate) graspedObj).Invoke(null)
+							: graspedObj.GetType() == typeof(FunctionDelegate)
+								? (GameObject) ((FunctionDelegate) graspedObj).Invoke(null)
 								: (GameObject) graspedObj,
 					indicatedRegion == null
 						? (Region) GetIndicatedRegion(null)
-						:
-						indicatedRegion.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) indicatedRegion).Function
+						: indicatedRegion.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) indicatedRegion).Function
 							: indicatedRegion.GetType() == typeof(FunctionDelegate)
 								? (Region) ((FunctionDelegate) indicatedRegion).Invoke(null)
 								: (Region) indicatedRegion,
 					objectOptions == null
 						? GetObjectOptions(null)
-						:
-						objectOptions.GetType() == typeof(DelegateFactory)
+						: objectOptions.GetType() == typeof(DelegateFactory)
 							? ((DelegateFactory) objectOptions).Function
-							:
-							objectOptions.GetType() == typeof(FunctionDelegate)
-								?
-								(List<GameObject>) ((FunctionDelegate) objectOptions).Invoke(null)
+							: objectOptions.GetType() == typeof(FunctionDelegate)
+								? (List<GameObject>) ((FunctionDelegate) objectOptions).Invoke(null)
 								: (List<GameObject>) objectOptions,
 					actionOptions == null
 						? GetActionOptions(null)
-						:
-						actionOptions.GetType() == typeof(DelegateFactory)
+						: actionOptions.GetType() == typeof(DelegateFactory)
 							? ((DelegateFactory) actionOptions).Function
-							:
-							actionOptions.GetType() == typeof(FunctionDelegate)
-								?
-								(List<string>) ((FunctionDelegate) actionOptions).Invoke(null)
+							: actionOptions.GetType() == typeof(FunctionDelegate)
+								? (List<string>) ((FunctionDelegate) actionOptions).Invoke(null)
 								: (List<string>) actionOptions,
 					actionSuggestions == null
 						? GetActionSuggestions(null)
-						:
-						actionSuggestions.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) actionSuggestions).Function
+						: actionSuggestions.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) actionSuggestions).Function
 							: actionSuggestions.GetType() == typeof(FunctionDelegate)
 								? (List<string>) ((FunctionDelegate) actionSuggestions).Invoke(null)
 								: (List<string>) actionSuggestions
@@ -3314,55 +3297,43 @@ namespace Agent {
 				new StackSymbolContent(
 					content.IndicatedObj == null
 						? (GameObject) GetIndicatedObj(null)
-						:
-						content.IndicatedObj.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) content.IndicatedObj).Function
+						: content.IndicatedObj.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) content.IndicatedObj).Function
 							: content.IndicatedObj.GetType() == typeof(FunctionDelegate)
 								? (GameObject) ((FunctionDelegate) content.IndicatedObj).Invoke(null)
 								: (GameObject) content.IndicatedObj,
 					content.GraspedObj == null
 						? (GameObject) GetGraspedObj(null)
-						:
-						content.GraspedObj.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) content.GraspedObj).Function
+						: content.GraspedObj.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) content.GraspedObj).Function
 							: content.GraspedObj.GetType() == typeof(FunctionDelegate)
 								? (GameObject) ((FunctionDelegate) content.GraspedObj).Invoke(null)
 								: (GameObject) content.GraspedObj,
 					content.IndicatedRegion == null
 						? (Region) GetIndicatedRegion(null)
-						:
-						content.IndicatedRegion.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) content.IndicatedRegion).Function
+						: content.IndicatedRegion.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) content.IndicatedRegion).Function
 							: content.IndicatedRegion.GetType() == typeof(FunctionDelegate)
 								? (Region) ((FunctionDelegate) content.IndicatedRegion).Invoke(null)
 								: (Region) content.IndicatedRegion,
 					content.ObjectOptions == null
 						? GetObjectOptions(null)
-						:
-						content.ObjectOptions.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) content.ObjectOptions).Function
+						: content.ObjectOptions.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) content.ObjectOptions).Function
 							: content.ObjectOptions.GetType() == typeof(FunctionDelegate)
 								? (List<GameObject>) ((FunctionDelegate) content.ObjectOptions).Invoke(null)
 								: (List<GameObject>) content.ObjectOptions,
 					content.ActionOptions == null
 						? GetActionOptions(null)
-						:
-						content.ActionOptions.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) content.ActionOptions).Function
+						: content.ActionOptions.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) content.ActionOptions).Function
 							: content.ActionOptions.GetType() == typeof(FunctionDelegate)
 								? (List<string>) ((FunctionDelegate) content.ActionOptions).Invoke(null)
 								: (List<string>) content.ActionOptions,
 					content.ActionSuggestions == null
 						? GetActionSuggestions(null)
-						:
-						content.ActionSuggestions.GetType() == typeof(DelegateFactory)
-							?
-							((DelegateFactory) content.ActionSuggestions).Function
+						: content.ActionSuggestions.GetType() == typeof(DelegateFactory)
+							? ((DelegateFactory) content.ActionSuggestions).Function
 							: content.ActionSuggestions.GetType() == typeof(FunctionDelegate)
 								? (List<string>) ((FunctionDelegate) content.ActionSuggestions).Invoke(null)
 								: (List<string>) content.ActionSuggestions
@@ -3412,55 +3383,37 @@ namespace Agent {
 					return string.Format("[{0},{1},{2},{3},{4},{5}]",
 						content.IndicatedObj == null
 							? "Null"
-							:
-							content.IndicatedObj.GetType() == typeof(FunctionDelegate)
-								?
-								((FunctionDelegate) content.IndicatedObj).ToString()
-								:
-								Convert.ToString(((GameObject) content.IndicatedObj).name),
+							: content.IndicatedObj.GetType() == typeof(FunctionDelegate)
+								? ((FunctionDelegate) content.IndicatedObj).ToString()
+								: Convert.ToString(((GameObject) content.IndicatedObj).name),
 						content.GraspedObj == null
 							? "Null"
-							:
-							content.GraspedObj.GetType() == typeof(FunctionDelegate)
-								?
-								((FunctionDelegate) content.GraspedObj).ToString()
-								:
-								Convert.ToString(((GameObject) content.GraspedObj).name),
+							: content.GraspedObj.GetType() == typeof(FunctionDelegate)
+								? ((FunctionDelegate) content.GraspedObj).ToString()
+								: Convert.ToString(((GameObject) content.GraspedObj).name),
 						content.IndicatedRegion == null
 							? "Null"
-							:
-							content.IndicatedRegion.GetType() == typeof(FunctionDelegate)
-								?
-								((FunctionDelegate) content.IndicatedRegion).ToString()
-								:
-								Helper.RegionToString((Region) content.IndicatedRegion),
+							: content.IndicatedRegion.GetType() == typeof(FunctionDelegate)
+								? ((FunctionDelegate) content.IndicatedRegion).ToString()
+								: Helper.RegionToString((Region) content.IndicatedRegion),
 						content.ObjectOptions == null
 							? "Null"
-							:
-							content.ObjectOptions.GetType() == typeof(FunctionDelegate)
-								?
-								((FunctionDelegate) content.ObjectOptions).ToString()
-								:
-								string.Format("[{0}]",
+							: content.ObjectOptions.GetType() == typeof(FunctionDelegate)
+								? ((FunctionDelegate) content.ObjectOptions).ToString()
+								: string.Format("[{0}]",
 									String.Join(", ",
 										((List<GameObject>) content.ObjectOptions).Select(o => o.name).ToArray())),
 						content.ActionOptions == null
 							? "Null"
-							:
-							content.ActionOptions.GetType() == typeof(FunctionDelegate)
-								?
-								((FunctionDelegate) content.ActionOptions).ToString()
-								:
-								string.Format("[{0}]",
+							: content.ActionOptions.GetType() == typeof(FunctionDelegate)
+								? ((FunctionDelegate) content.ActionOptions).ToString()
+								: string.Format("[{0}]",
 									String.Join(", ", ((List<string>) content.ActionOptions).ToArray())),
 						content.ActionSuggestions == null
 							? "Null"
-							:
-							content.ActionSuggestions.GetType() == typeof(FunctionDelegate)
-								?
-								((FunctionDelegate) content.ActionSuggestions).ToString()
-								:
-								string.Format("[{0}]",
+							: content.ActionSuggestions.GetType() == typeof(FunctionDelegate)
+								? ((FunctionDelegate) content.ActionSuggestions).ToString()
+								: string.Format("[{0}]",
 									String.Join(", ", ((List<string>) content.ActionSuggestions).ToArray())));
 				}
 				else if (symbol.Content.GetType() == typeof(StackSymbolConditions)) {
@@ -3496,54 +3449,36 @@ namespace Agent {
 				return string.Format("[{0},{1},{2},{3},{4},{5}]",
 					content.IndicatedObj == null
 						? "Null"
-						:
-						content.IndicatedObj.GetType() == typeof(FunctionDelegate)
-							?
-							((FunctionDelegate) content.IndicatedObj).ToString()
-							:
-							Convert.ToString(((GameObject) content.IndicatedObj).name),
+						: content.IndicatedObj.GetType() == typeof(FunctionDelegate)
+							? ((FunctionDelegate) content.IndicatedObj).ToString()
+							: Convert.ToString(((GameObject) content.IndicatedObj).name),
 					content.GraspedObj == null
 						? "Null"
-						:
-						content.GraspedObj.GetType() == typeof(FunctionDelegate)
-							?
-							((FunctionDelegate) content.GraspedObj).ToString()
-							:
-							Convert.ToString(((GameObject) content.GraspedObj).name),
+						: content.GraspedObj.GetType() == typeof(FunctionDelegate)
+							? ((FunctionDelegate) content.GraspedObj).ToString()
+							: Convert.ToString(((GameObject) content.GraspedObj).name),
 					content.IndicatedRegion == null
 						? "Null"
-						:
-						content.IndicatedRegion.GetType() == typeof(FunctionDelegate)
-							?
-							((FunctionDelegate) content.IndicatedRegion).ToString()
-							:
-							Helper.RegionToString((Region) content.IndicatedRegion),
+						: content.IndicatedRegion.GetType() == typeof(FunctionDelegate)
+							? ((FunctionDelegate) content.IndicatedRegion).ToString()
+							: Helper.RegionToString((Region) content.IndicatedRegion),
 					content.ObjectOptions == null
 						? "Null"
-						:
-						content.ObjectOptions.GetType() == typeof(FunctionDelegate)
-							?
-							((FunctionDelegate) content.ObjectOptions).ToString()
-							:
-							string.Format("[{0}]",
+						: content.ObjectOptions.GetType() == typeof(FunctionDelegate)
+							? ((FunctionDelegate) content.ObjectOptions).ToString()
+							: string.Format("[{0}]",
 								String.Join(", ",
 									((List<GameObject>) content.ObjectOptions).Select(o => o.name).ToArray())),
 					content.ActionOptions == null
 						? "Null"
-						:
-						content.ActionOptions.GetType() == typeof(FunctionDelegate)
-							?
-							((FunctionDelegate) content.ActionOptions).ToString()
-							:
-							string.Format("[{0}]", String.Join(", ", ((List<string>) content.ActionOptions).ToArray())),
+						: content.ActionOptions.GetType() == typeof(FunctionDelegate)
+							? ((FunctionDelegate) content.ActionOptions).ToString()
+							: string.Format("[{0}]", String.Join(", ", ((List<string>) content.ActionOptions).ToArray())),
 					content.ActionSuggestions == null
 						? "Null"
-						:
-						content.ActionSuggestions.GetType() == typeof(FunctionDelegate)
-							?
-							((FunctionDelegate) content.ActionSuggestions).ToString()
-							:
-							string.Format("[{0}]",
+						: content.ActionSuggestions.GetType() == typeof(FunctionDelegate)
+							? ((FunctionDelegate) content.ActionSuggestions).ToString()
+							: string.Format("[{0}]",
 								String.Join(", ", ((List<string>) content.ActionSuggestions).ToArray())));
 			}
 			else if (stackSymbol.GetType() == typeof(FunctionDelegate)) {
@@ -3695,15 +3630,11 @@ namespace Agent {
 								inst.StackOperation.Type.ToString(),
 								(inst.StackOperation.Content == null)
 									? "Null"
-									:
-									(inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
-										?
-										StackSymbolToString(inst.StackOperation.Content)
-										:
-										(inst.StackOperation.Content.GetType() == typeof(PDAState))
+									: (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
+										? StackSymbolToString(inst.StackOperation.Content)
+										: (inst.StackOperation.Content.GetType() == typeof(PDAState))
 											? ((PDAState) inst.StackOperation.Content).Name
-											:
-											(inst.StackOperation.Content.GetType() == typeof(FunctionDelegate))
+											: (inst.StackOperation.Content.GetType() == typeof(FunctionDelegate))
 												? ((FunctionDelegate) inst.StackOperation.Content).Method.Name
 												: string.Empty)));
 					}
@@ -3730,15 +3661,11 @@ namespace Agent {
 							instruction.StackOperation.Type.ToString(),
 							(instruction.StackOperation.Content == null)
 								? "Null"
-								:
-								(instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent))
-									?
-									StackSymbolToString(instruction.StackOperation.Content)
-									:
-									(instruction.StackOperation.Content.GetType() == typeof(PDAState))
+								: (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent))
+									? StackSymbolToString(instruction.StackOperation.Content)
+									: (instruction.StackOperation.Content.GetType() == typeof(PDAState))
 										? ((PDAState) instruction.StackOperation.Content).Name
-										:
-										(instruction.StackOperation.Content.GetType() == typeof(FunctionDelegate))
+										: (instruction.StackOperation.Content.GetType() == typeof(FunctionDelegate))
 											? ((FunctionDelegate) instruction.StackOperation.Content).Method.Name
 											: string.Empty)));
 				}
@@ -3822,12 +3749,9 @@ namespace Agent {
 							inst.StackOperation.Type.ToString(),
 							(inst.StackOperation.Content == null)
 								? "Null"
-								:
-								(inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
-									?
-									StackSymbolToString(inst.StackOperation.Content)
-									:
-									(inst.StackOperation.Content.GetType() == typeof(PDAState))
+								: (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
+									? StackSymbolToString(inst.StackOperation.Content)
+									: (inst.StackOperation.Content.GetType() == typeof(PDAState))
 										? ((PDAState) inst.StackOperation.Content).Name
 										: string.Empty)));
 				}
@@ -3853,12 +3777,9 @@ namespace Agent {
 						instruction.StackOperation.Type.ToString(),
 						(instruction.StackOperation.Content == null)
 							? "Null"
-							:
-							(instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent))
-								?
-								StackSymbolToString(instruction.StackOperation.Content)
-								:
-								(instruction.StackOperation.Content.GetType() == typeof(PDAState))
+							: (instruction.StackOperation.Content.GetType() == typeof(StackSymbolContent))
+								? StackSymbolToString(instruction.StackOperation.Content)
+								: (instruction.StackOperation.Content.GetType() == typeof(PDAState))
 									? ((PDAState) instruction.StackOperation.Content).Name
 									: string.Empty)));
 			}
@@ -4191,12 +4112,9 @@ namespace Agent {
 						inst.StackOperation.Type.ToString(),
 						(inst.StackOperation.Content == null)
 							? "Null"
-							:
-							(inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
-								?
-								StackSymbolToString(inst.StackOperation.Content)
-								:
-								(inst.StackOperation.Content.GetType() == typeof(PDAState))
+							: (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
+								? StackSymbolToString(inst.StackOperation.Content)
+								: (inst.StackOperation.Content.GetType() == typeof(PDAState))
 									? ((PDAState) inst.StackOperation.Content).Name
 									: string.Empty)));
 			}
@@ -4387,12 +4305,9 @@ namespace Agent {
 								          inst.StackOperation.Type.ToString(),
 								          (inst.StackOperation.Content == null)
 									          ? "Null"
-									          :
-									          (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
-										          ?
-										          StackSymbolToString(inst.StackOperation.Content)
-										          :
-										          (inst.StackOperation.Content.GetType() == typeof(PDAState))
+									          : (inst.StackOperation.Content.GetType() == typeof(StackSymbolContent))
+										          ? StackSymbolToString(inst.StackOperation.Content)
+										          : (inst.StackOperation.Content.GetType() == typeof(PDAState))
 											          ? ((PDAState) inst.StackOperation.Content).Name
 											          : string.Empty)));
 						TransitionRelation.Remove(inst);

@@ -4,12 +4,10 @@ using Episteme;
 using NUnit.Framework;
 using UnityEngine;
 
-public class EpistemeSocketTest : MonoBehaviour
-{
+public class EpistemeSocketTest : MonoBehaviour {
 	private EpistemicState model;
 
-	private void mock()
-	{
+	private void mock() {
 		model = new EpistemicState();
 		// creating Concept instances (actions)
 		// available types: ACTION, OBJECT, PROPERTY
@@ -39,8 +37,7 @@ public class EpistemeSocketTest : MonoBehaviour
 		model.SetEpisimUrl("http://localhost:5000");
 	}
 
-	private void second_mock()
-	{
+	private void second_mock() {
 		model = new EpistemicState();
 		// creating Concept instances (actions)
 		// available types: ACTION, OBJECT, PROPERTY
@@ -56,8 +53,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestInit()
-	{
+	public void TestInit() {
 		mock();
 
 		// for logging
@@ -69,8 +65,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestUpdate()
-	{
+	public void TestUpdate() {
 		mock();
 
 		// retrieve a concept
@@ -81,8 +76,7 @@ public class EpistemeSocketTest : MonoBehaviour
 		var yesG = model.GetConcept("POSACK", ConceptType.ACTION, ConceptMode.G);
 		var r = model.GetRelation(yesL, yesG);
 		// set certainty value
-		if (r != null)
-		{
+		if (r != null) {
 			r.Certainty = 1.0;
 		}
 
@@ -95,8 +89,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestUpdate2()
-	{
+	public void TestUpdate2() {
 		second_mock();
 		model.InitiateEpisim();
 		var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
@@ -106,8 +99,7 @@ public class EpistemeSocketTest : MonoBehaviour
 		Debug.Log(conceptG);
 		var conceptL = model.GetConcept("RIGHT", ConceptType.PROPERTY, ConceptMode.L);
 		Debug.Log(conceptL);
-		if (conceptG.Certainty < 0.5 || conceptL.Certainty < 0.5)
-		{
+		if (conceptG.Certainty < 0.5 || conceptL.Certainty < 0.5) {
 			conceptG.Certainty = 0.5;
 			conceptL.Certainty = 0.5;
 			json = Jsonifier.JsonifyUpdates(model, new[] {conceptG, conceptL}, new Relation[] { });
@@ -117,8 +109,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestSubgroup()
-	{
+	public void TestSubgroup() {
 		mock();
 		model.AddPropertyGroup(new PropertyGroup("SIZE", PropertyType.Ordinal));
 		model.AddPropertyGroup(new PropertyGroup("COLOR", PropertyType.Nominal));
@@ -142,8 +133,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestActualModel()
-	{
+	public void TestActualModel() {
 		model = EpistemicModel.initModel();
 		model.SetEpisimUrl("http://localhost:5000");
 //		var json = Jsonifier.JsonifyEpistemicState(model);
@@ -151,8 +141,7 @@ public class EpistemeSocketTest : MonoBehaviour
 		model.InitiateEpisim();
 		var moveL = model.GetConcept("PUT", ConceptType.ACTION, ConceptMode.L);
 		var pushL = model.GetConcept("PUSH", ConceptType.ACTION, ConceptMode.L);
-		if ((moveL != null) && (pushL != null))
-		{
+		if ((moveL != null) && (pushL != null)) {
 			moveL.Certainty = -1;
 			pushL.Certainty = -1;
 			var json = Jsonifier.JsonifyEpistemicStateInitiation(model);
@@ -162,8 +151,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestDisengage()
-	{
+	public void TestDisengage() {
 		mock();
 		model.InitiateEpisim();
 		Thread.Sleep(2000);
@@ -172,8 +160,7 @@ public class EpistemeSocketTest : MonoBehaviour
 	}
 
 	[Test]
-	public void TestSideload()
-	{
+	public void TestSideload() {
 		mock();
 		// retrieve a concept
 		var yesL = model.GetConcept("posack", ConceptType.ACTION, ConceptMode.L);
@@ -183,8 +170,7 @@ public class EpistemeSocketTest : MonoBehaviour
 		var yesG = model.GetConcept("POSACK", ConceptType.ACTION, ConceptMode.G);
 		var r = model.GetRelation(yesL, yesG);
 		// set certainty value
-		if (r != null)
-		{
+		if (r != null) {
 			r.Certainty = 0.43;
 		}
 
@@ -193,7 +179,5 @@ public class EpistemeSocketTest : MonoBehaviour
 		Debug.Log(json);
 		mock();
 		model.SideloadCertaintyState(json);
-
 	}
-
 }

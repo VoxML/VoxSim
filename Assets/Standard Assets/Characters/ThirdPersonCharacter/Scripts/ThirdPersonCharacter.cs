@@ -10,8 +10,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson {
 		[SerializeField] float m_JumpPower = 12f;
 		[Range(1f, 4f)] [SerializeField] float m_GravityMultiplier = 2f;
 
-		[SerializeField]
-		float
+		[SerializeField] float
 			m_RunCycleLegOffset =
 				0.2f; //specific to the character in sample assets, will need to be modified to work with others
 

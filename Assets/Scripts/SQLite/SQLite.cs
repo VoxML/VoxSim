@@ -1825,8 +1825,7 @@ namespace SQLite4Unity3d {
 				if (!Indices.Any()
 				    && !IsPK
 				    && ((createFlags & CreateFlags.ImplicitIndex) == CreateFlags.ImplicitIndex)
-				    && Name.EndsWith(Orm.ImplicitIndexSuffix, StringComparison.OrdinalIgnoreCase)
-				) {
+				    && Name.EndsWith(Orm.ImplicitIndexSuffix, StringComparison.OrdinalIgnoreCase)) {
 					Indices = new IndexedAttribute[] {new IndexedAttribute()};
 				}
 

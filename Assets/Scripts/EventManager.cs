@@ -918,8 +918,7 @@ public class EventManager : MonoBehaviour {
 										VoxML predVoxeme = new VoxML();
 										String path = string.Empty;
 										Debug.Log(pred);
-										if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))
-										) {
+										if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
 											path = string.Format("/programs/{0}.xml", pred);
 										}
 										else if (File.Exists(

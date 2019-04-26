@@ -21,8 +21,7 @@ namespace UnityStandardAssets.Characters.FirstPerson {
 		[SerializeField] private LerpControlledBob m_JumpBob = new LerpControlledBob();
 		[SerializeField] private float m_StepInterval;
 
-		[SerializeField]
-		private AudioClip[] m_FootstepSounds; // an array of footstep sounds that will be randomly selected from.
+		[SerializeField] private AudioClip[] m_FootstepSounds; // an array of footstep sounds that will be randomly selected from.
 
 		[SerializeField] private AudioClip m_JumpSound; // the sound played when character leaves the ground.
 		[SerializeField] private AudioClip m_LandSound; // the sound played when character touches back on ground.

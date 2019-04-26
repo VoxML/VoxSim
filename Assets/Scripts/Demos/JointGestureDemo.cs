@@ -3818,8 +3818,7 @@ public class JointGestureDemo : AgentInteraction {
 								suggestedActions.Add(string.Format("put({0},on({1}))", theme.name, obj.name));
 							}
 
-							if (!confirmationTexts.ContainsKey(string.Format("put({0},on({1}))", theme.name, obj.name))
-							) {
+							if (!confirmationTexts.ContainsKey(string.Format("put({0},on({1}))", theme.name, obj.name))) {
 								confirmationTexts.Add(string.Format("put({0},on({1}))", theme.name, obj.name),
 									string.Format("put {0} on {1}",
 										GenerateReferringExpression(theme, new List<object>() {obj}),

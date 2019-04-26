@@ -116,17 +116,13 @@ namespace RCC {
 				foreach (Vector3 point in x.Points.Where(p => p.y >= x.Center.y).ToList()) {
 					RaycastHit hitInfo;
 					Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
-							?
-							point.x + Constants.EPSILON
-							:
-							(Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
+							? point.x + Constants.EPSILON
+							: (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
 								? point.x - Constants.EPSILON
 								: point.x,
 						point.y - Constants.EPSILON, (Mathf.Abs(point.z - x.Min(MajorAxis.Z).z) <= Constants.EPSILON)
-							?
-							point.x + Constants.EPSILON
-							:
-							(Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
+							? point.x + Constants.EPSILON
+							: (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
 								? point.z - Constants.EPSILON
 								: point.z);
 					bool hit = Physics.Raycast(origin, Vector3.up, out hitInfo);
@@ -151,17 +147,13 @@ namespace RCC {
 					Debug.Log(Helper.VectorToParsable(point));
 					RaycastHit hitInfo;
 					Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
-							?
-							point.x + Constants.EPSILON
-							:
-							(Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
+							? point.x + Constants.EPSILON
+							: (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
 								? point.x - Constants.EPSILON
 								: point.x,
 						point.y + Constants.EPSILON, (Mathf.Abs(point.z - x.Min(MajorAxis.Z).z) <= Constants.EPSILON)
-							?
-							point.x + Constants.EPSILON
-							:
-							(Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
+							? point.x + Constants.EPSILON
+							: (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
 								? point.z - Constants.EPSILON
 								: point.z);
 					bool hit = Physics.Raycast(origin, -Vector3.up, out hitInfo);
@@ -192,10 +184,8 @@ namespace RCC {
 				foreach (Vector3 point in x.Points.Where(p => p.z >= x.Center.z).ToList()) {
 					RaycastHit hitInfo;
 					Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
-							?
-							point.x + Constants.EPSILON
-							:
-							(Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
+							? point.x + Constants.EPSILON
+							: (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
 								? point.x - Constants.EPSILON
 								: point.x,
 						(Mathf.Abs(point.y - x.Min(MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON :
@@ -214,10 +204,8 @@ namespace RCC {
 				foreach (Vector3 point in x.Points.Where(p => p.z <= x.Center.z).ToList()) {
 					RaycastHit hitInfo;
 					Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
-							?
-							point.x + Constants.EPSILON
-							:
-							(Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
+							? point.x + Constants.EPSILON
+							: (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
 								? point.x - Constants.EPSILON
 								: point.x,
 						(Mathf.Abs(point.y - x.Min(MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON :

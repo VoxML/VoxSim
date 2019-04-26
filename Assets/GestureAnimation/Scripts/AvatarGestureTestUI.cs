@@ -19,8 +19,6 @@ public class AvatarGestureTestUI : MonoBehaviour {
 	public void TriggerGestureAnimation(InputField textInput) {
 		// Example of using callback along with PerformGesture
 		gestureController.PerformGesture(textInput.text,
-			delegate(AvatarGesture ag) {
-				Debug.Log("Gesture End: " + ag.Name + " (IsGesturing=" + gestureController.IsGesturing + ")");
-			});
+			delegate(AvatarGesture ag) { Debug.Log("Gesture End: " + ag.Name + " (IsGesturing=" + gestureController.IsGesturing + ")"); });
 	}
 }
