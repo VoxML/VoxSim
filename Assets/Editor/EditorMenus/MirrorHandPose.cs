@@ -1,7 +1,8 @@
-﻿using Global;
-using RootMotion.FinalIK;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
+
+using Global;
+using RootMotion.FinalIK;
 
 namespace EditorMenus {
 	/// <summary>

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using UnityEditor;
+using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+
 using Global;
-using UnityEditor;
-using UnityEngine;
 
 namespace StandaloneBuild {
 	/// <summary>
