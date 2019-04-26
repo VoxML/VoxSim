@@ -1,15 +1,13 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Timers;
-using Global;
 using FlashbackVideoRecorder;
+using Global;
 using SQLite4Unity3d;
+using UnityEngine;
 
 namespace VideoCapture {
 	public enum VideoCaptureMode {
@@ -188,7 +186,7 @@ namespace VideoCapture {
 					string result = Marshal.PtrToStringAuto(PluginImport.PythonCall(
 						Application.dataPath + "/Externals/python/", "auto_event_script", "send_next_event_to_port",
 						args, args.Length));
-					eventIndex = System.Convert.ToInt32(result);
+					eventIndex = Convert.ToInt32(result);
 				}
 				else {
 					Debug.Log(string.Format("File {0} does not exist!",
@@ -550,7 +548,7 @@ namespace VideoCapture {
 					string result = Marshal.PtrToStringAuto(PluginImport.PythonCall(
 						Application.dataPath + "/Externals/python/", "auto_event_script", "send_next_event_to_port",
 						args, args.Length));
-					eventIndex = System.Convert.ToInt32(result);
+					eventIndex = Convert.ToInt32(result);
 				}
 				else {
 					Debug.Log(string.Format("File {0} does not exist!",

@@ -1,14 +1,16 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.Serialization.Formatters.Binary;
 using MajorAxes;
-using Agent;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using Object = System.Object;
+using Random = UnityEngine.Random;
 
 namespace Global {
 	/// <summary>
@@ -279,7 +281,7 @@ namespace Global {
 	/// <summary>
 	/// Pair class
 	/// </summary>
-	public class Pair<T1, T2> : IEquatable<System.Object> {
+	public class Pair<T1, T2> : IEquatable<Object> {
 		public T1 Item1 { get; set; }
 
 		public T2 Item2 { get; set; }
@@ -319,7 +321,7 @@ namespace Global {
 	/// <summary>
 	/// Triple class
 	/// </summary>
-	public class Triple<T1, T2, T3> : IEquatable<System.Object> {
+	public class Triple<T1, T2, T3> : IEquatable<Object> {
 		public T1 Item1 { get; set; }
 
 		public T2 Item2 { get; set; }
@@ -389,41 +391,41 @@ namespace Global {
 		}
 
 		public static String VectorToParsable(Vector3 vector) {
-			return ("<" + vector.x.ToString() + "; " +
-			        vector.y.ToString() + "; " +
-			        vector.z.ToString() + ">");
+			return ("<" + vector.x + "; " +
+			        vector.y + "; " +
+			        vector.z + ">");
 		}
 
 		public static Vector3 ParsableToVector(String parsable) {
 			List<String> components =
-				new List<String>((((String) parsable).Replace("<", "").Replace(">", "")).Split(new char[] {';'}));
-			return new Vector3(System.Convert.ToSingle(components[0]),
-				System.Convert.ToSingle(components[1]),
-				System.Convert.ToSingle(components[2]));
+				new List<String>((parsable.Replace("<", "").Replace(">", "")).Split(';'));
+			return new Vector3(Convert.ToSingle(components[0]),
+				Convert.ToSingle(components[1]),
+				Convert.ToSingle(components[2]));
 		}
 
 		public static String QuaternionToParsable(Quaternion quat) {
-			return ("<" + quat.x.ToString() + "; " +
-			        quat.y.ToString() + "; " +
-			        quat.z.ToString() + "; " +
-			        quat.w.ToString() + ">");
+			return ("<" + quat.x + "; " +
+			        quat.y + "; " +
+			        quat.z + "; " +
+			        quat.w + ">");
 		}
 
 		public static Quaternion ParsableToQuaternion(String parsable) {
 			List<String> components =
-				new List<String>((((String) parsable).Replace("<", "").Replace(">", "")).Split(new char[] {';'}));
-			return new Quaternion(System.Convert.ToSingle(components[0]),
-				System.Convert.ToSingle(components[1]),
-				System.Convert.ToSingle(components[2]),
-				System.Convert.ToSingle(components[3]));
+				new List<String>((parsable.Replace("<", "").Replace(">", "")).Split(';'));
+			return new Quaternion(Convert.ToSingle(components[0]),
+				Convert.ToSingle(components[1]),
+				Convert.ToSingle(components[2]),
+				Convert.ToSingle(components[3]));
 		}
 
 		public static String IntToString(int inInt) {
-			return System.Convert.ToString(inInt);
+			return Convert.ToString(inInt);
 		}
 
 		public static int StringToInt(String inString) {
-			return System.Convert.ToInt32(inString);
+			return Convert.ToInt32(inString);
 		}
 
 		public static Triple<String, String, String> MakeRDFTriples(String formula) {
@@ -734,11 +736,11 @@ namespace Global {
 				Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
 					temp.min.y * mesh.gameObject.transform.lossyScale.y,
 					temp.min.z * mesh.gameObject.transform.lossyScale.z);
-				min = Helper.RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
+				min = RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
 				Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
 					temp.max.y * mesh.gameObject.transform.lossyScale.y,
 					temp.max.z * mesh.gameObject.transform.lossyScale.z);
-				max = Helper.RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
+				max = RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
 				temp.SetMinMax(min, max);
 				combinedBounds.Encapsulate(temp);
 			}
@@ -782,7 +784,7 @@ namespace Global {
 			// also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
 			//			Debug.Log (obj1);
 			MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
-				m => (Helper.GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
+				m => (GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
 				     (m.gameObject.GetComponent<Voxeme>() != null) &&
 				     (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
 					     c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
@@ -803,11 +805,11 @@ namespace Global {
 					Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
 						temp.min.y * mesh.gameObject.transform.lossyScale.y,
 						temp.min.z * mesh.gameObject.transform.lossyScale.z);
-					min = Helper.RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
+					min = RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
 					Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
 						temp.max.y * mesh.gameObject.transform.lossyScale.y,
 						temp.max.z * mesh.gameObject.transform.lossyScale.z);
-					max = Helper.RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
+					max = RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
 					// set min and max
 					temp.SetMinMax(min, max);
 					// combined bounds = current combined bounds stretched to encapsulate this temp
@@ -819,13 +821,13 @@ namespace Global {
 			//Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
 			//Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
 			combinedBounds.SetMinMax(
-				combinedBounds.center + Helper.GetObjectWorldSize(obj).center - combinedBounds.extents,
-				combinedBounds.center + Helper.GetObjectWorldSize(obj).center + combinedBounds.extents);
+				combinedBounds.center + GetObjectWorldSize(obj).center - combinedBounds.extents,
+				combinedBounds.center + GetObjectWorldSize(obj).center + combinedBounds.extents);
 			//Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
 			//Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
 			//Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
 
-			Debug.Log(Helper.VectorToParsable(combinedBounds.size));
+			Debug.Log(VectorToParsable(combinedBounds.size));
 
 			List<Vector3> pts = new List<Vector3>(new Vector3[] {
 				new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
@@ -856,7 +858,7 @@ namespace Global {
 				bounds.Encapsulate(pt);
 			}
 
-			Debug.Log(Helper.VectorToParsable(bounds.size));
+			Debug.Log(VectorToParsable(bounds.size));
 
 			objBounds.Points = new List<Vector3>(points);
 
@@ -1066,21 +1068,21 @@ namespace Global {
 		public static bool Covers(Bounds obj1, Bounds obj2, Vector3 dir) {
 			bool covers = true;
 
-			if (Helper.Parallel(dir, Constants.xAxis)) {
+			if (Parallel(dir, Constants.xAxis)) {
 				if ((obj1.size.y + Constants.EPSILON <
 				     obj2.size.y) || // check for object bounds exceeding along all axes but dir
 				    (obj1.size.z + Constants.EPSILON < obj2.size.z)) {
 					covers = false;
 				}
 			}
-			else if (Helper.Parallel(dir, Constants.yAxis)) {
+			else if (Parallel(dir, Constants.yAxis)) {
 				if ((obj1.size.x + Constants.EPSILON <
 				     obj2.size.x) || // check for object bounds exceeding along all axes but dir
 				    (obj1.size.z + Constants.EPSILON < obj2.size.z)) {
 					covers = false;
 				}
 			}
-			else if (Helper.Parallel(dir, Constants.zAxis)) {
+			else if (Parallel(dir, Constants.zAxis)) {
 				if ((obj1.size.x + Constants.EPSILON <
 				     obj2.size.x) || // check for object bounds exceeding along all axes but dir
 				    (obj1.size.y + Constants.EPSILON < obj2.size.y)) {
@@ -1123,9 +1125,9 @@ namespace Global {
 
 			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
-			Vector3 testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
-				UnityEngine.Random.Range(region.min.y, region.max.y),
-				UnityEngine.Random.Range(region.min.z, region.max.z));
+			Vector3 testPoint = new Vector3(Random.Range(region.min.x, region.max.x),
+				Random.Range(region.min.y, region.max.y),
+				Random.Range(region.min.z, region.max.z));
 			bool clearRegionFound = false;
 			while (!clearRegionFound) {
 				testBounds.center = testPoint;
@@ -1144,9 +1146,9 @@ namespace Global {
 					break;
 				}
 
-				testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
-					UnityEngine.Random.Range(region.min.y, region.max.y),
-					UnityEngine.Random.Range(region.min.z, region.max.z));
+				testPoint = new Vector3(Random.Range(region.min.x, region.max.x),
+					Random.Range(region.min.y, region.max.y),
+					Random.Range(region.min.z, region.max.z));
 			}
 
 			region.min = testPoint - testBounds.extents;
@@ -1160,16 +1162,16 @@ namespace Global {
 
 			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
-			Vector3 testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
-				UnityEngine.Random.Range(region.min.y, region.max.y),
-				UnityEngine.Random.Range(region.min.z, region.max.z));
+			Vector3 testPoint = new Vector3(Random.Range(region.min.x, region.max.x),
+				Random.Range(region.min.y, region.max.y),
+				Random.Range(region.min.z, region.max.z));
 			bool clearRegionFound = false;
 			while (!clearRegionFound) {
 				testBounds.center = testPoint;
 				bool regionClear = true;
 				foreach (Voxeme voxeme in objSelector.allVoxemes) {
 					if (voxeme.gameObject != surface) {
-						if (testBounds.Intersects(Helper.GetObjectWorldSize(voxeme.gameObject))) {
+						if (testBounds.Intersects(GetObjectWorldSize(voxeme.gameObject))) {
 							regionClear = false;
 							break;
 						}
@@ -1181,9 +1183,9 @@ namespace Global {
 					break;
 				}
 
-				testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
-					UnityEngine.Random.Range(region.min.y, region.max.y),
-					UnityEngine.Random.Range(region.min.z, region.max.z));
+				testPoint = new Vector3(Random.Range(region.min.x, region.max.x),
+					Random.Range(region.min.y, region.max.y),
+					Random.Range(region.min.z, region.max.z));
 			}
 
 			region.min = testPoint - testBounds.extents;
@@ -1228,16 +1230,16 @@ namespace Global {
 				}
 			}
 
-			Vector3 testPoint = new Vector3(UnityEngine.Random.Range(intersection.min.x, intersection.max.x),
-				UnityEngine.Random.Range(intersection.min.y, intersection.max.y),
-				UnityEngine.Random.Range(intersection.min.z, intersection.max.z));
+			Vector3 testPoint = new Vector3(Random.Range(intersection.min.x, intersection.max.x),
+				Random.Range(intersection.min.y, intersection.max.y),
+				Random.Range(intersection.min.z, intersection.max.z));
 			bool clearRegionFound = false;
 			while (!clearRegionFound) {
 				testBounds.center = testPoint;
 				bool regionClear = true;
 				foreach (Voxeme voxeme in objSelector.allVoxemes) {
 					if (voxeme.gameObject != surface) {
-						if (testBounds.Intersects(Helper.GetObjectWorldSize(voxeme.gameObject))) {
+						if (testBounds.Intersects(GetObjectWorldSize(voxeme.gameObject))) {
 							regionClear = false;
 							break;
 						}
@@ -1249,9 +1251,9 @@ namespace Global {
 					break;
 				}
 
-				testPoint = new Vector3(UnityEngine.Random.Range(intersection.min.x, intersection.max.x),
-					UnityEngine.Random.Range(intersection.min.y, intersection.max.y),
-					UnityEngine.Random.Range(intersection.min.z, intersection.max.z));
+				testPoint = new Vector3(Random.Range(intersection.min.x, intersection.max.x),
+					Random.Range(intersection.min.y, intersection.max.y),
+					Random.Range(intersection.min.z, intersection.max.z));
 			}
 
 			region.min = testPoint - testBounds.extents;
@@ -1260,20 +1262,20 @@ namespace Global {
 			return region;
 		}
 
-		public static Region RegionOfIntersection(Region r1, Region r2, MajorAxes.MajorAxis axis) {
+		public static Region RegionOfIntersection(Region r1, Region r2, MajorAxis axis) {
 			Region intersection = new Region();
 
-			if (axis == MajorAxes.MajorAxis.X) {
+			if (axis == MajorAxis.X) {
 //				Debug.Log ("X");
 				intersection.min = new Vector3(r1.max.x, Mathf.Max(r1.min.y, r2.min.y), Mathf.Max(r1.min.z, r2.min.z));
 				intersection.max = new Vector3(r1.max.x, Mathf.Min(r1.max.y, r2.max.y), Mathf.Min(r1.max.z, r2.max.z));
 			}
-			else if (axis == MajorAxes.MajorAxis.Y) {
+			else if (axis == MajorAxis.Y) {
 //				Debug.Log ("Y");
 				intersection.min = new Vector3(Mathf.Max(r1.min.x, r2.min.x), r1.max.y, Mathf.Max(r1.min.z, r2.min.z));
 				intersection.max = new Vector3(Mathf.Min(r1.max.x, r2.max.x), r1.max.y, Mathf.Min(r1.max.z, r2.max.z));
 			}
-			else if (axis == MajorAxes.MajorAxis.Z) {
+			else if (axis == MajorAxis.Z) {
 //				Debug.Log ("Z");
 				intersection.min = new Vector3(Mathf.Max(r1.min.x, r2.min.x), Mathf.Max(r1.min.y, r2.min.y), r1.max.z);
 				intersection.max = new Vector3(Mathf.Min(r1.max.x, r2.max.x), Mathf.Min(r1.max.y, r2.max.y), r1.max.z);
@@ -1298,7 +1300,7 @@ namespace Global {
 			else if (r1 == null || r2 == null) {
 				return false;
 			}
-			else if (Helper.CloseEnough(r1.min, r2.min) && Helper.CloseEnough(r1.max, r2.max)) {
+			else if (CloseEnough(r1.min, r2.min) && CloseEnough(r1.max, r2.max)) {
 				return true;
 			}
 			else {
@@ -1366,7 +1368,7 @@ namespace Global {
 			GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 			foreach (GameObject o in allObjects) {
-				if (Helper.GetObjectWorldSize(o).Contains(point)) {
+				if (GetObjectWorldSize(o).Contains(point)) {
 					objs.Add(o);
 				}
 			}
@@ -1377,17 +1379,17 @@ namespace Global {
 		public static float GetMinYBoundAtTarget(GameObject obj, Vector3 targetPoint) {
 			float minYBound = 0.0f;
 
-			Bounds objBounds = Helper.GetObjectWorldSize(obj);
+			Bounds objBounds = GetObjectWorldSize(obj);
 
-			Debug.Log(Helper.VectorToParsable(targetPoint));
+			Debug.Log(VectorToParsable(targetPoint));
 			Vector3 rayStartX = new Vector3(objBounds.min.x - Constants.EPSILON,
 				objBounds.min.y + Constants.EPSILON, objBounds.center.z);
-			Vector3 contactPointX = Helper.RayIntersectionPoint(rayStartX, Vector3.right);
+			Vector3 contactPointX = RayIntersectionPoint(rayStartX, Vector3.right);
 			//contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
 
 			Vector3 rayStartZ = new Vector3(objBounds.center.x,
 				objBounds.min.y + Constants.EPSILON, objBounds.min.z - Constants.EPSILON);
-			Vector3 contactPointZ = Helper.RayIntersectionPoint(rayStartZ, Vector3.forward);
+			Vector3 contactPointZ = RayIntersectionPoint(rayStartZ, Vector3.forward);
 
 			//Debug.Log(Helper.VectorToParsable(rayStartX));
 			//Debug.Log(Helper.VectorToParsable(rayStartZ));
@@ -1404,24 +1406,24 @@ namespace Global {
 				? targetPoint + (contactPointZ - objBounds.center)
 				: targetPoint + (contactPointX - objBounds.center);
 			contactPoint = new Vector3(contactPoint.x, targetPoint.y, contactPoint.z);
-			Debug.Log(Helper.VectorToParsable(contactPoint));
+			Debug.Log(VectorToParsable(contactPoint));
 
 			RaycastHit[] hits;
 
 			//      hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
 			hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
-			List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+			List<RaycastHit> hitList = new List<RaycastHit>(hits);
 			hits = hitList.OrderBy(h => h.distance).ToArray();
 			foreach (RaycastHit hit in hits) {
 				if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
 					Debug.Log(hit.collider.gameObject);
 					if (!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) {
 						Debug.Log(hit.collider.gameObject);
-						if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-							Helper.GetObjectWorldSize(obj), true)) {
+						if (!FitsIn(GetObjectWorldSize(hit.collider.gameObject),
+							GetObjectWorldSize(obj), true)) {
 							Debug.Log(hit.collider.gameObject);
 							GameObject supportingSurface = hit.collider.gameObject;
-							minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
+							minYBound = GetObjectWorldSize(supportingSurface).max.y;
 
 							break;
 						}
@@ -1713,7 +1715,7 @@ namespace Global {
 		}
 
 		public static int RandomSign() {
-			return (UnityEngine.Random.Range(0, 2) * 2) - 1;
+			return (Random.Range(0, 2) * 2) - 1;
 		}
 
 		public static Vector3 RandomAxis() {
@@ -1733,7 +1735,7 @@ namespace Global {
 				rangeMax = max + 1;
 			}
 
-			return UnityEngine.Random.Range(rangeMin, rangeMax);
+			return Random.Range(rangeMin, rangeMax);
 		}
 
 		public static float RandomFloat(float min, float max, int flags = (int) RangeFlags.MinInclusive) {
@@ -1748,7 +1750,7 @@ namespace Global {
 				rangeMax = max + Constants.EPSILON;
 			}
 
-			return UnityEngine.Random.Range(min, max);
+			return Random.Range(min, max);
 		}
 
 		public static GameObject RandomVoxeme() {
@@ -1794,7 +1796,7 @@ namespace Global {
 		public static IEnumerator LoadScene(string sceneName) {
 			yield return null;
 
-			AsyncOperation ao = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
+			AsyncOperation ao = SceneManager.LoadSceneAsync(sceneName);
 			ao.allowSceneActivation = true;
 
 			while (!ao.isDone) {

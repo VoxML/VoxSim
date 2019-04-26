@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +10,8 @@ using Global;
 using MajorAxes;
 using RCC;
 using RootMotion.FinalIK;
-using Vox;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Satisfaction {
 	public static class SatisfactionTest {
@@ -33,7 +33,7 @@ namespace Satisfaction {
 
 			foreach (DictionaryEntry entry in predArgs) {
 				predString = (String) entry.Key;
-				argsStrings = ((String) entry.Value).Split(new char[] {','});
+				argsStrings = ((String) entry.Value).Split(',');
 			}
 
 			//Debug.Log (test);
@@ -50,11 +50,11 @@ namespace Satisfaction {
 						? voxComponent.graspTracker.transform.position
 						: theme.transform.position;
 
-					if (Helper.CloseEnough(testLocation, Helper.ParsableToVector((String) argsStrings[1]))) {
+					if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
 						if (voxComponent.isGrasped) {
 							//preds.UNGRASP (new object[]{ theme, true });
 							//em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-							theme.transform.position = Helper.ParsableToVector((String) argsStrings[1]);
+							theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
 							theme.transform.rotation = Quaternion.identity;
 						}
 
@@ -77,11 +77,11 @@ namespace Satisfaction {
 						? voxComponent.graspTracker.transform.position
 						: theme.transform.position;
 
-					if (Helper.CloseEnough(testLocation, Helper.ParsableToVector((String) argsStrings[1]))) {
+					if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
 						if (voxComponent.isGrasped) {
 							//preds.UNGRASP (new object[]{ theme, true });
 							//em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-							theme.transform.position = Helper.ParsableToVector((String) argsStrings[1]);
+							theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
 							theme.transform.rotation = Quaternion.identity;
 						}
 
@@ -104,11 +104,11 @@ namespace Satisfaction {
 						: theme.transform.position;
 
 					if (argsStrings.Length > 1) {
-						if (Helper.CloseEnough(testLocation, Helper.ParsableToVector((String) argsStrings[1]))) {
+						if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
 							if (voxComponent.isGrasped) {
 								//preds.UNGRASP (new object[]{ theme, true });
 								//em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-								theme.transform.position = Helper.ParsableToVector((String) argsStrings[1]);
+								theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
 								theme.transform.rotation = Quaternion.identity;
 							}
 
@@ -136,8 +136,8 @@ namespace Satisfaction {
 					//Debug.Log(Helper.VectorToParsable(theme.transform.rotation * Helper.ParsableToVector ((String)argsStrings [1])));
 					//Debug.Log(Helper.ParsableToVector ((String)argsStrings [2]));
 					if (Mathf.Deg2Rad *
-					    Vector3.Angle(theme.transform.rotation * Helper.ParsableToVector((String) argsStrings[1]),
-						    Helper.ParsableToVector((String) argsStrings[2])) < Constants.EPSILON) {
+					    Vector3.Angle(theme.transform.rotation * Helper.ParsableToVector(argsStrings[1]),
+						    Helper.ParsableToVector(argsStrings[2])) < Constants.EPSILON) {
 						if (voxComponent.isGrasped) {
 							//theme.transform.rotation = Quaternion.Euler(Helper.ParsableToVector ((String)argsStrings [1]));
 							//theme.transform.rotation = Quaternion.identity;
@@ -201,10 +201,10 @@ namespace Satisfaction {
 					//Vector3 testLocation = theme.transform.position;
 
 					if (voxComponent.isGrasped) {
-						if (Helper.CloseEnough(testLocation, Helper.ParsableToVector((String) argsStrings[1]) +
+						if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]) +
 						                                     voxComponent.grasperCoord.root.gameObject
 							                                     .GetComponent<GraspScript>().graspTrackerOffset)) {
-							theme.transform.position = Helper.ParsableToVector((String) argsStrings[1]); //+
+							theme.transform.position = Helper.ParsableToVector(argsStrings[1]); //+
 							//voxComponent.grasperCoord.root.gameObject.GetComponent<GraspScript> ().graspTrackerOffset;
 							theme.transform.rotation = Quaternion.identity;
 						}
@@ -213,7 +213,7 @@ namespace Satisfaction {
 						ReasonFromAffordances(predString,
 							voxComponent); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 					}
-					else if (Helper.CloseEnough(testLocation, Helper.ParsableToVector((String) argsStrings[1]))) {
+					else if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
 						satisfied = true;
 //						ReasonFromAffordances (predString, voxComponent);	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 						//theme.GetComponent<Rigging> ().ActivatePhysics (true);
@@ -459,10 +459,8 @@ namespace Satisfaction {
 												return false; // abort
 											}
 											//}
-											else {
-												foreach (GameObject match in matches) {
-													objs.Add(match);
-												}
+											foreach (GameObject match in matches) {
+												objs.Add(match);
 											}
 										}
 
@@ -488,7 +486,7 @@ namespace Satisfaction {
 					else {
 						// not a program
 						Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
-							methodToCall.Name, methodToCall.ReturnType.ToString()));
+							methodToCall.Name, methodToCall.ReturnType));
 						object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
 						if (obj is String) {
 							Debug.Log(obj as String);
@@ -550,14 +548,14 @@ namespace Satisfaction {
 			Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\], .*x.*)"); // check the order of the arguments
 			Regex groundComponentSecond = new Regex(@".*(x, .*\[[0-9]+\].*)");
 			List<string> supportedRelations = new List<string>(
-				new string[] {
+				new[] {
 					// list of supported relations
 					@"on\(.*\)",
 					@"in\(.*\)",
 					@"under\(.*\)"
 				}); // TODO: move externally, draw from voxeme database
 			List<string> genericRelations = new List<string>(
-				new string[] {
+				new[] {
 					// list of habitat-independent relations
 					@"under\(.*\)",
 					@"behind\(.*\)",
@@ -1338,7 +1336,7 @@ namespace Satisfaction {
 			Bounds objBounds = Helper.GetObjectWorldSize(obj);
 
 			// get all objects
-			GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+			GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
 
 			// reasoning from habitats
 			// for each object

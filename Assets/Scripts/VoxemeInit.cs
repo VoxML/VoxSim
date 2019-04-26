@@ -1,10 +1,8 @@
-using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using Global;
 using RootMotion.FinalIK;
-using System;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class VoxemeInit : MonoBehaviour {
 	Predicates preds;
@@ -29,7 +27,7 @@ public class VoxemeInit : MonoBehaviour {
 		/* MAKE GLOBAL OBJECT RUNTIME ALTERATIONS */
 
 		// get all objects
-		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+		GameObject[] allObjects = FindObjectsOfType<GameObject>();
 		Voxeme voxeme;
 
 		foreach (GameObject go in allObjects) {
@@ -228,7 +226,7 @@ public class VoxemeInit : MonoBehaviour {
 	}
 
 	T CopyComponent<T>(T original, GameObject destination) where T : Component {
-		System.Type type = original.GetType();
+		Type type = original.GetType();
 		//var dst = destination.GetComponent(type) as T;
 		//if (!dst) {
 		var dst = destination.AddComponent(type) as T;

@@ -1,9 +1,8 @@
-﻿using System.Linq;
+﻿using System.Threading;
 using Agent;
 using Episteme;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 public class EpistemeSocketTest : MonoBehaviour
 {
@@ -167,9 +166,9 @@ public class EpistemeSocketTest : MonoBehaviour
 	{
 		mock();
 		model.InitiateEpisim();
-		System.Threading.Thread.Sleep(2000);
+		Thread.Sleep(2000);
 		model.DisengageEpisim();
-		System.Threading.Thread.Sleep(2000);
+		Thread.Sleep(2000);
 	}
 
 	[Test]

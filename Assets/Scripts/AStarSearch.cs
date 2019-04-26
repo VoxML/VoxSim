@@ -1,12 +1,12 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AssemblyCSharp;
 using Global;
-using Arc = Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
-using RootMotion.Demos;
 using RootMotion.FinalIK;
+using UnityEngine;
+using Arc = Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
+using Debug = UnityEngine.Debug;
 
 public class PathNode {
 	public Vector3 position;
@@ -35,7 +35,7 @@ public class AStarSearch : MonoBehaviour {
 	public Vector3 defaultIncrement = Vector3.one;
 	public Vector3 increment;
 	public List<PathNode> nodes = new List<PathNode>();
-	public List<Global.Pair<PathNode, PathNode>> arcs = new List<Global.Pair<PathNode, PathNode>>();
+	public List<Pair<PathNode, PathNode>> arcs = new List<Pair<PathNode, PathNode>>();
 	public Dictionary<Vector3, bool> quantizedSpaceToClear = new Dictionary<Vector3, bool>();
 	public List<Vector3> path;
 
@@ -165,7 +165,7 @@ public class AStarSearch : MonoBehaviour {
 
 					Bounds testBounds = new Bounds(new Vector3(fx, fy, fz) + originToCenterOffset, objBounds.size);
 					// get all objects
-					GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+					GameObject[] allObjects = FindObjectsOfType<GameObject>();
 
 					bool spaceClear = true;
 					foreach (GameObject o in allObjects) {
@@ -206,7 +206,7 @@ public class AStarSearch : MonoBehaviour {
 		Bounds objBounds = Helper.GetObjectWorldSize(obj);
 		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
 		// get all objects
-		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+		GameObject[] allObjects = FindObjectsOfType<GameObject>();
 
 		bool spaceClear = true;
 		foreach (GameObject o in allObjects) {
@@ -256,7 +256,7 @@ public class AStarSearch : MonoBehaviour {
 				blocked |= Physics.Raycast(nodes[i].position - objBounds.extents, dir.normalized, out hitInfo, dist);
 				blocked |= Physics.Raycast(nodes[i].position + objBounds.extents, dir.normalized, out hitInfo, dist);
 				if (!blocked) {
-					arcs.Add(new Global.Pair<PathNode, PathNode>(nodes[i], nodes[j]));
+					arcs.Add(new Pair<PathNode, PathNode>(nodes[i], nodes[j]));
 				}
 			}
 		}
@@ -605,7 +605,7 @@ public class AStarSearch : MonoBehaviour {
 		//increment = size.magnitude/2  > defaultIncrement.magnitude ? new Vector3(size.x/2, size.y/2, size.z/2) : defaultIncrement;
 		increment = size.magnitude > defaultIncrement.magnitude ? size : defaultIncrement;
 
-		var watch = System.Diagnostics.Stopwatch.StartNew();
+		var watch = Stopwatch.StartNew();
 
 		PathNode startNode = new PathNode(startPos);
 		startNode.scoreFromStart = 0;
@@ -667,7 +667,7 @@ public class AStarSearch : MonoBehaviour {
 		//PathNode endNode = new PathNode(goalPos);
 		//nodes.Add (endNode);
 
-		watch = System.Diagnostics.Stopwatch.StartNew();
+		watch = Stopwatch.StartNew();
 
 		PlotArcs(Helper.GetObjectWorldSize(obj));
 

@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Xml.Serialization;
-
 using Global;
+using UnityEditor;
+using UnityEngine;
 
 namespace StandaloneBuild {
 
@@ -75,8 +74,8 @@ namespace StandaloneBuild {
 
     	public static void BuildMac() {
             // buildName is element 5 in the build script build command, the build config path is element 6
-    		string buildName = System.Environment.GetCommandLineArgs()[5];
-            string buildConfig = System.Environment.GetCommandLineArgs()[6];
+    		string buildName = Environment.GetCommandLineArgs()[5];
+            string buildConfig = Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for OSX with configuration {1}", buildName, buildConfig));
 
             // process the build config and refresh the assets database afterwards to get ScenesList into Resources
@@ -144,8 +143,8 @@ namespace StandaloneBuild {
 
         public static void BuildWindows() {
             // buildName is element 5 in the build script build command, the build config path is element 6
-            string buildName = System.Environment.GetCommandLineArgs()[5];
-            string buildConfig = System.Environment.GetCommandLineArgs()[6];
+            string buildName = Environment.GetCommandLineArgs()[5];
+            string buildConfig = Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for Windows with configuration {1}", buildName, buildConfig));
 
             // process the build config and refresh the assets database afterwards to get ScenesList into Resources
@@ -213,8 +212,8 @@ namespace StandaloneBuild {
            
         public static void BuildIOS() {
             // buildName is element 5 in the build script build command, the build config path is element 6
-            string buildName = System.Environment.GetCommandLineArgs()[5];
-            string buildConfig = System.Environment.GetCommandLineArgs()[6];
+            string buildName = Environment.GetCommandLineArgs()[5];
+            string buildConfig = Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for iOS with configuration {1}", buildName, buildConfig));
 
             // process the build config and refresh the assets database afterwards to get ScenesList into Resources

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Linq;
+﻿using System.Linq;
 using Global;
+using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
 public class GhostFreeRoamCamera : MonoBehaviour {

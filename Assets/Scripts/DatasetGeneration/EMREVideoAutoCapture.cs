@@ -1,15 +1,12 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Timers;
-using Global;
 using FlashbackVideoRecorder;
+using Global;
 using SQLite4Unity3d;
+using UnityEngine;
 
 namespace VideoCapture {
 	public enum EMREReferringModality {

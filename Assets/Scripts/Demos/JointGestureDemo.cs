@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +9,12 @@ using System.Timers;
 using Agent;
 using Episteme;
 using Global;
+using MajorAxes;
 using Network;
-using QSR;
 using RCC;
 using RootMotion.FinalIK;
+using UnityEngine;
+using Vox;
 
 public class SelectionEventArgs : EventArgs {
 	public object Content;
@@ -663,7 +664,7 @@ public class JointGestureDemo : AgentInteraction {
 			if (c.Trim() != string.Empty) {
 				//				Debug.Log (c);
 				try {
-					vector.Add(System.Convert.ToSingle(c));
+					vector.Add(Convert.ToSingle(c));
 				}
 				catch (Exception e) {
 				}
@@ -2141,17 +2142,17 @@ public class JointGestureDemo : AgentInteraction {
 		if (allOptionsSameType || anyGlobalSameType) {
 			for (int i = 0; i < objVoxemes.Count; i++) {
 				List<object> newAttrs = Helper.DiffLists(
-					uniqueAttrs.Select(x => ((Vox.VoxAttributesAttr) x).Value).Cast<object>().ToList(),
+					uniqueAttrs.Select(x => ((VoxAttributesAttr) x).Value).Cast<object>().ToList(),
 					objVoxemes[i].voxml.Attributes.Attrs.Cast<object>().ToList()
-						.Select(x => ((Vox.VoxAttributesAttr) x).Value).Cast<object>().ToList());
+						.Select(x => ((VoxAttributesAttr) x).Value).Cast<object>().ToList());
 
 				if (newAttrs.Count > 0) {
 					foreach (object attr in newAttrs) {
-						Debug.Log(string.Format("{0}:{1}", objVoxemes[i].name, attr.ToString()));
-						Vox.VoxAttributesAttr attrToAdd = new Vox.VoxAttributesAttr();
+						Debug.Log(string.Format("{0}:{1}", objVoxemes[i].name, attr));
+						VoxAttributesAttr attrToAdd = new VoxAttributesAttr();
 						attrToAdd.Value = attr.ToString();
 
-						if (uniqueAttrs.Where(x => ((Vox.VoxAttributesAttr) x).Value == attrToAdd.Value).ToList()
+						if (uniqueAttrs.Where(x => ((VoxAttributesAttr) x).Value == attrToAdd.Value).ToList()
 							    .Count == 0) {
 							uniqueAttrs.Add(attrToAdd);
 						}
@@ -2167,7 +2168,7 @@ public class JointGestureDemo : AgentInteraction {
 //		Debug.Log (interactionLogic.IndicatedObj.name);
 		string attribute = string.Empty;
 		if (uniqueAttrs.Count > 0) {
-			attribute = ((Vox.VoxAttributesAttr) uniqueAttrs[uniqueAttrs.Count - 1]).Value.ToString();
+			attribute = ((VoxAttributesAttr) uniqueAttrs[uniqueAttrs.Count - 1]).Value;
 		}
 
 		if (duplicateNominalAttr) {
@@ -4342,13 +4343,13 @@ public class JointGestureDemo : AgentInteraction {
 //				(!QSR.QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
 			Debug.Log(Helper.RegionToString(blockMax));
 			Debug.Log(Helper.RegionToString(otherMin));
-			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax, otherMin, MajorAxes.MajorAxis.Y)));
+			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax, otherMin, MajorAxis.Y)));
 			Debug.Log(QSR.QSR.Above(otherBounds, blockBounds));
 			Debug.Log(
-				((Helper.RegionOfIntersection(blockMax, otherMin, MajorAxes.MajorAxis.Y).Area() / blockMax.Area())));
+				((Helper.RegionOfIntersection(blockMax, otherMin, MajorAxis.Y).Area() / blockMax.Area())));
 			Debug.Log(RCC8.EC(otherBounds, blockBounds));
 			if ((QSR.QSR.Above(otherBounds, blockBounds)) &&
-			    ((Helper.RegionOfIntersection(blockMax, otherMin, MajorAxes.MajorAxis.Y).Area() / blockMax.Area()) >
+			    ((Helper.RegionOfIntersection(blockMax, otherMin, MajorAxis.Y).Area() / blockMax.Area()) >
 			     0.25f) &&
 			    (RCC8.EC(otherBounds, blockBounds))) {
 				surfaceClear = false;
@@ -4372,8 +4373,8 @@ public class JointGestureDemo : AgentInteraction {
 					Bounds projectedBounds = new Bounds(
 						new Vector3(objBounds.min.x - themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
 						themeBounds.size);
-					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
-					    !RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
+					if (!RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
+					    !RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
 						fits = false;
 					}
 				}
@@ -4381,8 +4382,8 @@ public class JointGestureDemo : AgentInteraction {
 					Bounds projectedBounds = new Bounds(
 						new Vector3(objBounds.max.x + themeBounds.extents.x, objBounds.center.y, objBounds.center.z),
 						themeBounds.size);
-					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
-					    !RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
+					if (!RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
+					    !RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
 						fits = false;
 					}
 				}
@@ -4390,8 +4391,8 @@ public class JointGestureDemo : AgentInteraction {
 					Bounds projectedBounds = new Bounds(
 						new Vector3(objBounds.center.x, objBounds.center.y, objBounds.min.z - themeBounds.extents.z),
 						themeBounds.size);
-					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
-					    !RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
+					if (!RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
+					    !RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
 						fits = false;
 					}
 				}
@@ -4399,8 +4400,8 @@ public class JointGestureDemo : AgentInteraction {
 					Bounds projectedBounds = new Bounds(
 						new Vector3(objBounds.center.x, objBounds.center.y, objBounds.max.z + themeBounds.extents.z),
 						themeBounds.size);
-					if (!RCC.RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
-					    !RCC.RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
+					if (!RCC8.DC(projectedBounds, Helper.GetObjectWorldSize(test)) &&
+					    !RCC8.EC(projectedBounds, Helper.GetObjectWorldSize(test))) {
 						fits = false;
 					}
 				}
@@ -4875,17 +4876,17 @@ public class JointGestureDemo : AgentInteraction {
 			objVoxemes.Concat(contextVoxemes);
 			for (int i = 0; i < objVoxemes.Count; i++) {
 				List<object> newAttrs = Helper.DiffLists(
-					uniqueAttrs.Select(x => ((Vox.VoxAttributesAttr) x).Value).Cast<object>().ToList(),
+					uniqueAttrs.Select(x => ((VoxAttributesAttr) x).Value).Cast<object>().ToList(),
 					objVoxemes[i].voxml.Attributes.Attrs.Cast<object>().ToList()
-						.Select(x => ((Vox.VoxAttributesAttr) x).Value).Cast<object>().ToList());
+						.Select(x => ((VoxAttributesAttr) x).Value).Cast<object>().ToList());
 
 				if (newAttrs.Count > 0) {
 					foreach (object attr in newAttrs) {
-						Debug.Log(string.Format("{0}:{1}", objVoxemes[i].name, attr.ToString()));
-						Vox.VoxAttributesAttr attrToAdd = new Vox.VoxAttributesAttr();
+						Debug.Log(string.Format("{0}:{1}", objVoxemes[i].name, attr));
+						VoxAttributesAttr attrToAdd = new VoxAttributesAttr();
 						attrToAdd.Value = attr.ToString();
 
-						if (uniqueAttrs.Where(x => ((Vox.VoxAttributesAttr) x).Value == attrToAdd.Value).ToList()
+						if (uniqueAttrs.Where(x => ((VoxAttributesAttr) x).Value == attrToAdd.Value).ToList()
 							    .Count == 0) {
 							uniqueAttrs.Add(attrToAdd);
 						}
@@ -4896,7 +4897,7 @@ public class JointGestureDemo : AgentInteraction {
 
 		string attribute = string.Empty;
 		if (uniqueAttrs.Count > 0) {
-			attribute = ((Vox.VoxAttributesAttr) uniqueAttrs[uniqueAttrs.Count - 1]).Value.ToString();
+			attribute = ((VoxAttributesAttr) uniqueAttrs[uniqueAttrs.Count - 1]).Value;
 		}
 
 		Debug.Log(anySameType);
@@ -5032,17 +5033,17 @@ public class JointGestureDemo : AgentInteraction {
 	void ReferentIndicated(object sender, EventArgs e) {
 		if (((EventReferentArgs) e).Referent is String) {
 			// object
-			GameObject obj = GameObject.Find(((string) ((EventReferentArgs) e).Referent).ToString());
+			GameObject obj = GameObject.Find(((string) ((EventReferentArgs) e).Referent));
 			if (obj != null) {
 				if ((interactionLogic != null) && (interactionLogic.isActiveAndEnabled)) {
 					if ((interactionLogic.CurrentState.Name == "ParseNP") ||
 					    (interactionLogic.CurrentState.Name == "ParseVP")) {
 						if ((interactionLogic.IndicatedObj !=
 						     GameObject.Find((string) eventManager.referents.stack.Peek())) &&
-						    (interactionLogic.GraspedObj != obj)) {
+						    interactionLogic.GraspedObj != obj) {
 							if ((interactionLogic.ActionOptions.Count > 0) &&
-							    (((interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1]
-								      .StartsWith("lift")) ||
+							    ((interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1]
+								      .StartsWith("lift") ||
 							      (interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1]
 								      .StartsWith("grasp")))) &&
 							    (!interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1]

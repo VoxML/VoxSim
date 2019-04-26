@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System;
-using Global;
+﻿using Global;
 using MajorAxes;
+using UnityEngine;
 
 // RCC8 relations
 // grossly underspecified for now

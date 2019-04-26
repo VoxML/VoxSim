@@ -1,8 +1,8 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using Global;
+using UnityEngine;
 using VideoCapture;
 
 public class ParamsEventArgs : EventArgs {

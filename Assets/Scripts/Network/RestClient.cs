@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -54,8 +55,8 @@ namespace Network {
 		private IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
 			var webRequest = new UnityWebRequest(url, method);
 			var payloadBytes = string.IsNullOrEmpty(jsonPayload)
-				? System.Text.Encoding.UTF8.GetBytes("{}")
-				: System.Text.Encoding.UTF8.GetBytes(jsonPayload);
+				? Encoding.UTF8.GetBytes("{}")
+				: Encoding.UTF8.GetBytes(jsonPayload);
 
 			UploadHandler upload = new UploadHandlerRaw(payloadBytes);
 			webRequest.uploadHandler = upload;

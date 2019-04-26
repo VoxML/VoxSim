@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using Global;
+using UnityEngine;
 using Vox;
 
 public class VoxemeInspectorModalWindow : ModalWindow {
@@ -1760,7 +1759,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 		// assign VoxML values
 		// PRED
 		voxml.Lex.Pred = mlPred;
-		voxml.Lex.Type = System.String.Join("*", mlTypes.ToArray());
+		voxml.Lex.Type = String.Join("*", mlTypes.ToArray());
 
 		// TYPE
 		voxml.Type.Head = (mlHeadReentrancy != string.Empty)
@@ -1790,7 +1789,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 			rotatSyms.Add("Z");
 		}
 
-		voxml.Type.RotatSym = System.String.Join(",", rotatSyms.ToArray());
+		voxml.Type.RotatSym = String.Join(",", rotatSyms.ToArray());
 
 		List<string> reflSyms = new List<string>();
 		if (mlReflSymXY) {
@@ -1805,7 +1804,7 @@ public class VoxemeInspectorModalWindow : ModalWindow {
 			reflSyms.Add("YZ");
 		}
 
-		voxml.Type.ReflSym = System.String.Join(",", reflSyms.ToArray());
+		voxml.Type.ReflSym = String.Join(",", reflSyms.ToArray());
 
 		for (int i = 0; i < mlArgCount; i++) {
 			voxml.Type.Args.Add(new VoxTypeArg());

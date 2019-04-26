@@ -1,11 +1,10 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using Agent;
 using Global;
+using UnityEngine;
 
 public class StaircaseScript : DemoScript {
 	enum ScriptStep {

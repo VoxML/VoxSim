@@ -1,13 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using Global;
 using GracesGames.SimpleFileBrowser.Scripts;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class ExportPrefsUIButton : UIButton {
 	public int fontSize = 12;

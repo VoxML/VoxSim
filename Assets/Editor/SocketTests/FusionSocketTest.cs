@@ -1,7 +1,7 @@
-﻿using Network;
-using UnityEngine;
-using UnityEditor;
+﻿using System.Threading;
+using Network;
 using NUnit.Framework;
+using UnityEngine;
 
 public class FusionSocketTest {
 
@@ -13,7 +13,7 @@ public class FusionSocketTest {
 		while (i < 20)
 		{
 			Debug.Log(socket.GetMessage());
-			System.Threading.Thread.Sleep(1000);
+			Thread.Sleep(1000);
 			Debug.Log(i++);
 		}
 		socket.Close();

@@ -1,11 +1,5 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Global;
-using Vox;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class InteractionPrefsModalWindow : ModalWindow {
 	public int fontSize = 12;

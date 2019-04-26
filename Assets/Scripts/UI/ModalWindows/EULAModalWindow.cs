@@ -1,9 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using Global;
 
 public class EULAModalWindow : ModalWindow {
 	[TextArea(3, 10)] public string licenseText =

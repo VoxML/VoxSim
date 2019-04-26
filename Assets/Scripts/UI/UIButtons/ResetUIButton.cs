@@ -1,6 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using Global;
+﻿using Global;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ResetUIButton : UIButton {
 	public int fontSize = 12;
@@ -25,7 +25,7 @@ public class ResetUIButton : UIButton {
 		buttonStyle.fontSize = fontSize;
 
 		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
-			StartCoroutine(SceneHelper.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name));
+			StartCoroutine(SceneHelper.LoadScene(SceneManager.GetActiveScene().name));
 			return;
 		}
 

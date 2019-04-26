@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Timers;
 using Global;
 using SimpleJSON;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class SRIInterpreter : MonoBehaviour {
 	string url;
@@ -43,7 +43,7 @@ public class SRIInterpreter : MonoBehaviour {
 		GameObject[] blocks = GameObject.FindGameObjectsWithTag("Block");
 
 		for (int i = 0; i < blocks.Length; i++) {
-			GameObject.Destroy(blocks[i]);
+			Destroy(blocks[i]);
 		}
 	}
 
@@ -64,7 +64,7 @@ public class SRIInterpreter : MonoBehaviour {
 					//GameObject block = GameObject.Find("block"+blockStates["BlockStates"][i]["ID"]);
 
 					Vector3 targetPosition =
-						Global.Helper.ParsableToVector(
+						Helper.ParsableToVector(
 							((String) blockStates["BlockStates"][i]["Position"]).Replace(",", ";"));
 					temp = targetPosition.y;
 					targetPosition.y = targetPosition.z;
@@ -75,7 +75,7 @@ public class SRIInterpreter : MonoBehaviour {
 					targetPosition.z *= voxTableSize.y / sriTableSize.y;
 
 					Quaternion targetRotation =
-						Global.Helper.ParsableToQuaternion(
+						Helper.ParsableToQuaternion(
 							((String) blockStates["BlockStates"][i]["Rotation"]).Replace(",", ";"));
 					//temp = targetRotation.y;
 					//targetRotation.y = targetRotation.z;
@@ -96,8 +96,8 @@ public class SRIInterpreter : MonoBehaviour {
 	public GameObject InstantiateObject(string objName) {
 		Debug.Log("Instantiate " + objName);
 
-		UnityEngine.Object prefab = Resources.Load(objName);
-		GameObject go = (GameObject) GameObject.Instantiate(prefab);
+		Object prefab = Resources.Load(objName);
+		GameObject go = (GameObject) Instantiate(prefab);
 		go.transform.position = Vector3.zero;
 		go.SetActive(true);
 		go.name = go.name.Replace("(Clone)", "");

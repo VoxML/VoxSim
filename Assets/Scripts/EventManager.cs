@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -11,10 +10,10 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using Agent;
 using Global;
-using Satisfaction;
-using Vox;
-using RootMotion.Demos;
 using RootMotion.FinalIK;
+using Satisfaction;
+using UnityEngine;
+using Vox;
 
 public class EventManagerArgs : EventArgs {
 	public string EventString { get; set; }
@@ -279,7 +278,7 @@ public class EventManager : MonoBehaviour {
 	}
 
 	public void WaitComplete(object sender, EventArgs e) {
-		((System.Timers.Timer) sender).Enabled = false;
+		((Timer) sender).Enabled = false;
 //		RemoveEvent (0);
 //		stayExecution = true;
 	}
@@ -436,11 +435,11 @@ public class EventManager : MonoBehaviour {
 									if (go is GameObject) {
 										if ((go as GameObject).GetComponent<Voxeme>() != null) {
 											if ((referents.stack.Count == 0) ||
-											    (!referents.stack.Peek().Equals(((GameObject) go).name))) {
-												referents.stack.Push(((GameObject) go).name);
+											    (!referents.stack.Peek().Equals(go.name))) {
+												referents.stack.Push(go.name);
 											}
 
-											OnEntityReferenced(this, new EventReferentArgs(((GameObject) go).name));
+											OnEntityReferenced(this, new EventReferentArgs(go.name));
 										}
 									}
 								}
@@ -527,7 +526,7 @@ public class EventManager : MonoBehaviour {
 						else {
 							// not a program
 							object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
-							Debug.Log(string.Format("{0}:{1}", obj.ToString(), obj.GetType().ToString()));
+							Debug.Log(string.Format("{0}:{1}", obj, obj.GetType()));
 							if (obj.ToString() == string.Empty) {
 								OnNonexistentEntityError(this,
 									new EventReferentArgs(
@@ -584,12 +583,12 @@ public class EventManager : MonoBehaviour {
 		String nextIncompleteEvent = "";
 		for (int i = 0; i < keys.Length; i++) {
 			if ((bool) eventsStatus[keys[i]] == false) {
-				nextIncompleteEvent = (String) keys[i];
+				nextIncompleteEvent = keys[i];
 				if (i < events.Count - 1) {
 					SatisfactionTest.ComputeSatisfactionConditions(events[i + 1]);
 					eventsStatus.Keys.CopyTo(keys, 0);
 					eventsStatus.Values.CopyTo(values, 0);
-					nextQueuedEvent = (String) keys[i + 1];
+					nextQueuedEvent = keys[i + 1];
 				}
 				else {
 					nextQueuedEvent = "";
@@ -646,7 +645,7 @@ public class EventManager : MonoBehaviour {
 				for (int i = 0; i < argsStrings.Count; i++) {
 					Debug.Log("Input: " + argsStrings.ElementAt(i));
 					if (r.IsMatch(argsStrings.ElementAt(i))) {
-						String v = argVarPrefix + argVarIndex.ToString();
+						String v = argVarPrefix + argVarIndex;
 						skolems[v] = argsStrings.ElementAt(i);
 						Debug.Log(v + " : " + skolems[v]);
 						argVarIndex++;
@@ -701,11 +700,11 @@ public class EventManager : MonoBehaviour {
 
 		int parenCount = temp.Count(f => f == '(') +
 		                 temp.Count(f => f == ')');
-		Debug.Log("Skolemize: parenCount = " + parenCount.ToString());
+		Debug.Log("Skolemize: parenCount = " + parenCount);
 
 		do {
 			foreach (DictionaryEntry kv in skolems) {
-				outString = (String) outString.Replace((String) kv.Value, (String) kv.Key);
+				outString = outString.Replace((String) kv.Value, (String) kv.Key);
 				//Debug.Log (outString);
 			}
 
@@ -729,14 +728,14 @@ public class EventManager : MonoBehaviour {
 
 		foreach (DictionaryEntry kv in globalVars) {
 			if (kv.Value is Vector3) {
-				outString = (String) outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+				outString = outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
 			}
 			else if (kv.Value is GameObject) {
-				outString = (String) outString.Replace((String) kv.Key, ((GameObject) kv.Value).name);
+				outString = outString.Replace((String) kv.Key, ((GameObject) kv.Value).name);
 				Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
 					.ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value)
-					.Where(kkv => ((String) kkv.Value).Contains((String) kv.Key))
-					.ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value);
+					.Where(kkv => kkv.Value.Contains((String) kv.Key))
+					.ToDictionary(kkv => kkv.Key, kkv => kkv.Value);
 				foreach (string key in changeValues.Keys) {
 					skolems[key] = changeValues[key].Replace((String) kv.Key, ((GameObject) kv.Value).name);
 				}
@@ -748,22 +747,22 @@ public class EventManager : MonoBehaviour {
 			}
 			else if (kv.Value is List<GameObject>) {
 				String list = String.Join(":", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray());
-				outString = (String) outString.Replace((String) kv.Key, list);
+				outString = outString.Replace((String) kv.Key, list);
 				list = String.Join(",", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray());
 				Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
 					.ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value)
-					.Where(kkv => ((String) kkv.Value).Contains((String) kv.Key))
-					.ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value);
+					.Where(kkv => (kkv.Value).Contains((String) kv.Key))
+					.ToDictionary(kkv => kkv.Key, kkv => kkv.Value);
 				foreach (string key in changeValues.Keys) {
 					skolems[key] = changeValues[key].Replace((String) kv.Key, list);
 				}
 			}
 			else if (kv.Value is String) {
-				outString = (String) outString.Replace((String) kv.Key, (String) kv.Value);
+				outString = outString.Replace((String) kv.Key, (String) kv.Value);
 			}
 			else if (kv.Value is List<String>) {
 				String list = String.Join(",", ((List<String>) kv.Value).ToArray());
-				outString = (String) outString.Replace((String) kv.Key, list);
+				outString = outString.Replace((String) kv.Key, list);
 			}
 		}
 
@@ -786,15 +785,15 @@ public class EventManager : MonoBehaviour {
 
 		foreach (DictionaryEntry kv in skolems) {
 			if (kv.Value is Vector3) {
-				outString = (String) outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+				outString = outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
 				//Debug.Log (outString);
 			}
 			else if (kv.Value is String) {
-				outString = (String) outString.Replace((String) kv.Key, (String) kv.Value);
+				outString = outString.Replace((String) kv.Key, (String) kv.Value);
 			}
 			else if (kv.Value is List<String>) {
 				String list = String.Join(",", ((List<String>) kv.Value).ToArray());
-				outString = (String) outString.Replace((String) kv.Key, list);
+				outString = outString.Replace((String) kv.Key, list);
 			}
 		}
 
@@ -1069,14 +1068,14 @@ public class EventManager : MonoBehaviour {
 			if (argsMatch.Groups[0].Value.Length > 0) {
 				Debug.Log(argsMatch.Groups[0]);
 				if (temp.ContainsKey(argsMatch.Groups[0].Value)) {
-					object replaceWith = temp[(String) argsMatch.Groups[0].Value];
+					object replaceWith = temp[argsMatch.Groups[0].Value];
 					Debug.Log(replaceWith.GetType());
 					//String replaced = ((String)skolems [kv.Key]).Replace ((String)argsMatch.Groups [0].Value,
 					//	replaceWith.ToString ().Replace (',', ';').Replace ('(', '<').Replace (')', '>'));
 					if (regex.Match((String) replaceWith).Length == 0) {
-						String replaced = (String) argsMatch.Groups[0].Value;
+						String replaced = argsMatch.Groups[0].Value;
 						if (replaceWith is String) {
-							replaced = ((String) skolems[kv.Key]).Replace((String) argsMatch.Groups[0].Value,
+							replaced = ((String) skolems[kv.Key]).Replace(argsMatch.Groups[0].Value,
 								(String) replaceWith);
 						}
 						else if (replaceWith is Vector3) {

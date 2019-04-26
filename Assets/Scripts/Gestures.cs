@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Gestures : MonoBehaviour {
 	public enum HandPose {

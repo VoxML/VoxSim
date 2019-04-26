@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections;
 
 public class ModalWindow : FontManager {
 	public Rect windowRect;
@@ -59,7 +57,7 @@ public class ModalWindow : FontManager {
 			windowManager.RegisterWindow(this);
 		}
 		else {
-			Debug.Log("ModalWindow of id " + id.ToString() + " already exists on this object!");
+			Debug.Log("ModalWindow of id " + id + " already exists on this object!");
 			Destroy(this);
 		}
 

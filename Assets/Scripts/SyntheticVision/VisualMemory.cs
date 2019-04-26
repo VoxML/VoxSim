@@ -1,8 +1,9 @@
 ﻿using System;
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
+using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using VisionViz;
 
@@ -145,8 +146,8 @@ namespace Agent {
 		}
 
 		private void SetRenderingModeToTransparent(Material mat) {
-			mat.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.One);
-			mat.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+			mat.SetInt("_SrcBlend", (int) BlendMode.One);
+			mat.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
 			mat.SetInt("_ZWrite", 0);
 			mat.DisableKeyword("_ALPHATEST_ON");
 			mat.DisableKeyword("_ALPHABLEND_ON");

@@ -1,11 +1,8 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Timers;
 using System.IO;
-using Global;
+using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class LogEventArgs : EventArgs {
 	public string LogString { get; set; }
@@ -42,7 +39,7 @@ public class DemoScript : MonoBehaviour {
 		log = (PlayerPrefs.GetInt("Make Logs") == 1);
 
 		// log default state
-		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+		GameObject[] allObjects = FindObjectsOfType<GameObject>();
 		foreach (GameObject o in allObjects) {
 			if (o.GetComponent<Voxeme>() != null) {
 				if (o.GetComponent<Voxeme>().enabled) {

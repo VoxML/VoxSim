@@ -1,6 +1,6 @@
-using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 public class HaskellInterface : MonoBehaviour {
 	[DllImport("HaskellInterface", CallingConvention = CallingConvention.Cdecl)]

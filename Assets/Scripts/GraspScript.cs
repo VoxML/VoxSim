@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
+using UnityEngine;
 
 public class GraspScript : MonoBehaviour {
 	private Animator anim;
@@ -50,6 +50,6 @@ public class GraspScript : MonoBehaviour {
 		//	Debug.Log (string.Format("Setting to {0}", complete));
 		//	Debug.Break ();
 		//}
-		isGrasping = System.Convert.ToBoolean(complete);
+		isGrasping = Convert.ToBoolean(complete);
 	}
 }

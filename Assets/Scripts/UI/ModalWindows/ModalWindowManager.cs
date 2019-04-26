@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ModalWindowEventArgs : EventArgs {
 	public int WindowID { get; set; }

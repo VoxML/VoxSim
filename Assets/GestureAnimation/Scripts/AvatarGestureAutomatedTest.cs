@@ -1,7 +1,6 @@
-﻿using RootMotion.FinalIK;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
+using RootMotion.FinalIK;
 using UnityEngine;
 using UnityEngine.UI;
 

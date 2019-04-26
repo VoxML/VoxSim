@@ -1,13 +1,7 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using Global;
-using Vox;
+using UnityEngine;
 
 public class StateExtractor : MonoBehaviour {
 	EventManager em;

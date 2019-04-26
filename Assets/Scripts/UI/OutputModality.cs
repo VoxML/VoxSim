@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using Agent;
+﻿using Agent;
+using UnityEngine;
 
 public class OutputModality : FontManager {
 	public enum Modality {

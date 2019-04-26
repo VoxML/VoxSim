@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using UnityEngine;
 using Global;
+using UnityEngine;
 
 namespace Agent {
 	public class PDAInstruction {

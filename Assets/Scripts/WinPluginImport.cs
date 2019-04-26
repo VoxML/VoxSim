@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class WinPluginImport : MonoBehaviour {
 	// Use this for initialization

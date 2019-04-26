@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
-
+using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace VisionViz {
 	[ExecuteInEditMode]
@@ -55,10 +55,10 @@ namespace VisionViz {
 			Material lineMaterial = new Material(shader);
 			lineMaterial.hideFlags = HideFlags.HideAndDontSave;
 			// Turn on alpha blending
-			lineMaterial.SetInt("_SrcBlend", (int) UnityEngine.Rendering.BlendMode.SrcAlpha);
-			lineMaterial.SetInt("_DstBlend", (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+			lineMaterial.SetInt("_SrcBlend", (int) BlendMode.SrcAlpha);
+			lineMaterial.SetInt("_DstBlend", (int) BlendMode.OneMinusSrcAlpha);
 			// Turn backface culling off
-			lineMaterial.SetInt("_Cull", (int) UnityEngine.Rendering.CullMode.Off);
+			lineMaterial.SetInt("_Cull", (int) CullMode.Off);
 			// Turn off depth writes
 			lineMaterial.SetInt("_ZWrite", 0);
 			return lineMaterial;

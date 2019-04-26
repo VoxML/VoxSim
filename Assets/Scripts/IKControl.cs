@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using Global;
+﻿using Global;
+using UnityEngine;
 
 [RequireComponent(typeof(Animator))]
 public class IKControl : MonoBehaviour {

@@ -2,16 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Timers;
+using Agent;
+using Global;
 using UnityEngine;
 using UnityEngine.UI;
-using Episteme;
-using Global;
-using Agent;
-using Network;
-
 
 public class ReferringExpressionGenerator : MonoBehaviour {
 	GameObject behaviorController;

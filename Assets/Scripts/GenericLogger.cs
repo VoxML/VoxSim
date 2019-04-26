@@ -1,11 +1,7 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Timers;
 using System.IO;
-using Global;
+using UnityEngine;
 
 public class LoggerArgs : EventArgs {
 	public string LogString { get; set; }
