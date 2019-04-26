@@ -6,10 +6,8 @@ using System.Reflection;
 using UnityEngine;
 using Global;
 
-namespace Agent
-{
-	public class PDAInstruction
-	{
+namespace Agent {
+	public class PDAInstruction {
 		List<PDAState> fromStates;
 		public List<PDAState> FromStates {
 			get { return fromStates; }
@@ -49,8 +47,7 @@ namespace Agent
 		}
 	}
 
-	public class PDAState
-	{
+	public class PDAState {
 		string name;
 		public string Name {
 			get { return name; }
@@ -69,8 +66,7 @@ namespace Agent
 		}
 	}
 
-	public class PDASymbol
-	{
+	public class PDASymbol {
 		string name;
 		public string Name {
 			get { return name; }
@@ -94,8 +90,7 @@ namespace Agent
 		}
 	}
 
-	public class PDAStackOperation
-	{
+	public class PDAStackOperation {
 		public enum PDAStackOperationType {
 			None,
 			Push,
@@ -136,8 +131,7 @@ namespace Agent
 		}
 	}
 
-	public class TransitionGate
-	{
+	public class TransitionGate {
 		PDAState rejectState;
 		public PDAState RejectState {
 			get { return rejectState; }
@@ -163,8 +157,7 @@ namespace Agent
 		}
 	}
 
-	public class CharacterLogicAutomaton : MonoBehaviour
-	{
+	public class CharacterLogicAutomaton : MonoBehaviour {
 		// a nondeterministic pushdown automaton
 
 		List<PDAState> states;
@@ -245,16 +238,14 @@ namespace Agent
             return instructionKey;
         }
 
-        public enum AttentionStatus
-        {
+        public enum AttentionStatus {
             Inattentive,
             Attentive
         }
 
         public event EventHandler LearnedNewInstruction;
 
-        public void OnLearnedNewInstruction(object sender, EventArgs e)
-        {
+        public void OnLearnedNewInstruction(object sender, EventArgs e) {
             if (LearnedNewInstruction != null)
             {
                 LearnedNewInstruction(this, e);
