@@ -67,6 +67,11 @@ namespace StandaloneBuild {
 			}
 		}
 
+        /// <summary>
+        /// Makes build for Mac OSX platform
+        /// </summary>
+        // IN: none
+        // OUT: none
 		public static void BuildMac() {
 			// buildName is element 5 in the build script build command, the build config path is element 6
 			string buildName = Environment.GetCommandLineArgs()[5];
@@ -103,7 +108,6 @@ namespace StandaloneBuild {
 					// but that shouldn't be happening anyway!
 					List<string> fileEntries = Directory.GetFiles(scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList()
 						.Select(f => f.Replace('\\', '/')).ToList();
-					;
 					foreach (string s in scenesList) {
 						if (s != string.Empty) {
 							// scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
@@ -142,6 +146,11 @@ namespace StandaloneBuild {
 			}
 		}
 
+        /// <summary>
+        /// Makes build for Windows platform
+        /// </summary>
+        // IN: none
+        // OUT: none
 		public static void BuildWindows() {
 			// buildName is element 5 in the build script build command, the build config path is element 6
 			string buildName = Environment.GetCommandLineArgs()[5];
@@ -216,6 +225,13 @@ namespace StandaloneBuild {
 			}
 		}
 
+        /// <summary>
+        /// Makes Xcode project for iOS platform
+        /// The Xcode project then has to be built and deployed to the device.
+        ///  The build_ios build script handles the entire process automatically.
+        /// </summary>
+        // IN: none
+        // OUT: none
 		public static void BuildIOS() {
 			// buildName is element 5 in the build script build command, the build config path is element 6
 			string buildName = Environment.GetCommandLineArgs()[5];
