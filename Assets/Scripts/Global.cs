@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
-
 using MajorAxes;
 using Agent;
 
@@ -20,7 +19,8 @@ namespace Global {
 		public static Vector3 xAxis = Vector3.right;
 		public static Vector3 yAxis = Vector3.up;
 		public static Vector3 zAxis = Vector3.forward;
-		public static Dictionary<string,Vector3> Axes = new Dictionary<string,Vector3>{
+
+		public static Dictionary<string, Vector3> Axes = new Dictionary<string, Vector3> {
 			{"X", xAxis},
 			{"Y", yAxis},
 			{"Z", zAxis}
@@ -28,67 +28,73 @@ namespace Global {
 	}
 
 	public static class Data {
-	#if UNITY_EDITOR
-		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
-	#elif UNITY_STANDALONE_OSX
-		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
-	#elif UNITY_STANDALONE_WIN
-		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
-	#elif UNITY_IOS
-		public static string voxmlDataPath = Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("/VoxML/voxml");
-	#endif
+#if UNITY_EDITOR
+		public static string voxmlDataPath = Application.dataPath.Remove(Application.dataPath.LastIndexOf('/') + 1) +
+		                                     string.Format("Data/voxml");
+#elif UNITY_STANDALONE_OSX
+		public static string voxmlDataPath =
+ Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
+#elif UNITY_STANDALONE_WIN
+		public static string voxmlDataPath =
+ Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
+#elif UNITY_IOS
+		public static string voxmlDataPath =
+ Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("/VoxML/voxml");
+#endif
 
-        public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs) {
-            // Get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+		public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs) {
+			// Get the subdirectories for the specified directory.
+			DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 
-            if (!dir.Exists) {
-                throw new DirectoryNotFoundException(
-                    "Source directory does not exist or could not be found: "
-                    + sourceDirName);
-            }
+			if (!dir.Exists) {
+				throw new DirectoryNotFoundException(
+					"Source directory does not exist or could not be found: "
+					+ sourceDirName);
+			}
 
-            DirectoryInfo[] dirs = dir.GetDirectories();
-            // If the destination directory doesn't exist, create it.
-            if (!Directory.Exists(destDirName)) {
-                Directory.CreateDirectory(destDirName);
-            }
+			DirectoryInfo[] dirs = dir.GetDirectories();
+			// If the destination directory doesn't exist, create it.
+			if (!Directory.Exists(destDirName)) {
+				Directory.CreateDirectory(destDirName);
+			}
 
-            // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files) {
-                string temppath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(temppath, true);
-            }
+			// Get the files in the directory and copy them to the new location.
+			FileInfo[] files = dir.GetFiles();
+			foreach (FileInfo file in files) {
+				string temppath = Path.Combine(destDirName, file.Name);
+				file.CopyTo(temppath, true);
+			}
 
-            // If copying subdirectories, copy them and their contents to new location.
-            if (copySubDirs) {
-                foreach (DirectoryInfo subdir in dirs) {
-                    string temppath = Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-                }
-            }
-        }
+			// If copying subdirectories, copy them and their contents to new location.
+			if (copySubDirs) {
+				foreach (DirectoryInfo subdir in dirs) {
+					string temppath = Path.Combine(destDirName, subdir.Name);
+					DirectoryCopy(subdir.FullName, temppath, copySubDirs);
+				}
+			}
+		}
 	}
 
 	/// <summary>
 	/// Region class
 	/// </summary>
-	public class Region{
-		Vector3 _min,_max,_center;
+	public class Region {
+		Vector3 _min, _max, _center;
 
 		public Vector3 min {
 			get { return _min; }
-			set { _min = value;
-					_center = (min + max) / 2.0f;
-				}
+			set {
+				_min = value;
+				_center = (min + max) / 2.0f;
+			}
 		}
 
 		public Vector3 max {
 			get { return _max; }
-			set { _max = value; 
-					_center = (min + max) / 2.0f;
-				}
+			set {
+				_max = value;
+				_center = (min + max) / 2.0f;
+			}
 		}
 
 		public Vector3 center {
@@ -112,19 +118,19 @@ namespace Global {
 
 		public Region(Vector3 center, float sideLength) {
 			// creates a square region centered on center with side length sideLength
-			min = center-new Vector3(sideLength/2.0f,0.0f,sideLength/2.0f);
-			max = center+new Vector3(sideLength/2.0f,0.0f,sideLength/2.0f);
+			min = center - new Vector3(sideLength / 2.0f, 0.0f, sideLength / 2.0f);
+			max = center + new Vector3(sideLength / 2.0f, 0.0f, sideLength / 2.0f);
 		}
 
 		public bool Contains(Vector3 point) {
 			return ((point.x >= min.x) && (point.x <= max.x) &&
-				(point.y >= min.y) && (point.y <= max.y) &&
-				(point.z >= min.z) && (point.z <= max.z));
+			        (point.y >= min.y) && (point.y <= max.y) &&
+			        (point.z >= min.z) && (point.z <= max.z));
 		}
 
 		public bool Contains(GameObject obj) {
 			return ((obj.transform.position.x >= min.x) && (obj.transform.position.x <= max.x) &&
-				(obj.transform.position.z >= min.z) && (obj.transform.position.z <= max.z));
+			        (obj.transform.position.z >= min.z) && (obj.transform.position.z <= max.z));
 		}
 
 		public float Area() {
@@ -142,7 +148,7 @@ namespace Global {
 			else {
 				area = (max.x - min.x) * (max.y - min.y) * (max.z - min.z); // volume
 			}
-	
+
 			return area;
 		}
 	}
@@ -150,8 +156,7 @@ namespace Global {
 	/// <summary>
 	/// Object oriented bounds class
 	/// </summary>
-	public class ObjBounds
-	{
+	public class ObjBounds {
 		Vector3 _center;
 		List<Vector3> _points;
 
@@ -167,20 +172,22 @@ namespace Global {
 
 		public ObjBounds() {
 			_center = Vector3.zero;
-			_points = new List<Vector3>(new Vector3[]{
-				Vector3.zero,Vector3.zero,
-				Vector3.zero,Vector3.zero,
-				Vector3.zero,Vector3.zero,
-				Vector3.zero,Vector3.zero});
+			_points = new List<Vector3>(new Vector3[] {
+				Vector3.zero, Vector3.zero,
+				Vector3.zero, Vector3.zero,
+				Vector3.zero, Vector3.zero,
+				Vector3.zero, Vector3.zero
+			});
 		}
 
 		public ObjBounds(Vector3 center) {
 			_center = center;
-			_points = new List<Vector3>(new Vector3[]{
-				Vector3.zero,Vector3.zero,
-				Vector3.zero,Vector3.zero,
-				Vector3.zero,Vector3.zero,
-				Vector3.zero,Vector3.zero});
+			_points = new List<Vector3>(new Vector3[] {
+				Vector3.zero, Vector3.zero,
+				Vector3.zero, Vector3.zero,
+				Vector3.zero, Vector3.zero,
+				Vector3.zero, Vector3.zero
+			});
 		}
 
 		public ObjBounds(List<Vector3> points) {
@@ -194,54 +201,57 @@ namespace Global {
 		}
 
 		public Vector3 Min(MajorAxis axis = MajorAxis.None) {
-			List<Vector3> pts = new List<Vector3> ();
-			if (axis == MajorAxis.None) {	// default to Y
-				pts = Points.OrderBy (v => v.y).ToList();
+			List<Vector3> pts = new List<Vector3>();
+			if (axis == MajorAxis.None) {
+				// default to Y
+				pts = Points.OrderBy(v => v.y).ToList();
 			}
 			else {
 				if (axis == MajorAxis.X) {
-					pts = Points.OrderBy (v => v.x).ToList();
+					pts = Points.OrderBy(v => v.x).ToList();
 				}
 				else if (axis == MajorAxis.Y) {
-					pts = Points.OrderBy (v => v.y).ToList();
+					pts = Points.OrderBy(v => v.y).ToList();
 				}
 				else if (axis == MajorAxis.Z) {
-					pts = Points.OrderBy (v => v.z).ToList();
+					pts = Points.OrderBy(v => v.z).ToList();
 				}
 			}
 
-			return pts [0];
+			return pts[0];
 		}
 
 		public Vector3 Max(MajorAxis axis = MajorAxis.None) {
-			List<Vector3> pts = new List<Vector3> ();
-			if (axis == MajorAxis.None) {	// default to Y
-				pts = Points.OrderByDescending (v => v.y).ToList();
+			List<Vector3> pts = new List<Vector3>();
+			if (axis == MajorAxis.None) {
+				// default to Y
+				pts = Points.OrderByDescending(v => v.y).ToList();
 			}
 			else {
 				if (axis == MajorAxis.X) {
-					pts = Points.OrderByDescending (v => v.x).ToList();
+					pts = Points.OrderByDescending(v => v.x).ToList();
 				}
 				else if (axis == MajorAxis.Y) {
-					pts = Points.OrderByDescending (v => v.y).ToList();
+					pts = Points.OrderByDescending(v => v.y).ToList();
 				}
 				else if (axis == MajorAxis.Z) {
-					pts = Points.OrderByDescending (v => v.z).ToList();
+					pts = Points.OrderByDescending(v => v.z).ToList();
 				}
 			}
 
-			return pts [0];
+			return pts[0];
 		}
 
 		public bool Contains(Vector3 point) {
 			bool contains = true;
 
-			Vector3 closestPoint = Points.OrderBy (p => (p - point).magnitude).ToList () [0];
+			Vector3 closestPoint = Points.OrderBy(p => (p - point).magnitude).ToList()[0];
 
-			List<Vector3> colinearPoints = Points.Where (p => p != closestPoint).OrderBy (p => (p - closestPoint).magnitude).Take (3).ToList ();
+			List<Vector3> colinearPoints = Points.Where(p => p != closestPoint)
+				.OrderBy(p => (p - closestPoint).magnitude).Take(3).ToList();
 
 			foreach (Vector3 pt in colinearPoints) {
-				contains &= (Vector3.Dot ((point - closestPoint).normalized, (pt - closestPoint).normalized) >= 0.0f);
+				contains &= (Vector3.Dot((point - closestPoint).normalized, (pt - closestPoint).normalized) >= 0.0f);
 			}
 
 			return contains;
@@ -251,20 +261,17 @@ namespace Global {
 	/// <summary>
 	/// List comparer class
 	/// </summary>
-	public class ListComparer<T> : IEqualityComparer<List<T>>
-	{
-		public bool Equals(List<T> x, List<T> y)
-		{
+	public class ListComparer<T> : IEqualityComparer<List<T>> {
+		public bool Equals(List<T> x, List<T> y) {
 			return x.SequenceEqual(y);
 		}
 
-		public int GetHashCode(List<T> obj)
-		{
+		public int GetHashCode(List<T> obj) {
 			int hashcode = 0;
-			foreach (T t in obj)
-			{
+			foreach (T t in obj) {
 				hashcode ^= t.GetHashCode();
 			}
+
 			return hashcode;
 		}
 	}
@@ -272,33 +279,27 @@ namespace Global {
 	/// <summary>
 	/// Pair class
 	/// </summary>
-	public class Pair<T1, T2> : IEquatable<System.Object>{
-		public T1 Item1{
-			get;
-			set;
-		}
+	public class Pair<T1, T2> : IEquatable<System.Object> {
+		public T1 Item1 { get; set; }
 
-		public T2 Item2{
-			get;
-			set;
-		}
+		public T2 Item2 { get; set; }
 
-		public Pair(T1 Item1, T2 Item2){
+		public Pair(T1 Item1, T2 Item2) {
 			this.Item1 = Item1;
 			this.Item2 = Item2;
 		}
 
 		public override bool Equals(object obj) {
-			if ( obj == null || (obj as Pair<T1, T2>) == null ) //if the object is null or the cast fails
+			if (obj == null || (obj as Pair<T1, T2>) == null) //if the object is null or the cast fails
 				return false;
 			else {
-				Pair<T1,T2> tuple = (Pair<T1, T2>) obj;
+				Pair<T1, T2> tuple = (Pair<T1, T2>) obj;
 				return Item1.Equals(tuple.Item1) && Item2.Equals(tuple.Item2);
 			}
 		}
 
-		public Pair<T2,T1> Reverse() {
-			Pair<T2,T1> tuple = new Pair<T2, T1> (Item2, Item1);
+		public Pair<T2, T1> Reverse() {
+			Pair<T2, T1> tuple = new Pair<T2, T1>(Item2, Item1);
 			return tuple;
 		}
 
@@ -306,11 +307,11 @@ namespace Global {
 			return Item1.GetHashCode() ^ Item2.GetHashCode();
 		}
 
-		public static bool operator == (Pair<T1, T2> tuple1, Pair<T1, T2> tuple2) {
+		public static bool operator ==(Pair<T1, T2> tuple1, Pair<T1, T2> tuple2) {
 			return tuple1.Equals(tuple2);
 		}
 
-		public static bool operator != (Pair<T1, T2> tuple1, Pair<T1, T2> tuple2) {
+		public static bool operator !=(Pair<T1, T2> tuple1, Pair<T1, T2> tuple2) {
 			return !tuple1.Equals(tuple2);
 		}
 	}
@@ -318,46 +319,37 @@ namespace Global {
 	/// <summary>
 	/// Triple class
 	/// </summary>
-	public class Triple<T1, T2, T3> : IEquatable<System.Object>{
-		public T1 Item1{
-			get;
-			set;
-		}
-		
-		public T2 Item2{
-			get;
-			set;
-		}
-		
-		public T3 Item3{
-			get;
-			set;
-		}
-		
-		public Triple(T1 Item1, T2 Item2, T3 Item3){
+	public class Triple<T1, T2, T3> : IEquatable<System.Object> {
+		public T1 Item1 { get; set; }
+
+		public T2 Item2 { get; set; }
+
+		public T3 Item3 { get; set; }
+
+		public Triple(T1 Item1, T2 Item2, T3 Item3) {
 			this.Item1 = Item1;
 			this.Item2 = Item2;
 			this.Item3 = Item3;
 		}
-		
+
 		public override bool Equals(object obj) {
-			if ( obj == null || (obj as Triple<T1, T2, T3>) == null ) //if the object is null or the cast fails
+			if (obj == null || (obj as Triple<T1, T2, T3>) == null) //if the object is null or the cast fails
 				return false;
 			else {
-				Triple<T1,T2,T3> tuple = (Triple<T1, T2, T3>) obj;
+				Triple<T1, T2, T3> tuple = (Triple<T1, T2, T3>) obj;
 				return Item1.Equals(tuple.Item1) && Item2.Equals(tuple.Item2) && Item3.Equals(tuple.Item3);
 			}
 		}
-		
+
 		public override int GetHashCode() {
 			return Item1.GetHashCode() ^ Item2.GetHashCode() ^ Item3.GetHashCode();
 		}
-		
-		public static bool operator == (Triple<T1, T2, T3> tuple1, Triple<T1, T2, T3> tuple2) {
+
+		public static bool operator ==(Triple<T1, T2, T3> tuple1, Triple<T1, T2, T3> tuple2) {
 			return tuple1.Equals(tuple2);
 		}
-		
-		public static bool operator != (Triple<T1, T2, T3> tuple1, Triple<T1, T2, T3> tuple2) {
+
+		public static bool operator !=(Triple<T1, T2, T3> tuple1, Triple<T1, T2, T3> tuple2) {
 			return !tuple1.Equals(tuple2);
 		}
 	}
@@ -366,61 +358,64 @@ namespace Global {
 	/// Helper class
 	/// </summary>
 	public static class Helper {
-		public static Regex v = new Regex (@"<.*>");
-		public static Regex cv = new Regex (@",<.*>");
-		public static Regex l = new Regex ("[\'\"].*[\'\"]");
+		public static Regex v = new Regex(@"<.*>");
+		public static Regex cv = new Regex(@",<.*>");
+		public static Regex l = new Regex("[\'\"].*[\'\"]");
 
 		// DATA METHODS
 		public static Hashtable ParsePredicate(String predicateString) {
-			Hashtable predArgs = new Hashtable ();
-			
-			Queue<String> split = new Queue<String>(predicateString.Split (new char[] {'('},2,StringSplitOptions.None));
+			Hashtable predArgs = new Hashtable();
+
+			Queue<String> split =
+				new Queue<String>(predicateString.Split(new char[] {'('}, 2, StringSplitOptions.None));
 			if (split.Count > 1) {
-				String pred = split.ElementAt (0);
-				String args = split.ElementAt (1);
-				args = args.Remove (args.Length - 1);
-				predArgs.Add (pred, args);
+				String pred = split.ElementAt(0);
+				String args = split.ElementAt(1);
+				args = args.Remove(args.Length - 1);
+				predArgs.Add(pred, args);
 			}
-			
+
 			return predArgs;
 		}
 
 		public static String GetTopPredicate(String formula) {
-			Queue<String> split = new Queue<String>(formula.Split (new char[] {'('},2,StringSplitOptions.None));
-			return split.ElementAt (0);
+			Queue<String> split = new Queue<String>(formula.Split(new char[] {'('}, 2, StringSplitOptions.None));
+			return split.ElementAt(0);
 		}
 
-		public static void PrintKeysAndValues(Hashtable ht)  {
+		public static void PrintKeysAndValues(Hashtable ht) {
 			foreach (DictionaryEntry entry in ht)
 				Debug.Log(entry.Key + " : " + entry.Value);
 		}
 
 		public static String VectorToParsable(Vector3 vector) {
-			return ("<"+vector.x.ToString ()+"; "+
-			       	vector.y.ToString ()+"; "+
-			        vector.z.ToString ()+">");
+			return ("<" + vector.x.ToString() + "; " +
+			        vector.y.ToString() + "; " +
+			        vector.z.ToString() + ">");
 		}
-		
+
 		public static Vector3 ParsableToVector(String parsable) {
-			List<String> components = new List<String> ((((String)parsable).Replace("<","").Replace(">","")).Split (new char[] {';'}));
+			List<String> components =
+				new List<String>((((String) parsable).Replace("<", "").Replace(">", "")).Split(new char[] {';'}));
 			return new Vector3(System.Convert.ToSingle(components[0]),
-			                   System.Convert.ToSingle(components[1]),
-			                   System.Convert.ToSingle(components[2]));
+				System.Convert.ToSingle(components[1]),
+				System.Convert.ToSingle(components[2]));
 		}
 
 		public static String QuaternionToParsable(Quaternion quat) {
-			return ("<"+quat.x.ToString ()+"; "+
-			        quat.y.ToString ()+"; "+
-			        quat.z.ToString ()+"; "+
-			        quat.w.ToString ()+">");
+			return ("<" + quat.x.ToString() + "; " +
+			        quat.y.ToString() + "; " +
+			        quat.z.ToString() + "; " +
+			        quat.w.ToString() + ">");
 		}
-		
+
 		public static Quaternion ParsableToQuaternion(String parsable) {
-			List<String> components = new List<String> ((((String)parsable).Replace("<","").Replace(">","")).Split (new char[] {';'}));
+			List<String> components =
+				new List<String>((((String) parsable).Replace("<", "").Replace(">", "")).Split(new char[] {';'}));
 			return new Quaternion(System.Convert.ToSingle(components[0]),
-								System.Convert.ToSingle(components[1]),
-			                  	System.Convert.ToSingle(components[2]),
-			                  	System.Convert.ToSingle(components[3]));
+				System.Convert.ToSingle(components[1]),
+				System.Convert.ToSingle(components[2]),
+				System.Convert.ToSingle(components[3]));
 		}
 
 		public static String IntToString(int inInt) {
@@ -431,11 +426,12 @@ namespace Global {
 			return System.Convert.ToInt32(inString);
 		}
 
-		public static Triple<String,String,String> MakeRDFTriples(String formula) {		// fix for multiple RDF triples
-			Triple<String,String,String> triple = new Triple<String,String,String> ("","","");
-			Debug.Log ("MakeRDFTriple: " + formula);
-			formula = cv.Replace (formula, "");
-			String[] components = formula.Replace ('(', '/').Replace (')', '/').Replace (',','/').Split ('/');
+		public static Triple<String, String, String> MakeRDFTriples(String formula) {
+			// fix for multiple RDF triples
+			Triple<String, String, String> triple = new Triple<String, String, String>("", "", "");
+			Debug.Log("MakeRDFTriple: " + formula);
+			formula = cv.Replace(formula, "");
+			String[] components = formula.Replace('(', '/').Replace(')', '/').Replace(',', '/').Split('/');
 
 //			//Debug.Log (components.Length);
 //			foreach (String s in components) {
@@ -450,9 +446,9 @@ namespace Global {
 			foreach (String s in components) {
 				if (s.Length > 0) {
 					//Debug.Log (s);
-					GameObject obj = GameObject.Find (s);
+					GameObject obj = GameObject.Find(s);
 					if (obj != null) {
-						if (components [0] == "def") {
+						if (components[0] == "def") {
 							if (triple.Item1 == "") {
 								triple.Item1 = s;
 							}
@@ -467,28 +463,28 @@ namespace Global {
 						}
 					}
 					else {
-						if (components [0] == "repeat") {
+						if (components[0] == "repeat") {
 							int i;
-							if (int.TryParse (s, out i)) {
+							if (int.TryParse(s, out i)) {
 								if (triple.Item3 == "") {
 									triple.Item3 = s;
 								}
 							}
-							else if (l.IsMatch (s)) {
+							else if (l.IsMatch(s)) {
 								if (triple.Item1 == "") {
 									triple.Item1 = s;
-								} 
+								}
 							}
 							else {
 								triple.Item2 = triple.Item2 + s + "_";
 							}
 						}
-						else if (v.IsMatch (s)) {
+						else if (v.IsMatch(s)) {
 							if (triple.Item3 == "") {
 								triple.Item3 = s;
 							}
 						}
-						else if (l.IsMatch (s)) {
+						else if (l.IsMatch(s)) {
 							if (triple.Item3 == "") {
 								triple.Item3 = s;
 							}
@@ -501,52 +497,52 @@ namespace Global {
 			}
 
 			if (triple.Item2.Length > 0) {
-				triple.Item2 = triple.Item2.Remove (triple.Item2.Length - 1, 1);
+				triple.Item2 = triple.Item2.Remove(triple.Item2.Length - 1, 1);
 			}
-			
-			Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
+
+			Debug.Log(triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 			return triple;
 		}
 
-		public static void PrintRDFTriples(List<Triple<String,String,String>> triples) {
+		public static void PrintRDFTriples(List<Triple<String, String, String>> triples) {
 			if (triples.Count == 0) {
-				Debug.Log ("No RDF triples to print");
+				Debug.Log("No RDF triples to print");
 			}
 
-			foreach (Triple<String,String,String> triple in triples) {
-				Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
+			foreach (Triple<String, String, String> triple in triples) {
+				Debug.Log(triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 			}
 		}
 
 		public static Hashtable DiffHashtables(Hashtable baseline, Hashtable comparand) {
-			Hashtable diff = new Hashtable ();
+			Hashtable diff = new Hashtable();
 
 			foreach (DictionaryEntry entry in comparand) {
-				if (!baseline.ContainsKey (entry.Key)) {
+				if (!baseline.ContainsKey(entry.Key)) {
 					object key = entry.Key;
 					if (entry.Key is List<object>) {
-						key = string.Join (",", ((List<object>)entry.Value).Cast<string>().ToArray ());
+						key = string.Join(",", ((List<object>) entry.Value).Cast<string>().ToArray());
 					}
 
 					object value = entry.Value;
 					if (entry.Value is List<object>) {
-						value = string.Join (",", ((List<object>)entry.Value).Cast<string>().ToArray ());
+						value = string.Join(",", ((List<object>) entry.Value).Cast<string>().ToArray());
 					}
 
-					diff.Add (key, value);
+					diff.Add(key, value);
 				}
 				else if (baseline[entry.Key] != entry.Value) {
 					object key = entry.Key;
 					if (entry.Key is List<object>) {
-						key = string.Join (",", ((List<object>)entry.Key).Cast<string>().ToArray ());
+						key = string.Join(",", ((List<object>) entry.Key).Cast<string>().ToArray());
 					}
 
 					object value = entry.Value;
 					if (entry.Value is List<object>) {
-						value = string.Join (",", ((List<object>)entry.Value).Cast<string>().ToArray ());
+						value = string.Join(",", ((List<object>) entry.Value).Cast<string>().ToArray());
 					}
 
-					diff.Add(key,value);
+					diff.Add(key, value);
 				}
 			}
 
@@ -556,31 +552,31 @@ namespace Global {
 		public static string HashtableToString(Hashtable ht) {
 			string output = string.Empty;
 			foreach (DictionaryEntry entry in ht) {
-				output += string.Format ("{0} {1};", entry.Key, entry.Value);
+				output += string.Format("{0} {1};", entry.Key, entry.Value);
 			}
 
 			return output;
 		}
 
-        public static string PrintByteArray(byte[] bytes) {
-            var sb = new StringBuilder("new byte[] { ");
-            foreach (var b in bytes)
-            {
-                sb.Append(b + ", ");
-            }
-            sb.Append("}");
+		public static string PrintByteArray(byte[] bytes) {
+			var sb = new StringBuilder("new byte[] { ");
+			foreach (var b in bytes) {
+				sb.Append(b + ", ");
+			}
 
-            return sb.ToString();
-        }
+			sb.Append("}");
+
+			return sb.ToString();
+		}
 
 		public static List<object> DiffLists(List<object> baseline, List<object> comparand) {
-			return comparand.Except (baseline).ToList ();
+			return comparand.Except(baseline).ToList();
 		}
 
 		public static byte[] SerializeObjectToBinary(object obj) {
-			BinaryFormatter binFormatter = new BinaryFormatter ();
-			MemoryStream mStream = new MemoryStream ();
-			binFormatter.Serialize (mStream, obj);
+			BinaryFormatter binFormatter = new BinaryFormatter();
+			MemoryStream mStream = new MemoryStream();
+			binFormatter.Serialize(mStream, obj);
 
 			//This gives you the byte array.
 			return mStream.ToArray();
@@ -591,14 +587,14 @@ namespace Global {
 			BinaryFormatter binFormatter = new BinaryFormatter();
 
 			// Where 'bytes' is your byte array.
-			mStream.Write (bytes, 0, bytes.Length);
+			mStream.Write(bytes, 0, bytes.Length);
 			mStream.Position = 0;
 
-			return (T)binFormatter.Deserialize(mStream);
+			return (T) binFormatter.Deserialize(mStream);
 		}
 
 		public static string SerializeObjectToJSON(object obj) {
-			string json = JsonUtility.ToJson (obj);
+			string json = JsonUtility.ToJson(obj);
 //			Debug.Log (json);
 //			Debug.Break ();
 
@@ -611,7 +607,7 @@ namespace Global {
 			if (array != null) {
 				foreach (object element in array) {
 					if (element != null) {
-						consistent &= (element.GetType () == type);
+						consistent &= (element.GetType() == type);
 					}
 				}
 			}
@@ -621,7 +617,7 @@ namespace Global {
 
 		// VECTOR METHODS
 		public static bool VectorIsNaN(Vector3 vec) {
-			return (float.IsNaN (vec.x) || float.IsNaN (vec.y) || float.IsNaN (vec.z));
+			return (float.IsNaN(vec.x) || float.IsNaN(vec.y) || float.IsNaN(vec.z));
 		}
 
 		public static bool PointInRect(Vector2 point, Rect rect) {
@@ -630,29 +626,29 @@ namespace Global {
 
 		public static bool PointOutsideMaskedAreas(Vector2 point, Rect[] rects) {
 			bool outside = true;
-			
+
 			foreach (Rect r in rects) {
-				if (PointInRect(point,r)) {
+				if (PointInRect(point, r)) {
 					outside = false;
 				}
 			}
-			
+
 			return outside;
 		}
 
 		public static Vector3 RayIntersectionPoint(Vector3 rayStart, Vector3 direction) {
 			//Collider[] colliders = obj.GetComponentsInChildren<Collider> ();
-			List<RaycastHit> hits = new List<RaycastHit> ();
+			List<RaycastHit> hits = new List<RaycastHit>();
 
 			//foreach (Collider c in colliders) {
-			RaycastHit hitInfo = new RaycastHit ();
-			Physics.Raycast (rayStart, direction.normalized, out hitInfo);
-			hits.Add (hitInfo);
+			RaycastHit hitInfo = new RaycastHit();
+			Physics.Raycast(rayStart, direction.normalized, out hitInfo);
+			hits.Add(hitInfo);
 			//}
-				
-			RaycastHit closestHit = hits [0];
 
-            foreach (RaycastHit hit in hits) {
+			RaycastHit closestHit = hits[0];
+
+			foreach (RaycastHit hit in hits) {
 				if (hit.distance < closestHit.distance) {
 					closestHit = hit;
 				}
@@ -662,11 +658,11 @@ namespace Global {
 		}
 
 		public static bool Parallel(Vector3 v1, Vector3 v2) {
-			return (1-Vector3.Dot (v1, v2) < Constants.EPSILON * 10);
+			return (1 - Vector3.Dot(v1, v2) < Constants.EPSILON * 10);
 		}
 
 		public static bool Perpendicular(Vector3 v1, Vector3 v2) {
-			return (Mathf.Abs (Vector3.Dot (v1, v2)) < Constants.EPSILON * 10);
+			return (Mathf.Abs(Vector3.Dot(v1, v2)) < Constants.EPSILON * 10);
 		}
 
 		public static Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Vector3 eulerAngles) {
@@ -681,16 +677,16 @@ namespace Global {
 		public static Bounds GetObjectSize(GameObject obj) {
 			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
 
-			Bounds combinedBounds = new Bounds (Vector3.zero, Vector3.zero);
-			
+			Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
+
 			foreach (MeshFilter mesh in meshes) {
-				Bounds temp = new Bounds (Vector3.zero,mesh.mesh.bounds.size);
+				Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
 				//Debug.Log(mesh.gameObject.name);
 				//Debug.Log(temp);
-				Vector3 min = new Vector3 (temp.min.x * mesh.gameObject.transform.lossyScale.x,
+				Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
 					temp.min.y * mesh.gameObject.transform.lossyScale.y,
 					temp.min.z * mesh.gameObject.transform.lossyScale.z);
-				Vector3 max = new Vector3 (temp.max.x * mesh.gameObject.transform.lossyScale.x,
+				Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
 					temp.max.y * mesh.gameObject.transform.lossyScale.y,
 					temp.max.z * mesh.gameObject.transform.lossyScale.z);
 				//Debug.Log (Helper.VectorToParsable(min));
@@ -700,8 +696,8 @@ namespace Global {
 				//Debug.Log(mesh.gameObject.transform.localEulerAngles);
 				//temp.center = obj.transform.position;
 				//temp.SetMinMax (min,max);
-				temp.SetMinMax (RotatePointAroundPivot(min,Vector3.zero,mesh.gameObject.transform.localEulerAngles),
-					RotatePointAroundPivot(max,Vector3.zero,mesh.gameObject.transform.localEulerAngles));
+				temp.SetMinMax(RotatePointAroundPivot(min, Vector3.zero, mesh.gameObject.transform.localEulerAngles),
+					RotatePointAroundPivot(max, Vector3.zero, mesh.gameObject.transform.localEulerAngles));
 				//Debug.Log (temp);
 				//Debug.Log (combinedBounds);
 				//Debug.Log (temp);
@@ -727,140 +723,142 @@ namespace Global {
 			return combinedBounds;
 		}
 
-        // returns current position-centered object bounds
+		// returns current position-centered object bounds
 		public static ObjBounds GetObjectOrientedSize(GameObject obj) {
 			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
 
-			Bounds combinedBounds = new Bounds (Vector3.zero, Vector3.zero);
+			Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
 
 			foreach (MeshFilter mesh in meshes) {
-				Bounds temp = new Bounds (Vector3.zero,mesh.mesh.bounds.size);
-				Vector3 min = new Vector3 (temp.min.x * mesh.gameObject.transform.lossyScale.x,
+				Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
+				Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
 					temp.min.y * mesh.gameObject.transform.lossyScale.y,
 					temp.min.z * mesh.gameObject.transform.lossyScale.z);
-                min = Helper.RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
-				Vector3 max = new Vector3 (temp.max.x * mesh.gameObject.transform.lossyScale.x,
+				min = Helper.RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
+				Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
 					temp.max.y * mesh.gameObject.transform.lossyScale.y,
 					temp.max.z * mesh.gameObject.transform.lossyScale.z);
-                max = Helper.RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
-				temp.SetMinMax (min,max);
+				max = Helper.RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
+				temp.SetMinMax(min, max);
 				combinedBounds.Encapsulate(temp);
 			}
 
-			combinedBounds.SetMinMax (combinedBounds.center + obj.transform.position - combinedBounds.extents,
+			combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
 				combinedBounds.center + obj.transform.position + combinedBounds.extents);
 
-			List<Vector3> pts = new List<Vector3> (new Vector3[]{
-				new Vector3(combinedBounds.min.x,combinedBounds.min.y,combinedBounds.min.z),
-				new Vector3(combinedBounds.min.x,combinedBounds.min.y,combinedBounds.max.z),
-				new Vector3(combinedBounds.min.x,combinedBounds.max.y,combinedBounds.min.z),
-				new Vector3(combinedBounds.min.x,combinedBounds.max.y,combinedBounds.max.z),
-				new Vector3(combinedBounds.max.x,combinedBounds.min.y,combinedBounds.min.z),
-				new Vector3(combinedBounds.max.x,combinedBounds.min.y,combinedBounds.max.z),
-				new Vector3(combinedBounds.max.x,combinedBounds.max.y,combinedBounds.min.z),
-				new Vector3(combinedBounds.max.x,combinedBounds.max.y,combinedBounds.max.z),
-				new Vector3(combinedBounds.min.x,combinedBounds.center.y,combinedBounds.center.z),
-				new Vector3(combinedBounds.max.x,combinedBounds.center.y,combinedBounds.center.z),
-				new Vector3(combinedBounds.center.x,combinedBounds.min.y,combinedBounds.center.z),
-				new Vector3(combinedBounds.center.x,combinedBounds.max.y,combinedBounds.center.z),
-				new Vector3(combinedBounds.center.x,combinedBounds.center.y,combinedBounds.min.z),
-				new Vector3(combinedBounds.center.x,combinedBounds.center.y,combinedBounds.max.z)
+			List<Vector3> pts = new List<Vector3>(new Vector3[] {
+				new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.center.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.center.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.min.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.max.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.max.z)
 			});
 
 			ObjBounds objBounds = new ObjBounds(combinedBounds.center);
-			List<Vector3> points = new List<Vector3> ();
+			List<Vector3> points = new List<Vector3>();
 			foreach (Vector3 pt in pts) {
-				points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
+				points.Add(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles));
 			}
 
-			objBounds.Points = new List<Vector3> (points);
+			objBounds.Points = new List<Vector3>(points);
 
 			return objBounds;
 		}
 
 		// returns current position-centered object bounds
 		public static ObjBounds GetObjectOrientedSize(GameObject obj, bool excludeChildren) {
-			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter> ();
+			MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
 
-            // me: I hate computer scientists!  They never document their code properly!
-            // also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
-            //			Debug.Log (obj1);
-            MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter> ().Where (
-	            m => (Helper.GetMostImmediateParentVoxeme (m.gameObject) != obj) && (m.gameObject.GetComponent<Voxeme> () != null) &&
-	            (!obj.GetComponent<Voxeme> ().opVox.Type.Components.Select (
-	                c => c.Item2).ToList ().Contains (m.gameObject))).ToArray ();
-			List<GameObject> exclude = new List<GameObject> ();
+			// me: I hate computer scientists!  They never document their code properly!
+			// also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
+			//			Debug.Log (obj1);
+			MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
+				m => (Helper.GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
+				     (m.gameObject.GetComponent<Voxeme>() != null) &&
+				     (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
+					     c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
+			List<GameObject> exclude = new List<GameObject>();
 			foreach (MeshFilter mesh in children) {
-				Debug.Log (mesh.gameObject);
-				exclude.Add (mesh.gameObject);
+				Debug.Log(mesh.gameObject);
+				exclude.Add(mesh.gameObject);
 			}
 
-			Bounds combinedBounds = new Bounds (Vector3.zero, Vector3.zero);
+			Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
 
 			foreach (MeshFilter mesh in meshes) {
-				if (!exclude.Contains (mesh.gameObject)) {
-                    Debug.Log(string.Format("{0}: Adding {1} to combined bounds", obj, mesh.gameObject));
-                    // create a temp bounds of size of mesh, centered on origin
-					Bounds temp = new Bounds (Vector3.zero, mesh.mesh.bounds.size);
-                    // scale it by object size
-					Vector3 min = new Vector3 (temp.min.x * mesh.gameObject.transform.lossyScale.x,
-						             temp.min.y * mesh.gameObject.transform.lossyScale.y,
-						             temp.min.z * mesh.gameObject.transform.lossyScale.z);
-                    min = Helper.RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
-					Vector3 max = new Vector3 (temp.max.x * mesh.gameObject.transform.lossyScale.x,
-						             temp.max.y * mesh.gameObject.transform.lossyScale.y,
-						             temp.max.z * mesh.gameObject.transform.lossyScale.z);
-                    max = Helper.RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
-                    // set min and max
-					temp.SetMinMax (min, max);
-                    // combined bounds = current combined bounds stretched to encapsulate this temp
-					combinedBounds.Encapsulate (temp);
+				if (!exclude.Contains(mesh.gameObject)) {
+					Debug.Log(string.Format("{0}: Adding {1} to combined bounds", obj, mesh.gameObject));
+					// create a temp bounds of size of mesh, centered on origin
+					Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
+					// scale it by object size
+					Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
+						temp.min.y * mesh.gameObject.transform.lossyScale.y,
+						temp.min.z * mesh.gameObject.transform.lossyScale.z);
+					min = Helper.RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
+					Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
+						temp.max.y * mesh.gameObject.transform.lossyScale.y,
+						temp.max.z * mesh.gameObject.transform.lossyScale.z);
+					max = Helper.RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
+					// set min and max
+					temp.SetMinMax(min, max);
+					// combined bounds = current combined bounds stretched to encapsulate this temp
+					combinedBounds.Encapsulate(temp);
 				}
 			}
 
-            //Debug.Log(string.Format("center({0}):{1}", obj,Helper.VectorToParsable(combinedBounds.center)));
-            //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-            //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
-            combinedBounds.SetMinMax (combinedBounds.center + Helper.GetObjectWorldSize(obj).center - combinedBounds.extents,
-                combinedBounds.center + Helper.GetObjectWorldSize(obj).center + combinedBounds.extents);
-            //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
-            //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-            //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+			//Debug.Log(string.Format("center({0}):{1}", obj,Helper.VectorToParsable(combinedBounds.center)));
+			//Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
+			//Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+			combinedBounds.SetMinMax(
+				combinedBounds.center + Helper.GetObjectWorldSize(obj).center - combinedBounds.extents,
+				combinedBounds.center + Helper.GetObjectWorldSize(obj).center + combinedBounds.extents);
+			//Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
+			//Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
+			//Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
 
-            Debug.Log(Helper.VectorToParsable(combinedBounds.size));
+			Debug.Log(Helper.VectorToParsable(combinedBounds.size));
 
-			List<Vector3> pts = new List<Vector3> (new Vector3[] {
-				new Vector3 (combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
-				new Vector3 (combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
-				new Vector3 (combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
-				new Vector3 (combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
-				new Vector3 (combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
-				new Vector3 (combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
-				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
-				new Vector3 (combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
-				new Vector3 (combinedBounds.min.x, combinedBounds.center.y, combinedBounds.center.z),
-				new Vector3 (combinedBounds.max.x, combinedBounds.center.y, combinedBounds.center.z),
-				new Vector3 (combinedBounds.center.x, combinedBounds.min.y, combinedBounds.center.z),
-				new Vector3 (combinedBounds.center.x, combinedBounds.max.y, combinedBounds.center.z),
-				new Vector3 (combinedBounds.center.x, combinedBounds.center.y, combinedBounds.min.z),
-				new Vector3 (combinedBounds.center.x, combinedBounds.center.y, combinedBounds.max.z)
+			List<Vector3> pts = new List<Vector3>(new Vector3[] {
+				new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
+				new Vector3(combinedBounds.min.x, combinedBounds.center.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.max.x, combinedBounds.center.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.min.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.max.y, combinedBounds.center.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.min.z),
+				new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.max.z)
 			});
 
-            Bounds bounds = new Bounds(pts[0],Vector3.zero);
-			ObjBounds objBounds = new ObjBounds (combinedBounds.center);
-            //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(objBounds.Center)));
-			List<Vector3> points = new List<Vector3> ();
+			Bounds bounds = new Bounds(pts[0], Vector3.zero);
+			ObjBounds objBounds = new ObjBounds(combinedBounds.center);
+			//Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(objBounds.Center)));
+			List<Vector3> points = new List<Vector3>();
 			foreach (Vector3 pt in pts) {
-                //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(pt)));
-                //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
-                //points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
-                points.Add(pt);
-                bounds.Encapsulate(pt);
+				//Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(pt)));
+				//Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
+				//points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
+				points.Add(pt);
+				bounds.Encapsulate(pt);
 			}
 
-            Debug.Log(Helper.VectorToParsable(bounds.size));
+			Debug.Log(Helper.VectorToParsable(bounds.size));
 
-			objBounds.Points = new List<Vector3> (points);
+			objBounds.Points = new List<Vector3>(points);
 
 			return objBounds;
 		}
@@ -869,7 +867,7 @@ namespace Global {
 		public static Bounds GetObjectWorldSize(GameObject obj) {
 			Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
 
-			Bounds combinedBounds = new Bounds (obj.transform.position, Vector3.zero);
+			Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
 
 			foreach (Renderer renderer in renderers) {
 				combinedBounds.Encapsulate(renderer.bounds);
@@ -882,12 +880,12 @@ namespace Global {
 		public static Bounds GetObjectWorldSize(GameObject obj, List<GameObject> exclude) {
 			Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
 
-			Bounds combinedBounds = new Bounds (obj.transform.position, Vector3.zero);
+			Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
 
 			foreach (Renderer renderer in renderers) {
-				if (!exclude.Contains (renderer.transform.gameObject)) {
+				if (!exclude.Contains(renderer.transform.gameObject)) {
 					//Debug.Log (renderer.transform.gameObject.name);
-					combinedBounds.Encapsulate (renderer.bounds);
+					combinedBounds.Encapsulate(renderer.bounds);
 				}
 			}
 
@@ -896,13 +894,13 @@ namespace Global {
 
 		// get the collective bounds of the objects in the current world
 		public static Bounds GetObjectWorldSize(List<GameObject> objs) {
-			Bounds combinedBounds = new Bounds (objs[0].transform.position, Vector3.zero);
+			Bounds combinedBounds = new Bounds(objs[0].transform.position, Vector3.zero);
 
 			foreach (GameObject obj in objs) {
-				Renderer[] renderers = obj.GetComponentsInChildren<Renderer> ();
+				Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
 
 				foreach (Renderer renderer in renderers) {
-					combinedBounds.Encapsulate (renderer.bounds);
+					combinedBounds.Encapsulate(renderer.bounds);
 				}
 			}
 
@@ -911,24 +909,24 @@ namespace Global {
 
 		// get the collective bounds of the objects in the current world
 		public static Bounds GetPointsWorldSize(List<Vector3> pts) {
-			Bounds combinedBounds = new Bounds (pts[0], Vector3.zero);
+			Bounds combinedBounds = new Bounds(pts[0], Vector3.zero);
 
 			foreach (Vector3 pt in pts) {
-				combinedBounds.Encapsulate (pt);
+				combinedBounds.Encapsulate(pt);
 			}
 
 			return combinedBounds;
 		}
 
 		public static Bounds GetObjectSize(object[] objs) {
-			Bounds starterBounds = (objs [0] as GameObject).GetComponentsInChildren<BoxCollider> ()[0].bounds;
+			Bounds starterBounds = (objs[0] as GameObject).GetComponentsInChildren<BoxCollider>()[0].bounds;
 			Bounds combinedBounds = starterBounds;
 			//Debug.Log (combinedBounds.size);
 
 			foreach (object obj in objs) {
 				if (obj is GameObject) {
 					//Debug.Log ((obj as GameObject).name);
-					Renderer[] renderers = (obj as GameObject).GetComponentsInChildren<Renderer> ();
+					Renderer[] renderers = (obj as GameObject).GetComponentsInChildren<Renderer>();
 
 					foreach (Renderer renderer in renderers) {
 						//Bounds bounds = new Bounds(renderer.bounds.center,
@@ -937,87 +935,95 @@ namespace Global {
 						//localBounds.size = new Vector3(localBounds.size.x * renderer.gameObject.transform.localScale.x,
 						//                               localBounds.size.y * renderer.gameObject.transform.localScale.y,
 						//                               localBounds.size.z * renderer.gameObject.transform.localScale.z);
-						combinedBounds.Encapsulate (renderer.bounds);
+						combinedBounds.Encapsulate(renderer.bounds);
 
 						//Debug.Log (combinedBounds.center);
 						//Debug.Log (combinedBounds.size);
 					}
 				}
 			}
-			
+
 			return combinedBounds;
 		}
 
-		public static Vector3 GetObjectMajorAxis (GameObject obj) {
-			Bounds bounds = GetObjectSize (obj);
-			Debug.Log (bounds);
+		public static Vector3 GetObjectMajorAxis(GameObject obj) {
+			Bounds bounds = GetObjectSize(obj);
+			Debug.Log(bounds);
 
-			List<float> dims = new List<float>(new float[]{bounds.size.x, bounds.size.y, bounds.size.z});
+			List<float> dims = new List<float>(new float[] {bounds.size.x, bounds.size.y, bounds.size.z});
 
 			int longest = dims.IndexOf(dims.Max());
 			//Debug.Log (bounds.size.x);
 			//Debug.Log (bounds.size.y);
 			//Debug.Log (bounds.size.z);
-			Debug.Log (longest);
+			Debug.Log(longest);
 
 			Vector3 axis = Vector3.zero;
-			if (longest == 0) {			// x
+			if (longest == 0) {
+				// x
 				axis = Vector3.right;
 			}
-			else if (longest == 1) {	// y
+			else if (longest == 1) {
+				// y
 				axis = Vector3.up;
 			}
-			else if (longest == 2) {	// z
+			else if (longest == 2) {
+				// z
 				axis = Vector3.forward;
 			}
 
 			return axis;
 		}
 
-		public static Vector3 GetObjectMinorAxis (GameObject obj) {
-			Bounds bounds = GetObjectSize (obj);
-			Debug.Log (bounds);
+		public static Vector3 GetObjectMinorAxis(GameObject obj) {
+			Bounds bounds = GetObjectSize(obj);
+			Debug.Log(bounds);
 
-			List<float> dims = new List<float>(new float[]{bounds.size.x, bounds.size.y, bounds.size.z});
+			List<float> dims = new List<float>(new float[] {bounds.size.x, bounds.size.y, bounds.size.z});
 
 			int shortest = dims.IndexOf(dims.Min());
-			Debug.Log (bounds.size.x);
-			Debug.Log (bounds.size.y);
-			Debug.Log (bounds.size.z);
-			Debug.Log (shortest);
+			Debug.Log(bounds.size.x);
+			Debug.Log(bounds.size.y);
+			Debug.Log(bounds.size.z);
+			Debug.Log(shortest);
 
 			Vector3 axis = Vector3.zero;
-			if (shortest == 0) {		// x
+			if (shortest == 0) {
+				// x
 				axis = Vector3.right;
 			}
-			else if (shortest == 1) {	// y
+			else if (shortest == 1) {
+				// y
 				axis = Vector3.up;
 			}
-			else if (shortest == 2) {	// z
+			else if (shortest == 2) {
+				// z
 				axis = Vector3.forward;
 			}
 
 			return axis;
 		}
 
-		public static Vector3 ClosestExteriorPoint (GameObject obj, Vector3 pos) {
+		public static Vector3 ClosestExteriorPoint(GameObject obj, Vector3 pos) {
 			Vector3 point = Vector3.zero;
-			Bounds bounds = GetObjectWorldSize (obj);
+			Bounds bounds = GetObjectWorldSize(obj);
 
-			if (bounds.ClosestPoint (pos) == pos) {	// if point inside bounding box
-				List<Vector3> boundsPoints = new List<Vector3> (new Vector3[] {
+			if (bounds.ClosestPoint(pos) == pos) {
+				// if point inside bounding box
+				List<Vector3> boundsPoints = new List<Vector3>(new Vector3[] {
 					bounds.min,
-					new Vector3 (bounds.min.x, bounds.min.y, bounds.max.z),
-					new Vector3 (bounds.min.x, bounds.max.y, bounds.min.z),
-					new Vector3 (bounds.min.x, bounds.max.y, bounds.max.z),
-					new Vector3 (bounds.max.x, bounds.min.y, bounds.min.z),
-					new Vector3 (bounds.max.x, bounds.min.y, bounds.max.z),
-					new Vector3 (bounds.max.x, bounds.max.y, bounds.min.z),
-					bounds.max });
+					new Vector3(bounds.min.x, bounds.min.y, bounds.max.z),
+					new Vector3(bounds.min.x, bounds.max.y, bounds.min.z),
+					new Vector3(bounds.min.x, bounds.max.y, bounds.max.z),
+					new Vector3(bounds.max.x, bounds.min.y, bounds.min.z),
+					new Vector3(bounds.max.x, bounds.min.y, bounds.max.z),
+					new Vector3(bounds.max.x, bounds.max.y, bounds.min.z),
+					bounds.max
+				});
 
 				float dist = float.MaxValue;
 				foreach (Vector3 boundsPoint in boundsPoints) {
-					float testDist = Vector3.Distance (pos, boundsPoint);
+					float testDist = Vector3.Distance(pos, boundsPoint);
 					if (testDist < dist) {
 						dist = testDist;
 						point = boundsPoint;
@@ -1041,9 +1047,11 @@ namespace Global {
 		public static bool FitsIn(Bounds obj1, Bounds obj2, bool threeDimensional = false) {
 			bool fits = true;
 
-			if ((obj1.size.x >= obj2.size.x) ||	// check for object bounds exceeding along all axes but the axis of major orientaton
+			if (
+				(obj1.size.x >=
+				 obj2.size.x) || // check for object bounds exceeding along all axes but the axis of major orientaton
 				//(obj1.size.y > obj2.size.y) ||
-			    (obj1.size.z >= obj2.size.z)) {
+				(obj1.size.z >= obj2.size.z)) {
 				fits = false;
 
 				if (threeDimensional) {
@@ -1059,20 +1067,23 @@ namespace Global {
 			bool covers = true;
 
 			if (Helper.Parallel(dir, Constants.xAxis)) {
-				if ((obj1.size.y+Constants.EPSILON < obj2.size.y) ||	// check for object bounds exceeding along all axes but dir
-					(obj1.size.z+Constants.EPSILON < obj2.size.z)) {
+				if ((obj1.size.y + Constants.EPSILON <
+				     obj2.size.y) || // check for object bounds exceeding along all axes but dir
+				    (obj1.size.z + Constants.EPSILON < obj2.size.z)) {
 					covers = false;
 				}
 			}
 			else if (Helper.Parallel(dir, Constants.yAxis)) {
-				if ((obj1.size.x+Constants.EPSILON < obj2.size.x) ||	// check for object bounds exceeding along all axes but dir
-					(obj1.size.z+Constants.EPSILON < obj2.size.z)) {
+				if ((obj1.size.x + Constants.EPSILON <
+				     obj2.size.x) || // check for object bounds exceeding along all axes but dir
+				    (obj1.size.z + Constants.EPSILON < obj2.size.z)) {
 					covers = false;
 				}
 			}
 			else if (Helper.Parallel(dir, Constants.zAxis)) {
-				if ((obj1.size.x+Constants.EPSILON < obj2.size.x) ||	// check for object bounds exceeding along all axes but dir
-					(obj1.size.y+Constants.EPSILON < obj2.size.y)) {
+				if ((obj1.size.x + Constants.EPSILON <
+				     obj2.size.x) || // check for object bounds exceeding along all axes but dir
+				    (obj1.size.y + Constants.EPSILON < obj2.size.y)) {
 					covers = false;
 				}
 			}
@@ -1085,13 +1096,14 @@ namespace Global {
 			bool supported = false;
 			GameObject obj = obj1;
 
-			while (obj.GetComponent<Voxeme> ().supportingSurface != null) {
+			while (obj.GetComponent<Voxeme>().supportingSurface != null) {
 				//Debug.Log (obj);
-				if (obj.GetComponent<Voxeme> ().supportingSurface.gameObject.transform.root.gameObject == obj2) {
+				if (obj.GetComponent<Voxeme>().supportingSurface.gameObject.transform.root.gameObject == obj2) {
 					supported = true;
 					break;
 				}
-				obj = obj.GetComponent<Voxeme> ().supportingSurface.gameObject.transform.root.gameObject;
+
+				obj = obj.GetComponent<Voxeme>().supportingSurface.gameObject.transform.root.gameObject;
 				//Debug.Log (obj);
 			}
 
@@ -1099,27 +1111,27 @@ namespace Global {
 		}
 
 		public static Region FindClearRegion(GameObject surface, GameObject testObj, float overhang = 0.0f) {
-			Region region = new Region ();
+			Region region = new Region();
 
-			Bounds surfaceBounds = GetObjectWorldSize (surface);
-			Bounds testBounds = GetObjectWorldSize (testObj);
+			Bounds surfaceBounds = GetObjectWorldSize(surface);
+			Bounds testBounds = GetObjectWorldSize(testObj);
 
-            region.min = new Vector3 (surfaceBounds.min.x - (testBounds.size.x*overhang) + testBounds.extents.x,
-                surfaceBounds.max.y, surfaceBounds.min.z - (testBounds.size.z*overhang) + testBounds.extents.z);
-            region.max = new Vector3 (surfaceBounds.max.x + (testBounds.size.x*overhang) - testBounds.extents.x,
-                surfaceBounds.max.y, surfaceBounds.max.z + (testBounds.size.z*overhang) - testBounds.extents.z);
+			region.min = new Vector3(surfaceBounds.min.x - (testBounds.size.x * overhang) + testBounds.extents.x,
+				surfaceBounds.max.y, surfaceBounds.min.z - (testBounds.size.z * overhang) + testBounds.extents.z);
+			region.max = new Vector3(surfaceBounds.max.x + (testBounds.size.x * overhang) - testBounds.extents.x,
+				surfaceBounds.max.y, surfaceBounds.max.z + (testBounds.size.z * overhang) - testBounds.extents.z);
 
-			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
-			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
-				                    UnityEngine.Random.Range (region.min.y, region.max.y),
-				                    UnityEngine.Random.Range (region.min.z, region.max.z));
+			Vector3 testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
+				UnityEngine.Random.Range(region.min.y, region.max.y),
+				UnityEngine.Random.Range(region.min.z, region.max.z));
 			bool clearRegionFound = false;
 			while (!clearRegionFound) {
 				testBounds.center = testPoint;
 				bool regionClear = true;
 				foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                    if ((voxeme.gameObject != surface) && (voxeme.gameObject.activeInHierarchy)) {
+					if ((voxeme.gameObject != surface) && (voxeme.gameObject.activeInHierarchy)) {
 						if (testBounds.Intersects(GetObjectWorldSize(voxeme.gameObject))) {
 							regionClear = false;
 							break;
@@ -1132,32 +1144,32 @@ namespace Global {
 					break;
 				}
 
-				testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
-					UnityEngine.Random.Range (region.min.y, region.max.y),
-					UnityEngine.Random.Range (region.min.z, region.max.z));
+				testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
+					UnityEngine.Random.Range(region.min.y, region.max.y),
+					UnityEngine.Random.Range(region.min.z, region.max.z));
 			}
 
 			region.min = testPoint - testBounds.extents;
 			region.max = testPoint + testBounds.extents;
-					
+
 			return region;
 		}
 
 		public static Region FindClearRegion(GameObject surface, Region region, GameObject testObj) {
-			Bounds testBounds = GetObjectWorldSize (testObj);
+			Bounds testBounds = GetObjectWorldSize(testObj);
 
-			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
-			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
-				UnityEngine.Random.Range (region.min.y, region.max.y),
-				UnityEngine.Random.Range (region.min.z, region.max.z));
+			Vector3 testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
+				UnityEngine.Random.Range(region.min.y, region.max.y),
+				UnityEngine.Random.Range(region.min.z, region.max.z));
 			bool clearRegionFound = false;
 			while (!clearRegionFound) {
 				testBounds.center = testPoint;
 				bool regionClear = true;
 				foreach (Voxeme voxeme in objSelector.allVoxemes) {
 					if (voxeme.gameObject != surface) {
-						if (testBounds.Intersects (Helper.GetObjectWorldSize (voxeme.gameObject))) {
+						if (testBounds.Intersects(Helper.GetObjectWorldSize(voxeme.gameObject))) {
 							regionClear = false;
 							break;
 						}
@@ -1169,9 +1181,9 @@ namespace Global {
 					break;
 				}
 
-				testPoint = new Vector3 (UnityEngine.Random.Range (region.min.x, region.max.x),
-					UnityEngine.Random.Range (region.min.y, region.max.y),
-					UnityEngine.Random.Range (region.min.z, region.max.z));
+				testPoint = new Vector3(UnityEngine.Random.Range(region.min.x, region.max.x),
+					UnityEngine.Random.Range(region.min.y, region.max.y),
+					UnityEngine.Random.Range(region.min.z, region.max.z));
 			}
 
 			region.min = testPoint - testBounds.extents;
@@ -1181,51 +1193,51 @@ namespace Global {
 		}
 
 		public static Region FindClearRegion(GameObject surface, Region[] regions, GameObject testObj) {
-			Region region = new Region ();
-			Bounds testBounds = GetObjectWorldSize (testObj);
+			Region region = new Region();
+			Bounds testBounds = GetObjectWorldSize(testObj);
 
-			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
-			Region intersection = new Region ();
-			intersection.min = regions [0].min;
-			intersection.max = regions [0].max;
+			Region intersection = new Region();
+			intersection.min = regions[0].min;
+			intersection.max = regions[0].max;
 
 			foreach (Region r in regions) {
 				if (r.min.x > intersection.min.x) {
-					intersection.min = new Vector3 (r.min.x, intersection.min.y, intersection.min.z);		
+					intersection.min = new Vector3(r.min.x, intersection.min.y, intersection.min.z);
 				}
 
 				if (r.min.y > intersection.min.y) {
-					intersection.min = new Vector3 (intersection.min.x, r.min.y, intersection.min.z);		
+					intersection.min = new Vector3(intersection.min.x, r.min.y, intersection.min.z);
 				}
 
 				if (r.min.z > intersection.min.z) {
-					intersection.min = new Vector3 (intersection.min.x, intersection.min.y, r.min.z);		
+					intersection.min = new Vector3(intersection.min.x, intersection.min.y, r.min.z);
 				}
 
 				if (r.max.x < intersection.max.x) {
-					intersection.max = new Vector3 (r.max.x, intersection.max.y, intersection.max.z);		
+					intersection.max = new Vector3(r.max.x, intersection.max.y, intersection.max.z);
 				}
 
 				if (r.max.y < intersection.max.y) {
-					intersection.max = new Vector3 (intersection.max.x, r.max.y, intersection.max.z);		
+					intersection.max = new Vector3(intersection.max.x, r.max.y, intersection.max.z);
 				}
 
 				if (r.max.z < intersection.max.z) {
-					intersection.max = new Vector3 (intersection.max.x, intersection.max.y, r.max.z);		
+					intersection.max = new Vector3(intersection.max.x, intersection.max.y, r.max.z);
 				}
 			}
 
-			Vector3 testPoint = new Vector3 (UnityEngine.Random.Range (intersection.min.x, intersection.max.x),
-				UnityEngine.Random.Range (intersection.min.y, intersection.max.y),
-				UnityEngine.Random.Range (intersection.min.z, intersection.max.z));
+			Vector3 testPoint = new Vector3(UnityEngine.Random.Range(intersection.min.x, intersection.max.x),
+				UnityEngine.Random.Range(intersection.min.y, intersection.max.y),
+				UnityEngine.Random.Range(intersection.min.z, intersection.max.z));
 			bool clearRegionFound = false;
 			while (!clearRegionFound) {
 				testBounds.center = testPoint;
 				bool regionClear = true;
 				foreach (Voxeme voxeme in objSelector.allVoxemes) {
 					if (voxeme.gameObject != surface) {
-						if (testBounds.Intersects (Helper.GetObjectWorldSize (voxeme.gameObject))) {
+						if (testBounds.Intersects(Helper.GetObjectWorldSize(voxeme.gameObject))) {
 							regionClear = false;
 							break;
 						}
@@ -1237,9 +1249,9 @@ namespace Global {
 					break;
 				}
 
-				testPoint = new Vector3 (UnityEngine.Random.Range (intersection.min.x, intersection.max.x),
-					UnityEngine.Random.Range (intersection.min.y, intersection.max.y),
-					UnityEngine.Random.Range (intersection.min.z, intersection.max.z));
+				testPoint = new Vector3(UnityEngine.Random.Range(intersection.min.x, intersection.max.x),
+					UnityEngine.Random.Range(intersection.min.y, intersection.max.y),
+					UnityEngine.Random.Range(intersection.min.z, intersection.max.z));
 			}
 
 			region.min = testPoint - testBounds.extents;
@@ -1249,22 +1261,22 @@ namespace Global {
 		}
 
 		public static Region RegionOfIntersection(Region r1, Region r2, MajorAxes.MajorAxis axis) {
-			Region intersection = new Region ();
+			Region intersection = new Region();
 
 			if (axis == MajorAxes.MajorAxis.X) {
 //				Debug.Log ("X");
-				intersection.min = new Vector3 (r1.max.x, Mathf.Max (r1.min.y, r2.min.y), Mathf.Max (r1.min.z, r2.min.z));
-				intersection.max = new Vector3 (r1.max.x, Mathf.Min (r1.max.y, r2.max.y), Mathf.Min (r1.max.z, r2.max.z));
+				intersection.min = new Vector3(r1.max.x, Mathf.Max(r1.min.y, r2.min.y), Mathf.Max(r1.min.z, r2.min.z));
+				intersection.max = new Vector3(r1.max.x, Mathf.Min(r1.max.y, r2.max.y), Mathf.Min(r1.max.z, r2.max.z));
 			}
 			else if (axis == MajorAxes.MajorAxis.Y) {
 //				Debug.Log ("Y");
-				intersection.min = new Vector3 (Mathf.Max (r1.min.x, r2.min.x), r1.max.y, Mathf.Max (r1.min.z, r2.min.z));
-				intersection.max = new Vector3 (Mathf.Min (r1.max.x, r2.max.x), r1.max.y, Mathf.Min (r1.max.z, r2.max.z));
+				intersection.min = new Vector3(Mathf.Max(r1.min.x, r2.min.x), r1.max.y, Mathf.Max(r1.min.z, r2.min.z));
+				intersection.max = new Vector3(Mathf.Min(r1.max.x, r2.max.x), r1.max.y, Mathf.Min(r1.max.z, r2.max.z));
 			}
 			else if (axis == MajorAxes.MajorAxis.Z) {
 //				Debug.Log ("Z");
-				intersection.min = new Vector3 (Mathf.Max (r1.min.x, r2.min.x), Mathf.Max (r1.min.y, r2.min.y), r1.max.z);
-				intersection.max = new Vector3 (Mathf.Min (r1.max.x, r2.max.x), Mathf.Min (r1.max.y, r2.max.y), r1.max.z);
+				intersection.min = new Vector3(Mathf.Max(r1.min.x, r2.min.x), Mathf.Max(r1.min.y, r2.min.y), r1.max.z);
+				intersection.max = new Vector3(Mathf.Min(r1.max.x, r2.max.x), Mathf.Min(r1.max.y, r2.max.y), r1.max.z);
 			}
 
 			return intersection;
@@ -1272,21 +1284,21 @@ namespace Global {
 
 		public static string RegionToString(Region region) {
 			if (region == null) {
-				return "null";	
+				return "null";
 			}
 			else {
-				return string.Format ("Region(min:{0}, max:{1})", region.min.ToString (), region.max.ToString ());
+				return string.Format("Region(min:{0}, max:{1})", region.min.ToString(), region.max.ToString());
 			}
 		}
 
-		public static bool RegionsEqual (Region r1, Region r2) {
+		public static bool RegionsEqual(Region r1, Region r2) {
 			if (r1 == null && r2 == null) {
-				return true;	
+				return true;
 			}
 			else if (r1 == null || r2 == null) {
 				return false;
 			}
-			else if (Helper.CloseEnough (r1.min, r2.min) && Helper.CloseEnough (r1.max, r2.max)) {
+			else if (Helper.CloseEnough(r1.min, r2.min) && Helper.CloseEnough(r1.max, r2.max)) {
 				return true;
 			}
 			else {
@@ -1306,11 +1318,11 @@ namespace Global {
 
 		// two quaternions are within epsilon
 		public static bool CloseEnough(Quaternion q1, Quaternion q2) {
-			return (Quaternion.Angle(q1,q2) < Constants.EPSILON);
+			return (Quaternion.Angle(q1, q2) < Constants.EPSILON);
 		}
 
 		public static bool IsTopmostVoxemeInHierarchy(GameObject obj) {
-			Voxeme voxeme = obj.GetComponent<Voxeme> ();
+			Voxeme voxeme = obj.GetComponent<Voxeme>();
 			bool r = false;
 
 			if (voxeme != null) {
@@ -1337,8 +1349,8 @@ namespace Global {
 
 			while (testObject.transform.parent != null) {
 				testObject = testObject.transform.parent.gameObject;
-				if (testObject.GetComponent<Rigging> () != null) {
-					if (testObject.GetComponent<Rigging> ().enabled) {
+				if (testObject.GetComponent<Rigging>() != null) {
+					if (testObject.GetComponent<Rigging>().enabled) {
 						voxObject = testObject;
 						break;
 					}
@@ -1354,7 +1366,7 @@ namespace Global {
 			GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 			foreach (GameObject o in allObjects) {
-				if (Helper.GetObjectWorldSize (o).Contains (point)) {
+				if (Helper.GetObjectWorldSize(o).Contains(point)) {
 					objs.Add(o);
 				}
 			}
@@ -1362,66 +1374,63 @@ namespace Global {
 			return objs;
 		}
 
-        public static float GetMinYBoundAtTarget(GameObject obj, Vector3 targetPoint) {
-            float minYBound = 0.0f;
+		public static float GetMinYBoundAtTarget(GameObject obj, Vector3 targetPoint) {
+			float minYBound = 0.0f;
 
-            Bounds objBounds = Helper.GetObjectWorldSize(obj);
+			Bounds objBounds = Helper.GetObjectWorldSize(obj);
 
-            Debug.Log(Helper.VectorToParsable(targetPoint));
-            Vector3 rayStartX = new Vector3(objBounds.min.x - Constants.EPSILON,
-                objBounds.min.y + Constants.EPSILON, objBounds.center.z);
-            Vector3 contactPointX = Helper.RayIntersectionPoint(rayStartX, Vector3.right);
-            //contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
+			Debug.Log(Helper.VectorToParsable(targetPoint));
+			Vector3 rayStartX = new Vector3(objBounds.min.x - Constants.EPSILON,
+				objBounds.min.y + Constants.EPSILON, objBounds.center.z);
+			Vector3 contactPointX = Helper.RayIntersectionPoint(rayStartX, Vector3.right);
+			//contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
 
-            Vector3 rayStartZ = new Vector3(objBounds.center.x,
-                objBounds.min.y + Constants.EPSILON, objBounds.min.z - Constants.EPSILON);
-            Vector3 contactPointZ = Helper.RayIntersectionPoint(rayStartZ, Vector3.forward);
+			Vector3 rayStartZ = new Vector3(objBounds.center.x,
+				objBounds.min.y + Constants.EPSILON, objBounds.min.z - Constants.EPSILON);
+			Vector3 contactPointZ = Helper.RayIntersectionPoint(rayStartZ, Vector3.forward);
 
-            //Debug.Log(Helper.VectorToParsable(rayStartX));
-            //Debug.Log(Helper.VectorToParsable(rayStartZ));
-            //Debug.Log(Helper.VectorToParsable(contactPointX));
-            //Debug.Log(Helper.VectorToParsable(contactPointZ));
-            //Debug.Log(Helper.VectorToParsable(contactPointX - objBounds.center));
-            //Debug.Log(Helper.VectorToParsable(contactPointZ - objBounds.center));
-            //Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
-            //new Vector3((contactPointZ.x-objBounds.center.x) + (targetPoint.x-objBounds.center.x),
-            //    targetPoint.y, (contactPointZ.z-objBounds.center.z + (targetPoint.z-objBounds.center.z))) :
-            //new Vector3((contactPointX.x-objBounds.center.x) + (targetPoint.x - objBounds.center.x),
-            //targetPoint.y, (contactPointX.z-objBounds.center.z + (targetPoint.z - objBounds.center.z)));
-            Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
-                targetPoint + (contactPointZ - objBounds.center) : targetPoint + (contactPointX - objBounds.center);
-            contactPoint = new Vector3(contactPoint.x, targetPoint.y, contactPoint.z);
-            Debug.Log(Helper.VectorToParsable(contactPoint));
+			//Debug.Log(Helper.VectorToParsable(rayStartX));
+			//Debug.Log(Helper.VectorToParsable(rayStartZ));
+			//Debug.Log(Helper.VectorToParsable(contactPointX));
+			//Debug.Log(Helper.VectorToParsable(contactPointZ));
+			//Debug.Log(Helper.VectorToParsable(contactPointX - objBounds.center));
+			//Debug.Log(Helper.VectorToParsable(contactPointZ - objBounds.center));
+			//Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
+			//new Vector3((contactPointZ.x-objBounds.center.x) + (targetPoint.x-objBounds.center.x),
+			//    targetPoint.y, (contactPointZ.z-objBounds.center.z + (targetPoint.z-objBounds.center.z))) :
+			//new Vector3((contactPointX.x-objBounds.center.x) + (targetPoint.x - objBounds.center.x),
+			//targetPoint.y, (contactPointX.z-objBounds.center.z + (targetPoint.z - objBounds.center.z)));
+			Vector3 contactPoint = (contactPointZ.y < contactPointX.y)
+				? targetPoint + (contactPointZ - objBounds.center)
+				: targetPoint + (contactPointX - objBounds.center);
+			contactPoint = new Vector3(contactPoint.x, targetPoint.y, contactPoint.z);
+			Debug.Log(Helper.VectorToParsable(contactPoint));
 
-            RaycastHit[] hits;
+			RaycastHit[] hits;
 
-            //      hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
-            hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
-            List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[])hits);
-            hits = hitList.OrderBy(h => h.distance).ToArray();
-            foreach (RaycastHit hit in hits)
-            {
-                if (hit.collider.gameObject.GetComponent<BoxCollider>() != null)
-                {
-                    Debug.Log(hit.collider.gameObject);
-                    if (!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger)
-                    {
-                        Debug.Log(hit.collider.gameObject);
-                        if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-                            Helper.GetObjectWorldSize(obj), true))
-                        {
-                            Debug.Log(hit.collider.gameObject);
-                            GameObject supportingSurface = hit.collider.gameObject;
-                            minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
-                                     
-                            break;
-                        }
-                    }
-                }
-            }
+			//      hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
+			hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
+			List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+			hits = hitList.OrderBy(h => h.distance).ToArray();
+			foreach (RaycastHit hit in hits) {
+				if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
+					Debug.Log(hit.collider.gameObject);
+					if (!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) {
+						Debug.Log(hit.collider.gameObject);
+						if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
+							Helper.GetObjectWorldSize(obj), true)) {
+							Debug.Log(hit.collider.gameObject);
+							GameObject supportingSurface = hit.collider.gameObject;
+							minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
 
-            return minYBound;
-        }
+							break;
+						}
+					}
+				}
+			}
+
+			return minYBound;
+		}
 	}
 
 
@@ -1430,9 +1439,9 @@ namespace Global {
 	/// </summary>
 	public static class PhysicsHelper {
 		public static void ResolveAllPhysicsDiscrepancies(bool macroEventSatisfied) {
-			ObjectSelector objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 			foreach (Voxeme voxeme in objSelector.allVoxemes) {
-				ResolvePhysicsDiscrepancies (voxeme.gameObject, macroEventSatisfied);
+				ResolvePhysicsDiscrepancies(voxeme.gameObject, macroEventSatisfied);
 			}
 		}
 
@@ -1445,17 +1454,19 @@ namespace Global {
 		}
 
 		public static void ResolvePhysicsRotationDiscrepancies(GameObject obj, bool macroEventSatisfied) {
-			Voxeme voxComponent = obj.GetComponent<Voxeme> ();
+			Voxeme voxComponent = obj.GetComponent<Voxeme>();
 
 			// find the smallest displacement angle between an axis on the main body and an axis on this rigidbody
 			float displacementAngle = 360.0f;
 			Quaternion rigidbodyRotation = Quaternion.identity;
-			Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody> ();
+			Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();
 			foreach (Rigidbody rigidbody in rigidbodies) {
 				foreach (Vector3 mainBodyAxis in Constants.Axes.Values) {
 					foreach (Vector3 rigidbodyAxis in Constants.Axes.Values) {
-						if (Vector3.Angle (obj.transform.rotation * mainBodyAxis, rigidbody.rotation * rigidbodyAxis) < displacementAngle) {
-							displacementAngle = Vector3.Angle (obj.transform.rotation * mainBodyAxis, rigidbody.rotation * rigidbodyAxis);
+						if (Vector3.Angle(obj.transform.rotation * mainBodyAxis, rigidbody.rotation * rigidbodyAxis) <
+						    displacementAngle) {
+							displacementAngle = Vector3.Angle(obj.transform.rotation * mainBodyAxis,
+								rigidbody.rotation * rigidbodyAxis);
 							rigidbodyRotation = rigidbody.rotation;
 						}
 					}
@@ -1510,17 +1521,19 @@ namespace Global {
 //						obj.transform.rotation = obj.transform.rotation *
 //							(rigidbodies [0].transform.localRotation * 
 //								Quaternion.Inverse (Quaternion.Euler (voxComponent.rotationalDisplacement [rigidbodies [0].gameObject])));
-							//(rigidbodies [0].transform.localRotation *
+						//(rigidbodies [0].transform.localRotation *
 //							obj.transform.rotation * Quaternion.Inverse (Quaternion.Euler (voxComponent.rotationalDisplacement [rigidbodies [0].gameObject])));
-						obj.transform.rotation = rigidbodies [0].transform.rotation *
-							Quaternion.Inverse (Quaternion.Euler (voxComponent.rotationalDisplacement [rigidbodies [0].gameObject]));
+						obj.transform.rotation = rigidbodies[0].transform.rotation *
+						                         Quaternion.Inverse(Quaternion.Euler(
+							                         voxComponent.rotationalDisplacement[rigidbodies[0].gameObject]));
 						voxComponent.targetRotation = obj.transform.rotation.eulerAngles;
 						//Debug.Log (obj.transform.rotation.eulerAngles);
 
 						foreach (Rigidbody rigidbody in rigidbodies) {
-							if (voxComponent.rotationalDisplacement.ContainsKey (rigidbody.gameObject)) {
+							if (voxComponent.rotationalDisplacement.ContainsKey(rigidbody.gameObject)) {
 								//Debug.Log (rigidbody.name);
-								rigidbody.transform.localEulerAngles = voxComponent.rotationalDisplacement [rigidbody.gameObject];
+								rigidbody.transform.localEulerAngles =
+									voxComponent.rotationalDisplacement[rigidbody.gameObject];
 							}
 						}
 
@@ -1550,18 +1563,25 @@ namespace Global {
 //						ResolvePhysicsRotationDiscepancies (child.gameObject);
 
 								if (macroEventSatisfied) {
-									child.transform.localRotation = voxComponent.parentToChildRotationOffset [child.gameObject];
+									child.transform.localRotation =
+										voxComponent.parentToChildRotationOffset[child.gameObject];
 									//voxComponent.parentToChildRotationOffset [child.gameObject] = child.transform.localRotation;
-									child.transform.rotation = voxComponent.gameObject.transform.rotation * child.transform.localRotation;
-								} else {
-									voxComponent.parentToChildRotationOffset [child.gameObject] = child.transform.localRotation;
+									child.transform.rotation =
+										voxComponent.gameObject.transform.rotation * child.transform.localRotation;
+								}
+								else {
+									voxComponent.parentToChildRotationOffset[child.gameObject] =
+										child.transform.localRotation;
 									child.targetRotation = child.transform.rotation.eulerAngles;
 								}
-								child.transform.localPosition = Helper.RotatePointAroundPivot (voxComponent.parentToChildPositionOffset [child.gameObject],
+
+								child.transform.localPosition = Helper.RotatePointAroundPivot(
+									voxComponent.parentToChildPositionOffset[child.gameObject],
 									Vector3.zero, voxComponent.gameObject.transform.eulerAngles);
 								//child.transform.localPosition = Helper.RotatePointAroundPivot (child.transform.localEulerAngles,
 								//	Vector3.zero, voxComponent.gameObject.transform.eulerAngles);
-								child.transform.position = voxComponent.gameObject.transform.position + child.transform.localPosition;
+								child.transform.position =
+									voxComponent.gameObject.transform.position + child.transform.localPosition;
 								child.targetPosition = child.transform.position;
 							}
 						}
@@ -1571,22 +1591,25 @@ namespace Global {
 		}
 
 		public static void ResolvePhysicsPositionDiscrepancies(GameObject obj, bool macroEventSatisfied) {
-			Voxeme voxComponent = obj.GetComponent<Voxeme> ();
+			Voxeme voxComponent = obj.GetComponent<Voxeme>();
 			//Debug.Break ();
 			// find the displacement between the main body and this rigidbody
 			float displacement = float.MaxValue;
-			Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody> ();
+			Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();
 			//Debug.Log (obj.name);
 			foreach (Rigidbody rigidbody in rigidbodies) {
-				if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
-				//	if (rigidbody.transform.localPosition.magnitude > voxComponent.displacement [rigidbody.gameObject].magnitude+Constants.EPSILON) {
-					if (rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude < displacement) {
-	//					Debug.Log (rigidbody.name);
-	//					Debug.Log (Helper.VectorToParsable (obj.transform.position));
-	//					Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
-						displacement = rigidbody.transform.localPosition.magnitude-voxComponent.displacement [rigidbody.gameObject].magnitude;
+				if (voxComponent.displacement.ContainsKey(rigidbody.gameObject)) {
+					//	if (rigidbody.transform.localPosition.magnitude > voxComponent.displacement [rigidbody.gameObject].magnitude+Constants.EPSILON) {
+					if (rigidbody.transform.localPosition.magnitude -
+					    voxComponent.displacement[rigidbody.gameObject].magnitude < displacement) {
+						//					Debug.Log (rigidbody.name);
+						//					Debug.Log (Helper.VectorToParsable (obj.transform.position));
+						//					Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
+						displacement = rigidbody.transform.localPosition.magnitude -
+						               voxComponent.displacement[rigidbody.gameObject].magnitude;
 					}
-				//	}
+
+					//	}
 				}
 			}
 
@@ -1602,7 +1625,9 @@ namespace Global {
 //						Debug.Log (rigidbodies [0].name);
 //						Debug.Log (rigidbodies [0].transform.position);
 //						Debug.Log (Helper.VectorToParsable(voxComponent.displacement [rigidbodies[0].gameObject]));
-						obj.transform.position = rigidbodies [0].transform.position - (obj.transform.rotation * voxComponent.displacement [rigidbodies[0].gameObject]);
+						obj.transform.position = rigidbodies[0].transform.position -
+						                         (obj.transform.rotation *
+						                          voxComponent.displacement[rigidbodies[0].gameObject]);
 						//Debug.Log (obj.name);
 						//Debug.Log (obj.transform.position);
 						//obj.transform.position = rigidbodies [0].transform.localPosition - voxComponent.displacement [rigidbodies[0].gameObject] +
@@ -1616,9 +1641,9 @@ namespace Global {
 						//Debug.Log (Helper.VectorToParsable (voxComponent.displacement [rigidbodies[0].name]));
 
 						foreach (Rigidbody rigidbody in rigidbodies) {
-							if (voxComponent.displacement.ContainsKey (rigidbody.gameObject)) {
+							if (voxComponent.displacement.ContainsKey(rigidbody.gameObject)) {
 								//								Debug.Log (rigidbody.name);
-								rigidbody.transform.localPosition = voxComponent.displacement [rigidbody.gameObject];
+								rigidbody.transform.localPosition = voxComponent.displacement[rigidbody.gameObject];
 							}
 						}
 					}
@@ -1634,7 +1659,8 @@ namespace Global {
 								//						ResolvePhysicsPositionDiscepancies (child.gameObject);
 								//						ResolvePhysicsRotationDiscepancies (child.gameObject);
 								//Debug.Log ("Moving child: " + gameObject.name);
-								child.transform.localPosition = voxComponent.parentToChildPositionOffset [child.gameObject];
+								child.transform.localPosition =
+									voxComponent.parentToChildPositionOffset[child.gameObject];
 								child.targetPosition = child.transform.position;
 							}
 						}
@@ -1644,17 +1670,18 @@ namespace Global {
 		}
 
 		public static float GetConcavityMinimum(GameObject obj) {
-			Bounds bounds = Helper.GetObjectSize (obj);
+			Bounds bounds = Helper.GetObjectSize(obj);
 
 			Vector3 concavityMin = bounds.min;
 			foreach (Renderer renderer in obj.GetComponentsInChildren<Renderer>()) {
 //				Debug.Log (renderer.gameObject.name + " " + Helper.GetObjectWorldSize (renderer.gameObject).min.y);
-				if (Helper.GetObjectSize (renderer.gameObject).min.y > concavityMin.y) {
-					concavityMin = Helper.GetObjectSize (renderer.gameObject).min;
+				if (Helper.GetObjectSize(renderer.gameObject).min.y > concavityMin.y) {
+					concavityMin = Helper.GetObjectSize(renderer.gameObject).min;
 				}
 			}
 
-			concavityMin = Helper.RotatePointAroundPivot (concavityMin, bounds.center, obj.transform.eulerAngles) + obj.transform.position;
+			concavityMin = Helper.RotatePointAroundPivot(concavityMin, bounds.center, obj.transform.eulerAngles) +
+			               obj.transform.position;
 
 //			Debug.Log (obj.transform.eulerAngles);
 //			Debug.Log (concavityMin.y);
@@ -1680,80 +1707,80 @@ namespace Global {
 	/// RandomHelper class
 	/// </summary>
 	public static class RandomHelper {
-		public enum RangeFlags
-		{
+		public enum RangeFlags {
 			MinInclusive = 1,
 			MaxInclusive = (1 << 1)
 		}
 
 		public static int RandomSign() {
-			return (UnityEngine.Random.Range (0, 2) * 2) - 1;
+			return (UnityEngine.Random.Range(0, 2) * 2) - 1;
 		}
 
 		public static Vector3 RandomAxis() {
-			System.Random random = new System.Random ();
-			return Constants.Axes[Constants.Axes.Keys.ToList()[random.Next(0,3)]];
+			System.Random random = new System.Random();
+			return Constants.Axes[Constants.Axes.Keys.ToList()[random.Next(0, 3)]];
 		}
 
-		public static int RandomInt(int min, int max, int flags = (int)RangeFlags.MinInclusive) {
+		public static int RandomInt(int min, int max, int flags = (int) RangeFlags.MinInclusive) {
 			int rangeMin = min;
 			int rangeMax = max;
 
-			if ((flags & (int)RangeFlags.MinInclusive) == 0) {
+			if ((flags & (int) RangeFlags.MinInclusive) == 0) {
 				rangeMin = min + 1;
 			}
 
-			if (((flags & (int)RangeFlags.MaxInclusive) >> 1) == 1) {
+			if (((flags & (int) RangeFlags.MaxInclusive) >> 1) == 1) {
 				rangeMax = max + 1;
 			}
 
-            return UnityEngine.Random.Range(rangeMin, rangeMax);
+			return UnityEngine.Random.Range(rangeMin, rangeMax);
 		}
 
-		public static float RandomFloat(float min, float max, int flags = (int)RangeFlags.MinInclusive) {
+		public static float RandomFloat(float min, float max, int flags = (int) RangeFlags.MinInclusive) {
 			float rangeMin = min;
 			float rangeMax = max;
 
-			if ((flags & (int)RangeFlags.MinInclusive) == 0) {
+			if ((flags & (int) RangeFlags.MinInclusive) == 0) {
 				rangeMin = min + Constants.EPSILON;
 			}
 
-			if (((flags & (int)RangeFlags.MaxInclusive) >> 1) == 1) {
+			if (((flags & (int) RangeFlags.MaxInclusive) >> 1) == 1) {
 				rangeMax = max + Constants.EPSILON;
 			}
 
-			return UnityEngine.Random.Range (min, max);
+			return UnityEngine.Random.Range(min, max);
 		}
 
 		public static GameObject RandomVoxeme() {
-			List<Voxeme> allVoxemes = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().allVoxemes.ToList();
+			List<Voxeme> allVoxemes = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>().allVoxemes.ToList();
 
-			Voxeme voxeme = allVoxemes [RandomInt (0, allVoxemes.Count, (int)RangeFlags.MinInclusive)];
+			Voxeme voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
 			while (Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) {
-				voxeme = allVoxemes [RandomInt (0, allVoxemes.Count, (int)RangeFlags.MinInclusive)];
+				voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
 			}
 
 			return voxeme.gameObject;
 		}
 
 		public static GameObject RandomVoxeme(List<GameObject> exclude) {
-			List<Voxeme> allVoxemes = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ().allVoxemes.ToList();
+			List<Voxeme> allVoxemes = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>().allVoxemes.ToList();
 
-			Voxeme voxeme = allVoxemes [RandomInt (0, allVoxemes.Count, (int)RangeFlags.MinInclusive)];
+			Voxeme voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
 			while ((Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||
-				(exclude.Contains(voxeme.gameObject))) {
-				voxeme = allVoxemes [RandomInt (0, allVoxemes.Count, (int)RangeFlags.MinInclusive)];
+			       (exclude.Contains(voxeme.gameObject))) {
+				voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
 			}
 
 			return voxeme.gameObject;
 		}
 
 		public static GameObject RandomVoxeme(List<GameObject> fromList, List<GameObject> exclude) {
-			Voxeme voxeme = fromList [RandomInt (0, fromList.Count, (int)RangeFlags.MinInclusive)].GetComponent<Voxeme>();
+			Voxeme voxeme = fromList[RandomInt(0, fromList.Count, (int) RangeFlags.MinInclusive)]
+				.GetComponent<Voxeme>();
 
 			while ((Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||
-				(exclude.Contains(voxeme.gameObject))) {
-				voxeme = fromList [RandomInt (0, fromList.Count, (int)RangeFlags.MinInclusive)].GetComponent<Voxeme>();
+			       (exclude.Contains(voxeme.gameObject))) {
+				voxeme = fromList[RandomInt(0, fromList.Count, (int) RangeFlags.MinInclusive)].GetComponent<Voxeme>();
 			}
 
 			return voxeme.gameObject;
@@ -1767,16 +1794,15 @@ namespace Global {
 		public static IEnumerator LoadScene(string sceneName) {
 			yield return null;
 
-			AsyncOperation ao = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync (sceneName);
+			AsyncOperation ao = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(sceneName);
 			ao.allowSceneActivation = true;
 
-			while (!ao.isDone)
-			{
+			while (!ao.isDone) {
 				yield return null;
 			}
 
-			PluginImport commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
-			commBridge.OpenPortInternal (PlayerPrefs.GetString("Listener Port"));
+			PluginImport commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+			commBridge.OpenPortInternal(PlayerPrefs.GetString("Listener Port"));
 
 #if UNITY_IOS
 			Screen.SetResolution(1280,960,true);

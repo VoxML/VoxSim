@@ -1,8 +1,6 @@
-namespace Agent
-{
-    public enum Role
-    {
+namespace Agent {
+	public enum Role {
 		Planner,
 		Affector
-    }
+	}
 }

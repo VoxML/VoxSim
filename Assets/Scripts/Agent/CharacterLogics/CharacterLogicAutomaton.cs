@@ -2,43 +2,48 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-
 using UnityEngine;
 using Global;
 
 namespace Agent {
 	public class PDAInstruction {
 		List<PDAState> fromStates;
+
 		public List<PDAState> FromStates {
 			get { return fromStates; }
 			set { fromStates = value; }
 		}
 
 		PDAState toState;
+
 		public PDAState ToState {
 			get { return toState; }
 			set { toState = value; }
 		}
 
 		List<PDASymbol> inputSymbols;
+
 		public List<PDASymbol> InputSymbols {
 			get { return inputSymbols; }
 			set { inputSymbols = value; }
 		}
 
 		PDASymbol stackSymbol;
+
 		public PDASymbol StackSymbol {
 			get { return stackSymbol; }
 			set { stackSymbol = value; }
 		}
 
 		PDAStackOperation stackOperation;
+
 		public PDAStackOperation StackOperation {
 			get { return stackOperation; }
 			set { stackOperation = value; }
 		}
 
-		internal PDAInstruction(List<PDAState> _fromStates, List<PDASymbol> _inputSymbols, PDASymbol _stackSymbol, PDAState _toState, PDAStackOperation _stackOperation) {
+		internal PDAInstruction(List<PDAState> _fromStates, List<PDASymbol> _inputSymbols, PDASymbol _stackSymbol,
+			PDAState _toState, PDAStackOperation _stackOperation) {
 			fromStates = _fromStates;
 			inputSymbols = _inputSymbols;
 			stackSymbol = _stackSymbol;
@@ -49,12 +54,14 @@ namespace Agent {
 
 	public class PDAState {
 		string name;
+
 		public string Name {
 			get { return name; }
 			set { name = value; }
 		}
 
 		object content;
+
 		public object Content {
 			get { return content; }
 			set { content = value; }
@@ -68,12 +75,14 @@ namespace Agent {
 
 	public class PDASymbol {
 		string name;
+
 		public string Name {
 			get { return name; }
 			set { name = value; }
 		}
 
 		object content;
+
 		public object Content {
 			get { return content; }
 			set { content = value; }
@@ -100,12 +109,14 @@ namespace Agent {
 		}
 
 		PDAStackOperationType type;
+
 		public PDAStackOperationType Type {
 			get { return type; }
 			set { type = value; }
 		}
 
 		object content;
+
 		public object Content {
 			get { return content; }
 			set { content = value; }
@@ -117,40 +128,45 @@ namespace Agent {
 		}
 	}
 
-    public delegate object FunctionDelegate(object args);
+	public delegate object FunctionDelegate(object args);
 
 	public class DelegateFactory {
 		object function;
+
 		public object Function {
 			get { return function; }
 			set { function = value; }
 		}
 
-		internal DelegateFactory(object _function){
+		internal DelegateFactory(object _function) {
 			function = _function;
 		}
 	}
 
 	public class TransitionGate {
 		PDAState rejectState;
+
 		public PDAState RejectState {
 			get { return rejectState; }
 			set { rejectState = value; }
 		}
 
 		PDAStackOperation rejectStackOperation;
+
 		public PDAStackOperation RejectStackOperation {
 			get { return rejectStackOperation; }
 			set { rejectStackOperation = value; }
 		}
 
 		FunctionDelegate condition;
+
 		public FunctionDelegate Condition {
 			get { return condition; }
 			set { condition = value; }
 		}
 
-		internal TransitionGate(FunctionDelegate _condition, PDAState _rejectState, PDAStackOperation _rejectStackOperation) {
+		internal TransitionGate(FunctionDelegate _condition, PDAState _rejectState,
+			PDAStackOperation _rejectStackOperation) {
 			condition = _condition;
 			rejectState = _rejectState;
 			rejectStackOperation = _rejectStackOperation;
@@ -161,156 +177,167 @@ namespace Agent {
 		// a nondeterministic pushdown automaton
 
 		List<PDAState> states;
+
 		public List<PDAState> States {
 			get { return states; }
 			set { states = value; }
 		}
 
 		List<PDASymbol> inputSymbols;
+
 		public List<PDASymbol> InputSymbols {
 			get { return inputSymbols; }
 			set { inputSymbols = value; }
 		}
 
 		List<PDASymbol> stackSymbols;
+
 		public List<PDASymbol> StackSymbols {
 			get { return stackSymbols; }
 			set { stackSymbols = value; }
 		}
 
 		List<PDAInstruction> transitionRelation;
+
 		public List<PDAInstruction> TransitionRelation {
 			get { return transitionRelation; }
 			set { transitionRelation = value; }
 		}
 
 		PDAState currentState;
+
 		public PDAState CurrentState {
 			get { return currentState; }
 			set { currentState = value; }
 		}
 
 		PDASymbol currentStackSymbol;
+
 		public PDASymbol CurrentStackSymbol {
 			get { return GetCurrentStackSymbol(); }
 		}
 
 		PDASymbol lastInputSymbol;
+
 		public PDASymbol LastInputSymbol {
 			get { return lastInputSymbol; }
 			set { lastInputSymbol = value; }
 		}
 
 		Stack<PDASymbol> stack;
+
 		public Stack<PDASymbol> Stack {
 			get { return stack; }
 			set { stack = value; }
 		}
 
-        Stack<Triple<PDASymbol,PDAState,PDASymbol>> stateTransitionHistory;
-        public Stack<Triple<PDASymbol,PDAState, PDASymbol>> StateTransitionHistory {
+		Stack<Triple<PDASymbol, PDAState, PDASymbol>> stateTransitionHistory;
+
+		public Stack<Triple<PDASymbol, PDAState, PDASymbol>> StateTransitionHistory {
 			get { return stateTransitionHistory; }
 			set { stateTransitionHistory = value; }
 		}
 
-        Stack<Triple<PDASymbol, PDAState, PDASymbol>> contextualMemory;
-        public Stack<Triple<PDASymbol, PDAState, PDASymbol>> ContextualMemory {
-            get { return contextualMemory; }
-            set { contextualMemory = value; }
-        }
+		Stack<Triple<PDASymbol, PDAState, PDASymbol>> contextualMemory;
 
-        Dictionary<List<PDASymbol>, PDAStackOperation> learnableInstructions;  // TODO: not sure sure if it should map to PDAInstruction or another type
-        public Dictionary<List<PDASymbol>, PDAStackOperation> LearnableInstructions {
-            get { return learnableInstructions; }
-            set { learnableInstructions = value; }
-        }
+		public Stack<Triple<PDASymbol, PDAState, PDASymbol>> ContextualMemory {
+			get { return contextualMemory; }
+			set { contextualMemory = value; }
+		}
 
-        public List<PDASymbol> GetLearnableInstructionKeyByName(string name) {
-            List<PDASymbol> instructionKey = new List<PDASymbol>();
+		Dictionary<List<PDASymbol>, PDAStackOperation>
+			learnableInstructions; // TODO: not sure sure if it should map to PDAInstruction or another type
 
-            foreach (List<PDASymbol> key in learnableInstructions.Keys) {
-                if (key.Contains(GetInputSymbolByName(name))) {
-                    instructionKey = key;
-                    break;
-                }
-            }
+		public Dictionary<List<PDASymbol>, PDAStackOperation> LearnableInstructions {
+			get { return learnableInstructions; }
+			set { learnableInstructions = value; }
+		}
 
-            return instructionKey;
-        }
+		public List<PDASymbol> GetLearnableInstructionKeyByName(string name) {
+			List<PDASymbol> instructionKey = new List<PDASymbol>();
 
-        public enum AttentionStatus {
-            Inattentive,
-            Attentive
-        }
+			foreach (List<PDASymbol> key in learnableInstructions.Keys) {
+				if (key.Contains(GetInputSymbolByName(name))) {
+					instructionKey = key;
+					break;
+				}
+			}
 
-        public event EventHandler LearnedNewInstruction;
+			return instructionKey;
+		}
 
-        public void OnLearnedNewInstruction(object sender, EventArgs e) {
-            if (LearnedNewInstruction != null)
-            {
-                LearnedNewInstruction(this, e);
-            }
-        } 
+		public enum AttentionStatus {
+			Inattentive,
+			Attentive
+		}
+
+		public event EventHandler LearnedNewInstruction;
+
+		public void OnLearnedNewInstruction(object sender, EventArgs e) {
+			if (LearnedNewInstruction != null) {
+				LearnedNewInstruction(this, e);
+			}
+		}
 
 		public virtual void Start() {
-			States = new List<PDAState> ();
-			InputSymbols = new List<PDASymbol> ();
-			StackSymbols = new List<PDASymbol> ();
-			TransitionRelation = new List<PDAInstruction> ();
-            LearnableInstructions = new Dictionary<List<PDASymbol>, PDAStackOperation> ();
+			States = new List<PDAState>();
+			InputSymbols = new List<PDASymbol>();
+			StackSymbols = new List<PDASymbol>();
+			TransitionRelation = new List<PDAInstruction>();
+			LearnableInstructions = new Dictionary<List<PDASymbol>, PDAStackOperation>();
 
-			Stack = new Stack<PDASymbol> ();
-            StateTransitionHistory = new Stack<Triple<PDASymbol,PDAState,PDASymbol>> ();
-            ContextualMemory = new Stack<Triple<PDASymbol, PDAState, PDASymbol>>();
+			Stack = new Stack<PDASymbol>();
+			StateTransitionHistory = new Stack<Triple<PDASymbol, PDAState, PDASymbol>>();
+			ContextualMemory = new Stack<Triple<PDASymbol, PDAState, PDASymbol>>();
 		}
 
 		public virtual void Update() {
 		}
 
 		protected PDAState GetState(string name) {
-			if (States.Where (s => s.Name == name).FirstOrDefault () == null) {
-				Debug.Log (string.Format ("No state: {0}", name));
+			if (States.Where(s => s.Name == name).FirstOrDefault() == null) {
+				Debug.Log(string.Format("No state: {0}", name));
 			}
 
-			return States.Where (s => s.Name == name).FirstOrDefault ();
+			return States.Where(s => s.Name == name).FirstOrDefault();
 		}
 
 		protected List<PDAState> GetStates(params string[] names) {
-			return States.Where (s => names.Contains(s.Name)).ToList ();
+			return States.Where(s => names.Contains(s.Name)).ToList();
 		}
 
 		protected PDASymbol GetInputSymbolByName(string name) {
-			if (InputSymbols.Where (s => s.Name == name).FirstOrDefault () == null) {
-				Debug.Log (string.Format ("No input symbol: {0}", name));
+			if (InputSymbols.Where(s => s.Name == name).FirstOrDefault() == null) {
+				Debug.Log(string.Format("No input symbol: {0}", name));
 			}
 
-			return InputSymbols.Where (s => s.Name == name).FirstOrDefault ();
+			return InputSymbols.Where(s => s.Name == name).FirstOrDefault();
 		}
 
 		protected List<PDASymbol> GetInputSymbolsByName(params string[] names) {
-			return InputSymbols.Where (s => names.Contains(s.Name)).ToList ();
+			return InputSymbols.Where(s => names.Contains(s.Name)).ToList();
 		}
 
 		protected PDASymbol GetInputSymbolByContent(object content) {
-			return InputSymbols.Where (s => (s.Content.GetType() == content.GetType()) &&
-				(s.Content == content)).FirstOrDefault ();
+			return InputSymbols.Where(s => (s.Content.GetType() == content.GetType()) &&
+			                               (s.Content == content)).FirstOrDefault();
 		}
 
 		protected PDASymbol GetStackSymbolByName(string name) {
-			return StackSymbols.Where (s => s.Name == name).FirstOrDefault ();
+			return StackSymbols.Where(s => s.Name == name).FirstOrDefault();
 		}
 
 		protected PDASymbol GetStackSymbolByContent(object content) {
-			return StackSymbols.Where (s => (s.Content.GetType() == content.GetType()) &&
-				(s.Content == content)).FirstOrDefault ();
+			return StackSymbols.Where(s => (s.Content.GetType() == content.GetType()) &&
+			                               (s.Content == content)).FirstOrDefault();
 		}
 
 		protected PDASymbol GetCurrentStackSymbol() {
 			if (Stack.Count > 0) {
-				return Stack.Peek ();
+				return Stack.Peek();
 			}
 			else {
-				return null; 
+				return null;
 			}
 		}
 
@@ -319,4 +346,3 @@ namespace Agent {
 		}
 	}
 }
-

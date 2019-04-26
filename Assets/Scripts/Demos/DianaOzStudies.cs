@@ -5,19 +5,18 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
 using UnityEngine;
-
 using Episteme;
 using Global;
 using Network;
 
 public class DianaOzStudies : MonoBehaviour {
-    void EventManager_EventComplete(object sender, EventArgs e)
-    {
-    }
+	void EventManager_EventComplete(object sender, EventArgs e) {
+	}
 
 
 	class CommanderStatus {
-		public CommanderStatus(string _input, string _question, string _utter, string _anim, string _show, string _hide, string _clicked, string _state) {
+		public CommanderStatus(string _input, string _question, string _utter, string _anim, string _show, string _hide,
+			string _clicked, string _state) {
 			input = _input;
 			question = _question;
 			utter = _utter;
@@ -25,7 +24,7 @@ public class DianaOzStudies : MonoBehaviour {
 			show = _show;
 			hide = _hide;
 			clicked = _clicked;
-            state = _state;
+			state = _state;
 		}
 
 		public string input;
@@ -35,7 +34,7 @@ public class DianaOzStudies : MonoBehaviour {
 		public string show;
 		public string hide;
 		public string clicked;
-        public string state;
+		public string state;
 	}
 
 	GameObject restClient;
@@ -46,29 +45,29 @@ public class DianaOzStudies : MonoBehaviour {
 	float getInterval = 100;
 	bool get = false;
 
-    GameObject behaviorController;
+	GameObject behaviorController;
 	JointGestureDemo world;
 	Predicates preds;
 	ObjectSelector objSelector;
-    EventManager eventManager;
+	EventManager eventManager;
 
 	// Use this for initialization
-	void Start () {
+	void Start() {
 		restClient = new GameObject("RestClient");
 		restClient.AddComponent<RestClient>();
 
-        behaviorController = GameObject.Find("BehaviorController");
-		world = GameObject.Find ("JointGestureDemo").GetComponent<JointGestureDemo> ();
-		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
-        preds = behaviorController.GetComponent<Predicates>();
-        eventManager = behaviorController.GetComponent<EventManager>();
+		behaviorController = GameObject.Find("BehaviorController");
+		world = GameObject.Find("JointGestureDemo").GetComponent<JointGestureDemo>();
+		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
+		preds = behaviorController.GetComponent<Predicates>();
+		eventManager = behaviorController.GetComponent<EventManager>();
 
-		if (PlayerPrefs.HasKey ("URLs")) {
+		if (PlayerPrefs.HasKey("URLs")) {
 			string cmdrUrlString = string.Empty;
 			foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-				if (url.Split ('=') [0] == "Commander URL") {
-					cmdrUrlString = url.Split ('=') [1];
-					cmdrUrl = !cmdrUrlString.StartsWith ("http://") ? "http://" + cmdrUrlString : cmdrUrlString;
+				if (url.Split('=')[0] == "Commander URL") {
+					cmdrUrlString = url.Split('=')[1];
+					cmdrUrl = !cmdrUrlString.StartsWith("http://") ? "http://" + cmdrUrlString : cmdrUrlString;
 //					Debug.Log (cmdrUrl);
 					restClient.GetComponent<RestClient>().Post(cmdrUrl + "/init", "", "okay", "error");
 					break;
@@ -79,7 +78,7 @@ public class DianaOzStudies : MonoBehaviour {
 		restClient.GetComponent<RestClient>().GotData += ConsumeData;
 		world.ObjectSelected += BlockClicked;
 		world.PointSelected += PointClicked;
-        eventManager.EventComplete += EventCompleted;
+		eventManager.EventComplete += EventCompleted;
 
 		// Create a timer
 		getTimer = new Timer();
@@ -92,15 +91,15 @@ public class DianaOzStudies : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		if (get) {
-			StartCoroutine ("GetCommanderInput");
+			StartCoroutine("GetCommanderInput");
 			get = false;
 		}
 	}
 
 	IEnumerator GetCommanderInput() {
-		restClient.GetComponent<RestClient>().Get(cmdrUrl + "/server","okay", "error");
+		restClient.GetComponent<RestClient>().Get(cmdrUrl + "/server", "okay", "error");
 		yield return null;
 	}
 
@@ -113,56 +112,60 @@ public class DianaOzStudies : MonoBehaviour {
 	}
 
 	void ConsumeData(object sender, EventArgs e) {
-		if (((RestEventArgs)e).Content is string) {
-			if ((((RestEventArgs)e).Content.ToString() != string.Empty) && (((RestEventArgs)e).Content.ToString() != lastReceivedData)) {
-				Debug.Log (((RestEventArgs)e).Content);
-				CommanderStatus dict = JsonUtility.FromJson<CommanderStatus>(((RestEventArgs)e).Content.ToString());
+		if (((RestEventArgs) e).Content is string) {
+			if ((((RestEventArgs) e).Content.ToString() != string.Empty) &&
+			    (((RestEventArgs) e).Content.ToString() != lastReceivedData)) {
+				Debug.Log(((RestEventArgs) e).Content);
+				CommanderStatus dict = JsonUtility.FromJson<CommanderStatus>(((RestEventArgs) e).Content.ToString());
 				if (dict != null) {
 //					Debug.Log(string.Format("input: \"{0}\", question: \"{1}\", utter: \"{2}\"",dict.input,dict.question,dict.utter));
-					lastReceivedData = ((RestEventArgs)e).Content.ToString ();
+					lastReceivedData = ((RestEventArgs) e).Content.ToString();
 
 					if (dict.input != string.Empty) {
-						((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).inputString = dict.input.Trim();
-						((InputController)(GameObject.Find ("IOController").GetComponent ("InputController"))).MessageReceived(dict.input.Trim());
+						((InputController) (GameObject.Find("IOController").GetComponent("InputController")))
+							.inputString = dict.input.Trim();
+						((InputController) (GameObject.Find("IOController").GetComponent("InputController")))
+							.MessageReceived(dict.input.Trim());
 					}
 					else if (dict.question != string.Empty) {
-						if (Regex.IsMatch (dict.question, @"The .+ block\?")) {
-							string color = dict.question.Split () [1];
-							MethodInfo methodToCall = preds.GetType ().GetMethod (color.ToUpper ());
-							object obj = methodToCall.Invoke (preds, new object[]{ world.availableObjs.ToArray () });
+						if (Regex.IsMatch(dict.question, @"The .+ block\?")) {
+							string color = dict.question.Split()[1];
+							MethodInfo methodToCall = preds.GetType().GetMethod(color.ToUpper());
+							object obj = methodToCall.Invoke(preds, new object[] {world.availableObjs.ToArray()});
 							if (obj != null) {
-								world.ReachFor (GameObject.Find (obj as string));
+								world.ReachFor(GameObject.Find(obj as string));
 							}
-							world.RespondAndUpdate (dict.question);
+
+							world.RespondAndUpdate(dict.question);
 						}
-						else if (Regex.IsMatch (dict.question, @".*<.+; .+; .+>\?")) {
-							string coord = Regex.Match (dict.question, @"<.+; .+; .+>").Value;
-							world.RespondAndUpdate (Regex.Replace(dict.question,@"<.+; .+; .+>","here"));
-							world.ReachFor (Helper.ParsableToVector (coord));
+						else if (Regex.IsMatch(dict.question, @".*<.+; .+; .+>\?")) {
+							string coord = Regex.Match(dict.question, @"<.+; .+; .+>").Value;
+							world.RespondAndUpdate(Regex.Replace(dict.question, @"<.+; .+; .+>", "here"));
+							world.ReachFor(Helper.ParsableToVector(coord));
 						}
 						else {
-							world.RespondAndUpdate (dict.question);
+							world.RespondAndUpdate(dict.question);
 						}
 					}
 					else if (dict.utter != string.Empty) {
-						world.RespondAndUpdate (dict.utter);
+						world.RespondAndUpdate(dict.utter);
 					}
 					else if (dict.hide != string.Empty) {
-						GameObject obj = GameObject.Find (dict.hide);
+						GameObject obj = GameObject.Find(dict.hide);
 						if (obj != null) {
-							preds.DISABLE (new object[]{ obj });
+							preds.DISABLE(new object[] {obj});
 						}
 					}
 					else if (dict.show != string.Empty) {
 						for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
 							if (objSelector.disabledObjects[i].name == dict.show) {
-								preds.ENABLE (new object[]{ objSelector.disabledObjects[i] });
+								preds.ENABLE(new object[] {objSelector.disabledObjects[i]});
 							}
 						}
 					}
 					else if (dict.anim != string.Empty) {
 						world.MoveToPerform();
-						world.gestureController.PerformGesture (dict.anim);
+						world.gestureController.PerformGesture(dict.anim);
 					}
 				}
 			}
@@ -170,24 +173,25 @@ public class DianaOzStudies : MonoBehaviour {
 	}
 
 	void BlockClicked(object sender, EventArgs e) {
-		string color = (((SelectionEventArgs)e).Content as GameObject).GetComponent<Voxeme> ().voxml.Attributes.Attrs [0].Value;
+		string color = (((SelectionEventArgs) e).Content as GameObject).GetComponent<Voxeme>().voxml.Attributes.Attrs[0]
+			.Value;
 
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","","","","",
-				string.Format("the {0} block",color),"")),
-				"okay", "error");
+			JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "",
+				string.Format("the {0} block", color), "")),
+			"okay", "error");
 	}
 
 	void PointClicked(object sender, EventArgs e) {
 		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("","","","","","",
-                Helper.VectorToParsable((Vector3)((SelectionEventArgs)e).Content),"")),
-				"okay", "error");
+			JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "",
+				Helper.VectorToParsable((Vector3) ((SelectionEventArgs) e).Content), "")),
+			"okay", "error");
 	}
 
-    void EventCompleted(object sender, EventArgs e) {
-        restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-            JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "","", "")),
-                "okay", "error");
-    }
+	void EventCompleted(object sender, EventArgs e) {
+		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
+			JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "", "", "")),
+			"okay", "error");
+	}
 }

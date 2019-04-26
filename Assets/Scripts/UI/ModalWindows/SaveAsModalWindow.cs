@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
-
 using Vox;
 
 public class SaveAsInfo {
@@ -15,12 +14,12 @@ public class SaveAsInfo {
 }
 
 public class SaveAsModalWindow : ModalWindow {
-
 	public int fontSize = 12;
 
-	GUIStyle buttonStyle = new GUIStyle ("Button");
+	GUIStyle buttonStyle = new GUIStyle("Button");
 
-	float fontSizeModifier;	
+	float fontSizeModifier;
+
 	public float FontSizeModifier {
 		get { return fontSizeModifier; }
 		set { fontSizeModifier = value; }
@@ -31,46 +30,45 @@ public class SaveAsModalWindow : ModalWindow {
 
 	public event EventHandler SaveAsEvent;
 
-	public void OnSaveAsEvent(object sender, EventArgs e)
-	{
-		if (SaveAsEvent != null)
-		{
+	public void OnSaveAsEvent(object sender, EventArgs e) {
+		if (SaveAsEvent != null) {
 			SaveAsEvent(this, e);
 		}
 	}
 
 	// Use this for initialization
-	void Start () {
-		base.Start ();
+	void Start() {
+		base.Start();
 
 		windowTitle = "Save As...";
 		persistent = true;
 
-		buttonStyle = new GUIStyle ("Button");
+		buttonStyle = new GUIStyle("Button");
 
-		fontSizeModifier = (int)(fontSize / defaultFontSize);
+		fontSizeModifier = (int) (fontSize / defaultFontSize);
 		buttonStyle.fontSize = fontSize;
 	}
-	
-	// Update is called once per frame
-	void Update () {
-	}	
 
-	protected override void OnGUI () {
-		base.OnGUI ();
+	// Update is called once per frame
+	void Update() {
 	}
 
-	public override void DoModalWindow(int windowID){
-		base.DoModalWindow (windowID);
+	protected override void OnGUI() {
+		base.OnGUI();
+	}
+
+	public override void DoModalWindow(int windowID) {
+		base.DoModalWindow(windowID);
 
 		//makes GUI window scrollable
-		scrollPosition = GUILayout.BeginScrollView (scrollPosition);
-		GUILayout.BeginHorizontal ();
-		newFile = GUILayout.TextField (newFile, 25, GUILayout.Width (100));
-		if (GUILayout.Button ("Save", GUILayout.Width (50))) { 
+		scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+		GUILayout.BeginHorizontal();
+		newFile = GUILayout.TextField(newFile, 25, GUILayout.Width(100));
+		if (GUILayout.Button("Save", GUILayout.Width(50))) {
 			OnSaveAsEvent(this, new ModalWindowEventArgs(windowID, new SaveAsInfo(newFile, entityType)));
 		}
-		GUILayout.EndHorizontal ();
-		GUILayout.EndScrollView ();
+
+		GUILayout.EndHorizontal();
+		GUILayout.EndScrollView();
 	}
 }

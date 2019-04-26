@@ -3,28 +3,22 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-
 using UnityEngine;
 
-namespace Network
-{
+namespace Network {
 	public class CommanderEventArgs : EventArgs {
 		public string Content { get; set; }
 
-		public CommanderEventArgs(string content, bool macroEvent = false)
-		{
+		public CommanderEventArgs(string content, bool macroEvent = false) {
 			this.Content = content;
 		}
 	}
 
-	public class CommanderSocket : SocketConnection
-	{		
+	public class CommanderSocket : SocketConnection {
 		public event EventHandler ConnectionLost;
 
-		public void OnConnectionLost(object sender, EventArgs e)
-		{
-			if (ConnectionLost != null)
-			{
+		public void OnConnectionLost(object sender, EventArgs e) {
+			if (ConnectionLost != null) {
 				ConnectionLost(this, e);
 			}
 		}

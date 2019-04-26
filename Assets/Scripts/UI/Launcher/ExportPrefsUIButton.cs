@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-
 using Global;
 using GracesGames.SimpleFileBrowser.Scripts;
 
 public class ExportPrefsUIButton : UIButton {
-
 	public int fontSize = 12;
 
 	GUIStyle buttonStyle;
@@ -22,44 +20,41 @@ public class ExportPrefsUIButton : UIButton {
 
 
 	// Use this for initialization
-	void Start () {
-		FontSizeModifier = (int)(fontSize / defaultFontSize);
-		launcher = gameObject.GetComponent<Launcher> ();
+	void Start() {
+		FontSizeModifier = (int) (fontSize / defaultFontSize);
+		launcher = gameObject.GetComponent<Launcher>();
 
-		base.Start ();
+		base.Start();
 	}
 
 	// Update is called once per frame
-	void Update () {
-
+	void Update() {
 	}
 
-	protected override void OnGUI () {
+	protected override void OnGUI() {
 		if (!Draw) {
 			return;
 		}
 
-		buttonStyle = new GUIStyle ("Button");
+		buttonStyle = new GUIStyle("Button");
 		buttonStyle.fontSize = fontSize;
 
-		if (GUI.Button (buttonRect, buttonText, buttonStyle)) {
+		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
 			launcher.Draw = false;
-			textToSave = ExportPrefs ();
-			OpenFileBrowser (FileBrowserMode.Save);
+			textToSave = ExportPrefs();
+			OpenFileBrowser(FileBrowserMode.Save);
 			return;
 		}
 
-		base.OnGUI ();
+		base.OnGUI();
 	}
 
-	public override void DoUIButton(int buttonID){
-
-		base.DoUIButton (buttonID);
+	public override void DoUIButton(int buttonID) {
+		base.DoUIButton(buttonID);
 	}
 
 	string ExportPrefs() {
-		
-		launcher.SavePrefs ();
+		launcher.SavePrefs();
 		if ((launcher.eventResetCounter == string.Empty) || (launcher.eventResetCounter == "0")) {
 			launcher.eventResetCounter = "1";
 		}
@@ -68,41 +63,42 @@ public class ExportPrefsUIButton : UIButton {
 			launcher.startIndex = "0";
 		}
 
-		Dictionary<string, object> prefsDict = new Dictionary<string, object> ();
-		prefsDict.Add ("Listener Port", PlayerPrefs.GetString ("Listener Port"));
-		prefsDict.Add ("Make Logs", (PlayerPrefs.GetInt ("Make Logs") == 1));
-		prefsDict.Add ("Logs Prefix", PlayerPrefs.GetString ("Logs Prefix"));
-        prefsDict.Add("Action Only Logs", (PlayerPrefs.GetInt("Action Only Logs") == 1));
-        prefsDict.Add("Full State Info", (PlayerPrefs.GetInt("Full State Info") == 1));
-        prefsDict.Add("Log Timestamps", (PlayerPrefs.GetInt("Log Timestamps") == 1));
+		Dictionary<string, object> prefsDict = new Dictionary<string, object>();
+		prefsDict.Add("Listener Port", PlayerPrefs.GetString("Listener Port"));
+		prefsDict.Add("Make Logs", (PlayerPrefs.GetInt("Make Logs") == 1));
+		prefsDict.Add("Logs Prefix", PlayerPrefs.GetString("Logs Prefix"));
+		prefsDict.Add("Action Only Logs", (PlayerPrefs.GetInt("Action Only Logs") == 1));
+		prefsDict.Add("Full State Info", (PlayerPrefs.GetInt("Full State Info") == 1));
+		prefsDict.Add("Log Timestamps", (PlayerPrefs.GetInt("Log Timestamps") == 1));
 
 		string urlsString = string.Empty;
 		for (int i = 0; i < launcher.numUrls; i++) {
-			urlsString += string.Format ("{0}={1};", launcher.urlLabels[i], launcher.urls[i]);
+			urlsString += string.Format("{0}={1};", launcher.urlLabels[i], launcher.urls[i]);
 		}
-		prefsDict.Add ("URLs", urlsString);
 
-		prefsDict.Add ("Capture Video", (PlayerPrefs.GetInt ("Capture Video") == 1));
-		prefsDict.Add ("Capture Params", (PlayerPrefs.GetInt ("Capture Params") == 1));
-		prefsDict.Add ("Video Capture Mode", PlayerPrefs.GetInt ("Video Capture Mode"));
-		prefsDict.Add ("Reset Between Events", (PlayerPrefs.GetInt ("Reset Between Events") == 1));
-		prefsDict.Add ("Event Reset Counter", PlayerPrefs.GetInt ("Event Reset Counter").ToString ());
-		prefsDict.Add ("Video Capture Filename Type", PlayerPrefs.GetInt ("Video Capture Filename Type"));
-		prefsDict.Add ("Sort By Event String", (PlayerPrefs.GetInt ("Sort By Event String") == 1));
-		prefsDict.Add ("Custom Video Filename Prefix", PlayerPrefs.GetString ("Custom Video Filename Prefix"));
-		prefsDict.Add ("Auto Events List", PlayerPrefs.GetString ("Auto Events List"));
-		prefsDict.Add ("Start Index", PlayerPrefs.GetInt ("Start Index").ToString ());
-		prefsDict.Add ("Video Capture DB", PlayerPrefs.GetString("Video Capture DB"));
-		prefsDict.Add ("Video Output Directory", PlayerPrefs.GetString("Video Output Directory"));
-		prefsDict.Add ("Make Voxemes Editable", (PlayerPrefs.GetInt("Make Voxemes Editable") == 1));
+		prefsDict.Add("URLs", urlsString);
 
-		StringBuilder sb = new StringBuilder ();
+		prefsDict.Add("Capture Video", (PlayerPrefs.GetInt("Capture Video") == 1));
+		prefsDict.Add("Capture Params", (PlayerPrefs.GetInt("Capture Params") == 1));
+		prefsDict.Add("Video Capture Mode", PlayerPrefs.GetInt("Video Capture Mode"));
+		prefsDict.Add("Reset Between Events", (PlayerPrefs.GetInt("Reset Between Events") == 1));
+		prefsDict.Add("Event Reset Counter", PlayerPrefs.GetInt("Event Reset Counter").ToString());
+		prefsDict.Add("Video Capture Filename Type", PlayerPrefs.GetInt("Video Capture Filename Type"));
+		prefsDict.Add("Sort By Event String", (PlayerPrefs.GetInt("Sort By Event String") == 1));
+		prefsDict.Add("Custom Video Filename Prefix", PlayerPrefs.GetString("Custom Video Filename Prefix"));
+		prefsDict.Add("Auto Events List", PlayerPrefs.GetString("Auto Events List"));
+		prefsDict.Add("Start Index", PlayerPrefs.GetInt("Start Index").ToString());
+		prefsDict.Add("Video Capture DB", PlayerPrefs.GetString("Video Capture DB"));
+		prefsDict.Add("Video Output Directory", PlayerPrefs.GetString("Video Output Directory"));
+		prefsDict.Add("Make Voxemes Editable", (PlayerPrefs.GetInt("Make Voxemes Editable") == 1));
+
+		StringBuilder sb = new StringBuilder();
 
 		foreach (var entry in prefsDict) {
-			sb.Append (string.Format ("{0},{1}\n", entry.Key, entry.Value));
+			sb.Append(string.Format("{0},{1}\n", entry.Key, entry.Value));
 		}
 
-		return sb.ToString ();
+		return sb.ToString();
 	}
 
 	// Open a file browser to save and load files
@@ -114,19 +110,19 @@ public class ExportPrefsUIButton : UIButton {
 		FileBrowser fileBrowserScript = fileBrowserObject.GetComponent<FileBrowser>();
 		fileBrowserScript.SetupFileBrowser(ViewMode.Landscape);
 		if (fileBrowserMode == FileBrowserMode.Save) {
-            fileBrowserScript.SaveFilePanel("NewPrefs", new string[] { "txt" });
-            fileBrowserScript.OnFileSelect += SaveFileUsingPath;
+			fileBrowserScript.SaveFilePanel("NewPrefs", new string[] {"txt"});
+			fileBrowserScript.OnFileSelect += SaveFileUsingPath;
 		}
 
-		GameObject uiObject = GameObject.Find (fileBrowserObject.name + "UI");
-		uiObject.GetComponent<RectTransform> ().transform.localScale = new Vector3 (0.6f, 0.6f, 1.0f);
+		GameObject uiObject = GameObject.Find(fileBrowserObject.name + "UI");
+		uiObject.GetComponent<RectTransform>().transform.localScale = new Vector3(0.6f, 0.6f, 1.0f);
 
-		GameObject directoryPanel = GameObject.Find (uiObject.name + "/FileBrowserPanel/DirectoryPanel");
+		GameObject directoryPanel = GameObject.Find(uiObject.name + "/FileBrowserPanel/DirectoryPanel");
 		foreach (Text text in directoryPanel.GetComponentsInChildren<Text>()) {
 			text.fontSize = 20;
 		}
 
-		GameObject filePanel = GameObject.Find (uiObject.name + "/FileBrowserPanel/FilePanel");
+		GameObject filePanel = GameObject.Find(uiObject.name + "/FileBrowserPanel/FilePanel");
 		foreach (Text text in filePanel.GetComponentsInChildren<Text>()) {
 			text.fontSize = 20;
 		}

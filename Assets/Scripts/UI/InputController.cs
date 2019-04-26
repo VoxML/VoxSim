@@ -8,11 +8,9 @@ using Agent;
 using Global;
 
 public class InputEventArgs : EventArgs {
-
 	public string InputString { get; set; }
 
-	public InputEventArgs(string str)
-	{
+	public InputEventArgs(string str) {
 		this.InputString = str;
 	}
 }
@@ -23,12 +21,14 @@ public class InputController : FontManager {
 		Center,
 		Right
 	}
+
 	public Alignment alignment;
 
 	public enum Placement {
 		Top,
 		Bottom
 	}
+
 	public Placement placement;
 
 	public int fontSize = 12;
@@ -50,6 +50,7 @@ public class InputController : FontManager {
 	Macros macros;
 
 	PluginImport commBridge;
+
 	ObjectSelector objSelector;
 	//ExitToMenuUIButton exitToMenu;
 
@@ -67,69 +68,67 @@ public class InputController : FontManager {
 
 	public event EventHandler InputReceived;
 
-	public void OnInputReceived(object sender, EventArgs e)
-	{
-		if (InputReceived != null)
-		{
+	public void OnInputReceived(object sender, EventArgs e) {
+		if (InputReceived != null) {
 			InputReceived(this, e);
 		}
 	}
 
 	public event EventHandler ParseComplete;
 
-	public void OnParseComplete(object sender, EventArgs e)
-	{
-		if (ParseComplete != null)
-		{
+	public void OnParseComplete(object sender, EventArgs e) {
+		if (ParseComplete != null) {
 			ParseComplete(this, e);
 		}
 	}
 
 	void Start() {
-		GameObject bc = GameObject.Find ("BehaviorController");
-		eventManager = bc.GetComponent<EventManager> ();
-		macros = bc.GetComponent<Macros> ();
+		GameObject bc = GameObject.Find("BehaviorController");
+		eventManager = bc.GetComponent<EventManager>();
+		macros = bc.GetComponent<Macros>();
 
-		objSelector = GameObject.Find ("VoxWorld").GetComponent<ObjectSelector> ();
+		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 		//exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
 
-		commBridge = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ();
+		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
 
-		labelStyle = new GUIStyle ("Label");
-		textFieldStyle = new GUIStyle ("TextField");
-		buttonStyle = new GUIStyle ("Button");
+		labelStyle = new GUIStyle("Label");
+		textFieldStyle = new GUIStyle("TextField");
+		buttonStyle = new GUIStyle("Button");
 		labelStyle.fontSize = fontSize;
 		textFieldStyle.fontSize = fontSize;
 		buttonStyle.fontSize = fontSize;
 
-		fontSizeModifier = (int)(fontSize / defaultFontSize);
+		fontSizeModifier = (int) (fontSize / defaultFontSize);
 
-		inputWidth = (System.Convert.ToInt32(Screen.width - inputMargin) > inputMaxWidth) ? inputMaxWidth : System.Convert.ToInt32(Screen.width - inputMargin);
-		inputHeight = System.Convert.ToInt32(20.0f * (float)fontSizeModifier);
+		inputWidth = (System.Convert.ToInt32(Screen.width - inputMargin) > inputMaxWidth)
+			? inputMaxWidth
+			: System.Convert.ToInt32(Screen.width - inputMargin);
+		inputHeight = System.Convert.ToInt32(20.0f * (float) fontSizeModifier);
 
 		if (alignment == Alignment.Left) {
 			if (placement == Placement.Top) {
-				inputRect = new Rect (5, 5, inputWidth, inputHeight);
+				inputRect = new Rect(5, 5, inputWidth, inputHeight);
 			}
 			else if (placement == Placement.Bottom) {
-				inputRect = new Rect (5, Screen.height - inputHeight - 5, inputWidth, inputHeight);
+				inputRect = new Rect(5, Screen.height - inputHeight - 5, inputWidth, inputHeight);
 			}
 		}
 		else if (alignment == Alignment.Center) {
 			if (placement == Placement.Top) {
-				inputRect = new Rect ((int)((Screen.width / 2) - (inputWidth / 2)), 5, inputWidth, inputHeight);
+				inputRect = new Rect((int) ((Screen.width / 2) - (inputWidth / 2)), 5, inputWidth, inputHeight);
 			}
 			else if (placement == Placement.Bottom) {
-				inputRect = new Rect ((int)((Screen.width / 2) - (inputWidth / 2)), 
+				inputRect = new Rect((int) ((Screen.width / 2) - (inputWidth / 2)),
 					Screen.height - inputHeight - 5, inputWidth, inputHeight);
 			}
 		}
 		else if (alignment == Alignment.Right) {
 			if (placement == Placement.Top) {
-				inputRect = new Rect (Screen.width - (5 + inputWidth), 5, inputWidth, inputHeight);
+				inputRect = new Rect(Screen.width - (5 + inputWidth), 5, inputWidth, inputHeight);
 			}
 			else if (placement == Placement.Bottom) {
-				inputRect = new Rect (Screen.width - (5 + inputWidth),
+				inputRect = new Rect(Screen.width - (5 + inputWidth),
 					Screen.height - inputHeight - 5, inputWidth, inputHeight);
 			}
 		}
@@ -148,22 +147,22 @@ public class InputController : FontManager {
 			return;
 		}
 
-		labelStyle = new GUIStyle ("Label");
-		textFieldStyle = new GUIStyle ("TextField");
-		buttonStyle = new GUIStyle ("Button");
+		labelStyle = new GUIStyle("Label");
+		textFieldStyle = new GUIStyle("TextField");
+		buttonStyle = new GUIStyle("Button");
 #if !UNITY_IOS
 		Event e = Event.current;
 		if (e.keyCode == KeyCode.Return) {
 			if (inputString != "") {
-
-				MessageReceived (inputString);
+				MessageReceived(inputString);
 
 				// warning: switching to TextArea here (and below) seems to cause crash
-				GUILayout.BeginArea (inputRect);
+				GUILayout.BeginArea(inputRect);
 				GUILayout.BeginHorizontal();
-				GUILayout.Label(inputLabel+":", labelStyle);
-				inputString = GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
-				GUILayout.EndHorizontal ();
+				GUILayout.Label(inputLabel + ":", labelStyle);
+				inputString = GUILayout.TextField("", textFieldStyle, GUILayout.Width(300 * fontSizeModifier),
+					GUILayout.ExpandHeight(false));
+				GUILayout.EndHorizontal();
 				GUILayout.EndArea();
 
 				//GUI.Label (inputRect, inputLabel+":");
@@ -171,14 +170,14 @@ public class InputController : FontManager {
 			}
 		}
 		else {
-
 			//GUI.Label (inputRect, inputLabel+":");
 			//inputString = GUI.TextField (inputRect, inputString);
-			GUILayout.BeginArea (inputRect);
+			GUILayout.BeginArea(inputRect);
 			GUILayout.BeginHorizontal();
-			GUILayout.Label(inputLabel+":", labelStyle);
-			inputString = GUILayout.TextField(inputString, textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
-			GUILayout.EndHorizontal ();
+			GUILayout.Label(inputLabel + ":", labelStyle);
+			inputString = GUILayout.TextField(inputString, textFieldStyle, GUILayout.Width(300 * fontSizeModifier),
+				GUILayout.ExpandHeight(false));
+			GUILayout.EndHorizontal();
 			GUILayout.EndArea();
 		}
 #else
@@ -189,7 +188,8 @@ public class InputController : FontManager {
 				GUILayout.BeginArea (inputRect);
 				GUILayout.BeginHorizontal();
 				GUILayout.Label(inputLabel+":", labelStyle);
-				inputString = GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+				inputString =
+ GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
 				GUILayout.EndHorizontal ();
 				GUILayout.EndArea();
 			}
@@ -198,7 +198,8 @@ public class InputController : FontManager {
 				GUILayout.BeginArea (inputRect);
 				GUILayout.BeginHorizontal();
 				GUILayout.Label(inputLabel+":", labelStyle);
-				inputString = GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+				inputString =
+ GUILayout.TextField("", textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
 				GUILayout.EndHorizontal ();
 				GUILayout.EndArea();
 
@@ -213,14 +214,15 @@ public class InputController : FontManager {
 			GUILayout.BeginArea (inputRect);
 			GUILayout.BeginHorizontal();
 			GUILayout.Label(inputLabel+":", labelStyle);
-			inputString = GUILayout.TextField(inputString, textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
+			inputString =
+ GUILayout.TextField(inputString, textFieldStyle, GUILayout.Width(300*fontSizeModifier), GUILayout.ExpandHeight (false));
 			GUILayout.EndHorizontal ();
 			GUILayout.EndArea();
 		}
 #endif
 
 
-			/* DEBUG BUTTONS */
+		/* DEBUG BUTTONS */
 
 //		if (GUI.Button (new Rect (10, Screen.height - ((10 + (int)(20*exitToMenu.FontSizeModifier)) + (10 + (int)(40*fontSizeModifier))),
 //			100*fontSizeModifier, 20*fontSizeModifier), "Reset", buttonStyle)) {
@@ -250,91 +252,96 @@ public class InputController : FontManager {
 
 	public void MessageReceived(String inputString) {
 		Regex r = new Regex(@".*\(.*\)");
-		Regex v = new Regex ("<.*?;.*?;.*?>");
+		Regex v = new Regex("<.*?;.*?;.*?>");
 		string functionalCommand = "";
 
 		if (inputString != "") {
-			InputEventArgs inputArgs = new InputEventArgs (inputString);
-			OnInputReceived (this, inputArgs);
+			InputEventArgs inputArgs = new InputEventArgs(inputString);
+			OnInputReceived(this, inputArgs);
 
 			if (inputString == "reset") {
-				StartCoroutine(SceneHelper.LoadScene (UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name));
+				StartCoroutine(SceneHelper.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name));
 				return;
 			}
 
 			if (inputString == "repeat") {
-				GameObject.Find ("VoxWorld").GetComponent<ScenarioManager> ().scenarioScript.SendMessage("Repeat");
+				GameObject.Find("VoxWorld").GetComponent<ScenarioManager>().scenarioScript.SendMessage("Repeat");
 				return;
 			}
 
 			if (inputString == "that's all") {
-				GameObject.Find ("VoxWorld").GetComponent<ScenarioManager> ().scenarioScript.SendMessage("PlayGame");
+				GameObject.Find("VoxWorld").GetComponent<ScenarioManager>().scenarioScript.SendMessage("PlayGame");
 				return;
 			}
 
-			Debug.Log ("User entered: " + inputString);
+			Debug.Log("User entered: " + inputString);
 
-			Dictionary<string,string> vectors = new Dictionary<string,string> ();
+			Dictionary<string, string> vectors = new Dictionary<string, string>();
 
 			foreach (Match match in v.Matches(inputString)) {
-				vectors.Add (string.Format ("V@{0}", match.Index),match.Value);
-				Debug.Log (string.Format ("{0}:{1}", string.Format ("V@{0}", match.Index), match.Value));
-				inputString = v.Replace (inputString, string.Format ("V@{0}", match.Index),1);
+				vectors.Add(string.Format("V@{0}", match.Index), match.Value);
+				Debug.Log(string.Format("{0}:{1}", string.Format("V@{0}", match.Index), match.Value));
+				inputString = v.Replace(inputString, string.Format("V@{0}", match.Index), 1);
 			}
 
-			Debug.Log (inputString);
+			Debug.Log(inputString);
 
-			if (!r.IsMatch (inputString)) { // is not already functional form
+			if (!r.IsMatch(inputString)) {
+				// is not already functional form
 				// parse into functional form
-				String[] inputs = inputString.Split(new char[]{'.',',','!'});
-				List<String> commands = new List<String> ();
+				String[] inputs = inputString.Split(new char[] {'.', ',', '!'});
+				List<String> commands = new List<String>();
 				foreach (String s in inputs) {
 					if (s != String.Empty) {
 						commands.Add(commBridge.NLParse(s.Trim().ToLower()));
 					}
 				}
-				functionalCommand = String.Join (";", commands.ToArray());
+
+				functionalCommand = String.Join(";", commands.ToArray());
 			}
 			else {
 				functionalCommand = inputString;
 			}
 
-			Debug.Log (functionalCommand);
+			Debug.Log(functionalCommand);
 
-			if (functionalCommand.Count (x => x == '(') == functionalCommand.Count (x => x == ')')) {
+			if (functionalCommand.Count(x => x == '(') == functionalCommand.Count(x => x == ')')) {
 				//eventManager.ClearEvents ();
 				if (macros != null) {
-					foreach (KeyValuePair<String,String> kv in macros.commandMacros) {	// if input is a macro
-						if (functionalCommand == kv.Key) {									// sub in value
+					foreach (KeyValuePair<String, String> kv in macros.commandMacros) {
+						// if input is a macro
+						if (functionalCommand == kv.Key) {
+							// sub in value
 							functionalCommand = kv.Value;
 							break;
 						}
 					}
 				}
-				Debug.Log ("Parsed as: " + functionalCommand);
-				InputEventArgs parseArgs = new InputEventArgs (functionalCommand);
-				OnParseComplete (this, parseArgs);
+
+				Debug.Log("Parsed as: " + functionalCommand);
+				InputEventArgs parseArgs = new InputEventArgs(functionalCommand);
+				OnParseComplete(this, parseArgs);
 
 				if (!silenceAcknowledgment) {
-					OutputHelper.PrintOutput (Role.Affector, "OK.");
-					OutputHelper.PrintOutput (Role.Planner, "");
+					OutputHelper.PrintOutput(Role.Affector, "OK.");
+					OutputHelper.PrintOutput(Role.Planner, "");
 				}
 
-				Debug.Log (functionalCommand);
+				Debug.Log(functionalCommand);
 
-				commands = functionalCommand.Split (';');
+				commands = functionalCommand.Split(';');
 				foreach (String commandString in commands) {
 					string command = commandString;
 					foreach (string vector in vectors.Keys) {
-						command = command.Replace (vector, vectors [vector]);
+						command = command.Replace(vector, vectors[vector]);
 					}
 
 					// add to queue
-					eventManager.QueueEvent (command);
+					eventManager.QueueEvent(command);
 				}
 
 				if (eventManager.immediateExecution) {
-					eventManager.ExecuteNextCommand ();
+					eventManager.ExecuteNextCommand();
 				}
 			}
 		}

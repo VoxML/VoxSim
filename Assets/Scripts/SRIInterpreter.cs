@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Timers;
-
 using Global;
 using SimpleJSON;
 
@@ -12,8 +11,8 @@ public class SRIInterpreter : MonoBehaviour {
 	//http://www.voxicon.net/cwc/block-state-log.json
 	//http://192.168.1.2:1236/world-api/block-state.json
 
-	Vector2 voxTableSize = new Vector2(2.916323f,2.916323f);
-	Vector2 sriTableSize = new Vector2(1.7f,1.7f);
+	Vector2 voxTableSize = new Vector2(2.916323f, 2.916323f);
+	Vector2 sriTableSize = new Vector2(1.7f, 1.7f);
 	float yOffset = 0;
 
 	Timer pollTimer;
@@ -23,11 +22,11 @@ public class SRIInterpreter : MonoBehaviour {
 	void Start() {
 		url = PlayerPrefs.GetString("SRI URL");
 
-		GameObject bc = GameObject.Find ("BehaviorController");
-		GameObject table = GameObject.Find ("square_table");
-		Predicates preds = bc.GetComponent<Predicates> ();
+		GameObject bc = GameObject.Find("BehaviorController");
+		GameObject table = GameObject.Find("square_table");
+		Predicates preds = bc.GetComponent<Predicates>();
 
-		yOffset = preds.TOP (new object[]{table}).y;
+		yOffset = preds.TOP(new object[] {table}).y;
 
 		// Create poll timer
 		// Create a timer
@@ -41,31 +40,32 @@ public class SRIInterpreter : MonoBehaviour {
 	}
 
 	void ClearBlocks() {
-		GameObject[] blocks = GameObject.FindGameObjectsWithTag ("Block");
-		
-		for(int i = 0; i < blocks.Length; i++)
-		{
+		GameObject[] blocks = GameObject.FindGameObjectsWithTag("Block");
+
+		for (int i = 0; i < blocks.Length; i++) {
 			GameObject.Destroy(blocks[i]);
 		}
 	}
 
 	IEnumerator GetApparatusData() {
-		using (WWW www = new WWW (url)) {
+		using (WWW www = new WWW(url)) {
 			yield return www;
-			
+
 			string content = www.text;
 
-			JSONNode blockStates = JSONNode.Parse (content);
+			JSONNode blockStates = JSONNode.Parse(content);
 
 			if (blockStates != null) {
-				for (int i = 0; i < blockStates ["BlockStates"].Count; i++) {
+				for (int i = 0; i < blockStates["BlockStates"].Count; i++) {
 					float temp;
 
-					GameObject block = InstantiateObject ("block");
+					GameObject block = InstantiateObject("block");
 					block.tag = "Block";
 					//GameObject block = GameObject.Find("block"+blockStates["BlockStates"][i]["ID"]);
 
-					Vector3 targetPosition = Global.Helper.ParsableToVector (((String)blockStates ["BlockStates"] [i] ["Position"]).Replace (",", ";"));
+					Vector3 targetPosition =
+						Global.Helper.ParsableToVector(
+							((String) blockStates["BlockStates"][i]["Position"]).Replace(",", ";"));
 					temp = targetPosition.y;
 					targetPosition.y = targetPosition.z;
 					targetPosition.z = temp;
@@ -74,7 +74,9 @@ public class SRIInterpreter : MonoBehaviour {
 					targetPosition.y += yOffset;
 					targetPosition.z *= voxTableSize.y / sriTableSize.y;
 
-					Quaternion targetRotation = Global.Helper.ParsableToQuaternion (((String)blockStates ["BlockStates"] [i] ["Rotation"]).Replace (",", ";"));
+					Quaternion targetRotation =
+						Global.Helper.ParsableToQuaternion(
+							((String) blockStates["BlockStates"][i]["Rotation"]).Replace(",", ";"));
 					//temp = targetRotation.y;
 					//targetRotation.y = targetRotation.z;
 					//targetRotation.z = temp;
@@ -82,8 +84,8 @@ public class SRIInterpreter : MonoBehaviour {
 					block.transform.position = targetPosition;
 					block.transform.rotation = targetRotation;
 					//block.transform.rotation = targetRotation;
-					block.transform.Rotate (Vector3.right, 90, Space.World);
-					block.transform.localScale = new Vector3 (0.152439f, 0.152439f, 0.152439f);
+					block.transform.Rotate(Vector3.right, 90, Space.World);
+					block.transform.localScale = new Vector3(0.152439f, 0.152439f, 0.152439f);
 					//block.GetComponent<Entity>().targetPosition = targetPosition;
 					//block.GetComponent<Entity>().targetRotation = targetRotation;
 				}
@@ -91,23 +93,23 @@ public class SRIInterpreter : MonoBehaviour {
 		}
 	}
 
-	public GameObject InstantiateObject (string objName) {
-		Debug.Log ("Instantiate " + objName);
+	public GameObject InstantiateObject(string objName) {
+		Debug.Log("Instantiate " + objName);
 
 		UnityEngine.Object prefab = Resources.Load(objName);
-		GameObject go = (GameObject)GameObject.Instantiate (prefab);
+		GameObject go = (GameObject) GameObject.Instantiate(prefab);
 		go.transform.position = Vector3.zero;
-		go.SetActive (true);
-		go.name = go.name.Replace ("(Clone)", "");
+		go.SetActive(true);
+		go.name = go.name.Replace("(Clone)", "");
 
 		return go;
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		if (poll) {
-			ClearBlocks ();
-			StartCoroutine ("GetApparatusData");
+			ClearBlocks();
+			StartCoroutine("GetApparatusData");
 			poll = false;
 		}
 	}
@@ -120,11 +122,11 @@ public class SRIInterpreter : MonoBehaviour {
 		pollTimer.Interval = pollInterval;
 		pollTimer.Enabled = true;
 	}
-	
-	void OnGUI () {
-		if (GUI.Button (new Rect (10, Screen.height - 55, 100, 20), "Refresh")) {
-			ClearBlocks ();
-			StartCoroutine ("GetApparatusData");
+
+	void OnGUI() {
+		if (GUI.Button(new Rect(10, Screen.height - 55, 100, 20), "Refresh")) {
+			ClearBlocks();
+			StartCoroutine("GetApparatusData");
 		}
 	}
 }

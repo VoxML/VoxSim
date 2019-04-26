@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
-
 using Global;
 
-[RequireComponent(typeof(Animator))] 
-
+[RequireComponent(typeof(Animator))]
 public class IKControl : MonoBehaviour {
-
 	protected Animator animator;
 
 	public bool ikActive = false;
@@ -20,17 +17,18 @@ public class IKControl : MonoBehaviour {
 
 	public float turnSpeed = 5.0f;
 
-	void Start () {
+	void Start() {
 		animator = GetComponentInChildren<Animator>();
 	}
 
-	void Update () {
-		if (!Helper.VectorIsNaN (targetRotation)) {	// has valid target
-			if (transform.rotation != Quaternion.Euler (targetRotation)) {
-				float offset = RotateToward (targetRotation);
+	void Update() {
+		if (!Helper.VectorIsNaN(targetRotation)) {
+			// has valid target
+			if (transform.rotation != Quaternion.Euler(targetRotation)) {
+				float offset = RotateToward(targetRotation);
 
 				if ((Mathf.Deg2Rad * offset) < 0.01f) {
-					transform.rotation = Quaternion.Euler (targetRotation);
+					transform.rotation = Quaternion.Euler(targetRotation);
 				}
 			}
 		}
@@ -38,39 +36,36 @@ public class IKControl : MonoBehaviour {
 
 	//a callback for calculating IK
 	void OnAnimatorIK() {
-		if(animator) {
-
+		if (animator) {
 			//if the IK is active, set the position and rotation directly to the goal. 
-			if(ikActive) {
-
+			if (ikActive) {
 				// Set the look target position, if one has been assigned
-				if(lookObj != null) {
+				if (lookObj != null) {
 					animator.SetLookAtWeight(1);
 					animator.SetLookAtPosition(lookObj.position);
-				}    
+				}
 
 				// Set the left hand target position and rotation, if one has been assigned
-				if(leftHandObj != null) {
-					animator.SetIKPositionWeight(AvatarIKGoal.LeftHand,1);
+				if (leftHandObj != null) {
+					animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1);
 					//animator.SetIKRotationWeight(AvatarIKGoal.RightHand,1);  
-					animator.SetIKPosition(AvatarIKGoal.LeftHand,leftHandObj.position);
+					animator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandObj.position);
 					//animator.SetIKRotation(AvatarIKGoal.RightHand,rightHandObj.rotation);
-				} 
+				}
 
 				// Set the right hand target position and rotation, if one has been assigned
-				if(rightHandObj != null) {
-					animator.SetIKPositionWeight(AvatarIKGoal.RightHand,1);
+				if (rightHandObj != null) {
+					animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1);
 					//animator.SetIKRotationWeight(AvatarIKGoal.RightHand,1);  
-					animator.SetIKPosition(AvatarIKGoal.RightHand,rightHandObj.position);
+					animator.SetIKPosition(AvatarIKGoal.RightHand, rightHandObj.position);
 					//animator.SetIKRotation(AvatarIKGoal.RightHand,rightHandObj.rotation);
-				}        
-
+				}
 			}
 
 			//if the IK is not active, set the position and rotation of the hand and head back to the original position
-			else {          
-				animator.SetIKPositionWeight(AvatarIKGoal.LeftHand,0);
-				animator.SetIKRotationWeight(AvatarIKGoal.RightHand,0); 
+			else {
+				animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0);
+				animator.SetIKRotationWeight(AvatarIKGoal.RightHand, 0);
 				animator.SetLookAtWeight(0);
 			}
 		}
@@ -82,10 +77,10 @@ public class IKControl : MonoBehaviour {
 		//Quaternion offset = Quaternion.FromToRotation (transform.eulerAngles, targetRotation);
 		//Vector3 normalizedOffset = Vector3.Normalize (offset);
 
-		float angle = Quaternion.Angle (transform.rotation, Quaternion.Euler (target));
+		float angle = Quaternion.Angle(transform.rotation, Quaternion.Euler(target));
 		float timeToComplete = angle / turnSpeed;
-		float donePercentage = Mathf.Min (1.0f, Time.deltaTime / timeToComplete);
-		Quaternion rot = Quaternion.Slerp (transform.rotation, Quaternion.Euler (target), donePercentage * 100.0f);
+		float donePercentage = Mathf.Min(1.0f, Time.deltaTime / timeToComplete);
+		Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.Euler(target), donePercentage * 100.0f);
 		//Debug.Log (turnSpeed);
 		//Quaternion resolve = Quaternion.identity;
 
@@ -117,7 +112,7 @@ public class IKControl : MonoBehaviour {
 			}
 		}*/
 
-		offset = Quaternion.Angle (rot, Quaternion.Euler (target));
+		offset = Quaternion.Angle(rot, Quaternion.Euler(target));
 		//Debug.Log (offset);
 
 		return offset;

@@ -10,8 +10,7 @@ namespace Vox {
 	/// ENTITY
 	/// </summary>
 	public class VoxEntity {
-		public enum EntityType
-		{
+		public enum EntityType {
 			None,
 			Object,
 			Program,
@@ -19,8 +18,8 @@ namespace Vox {
 			Relation,
 			Function
 		}
-		[XmlAttribute]
-		public EntityType Type { get; set; }
+
+		[XmlAttribute] public EntityType Type { get; set; }
 	}
 
 	/// <summary>
@@ -35,42 +34,35 @@ namespace Vox {
 	/// TYPE
 	/// </summary>
 	public class VoxTypeComponent {
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxTypeArg {
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxTypeSubevent {
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxTypeCorresp {
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxType {
 		public string Head = "";
-		
-		[XmlArray("Components")]
-		[XmlArrayItem("Component")]
+
+		[XmlArray("Components")] [XmlArrayItem("Component")]
 		public List<VoxTypeComponent> Components = new List<VoxTypeComponent>();
-		
+
 		public string Concavity = "";
 		public string RotatSym = "";
 		public string ReflSym = "";
 
-		[XmlArray("Args")]
-		[XmlArrayItem("Arg")]
+		[XmlArray("Args")] [XmlArrayItem("Arg")]
 		public List<VoxTypeArg> Args = new List<VoxTypeArg>();
 
-		[XmlArray("Body")]
-		[XmlArrayItem("Subevent")]
+		[XmlArray("Body")] [XmlArrayItem("Subevent")]
 		public List<VoxTypeSubevent> Body = new List<VoxTypeSubevent>();
 
 		public string Scale = "";
@@ -80,11 +72,10 @@ namespace Vox {
 		public string Value = "";
 		public string Constr = "";
 
-        public string Referent = "";
-        public string Mapping = "";
+		public string Referent = "";
+		public string Mapping = "";
 
-        [XmlArray("Corresps")]
-		[XmlArrayItem("Corresp")]
+		[XmlArray("Corresps")] [XmlArrayItem("Corresp")]
 		public List<VoxTypeCorresp> Corresps = new List<VoxTypeCorresp>();
 	}
 
@@ -92,28 +83,22 @@ namespace Vox {
 	/// HABITAT
 	/// </summary>
 	public class VoxHabitatIntr {
-		[XmlAttribute]
-		public string Name { get; set; }
-		
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Name { get; set; }
+
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxHabitatExtr {
-		[XmlAttribute]
-		public string Name { get; set; }
-		
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Name { get; set; }
+
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxHabitat {
-		[XmlArray("Intrinsic")]
-		[XmlArrayItem("Intr")]
+		[XmlArray("Intrinsic")] [XmlArrayItem("Intr")]
 		public List<VoxHabitatIntr> Intrinsic = new List<VoxHabitatIntr>();
 
-		[XmlArray("Extrinsic")]
-		[XmlArrayItem("Extr")]
+		[XmlArray("Extrinsic")] [XmlArrayItem("Extr")]
 		public List<VoxHabitatExtr> Extrinsic = new List<VoxHabitatExtr>();
 	}
 
@@ -121,13 +106,11 @@ namespace Vox {
 	/// AFFORD_STR
 	/// </summary>
 	public class VoxAffordAffordance {
-		[XmlAttribute]
-		public string Formula { get; set; }
+		[XmlAttribute] public string Formula { get; set; }
 	}
 
 	public class VoxAfford_Str {
-		[XmlArray("Affordances")]
-		[XmlArrayItem("Affordance")]
+		[XmlArray("Affordances")] [XmlArrayItem("Affordance")]
 		public List<VoxAffordAffordance> Affordances = new List<VoxAffordAffordance>();
 	}
 
@@ -136,6 +119,7 @@ namespace Vox {
 	/// </summary>
 	public class VoxEmbodiment {
 		public string Scale = "";
+
 		public bool Movable = false;
 		//public int Density = 0;
 	}
@@ -144,23 +128,19 @@ namespace Vox {
 	/// ATTRIBUTES
 	/// </summary>
 	public class VoxAttributesAttr {
-		[XmlAttribute]
-		public string Value { get; set; }
+		[XmlAttribute] public string Value { get; set; }
 	}
 
 	public class VoxAttributes {
-		[XmlArray("Attrs")]
-		[XmlArrayItem("Attr")]
+		[XmlArray("Attrs")] [XmlArrayItem("Attr")]
 		public List<VoxAttributesAttr> Attrs = new List<VoxAttributesAttr>();
 	}
 
 	public class VoxMLEventArgs : EventArgs {
-	
 		public GameObject Voxeme { get; set; }
 		public VoxML VoxML { get; set; }
 
-		public VoxMLEventArgs(GameObject voxObj, VoxML voxml)
-		{
+		public VoxMLEventArgs(GameObject voxObj, VoxML voxml) {
 			this.Voxeme = voxObj;
 			this.VoxML = voxml;
 		}
@@ -170,9 +150,8 @@ namespace Vox {
 	///  VOXEME
 	/// </summary>
 	public class VoxML {
-
 		// all VoxML entities encode a subset of the following structures
-		public VoxEntity Entity = new VoxEntity ();
+		public VoxEntity Entity = new VoxEntity();
 		public VoxLex Lex = new VoxLex();
 		public VoxType Type = new VoxType();
 		public VoxHabitat Habitat = new VoxHabitat();
@@ -180,29 +159,24 @@ namespace Vox {
 		public VoxEmbodiment Embodiment = new VoxEmbodiment();
 		public VoxAttributes Attributes = new VoxAttributes();
 
-		public void Save(string path)
-		{
+		public void Save(string path) {
 			XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
-			using(var stream = new FileStream(path, FileMode.Create))
-			{
+			using (var stream = new FileStream(path, FileMode.Create)) {
 				serializer.Serialize(stream, this);
 			}
 		}
-		
-		public static VoxML Load(string path)
-		{
+
+		public static VoxML Load(string path) {
 			XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
-			using(var stream = new FileStream(path, FileMode.Open))
-			{
+			using (var stream = new FileStream(path, FileMode.Open)) {
 				return serializer.Deserialize(stream) as VoxML;
 			}
 		}
-		
+
 		//Loads the xml directly from the given string. Useful in combination with www.text.
-		public static VoxML LoadFromText(string text) 
-		{
+		public static VoxML LoadFromText(string text) {
 			XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
 			return serializer.Deserialize(new StringReader(text)) as VoxML;
-		}	
+		}
 	}
 }

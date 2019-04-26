@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using Network;
 
 public class GestureDemoInputModalWindow : ModalWindow {
-
-    FusionSocket fusionClient;
+	FusionSocket fusionClient;
 
 	public int fontSize = 12;
 
@@ -13,7 +12,8 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	private bool showSpeech = true;
 	private bool showGesture = true;
 
-	float fontSizeModifier;	
+	float fontSizeModifier;
+
 	public float FontSizeModifier {
 		get { return fontSizeModifier; }
 		set { fontSizeModifier = value; }
@@ -23,85 +23,84 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	List<string> inputs = new List<string>();
 
 	// Use this for initialization
-	void Start () {
-		base.Start ();
+	void Start() {
+		base.Start();
 
 		actionButtonText = "View Input Symbols";
 		windowTitle = "Input Symbol Log";
 		persistent = true;
 
-		fontSizeModifier = (int)(fontSize / defaultFontSize);
+		fontSizeModifier = (int) (fontSize / defaultFontSize);
 
-		windowRect = new Rect (15, 15 + (int)(20 * fontSizeModifier), 200, 200);
+		windowRect = new Rect(15, 15 + (int) (20 * fontSizeModifier), 200, 200);
 	}
 
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		if (fusionClient == null) {
-			fusionClient = GameObject.Find ("CommunicationsBridge").GetComponent<PluginImport> ().FusionSocket;
+			fusionClient = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>().FusionSocket;
 			if (fusionClient != null) {
 				fusionClient.FusionReceived += ReceivedGesture;
 			}
 		}
-	}	
+	}
 
-	protected override void OnGUI () {
-		buttonStyle = new GUIStyle ("Button");
+	protected override void OnGUI() {
+		buttonStyle = new GUIStyle("Button");
 		buttonStyle.fontSize = fontSize;
 
 		Rect buttonRect = new Rect(10, 10,
 			GUI.skin.label.CalcSize(new GUIContent(actionButtonText)).x + 10,
 			20 * fontSizeModifier);
-		if (GUI.Button (buttonRect, actionButtonText, buttonStyle)) {
+		if (GUI.Button(buttonRect, actionButtonText, buttonStyle)) {
 			render = true;
 		}
 
-		showSpeech = GUI.Toggle(new Rect(buttonRect.x * 2 + buttonRect.width, buttonRect.y, 25, buttonRect.height), showSpeech, "S");
-		showGesture = GUI.Toggle(new Rect(buttonRect.x * 2 + buttonRect.width + 30, buttonRect.y, 25, buttonRect.height), showGesture, "G");
+		showSpeech = GUI.Toggle(new Rect(buttonRect.x * 2 + buttonRect.width, buttonRect.y, 25, buttonRect.height),
+			showSpeech, "S");
+		showGesture =
+			GUI.Toggle(new Rect(buttonRect.x * 2 + buttonRect.width + 30, buttonRect.y, 25, buttonRect.height),
+				showGesture, "G");
 
-		base.OnGUI ();
+		base.OnGUI();
 	}
 
-	public override void DoModalWindow(int windowID){
-
-		base.DoModalWindow (windowID);
+	public override void DoModalWindow(int windowID) {
+		base.DoModalWindow(windowID);
 
 		//makes GUI window scrollable
-		scrollPosition = GUILayout.BeginScrollView (scrollPosition);
+		scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 		GUILayout.BeginVertical(GUI.skin.box);
 		foreach (string input in inputs) {
-			GUILayout.Label (input);
+			GUILayout.Label(input);
 		}
+
 		GUILayout.EndVertical();
-		GUILayout.EndScrollView ();
+		GUILayout.EndScrollView();
 	}
 
-	private bool IsInputSpeech(string msg)
-	{
+	private bool IsInputSpeech(string msg) {
 		return msg.StartsWith("S");
 	}
 
-	private bool IsInputGesture(string msg)
-	{
+	private bool IsInputGesture(string msg) {
 		return msg.StartsWith("G");
 	}
 
-	private bool IsInputPointing(string msg)
-	{
+	private bool IsInputPointing(string msg) {
 		return msg.StartsWith("P");
 	}
 
 	void ReceivedGesture(object sender, EventArgs e) {
-		string msg = ((FusionEventArgs)e).Content;
-		if (!IsInputPointing(msg))
-		{
+		string msg = ((FusionEventArgs) e).Content;
+		if (!IsInputPointing(msg)) {
 			bool showInModal = IsInputSpeech(msg) ? showSpeech : showGesture;
-            Debug.Log (string.Format("\"{0}\", shown in scene: {1}", msg, showInModal));
-			if (showInModal)
-			{
-				inputs.Add (string.Format ("{0} {1}", msg.Split (';') [0], msg.Split (';') [1]));
+			Debug.Log(string.Format("\"{0}\", shown in scene: {1}", msg, showInModal));
+			if (showInModal) {
+				inputs.Add(string.Format("{0} {1}", msg.Split(';')[0], msg.Split(';')[1]));
 			}
 		}
-		scrollPosition.y = Mathf.Infinity;	// scroll to bottom
+
+		scrollPosition.y = Mathf.Infinity; // scroll to bottom
 	}
 }
