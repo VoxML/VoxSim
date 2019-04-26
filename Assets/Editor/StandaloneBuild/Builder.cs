@@ -103,7 +103,11 @@ namespace StandaloneBuild {
                     //  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
                     //  "Agents/Diana.unity" in the build config to include it
                     string scenesDirPath = Application.dataPath + "/Scenes/";
-                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList();
+                    // Windows will extract any subdirectories from the build config with a backslash instead of a forward slash
+                    //  but Unity/any Unix system needs forward slashes, so replace them
+                    // therefore, make sure none of your actual filenames somehow has a backslash in it
+                    // but that shouldn't be happening anyway!
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList().Select(f => f.Replace('\\', '/')).ToList(); ;
                     foreach (string s in scenesList) {
                         if (s != string.Empty) {    // scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
                             string scenePath = scenesDirPath + s + ".unity";
@@ -165,7 +169,11 @@ namespace StandaloneBuild {
                     //  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
                     //  "Agents/Diana.unity" in the build config to include it
                     string scenesDirPath = Application.dataPath + "/Scenes/";
-                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList();
+                    // Windows will extract any subdirectories from the build config with a backslash instead of a forward slash
+                    //  but Unity/any Unix system needs forward slashes, so replace them
+                    // therefore, make sure none of your actual filenames somehow has a backslash in it
+                    // but that shouldn't be happening anyway!
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList().Select(f => f.Replace('\\','/')).ToList();
                     foreach (string s in scenesList) {
                         if (s != string.Empty) {    // scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
                             string scenePath = scenesDirPath + s + ".unity";
@@ -227,7 +235,13 @@ namespace StandaloneBuild {
                     //  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
                     //  "Agents/Diana.unity" in the build config to include it
                     string scenesDirPath = Application.dataPath + "/Scenes/";
-                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList();
+                    // Windows will extract any subdirectories from the build config with a backslash instead of a forward slash
+                    //  but Unity/any Unix system needs forward slashes, so replace them
+                    // therefore, make sure none of your actual filenames somehow has a backslash in it
+                    // but that shouldn't be happening anyway!
+                    // Since iOS building is only really supported on Max OS, this shouldn't be an issue here,
+                    //  but the check is included anyway for consistency
+                    List<string> fileEntries = Directory.GetFiles (scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList().Select(f => f.Replace('\\', '/')).ToList();
                     foreach (string s in scenesList) {
                         if (s != string.Empty) {    // scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
                             string scenePath = scenesDirPath + s + ".unity";
