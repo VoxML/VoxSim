@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-
 using Agent;
 using Global;
 using MajorAxes;
@@ -13,9 +12,7 @@ using RootMotion.FinalIK;
 using Vox;
 
 public class Voxeme : MonoBehaviour {
-
-	[HideInInspector]
-	public VoxML voxml = new VoxML();
+	[HideInInspector] public VoxML voxml = new VoxML();
 
 	public OperationalVox opVox;
 
@@ -25,25 +22,27 @@ public class Voxeme : MonoBehaviour {
 	// (physics-resultant changes between the completion of one event and the start of the next must be brought into line)
 	//public Dictionary<string,Vector3> startEventRotations = new Dictionary<string, Vector3> ();
 	//public Dictionary<string,Vector3> endEventRotations = new Dictionary<string, Vector3> ();
-	public Dictionary<GameObject,Vector3> displacement = new Dictionary<GameObject, Vector3> ();
-	public Dictionary<GameObject,Vector3> rotationalDisplacement = new Dictionary<GameObject, Vector3> ();
+	public Dictionary<GameObject, Vector3> displacement = new Dictionary<GameObject, Vector3>();
+	public Dictionary<GameObject, Vector3> rotationalDisplacement = new Dictionary<GameObject, Vector3>();
 
 	Rigging rigging;
 
-    public GameObject graspConvention = null;
+	public GameObject graspConvention = null;
 
-	public List<InteractionTarget> interactionTargets = new List<InteractionTarget> ();
+	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
-	public Queue<Vector3> interTargetPositions = new Queue<Vector3> ();
-    private Vector3 _targetPosition;
+	public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
+	private Vector3 _targetPosition;
+
 	public Vector3 targetPosition {
-        get { return _targetPosition; }
-        set {
-            OnTargetPositionChanged(_targetPosition,value);
-            _targetPosition = value;
-        }
-    }
-	public Queue<Vector3> interTargetRotations = new Queue<Vector3> ();
+		get { return _targetPosition; }
+		set {
+			OnTargetPositionChanged(_targetPosition, value);
+			_targetPosition = value;
+		}
+	}
+
+	public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
 	public Vector3 targetRotation;
 	public Vector3 targetScale;
 	public float moveSpeed = 1.0f;
@@ -78,8 +77,8 @@ public class Voxeme : MonoBehaviour {
 	public Transform grasperCoord = null;
 
 	public Voxeme[] children;
-	public Dictionary<GameObject,Vector3> parentToChildPositionOffset;
-	public Dictionary<GameObject,Quaternion> parentToChildRotationOffset;
+	public Dictionary<GameObject, Vector3> parentToChildPositionOffset;
+	public Dictionary<GameObject, Quaternion> parentToChildRotationOffset;
 
 	public Vector3 startPosition;
 	public Vector3 startRotation;
@@ -87,16 +86,14 @@ public class Voxeme : MonoBehaviour {
 
 	public event EventHandler VoxMLLoaded;
 
-	public void OnVoxMLLoaded(object sender, EventArgs e)
-	{
-		if (VoxMLLoaded != null)
-		{
+	public void OnVoxMLLoaded(object sender, EventArgs e) {
+		if (VoxMLLoaded != null) {
 			VoxMLLoaded(this, e);
 		}
 	}
 
 	// Use this for initialization
-	void Start () {
+	void Start() {
 		// load in VoxML knowledge
 //		TextAsset markup = Resources.Load (gameObject.name) as TextAsset;
 //		if (markup != null) {
@@ -110,16 +107,16 @@ public class Voxeme : MonoBehaviour {
 
 //		voxml = VoxML.LoadFromText (www.text);
 
-		LoadVoxML ();
+		LoadVoxML();
 
 		// get movement blocking
 		minYBound = Helper.GetObjectWorldSize(gameObject).min.y;
 		//Debug.Log (minYBound);
 
 		// get rigging components
-		rigging = gameObject.GetComponent<Rigging> ();
+		rigging = gameObject.GetComponent<Rigging>();
 		if (rigging != null) {
-			rigging.rigidbodies = gameObject.GetComponentsInChildren<Rigidbody> ();
+			rigging.rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
 		}
 
 		startPosition = transform.position;
@@ -135,30 +132,32 @@ public class Voxeme : MonoBehaviour {
 
 		parentToChildPositionOffset = new Dictionary<GameObject, Vector3>();
 		parentToChildRotationOffset = new Dictionary<GameObject, Quaternion>();
-		children = GetComponentsInChildren<Voxeme> ();
+		children = GetComponentsInChildren<Voxeme>();
 		foreach (Voxeme child in children) {
 			if (child.isActiveAndEnabled) {
 				if (child.gameObject != gameObject) {
 					//Debug.Log (child.transform);
-					parentToChildPositionOffset [child.gameObject] = child.transform.localPosition;
-					parentToChildRotationOffset [child.gameObject] = child.transform.localRotation;
+					parentToChildPositionOffset[child.gameObject] = child.transform.localPosition;
+					parentToChildRotationOffset[child.gameObject] = child.transform.localRotation;
 					//Debug.Log (parentToChildPositionOffset [child.gameObject]);
 				}
 			}
 		}
 
-		Debug.Log (gameObject);
-		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).min));
-		Debug.Log (Helper.VectorToParsable (Helper.GetObjectWorldSize (gameObject).max));
+		Debug.Log(gameObject);
+		Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(gameObject).min));
+		Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(gameObject).max));
 	}
-		
+
 	// Update is called once per frame
-	void Update () {
-		if (interTargetPositions.Count == 0) {	// no queued path
-			if (!Helper.VectorIsNaN (targetPosition)) {	// has valid destination
+	void Update() {
+		if (interTargetPositions.Count == 0) {
+			// no queued path
+			if (!Helper.VectorIsNaN(targetPosition)) {
+				// has valid destination
 				if (!isGrasped) {
 					if (transform.position != targetPosition) {
-                        Vector3 offset = MoveToward (targetPosition);
+						Vector3 offset = MoveToward(targetPosition);
 
 						if (offset.sqrMagnitude <= Constants.EPSILON) {
 							transform.position = targetPosition;
@@ -166,7 +165,7 @@ public class Voxeme : MonoBehaviour {
 							foreach (Voxeme child in children) {
 								if (child.isActiveAndEnabled) {
 									if (child.gameObject != gameObject) {
-										child.transform.localPosition = parentToChildPositionOffset [child.gameObject];
+										child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
 										child.targetPosition = child.transform.position;
 									}
 								}
@@ -181,65 +180,71 @@ public class Voxeme : MonoBehaviour {
 					}
 				}
 				else {
-					GraspScript graspController = grasperCoord.root.gameObject.GetComponent<GraspScript> ();
-					if (graspTracker.transform.position != targetPosition+graspController.graspTrackerOffset) {
-						Vector3 offset = MoveToward (targetPosition+graspController.graspTrackerOffset);
+					GraspScript graspController = grasperCoord.root.gameObject.GetComponent<GraspScript>();
+					if (graspTracker.transform.position != targetPosition + graspController.graspTrackerOffset) {
+						Vector3 offset = MoveToward(targetPosition + graspController.graspTrackerOffset);
 
 						if (offset.sqrMagnitude <= Constants.EPSILON) {
-							graspTracker.transform.position = targetPosition+graspController.graspTrackerOffset;
+							graspTracker.transform.position = targetPosition + graspController.graspTrackerOffset;
 						}
 					}
 				}
 			}
-			else {	// cannot execute motion
-				OutputHelper.PrintOutput(Role.Affector,"I'm sorry, I can't do that.");
-				GameObject.Find ("BehaviorController").GetComponent<EventManager> ().SendMessage("AbortEvent");
+			else {
+				// cannot execute motion
+				OutputHelper.PrintOutput(Role.Affector, "I'm sorry, I can't do that.");
+				GameObject.Find("BehaviorController").GetComponent<EventManager>().SendMessage("AbortEvent");
 				targetPosition = transform.position;
 			}
 		}
 		else {
-			Vector3 interimTarget = interTargetPositions.Peek ();
+			Vector3 interimTarget = interTargetPositions.Peek();
 			if (!isGrasped) {
-                //if (transform.position != interimTarget) {
-                Vector3 offset = MoveToward (interimTarget);
+				//if (transform.position != interimTarget) {
+				Vector3 offset = MoveToward(interimTarget);
 
-					if (offset.sqrMagnitude <= Constants.EPSILON) {
-						transform.position = interimTarget;
+				if (offset.sqrMagnitude <= Constants.EPSILON) {
+					transform.position = interimTarget;
 
-						foreach (Voxeme child in children) {
-							if (child.isActiveAndEnabled) {
-								if (child.gameObject != gameObject) {
-									child.transform.localPosition = parentToChildPositionOffset [child.gameObject];
-									child.targetPosition = child.transform.position;
-								}
+					foreach (Voxeme child in children) {
+						if (child.isActiveAndEnabled) {
+							if (child.gameObject != gameObject) {
+								child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
+								child.targetPosition = child.transform.position;
 							}
 						}
-						interTargetPositions.Dequeue ();
 					}
-                //}
-            }
-            else {
-				GraspScript graspController = grasperCoord.root.gameObject.GetComponent<GraspScript> ();
-				//if (graspTracker.transform.position != interimTarget+graspController.graspTrackerOffset) {
-				Vector3 offset = MoveToward (interimTarget+graspController.graspTrackerOffset);
 
-					if (offset.sqrMagnitude <= Constants.EPSILON) {
-						graspTracker.transform.position = interimTarget;//+graspController.graspTrackerOffset;
-						interTargetPositions.Dequeue ();
-					}
+					interTargetPositions.Dequeue();
+				}
+
+				//}
+			}
+			else {
+				GraspScript graspController = grasperCoord.root.gameObject.GetComponent<GraspScript>();
+				//if (graspTracker.transform.position != interimTarget+graspController.graspTrackerOffset) {
+				Vector3 offset = MoveToward(interimTarget + graspController.graspTrackerOffset);
+
+				if (offset.sqrMagnitude <= Constants.EPSILON) {
+					graspTracker.transform.position = interimTarget; //+graspController.graspTrackerOffset;
+					interTargetPositions.Dequeue();
+				}
+
 				//}
 			}
 		}
-			
-		if (interTargetRotations.Count == 0) {	// no queued sequence
-			if (!Helper.VectorIsNaN (targetRotation)) {	// has valid target
+
+		if (interTargetRotations.Count == 0) {
+			// no queued sequence
+			if (!Helper.VectorIsNaN(targetRotation)) {
+				// has valid target
 				if (!isGrasped) {
-					if (transform.rotation != Quaternion.Euler (targetRotation)) {
+					if (transform.rotation != Quaternion.Euler(targetRotation)) {
 						//Debug.Log (transform.eulerAngles);
-						float offset = RotateToward (targetRotation);
+						float offset = RotateToward(targetRotation);
 
 						if ((Mathf.Deg2Rad * offset) < 0.01f) {
-							transform.rotation = Quaternion.Euler (targetRotation);
+							transform.rotation = Quaternion.Euler(targetRotation);
 
 //							foreach (Rigidbody rigidbody in rigging.rigidbodies) {
 //								if (rotationalDisplacement.ContainsKey (rigidbody.gameObject)) {
@@ -249,50 +254,53 @@ public class Voxeme : MonoBehaviour {
 						}
 					}
 				}
-				else {	// grasp tracking
+				else {
+					// grasp tracking
 				}
 			}
-			else {	// cannot execute motion
-				OutputHelper.PrintOutput(Role.Affector,"I'm sorry, I can't do that.");
-				GameObject.Find ("BehaviorController").GetComponent<EventManager> ().SendMessage("AbortEvent");
+			else {
+				// cannot execute motion
+				OutputHelper.PrintOutput(Role.Affector, "I'm sorry, I can't do that.");
+				GameObject.Find("BehaviorController").GetComponent<EventManager>().SendMessage("AbortEvent");
 				targetRotation = transform.eulerAngles;
 			}
 		}
 		else {
-			Vector3 interimTarget = interTargetRotations.Peek ();
+			Vector3 interimTarget = interTargetRotations.Peek();
 			if (!isGrasped) {
-				if (transform.rotation != Quaternion.Euler (interimTarget)) {
+				if (transform.rotation != Quaternion.Euler(interimTarget)) {
 					//Debug.Log (transform.rotation == Quaternion.Euler (targetRotation));
-					float offset = RotateToward (interimTarget);
+					float offset = RotateToward(interimTarget);
 					//Debug.Log (offset);
 					//Debug.Log (Quaternion.Angle(transform.rotation,Quaternion.Euler (interimTarget)));
 					//if ((Mathf.Deg2Rad * Quaternion.Angle (transform.rotation, Quaternion.Euler (interimTarget))) < 0.01f) {
 					if ((Mathf.Deg2Rad * offset) < 0.01f) {
-						transform.rotation = Quaternion.Euler (interimTarget);
+						transform.rotation = Quaternion.Euler(interimTarget);
 
 						//Debug.Log (interimTarget);
-						interTargetRotations.Dequeue ();
+						interTargetRotations.Dequeue();
 						//Debug.Log (interTargetRotations.Peek ());
 					}
 				}
 			}
-			else {	// grasp tracking
+			else {
+				// grasp tracking
 			}
 		}
 
 		if ((transform.localScale != targetScale) && (!isGrasped)) {
 			Vector3 offset = transform.localScale - targetScale;
-			Vector3 normalizedOffset = Vector3.Normalize (offset);
-	
-			transform.localScale = new Vector3 (transform.localScale.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
+			Vector3 normalizedOffset = Vector3.Normalize(offset);
+
+			transform.localScale = new Vector3(transform.localScale.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
 				transform.localScale.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
 				transform.localScale.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
-	
+
 			if (offset.sqrMagnitude <= 0.01f) {
 				transform.localScale = targetScale;
 			}
 		}
-			
+
 		// Don't let the object sink below supporting surface
 		AdjustToSupportingSurface();
 
@@ -306,7 +314,7 @@ public class Voxeme : MonoBehaviour {
 			//Debug.Log (supportingSurface.name);
 			// add check for SupportingSurface component
 			Bounds surfaceBounds = Helper.GetObjectWorldSize(supportingSurface);
-			Bounds objectBounds = Helper.GetObjectWorldSize (gameObject);
+			Bounds objectBounds = Helper.GetObjectWorldSize(gameObject);
 //			Renderer[] renderers = supportingSurface.GetComponentsInChildren<Renderer> ();
 //			Bounds surfaceBounds = new Bounds ();
 //			foreach (Renderer renderer in renderers) {
@@ -328,9 +336,9 @@ public class Voxeme : MonoBehaviour {
 //				}
 //			}
 
-			if (Helper.IsTopmostVoxemeInHierarchy (gameObject)) {
+			if (Helper.IsTopmostVoxemeInHierarchy(gameObject)) {
 				if (objectBounds.min.y < minYBound) {
-					transform.position = new Vector3 (transform.position.x,
+					transform.position = new Vector3(transform.position.x,
 						transform.position.y + (minYBound - objectBounds.min.y),
 						transform.position.z);
 				}
@@ -342,104 +350,119 @@ public class Voxeme : MonoBehaviour {
 				                                  transform.position.y + (surfaceBounds.min.y - objectBounds.min.y),
 				                                  transform.position.z);
 			}*/
-				/*if (currentMin.y < surfaceBounds.min.y) {
-					transform.position = new Vector3 (transform.position.x,
-						transform.position.y + (surfaceBounds.min.y - currentMin.y),
-						transform.position.z);
-				}
-			} else {
-				/*if (objectBounds.min.y < surfaceBounds.max.y) {
+			/*if (currentMin.y < surfaceBounds.min.y) {
 				transform.position = new Vector3 (transform.position.x,
-			                         transform.position.y + (surfaceBounds.max.y - objectBounds.min.y),
-			                         transform.position.z);
-			}*/
-				/*if (currentMin.y < surfaceBounds.max.y) {
-					transform.position = new Vector3 (transform.position.x,
-						transform.position.y + (surfaceBounds.max.y - currentMin.y),
-						transform.position.z);
-				}
-			}*/
+					transform.position.y + (surfaceBounds.min.y - currentMin.y),
+					transform.position.z);
+			}
+		} else {
+			/*if (objectBounds.min.y < surfaceBounds.max.y) {
+			transform.position = new Vector3 (transform.position.x,
+		                         transform.position.y + (surfaceBounds.max.y - objectBounds.min.y),
+		                         transform.position.z);
+		}*/
+			/*if (currentMin.y < surfaceBounds.max.y) {
+				transform.position = new Vector3 (transform.position.x,
+					transform.position.y + (surfaceBounds.max.y - currentMin.y),
+					transform.position.z);
+			}
+		}*/
 		}
 
-        // check relationships
+		// check relationships
+	}
 
-    }
-
-    void AdjustToSupportingSurface() {
-		Vector3 rayStartX = new Vector3 (Helper.GetObjectWorldSize(gameObject).min.x-Constants.EPSILON,
-			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).center.z);
-		Vector3 contactPointX = Helper.RayIntersectionPoint (rayStartX, Vector3.right);
+	void AdjustToSupportingSurface() {
+		Vector3 rayStartX = new Vector3(Helper.GetObjectWorldSize(gameObject).min.x - Constants.EPSILON,
+			Helper.GetObjectWorldSize(gameObject).min.y + Constants.EPSILON,
+			Helper.GetObjectWorldSize(gameObject).center.z);
+		Vector3 contactPointX = Helper.RayIntersectionPoint(rayStartX, Vector3.right);
 		//contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
 
-		Vector3 rayStartZ = new Vector3 (Helper.GetObjectWorldSize(gameObject).center.x,
-			Helper.GetObjectWorldSize(gameObject).min.y+Constants.EPSILON, Helper.GetObjectWorldSize(gameObject).min.z-Constants.EPSILON);
-		Vector3 contactPointZ = Helper.RayIntersectionPoint (rayStartZ, Vector3.forward);
+		Vector3 rayStartZ = new Vector3(Helper.GetObjectWorldSize(gameObject).center.x,
+			Helper.GetObjectWorldSize(gameObject).min.y + Constants.EPSILON,
+			Helper.GetObjectWorldSize(gameObject).min.z - Constants.EPSILON);
+		Vector3 contactPointZ = Helper.RayIntersectionPoint(rayStartZ, Vector3.forward);
 		//contactPointZ = new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z);
 
-		Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
-			new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z) : 
-			new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
+		Vector3 contactPoint = (contactPointZ.y < contactPointX.y)
+			? new Vector3(contactPointZ.x, transform.position.y, contactPointZ.z)
+			: new Vector3(contactPointX.x, transform.position.y, contactPointX.z);
 
-        bool grasped = false;
-        InteractionObject interactionObject = gameObject.GetComponent<InteractionObject>();
-        if ((interactionObject != null) && (interactionObject.lastUsedInteractionSystem != null))
-        {
-            grasped = interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
-                interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.RightHand);
-        }
+		bool grasped = false;
+		InteractionObject interactionObject = gameObject.GetComponent<InteractionObject>();
+		if ((interactionObject != null) && (interactionObject.lastUsedInteractionSystem != null)) {
+			grasped = interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
+			          interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.RightHand);
+		}
 
 		RaycastHit[] hits;
 
 		//		hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
-		hits = Physics.RaycastAll (contactPoint, AxisVector.negYAxis);
-		List<RaycastHit> hitList = new List<RaycastHit> ((RaycastHit[])hits);
-		hits = hitList.OrderBy (h => h.distance).ToArray ();
+		hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
+		List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+		hits = hitList.OrderBy(h => h.distance).ToArray();
 		foreach (RaycastHit hit in hits) {
-			if (hit.collider.gameObject.GetComponent<BoxCollider> () != null) {
-				if ((!hit.collider.gameObject.GetComponent<BoxCollider> ().isTrigger) &&
-					(!hit.collider.gameObject.transform.IsChildOf (gameObject.transform))) {
-					if (!Helper.FitsIn (Helper.GetObjectWorldSize (hit.collider.gameObject),
-						Helper.GetObjectWorldSize (gameObject), true)) {
+			if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
+				if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
+				    (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
+					if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
+						Helper.GetObjectWorldSize(gameObject), true)) {
 						supportingSurface = hit.collider.gameObject;
 
-                        if (!grasped) {
-							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme (gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
-							bool themeIsUpright = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
-							bool themeIsUpsideDown = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
+						if (!grasped) {
+							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme(gameObject)
+								.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
+							bool themeIsUpright =
+								(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
+							bool themeIsUpsideDown =
+								(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
 
-							bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme (supportingSurface).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
-							bool supportIsUpright = (Vector3.Dot (supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
-							bool supportIsUpsideDown = (Vector3.Dot (supportingSurface.transform.root.transform.up, Vector3.up) < -0.5f);
+							bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme(supportingSurface)
+								.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
+							bool supportIsUpright =
+								(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
+							bool supportIsUpsideDown =
+								(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) < -0.5f);
 
 							// if theme is concave, the concavity isn't enabled, and the object is on top of an object that fits inside of it
 							// e.g. cup on top of ball
-							if ((themeIsConcave) && (Concavity.IsEnabled (Helper.GetMostImmediateParentVoxeme (gameObject))) &&
-								(Helper.FitsIn (Helper.GetObjectWorldSize (supportingSurface.transform.root.gameObject), Helper.GetObjectWorldSize (gameObject)))) {
-								minYBound = Helper.GetObjectWorldSize (supportingSurface).min.y;
+							if ((themeIsConcave) &&
+							    (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(gameObject))) &&
+							    (Helper.FitsIn(Helper.GetObjectWorldSize(supportingSurface.transform.root.gameObject),
+								    Helper.GetObjectWorldSize(gameObject)))) {
+								minYBound = Helper.GetObjectWorldSize(supportingSurface).min.y;
 								//flip the plate.  flip the cup.  put the plate under the cup
 								//flip the cup.  put the ball under the cup
 							}
-							else {	// otherwise
-								if (supportIsConcave) {	// if the object under this object is concave
-									if (Concavity.IsEnabled (Helper.GetMostImmediateParentVoxeme (supportingSurface))) {	// if the object under this object has its concavity enabled
-										minYBound = PhysicsHelper.GetConcavityMinimum (supportingSurface.transform.root.gameObject);
+							else {
+								// otherwise
+								if (supportIsConcave) {
+									// if the object under this object is concave
+									if (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(supportingSurface))) {
+										// if the object under this object has its concavity enabled
+										minYBound = PhysicsHelper.GetConcavityMinimum(supportingSurface.transform.root
+											.gameObject);
 										//										Debug.Log (gameObject.name);
 										//										Debug.Log (supportingSurface.name);
 										//										Debug.Log (minYBound);
 										//Debug.Break ();
 									}
-									else {	// if the object under this object is not upright
+									else {
+										// if the object under this object is not upright
 										//Debug.Break ();
-										minYBound = Helper.GetObjectWorldSize (supportingSurface).max.y;
+										minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
 										//								Debug.Log (minYBound);
 										//Debug.Log (minYBound);
 									}
 								}
-								else {	// if the object under this object is not concave
-									minYBound = Helper.GetObjectWorldSize (supportingSurface).max.y;
+								else {
+									// if the object under this object is not concave
+									minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
 									//							Debug.Log (minYBound);
 									//Debug.Break ();
 								}
+
 								//**
 								//Bug list:
 								// put the plate under the cup jitter
@@ -456,11 +479,11 @@ public class Voxeme : MonoBehaviour {
 	public void Reset() {
 		if (gameObject.transform.parent != null) {
 			GameObject parent = gameObject.transform.parent.gameObject;
-			Voxeme parentVox = Helper.GetMostImmediateParentVoxeme (parent).GetComponent<Voxeme> ();
+			Voxeme parentVox = Helper.GetMostImmediateParentVoxeme(parent).GetComponent<Voxeme>();
 
 			// if this voxeme is not (intentionally) a subcomponent of another voxeme object
-			if (!(parentVox.opVox.Type.Components.Select (i => i.Item2).ToList ()).Contains (gameObject)) {
-				RiggingHelper.UnRig (gameObject, gameObject.transform.parent.gameObject);
+			if (!(parentVox.opVox.Type.Components.Select(i => i.Item2).ToList()).Contains(gameObject)) {
+				RiggingHelper.UnRig(gameObject, gameObject.transform.parent.gameObject);
 			}
 		}
 
@@ -480,39 +503,40 @@ public class Voxeme : MonoBehaviour {
 		//Debug.Log (string.Format("{0}: {1}",gameObject.name,Helper.VectorToParsable(target)));
 		if (!isGrasped) {
 			Vector3 offset = transform.position - target;
-			Vector3 normalizedOffset = Vector3.Normalize (offset);
+			Vector3 normalizedOffset = Vector3.Normalize(offset);
 
 			if (rigging.usePhysicsRig) {
-				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody> ();
+				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
 				foreach (Rigidbody rigidbody in rigidbodies) {
-					rigidbody.MovePosition (new Vector3 (transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
+					rigidbody.MovePosition(new Vector3(
+						transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
 						transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
 						transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed));
 				}
 			}
 
-			transform.position = new Vector3 (transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
+			transform.position = new Vector3(transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
 				transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
 				transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
 
-			
+
 			foreach (Voxeme child in children) {
 				if (child.isActiveAndEnabled) {
 					if (child.gameObject != gameObject) {
 						//Debug.Log ("Moving child: " + gameObject.name);
-						child.transform.localPosition = parentToChildPositionOffset [child.gameObject];
+						child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
 						child.targetPosition = child.transform.position;
 					}
 				}
 			}
 
-            //GameObject.Find ("ReachObject").transform.position = transform.position;
+			//GameObject.Find ("ReachObject").transform.position = transform.position;
 
-            return offset;
+			return offset;
 		}
 		else {
 			Vector3 offset = graspTracker.transform.position - target;
-			Vector3 normalizedOffset = Vector3.Normalize (offset);
+			Vector3 normalizedOffset = Vector3.Normalize(offset);
 
 			/*if (rigging.usePhysicsRig) {
 				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody> ();
@@ -523,7 +547,8 @@ public class Voxeme : MonoBehaviour {
 				}
 			}*/
 
-			graspTracker.transform.position = new Vector3 (graspTracker.transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
+			graspTracker.transform.position = new Vector3(
+				graspTracker.transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
 				graspTracker.transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
 				graspTracker.transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
 
@@ -537,18 +562,18 @@ public class Voxeme : MonoBehaviour {
 			//Quaternion offset = Quaternion.FromToRotation (transform.eulerAngles, targetRotation);
 			//Vector3 normalizedOffset = Vector3.Normalize (offset);
 
-			float angle = Quaternion.Angle (transform.rotation, Quaternion.Euler (target));
+			float angle = Quaternion.Angle(transform.rotation, Quaternion.Euler(target));
 			float timeToComplete = angle / turnSpeed;
-			float donePercentage = Mathf.Min (1.0f, Time.deltaTime / timeToComplete);
-			Quaternion rot = Quaternion.Slerp (transform.rotation, Quaternion.Euler (target), donePercentage * 100.0f);
+			float donePercentage = Mathf.Min(1.0f, Time.deltaTime / timeToComplete);
+			Quaternion rot = Quaternion.Slerp(transform.rotation, Quaternion.Euler(target), donePercentage * 100.0f);
 			//Debug.Log (turnSpeed);
 			//Quaternion resolve = Quaternion.identity;
 
 			if (rigging.usePhysicsRig) {
 				float displacementAngle = 360.0f;
-				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody> ();
+				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
 				foreach (Rigidbody rigidbody in rigidbodies) {
-					rigidbody.MoveRotation (rot);
+					rigidbody.MoveRotation(rot);
 				}
 			}
 
@@ -558,10 +583,11 @@ public class Voxeme : MonoBehaviour {
 			foreach (Voxeme child in children) {
 				if (child.isActiveAndEnabled) {
 					if (child.gameObject != gameObject) {
-						child.transform.localRotation = parentToChildRotationOffset [child.gameObject];
+						child.transform.localRotation = parentToChildRotationOffset[child.gameObject];
 						child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
 						child.targetRotation = child.transform.rotation.eulerAngles;
-						child.transform.localPosition = Helper.RotatePointAroundPivot (parentToChildPositionOffset [child.gameObject],
+						child.transform.localPosition = Helper.RotatePointAroundPivot(
+							parentToChildPositionOffset[child.gameObject],
 							Vector3.zero, gameObject.transform.eulerAngles);
 						child.transform.position = gameObject.transform.position + child.transform.localPosition;
 						child.targetPosition = child.transform.position;
@@ -572,7 +598,7 @@ public class Voxeme : MonoBehaviour {
 				}
 			}
 
-			offset = Quaternion.Angle (rot, Quaternion.Euler (target));
+			offset = Quaternion.Angle(rot, Quaternion.Euler(target));
 			//Debug.Log (offset);
 		}
 		else {
@@ -591,15 +617,15 @@ public class Voxeme : MonoBehaviour {
 			/*graspTracker.transform.position = new Vector3 (graspTracker.transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
 				graspTracker.transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
 				graspTracker.transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);*/
-
 		}
 
 		return offset;
 	}
 
-    void OnTargetPositionChanged(Vector3 oldVal, Vector3 newVal) {
-        Debug.Log(string.Format("==================== Target position changed ==================== {0}: {1}->{2}", gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
-    }
+	void OnTargetPositionChanged(Vector3 oldVal, Vector3 newVal) {
+		Debug.Log(string.Format("==================== Target position changed ==================== {0}: {1}->{2}",
+			gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
+	}
 
 	void OnCollisionEnter(Collision other) {
 		if (other.gameObject.tag == "MainCamera") {
@@ -609,13 +635,13 @@ public class Voxeme : MonoBehaviour {
 
 	public void LoadVoxML() {
 		try {
-			using (StreamReader sr = new StreamReader (
-				string.Format ("{0}/{1}", Data.voxmlDataPath, string.Format ("objects/{0}.xml", gameObject.name)))) {
-				voxml = VoxML.LoadFromText (sr.ReadToEnd ());
+			using (StreamReader sr = new StreamReader(
+				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", gameObject.name)))) {
+				voxml = VoxML.LoadFromText(sr.ReadToEnd());
 			}
 		}
 		catch (FileNotFoundException ex) {
-			voxml = new VoxML ();
+			voxml = new VoxML();
 			voxml.Entity.Type = VoxEntity.EntityType.Object;
 		}
 
@@ -625,8 +651,8 @@ public class Voxeme : MonoBehaviour {
 	}
 
 	void PopulateOperationalVoxeme() {
-		opVox = new OperationalVox ();
-		
+		opVox = new OperationalVox();
+
 		// set entity type
 		opVox.VoxemeType = voxml.Entity.Type;
 
@@ -638,49 +664,50 @@ public class Voxeme : MonoBehaviour {
 
 		// find component objects
 		foreach (VoxTypeComponent c in voxml.Type.Components) {
-			Regex operators = new Regex (@"[\*\+]");
+			Regex operators = new Regex(@"[\*\+]");
 			string oper = String.Empty;
 			//Debug.Log (c.Value);
-			if (operators.Match (c.Value).Length > 0) {
-				oper = operators.Match (c.Value).Groups [0].ToString ();
+			if (operators.Match(c.Value).Length > 0) {
+				oper = operators.Match(c.Value).Groups[0].ToString();
 				//Debug.Log (oper);
 			}
 
 			string[] s;
 			if (oper != string.Empty) {
-				s = c.Value.Remove (c.Value.IndexOf (oper)).Split ('[');
+				s = c.Value.Remove(c.Value.IndexOf(oper)).Split('[');
 			}
 			else {
-				s = c.Value.Split ('[');
+				s = c.Value.Split('[');
 			}
 
 			if (oper == String.Empty) {
 				Transform obj = null;
 				int index = -1;
-				obj = gameObject.transform.Find (gameObject.name + "*/" + s [0]);
+				obj = gameObject.transform.Find(gameObject.name + "*/" + s[0]);
 				if (s.Length > 1) {
-					index = Helper.StringToInt (s [1].Remove (s [1].IndexOf (']')));
+					index = Helper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
 				}
 
 				if (obj != null) {
 					//Debug.Log (s[0]);
 					//Debug.Log (obj);
 					//Debug.Log (index);
-					opVox.Type.Components.Add (new Triple<string,GameObject,int> (s [0], obj.gameObject, index));
+					opVox.Type.Components.Add(new Triple<string, GameObject, int>(s[0], obj.gameObject, index));
 				}
 			}
 			else if (oper == "+" || oper == "*") {
-				Transform subVox = gameObject.transform.Find (gameObject.name + "*/");
+				Transform subVox = gameObject.transform.Find(gameObject.name + "*/");
 				if (subVox != null) {
 					foreach (Transform child in subVox) {
-						if (child.name == s [0]) {
+						if (child.name == s[0]) {
 							//Debug.Log (child.name);
 							int index = -1;
 							if (s.Length > 1) {
-								index = Helper.StringToInt (s [1].Remove (s [1].IndexOf (']')));
+								index = Helper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
 							}
-						
-							opVox.Type.Components.Add (new Triple<string,GameObject,int> (s [0], child.gameObject, index));
+
+							opVox.Type.Components.Add(
+								new Triple<string, GameObject, int>(s[0], child.gameObject, index));
 						}
 					}
 				}
@@ -690,79 +717,80 @@ public class Voxeme : MonoBehaviour {
 		// set component as semantic head
 		string[] str = voxml.Type.Head.Split('[');
 		if (str.Length > 1) {
-			int i = Helper.StringToInt (str [1].Remove (str [1].IndexOf (']')));
-			if (opVox.Type.Components.FindIndex (c => c.Item3 == i) != -1) {
-				opVox.Type.Head = opVox.Type.Components.First (c => c.Item3 == i);
+			int i = Helper.StringToInt(str[1].Remove(str[1].IndexOf(']')));
+			if (opVox.Type.Components.FindIndex(c => c.Item3 == i) != -1) {
+				opVox.Type.Head = opVox.Type.Components.First(c => c.Item3 == i);
 			}
 			// if none, add entire game object as semantic head for voxeme
 			else {
-				opVox.Type.Head = new Triple<string,GameObject,int> (gameObject.name, gameObject, i);
-				opVox.Type.Components.Add (new Triple<string,GameObject,int> (gameObject.name, gameObject, i));
+				opVox.Type.Head = new Triple<string, GameObject, int>(gameObject.name, gameObject, i);
+				opVox.Type.Components.Add(new Triple<string, GameObject, int>(gameObject.name, gameObject, i));
 			}
 		}
 		else {
-			opVox.Type.Head = new Triple<string,GameObject,int> (gameObject.name, gameObject, -1);
-			opVox.Type.Components.Add (new Triple<string,GameObject,int> (gameObject.name, gameObject, -1));
+			opVox.Type.Head = new Triple<string, GameObject, int>(gameObject.name, gameObject, -1);
+			opVox.Type.Components.Add(new Triple<string, GameObject, int>(gameObject.name, gameObject, -1));
 		}
 
 		// set concavity info
 		string[] concavity = voxml.Type.Concavity.Split('[');
 		// if reentrancy index given
 		if (concavity.Length > 1) {
-			int index = Helper.StringToInt (concavity [1].Remove (concavity [1].IndexOf (']')));
-			if (opVox.Type.Components.FindIndex (c => c.Item3 == index) != -1) {
-				GameObject obj = opVox.Type.Components.Find (c => c.Item3 == index).Item2;
-				opVox.Type.Concavity = new Triple<string,GameObject,int> (concavity [0], obj, index);
+			int index = Helper.StringToInt(concavity[1].Remove(concavity[1].IndexOf(']')));
+			if (opVox.Type.Components.FindIndex(c => c.Item3 == index) != -1) {
+				GameObject obj = opVox.Type.Components.Find(c => c.Item3 == index).Item2;
+				opVox.Type.Concavity = new Triple<string, GameObject, int>(concavity[0], obj, index);
 			}
 			// if none, add entire game object as concavity segment
 			else {
-				opVox.Type.Concavity = new Triple<string,GameObject,int> (concavity [0], gameObject, opVox.Type.Head.Item3);
+				opVox.Type.Concavity =
+					new Triple<string, GameObject, int>(concavity[0], gameObject, opVox.Type.Head.Item3);
 			}
 		}
 		else {
-			opVox.Type.Concavity = new Triple<string,GameObject,int> (concavity [0], gameObject, opVox.Type.Head.Item3);
+			opVox.Type.Concavity = new Triple<string, GameObject, int>(concavity[0], gameObject, opVox.Type.Head.Item3);
 		}
 //		foreach (string sym in rotsym) {
 //			opVox.Type.RotatSym.Add (sym);
 //		}
 
 		// set symmetry info
-		string[] rotsym = voxml.Type.RotatSym.Split (',');
+		string[] rotsym = voxml.Type.RotatSym.Split(',');
 		foreach (string sym in rotsym) {
-			opVox.Type.RotatSym.Add (sym);
+			opVox.Type.RotatSym.Add(sym);
 		}
 
-		string[] reflsym = voxml.Type.ReflSym.Split (',');
+		string[] reflsym = voxml.Type.ReflSym.Split(',');
 		foreach (string sym in reflsym) {
-			opVox.Type.ReflSym.Add (sym);
+			opVox.Type.ReflSym.Add(sym);
 		}
 
 		// set habitat info
 		foreach (VoxHabitatIntr ih in voxml.Habitat.Intrinsic) {
-			string[] s = ih.Name.Split ('[');
-			int index = Helper.StringToInt (s [1].Remove (s [1].IndexOf (']')));
+			string[] s = ih.Name.Split('[');
+			int index = Helper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
 			//Debug.Log(index);
 			//Debug.Log (s[0] + " = {" + ih.Value + "}");
 
-			if (!opVox.Habitat.IntrinsicHabitats.ContainsKey (index)) {
-				opVox.Habitat.IntrinsicHabitats.Add (index, new List<string> (){ s[0] + " = {" + ih.Value + "}" });
+			if (!opVox.Habitat.IntrinsicHabitats.ContainsKey(index)) {
+				opVox.Habitat.IntrinsicHabitats.Add(index, new List<string>() {s[0] + " = {" + ih.Value + "}"});
 			}
 			else {
-				opVox.Habitat.IntrinsicHabitats [index].Add (s [0] + " = {" + ih.Value + "}");
+				opVox.Habitat.IntrinsicHabitats[index].Add(s[0] + " = {" + ih.Value + "}");
 			}
 		}
 
 		foreach (VoxHabitatExtr eh in voxml.Habitat.Extrinsic) {
-			string[] s = eh.Name.Split ('[');
-			int index = System.Convert.ToInt16 (s[1].Remove (s[1].IndexOf(']')));
+			string[] s = eh.Name.Split('[');
+			int index = System.Convert.ToInt16(s[1].Remove(s[1].IndexOf(']')));
 			//Debug.Log(index);
 			//Debug.Log (s[0] + " = {" + ih.Value + "}");
 
-			if (!opVox.Habitat.ExtrinsicHabitats.ContainsKey (index)) {
-				opVox.Habitat.ExtrinsicHabitats.Add (index, new List<string> (){ s[0] + " = {" + eh.Value + "}" });
+			if (!opVox.Habitat.ExtrinsicHabitats.ContainsKey(index)) {
+				opVox.Habitat.ExtrinsicHabitats.Add(index, new List<string>() {s[0] + " = {" + eh.Value + "}"});
 			}
 			else {
-				opVox.Habitat.ExtrinsicHabitats [index].Add (s [0] + " = {" + eh.Value + "}");
+				opVox.Habitat.ExtrinsicHabitats[index].Add(s[0] + " = {" + eh.Value + "}");
 			}
 		}
 
@@ -776,26 +804,29 @@ public class Voxeme : MonoBehaviour {
 		// set affordance info
 		foreach (VoxAffordAffordance a in voxml.Afford_Str.Affordances) {
 			//Debug.Log (a.Formula);
-			Regex reentrancyForm = new Regex (@"\[[0-9]+\]");
-			Regex numericalForm = new Regex (@"[0-9]+");
-			string[] s = a.Formula.Split (new string[]{ "->" }, StringSplitOptions.None);
-			string[] conditions = s [0].Split (new char[]{ ',' }, 2);
-			MatchCollection reentrancies = reentrancyForm.Matches (s [1]);
+			Regex reentrancyForm = new Regex(@"\[[0-9]+\]");
+			Regex numericalForm = new Regex(@"[0-9]+");
+			string[] s = a.Formula.Split(new string[] {"->"}, StringSplitOptions.None);
+			string[] conditions = s[0].Split(new char[] {','}, 2);
+			MatchCollection reentrancies = reentrancyForm.Matches(s[1]);
 			string aff = "";
 			string cHabitat = "";
 			string cFormula = "";
 			string events = "";
 			string result = "";
-			cHabitat = conditions [0]; // split into habitat and non-habitat condition (if any)
-			cFormula = conditions.Length > 1 ? conditions [1] : ""; // split into habitat and non-habitat condition (if any)
-			int index = (cHabitat.Split ('[').Length > 1) ? 
-				Helper.StringToInt (cHabitat.Split ('[') [1].Remove (cHabitat.Split ('[') [1].IndexOf (']'))) : 0;
+			cHabitat = conditions[0]; // split into habitat and non-habitat condition (if any)
+			cFormula = conditions.Length > 1
+				? conditions[1]
+				: ""; // split into habitat and non-habitat condition (if any)
+			int index = (cHabitat.Split('[').Length > 1)
+				? Helper.StringToInt(cHabitat.Split('[')[1].Remove(cHabitat.Split('[')[1].IndexOf(']')))
+				: 0;
 
 			//Debug.Log ("Habitat index: " + index.ToString ());
 			foreach (Match match in reentrancies) {
 				GroupCollection groups = match.Groups;
 				foreach (Group group in groups) {
-					aff = s[1].Replace (group.Value, group.Value.Trim (new char[]{ '[', ']' }));
+					aff = s[1].Replace(group.Value, group.Value.Trim(new char[] {'[', ']'}));
 				}
 			}
 
@@ -804,70 +835,72 @@ public class Voxeme : MonoBehaviour {
 			//}
 			//Debug.Log ("Affordance: " + aff);
 
-			events = aff.Split (']')[0].Trim ('[');
-			MatchCollection numerical = numericalForm.Matches (events);
+			events = aff.Split(']')[0].Trim('[');
+			MatchCollection numerical = numericalForm.Matches(events);
 			foreach (Match match in numerical) {
 				GroupCollection groups = match.Groups;
 				foreach (Group group in groups) {
-					events = events.Replace (group.Value, '['+group.Value+']');
+					events = events.Replace(group.Value, '[' + group.Value + ']');
 				}
 			}
 			//Debug.Log ("Events: " + events);
 
-			result = aff.Split (']') [1];
-			numerical = numericalForm.Matches (result);
+			result = aff.Split(']')[1];
+			numerical = numericalForm.Matches(result);
 			foreach (Match match in numerical) {
 				GroupCollection groups = match.Groups;
 				foreach (Group group in groups) {
-					result = result.Replace (group.Value, '[' + group.Value + ']');
+					result = result.Replace(group.Value, '[' + group.Value + ']');
 				}
 			}
 			//Debug.Log ("Result: " + result);
 
-			Pair<string,string> affordance = new Pair<string, string> (events, result);
-			if (!opVox.Affordance.Affordances.ContainsKey (index)) {
-				opVox.Affordance.Affordances.Add (index, new List<Pair<string,Pair<string,string>>> (){ new Pair<string,Pair<string,string>>(cFormula,affordance) });
+			Pair<string, string> affordance = new Pair<string, string>(events, result);
+			if (!opVox.Affordance.Affordances.ContainsKey(index)) {
+				opVox.Affordance.Affordances.Add(index,
+					new List<Pair<string, Pair<string, string>>>()
+						{new Pair<string, Pair<string, string>>(cFormula, affordance)});
 			}
 			else {
-				opVox.Affordance.Affordances[index].Add (new Pair<string,Pair<string,string>>(cFormula,affordance));
+				opVox.Affordance.Affordances[index].Add(new Pair<string, Pair<string, string>>(cFormula, affordance));
 			}
 		}
-			
+
 		opVox.Embodiment.Scale = voxml.Embodiment.Scale;
 		opVox.Embodiment.Movable = voxml.Embodiment.Movable;
 
 		if (voxml.Entity.Type == VoxEntity.EntityType.Object) {
-			AttributeSet attrSet = gameObject.GetComponent<AttributeSet> ();
+			AttributeSet attrSet = gameObject.GetComponent<AttributeSet>();
 			if (attrSet != null) {
-				attrSet.attributes.Clear ();
+				attrSet.attributes.Clear();
 				for (int i = 0; i < voxml.Attributes.Attrs.Count; i++) {
-					attrSet.attributes.Add (voxml.Attributes.Attrs [i].Value);
-					Debug.Log (attrSet.attributes[i]);
+					attrSet.attributes.Add(voxml.Attributes.Attrs[i].Value);
+					Debug.Log(attrSet.attributes[i]);
 				}
 			}
 		}
 
-		OnVoxMLLoaded (this, new VoxMLEventArgs (gameObject, voxml));
-		
+		OnVoxMLLoaded(this, new VoxMLEventArgs(gameObject, voxml));
+
 #if UNITY_EDITOR
-		using (System.IO.StreamWriter file = 
-			new System.IO.StreamWriter(gameObject.name+@".txt"))
-		{
+		using (System.IO.StreamWriter file =
+			new System.IO.StreamWriter(gameObject.name + @".txt")) {
 			file.WriteLine("PRED");
-			file.WriteLine("{0,-20}",opVox.Lex.Pred);
+			file.WriteLine("{0,-20}", opVox.Lex.Pred);
 			file.WriteLine("\n");
 			file.WriteLine("TYPE");
 			file.WriteLine("COMPONENTS");
 			foreach (Triple<string, GameObject, int> component in opVox.Type.Components) {
-				file.Write (String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
+				file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
 					"Name: " + component.Item1,
 					"\t",
 					"GameObject name: " + component.Item2.name,
 					"\t",
 					"Index: " + component.Item3));
 			}
+
 			file.WriteLine("CONCAVITY");
-			file.Write (String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
+			file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
 				"Name: " + opVox.Type.Concavity.Item1,
 				"\t",
 				"GameObject name: " + opVox.Type.Concavity.Item2.name,
@@ -876,35 +909,40 @@ public class Voxeme : MonoBehaviour {
 			file.WriteLine("SYMMETRY");
 			file.Write("ROT\t");
 			foreach (string s in opVox.Type.RotatSym) {
-				file.Write(String.Format("{0}\t",s));
+				file.Write(String.Format("{0}\t", s));
 			}
+
 			file.Write("REFL\t");
 			foreach (string s in opVox.Type.ReflSym) {
-				file.Write(String.Format("{0}\t",s));
+				file.Write(String.Format("{0}\t", s));
 			}
+
 			file.WriteLine("\n");
 			file.WriteLine("HABITATS");
 			file.WriteLine("INTRINSIC");
-			foreach (KeyValuePair<int,List<string>> kv in opVox.Habitat.IntrinsicHabitats) {
-				file.Write ("Index: " + kv.Key);
+			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.IntrinsicHabitats) {
+				file.Write("Index: " + kv.Key);
 				foreach (string formula in kv.Value) {
-					file.Write ("\t\tFormula: " + formula + "\n");
+					file.Write("\t\tFormula: " + formula + "\n");
 				}
 			}
+
 			file.WriteLine("EXTRINSIC");
-			foreach (KeyValuePair<int,List<string>> kv in opVox.Habitat.ExtrinsicHabitats) {
-				file.Write ("Index: " + kv.Key);
+			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.ExtrinsicHabitats) {
+				file.Write("Index: " + kv.Key);
 				foreach (string formula in kv.Value) {
-					file.Write ("\t\tFormula: " + formula + "\n");
+					file.Write("\t\tFormula: " + formula + "\n");
 				}
 			}
+
 			file.WriteLine("\n");
 			file.WriteLine("AFFORDANCES");
 			foreach (KeyValuePair<int, List<Pair<string, Pair<string, string>>>> kv in opVox.Affordance.Affordances) {
-				file.Write ("Habitat index: " + kv.Key);
+				file.Write("Habitat index: " + kv.Key);
 				foreach (Pair<string, Pair<string, string>> affordance in kv.Value) {
-					file.Write ("\t\tCondition: " + ((affordance.Item1 != "") ? affordance.Item1 : "None") +
-						"\t\tEvents: " + affordance.Item2.Item1 + "\t\tResult: " + ((affordance.Item2.Item2 != "") ? affordance.Item2.Item2 : "None") + "\n");
+					file.Write("\t\tCondition: " + ((affordance.Item1 != "") ? affordance.Item1 : "None") +
+					           "\t\tEvents: " + affordance.Item2.Item1 + "\t\tResult: " +
+					           ((affordance.Item2.Item2 != "") ? affordance.Item2.Item2 : "None") + "\n");
 				}
 			}
 		}

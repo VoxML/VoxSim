@@ -3,47 +3,37 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-
 using UnityEngine;
 
-namespace Network
-{
+namespace Network {
 	public class FusionEventArgs : EventArgs {
 		public string Content { get; set; }
 
-		public FusionEventArgs(string content, bool macroEvent = false)
-		{
+		public FusionEventArgs(string content, bool macroEvent = false) {
 			this.Content = content;
 		}
 	}
 
-    public class FusionSocket : SocketConnection
-	{
+	public class FusionSocket : SocketConnection {
 		public event EventHandler FusionReceived;
 
-		public void OnFusionReceived(object sender, EventArgs e)
-		{
-			if (FusionReceived != null)
-			{
+		public void OnFusionReceived(object sender, EventArgs e) {
+			if (FusionReceived != null) {
 				FusionReceived(this, e);
 			}
 		}
 
-		protected override void Loop()
-		{
-            while (IsConnected())
-			{
+		protected override void Loop() {
+			while (IsConnected()) {
 				NetworkStream stream = _client.GetStream();
 				byte[] byteBuffer = new byte[IntSize];
-                try
-                {
-                    stream.Read(byteBuffer, 0, IntSize);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                    Debug.LogError(e.Message);
-                }
+				try {
+					stream.Read(byteBuffer, 0, IntSize);
+				}
+				catch (Exception e) {
+					Debug.LogError(e);
+					Debug.LogError(e.Message);
+				}
 
 //				if (!BitConverter.IsLittleEndian)
 //				{
@@ -58,21 +48,20 @@ namespace Network
 				//Debug.Log (numBytesRead);
 
 				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
-				if (message.StartsWith ("P")) {
-					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith ("P"))) {
-						_messages.Enqueue (message);
+				if (message.StartsWith("P")) {
+					if ((HowManyLeft() == 0) || (!_messages.Peek().StartsWith("P"))) {
+						_messages.Enqueue(message);
 					}
 				}
 				else {
-					_messages.Enqueue (message);
+					_messages.Enqueue(message);
 				}
+
 				//_messages.Enqueue (message);
 //				Debug.Log (stream.DataAvailable);
-
 			}
 
 			//_client.Close();
 		}
-
 	}
 }

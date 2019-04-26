@@ -3,16 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class AttributeSet : MonoBehaviour {
-
-	public List<string> attributes = new List<string> ();
+	public List<string> attributes = new List<string>();
 
 	// Use this for initialization
-	void Start () {
-	
+	void Start() {
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
-	
+	void Update() {
 	}
 }

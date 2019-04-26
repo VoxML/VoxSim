@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
-
 using UnityEngine;
 using Global;
 using Vox;
@@ -76,7 +75,8 @@ public class OperationalVox {
 		// List Item2: Event/Result pair
 		// List Item2 Item1: Event
 		// List Item2 Item2: Result
-		public Dictionary<int, List<Pair<string, Pair<string, string>>>> Affordances = new Dictionary<int, List<Pair<string, Pair<string, string>>>>();
+		public Dictionary<int, List<Pair<string, Pair<string, string>>>> Affordances =
+			new Dictionary<int, List<Pair<string, Pair<string, string>>>>();
 	}
 
 	/// <summary>

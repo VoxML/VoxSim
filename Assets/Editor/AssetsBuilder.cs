@@ -1,10 +1,8 @@
 ﻿using UnityEditor;
 
-public class CreateAssetBundles
-{
-	[MenuItem ("Assets/Build AssetBundles")]
-	static void BuildAllAssetBundles ()
-	{
-		BuildPipeline.BuildAssetBundles ("AssetBundles", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
+public class CreateAssetBundles {
+	[MenuItem("Assets/Build AssetBundles")]
+	static void BuildAllAssetBundles() {
+		BuildPipeline.BuildAssetBundles("AssetBundles", BuildAssetBundleOptions.None, BuildTarget.StandaloneOSX);
 	}
 }

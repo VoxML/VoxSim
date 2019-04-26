@@ -5,26 +5,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using System.IO;
-
 using Global;
 
 public class LogEventArgs : EventArgs {
+	public string LogString { get; set; }
 
-	public string LogString {get; set; }
-
-	public LogEventArgs(string str)
-	{
+	public LogEventArgs(string str) {
 		this.LogString = str;
 	}
 }
 
 public class DemoScript : MonoBehaviour {
+	[HideInInspector] public bool moveLogged;
 
-	[HideInInspector]
-	public bool moveLogged;
-
-	[HideInInspector]
-	public float logTimer;
+	[HideInInspector] public float logTimer;
 
 	protected EventManager eventManager;
 
@@ -37,25 +31,23 @@ public class DemoScript : MonoBehaviour {
 
 	public event EventHandler LogEvent;
 
-	public void OnLogEvent(object sender, EventArgs e)
-	{
-		if (LogEvent != null)
-		{
+	public void OnLogEvent(object sender, EventArgs e) {
+		if (LogEvent != null) {
 			LogEvent(this, e);
 		}
 	}
-		
+
 	// Use this for initialization
-	public void Start () {
-		log = (PlayerPrefs.GetInt ("Make Logs") == 1);
+	public void Start() {
+		log = (PlayerPrefs.GetInt("Make Logs") == 1);
 
 		// log default state
 		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 		foreach (GameObject o in allObjects) {
-			if (o.GetComponent<Voxeme> () != null) {
-				if (o.GetComponent<Voxeme> ().enabled) {
+			if (o.GetComponent<Voxeme>() != null) {
+				if (o.GetComponent<Voxeme>().enabled) {
 					//Debug.Log (o.name);
-					defaultState.Add (o.name, o.transform.position);
+					defaultState.Add(o.name, o.transform.position);
 				}
 			}
 		}
@@ -64,7 +56,7 @@ public class DemoScript : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	public void Update () {
+	public void Update() {
 		logTimer += Time.deltaTime;
 	}
 
@@ -73,25 +65,31 @@ public class DemoScript : MonoBehaviour {
 			return;
 		}
 
-		if (!Directory.Exists ("Logs")) {
-			Directory.CreateDirectory ("Logs");
+		if (!Directory.Exists("Logs")) {
+			Directory.CreateDirectory("Logs");
 		}
 
 
-		if (!Directory.Exists (string.Format("Logs/{0}",name))) {
-			Directory.CreateDirectory (string.Format("Logs/{0}",name));
+		if (!Directory.Exists(string.Format("Logs/{0}", name))) {
+			Directory.CreateDirectory(string.Format("Logs/{0}", name));
 		}
 
-		string dateTime = DateTime.Now.ToString ("yyyy-MM-dd-HHmmss");
-		logFile = new StreamWriter (string.Format ("Logs/{0}/{1}-{2}.txt", name, name, dateTime));
+		string dateTime = DateTime.Now.ToString("yyyy-MM-dd-HHmmss");
+		logFile = new StreamWriter(string.Format("Logs/{0}/{1}-{2}.txt", name, name, dateTime));
 
-		logFile.WriteLine (string.Format ("Structure: {0}", name));
+		logFile.WriteLine(string.Format("Structure: {0}", name));
 		string modalityString = string.Empty;
-		modalityString += ((int)(modality & OutputModality.Modality.Gestural) == (int)OutputModality.Modality.Gestural) ? "Gestural" : string.Empty;
+		modalityString +=
+			((int) (modality & OutputModality.Modality.Gestural) == (int) OutputModality.Modality.Gestural)
+				? "Gestural"
+				: string.Empty;
 		modalityString += " ";
-		modalityString += ((int)(modality & OutputModality.Modality.Linguistic) == (int)OutputModality.Modality.Linguistic) ? "Linguistic" : string.Empty;
-		modalityString = String.Join(", ", modalityString.Split ());
-		logFile.WriteLine (string.Format ("Modality: {0}", modalityString));
+		modalityString +=
+			((int) (modality & OutputModality.Modality.Linguistic) == (int) OutputModality.Modality.Linguistic)
+				? "Linguistic"
+				: string.Empty;
+		modalityString = String.Join(", ", modalityString.Split());
+		logFile.WriteLine(string.Format("Modality: {0}", modalityString));
 	}
 
 	protected string MakeLogString(params string[] strings) {
@@ -104,16 +102,16 @@ public class DemoScript : MonoBehaviour {
 	}
 
 	protected string FormatLogUtterance(string utterance) {
-		return string.Format ("\"{0}\"", utterance);
+		return string.Format("\"{0}\"", utterance);
 	}
 
-	protected void Log (string content) {
+	protected void Log(string content) {
 		if (!log) {
 			return;
 		}
 
 		if (!moveLogged) {
-			logFile.WriteLine(string.Format("{0}\t{1}",logTimer.ToString(),content));
+			logFile.WriteLine(string.Format("{0}\t{1}", logTimer.ToString(), content));
 		}
 	}
 
@@ -122,15 +120,14 @@ public class DemoScript : MonoBehaviour {
 			return;
 		}
 
-		logFile.Close ();
+		logFile.Close();
 	}
 
 	void LogEventReceived(object sender, EventArgs e) {
-		Log (((LogEventArgs)e).LogString);
+		Log(((LogEventArgs) e).LogString);
 	}
 
 	protected void EventsForceCleared(object sender, EventArgs e) {
 		OnLogEvent(this, new LogEventArgs("Wizard: Force clear event queue"));
 	}
 }
-

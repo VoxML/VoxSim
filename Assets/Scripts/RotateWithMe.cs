@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RotateWithMe : MonoBehaviour {
-	public enum Axis
-	{
-		X=0, Y, Z
+	public enum Axis {
+		X = 0,
+		Y,
+		Z
 	}
 
 	public GameObject source;
@@ -21,20 +22,20 @@ public class RotateWithMe : MonoBehaviour {
 	public bool debug;
 
 	// Use this for initialization
-	void Start () {
+	void Start() {
 		startPosition = transform.position;
 		sourcePosition = source.transform.position;
 
 		startEulerRotation = transform.rotation.eulerAngles;
 		startOrientation = (startPosition - sourcePosition).normalized;
 
-		flatStart = ReduceDimensions (startOrientation);
+		flatStart = ReduceDimensions(startOrientation);
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		Vector3 currentOrientation = (transform.position - sourcePosition).normalized;
-		Vector2 flatCurrent = ReduceDimensions (currentOrientation);
+		Vector2 flatCurrent = ReduceDimensions(currentOrientation);
 
 		// Calculate angle from start to current
 		float angle = GetAngleBetween(flatStart, flatCurrent);
@@ -43,16 +44,16 @@ public class RotateWithMe : MonoBehaviour {
 		Vector3 currentRotation = transform.rotation.eulerAngles;
 
 		switch (rotateAround) {
-		case Axis.X:
-			currentRotation.x = startEulerRotation.x + angle;
-			break;
-		case Axis.Y:
-		default:
-			currentRotation.y = startEulerRotation.y + angle;
-			break;
-		case Axis.Z:
-			currentRotation.z = startEulerRotation.z + angle;
-			break;
+			case Axis.X:
+				currentRotation.x = startEulerRotation.x + angle;
+				break;
+			case Axis.Y:
+			default:
+				currentRotation.y = startEulerRotation.y + angle;
+				break;
+			case Axis.Z:
+				currentRotation.z = startEulerRotation.z + angle;
+				break;
 		}
 
 		// Apply to transform
@@ -60,12 +61,13 @@ public class RotateWithMe : MonoBehaviour {
 	}
 
 	public static float GetAngleBetween(Vector2 from, Vector2 to) {
-		float angle = (Mathf.Atan2 (from.y, from.x) - Mathf.Atan2(to.y, to.x)) * Mathf.Rad2Deg;
+		float angle = (Mathf.Atan2(from.y, from.x) - Mathf.Atan2(to.y, to.x)) * Mathf.Rad2Deg;
 
 		// Constrain within range -180 to 180
 		if (angle > 180) {
 			angle -= 360;
-		} else if (angle < -180) {
+		}
+		else if (angle < -180) {
 			angle += 360;
 		}
 
@@ -73,22 +75,22 @@ public class RotateWithMe : MonoBehaviour {
 	}
 
 	Vector2 ReduceDimensions(Vector3 input) {
-		Vector2 output = new Vector2 ();
+		Vector2 output = new Vector2();
 
 		switch (rotateAround) {
-		case Axis.X:
-			output.x = input.y;
-			output.y = input.z;
-			break;
-		case Axis.Y:
-		default:
-			output.x = input.x;
-			output.y = input.z;
-			break;
-		case Axis.Z:
-			output.x = input.x;
-			output.y = input.z;
-			break;
+			case Axis.X:
+				output.x = input.y;
+				output.y = input.z;
+				break;
+			case Axis.Y:
+			default:
+				output.x = input.x;
+				output.y = input.z;
+				break;
+			case Axis.Z:
+				output.x = input.x;
+				output.y = input.z;
+				break;
 		}
 
 		return output;

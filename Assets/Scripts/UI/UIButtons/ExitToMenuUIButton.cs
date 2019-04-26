@@ -1,41 +1,36 @@
 ﻿using UnityEngine;
 using System.Collections;
-
 using Global;
 
 public class ExitToMenuUIButton : UIButton {
-
 	public int fontSize = 12;
 
 	GUIStyle buttonStyle;
 
 	// Use this for initialization
-	void Start () {
-		FontSizeModifier = (int)(fontSize / defaultFontSize);
+	void Start() {
+		FontSizeModifier = (int) (fontSize / defaultFontSize);
 
-		base.Start ();
+		base.Start();
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
-
+	void Update() {
 	}
-		
-	protected override void OnGUI () {
-		buttonStyle = new GUIStyle ("Button");
+
+	protected override void OnGUI() {
+		buttonStyle = new GUIStyle("Button");
 		buttonStyle.fontSize = fontSize;
 
-		if (GUI.Button (buttonRect, buttonText, buttonStyle)) {
-			StartCoroutine(SceneHelper.LoadScene ("VoxSimMenu"));
+		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
+			StartCoroutine(SceneHelper.LoadScene("VoxSimMenu"));
 			return;
 		}
 
-		base.OnGUI ();
+		base.OnGUI();
 	}
 
-	public override void DoUIButton(int buttonID){
-
-		base.DoUIButton (buttonID);
+	public override void DoUIButton(int buttonID) {
+		base.DoUIButton(buttonID);
 	}
-
 }

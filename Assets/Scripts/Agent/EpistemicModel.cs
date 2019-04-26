@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-
 using Episteme;
 
 namespace Agent {
-	public enum EpistemicCertaintyOperation
-	{
+	public enum EpistemicCertaintyOperation {
 		Increase,
 		Decrease
 	}
@@ -16,28 +14,27 @@ namespace Agent {
 		public EpistemicState state;
 
 		public bool engaged;
-        public bool reuseModel;
+		public bool reuseModel;
 
-        UserNameModalWindow userNameModalWindow;
+		UserNameModalWindow userNameModalWindow;
 
-        bool idUser = false;
-        public string userID = string.Empty;
+		bool idUser = false;
+		public string userID = string.Empty;
 
-		public static EpistemicState initModel()
-		{
+		public static EpistemicState initModel() {
 			EpistemicState state = new EpistemicState();
 			// creating Concept instances (actions)
 			// available types: ACTION, OBJECT, PROPERTY
 			// available modes: L, G
-			Concept pointG = new Concept ("point", ConceptType.ACTION, ConceptMode.G);
+			Concept pointG = new Concept("point", ConceptType.ACTION, ConceptMode.G);
 			Concept deixis_thisL = new Concept("THIS", ConceptType.ACTION, ConceptMode.L);
 			Concept deixis_thatL = new Concept("THAT", ConceptType.ACTION, ConceptMode.L);
 			Concept deixis_thereL = new Concept("THERE", ConceptType.ACTION, ConceptMode.L);
-			Concept grabG = new Concept ("grab", ConceptType.ACTION, ConceptMode.G);
-			Concept grabL = new Concept ("GRAB", ConceptType.ACTION, ConceptMode.L);
-			Concept moveG = new Concept ("move", ConceptType.ACTION, ConceptMode.G);
+			Concept grabG = new Concept("grab", ConceptType.ACTION, ConceptMode.G);
+			Concept grabL = new Concept("GRAB", ConceptType.ACTION, ConceptMode.L);
+			Concept moveG = new Concept("move", ConceptType.ACTION, ConceptMode.G);
 			//Concept moveL = new Concept ("PUT", ConceptType.ACTION, ConceptMode.L);
-			Concept pushG = new Concept ("push", ConceptType.ACTION, ConceptMode.G);
+			Concept pushG = new Concept("push", ConceptType.ACTION, ConceptMode.G);
 			//Concept pushL = new Concept ("PUSH", ConceptType.ACTION, ConceptMode.L);
 
 			Concept posackG = new Concept("posack", ConceptType.ACTION, ConceptMode.G);
@@ -129,38 +126,41 @@ namespace Agent {
 			state.AddConcept(up);
 			state.AddConcept(down);
 
-			Debug.Log (state);
+			Debug.Log(state);
 			return state;
 		}
-		
+
 		// Use this for initialization
-		void Start () {
+		void Start() {
 			engaged = false;
 
-            if (reuseModel) {
-                idUser = true;
-                userNameModalWindow = gameObject.AddComponent<UserNameModalWindow>();
-                userNameModalWindow.windowRect = new Rect(Screen.width/2 - 185 / 2, Screen.height / 2 - 60 / 2, 185, 60);
-                userNameModalWindow.Render = true;
-                userNameModalWindow.AllowDrag = false;
-                userNameModalWindow.AllowResize = false;
-                userNameModalWindow.AllowForceClose = false;
-                userNameModalWindow.UserNameEvent += IdentifyUser;
-            }
+			if (reuseModel) {
+				idUser = true;
+				userNameModalWindow = gameObject.AddComponent<UserNameModalWindow>();
+				userNameModalWindow.windowRect =
+					new Rect(Screen.width / 2 - 185 / 2, Screen.height / 2 - 60 / 2, 185, 60);
+				userNameModalWindow.Render = true;
+				userNameModalWindow.AllowDrag = false;
+				userNameModalWindow.AllowResize = false;
+				userNameModalWindow.AllowForceClose = false;
+				userNameModalWindow.UserNameEvent += IdentifyUser;
+			}
 
-            if (state == null) {
-                state = initModel();
-                Debug.Log(state);
-            }
+			if (state == null) {
+				state = initModel();
+				Debug.Log(state);
+			}
 
 
-			if (PlayerPrefs.HasKey ("URLs")) {
+			if (PlayerPrefs.HasKey("URLs")) {
 				string epiSimUrlString = string.Empty;
 				foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-					if (url.Split ('=') [0] == "EpiSim URL") {
-						epiSimUrlString = url.Split ('=') [1];
-						string epiSimUrl = !epiSimUrlString.StartsWith ("http://") ? "http://" + epiSimUrlString : epiSimUrlString;
-						state.SetEpisimUrl (epiSimUrl);
+					if (url.Split('=')[0] == "EpiSim URL") {
+						epiSimUrlString = url.Split('=')[1];
+						string epiSimUrl = !epiSimUrlString.StartsWith("http://")
+							? "http://" + epiSimUrlString
+							: epiSimUrlString;
+						state.SetEpisimUrl(epiSimUrl);
 						state.InitiateEpisim();
 						break;
 					}
@@ -168,12 +168,12 @@ namespace Agent {
 			}
 		}
 
-        // Update is called once per frame
-        void Update() {
-        }
+		// Update is called once per frame
+		void Update() {
+		}
 
-        public void AddNewConcept(Concept concept) {
-        }
+		public void AddNewConcept(Concept concept) {
+		}
 
 		void LoadUserModel(string path) {
 			string savedCertainties = File.ReadAllText(path);
@@ -181,12 +181,12 @@ namespace Agent {
 			state.SideloadCertaintyState(savedCertainties);
 		}
 
-        public void SaveUserModel(string userID) {
-            List<Concept> stateConcepts = new List<Concept>();
-            List<Relation> stateRelations = new List<Relation>();
+		public void SaveUserModel(string userID) {
+			List<Concept> stateConcepts = new List<Concept>();
+			List<Relation> stateRelations = new List<Relation>();
 
-            List<Concept> gestureConcepts = new List<Concept>();
-            List<Concept> linguisticConcepts = new List<Concept>();
+			List<Concept> gestureConcepts = new List<Concept>();
+			List<Concept> linguisticConcepts = new List<Concept>();
 
 			if (state != null) {
 				foreach (Concepts conceptsByMode in state.GetAllConcepts()) {
@@ -212,7 +212,7 @@ namespace Agent {
 					}
 
 					foreach (Concept linguisticConcept in linguisticConcepts) {
-						if (!stateConcepts.Contains(linguisticConcept)){
+						if (!stateConcepts.Contains(linguisticConcept)) {
 							stateConcepts.Add(linguisticConcept);
 
 							foreach (Concept relatedConcept in state.GetRelated(linguisticConcept)) {
@@ -225,7 +225,8 @@ namespace Agent {
 					}
 				}
 
-				string jsonifiedCertaintyState = Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
+				string jsonifiedCertaintyState =
+					Jsonifier.JsonifyUpdates(state, stateConcepts.ToArray(), stateRelations.ToArray());
 				Debug.Log(jsonifiedCertaintyState);
 
 
@@ -233,26 +234,27 @@ namespace Agent {
 					sw.Write(jsonifiedCertaintyState);
 				}
 			}
-        }
+		}
 
-        string GetUserModelPath(string username) {
-            string userModelLocation = @"EpiSim/UserModels";
-            if (!Directory.Exists(userModelLocation)) {
-                Directory.CreateDirectory(userModelLocation);
-            }
-            return string.Format(@"{0}/user-{1}.json", userModelLocation, username);
-        }
+		string GetUserModelPath(string username) {
+			string userModelLocation = @"EpiSim/UserModels";
+			if (!Directory.Exists(userModelLocation)) {
+				Directory.CreateDirectory(userModelLocation);
+			}
 
-        void IdentifyUser(object sender, EventArgs e) {
-            string username = ((UserNameInfo)((ModalWindowEventArgs)e).Data).Username;
-            userNameModalWindow.CloseWindow((ModalWindowEventArgs)e);
-            userID = username;
+			return string.Format(@"{0}/user-{1}.json", userModelLocation, username);
+		}
 
-            string userModelPath = GetUserModelPath(username);
-            if (File.Exists(userModelPath)) {
-                // load user model
-                LoadUserModel(userModelPath);
-            }
-        }
-    }
+		void IdentifyUser(object sender, EventArgs e) {
+			string username = ((UserNameInfo) ((ModalWindowEventArgs) e).Data).Username;
+			userNameModalWindow.CloseWindow((ModalWindowEventArgs) e);
+			userID = username;
+
+			string userModelPath = GetUserModelPath(username);
+			if (File.Exists(userModelPath)) {
+				// load user model
+				LoadUserModel(userModelPath);
+			}
+		}
+	}
 }

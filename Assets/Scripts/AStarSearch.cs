@@ -30,12 +30,12 @@ public class AStarSearch : MonoBehaviour {
 
 	public GameObject embeddingSpace;
 	Bounds embeddingSpaceBounds;
-	List<GameObject> debugVisual = new List<GameObject> ();
+	List<GameObject> debugVisual = new List<GameObject>();
 
 	public Vector3 defaultIncrement = Vector3.one;
 	public Vector3 increment;
 	public List<PathNode> nodes = new List<PathNode>();
-	public List<Global.Pair<PathNode,PathNode>> arcs = new List<Global.Pair<PathNode,PathNode>> ();
+	public List<Global.Pair<PathNode, PathNode>> arcs = new List<Global.Pair<PathNode, PathNode>>();
 	public Dictionary<Vector3, bool> quantizedSpaceToClear = new Dictionary<Vector3, bool>();
 	public List<Vector3> path;
 
@@ -46,18 +46,18 @@ public class AStarSearch : MonoBehaviour {
 
 	public float rigAttractionWeight;
 	public FullBodyBipedIK bodyIk;
-		
+
 
 	// Use this for initialization
-	void Start () {
-		Renderer r = embeddingSpace.GetComponent<Renderer> ();
+	void Start() {
+		Renderer r = embeddingSpace.GetComponent<Renderer>();
 		embeddingSpaceBounds = r.bounds;
-		Debug.Log (embeddingSpaceBounds.min);
-		Debug.Log (embeddingSpaceBounds.max);
+		Debug.Log(embeddingSpaceBounds.min);
+		Debug.Log(embeddingSpaceBounds.max);
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		/*if ((goal - start).magnitude > 0.0f) {
 			Debug.Log ("Start: " + start);
 			Debug.Log ("Goal: " + goal);
@@ -80,12 +80,12 @@ public class AStarSearch : MonoBehaviour {
 	}
 
 	void AddDebugCube(Vector3 coord) {
-		GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
+		GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		cube.transform.position = coord;
-		cube.transform.localScale = new Vector3 (increment.x / 10, increment.y / 10, increment.z / 10);
+		cube.transform.localScale = new Vector3(increment.x / 10, increment.y / 10, increment.z / 10);
 		cube.tag = "UnPhysic";
 
-		debugVisual.Add (cube);
+		debugVisual.Add(cube);
 	}
 
 	/**
@@ -98,16 +98,22 @@ public class AStarSearch : MonoBehaviour {
 		float xStart, yStart, zStart;
 		float xEnd, yEnd, zEnd;
 		Vector3 origin = obj.transform.position;
-		Bounds objBounds = Helper.GetObjectWorldSize (obj);
+		Bounds objBounds = Helper.GetObjectWorldSize(obj);
 		Vector3 originToCenterOffset = objBounds.center - origin;
 
-		for (xStart = origin.x; xStart > embeddingSpaceBounds.min.x; xStart -= increment.x) {}
+		for (xStart = origin.x; xStart > embeddingSpaceBounds.min.x; xStart -= increment.x) {
+		}
+
 		xEnd = embeddingSpaceBounds.max.x;
 
-		for (yStart = origin.y; yStart > embeddingSpaceBounds.min.y; yStart -= increment.y) {}
+		for (yStart = origin.y; yStart > embeddingSpaceBounds.min.y; yStart -= increment.y) {
+		}
+
 		yEnd = embeddingSpaceBounds.max.y;
 
-		for (zStart = origin.z; zStart > embeddingSpaceBounds.min.z; zStart -= increment.z) {}
+		for (zStart = origin.z; zStart > embeddingSpaceBounds.min.z; zStart -= increment.z) {
+		}
+
 		zEnd = embeddingSpaceBounds.max.z;
 
 //		Debug.Log(string.Format("X: ({0},{1})",xStart,xEnd));
@@ -116,29 +122,29 @@ public class AStarSearch : MonoBehaviour {
 
 		if (constraints.Length > 0) {
 			foreach (object constraint in constraints) {
-				Debug.Log (constraint);
+				Debug.Log(constraint);
 				if (constraint is Bounds) {
-					xStart = (((Bounds)constraint).min.x > xStart) ? ((Bounds)constraint).min.x : xStart;
-					xEnd = (((Bounds)constraint).max.x < xEnd) ? ((Bounds)constraint).max.x : xEnd;
+					xStart = (((Bounds) constraint).min.x > xStart) ? ((Bounds) constraint).min.x : xStart;
+					xEnd = (((Bounds) constraint).max.x < xEnd) ? ((Bounds) constraint).max.x : xEnd;
 
-					yStart = (((Bounds)constraint).min.y > yStart) ? ((Bounds)constraint).min.y : yStart;
-					yEnd = (((Bounds)constraint).max.y < yEnd) ? ((Bounds)constraint).max.y : yEnd;
+					yStart = (((Bounds) constraint).min.y > yStart) ? ((Bounds) constraint).min.y : yStart;
+					yEnd = (((Bounds) constraint).max.y < yEnd) ? ((Bounds) constraint).max.y : yEnd;
 
-					zStart = (((Bounds)constraint).min.z > zStart) ? ((Bounds)constraint).min.z : zStart;
-					zEnd = (((Bounds)constraint).max.z < zEnd) ? ((Bounds)constraint).max.z : zEnd;
+					zStart = (((Bounds) constraint).min.z > zStart) ? ((Bounds) constraint).min.z : zStart;
+					zEnd = (((Bounds) constraint).max.z < zEnd) ? ((Bounds) constraint).max.z : zEnd;
 				}
 				else if (constraint is string) {
-					if ((constraint as string).Contains ('X')) {
+					if ((constraint as string).Contains('X')) {
 						xStart = origin.x;
 						xEnd = origin.x + increment.x;
 					}
 
-					if ((constraint as string).Contains ('Y')) {
+					if ((constraint as string).Contains('Y')) {
 						yStart = origin.y;
 						yEnd = origin.y + increment.y;
 					}
 
-					if ((constraint as string).Contains ('Z')) {
+					if ((constraint as string).Contains('Z')) {
 						zStart = origin.z;
 						zEnd = origin.z + increment.z;
 					}
@@ -149,23 +155,22 @@ public class AStarSearch : MonoBehaviour {
 //		Debug.Log(string.Format("X: ({0},{1})",xStart,xEnd));
 //		Debug.Log(string.Format("Y: ({0},{1})",yStart,yEnd));
 //		Debug.Log(string.Format("Z: ({0},{1})",zStart,zEnd));
-			
+
 		for (float fx = xStart; fx < xEnd; fx += increment.x) {
 			for (float fy = yStart; fy < yEnd; fy += increment.y) {
 				for (float fz = zStart; fz < zEnd; fz += increment.z) {
-
 					// create test bounding box
 					//Bounds testBounds = new Bounds(new Vector3 (fx+(increment.x/2), fy+(increment.y/2), fz+(increment.z/2)),
 					//	new Vector3 (increment.x, increment.y, increment.z));
 
-					Bounds testBounds = new Bounds(new Vector3 (fx,fy,fz)+originToCenterOffset,objBounds.size);
+					Bounds testBounds = new Bounds(new Vector3(fx, fy, fz) + originToCenterOffset, objBounds.size);
 					// get all objects
 					GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 
 					bool spaceClear = true;
 					foreach (GameObject o in allObjects) {
 						if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
-							if (testBounds.Intersects (Helper.GetObjectWorldSize(o))) {
+							if (testBounds.Intersects(Helper.GetObjectWorldSize(o))) {
 								spaceClear = false;
 								break;
 							}
@@ -175,20 +180,21 @@ public class AStarSearch : MonoBehaviour {
 					if (spaceClear) {
 						// add node
 						//Vector3 node = new Vector3 (fx + (increment.x / 2), fy + (increment.y / 2), fz + (increment.z / 2));
-						Vector3 node = new Vector3 (fx, fy, fz);
+						Vector3 node = new Vector3(fx, fy, fz);
 						nodes.Add(new PathNode(node));
 
 						//Debug.Log (node);
 
 						if (debugNodes) {
-							GameObject cube = GameObject.CreatePrimitive (PrimitiveType.Cube);
+							GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 							cube.transform.position = node;
-							cube.transform.localScale = new Vector3 (increment.x / 10, increment.y / 10, increment.z / 10);
+							cube.transform.localScale =
+								new Vector3(increment.x / 10, increment.y / 10, increment.z / 10);
 							cube.tag = "UnPhysic";
-							cube.GetComponent<Renderer> ().enabled = true;
-							Destroy (cube.GetComponent<Collider> ());
+							cube.GetComponent<Renderer>().enabled = true;
+							Destroy(cube.GetComponent<Collider>());
 
-							debugVisual.Add (cube);
+							debugVisual.Add(cube);
 						}
 					}
 				}
@@ -196,8 +202,8 @@ public class AStarSearch : MonoBehaviour {
 		}
 	}
 
-	bool testClear(GameObject obj, Vector3 curPoint){
-		Bounds objBounds = Helper.GetObjectWorldSize (obj);
+	bool testClear(GameObject obj, Vector3 curPoint) {
+		Bounds objBounds = Helper.GetObjectWorldSize(obj);
 		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
 		// get all objects
 		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
@@ -205,7 +211,7 @@ public class AStarSearch : MonoBehaviour {
 		bool spaceClear = true;
 		foreach (GameObject o in allObjects) {
 			if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
-				if (testBounds.Intersects (Helper.GetObjectWorldSize(o))) {
+				if (testBounds.Intersects(Helper.GetObjectWorldSize(o))) {
 					spaceClear = false;
 					break;
 				}
@@ -215,21 +221,22 @@ public class AStarSearch : MonoBehaviour {
 		return spaceClear;
 	}
 
-    List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step){
+	List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step) {
 		// In general 
 		// step * increment = size of object
-		var neighbors = new List<Vector3> ();
+		var neighbors = new List<Vector3>();
 		for (int i = -step; i <= step; i++)
-			for (int j = -step; j <= step; j++)
-				for (int k = -step; k <= step; k++) {
-					// No overlapping between neighbor and curNode
-					// at least one size equal |step|
-					if (i*i == step*step || j*j == step*step || k*k == step*step) {
-						Vector3 newNode = new Vector3 (curPos.x + i * increment.x, curPos.y + j * increment.y, curPos.z + k * increment.z);
-						if (testClear(obj, newNode))
-							neighbors.Add (newNode);
-					}
-				}
+		for (int j = -step; j <= step; j++)
+		for (int k = -step; k <= step; k++) {
+			// No overlapping between neighbor and curNode
+			// at least one size equal |step|
+			if (i * i == step * step || j * j == step * step || k * k == step * step) {
+				Vector3 newNode = new Vector3(curPos.x + i * increment.x, curPos.y + j * increment.y,
+					curPos.z + k * increment.z);
+				if (testClear(obj, newNode))
+					neighbors.Add(newNode);
+			}
+		}
 
 		// specialNodes are also neighbors
 		neighbors.AddRange(specialNodes);
@@ -241,15 +248,15 @@ public class AStarSearch : MonoBehaviour {
 	*/
 	public void PlotArcs(Bounds objBounds) {
 		RaycastHit hitInfo;
-		for (int i = 0; i < nodes.Count-1; i++) {
-			for (int j = i+1; j < nodes.Count; j++) {
-				Vector3 dir = (nodes [j].position - nodes [i].position);
+		for (int i = 0; i < nodes.Count - 1; i++) {
+			for (int j = i + 1; j < nodes.Count; j++) {
+				Vector3 dir = (nodes[j].position - nodes[i].position);
 				float dist = dir.magnitude;
-				bool blocked = Physics.Raycast (nodes [i].position, dir.normalized, out hitInfo, dist);
-				blocked |= Physics.Raycast (nodes [i].position-objBounds.extents, dir.normalized, out hitInfo, dist);
-				blocked |= Physics.Raycast (nodes [i].position+objBounds.extents, dir.normalized, out hitInfo, dist);
+				bool blocked = Physics.Raycast(nodes[i].position, dir.normalized, out hitInfo, dist);
+				blocked |= Physics.Raycast(nodes[i].position - objBounds.extents, dir.normalized, out hitInfo, dist);
+				blocked |= Physics.Raycast(nodes[i].position + objBounds.extents, dir.normalized, out hitInfo, dist);
 				if (!blocked) {
-					arcs.Add (new Global.Pair<PathNode, PathNode> (nodes [i], nodes [j]));
+					arcs.Add(new Global.Pair<PathNode, PathNode>(nodes[i], nodes[j]));
 				}
 			}
 		}
@@ -257,14 +264,14 @@ public class AStarSearch : MonoBehaviour {
 
 	/*
 	 * Check if the path from first to second with objBounds width is blocked
-	 */ 
-    bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
+	 */
+	bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
 		RaycastHit hitInfo;
 		Vector3 dir = (second - first);
 		float dist = dir.magnitude;
-		bool blocked = Physics.Raycast (first, dir.normalized, out hitInfo, dist);
-		blocked |= Physics.Raycast (first-objBounds.extents, dir.normalized, out hitInfo, dist);
-		blocked |= Physics.Raycast (first+objBounds.extents, dir.normalized, out hitInfo, dist);
+		bool blocked = Physics.Raycast(first, dir.normalized, out hitInfo, dist);
+		blocked |= Physics.Raycast(first - objBounds.extents, dir.normalized, out hitInfo, dist);
+		blocked |= Physics.Raycast(first + objBounds.extents, dir.normalized, out hitInfo, dist);
 
 		return blocked;
 	}
@@ -274,8 +281,7 @@ public class AStarSearch : MonoBehaviour {
 	Dictionary<Vector3, float> hScore;
 	HashSet<Vector3> specialNodes = new HashSet<Vector3>();
 
-	public class BetterHeuristic : Comparer<Vector3> 
-	{
+	public class BetterHeuristic : Comparer<Vector3> {
 		Dictionary<Vector3, float> gScore;
 		Dictionary<Vector3, float> hScore;
 
@@ -285,108 +291,107 @@ public class AStarSearch : MonoBehaviour {
 		}
 
 		// Compares by Length, Height, and Width.
-		public override int Compare(Vector3 x, Vector3 y)
-		{
-			if (gScore[x] + hScore[x] < gScore[y] + hScore[y]) 
+		public override int Compare(Vector3 x, Vector3 y) {
+			if (gScore[x] + hScore[x] < gScore[y] + hScore[y])
 				return -1;
-			if (gScore[x] + hScore[x] > gScore[y] + hScore[y]) 
+			if (gScore[x] + hScore[x] > gScore[y] + hScore[y])
 				return 1;
 			return 0;
 		}
-
 	}
 
-	public class BetterHeuristicOld : Comparer<PathNode> 
-	{
+	public class BetterHeuristicOld : Comparer<PathNode> {
 		// Compares by Length, Height, and Width.
-		public override int Compare(PathNode x, PathNode y)
-		{
-			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
+		public override int Compare(PathNode x, PathNode y) {
+			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore)
 				return -1;
-			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore) 
+			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore)
 				return 1;
 			return 0;
 		}
-
 	}
 
 	/*
 	 * Look for closest point to goalPos that make a quantized distance to obj
-	 */ 
-    Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
+	 */
+	Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
 		float dist = Mathf.Infinity;
 		Vector3 closest = goalPos;
 
 		var distance = goalPos - obj.transform.position;
-		var quantizedDistance = new Vector3( distance.x / increment.x, distance.y / increment.y, distance.z / increment.z);
+		var quantizedDistance =
+			new Vector3(distance.x / increment.x, distance.y / increment.y, distance.z / increment.z);
 
-		var quantizedDistanceX = (int)quantizedDistance.x;
-		var quantizedDistanceY = (int)quantizedDistance.y;
-		var quantizedDistanceZ = (int)quantizedDistance.z;
+		var quantizedDistanceX = (int) quantizedDistance.x;
+		var quantizedDistanceY = (int) quantizedDistance.y;
+		var quantizedDistanceZ = (int) quantizedDistance.z;
 
-        for (int x = quantizedDistanceX; x <= quantizedDistanceX + 1; x++) {
-            for (int y = quantizedDistanceY; y <= quantizedDistanceY + 1; y++) {
-                for (int z = quantizedDistanceZ; z <= quantizedDistanceZ + 1; z++) {
-                    Vector3 candidate = new Vector3(x * increment.x + obj.transform.position.x, y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
+		for (int x = quantizedDistanceX; x <= quantizedDistanceX + 1; x++) {
+			for (int y = quantizedDistanceY; y <= quantizedDistanceY + 1; y++) {
+				for (int z = quantizedDistanceZ; z <= quantizedDistanceZ + 1; z++) {
+					Vector3 candidate = new Vector3(x * increment.x + obj.transform.position.x,
+						y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
 
-                    if (testClear(obj, candidate)) {
-                        float temp = (candidate - goalPos).magnitude;
+					if (testClear(obj, candidate)) {
+						float temp = (candidate - goalPos).magnitude;
 
-                        if (dist > temp) {
-                            dist = temp;
-                            closest = candidate;
-                        }
-                    }
-                }
-            }
-        }
+						if (dist > temp) {
+							dist = temp;
+							closest = candidate;
+						}
+					}
+				}
+			}
+		}
 
-        //if ((closest - obj.transform.position).magnitude > distance.magnitude) {
-        //    closest = goalPos;
-        //}
+		//if ((closest - obj.transform.position).magnitude > distance.magnitude) {
+		//    closest = goalPos;
+		//}
 
 		return closest;
 	}
 
 	List<Vector3> ReconstructPath2(Vector3 firstNode, Vector3 lastNode) {
-		path = new List<Vector3> ();
+		path = new List<Vector3>();
 		Vector3 node = lastNode;
 
 		//path.Add (lastNode.position);
 
 		while (node != firstNode) {
-			path.Insert (0, node);
+			path.Insert(0, node);
 			node = cameFrom[node];
 		}
 
 		return path;
 	}
 
-    float GetGScore(Vector3 fromPoint, Vector3 explorePoint) {
+	float GetGScore(Vector3 fromPoint, Vector3 explorePoint) {
 		return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
 	}
 
-    float GetHScore(Vector3 explorePoint, Vector3 goalPoint) {
+	float GetHScore(Vector3 explorePoint, Vector3 goalPoint) {
 		return (goalPoint - explorePoint).magnitude;
 	}
 
-    float GetErgonomicScore(Vector3 point) {
-		return (bodyIk.solver.rightArmChain.nodes [0].transform.position - point).magnitude;
+	float GetErgonomicScore(Vector3 point) {
+		return (bodyIk.solver.rightArmChain.nodes[0].transform.position - point).magnitude;
 	}
 
-    float GetGScoreErgonomic(Vector3 fromPoint, Vector3 explorePoint) {
+	float GetGScoreErgonomic(Vector3 fromPoint, Vector3 explorePoint) {
 		if (bodyIk != null) {
-			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude * (1 + rigAttractionWeight * (GetErgonomicScore (fromPoint) + GetErgonomicScore (explorePoint)));
+			return gScore[fromPoint] + (explorePoint - fromPoint).magnitude *
+			       (1 + rigAttractionWeight * (GetErgonomicScore(fromPoint) + GetErgonomicScore(explorePoint)));
 		}
 		else {
-			return gScore [fromPoint] + (explorePoint - fromPoint).magnitude;
+			return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
 		}
 	}
 
-    float GetHScoreErgonomic(Vector3 explorePoint, Vector3 goalPoint) {
+	float GetHScoreErgonomic(Vector3 explorePoint, Vector3 goalPoint) {
 		// a discount factor of 2 so that the algorith would be faster
 		if (bodyIk != null) {
-			return (goalPoint - explorePoint).magnitude * (1 + rigAttractionWeight / 2 * (GetErgonomicScore (goalPoint) + GetErgonomicScore (explorePoint)));
+			return (goalPoint - explorePoint).magnitude *
+			       (1 + rigAttractionWeight / 2 * (GetErgonomicScore(goalPoint) + GetErgonomicScore(explorePoint)));
 		}
 		else {
 			return (goalPoint - explorePoint).magnitude;
@@ -394,48 +399,49 @@ public class AStarSearch : MonoBehaviour {
 	}
 
 	// A plan path that run faster and more smooth
-	public void PlanPath2(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj, params object[] constraints) {
-		Debug.Log ("========== In plan ========= " + goalPos);
-		cameFrom = new Dictionary<Vector3, Vector3> ();
-		gScore = new Dictionary<Vector3, float> ();
-		hScore = new Dictionary<Vector3, float> ();
+	public void PlanPath2(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj,
+		params object[] constraints) {
+		Debug.Log("========== In plan ========= " + goalPos);
+		cameFrom = new Dictionary<Vector3, Vector3>();
+		gScore = new Dictionary<Vector3, float>();
+		hScore = new Dictionary<Vector3, float>();
 		specialNodes = new HashSet<Vector3>();
 
 		// init empty path
 		path = new List<Vector3>();
 
 		MinHeap<Vector3> openSet = new MinHeap<Vector3>(new BetterHeuristic(gScore, hScore));
-		var openSetForCheck = new HashSet<Vector3> ();
+		var openSetForCheck = new HashSet<Vector3>();
 
 		// Closed set can be used because euclidean distance is monotonic
-		var closedSet = new HashSet<Vector3> ();
+		var closedSet = new HashSet<Vector3>();
 
-		var objectBound = Helper.GetObjectWorldSize (obj);
+		var objectBound = Helper.GetObjectWorldSize(obj);
 
-		Vector3 size = Helper.GetObjectWorldSize (obj).size;
+		Vector3 size = Helper.GetObjectWorldSize(obj).size;
 
 		Vector3 increment = defaultIncrement;
 
 		foreach (object constraint in constraints) {
 			if (constraint is string) {
-				if ((constraint as string).Contains ('X')) {
-					increment = new Vector3(0.0f,increment.y,increment.z);
+				if ((constraint as string).Contains('X')) {
+					increment = new Vector3(0.0f, increment.y, increment.z);
 				}
 
-				if ((constraint as string).Contains ('Y')) {
-					increment = new Vector3(increment.x,0.0f,increment.z);
+				if ((constraint as string).Contains('Y')) {
+					increment = new Vector3(increment.x, 0.0f, increment.z);
 				}
 
-				if ((constraint as string).Contains ('Z')) {
-					increment = new Vector3(increment.x,increment.y,0.0f);
+				if ((constraint as string).Contains('Z')) {
+					increment = new Vector3(increment.x, increment.y, 0.0f);
 				}
 			}
 		}
 
 		int step = 1;
 
-		Debug.Log (" ======== size.magnitude ====== " + size.magnitude);
-		Debug.Log (" ======== defaultIncrement.magnitude ====== " + defaultIncrement.magnitude);
+		Debug.Log(" ======== size.magnitude ====== " + size.magnitude);
+		Debug.Log(" ======== defaultIncrement.magnitude ====== " + defaultIncrement.magnitude);
 
 
 //		if (size.magnitude > defaultIncrement.magnitude) {
@@ -444,42 +450,44 @@ public class AStarSearch : MonoBehaviour {
 //			increment = new Vector3 (size.x / step, size.y / step, size.z / step);
 //		}
 
-		Debug.Log (" ======== increment ====== " + increment);
-		Debug.Log (" ======== step ====== " + step);
+		Debug.Log(" ======== increment ====== " + increment);
+		Debug.Log(" ======== step ====== " + step);
 
-		openSet.Add (startPos);
-		openSetForCheck.Add (startPos);
+		openSet.Add(startPos);
+		openSetForCheck.Add(startPos);
 
 		Vector3 endPos = new Vector3();
 		// if constraints contain a voxeme
-		Voxeme testTarget = constraints.OfType<Voxeme> ().FirstOrDefault ();
+		Voxeme testTarget = constraints.OfType<Voxeme>().FirstOrDefault();
 		if (testTarget != null) {
-            Debug.Log(testTarget);
+			Debug.Log(testTarget);
 			// if that object is concave (e.g. cup)
 			// if goalPos is within the bounds of target (e.g. in cup)
-			if (testTarget.voxml.Type.Concavity.Contains ("Concave") && Helper.GetObjectWorldSize (testTarget.gameObject).Contains (goalPos)) {
+			if (testTarget.voxml.Type.Concavity.Contains("Concave") &&
+			    Helper.GetObjectWorldSize(testTarget.gameObject).Contains(goalPos)) {
 				// This endPos is special, and requires a special handling to avoid path not found
-				var specialPos = new Vector3(goalPos.x, Helper.GetObjectWorldSize (testTarget.gameObject).max.y+size.y, goalPos.z);
+				var specialPos = new Vector3(goalPos.x, Helper.GetObjectWorldSize(testTarget.gameObject).max.y + size.y,
+					goalPos.z);
 				endPos = specialPos;
-				specialNodes.Add (specialPos);
-                Debug.Log(" ======== special ====== " + Helper.VectorToParsable(specialPos));
+				specialNodes.Add(specialPos);
+				Debug.Log(" ======== special ====== " + Helper.VectorToParsable(specialPos));
 			}
 			else {
-				endPos = LookForClosest (goalPos, obj, increment);
+				endPos = LookForClosest(goalPos, obj, increment);
 			}
 		}
 		else {
-			endPos = LookForClosest (goalPos, obj, increment);
+			endPos = LookForClosest(goalPos, obj, increment);
 		}
 
-		gScore [startPos] = 0 ;
+		gScore[startPos] = 0;
 		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
-		hScore [startPos] = GetHScoreErgonomic(startPos, goalPos) ;
+		hScore[startPos] = GetHScoreErgonomic(startPos, goalPos);
 
-        Debug.Log (" ========= obj.transform.position ======== " + Helper.VectorToParsable(obj.transform.position));
-        Debug.Log (" ======== start ====== " + Helper.VectorToParsable(startPos));
-        Debug.Log (" ======== goal ====== " + Helper.VectorToParsable(goalPos));
-        Debug.Log (" ======== end ====== " + Helper.VectorToParsable(endPos));
+		Debug.Log(" ========= obj.transform.position ======== " + Helper.VectorToParsable(obj.transform.position));
+		Debug.Log(" ======== start ====== " + Helper.VectorToParsable(startPos));
+		Debug.Log(" ======== goal ====== " + Helper.VectorToParsable(goalPos));
+		Debug.Log(" ======== end ====== " + Helper.VectorToParsable(endPos));
 
 		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
 		// using best node found until endNode reached
@@ -491,88 +499,83 @@ public class AStarSearch : MonoBehaviour {
 		float bestMagnitude = Mathf.Infinity;
 		Vector3 bestLastPos = new Vector3();
 
-        if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude)
-        {
-            Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(startPos), (goalPos - startPos).magnitude));
-            Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(endPos), (goalPos - endPos).magnitude));
-            while (openSet.Count > 0 && counter < counterMax)
-            {
-                // O(1)
-                curPos = openSet.TakeMin();
+		if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude) {
+			Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(startPos),
+				(goalPos - startPos).magnitude));
+			Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(endPos),
+				(goalPos - endPos).magnitude));
+			while (openSet.Count > 0 && counter < counterMax) {
+				// O(1)
+				curPos = openSet.TakeMin();
 
-                Debug.Log(counter + " ======== curNode ====== (" + Helper.VectorToParsable(curPos) + ") " + gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
+				Debug.Log(counter + " ======== curNode ====== (" + Helper.VectorToParsable(curPos) + ") " +
+				          gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
 
-                float currentDistance = (curPos - endPos).magnitude;
-                if (currentDistance < bestMagnitude)
-                {
-                    bestMagnitude = currentDistance;
-                    bestLastPos = curPos;
-                }
+				float currentDistance = (curPos - endPos).magnitude;
+				if (currentDistance < bestMagnitude) {
+					bestMagnitude = currentDistance;
+					bestLastPos = curPos;
+				}
 
-                // short cut
-                // if reached end node
-                if ((curPos - endPos).magnitude < Constants.EPSILON)
-                {
-                    Debug.Log("=== counter === " + counter);
-                    // extend path to goal node (goal position)
-                    cameFrom[goalPos] = curPos;
-                    path = ReconstructPath2(startPos, goalPos);
-                    Debug.Log("====== path ===== ");
-                    foreach (var point in path)
-                    {
-                        Debug.Log(Helper.VectorToParsable(point));
-                    }
-                    return;
-                }
+				// short cut
+				// if reached end node
+				if ((curPos - endPos).magnitude < Constants.EPSILON) {
+					Debug.Log("=== counter === " + counter);
+					// extend path to goal node (goal position)
+					cameFrom[goalPos] = curPos;
+					path = ReconstructPath2(startPos, goalPos);
+					Debug.Log("====== path ===== ");
+					foreach (var point in path) {
+						Debug.Log(Helper.VectorToParsable(point));
+					}
 
-                closedSet.Add(curPos);
+					return;
+				}
 
-                var neighbors = GetNeighborNodes(obj, curPos, increment, step);
+				closedSet.Add(curPos);
 
-                foreach (var neighbor in neighbors)
-                {
-                    if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor))
-                    {
-                        float tentativeGScore = GetGScoreErgonomic(curPos, neighbor);
+				var neighbors = GetNeighborNodes(obj, curPos, increment, step);
 
-                        if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
-                            continue;
+				foreach (var neighbor in neighbors) {
+					if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor)) {
+						float tentativeGScore = GetGScoreErgonomic(curPos, neighbor);
 
-                        cameFrom[neighbor] = curPos;
-                        gScore[neighbor] = tentativeGScore;
-                        hScore[neighbor] = GetHScoreErgonomic(neighbor, goalPos);
-                        // Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
+						if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
+							continue;
 
-                        // If neighbor is not yet in openset 
-                        // Add it
-                        // Heap is automatically rearranged
-                        if (!openSet.Has(neighbor))
-                        {
-                            Debug.Log ("=== Add candidate === (" + Helper.VectorToParsable(neighbor) + ")");
-                            openSet.Add(neighbor);
-                        }
-                        else
-                        {
-                            // If neighbor is already there, update the heap
-                            Debug.Log ("=== Update candidate === (" + Helper.VectorToParsable(neighbor) + ")");
-                            openSet.Update(neighbor);
-                        }
-                    }
-                }
+						cameFrom[neighbor] = curPos;
+						gScore[neighbor] = tentativeGScore;
+						hScore[neighbor] = GetHScoreErgonomic(neighbor, goalPos);
+						// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
 
-                counter += 1;
-            }
-        }
-        else    // if the dist from startPos to goalPos < dist from goalPos to endPos (aka closest non-start node to endPos)
-        {
-            cameFrom[goalPos] = startPos;
-            bestLastPos = goalPos;
-        }
+						// If neighbor is not yet in openset 
+						// Add it
+						// Heap is automatically rearranged
+						if (!openSet.Has(neighbor)) {
+							Debug.Log("=== Add candidate === (" + Helper.VectorToParsable(neighbor) + ")");
+							openSet.Add(neighbor);
+						}
+						else {
+							// If neighbor is already there, update the heap
+							Debug.Log("=== Update candidate === (" + Helper.VectorToParsable(neighbor) + ")");
+							openSet.Update(neighbor);
+						}
+					}
+				}
 
-		path = ReconstructPath2 (startPos, bestLastPos);
-		Debug.Log ("====== path ===== ");
+				counter += 1;
+			}
+		}
+		else // if the dist from startPos to goalPos < dist from goalPos to endPos (aka closest non-start node to endPos)
+		{
+			cameFrom[goalPos] = startPos;
+			bestLastPos = goalPos;
+		}
+
+		path = ReconstructPath2(startPos, bestLastPos);
+		Debug.Log("====== path ===== ");
 		foreach (var point in path) {
-			Debug.Log (point);
+			Debug.Log(point);
 		}
 	}
 
@@ -580,63 +583,68 @@ public class AStarSearch : MonoBehaviour {
 	// constraints should be the target object!
 	// Plan path uses a heuristic function h(n) of manhattan distance
 	// Just change to the Euclidian distance for better performance
-	public void PlanPath(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj, params object[] constraints) {
-		Debug.Log ("====== startPos ===== " + startPos);
-		Debug.Log ("====== goalPos ===== " + goalPos);
+	public void PlanPath(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj,
+		params object[] constraints) {
+		Debug.Log("====== startPos ===== " + startPos);
+		Debug.Log("====== goalPos ===== " + goalPos);
 		// clear nodes
-		nodes.Clear ();
+		nodes.Clear();
 
 		// init empty path
 		List<PathNode> plannedPath = new List<PathNode>();
 
 		//List<PathNode> openSet = new List<PathNode> ();
 		MinHeap<PathNode> openSet = new MinHeap<PathNode>(new BetterHeuristicOld());
-		List<PathNode> closedSet = new List<PathNode> ();
+		List<PathNode> closedSet = new List<PathNode>();
 
 		PathNode endNode = null;
 
 		path = new List<Vector3>();
 
-		Vector3 size = Helper.GetObjectWorldSize (obj).size;
+		Vector3 size = Helper.GetObjectWorldSize(obj).size;
 		//increment = size.magnitude/2  > defaultIncrement.magnitude ? new Vector3(size.x/2, size.y/2, size.z/2) : defaultIncrement;
-		increment = size.magnitude  > defaultIncrement.magnitude ? size : defaultIncrement;
+		increment = size.magnitude > defaultIncrement.magnitude ? size : defaultIncrement;
 
-		var watch = System.Diagnostics.Stopwatch.StartNew ();
+		var watch = System.Diagnostics.Stopwatch.StartNew();
 
-		PathNode startNode = new PathNode (startPos);
+		PathNode startNode = new PathNode(startPos);
 		startNode.scoreFromStart = 0;
 
 		// Manhattan distance
-		startNode.heuristicScore = Mathf.Abs(goalPos.x - startNode.position.x) + Mathf.Abs(goalPos.y - startNode.position.y) +
-			Mathf.Abs(goalPos.z - startNode.position.z);
+		startNode.heuristicScore = Mathf.Abs(goalPos.x - startNode.position.x) +
+		                           Mathf.Abs(goalPos.y - startNode.position.y) +
+		                           Mathf.Abs(goalPos.z - startNode.position.z);
 		// Euclidan distance
 //		startNode.heuristicScore = new Vector3 (goalPos.x - startNode.position.x, goalPos.y - startNode.position.y, goalPos.z - startNode.position.z).magnitude;
 		nodes.Add(startNode);
-		openSet.Add (startNode);
-		QuantizeSpace (obj, embeddingSpaceBounds, increment, constraints);	// set increment to moving object size, clean up after each run
+		openSet.Add(startNode);
+		QuantizeSpace(obj, embeddingSpaceBounds, increment,
+			constraints); // set increment to moving object size, clean up after each run
 
-		watch.Stop ();
-		Debug.Log ("========= Time to quantize space " + watch.ElapsedMilliseconds);
+		watch.Stop();
+		Debug.Log("========= Time to quantize space " + watch.ElapsedMilliseconds);
 		// find closest node to goal
 		// TODO: if goal is inside concave object (concave voxeme provided as constraint)
 		//	find closest node to goal such that arc from testNode to goal
 		//	does not intersect non-concave component of object
 
 		// if constraints contain a voxeme
-		Voxeme testTarget = constraints.OfType<Voxeme> ().FirstOrDefault ();
+		Voxeme testTarget = constraints.OfType<Voxeme>().FirstOrDefault();
 		if (testTarget != null) {
 			// if that object is concave (e.g. cup)
 			// if goalPos is within the bounds of target (e.g. in cup)
-			if (testTarget.voxml.Type.Concavity.Contains ("Concave") && Helper.GetObjectWorldSize (testTarget.gameObject).Contains (goalPos)) {
-				endNode = new PathNode (new Vector3(goalPos.x,
-					Helper.GetObjectWorldSize (testTarget.gameObject).max.y+size.y, goalPos.z));
-				nodes.Add (endNode);
+			if (testTarget.voxml.Type.Concavity.Contains("Concave") &&
+			    Helper.GetObjectWorldSize(testTarget.gameObject).Contains(goalPos)) {
+				endNode = new PathNode(new Vector3(goalPos.x,
+					Helper.GetObjectWorldSize(testTarget.gameObject).max.y + size.y, goalPos.z));
+				nodes.Add(endNode);
 				//Debug.Break();
 			}
 			else {
 				float dist = Mathf.Infinity;
 				foreach (PathNode node in nodes) {
-					if ((node.position - goalPos).magnitude < dist) {	// if dist from this node to goal < dstance from previous node in list to goal
+					if ((node.position - goalPos).magnitude < dist) {
+						// if dist from this node to goal < dstance from previous node in list to goal
 						dist = (node.position - goalPos).magnitude;
 						endNode = node;
 					}
@@ -646,40 +654,41 @@ public class AStarSearch : MonoBehaviour {
 		else {
 			float dist = Mathf.Infinity;
 			foreach (PathNode node in nodes) {
-				if ((node.position - goalPos).magnitude < dist) {	// if dist from this node to goal < dstance from previous node in list to goal
+				if ((node.position - goalPos).magnitude < dist) {
+					// if dist from this node to goal < dstance from previous node in list to goal
 					dist = (node.position - goalPos).magnitude;
 					endNode = node;
 				}
 			}
 		}
 
-		Debug.Log ("========= endNode ========== " + endNode);
+		Debug.Log("========= endNode ========== " + endNode);
 
 		//PathNode endNode = new PathNode(goalPos);
 		//nodes.Add (endNode);
 
-		watch = System.Diagnostics.Stopwatch.StartNew ();
+		watch = System.Diagnostics.Stopwatch.StartNew();
 
-		PlotArcs (Helper.GetObjectWorldSize (obj));
+		PlotArcs(Helper.GetObjectWorldSize(obj));
 
-		watch.Stop ();
+		watch.Stop();
 
-		Debug.Log ("========= Time to plot arcs " + watch.ElapsedMilliseconds);
+		Debug.Log("========= Time to plot arcs " + watch.ElapsedMilliseconds);
 		//return;
 
 		//path.Add(startPos);
 
-		PathNode nextNode = new PathNode(embeddingSpaceBounds.max+Vector3.one);
+		PathNode nextNode = new PathNode(embeddingSpaceBounds.max + Vector3.one);
 
-		plannedPath.Add (new PathNode(startPos));
+		plannedPath.Add(new PathNode(startPos));
 
 		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
 		// using best node found until endNode reached
 		while (openSet.Count > 0) {
-			Debug.Log (" ======== openSet.Count ====== " + openSet.Count);
+			Debug.Log(" ======== openSet.Count ====== " + openSet.Count);
 
 			// O(1)
-			PathNode curNode = openSet.TakeMin ();
+			PathNode curNode = openSet.TakeMin();
 
 			// O(n)
 			//			PathNode curNode = null;
@@ -699,22 +708,22 @@ public class AStarSearch : MonoBehaviour {
 			// if reached end node
 			if ((curNode.position - endNode.position).magnitude < Constants.EPSILON) {
 				// extend path to goal node (goal position)
-				PathNode goalNode = new PathNode (goalPos);
+				PathNode goalNode = new PathNode(goalPos);
 				goalNode.cameFrom = curNode;
-				path = ReconstructPath (startNode, goalNode);
-				Debug.Log ("====== path ===== ");
+				path = ReconstructPath(startNode, goalNode);
+				Debug.Log("====== path ===== ");
 				foreach (var point in path) {
-					Debug.Log (point);
+					Debug.Log(point);
 				}
+
 				break;
 			}
-				
-			closedSet.Add (curNode);
+
+			closedSet.Add(curNode);
 
 
-
-			var arcList = arcs.Where(n => ((n.Item1.position - curNode.position).magnitude < Constants.EPSILON) || 
-				(n.Item2.position-curNode.position).magnitude < Constants.EPSILON).ToList();
+			var arcList = arcs.Where(n => ((n.Item1.position - curNode.position).magnitude < Constants.EPSILON) ||
+			                              (n.Item2.position - curNode.position).magnitude < Constants.EPSILON).ToList();
 			foreach (var arc in arcList) {
 				float testScore;
 				if ((arc.Item1.position - curNode.position).magnitude < Constants.EPSILON) {
@@ -731,10 +740,12 @@ public class AStarSearch : MonoBehaviour {
 
 							// Euclidian distance
 							arc.Item2.heuristicScore = arc.Item2.scoreFromStart +
-							new Vector3 (goalPos.x - arc.Item2.position.x, goalPos.y - arc.Item2.position.y, goalPos.z - arc.Item2.position.z).magnitude;
+							                           new Vector3(goalPos.x - arc.Item2.position.x,
+								                           goalPos.y - arc.Item2.position.y,
+								                           goalPos.z - arc.Item2.position.z).magnitude;
 
-							if (!openSet.Contains (arc.Item2)) {
-								openSet.Add (arc.Item2);
+							if (!openSet.Contains(arc.Item2)) {
+								openSet.Add(arc.Item2);
 							}
 						}
 					}
@@ -754,26 +765,28 @@ public class AStarSearch : MonoBehaviour {
 
 							// Euclidian distance
 							arc.Item1.heuristicScore = arc.Item1.scoreFromStart +
-								new Vector3 (goalPos.x - arc.Item1.position.x, goalPos.y - arc.Item1.position.y, goalPos.z - arc.Item1.position.z).magnitude;
+							                           new Vector3(goalPos.x - arc.Item1.position.x,
+								                           goalPos.y - arc.Item1.position.y,
+								                           goalPos.z - arc.Item1.position.z).magnitude;
 
-							if (!openSet.Contains (arc.Item1)) {
-								openSet.Add (arc.Item1);
+							if (!openSet.Contains(arc.Item1)) {
+								openSet.Add(arc.Item1);
 							}
 						}
 					}
 				}
 			}
-		} 
+		}
 	}
 
 	List<Vector3> ReconstructPath(PathNode firstNode, PathNode lastNode) {
-		path = new List<Vector3> ();
+		path = new List<Vector3>();
 		PathNode node = lastNode;
 
 		//path.Add (lastNode.position);
 
 		while (node != firstNode) {
-			path.Insert (0, node.position);
+			path.Insert(0, node.position);
 			node = node.cameFrom;
 		}
 

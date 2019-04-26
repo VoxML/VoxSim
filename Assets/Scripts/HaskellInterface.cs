@@ -12,7 +12,7 @@ public class HaskellInterface : MonoBehaviour {
 	[DllImport("HaskellInterface", CallingConvention = CallingConvention.Cdecl)]
 	private static extern string hs_test(string str);
 
-	void Start()  {
+	void Start() {
 		Debug.Log("Initializing runtime...");
 		hs_init(IntPtr.Zero, IntPtr.Zero);
 
@@ -21,8 +21,8 @@ public class HaskellInterface : MonoBehaviour {
 			string result = hs_test("C#");
 			Debug.Log(string.Format("Got result: {0}", result));
 		}
-		catch(Exception e) {
-			Debug.Log (e.Message);
+		catch (Exception e) {
+			Debug.Log(e.Message);
 		}
 		finally {
 		}
@@ -31,12 +31,12 @@ public class HaskellInterface : MonoBehaviour {
 	void Update() {
 	}
 
-	void OnDestroy () {
+	void OnDestroy() {
 //		Debug.Log("Exiting runtime...");
 //		hs_exit();
 	}
 
-	void OnApplicationQuit () {
+	void OnApplicationQuit() {
 		//OnDestroy();
 	}
 }

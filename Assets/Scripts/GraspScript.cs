@@ -4,22 +4,22 @@ using System.Collections;
 public class GraspScript : MonoBehaviour {
 	private Animator anim;
 	public int grasper;
-	public Transform leftGrasperCoord,rightGrasperCoord;
-	public Transform leftFingerCoord,rightFingerCoord;
+	public Transform leftGrasperCoord, rightGrasperCoord;
+	public Transform leftFingerCoord, rightFingerCoord;
 	public bool isGrasping = false;
-	public Vector3 graspTrackerOffset;// = new Vector3(0.0f,0.0f,0.0f);
+	public Vector3 graspTrackerOffset; // = new Vector3(0.0f,0.0f,0.0f);
 	public Vector3 fingertipOffset;
-	public Vector3 leftDefaultPosition,rightDefaultPosition;
-	public Vector3 leftPerformPosition,rightPerformPosition;
+	public Vector3 leftDefaultPosition, rightDefaultPosition;
+	public Vector3 leftPerformPosition, rightPerformPosition;
 
 
 	// Use this for initialization
-	void Start () {
-		anim = GetComponentInChildren<Animator> ();
+	void Start() {
+		anim = GetComponentInChildren<Animator>();
 	}
-	
+
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 		/*if (Input.GetKeyDown (KeyCode.Alpha1)) {
 			grasper = 1;
 			Debug.Log (grasper);
@@ -45,8 +45,8 @@ public class GraspScript : MonoBehaviour {
 		//anim.SetInteger ("anim", grasper);
 	}
 
-	void UpdateGraspStatus(int complete) { 
- 		//if (isGrasping != System.Convert.ToBoolean(complete)) {
+	void UpdateGraspStatus(int complete) {
+		//if (isGrasping != System.Convert.ToBoolean(complete)) {
 		//	Debug.Log (string.Format("Setting to {0}", complete));
 		//	Debug.Break ();
 		//}

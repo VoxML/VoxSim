@@ -1,8 +1,6 @@
-namespace Agent
-{
-    public enum Gender
-    {
-        Female, 
-        Male
-    }
+namespace Agent {
+	public enum Gender {
+		Female,
+		Male
+	}
 }

@@ -5,26 +5,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using System.IO;
-
 using Global;
 
 public class LoggerArgs : EventArgs {
+	public string LogString { get; set; }
 
-	public string LogString {get; set; }
-
-	public LoggerArgs(string str)
-	{
+	public LoggerArgs(string str) {
 		this.LogString = str;
 	}
 }
 
 public class GenericLogger : MonoBehaviour {
-
 //	[HideInInspector]
 //	public bool moveLogged;
 
-	[HideInInspector]
-	public float logTimer;
+	[HideInInspector] public float logTimer;
 
 //	protected EventManager eventManager;
 //
@@ -37,18 +32,16 @@ public class GenericLogger : MonoBehaviour {
 
 	public event EventHandler LogEvent;
 
-	public void OnLogEvent(object sender, EventArgs e)
-	{
-		if (LogEvent != null)
-		{
+	public void OnLogEvent(object sender, EventArgs e) {
+		if (LogEvent != null) {
 			LogEvent(this, e);
 		}
 	}
 
 	// Use this for initialization
-	public void Start () {
-        logTimestamps = (PlayerPrefs.GetInt("Timestamps") == 1);
-        //
+	public void Start() {
+		logTimestamps = (PlayerPrefs.GetInt("Timestamps") == 1);
+		//
 //		// log default state
 //		GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
 //		foreach (GameObject o in allObjects) {
@@ -64,7 +57,7 @@ public class GenericLogger : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	public void Update () {
+	public void Update() {
 		logTimer += Time.deltaTime;
 	}
 
@@ -77,17 +70,17 @@ public class GenericLogger : MonoBehaviour {
 			name = "Temp";
 		}
 
-		if (!Directory.Exists ("Logs")) {
-			Directory.CreateDirectory ("Logs");
+		if (!Directory.Exists("Logs")) {
+			Directory.CreateDirectory("Logs");
 		}
 
 
-		if (!Directory.Exists (string.Format("Logs/{0}",name))) {
-			Directory.CreateDirectory (string.Format("Logs/{0}",name));
+		if (!Directory.Exists(string.Format("Logs/{0}", name))) {
+			Directory.CreateDirectory(string.Format("Logs/{0}", name));
 		}
 
-		string dateTime = DateTime.Now.ToString ("yyyy-MM-dd-HHmmss");
-		logFile = new StreamWriter (string.Format ("Logs/{0}/{1}-{2}.txt", name, name, dateTime));
+		string dateTime = DateTime.Now.ToString("yyyy-MM-dd-HHmmss");
+		logFile = new StreamWriter(string.Format("Logs/{0}/{1}-{2}.txt", name, name, dateTime));
 
 //		logFile.WriteLine (string.Format ("Structure: {0}", name));
 //		string modalityString = string.Empty;
@@ -108,12 +101,12 @@ public class GenericLogger : MonoBehaviour {
 	}
 
 	protected string FormatLogUtterance(string utterance) {
-		return string.Format ("\"{0}\"", utterance);
+		return string.Format("\"{0}\"", utterance);
 	}
 
-	protected void Log (string content) {
+	protected void Log(string content) {
 		if (PlayerPrefs.GetInt("Make Logs") == 1) {
-            logFile.WriteLine(string.Format("{0}\t{1}",content,logTimestamps ? logTimer.ToString() : string.Empty));
+			logFile.WriteLine(string.Format("{0}\t{1}", content, logTimestamps ? logTimer.ToString() : string.Empty));
 		}
 	}
 
@@ -122,14 +115,13 @@ public class GenericLogger : MonoBehaviour {
 			return;
 
 		try {
-			logFile.Close ();
+			logFile.Close();
 		}
 		catch (Exception e) {
 		}
 	}
 
 	void LogEventReceived(object sender, EventArgs e) {
-		Log (((LoggerArgs)e).LogString);
+		Log(((LoggerArgs) e).LogString);
 	}
 }
-
