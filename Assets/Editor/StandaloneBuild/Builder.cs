@@ -143,13 +143,16 @@ namespace StandaloneBuild {
     	}
 
         public static void BuildWindows() {
+            // buildName is element 5 in the build script build command, the build config path is element 6
             string buildName = System.Environment.GetCommandLineArgs()[5];
             string buildConfig = System.Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for Windows with configuration {1}", buildName, buildConfig));
 
+            // process the build config and refresh the assets database afterwards to get ScenesList into Resources
             ProcessBuildConfig(buildConfig);
             AssetDatabase.Refresh();
 
+            // the list of scenes to populate
             List<string> scenes = new List<string>();
 
             try {
@@ -209,13 +212,16 @@ namespace StandaloneBuild {
         }
            
         public static void BuildIOS() {
+            // buildName is element 5 in the build script build command, the build config path is element 6
             string buildName = System.Environment.GetCommandLineArgs()[5];
             string buildConfig = System.Environment.GetCommandLineArgs()[6];
             Debug.Log (string.Format("Building target {0} for iOS with configuration {1}", buildName, buildConfig));
 
+            // process the build config and refresh the assets database afterwards to get ScenesList into Resources
             ProcessBuildConfig(buildConfig);
             AssetDatabase.Refresh();
 
+            // the list of scenes to populate
             List<string> scenes = new List<string>();
 
             try {
@@ -274,29 +280,5 @@ namespace StandaloneBuild {
                 Debug.Log(string.Format("BuildIOS: File {0} not found!", e.FileName));
             }
         }
-
-    	//public static void BuildIOS() {
-    	//	string buildName = System.Environment.GetCommandLineArgs()[5];
-     //       Debug.Log(string.Format("Building target {0} for iOS", buildName));
-
-     //       List<string> scenes = new List<string>(){"Assets/Scenes/VoxSimMenu.unity"};
-
-    	//	using (System.IO.StreamWriter file =
-    	//		new System.IO.StreamWriter (@"Assets/Resources/ScenesList.txt")) {
-    	//		string scenesDirPath = Application.dataPath + "/Scenes/";
-    	//		string[] fileEntries = Directory.GetFiles (Application.dataPath + "/Scenes/", "*.unity");
-    	//		foreach (string s in fileEntries) {
-    	//			string sceneName = s.Remove (0, Application.dataPath.Length - "Assets".Length);
-    	//			if (!scenes.Contains (sceneName)) {
-    	//				scenes.Add (sceneName);
-    	//				file.WriteLine (sceneName.Split ('/') [2].Replace (".unity", ""));
-    	//			}
-    	//		}
-    	//	}
-
-    	//	BuildPipeline.BuildPlayer (scenes.ToArray (), "Build/ios/" + buildName, BuildTarget.iOS, (BuildOptions.BuildScriptsOnly |
-    	//		BuildOptions.AcceptExternalModificationsToPlayer));
-    	//	//DirectoryCopy (Path.GetFullPath (Data.voxmlDataPath + "/../"), @"Build/ios/" + buildName + "/VoxML", true);
-    	//}
     }
 }
