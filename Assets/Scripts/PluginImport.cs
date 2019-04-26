@@ -1,14 +1,11 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Timers;
 using Network;
 using NLU;
+using UnityEngine;
 
 public class SocketEventArgs : EventArgs {
 	public Type SocketType { get; set; }
@@ -488,7 +485,7 @@ public class PluginImport : MonoBehaviour {
 			try {
 				socket.Connect(address, port);
 				Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port,
-					socket.IsConnected(), socketType.ToString()));
+					socket.IsConnected(), socketType));
 				socket.OnConnectionMade(this, new SocketEventArgs(socketType));
 			}
 			catch (Exception e) {
@@ -508,7 +505,7 @@ public class PluginImport : MonoBehaviour {
 			try {
 				socket.Connect(address, port);
 				Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port,
-					socket.IsConnected(), socketType.ToString()));
+					socket.IsConnected(), socketType));
 				socket.OnConnectionMade(this, new SocketEventArgs(socketType));
 			}
 			catch (Exception e) {

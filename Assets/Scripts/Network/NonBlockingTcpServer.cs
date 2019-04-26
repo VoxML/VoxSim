@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 namespace Network {
 	public abstract class NonBlockingTcpServer {

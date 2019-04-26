@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using Global;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class ScriptSelector : ResetUIButton {
 	List<string> availableScripts = new List<string>();

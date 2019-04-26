@@ -1,11 +1,8 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Global;
-using Vox;
+using UnityEngine;
 
 public class ModuleEditProgram : ModalWindow {
 	public int fontSize = 12;

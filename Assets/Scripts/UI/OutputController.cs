@@ -1,15 +1,7 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System;
 using Agent;
-using Global;
-using Satisfaction;
 using UI;
+using UnityEngine;
 
 public class OutputController : FontManager {
 	public Role role;
@@ -49,10 +41,10 @@ public class OutputController : FontManager {
 	void Start() {
 		fontSizeModifier = (float) ((float) fontSize / (float) defaultFontSize);
 
-		outputWidth = (System.Convert.ToInt32(Screen.width - outputMargin) > outputMaxWidth)
+		outputWidth = (Convert.ToInt32(Screen.width - outputMargin) > outputMaxWidth)
 			? outputMaxWidth
-			: System.Convert.ToInt32(Screen.width - outputMargin);
-		outputHeight = System.Convert.ToInt32(20.0f * (float) fontSizeModifier);
+			: Convert.ToInt32(Screen.width - outputMargin);
+		outputHeight = Convert.ToInt32(20.0f * (float) fontSizeModifier);
 
 		if (alignment == Alignment.Left) {
 			if (placement == Placement.Top) {

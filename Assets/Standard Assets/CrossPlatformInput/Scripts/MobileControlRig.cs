@@ -1,15 +1,16 @@
-using System;
+using UnityEditor.Build;
+using UnityEngine;
+using UnityEngine.EventSystems;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
 
 
 namespace UnityStandardAssets.CrossPlatformInput {
 	[ExecuteInEditMode]
 	public class MobileControlRig : MonoBehaviour
 #if UNITY_EDITOR
-		, UnityEditor.Build.IActiveBuildTargetChanged
+		, IActiveBuildTargetChanged
 #endif
 	{
 		// this script enables or disables the child objects of a control rig
@@ -36,15 +37,15 @@ namespace UnityStandardAssets.CrossPlatformInput {
 				) //if in the editor, need to check if we are playing, as start is also called just after exiting play
 #endif
 			{
-				UnityEngine.EventSystems.EventSystem system =
-					GameObject.FindObjectOfType<UnityEngine.EventSystems.EventSystem>();
+				EventSystem system =
+					FindObjectOfType<EventSystem>();
 
 				if (system == null) {
 					//the scene have no event system, spawn one
 					GameObject o = new GameObject("EventSystem");
 
-					o.AddComponent<UnityEngine.EventSystems.EventSystem>();
-					o.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+					o.AddComponent<EventSystem>();
+					o.AddComponent<StandaloneInputModule>();
 				}
 			}
 		}

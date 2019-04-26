@@ -1,9 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Global;
 using RCC;
+using UnityEngine;
 
 public static class Concavity {
 	public static bool IsEnabled(GameObject obj) {

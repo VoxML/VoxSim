@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -77,11 +78,11 @@ namespace Network {
 			_t = new Thread(Loop);
 			_t.Start();
 			Debug.Log("I am connected to " +
-			          ((System.Net.IPEndPoint) _client.Client.RemoteEndPoint).Address.ToString() +
-			          " on port " + ((System.Net.IPEndPoint) _client.Client.RemoteEndPoint).Port.ToString());
+			          ((IPEndPoint) _client.Client.RemoteEndPoint).Address +
+			          " on port " + ((IPEndPoint) _client.Client.RemoteEndPoint).Port);
 			Debug.Log("I am connected from " +
-			          ((System.Net.IPEndPoint) _client.Client.LocalEndPoint).Address.ToString() +
-			          " on port " + ((System.Net.IPEndPoint) _client.Client.LocalEndPoint).Port.ToString());
+			          ((IPEndPoint) _client.Client.LocalEndPoint).Address +
+			          " on port " + ((IPEndPoint) _client.Client.LocalEndPoint).Port);
 		}
 
 		protected virtual void Loop() {

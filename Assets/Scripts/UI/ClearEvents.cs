@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Global;
 
 public class ClearEvents : FontManager {
 	public int fontSize = 12;

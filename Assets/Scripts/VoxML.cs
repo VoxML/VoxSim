@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Serialization;
 using System.IO;
+using System.Xml.Serialization;
+using UnityEngine;
 
 namespace Vox {
 	/// <summary>

@@ -1,10 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-
-using Global;
+﻿using Global;
 using RootMotion.FinalIK;
+using UnityEditor;
+using UnityEngine;
 
 namespace EditorMenus {
 
@@ -136,9 +133,9 @@ namespace EditorMenus {
             // Return false if no transform is selected, or if the selected transform does not contain
             //  an InteractionTarget component or does not begin with "[lr]Hand"
             return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
-                (((GameObject)Selection.activeGameObject).GetComponent<InteractionTarget>() != null) &&
-                ((((GameObject)Selection.activeGameObject).name.StartsWith("lHand")) ||
-                    (((GameObject)Selection.activeGameObject).name.StartsWith("rHand")));
+                (Selection.activeGameObject.GetComponent<InteractionTarget>() != null) &&
+                ((Selection.activeGameObject.name.StartsWith("lHand")) ||
+                    (Selection.activeGameObject.name.StartsWith("rHand")));
         }
 
         /// <summary>
@@ -231,9 +228,9 @@ namespace EditorMenus {
             // Return false if no transform is selected, or if the selected transform does not contain
             //  an InteractionTarget component or does not begin with "[lr]Hand"
             return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
-                (((GameObject)Selection.activeGameObject).GetComponent<InteractionTarget>() != null) &&
-                ((((GameObject)Selection.activeGameObject).name.StartsWith("lHand")) || 
-                    (((GameObject)Selection.activeGameObject).name.StartsWith("rHand")));
+                (Selection.activeGameObject.GetComponent<InteractionTarget>() != null) &&
+                ((Selection.activeGameObject.name.StartsWith("lHand")) || 
+                    (Selection.activeGameObject.name.StartsWith("rHand")));
         }
     }
 }

@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Global;
+using UnityEngine;
 
 public class Macros : MonoBehaviour {
 	public Dictionary<String, String> commandMacros = new Dictionary<String, String>();

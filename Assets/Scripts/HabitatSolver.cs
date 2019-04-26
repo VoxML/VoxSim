@@ -1,12 +1,6 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using Global;
-using RCC;
-using Satisfaction;
+using UnityEngine;
 
 public class HabitatSolver : MonoBehaviour {
 	// Use this for initialization

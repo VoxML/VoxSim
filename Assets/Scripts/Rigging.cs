@@ -1,9 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Global;
-using RCC;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Rigging : MonoBehaviour {
 	//[HideInInspector]

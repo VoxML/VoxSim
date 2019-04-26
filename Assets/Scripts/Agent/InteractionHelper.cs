@@ -1,7 +1,6 @@
-﻿using System;
-using UnityEngine;
-using Global;
+﻿using Global;
 using RootMotion.FinalIK;
+using UnityEngine;
 
 namespace Agent {
 	public static class InteractionHelper {

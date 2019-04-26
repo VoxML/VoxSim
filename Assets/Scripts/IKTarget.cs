@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using Agent;
 using Global;
+using UnityEngine;
 
 public class IKTarget : MonoBehaviour {
 	// it's funny, it's like a voxeme but not

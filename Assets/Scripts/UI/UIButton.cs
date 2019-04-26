@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections;
 
 public enum UIButtonPosition {
 	TopLeft,
@@ -46,7 +44,7 @@ public class UIButton : FontManager {
 			buttonManager.RegisterButton(this);
 		}
 		else {
-			Debug.Log("UIButton of id " + id.ToString() + " already exists on this object!");
+			Debug.Log("UIButton of id " + id + " already exists on this object!");
 			Destroy(this);
 		}
 

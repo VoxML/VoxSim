@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using Global;
-using Network;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using VideoCapture;
 
 public class Launcher : FontManager {
@@ -155,7 +154,7 @@ public class Launcher : FontManager {
 		string[] fileEntries = Directory.GetFiles(Application.dataPath + "/Scenes/", "*.unity");
 		foreach (string s in fileEntries) {
 			string sceneName = s.Remove(0, scenesDirPath.Length).Replace(".unity", "");
-			if (!sceneName.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name)) {
+			if (!sceneName.Equals(SceneManager.GetActiveScene().name)) {
 				Debug.Log(string.Format("Launcher.Start: Adding scene {0} to available scenes", sceneName));
 				availableScenes.Add(sceneName);
 			}
@@ -582,7 +581,7 @@ public class Launcher : FontManager {
 
 	void EULAAccepted(bool accepted) {
 		eulaAccepted = accepted;
-		PlayerPrefs.SetInt("EULA Accepted", System.Convert.ToInt32(eulaAccepted));
+		PlayerPrefs.SetInt("EULA Accepted", Convert.ToInt32(eulaAccepted));
 	}
 
 	void LoadPrefs() {
@@ -629,11 +628,11 @@ public class Launcher : FontManager {
 		}
 
 		PlayerPrefs.SetString("Listener Port", inPort);
-		PlayerPrefs.SetInt("Make Logs", System.Convert.ToInt32(makeLogs));
+		PlayerPrefs.SetInt("Make Logs", Convert.ToInt32(makeLogs));
 		PlayerPrefs.SetString("Logs Prefix", logsPrefix);
-		PlayerPrefs.SetInt("Actions Only Logs", System.Convert.ToInt32(actionsOnly));
-		PlayerPrefs.SetInt("Full State Info", System.Convert.ToInt32(fullState));
-		PlayerPrefs.SetInt("Timestamps", System.Convert.ToInt32(logTimestamps));
+		PlayerPrefs.SetInt("Actions Only Logs", Convert.ToInt32(actionsOnly));
+		PlayerPrefs.SetInt("Full State Info", Convert.ToInt32(fullState));
+		PlayerPrefs.SetInt("Timestamps", Convert.ToInt32(logTimestamps));
 
 		string urlsString = string.Empty;
 		for (int i = 0; i < numUrls; i++) {
@@ -642,18 +641,18 @@ public class Launcher : FontManager {
 
 		PlayerPrefs.SetString("URLs", urlsString);
 
-		PlayerPrefs.SetInt("Capture Video", System.Convert.ToInt32(captureVideo));
-		PlayerPrefs.SetInt("Capture Params", System.Convert.ToInt32(captureParams));
-		PlayerPrefs.SetInt("Video Capture Mode", System.Convert.ToInt32(videoCaptureMode));
-		PlayerPrefs.SetInt("Reset Between Events", System.Convert.ToInt32(resetScene));
-		PlayerPrefs.SetInt("Event Reset Counter", System.Convert.ToInt32(eventResetCounter));
-		PlayerPrefs.SetInt("Video Capture Filename Type", System.Convert.ToInt32(videoCaptureFilenameType));
-		PlayerPrefs.SetInt("Sort By Event String", System.Convert.ToInt32(sortByEventString));
+		PlayerPrefs.SetInt("Capture Video", Convert.ToInt32(captureVideo));
+		PlayerPrefs.SetInt("Capture Params", Convert.ToInt32(captureParams));
+		PlayerPrefs.SetInt("Video Capture Mode", Convert.ToInt32(videoCaptureMode));
+		PlayerPrefs.SetInt("Reset Between Events", Convert.ToInt32(resetScene));
+		PlayerPrefs.SetInt("Event Reset Counter", Convert.ToInt32(eventResetCounter));
+		PlayerPrefs.SetInt("Video Capture Filename Type", Convert.ToInt32(videoCaptureFilenameType));
+		PlayerPrefs.SetInt("Sort By Event String", Convert.ToInt32(sortByEventString));
 		PlayerPrefs.SetString("Custom Video Filename Prefix", customVideoFilenamePrefix);
 		PlayerPrefs.SetString("Auto Events List", autoEventsList);
-		PlayerPrefs.SetInt("Start Index", System.Convert.ToInt32(startIndex));
+		PlayerPrefs.SetInt("Start Index", Convert.ToInt32(startIndex));
 		PlayerPrefs.SetString("Video Capture DB", captureDB);
 		PlayerPrefs.SetString("Video Output Directory", videoOutputDir);
-		PlayerPrefs.SetInt("Make Voxemes Editable", System.Convert.ToInt32(editableVoxemes));
+		PlayerPrefs.SetInt("Make Voxemes Editable", Convert.ToInt32(editableVoxemes));
 	}
 }

@@ -1,7 +1,7 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Network;
+using UnityEngine;
 
 public class GestureDemoInputModalWindow : ModalWindow {
 	FusionSocket fusionClient;

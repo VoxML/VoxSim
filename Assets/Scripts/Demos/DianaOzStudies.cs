@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
-using UnityEngine;
-using Episteme;
 using Global;
 using Network;
+using UnityEngine;
 
 public class DianaOzStudies : MonoBehaviour {
 	void EventManager_EventComplete(object sender, EventArgs e) {

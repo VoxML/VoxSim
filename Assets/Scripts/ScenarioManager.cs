@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class ScenarioManager : MonoBehaviour {
 	public GameObject scenarioScript; // object with a scenario script on it

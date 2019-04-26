@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class HelpModalWindow : ModalWindow {
 	[TextArea(3, 10)] public string helpText = "Available behaviors:\n" +

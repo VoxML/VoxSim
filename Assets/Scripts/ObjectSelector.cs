@@ -1,10 +1,9 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Global;
+using UnityEngine;
 
 public class ObjectSelector : MonoBehaviour {
 	public List<Voxeme> allVoxemes = new List<Voxeme>();

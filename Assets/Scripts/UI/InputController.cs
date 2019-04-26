@@ -1,11 +1,11 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Agent;
 using Global;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InputEventArgs : EventArgs {
 	public string InputString { get; set; }
@@ -101,10 +101,10 @@ public class InputController : FontManager {
 
 		fontSizeModifier = (int) (fontSize / defaultFontSize);
 
-		inputWidth = (System.Convert.ToInt32(Screen.width - inputMargin) > inputMaxWidth)
+		inputWidth = (Convert.ToInt32(Screen.width - inputMargin) > inputMaxWidth)
 			? inputMaxWidth
-			: System.Convert.ToInt32(Screen.width - inputMargin);
-		inputHeight = System.Convert.ToInt32(20.0f * (float) fontSizeModifier);
+			: Convert.ToInt32(Screen.width - inputMargin);
+		inputHeight = Convert.ToInt32(20.0f * (float) fontSizeModifier);
 
 		if (alignment == Alignment.Left) {
 			if (placement == Placement.Top) {
@@ -260,7 +260,7 @@ public class InputController : FontManager {
 			OnInputReceived(this, inputArgs);
 
 			if (inputString == "reset") {
-				StartCoroutine(SceneHelper.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name));
+				StartCoroutine(SceneHelper.LoadScene(SceneManager.GetActiveScene().name));
 				return;
 			}
 

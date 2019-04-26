@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Boundary : MonoBehaviour {
 	public bool isBoundary = true;

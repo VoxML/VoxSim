@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Timers;
 using Global;
 using Satisfaction;
+using UnityEngine;
 
 public class PhysicsPrimitives : MonoBehaviour {
 	bool resolveDiscrepancies;
@@ -56,7 +56,7 @@ public class PhysicsPrimitives : MonoBehaviour {
 			if ((predString == "ungrasp") || (predString == "lift") ||
 			    (predString == "turn") || (predString == "roll") ||
 			    (predString == "slide") || (predString == "put")) {
-				Satisfaction.SatisfactionTest.ReasonFromAffordances(predString,
+				SatisfactionTest.ReasonFromAffordances(predString,
 					GameObject.Find(argsStrings[0] as String)
 						.GetComponent<Voxeme>()); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
 			}

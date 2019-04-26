@@ -3,20 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using Episteme;
 using Global;
+using UnityEngine;
+using Object = System.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
 
 namespace Agent {
-	public class StackSymbolContent : IEquatable<System.Object> {
+	public class StackSymbolContent : IEquatable<Object> {
 		public object IndicatedObj { get; set; }
 
 		public object GraspedObj { get; set; }
@@ -102,7 +101,7 @@ namespace Agent {
 		}
 	}
 
-	public class StackSymbolConditions : IEquatable<System.Object> {
+	public class StackSymbolConditions : IEquatable<Object> {
 		public Expression<Predicate<GameObject>> IndicatedObjCondition { get; set; }
 
 		public Expression<Predicate<GameObject>> GraspedObjCondition { get; set; }
@@ -188,8 +187,8 @@ namespace Agent {
 				}
 				else {
 					// loath to do this but it should work for now
-					equal &= System.Convert.ToString(IndicatedObjCondition) ==
-					         System.Convert.ToString(tuple.IndicatedObjCondition);
+					equal &= Convert.ToString(IndicatedObjCondition) ==
+					         Convert.ToString(tuple.IndicatedObjCondition);
 					//equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedObjCondition, tuple.IndicatedObjCondition)).Compile()();
 				}
 
@@ -203,8 +202,8 @@ namespace Agent {
 					equal &= false;
 				}
 				else {
-					equal &= System.Convert.ToString(GraspedObjCondition) ==
-					         System.Convert.ToString(tuple.GraspedObjCondition);
+					equal &= Convert.ToString(GraspedObjCondition) ==
+					         Convert.ToString(tuple.GraspedObjCondition);
 					//equal &= Expression.Lambda<Func<bool>>(Expression.Equal(GraspedObjCondition, tuple.GraspedObjCondition)).Compile()();
 				}
 
@@ -218,8 +217,8 @@ namespace Agent {
 					equal &= false;
 				}
 				else {
-					equal &= System.Convert.ToString(IndicatedRegionCondition) ==
-					         System.Convert.ToString(tuple.IndicatedRegionCondition);
+					equal &= Convert.ToString(IndicatedRegionCondition) ==
+					         Convert.ToString(tuple.IndicatedRegionCondition);
 					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(IndicatedRegionCondition, tuple.IndicatedRegionCondition)).Compile()();
 				}
 
@@ -233,8 +232,8 @@ namespace Agent {
 					equal &= false;
 				}
 				else {
-					equal &= System.Convert.ToString(ObjectOptionsCondition) ==
-					         System.Convert.ToString(tuple.ObjectOptionsCondition);
+					equal &= Convert.ToString(ObjectOptionsCondition) ==
+					         Convert.ToString(tuple.ObjectOptionsCondition);
 					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ObjectOptionsCondition, tuple.ObjectOptionsCondition)).Compile()();
 				}
 
@@ -248,8 +247,8 @@ namespace Agent {
 					equal &= false;
 				}
 				else {
-					equal &= System.Convert.ToString(ActionOptionsCondition) ==
-					         System.Convert.ToString(tuple.ActionOptionsCondition);
+					equal &= Convert.ToString(ActionOptionsCondition) ==
+					         Convert.ToString(tuple.ActionOptionsCondition);
 					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionOptionsCondition, tuple.ActionOptionsCondition)).Compile()();
 				}
 
@@ -263,8 +262,8 @@ namespace Agent {
 					equal &= false;
 				}
 				else {
-					equal &= System.Convert.ToString(ActionSuggestionsCondition) ==
-					         System.Convert.ToString(tuple.ActionSuggestionsCondition);
+					equal &= Convert.ToString(ActionSuggestionsCondition) ==
+					         Convert.ToString(tuple.ActionSuggestionsCondition);
 					//					equal &= Expression.Lambda<Func<bool>>(Expression.Equal(ActionSuggestionsCondition, tuple.ActionSuggestionsCondition)).Compile()();
 				}
 
@@ -423,21 +422,21 @@ namespace Agent {
 
 				GUILayout.BeginHorizontal();
 				GUILayout.Label("Repeat Wait Time", bold, GUILayout.Width(150));
-				((DianaInteractionLogic) target).repeatTimerTime = System.Convert.ToDouble(
+				((DianaInteractionLogic) target).repeatTimerTime = Convert.ToDouble(
 					GUILayout.TextField(((DianaInteractionLogic) target).repeatTimerTime.ToString(),
 						GUILayout.Width(50)));
 				GUILayout.EndHorizontal();
 
 				GUILayout.BeginHorizontal();
 				GUILayout.Label("Servo Wait Time", bold, GUILayout.Width(150));
-				((DianaInteractionLogic) target).servoWaitTimerTime = System.Convert.ToDouble(
+				((DianaInteractionLogic) target).servoWaitTimerTime = Convert.ToDouble(
 					GUILayout.TextField(((DianaInteractionLogic) target).servoWaitTimerTime.ToString(),
 						GUILayout.Width(50)));
 				GUILayout.EndHorizontal();
 
 				GUILayout.BeginHorizontal();
 				GUILayout.Label("Servo Loop Time", bold, GUILayout.Width(150));
-				((DianaInteractionLogic) target).servoLoopTimerTime = System.Convert.ToDouble(
+				((DianaInteractionLogic) target).servoLoopTimerTime = Convert.ToDouble(
 					GUILayout.TextField(((DianaInteractionLogic) target).servoLoopTimerTime.ToString(),
 						GUILayout.Width(50)));
 				GUILayout.EndHorizontal();
@@ -3418,7 +3417,7 @@ namespace Agent {
 								?
 								((FunctionDelegate) content.IndicatedObj).ToString()
 								:
-								System.Convert.ToString(((GameObject) content.IndicatedObj).name),
+								Convert.ToString(((GameObject) content.IndicatedObj).name),
 						content.GraspedObj == null
 							? "Null"
 							:
@@ -3426,7 +3425,7 @@ namespace Agent {
 								?
 								((FunctionDelegate) content.GraspedObj).ToString()
 								:
-								System.Convert.ToString(((GameObject) content.GraspedObj).name),
+								Convert.ToString(((GameObject) content.GraspedObj).name),
 						content.IndicatedRegion == null
 							? "Null"
 							:
@@ -3470,22 +3469,22 @@ namespace Agent {
 					return string.Format("[{0},{1},{2},{3},{4},{5}]",
 						content.IndicatedObjCondition == null
 							? "Null"
-							: System.Convert.ToString(content.IndicatedObjCondition),
+							: Convert.ToString(content.IndicatedObjCondition),
 						content.GraspedObjCondition == null
 							? "Null"
-							: System.Convert.ToString(content.GraspedObjCondition),
+							: Convert.ToString(content.GraspedObjCondition),
 						content.IndicatedRegionCondition == null
 							? "Null"
-							: System.Convert.ToString(content.IndicatedRegionCondition),
+							: Convert.ToString(content.IndicatedRegionCondition),
 						content.ObjectOptionsCondition == null
 							? "Null"
-							: System.Convert.ToString(content.ObjectOptionsCondition),
+							: Convert.ToString(content.ObjectOptionsCondition),
 						content.ActionOptionsCondition == null
 							? "Null"
-							: System.Convert.ToString(content.ActionOptionsCondition),
+							: Convert.ToString(content.ActionOptionsCondition),
 						content.ActionSuggestionsCondition == null
 							? "Null"
-							: System.Convert.ToString(content.ActionSuggestionsCondition));
+							: Convert.ToString(content.ActionSuggestionsCondition));
 				}
 				else if (symbol.Content.GetType() == typeof(PDAState)) {
 					return ((PDAState) symbol.Content).Name;
@@ -3502,7 +3501,7 @@ namespace Agent {
 							?
 							((FunctionDelegate) content.IndicatedObj).ToString()
 							:
-							System.Convert.ToString(((GameObject) content.IndicatedObj).name),
+							Convert.ToString(((GameObject) content.IndicatedObj).name),
 					content.GraspedObj == null
 						? "Null"
 						:
@@ -3510,7 +3509,7 @@ namespace Agent {
 							?
 							((FunctionDelegate) content.GraspedObj).ToString()
 							:
-							System.Convert.ToString(((GameObject) content.GraspedObj).name),
+							Convert.ToString(((GameObject) content.GraspedObj).name),
 					content.IndicatedRegion == null
 						? "Null"
 						:

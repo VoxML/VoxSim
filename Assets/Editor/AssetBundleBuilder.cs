@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using UnityEditor;
-using System.Collections.Generic;
-using System.IO;
+﻿using UnityEditor;
+using UnityEngine;
 
 [CustomEditor(typeof(AssetBundleBuilder))]
 public class AssetBundleBuilder : Editor {

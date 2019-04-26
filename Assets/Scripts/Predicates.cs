@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,10 +7,11 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using Agent;
 using Global;
-using RCC;
-using Satisfaction;
-using Vox;
 using RootMotion.FinalIK;
+using Satisfaction;
+using UnityEngine;
+using Vox;
+using Random = System.Random;
 
 /// <summary>
 /// Semantics of each predicate should be explicated within the method itself
@@ -486,7 +486,7 @@ public class Predicates : MonoBehaviour {
 		};
 		Vector3 outValue = Vector3.zero;
 
-		int selected = new System.Random().Next(manners.Count);
+		int selected = new Random().Next(manners.Count);
 		MethodInfo methodToCall = this.GetType().GetMethod(manners[selected]);
 
 		if ((methodToCall != null) && (rdfTriples.Count > 0)) {
@@ -573,7 +573,7 @@ public class Predicates : MonoBehaviour {
 			};
 			//Debug.Log (bounds.ToString());
 			//Debug.Log (obj.transform.position.ToString());
-			System.Random random = new System.Random();
+			Random random = new Random();
 			outValue = edges[random.Next(edges.Count)];
 		}
 
@@ -1010,7 +1010,7 @@ public class Predicates : MonoBehaviour {
 	// OUT: String
 	public String A(object[] args) {
 		String objName = "";
-		System.Random random = new System.Random();
+		Random random = new Random();
 
 		if (args[0] is GameObject) {
 			// assume all inputs are of same type
@@ -1027,7 +1027,7 @@ public class Predicates : MonoBehaviour {
 	public String TWO(object[] args) {
 		//Debug.Log (args.Length);
 		List<String> objNames = new List<String>();
-		System.Random random = new System.Random();
+		Random random = new Random();
 
 		if (args[0] is GameObject) {
 			// assume all inputs are of same type
@@ -1068,7 +1068,7 @@ public class Predicates : MonoBehaviour {
 			// assume all inputs are of same type
 			List<GameObject> objs = args.Cast<GameObject>().ToList().OrderBy(o => o.transform.position.x).ToList();
 
-			objName = objs[(int) (objs.Count / 2)].name;
+			objName = objs[objs.Count / 2].name;
 		}
 
 		return objName;
@@ -1216,7 +1216,7 @@ public class Predicates : MonoBehaviour {
 						"on"
 					};
 
-					int selected = new System.Random().Next(manners.Count);
+					int selected = new Random().Next(manners.Count);
 					eventManager.InsertEvent(
 						string.Format("put({0},{1}({2}))", (args[0] as GameObject).name, manners[selected],
 							rdfTriples[0].Item3), 1);
@@ -1297,7 +1297,7 @@ public class Predicates : MonoBehaviour {
 
 					float yAdjust = (theme.transform.position.y - themeBounds.center.y);
 					Debug.Log("Y-size = " + (themeBounds.center.y - themeBounds.min.y));
-					Debug.Log("put_on: " + (theme.transform.position.y - themeBounds.min.y).ToString());
+					Debug.Log("put_on: " + (theme.transform.position.y - themeBounds.min.y));
 
 					// compose computed on(a) into put(x,y) formula
 					// if the glove don't fit, you must acquit! (recompute)
@@ -1411,7 +1411,7 @@ public class Predicates : MonoBehaviour {
 
 					float yAdjust = (theme.transform.position.y - themeBounds.center.y);
 					Debug.Log("Y-size = " + (themeBounds.center.y - themeBounds.min.y));
-					Debug.Log("put_in: " + (theme.transform.position.y - themeBounds.min.y).ToString());
+					Debug.Log("put_in: " + (theme.transform.position.y - themeBounds.min.y));
 
 					// compose computed in(a) into put(x,y) formula
 					Vector3 loc = ((Vector3) args[1]); // coord of "in"
@@ -1534,7 +1534,7 @@ public class Predicates : MonoBehaviour {
 
 					float yAdjust = (theme.transform.position.y - themeBounds.center.y);
 					Debug.Log("Y-size = " + (themeBounds.max.y - themeBounds.center.y));
-					Debug.Log("put_under: " + (theme.transform.position.y - themeBounds.min.y).ToString());
+					Debug.Log("put_under: " + (theme.transform.position.y - themeBounds.min.y));
 
 					// compose computed under(a) into put(x,y) formula
 					Vector3 loc = ((Vector3) args[1]); // coord of "under"
@@ -2089,7 +2089,7 @@ public class Predicates : MonoBehaviour {
 						RaycastHit[] hits = Physics.RaycastAll(
 							new Vector3(targetPosition.x, targetPosition.y + Constants.EPSILON,
 								targetPosition.z), -Constants.yAxis);
-						List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+						List<RaycastHit> hitList = new List<RaycastHit>(hits);
 						hits = hitList.OrderBy(h => h.distance).ToArray();
 
 						GameObject supportingSurface = null;
@@ -2231,7 +2231,7 @@ public class Predicates : MonoBehaviour {
 						}
 					}
 
-					Debug.Log("move_to_top: " + (bounds.center.y - bounds.min.y).ToString());
+					Debug.Log("move_to_top: " + (bounds.center.y - bounds.min.y));
 					targetPosition = new Vector3(((Vector3) args[1]).x,
 						((Vector3) args[1]).y + (bounds.center.y - bounds.min.y),
 						((Vector3) args[1]).z);
@@ -2845,7 +2845,7 @@ public class Predicates : MonoBehaviour {
 							RaycastHit[] hits = Physics.RaycastAll(
 								new Vector3(targetPosition.x, targetPosition.y + Constants.EPSILON,
 									targetPosition.z), -Constants.yAxis);
-							List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+							List<RaycastHit> hitList = new List<RaycastHit>(hits);
 							hits = hitList.OrderBy(h => h.distance).ToArray();
 
 							GameObject supportingSurface = null;
@@ -3398,7 +3398,7 @@ public class Predicates : MonoBehaviour {
 							RaycastHit[] hits = Physics.RaycastAll(
 								new Vector3(targetPosition.x, targetPosition.y + Constants.EPSILON,
 									targetPosition.z), -Constants.yAxis);
-							List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+							List<RaycastHit> hitList = new List<RaycastHit>(hits);
 							hits = hitList.OrderBy(h => h.distance).ToArray();
 
 							GameObject supportingSurface = null;
@@ -3888,7 +3888,7 @@ public class Predicates : MonoBehaviour {
 			}
 		}
 
-		System.Random random = new System.Random();
+		Random random = new Random();
 
 		Vector3 targetRotation = Vector3.zero;
 		Vector3 objAxis = Vector3.zero;
@@ -4030,8 +4030,7 @@ public class Predicates : MonoBehaviour {
 					Debug.Log(Mathf.Rad2Deg * Constants.EPSILON);
 					OnPrepareLog(this, new ParamsEventArgs("SymmetryAxis", Constants.Axes.FirstOrDefault(a =>
 							(Helper.AngleCloseEnough(objAxis, a.Value) || Helper.AngleCloseEnough(-objAxis, a.Value)))
-						.Key
-						.ToString()));
+						.Key));
 					KeyValuePair<string, Vector3> rotAxis = Constants.Axes.FirstOrDefault(a =>
 						(Helper.AngleCloseEnough(objRotAxis, a.Value) ||
 						 Helper.AngleCloseEnough(-objRotAxis, a.Value)));
@@ -4039,7 +4038,7 @@ public class Predicates : MonoBehaviour {
 						rotAxis = Constants.Axes.FirstOrDefault(a => a.Value == Constants.xAxis);
 					}
 
-					OnPrepareLog(this, new ParamsEventArgs("RotAxis", rotAxis.Key.ToString()));
+					OnPrepareLog(this, new ParamsEventArgs("RotAxis", rotAxis.Key));
 					OnParamsCalculated(null, null);
 					return;
 				}
@@ -4573,7 +4572,7 @@ public class Predicates : MonoBehaviour {
 						}
 					}
 
-					System.Random rand = new System.Random();
+					Random rand = new Random();
 					objs = objs.OrderBy(item => rand.Next()).ToList();
 					int i;
 					for (i = 0; i < objs.Count - 1; i++) {
@@ -5820,7 +5819,7 @@ public class Predicates : MonoBehaviour {
 				}
 			}
 
-			GameObject.Destroy(obj);
+			Destroy(obj);
 		}
 	}
 

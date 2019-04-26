@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace AssemblyCSharp {
 	public abstract class Heap<T> : IEnumerable<T> {

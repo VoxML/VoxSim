@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Global;
+using UnityEngine;
 using Vox;
+using Object = UnityEngine.Object;
 
 public class ModuleObjectCreation : ModalWindow {
 	public int fontSize = 12;
@@ -43,7 +43,7 @@ public class ModuleObjectCreation : ModalWindow {
 		Highlight
 	};
 
-	UnityEngine.Object[] prefabs;
+	Object[] prefabs;
 
 	int selected = -1;
 	GameObject selectedObject;
@@ -85,7 +85,7 @@ public class ModuleObjectCreation : ModalWindow {
 		cameraControl = Camera.main.GetComponent<GhostFreeRoamCamera>();
 
 		prefabs = Resources.LoadAll("DemoObjects");
-		foreach (UnityEngine.Object prefab in prefabs) {
+		foreach (Object prefab in prefabs) {
 			Objects.Add(prefab.name);
 		}
 
@@ -277,7 +277,7 @@ public class ModuleObjectCreation : ModalWindow {
 		if (selected != -1) {
 			render = false;
 
-			GameObject go = (GameObject) GameObject.Instantiate(prefabs[selected]);
+			GameObject go = (GameObject) Instantiate(prefabs[selected]);
 			go.transform.position = Helper.FindClearRegion(sandboxSurface, go).center;
 			Debug.Log(go.transform.position);
 			go.SetActive(true);
@@ -285,7 +285,7 @@ public class ModuleObjectCreation : ModalWindow {
 
 			List<Voxeme> existingObjsOfType =
 				objSelector.allVoxemes.FindAll(v => v.gameObject.name.StartsWith(go.name));
-			List<int> objIndices = existingObjsOfType.Select(v => System.Convert.ToInt32(v.name.Replace(go.name, "0")))
+			List<int> objIndices = existingObjsOfType.Select(v => Convert.ToInt32(v.name.Replace(go.name, "0")))
 				.ToList();
 			for (int i = 0; i < objIndices.Count; i++) {
 				if (objIndices[i] == 0) {
@@ -300,7 +300,7 @@ public class ModuleObjectCreation : ModalWindow {
 				}
 			}
 
-			go.name = go.name + (j + 1).ToString();
+			go.name = go.name + (j + 1);
 
 			// store shaders
 			foreach (Renderer renderer in go.GetComponentsInChildren<Renderer>()) {

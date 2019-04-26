@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +7,7 @@ using Agent;
 using Global;
 using MajorAxes;
 using RootMotion.FinalIK;
+using UnityEngine;
 using Vox;
 
 public class Voxeme : MonoBehaviour {
@@ -400,7 +399,7 @@ public class Voxeme : MonoBehaviour {
 
 		//		hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
 		hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
-		List<RaycastHit> hitList = new List<RaycastHit>((RaycastHit[]) hits);
+		List<RaycastHit> hitList = new List<RaycastHit>(hits);
 		hits = hitList.OrderBy(h => h.distance).ToArray();
 		foreach (RaycastHit hit in hits) {
 			if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
@@ -782,7 +781,7 @@ public class Voxeme : MonoBehaviour {
 
 		foreach (VoxHabitatExtr eh in voxml.Habitat.Extrinsic) {
 			string[] s = eh.Name.Split('[');
-			int index = System.Convert.ToInt16(s[1].Remove(s[1].IndexOf(']')));
+			int index = Convert.ToInt16(s[1].Remove(s[1].IndexOf(']')));
 			//Debug.Log(index);
 			//Debug.Log (s[0] + " = {" + ih.Value + "}");
 
@@ -883,8 +882,8 @@ public class Voxeme : MonoBehaviour {
 		OnVoxMLLoaded(this, new VoxMLEventArgs(gameObject, voxml));
 
 #if UNITY_EDITOR
-		using (System.IO.StreamWriter file =
-			new System.IO.StreamWriter(gameObject.name + @".txt")) {
+		using (StreamWriter file =
+			new StreamWriter(gameObject.name + @".txt")) {
 			file.WriteLine("PRED");
 			file.WriteLine("{0,-20}", opVox.Lex.Pred);
 			file.WriteLine("\n");

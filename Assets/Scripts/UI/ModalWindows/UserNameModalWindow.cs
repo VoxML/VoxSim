@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System;
-using System.Collections;
-using Vox;
+﻿using System;
+using UnityEngine;
 
 public class UserNameInfo {
 	public string Username;

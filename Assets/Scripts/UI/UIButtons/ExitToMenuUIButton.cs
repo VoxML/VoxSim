@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using Global;
+﻿using Global;
+using UnityEngine;
 
 public class ExitToMenuUIButton : UIButton {
 	public int fontSize = 12;

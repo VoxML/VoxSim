@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 public class ScriptedDemo : MonoBehaviour {
 	// Use this for initialization

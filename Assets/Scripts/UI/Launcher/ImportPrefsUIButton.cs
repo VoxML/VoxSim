@@ -1,13 +1,9 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using GracesGames.SimpleFileBrowser.Scripts;
-using Global;
+using UnityEngine;
+using UnityEngine.UI;
 using VideoCapture;
 
 public class ImportPrefsUIButton : UIButton {
@@ -62,7 +58,7 @@ public class ImportPrefsUIButton : UIButton {
 					break;
 
 				case "Make Logs":
-					launcher.makeLogs = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.makeLogs = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Logs Prefix":
@@ -70,15 +66,15 @@ public class ImportPrefsUIButton : UIButton {
 					break;
 
 				case "Actions Only Logs":
-					launcher.actionsOnly = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.actionsOnly = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Full State Info":
-					launcher.actionsOnly = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.actionsOnly = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Log Timestamps":
-					launcher.actionsOnly = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.actionsOnly = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "URLs":
@@ -97,19 +93,19 @@ public class ImportPrefsUIButton : UIButton {
 					break;
 
 				case "Capture Video":
-					launcher.captureVideo = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.captureVideo = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Capture Params":
-					launcher.captureParams = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.captureParams = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Video Capture Mode":
-					launcher.videoCaptureMode = (VideoCaptureMode) System.Convert.ToInt32(line.Split(',')[1].Trim());
+					launcher.videoCaptureMode = (VideoCaptureMode) Convert.ToInt32(line.Split(',')[1].Trim());
 					break;
 
 				case "Reset Between Events":
-					launcher.resetScene = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.resetScene = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Event Reset Counter":
@@ -118,11 +114,11 @@ public class ImportPrefsUIButton : UIButton {
 
 				case "Video Capture Filename Type":
 					launcher.videoCaptureFilenameType =
-						(VideoCaptureFilenameType) System.Convert.ToInt32(line.Split(',')[1].Trim());
+						(VideoCaptureFilenameType) Convert.ToInt32(line.Split(',')[1].Trim());
 					break;
 
 				case "Sort By Event String":
-					launcher.sortByEventString = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.sortByEventString = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				case "Custom Video Filename Prefix":
@@ -146,7 +142,7 @@ public class ImportPrefsUIButton : UIButton {
 					break;
 
 				case "Make Voxemes Editable":
-					launcher.editableVoxemes = System.Convert.ToBoolean(line.Split(',')[1].Trim());
+					launcher.editableVoxemes = Convert.ToBoolean(line.Split(',')[1].Trim());
 					break;
 
 				default:
