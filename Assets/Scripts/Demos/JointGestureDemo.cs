@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,14 +7,16 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
+
 using Agent;
+using Agent.CharacterLogic;
 using Episteme;
 using Global;
+using Interaction;
 using MajorAxes;
 using Network;
 using RCC;
 using RootMotion.FinalIK;
-using UnityEngine;
 using Vox;
 
 public class SelectionEventArgs : EventArgs {
@@ -24,7 +27,7 @@ public class SelectionEventArgs : EventArgs {
 	}
 }
 
-public class JointGestureDemo : AgentInteraction {
+public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
 	EventManager eventManager;
 	ObjectSelector objSelector;

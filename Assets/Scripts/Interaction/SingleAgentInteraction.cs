@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Agent {
+namespace Interaction {
 	public class CharacterLogicEventArgs : EventArgs {
 		public string InputSymbolName { get; set; }
 		public object InputSymbolContent { get; set; }
@@ -12,7 +12,7 @@ namespace Agent {
 		}
 	}
 
-	public class AgentInteraction : MonoBehaviour {
+	public class SingleAgentInteraction : MonoBehaviour {
 		private bool useTeaching;
 
 		public bool UseTeaching {

@@ -1,8 +1,9 @@
+using UnityEngine;
 using System;
+
 using Agent;
 using Crosstales.RTVoice;
 using Crosstales.RTVoice.Model;
-using UnityEngine;
 
 namespace UI {
 	public class VoiceController : MonoBehaviour {
