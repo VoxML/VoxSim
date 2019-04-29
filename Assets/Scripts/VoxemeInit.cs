@@ -1,8 +1,10 @@
-using System;
-using Global;
-using RootMotion.FinalIK;
 using UnityEngine;
+using System;
+
+using Animation;
+using Global;
 using Object = UnityEngine.Object;
+using RootMotion.FinalIK;
 
 public class VoxemeInit : MonoBehaviour {
 	Predicates preds;

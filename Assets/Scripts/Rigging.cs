@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections.Generic;
+
+using Animation;
 
 public class Rigging : MonoBehaviour {
 	//[HideInInspector]

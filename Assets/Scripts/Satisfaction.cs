@@ -1,17 +1,19 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+
 using Agent;
+using Animation;
 using Global;
 using MajorAxes;
+using Object = UnityEngine.Object;
 using RCC;
 using RootMotion.FinalIK;
-using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Satisfaction {
 	public static class SatisfactionTest {

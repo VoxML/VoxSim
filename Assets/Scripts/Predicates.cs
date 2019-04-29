@@ -1,15 +1,17 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
+
 using Agent;
 using Global;
+using Pathfinding;
 using RootMotion.FinalIK;
 using Satisfaction;
-using UnityEngine;
 using Vox;
 using Random = System.Random;
 
