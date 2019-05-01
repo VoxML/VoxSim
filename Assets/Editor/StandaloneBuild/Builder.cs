@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 
-using Global;
+using VoxSimPlatform.Global;
 
 namespace StandaloneBuild {
 	/// <summary>
@@ -14,7 +14,8 @@ namespace StandaloneBuild {
 	/// An example build config file is provided parallel to the Assets folder (sample_build_config.xml).
 	/// </summary>
 	public class VoxSimBuildConfig {
-		[XmlArray("ScenesList")] [XmlArrayItem("SceneFile")]
+		[XmlArray("ScenesList")]
+        [XmlArrayItem("SceneFile")]
 		public List<SceneFile> Scenes = new List<SceneFile>();
 	}
 
@@ -23,7 +24,8 @@ namespace StandaloneBuild {
 	/// All included scenes must be in the Scenes folder, though subfolders within it are allowed.
 	/// </summary>
 	public class SceneFile {
-		[XmlAttribute] public string Path { get; set; }
+		[XmlAttribute]
+        public string Path { get; set; }
 	}
 
 	/// <summary>

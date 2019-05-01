@@ -1,8 +1,11 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Agent;
-using UnityEngine;
+
+using VoxSimPlatform.Agent;
+using VoxSimPlatform.Core;
+using VoxSimPlatform.SpatialReasoning;
 
 public class CupsGame : DemoScript {
 	RelationTracker relationTracker;

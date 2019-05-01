@@ -8,16 +8,22 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 
-using Agent;
-using Agent.CharacterLogic;
-using Episteme;
-using Global;
-using Interaction;
 using MajorAxes;
-using Network;
-using RCC;
 using RootMotion.FinalIK;
-using Vox;
+using VoxSimPlatform;
+using VoxSimPlatform.Agent;
+using VoxSimPlatform.Agent.CharacterLogic;
+using VoxSimPlatform.Agent.SyntheticVision;
+using VoxSimPlatform.Core;
+using VoxSimPlatform.Episteme;
+using VoxSimPlatform.Global;
+using VoxSimPlatform.Interaction;
+using VoxSimPlatform.Logging;
+using VoxSimPlatform.Network;
+using VoxSimPlatform.SpatialReasoning;
+using VoxSimPlatform.SpatialReasoning.QSR;
+using VoxSimPlatform.SpatialReasoning.RCC;
+using VoxSimPlatform.Vox;
 
 public class SelectionEventArgs : EventArgs {
 	public object Content;
@@ -51,9 +57,6 @@ public class JointGestureDemo : SingleAgentInteraction {
 	};
 
 	IKControl ikControl;
-	IKTarget leftTarget;
-	IKTarget rightTarget;
-	IKTarget headTarget;
 
 	bool setLeftHandTarget = false;
 	bool setRightHandTarget = false;
@@ -4123,7 +4126,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 			qsr = "Behind";
 		}
 
-		//object qsrClassInstance = Activator.CreateInstance (QSR.QSR);
+		//object qsrClassInstance = Activator.CreateInstance (QSR);
 		List<object> placementOptions = new List<object>();
 		List<GameObject> objectMatches = new List<GameObject>();
 		Bounds themeBounds = Helper.GetObjectWorldSize(theme);
@@ -4136,7 +4139,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 					if (block.activeInHierarchy) {
 						if (block != theme) {
 							// if candidate block has clear surface and is not indicatedObj (?--shouldn't this be null at this point)
-							if ((bool) (Type.GetType("QSR.QSR").GetMethod(qsr).Invoke(null, new object[] {
+							if ((bool) (Type.GetType("QSR").GetMethod(qsr).Invoke(null, new object[] {
 								    Helper.GetObjectWorldSize(block),
 								    themeBounds
 							    })) && // if it's to the left of the grasped block
@@ -4341,16 +4344,16 @@ public class JointGestureDemo : SingleAgentInteraction {
 				new Vector3(blockBounds.max.x, blockBounds.max.y, blockBounds.max.z));
 			Region otherMin = new Region(new Vector3(otherBounds.min.x, blockBounds.max.y, otherBounds.min.z),
 				new Vector3(otherBounds.max.x, blockBounds.max.y, otherBounds.max.z));
-//			if ((QSR.QSR.Above (otherBounds, blockBounds)) && (!QSR.QSR.Left (otherBounds, blockBounds)) &&
-//				(!QSR.QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
+//			if ((QSR.Above (otherBounds, blockBounds)) && (!QSR.Left (otherBounds, blockBounds)) &&
+//				(!QSR.Right (otherBounds, blockBounds)) && (RCC8.EC (otherBounds, blockBounds))) {
 			Debug.Log(Helper.RegionToString(blockMax));
 			Debug.Log(Helper.RegionToString(otherMin));
 			Debug.Log(Helper.RegionToString(Helper.RegionOfIntersection(blockMax, otherMin, MajorAxis.Y)));
-			Debug.Log(QSR.QSR.Above(otherBounds, blockBounds));
+			Debug.Log(QSR.Above(otherBounds, blockBounds));
 			Debug.Log(
 				((Helper.RegionOfIntersection(blockMax, otherMin, MajorAxis.Y).Area() / blockMax.Area())));
 			Debug.Log(RCC8.EC(otherBounds, blockBounds));
-			if ((QSR.QSR.Above(otherBounds, blockBounds)) &&
+			if ((QSR.Above(otherBounds, blockBounds)) &&
 			    ((Helper.RegionOfIntersection(blockMax, otherMin, MajorAxis.Y).Area() / blockMax.Area()) >
 			     0.25f) &&
 			    (RCC8.EC(otherBounds, blockBounds))) {

@@ -1,8 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-using Global;
 using RootMotion.FinalIK;
+using VoxSimPlatform.Global;
 
 namespace EditorMenus {
 	/// <summary>

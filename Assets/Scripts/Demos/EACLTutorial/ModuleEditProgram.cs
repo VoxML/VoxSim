@@ -1,8 +1,11 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Global;
-using UnityEngine;
+
+using VoxSimPlatform.Core;
+using VoxSimPlatform.Global;
+using VoxSimPlatform.UI.ModalWindow;
 
 public class ModuleEditProgram : ModalWindow {
 	public int fontSize = 12;

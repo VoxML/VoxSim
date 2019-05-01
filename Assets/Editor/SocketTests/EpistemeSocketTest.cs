@@ -1,8 +1,9 @@
-﻿using System.Threading;
-using Agent;
-using Episteme;
+﻿using UnityEngine;
+using System.Threading;
+
 using NUnit.Framework;
-using UnityEngine;
+using VoxSimPlatform.Agent;
+using VoxSimPlatform.Episteme;
 
 public class EpistemeSocketTest : MonoBehaviour {
 	private EpistemicState model;

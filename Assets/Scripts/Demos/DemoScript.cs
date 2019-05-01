@@ -1,8 +1,12 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
+
 using Object = UnityEngine.Object;
+using VoxSimPlatform.Agent;
+using VoxSimPlatform.Core;
+using VoxSimPlatform.Vox;
 
 public class LogEventArgs : EventArgs {
 	public string LogString { get; set; }

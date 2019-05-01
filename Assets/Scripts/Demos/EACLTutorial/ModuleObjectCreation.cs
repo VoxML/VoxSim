@@ -1,10 +1,14 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Global;
-using UnityEngine;
-using Vox;
+
 using Object = UnityEngine.Object;
+using VoxSimPlatform.CogPhysics;
+using VoxSimPlatform.Core;
+using VoxSimPlatform.Global;
+using VoxSimPlatform.UI.ModalWindow;
+using VoxSimPlatform.Vox;
 
 public class ModuleObjectCreation : ModalWindow {
 	public int fontSize = 12;

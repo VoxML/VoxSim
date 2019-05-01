@@ -1,7 +1,8 @@
-﻿using System.Threading;
-using Network;
+﻿using UnityEngine;
+using System.Threading;
+
 using NUnit.Framework;
-using UnityEngine;
+using VoxSimPlatform.Network;
 
 public class FusionSocketTest {
 	[Test]

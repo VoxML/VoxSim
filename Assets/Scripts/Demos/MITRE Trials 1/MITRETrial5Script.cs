@@ -1,10 +1,15 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using Agent;
-using Global;
-using UnityEngine;
+
+using VoxSimPlatform;
+using VoxSimPlatform.Agent;
+using VoxSimPlatform.Core;
+using VoxSimPlatform.Global;
+using VoxSimPlatform.SpatialReasoning;
+using VoxSimPlatform.Vox;
 
 public class MITRETrial5Script : DemoScript {
 	enum ScriptStep {

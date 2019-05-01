@@ -1,16 +1,19 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
-using Global;
-using Network;
-using UnityEngine;
+
+using VoxSimPlatform.Agent;
+using VoxSimPlatform.Core;
+using VoxSimPlatform.Global;
+using VoxSimPlatform.Network;
+using VoxSimPlatform.Vox;
 
 public class DianaOzStudies : MonoBehaviour {
 	void EventManager_EventComplete(object sender, EventArgs e) {
 	}
-
 
 	class CommanderStatus {
 		public CommanderStatus(string _input, string _question, string _utter, string _anim, string _show, string _hide,
