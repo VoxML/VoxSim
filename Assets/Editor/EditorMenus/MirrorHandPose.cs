@@ -33,11 +33,18 @@ namespace EditorMenus {
 		// OUT: none
 		[MenuItem("VoxSim/Hand Poses/Mirror Selected Hand Pose %#m")]
 		static void MirrorSelectedHandPose() {
-			// get the selected game object
-			GameObject obj = Selection.activeGameObject;
 
-			// clone it, parent it to the same object as the original, and apply the requisite transformations
-			GameObject clone = Instantiate(obj);
+            // get the selected game object
+            GameObject obj = Selection.activeGameObject;
+
+            // if the pose already has a corresponding mirror, we don't need to do anything.
+            if (obj.transform.parent.Find("l" + obj.name.Remove(0, 1)) && obj.transform.parent.Find("r" + obj.name.Remove(0, 1))) {
+                Debug.Log("Preexisting Mirror Pose");
+                return;
+            }
+
+            // clone it, parent it to the same object as the original, and apply the requisite transformations
+            GameObject clone = Instantiate(obj);
 			clone.transform.parent = obj.transform.parent;
 			// mirror along the X-axis
 			clone.transform.localScale = new Vector3(-obj.transform.localScale.x,
