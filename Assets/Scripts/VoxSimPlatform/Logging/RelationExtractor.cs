@@ -14,13 +14,13 @@ namespace VoxSimPlatform {
         public class RelationExtractor : MonoBehaviour {
         	RelationTracker relationTracker;
         	EventManager em;
-        	PluginImport commBridge;
+        	CommunicationsBridge commBridge;
 
         	// Use this for initialization
         	void Start() {
         		relationTracker = gameObject.GetComponent<RelationTracker>();
         		em = gameObject.GetComponent<EventManager>();
-        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 
         		em.QueueEmpty += QueueEmpty;
         	}

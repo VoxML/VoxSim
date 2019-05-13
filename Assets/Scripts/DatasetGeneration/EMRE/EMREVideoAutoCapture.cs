@@ -49,7 +49,7 @@ public class EMREVideoAutoCapture : MonoBehaviour {
 	InputController inputController;
 	EventManager eventManager;
 	ObjectSelector objSelector;
-	PluginImport commBridge;
+	CommunicationsBridge commBridge;
 	Predicates preds;
 	ReferringExpressionGenerator refExpGenerator;
 
@@ -96,7 +96,7 @@ public class EMREVideoAutoCapture : MonoBehaviour {
 		inputController = GameObject.Find("IOController").GetComponent<InputController>();
 		eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
 		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 		preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
 
 		refExpGenerator = GameObject.Find("ReferringExpressionGenerator")

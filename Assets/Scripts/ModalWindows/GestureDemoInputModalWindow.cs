@@ -40,7 +40,7 @@ public class GestureDemoInputModalWindow : ModalWindow {
 	// Update is called once per frame
 	void Update() {
 		if (fusionClient == null) {
-			fusionClient = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>().FusionSocket;
+			fusionClient = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>().FusionSocket;
 			if (fusionClient != null) {
 				fusionClient.FusionReceived += ReceivedGesture;
 			}

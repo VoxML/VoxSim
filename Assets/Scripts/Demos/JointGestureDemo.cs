@@ -37,7 +37,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
 	EventManager eventManager;
 	ObjectSelector objSelector;
-	PluginImport commBridge;
+	CommunicationsBridge commBridge;
 	RelationTracker relationTracker;
 	Predicates predicates;
 
@@ -220,7 +220,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 		windowScaleFactor.y = (float) Screen.height / (float) Screen.currentResolution.height;
 
 		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 
 		eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
 		eventManager.EventComplete += ReturnToRest;
@@ -256,7 +256,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 			dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 		}
 
-		fusionSocket = commBridge.GetComponent<PluginImport>().FusionSocket;
+		fusionSocket = commBridge.GetComponent<CommunicationsBridge>().FusionSocket;
 		//TODO: What if there is no CSUClient address assigned?
 		if (fusionSocket != null) {
 			fusionSocket.ConnectionMade += ConnectionMade;

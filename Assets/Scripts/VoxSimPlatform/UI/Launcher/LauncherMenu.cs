@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 
 using VoxSimPlatform.Global;
+using VoxSimPlatform.Network;
 using VoxSimPlatform.UI.ModalWindow;
 using VoxSimPlatform.UI.UIButtons;
 using VoxSimPlatform.VideoCapture;
@@ -15,67 +18,125 @@ using VoxSimPlatform.VideoCapture;
 namespace VoxSimPlatform {
     namespace UI {
         namespace Launcher {
+            public class VoxSimUserPrefs {
+                public bool MakeLogs = false;
+                public string LogsPrefix = string.Empty;
+                public bool ActionOnlyLogs = false;
+                public bool FullStateInfo = false;
+                public bool LogTimestamps = false;
+                public VoxSimSocketConfig SocketConfig = null;
+                public CapturePrefs CapturePrefs = null;
+                public bool MakeVoxemesEditable = false;
+            }
+
+            public class CapturePrefs {
+                public bool CaptureVideo = false;
+                public bool CaptureParams = false;
+                public string VideoCaptureMode = string.Empty;
+                public bool ResetBetweenEvents = false;
+                public int EventResetCounter = 0;
+                public string VideoCaptureFilenameType = string.Empty;
+                public bool SortByEventString = false;
+                public string CustomVideoFilenamePrefix = string.Empty;
+                public string AutoEventsList = string.Empty;
+                public int StartIndex = 0;
+                public string VideoCaptureDB = string.Empty;
+                public string VideoOutputDirectory = string.Empty;
+            }
+
             public class LauncherMenu : FontManager {
             	public int fontSize = 12;
 
             	string launcherTitle = "VoxSim";
 
-            	[HideInInspector] public string ip;
+            	[HideInInspector] 
+                public string ip;
 
-            	[HideInInspector] public string ipContent = "IP";
+            	[HideInInspector] 
+                public string ipContent = "IP";
 
-            	[HideInInspector] public string inPort;
+            	[HideInInspector] 
+                public string inPort;
 
-            	[HideInInspector] public int numUrls = 0;
+            	[HideInInspector] 
+                public int numUrls = 0;
             	int addUrl = -1;
             	List<int> removeUrl = new List<int>();
 
-            	[HideInInspector] public List<string> urlLabels = new List<string>();
+            	[HideInInspector] 
+                public List<string> urlLabels = new List<string>();
 
-            	[HideInInspector] public List<string> urls = new List<string>();
+                [HideInInspector] 
+                public List<string> urlTypes = new List<string>();
 
-            	[HideInInspector] public bool makeLogs;
+            	[HideInInspector] 
+                public List<string> urls = new List<string>();
 
-            	[HideInInspector] public string logsPrefix;
+                [HideInInspector] 
+                public List<bool> urlActiveStatuses = new List<bool>();
 
-            	[HideInInspector] public bool actionsOnly;
+            	[HideInInspector] 
+                public bool makeLogs;
 
-            	[HideInInspector] public bool fullState;
+            	[HideInInspector] 
+                public string logsPrefix;
 
-            	[HideInInspector] public bool logTimestamps;
+            	[HideInInspector]
+                public bool actionsOnly;
 
-            	[HideInInspector] public bool captureVideo;
+            	[HideInInspector]
+                public bool fullState;
 
-            	[HideInInspector] public VideoCaptureMode videoCaptureMode;
+            	[HideInInspector]
+                public bool logTimestamps;
 
-            	[HideInInspector] public VideoCaptureFilenameType prevVideoCaptureFilenameType;
+            	[HideInInspector] 
+                public bool captureVideo;
 
-            	[HideInInspector] public VideoCaptureFilenameType videoCaptureFilenameType;
+            	[HideInInspector] 
+                public VideoCaptureMode videoCaptureMode;
 
-            	[HideInInspector] public string customVideoFilenamePrefix;
+            	[HideInInspector] 
+                public VideoCaptureFilenameType prevVideoCaptureFilenameType;
 
-            	[HideInInspector] public bool sortByEventString;
+            	[HideInInspector] 
+                public VideoCaptureFilenameType videoCaptureFilenameType;
 
-            	[HideInInspector] public bool captureParams;
+            	[HideInInspector] 
+                public string customVideoFilenamePrefix;
 
-            	[HideInInspector] public bool resetScene;
+            	[HideInInspector] 
+                public bool sortByEventString;
 
-            	[HideInInspector] public string eventResetCounter;
+            	[HideInInspector] 
+                public bool captureParams;
 
-            	[HideInInspector] public string autoEventsList;
+            	[HideInInspector] 
+                public bool resetScene;
 
-            	[HideInInspector] public string startIndex;
+            	[HideInInspector] 
+                public string eventResetCounter;
 
-            	[HideInInspector] public string captureDB;
+            	[HideInInspector] 
+                public string autoEventsList;
 
-            	[HideInInspector] public string videoOutputDir;
+            	[HideInInspector] 
+                public string startIndex;
 
-            	[HideInInspector] public bool editableVoxemes;
+            	[HideInInspector] 
+                public string captureDB;
+
+            	[HideInInspector] 
+                public string videoOutputDir;
+
+            	[HideInInspector] 
+                public bool editableVoxemes;
 
             //	[HideInInspector]
             //	public bool teachingAgent;
 
-            	[HideInInspector] public bool eulaAccepted;
+            	[HideInInspector] 
+                public bool eulaAccepted;
 
             	ModalWindowManager windowManager;
             	EULAModalWindow eulaWindow;
@@ -131,10 +192,10 @@ namespace VoxSimPlatform {
             	void Awake() {
             		Draw = true;
 
-            #if UNITY_IOS
+#if UNITY_IOS
             		Screen.SetResolution(1280,960,true);
             		Debug.Log(Screen.currentResolution);
-            #endif
+#endif
 
             		fontSizeModifier = (fontSize / defaultFontSize);
 
@@ -146,16 +207,7 @@ namespace VoxSimPlatform {
             	// Use this for initialization
             	void Start() {
             		LoadPrefs();
-
-            #if !UNITY_IOS
-            		exportPrefsButton = gameObject.GetComponent<ExportPrefsUIButton>();
-            		importPrefsButton = gameObject.GetComponent<ImportPrefsUIButton>();
-
-            		uiButtons.Add(exportPrefsButton);
-            		uiButtons.Add(importPrefsButton);
-            #endif
-
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             		string scenesDirPath = Application.dataPath + "/Scenes/";
             		string[] fileEntries = Directory.GetFiles(Application.dataPath + "/Scenes/", "*.unity");
             		foreach (string s in fileEntries) {
@@ -165,7 +217,7 @@ namespace VoxSimPlatform {
             				availableScenes.Add(sceneName);
             			}
             		}
-            #elif UNITY_STANDALONE || UNITY_IOS || UNITY_WEBPLAYER
+#elif UNITY_STANDALONE || UNITY_IOS || UNITY_WEBPLAYER
             		// What if ScenesList has been deleted?
             		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
             		string[] scenes = scenesList.text.Split ('\r','\n');
@@ -175,31 +227,18 @@ namespace VoxSimPlatform {
             				availableScenes.Add(s);
             			}
             		}
-            #endif
+#endif
+                    GetMyIP();
 
             		listItems = availableScenes.ToArray();
 
-            		// get IP address
-            #if !UNITY_IOS
-            		foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
-            			if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
-            				//Debug.Log(ipAddress.ToString());
-            				ip = ipAddress.ToString();
-            			}
-            		}
-            #else
-            		foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces()){
-            			if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet) {
-            				//Debug.Log(ni.Name);
-            				foreach (UnicastIPAddressInformation ipInfo in ni.GetIPProperties().UnicastAddresses) {
-            					if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
-            //						Debug.Log (ipInfo.Address.ToString());
-            						ip = ipInfo.Address.ToString();
-            					}
-            				}
-            			}  
-            		}
-            #endif
+#if !UNITY_IOS
+                    exportPrefsButton = gameObject.GetComponent<ExportPrefsUIButton>();
+                    importPrefsButton = gameObject.GetComponent<ImportPrefsUIButton>();
+
+                    uiButtons.Add(exportPrefsButton);
+                    uiButtons.Add(importPrefsButton);
+#endif
             	}
 
             	// Update is called once per frame
@@ -227,17 +266,7 @@ namespace VoxSimPlatform {
             			masterScrollPosition,
             			new Rect(bgLeft + margin, bgTop + 5, bgWidth - 10, bgHeight - 70));
 
-            		GUI.Label(new Rect(bgLeft + 10, bgTop + 35, 90 * fontSizeModifier, 25 * fontSizeModifier), "Listener Port");
-            		inPort = GUI.TextField(new Rect(bgLeft + 100, bgTop + 35, 60, 25 * fontSizeModifier), inPort);
-
-            #if !UNITY_IOS
-            		GUI.Button(new Rect(bgLeft + 165, bgTop + 35, 10, 10), new GUIContent("*", "IP: " + ip));
-            		if (GUI.tooltip != string.Empty) {
-            			GUI.TextArea(
-            				new Rect(bgLeft + 175, bgTop + 35, GUI.skin.label.CalcSize(new GUIContent("IP: " + ip)).x + 10, 20),
-            				GUI.tooltip);
-            		}
-            #else
+#if UNITY_IOS
             		if (GUI.Button (new Rect (bgLeft + 165, bgTop + 35, GUI.skin.label.CalcSize (new GUIContent (ipContent)).x+10, 25*fontSizeModifier),
             			new GUIContent (ipContent))) {
             			if (ipContent == "IP") {
@@ -247,14 +276,14 @@ namespace VoxSimPlatform {
             				ipContent = "IP";
             			}
             		}
-            #endif
+#endif
 
-            #if !UNITY_IOS
-            		GUI.Label(new Rect(bgLeft + 10, bgTop + 60, 90 * fontSizeModifier, 25 * fontSizeModifier), "Make Logs");
-            		makeLogs = GUI.Toggle(new Rect(bgLeft + 100, bgTop + 60, 25, 25 * fontSizeModifier), makeLogs, string.Empty);
+#if !UNITY_IOS
+            		GUI.Label(new Rect(bgLeft + 10, bgTop + 35, 90 * fontSizeModifier, 25 * fontSizeModifier), "Make Logs");
+            		makeLogs = GUI.Toggle(new Rect(bgLeft + 100, bgTop + 35, 25, 25 * fontSizeModifier), makeLogs, string.Empty);
 
             		if (makeLogs) {
-            			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 85, 290 * fontSizeModifier, 45 * fontSizeModifier),
+            			GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 60, 290 * fontSizeModifier, 45 * fontSizeModifier),
             				GUI.skin.box);
             			logsPrefsBoxScrollPosition = GUILayout.BeginScrollView(logsPrefsBoxScrollPosition, false, false);
             			GUILayout.BeginVertical(GUI.skin.box);
@@ -285,26 +314,46 @@ namespace VoxSimPlatform {
             			GUILayout.EndScrollView();
             			GUILayout.EndArea();
             		}
-            #endif
+#endif
 
-            		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 135, 290 * fontSizeModifier, 95 * fontSizeModifier),
+            		GUILayout.BeginArea(new Rect(bgLeft + 10, bgTop + 110, 290 * fontSizeModifier, 120 * fontSizeModifier),
             			GUI.skin.box);
+                    Vector2 connectionsLabelDimensions = GUI.skin.label.CalcSize(new GUIContent("Connections"));
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Connections", GUILayout.Width(connectionsLabelDimensions.x));
+                    GUILayout.Button(new GUIContent("*", "IP: " + ip),GUILayout.Width(10 * fontSizeModifier), GUILayout.Height(10 * fontSizeModifier));
+                    if (GUI.tooltip != string.Empty) {
+                        GetMyIP();
+                        GUILayout.Label(GUI.tooltip, GUILayout.MaxWidth(GUI.skin.label.CalcSize(new GUIContent("IP: " + ip)).x + 10), GUILayout.ExpandWidth(false));
+                    }
+                    else {
+                        GUILayout.Label(string.Empty);
+                    }
+                    GUILayout.EndHorizontal();
             		urlBoxScrollPosition = GUILayout.BeginScrollView(urlBoxScrollPosition, false, false);
             		GUILayout.BeginVertical(GUI.skin.box);
 
             		for (int i = 0; i < urls.Count; i++) {
-            			GUILayout.BeginHorizontal(GUI.skin.box);
+                        GUILayout.BeginVertical(GUI.skin.box);
+            			GUILayout.BeginHorizontal();
             			urlLabels[i] = GUILayout.TextField(urlLabels[i], GUILayout.Width(80 * fontSizeModifier));
             			urls[i] = GUILayout.TextField(urls[i], GUILayout.Width(140 * fontSizeModifier));
-            			removeUrl.Add(-1);
-            			removeUrl[i] = GUILayout.SelectionGrid(removeUrl[i], new string[] {"-"}, 1, GUI.skin.button,
-            				GUILayout.ExpandWidth(true));
-            			GUILayout.EndHorizontal();
+                        urlActiveStatuses[i] = GUILayout.Toggle(urlActiveStatuses[i], string.Empty, GUILayout.Width(20 * fontSizeModifier));
+                        GUILayout.EndHorizontal();
+                        GUILayout.BeginHorizontal();
+                        urlTypes[i] = GUILayout.TextField(urlTypes[i], GUILayout.Width(80 * fontSizeModifier));
+                        removeUrl.Add(-1);
+                        removeUrl[i] = GUILayout.SelectionGrid(removeUrl[i], new string[] {"-"}, 1, GUI.skin.button,
+                            GUILayout.ExpandWidth(true));
+                        GUILayout.EndHorizontal();
+            			GUILayout.EndVertical();
 
             			if (removeUrl[i] == 0) {
             				removeUrl[i] = -1;
             				urlLabels.RemoveAt(i);
+                            urlTypes.RemoveAt(i);
             				urls.RemoveAt(i);
+                            urlActiveStatuses.RemoveAt(i);
             				numUrls--;
             			}
             		}
@@ -316,7 +365,9 @@ namespace VoxSimPlatform {
             			for (int j = 1; j <= urls.Count + 1; j++) {
             				if (!urlLabels.Contains(string.Format("URL {0}", j))) {
             					urlLabels.Add(string.Format("URL {0}", j));
+                                urlTypes.Add("");
             					urls.Add("");
+                                urlActiveStatuses.Add(true);
             					break;
             				}
             			}
@@ -325,7 +376,34 @@ namespace VoxSimPlatform {
             		}
 
             		GUILayout.EndVertical();
-            		GUILayout.EndScrollView();
+                    GUILayout.EndScrollView();
+
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Load Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
+                        // read in the socket config file and deserialize it to an instance of VoxSimSocketConfig
+                        XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
+                        using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Open)) {
+                            VoxSimSocketConfig config = serializer.Deserialize(stream) as VoxSimSocketConfig;
+
+                            urlLabels.Clear();
+                            urlTypes.Clear();
+                            urls.Clear();
+                            urlActiveStatuses.Clear();
+                            numUrls = 0;
+
+                            Debug.Log(config.Sockets.Count);
+                            foreach (VoxSimSocket socket in config.Sockets) {
+                                urlLabels.Add(socket.Name);
+                                urlTypes.Add(socket.Type);
+                                urls.Add(socket.URL);
+                                urlActiveStatuses.Add(socket.Enabled);
+                                numUrls++;
+                            }
+                        }
+                    }
+                    if (GUILayout.Button("Save Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
+                    }
+                    GUILayout.EndHorizontal();
             		GUILayout.EndArea();
 
             #if !UNITY_IOS
@@ -538,9 +616,9 @@ namespace VoxSimPlatform {
             //		GUI.Label (new Rect ((13*Screen.width/24 + 3*Screen.width/12) - (150*fontSizeModifier), bgTop + 35 + (3*Screen.height/6) + 10*fontSizeModifier, 150*fontSizeModifier, 25*fontSizeModifier), "Use Teaching Agent");
             //		teachingAgent = GUI.Toggle (new Rect ((13*Screen.width/24 + 3*Screen.width/12) - (25*fontSizeModifier), bgTop + 35 + (3*Screen.height/6) + 10*fontSizeModifier, 150, 25*fontSizeModifier), teachingAgent, string.Empty);
 
-            		Vector2 textDimensions = GUI.skin.label.CalcSize(new GUIContent("Scenes"));
+            		Vector2 scenesLabelDimensions = GUI.skin.label.CalcSize(new GUIContent("Scenes"));
 
-            		GUI.Label(new Rect(2 * Screen.width / 3 - textDimensions.x / 2, bgTop + 35, textDimensions.x, 25), "Scenes");
+            		GUI.Label(new Rect(2 * Screen.width / 3 - scenesLabelDimensions.x / 2, bgTop + 35, scenesLabelDimensions.x, 25), "Scenes");
             		GUI.EndScrollView();
 
             		if (GUI.Button(
@@ -571,10 +649,34 @@ namespace VoxSimPlatform {
             			}
             		}
 
-            		textDimensions = GUI.skin.label.CalcSize(new GUIContent(launcherTitle));
-            		GUI.Label(new Rect(((2 * bgLeft + bgWidth) / 2) - textDimensions.x / 2, bgTop, textDimensions.x, 25),
+            		scenesLabelDimensions = GUI.skin.label.CalcSize(new GUIContent(launcherTitle));
+            		GUI.Label(new Rect(((2 * bgLeft + bgWidth) / 2) - scenesLabelDimensions.x / 2, bgTop, scenesLabelDimensions.x, 25),
             			launcherTitle);
             	}
+
+                void GetMyIP() {
+                // get IP address
+#if !UNITY_IOS
+                    foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
+                        if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
+                            //Debug.Log(ipAddress.ToString());
+                            ip = ipAddress.ToString();
+                        }
+                    }
+#else
+                    foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces()){
+                        if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet) {
+                            //Debug.Log(ni.Name);
+                            foreach (UnicastIPAddressInformation ipInfo in ni.GetIPProperties().UnicastAddresses) {
+                                if (ipInfo.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork) {
+            //                      Debug.Log (ipInfo.Address.ToString());
+                                    ip = ipInfo.Address.ToString();
+                                }
+                            }
+                        }  
+                    }
+#endif
+                }
 
             	void PopUpEULAWindow() {
             		eulaWindow = gameObject.AddComponent<EULAModalWindow>();
@@ -601,11 +703,57 @@ namespace VoxSimPlatform {
             		numUrls = 0;
             		string urlsString = PlayerPrefs.GetString("URLs");
             		foreach (string urlString in urlsString.Split(';')) {
-            			if (urlString.Contains("=")) {
-            				urlLabels.Add(urlString.Split('=')[0]);
-            				urls.Add(urlString.Split('=')[1]);
-            				numUrls++;
+                        // e.g., Fusion|FusionSocket=tarski.cs-i.brandeis.edu:9126,true;EpiSim|EpiSimSocket=localhost:5000,false
+                        if (urlString.Contains("|")) {
+                            urlTypes.Add(urlString.Split('|')[1].Split('=')[0]);
+                			if (urlString.Contains("=")) {
+                				urlLabels.Add(urlString.Split('|')[0]);
+                                if (urlString.Contains(",")) {
+                				    urls.Add(urlString.Split('=')[1].Split(',')[0]);
+                                    urlActiveStatuses.Add(Convert.ToBoolean(urlString.Split('=')[1].Split(',')[1]));
+                                }
+                                else {
+                                    urls.Add(urlString.Split('=')[1]);
+                                    urlActiveStatuses.Add(false);
+                                }
+                            }
+                            else {
+                                urlTypes.Add(urlString.Split('|')[1]);
+                                urlLabels.Add(urlString.Split('|')[0]);
+                                urls.Add(string.Empty);
+                                if (urlString.Contains(",")) {
+                                    urlActiveStatuses.Add(Convert.ToBoolean(urlString.Split('|')[1].Split(',')[1]));
+                                }
+                                else {
+                                    urlActiveStatuses.Add(false);
+                                }
+                            }
             			}
+                        else {
+                            urlTypes.Add(string.Empty);
+                            if (urlString.Contains("=")) {
+                                urlLabels.Add(urlString.Split('=')[0]);
+                                if (urlString.Contains(",")) {
+                                    urls.Add(urlString.Split('=')[1].Split(',')[0]);
+                                    urlActiveStatuses.Add(Convert.ToBoolean(urlString.Split('=')[1].Split(',')[0]));
+                                }
+                                else {
+                                    urls.Add(urlString.Split('=')[1]);
+                                    urlActiveStatuses.Add(false);
+                                }
+                            }
+                            else {
+                                urlLabels.Add(string.Empty);
+                                urls.Add(string.Empty);
+                                if (urlString.Contains(",")) {
+                                    urlActiveStatuses.Add(Convert.ToBoolean(urlString.Split('|')[1].Split(',')[0]));
+                                }
+                                else {
+                                    urlActiveStatuses.Add(false);
+                                }
+                            }
+                        }
+                        numUrls++;
             		}
 
             		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
@@ -640,10 +788,13 @@ namespace VoxSimPlatform {
             		PlayerPrefs.SetInt("Full State Info", Convert.ToInt32(fullState));
             		PlayerPrefs.SetInt("Timestamps", Convert.ToInt32(logTimestamps));
 
+                    List<string> urlStrings = new List<string>();
             		string urlsString = string.Empty;
             		for (int i = 0; i < numUrls; i++) {
-            			urlsString += string.Format("{0}={1};", urlLabels[i], urls[i]);
+            			urlStrings.Add(string.Format("{0}|{1}={2},{3}", urlLabels[i], urlTypes[i], urls[i], urlActiveStatuses[i].ToString()));
             		}
+                    urlsString = string.Join(";", urlStrings);
+                    Debug.Log(urlsString);
 
             		PlayerPrefs.SetString("URLs", urlsString);
 

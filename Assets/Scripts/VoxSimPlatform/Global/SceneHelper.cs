@@ -20,7 +20,7 @@ namespace VoxSimPlatform {
                     yield return null;
                 }
 
-                PluginImport commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+                CommunicationsBridge commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
                 commBridge.OpenPortInternal(PlayerPrefs.GetString("Listener Port"));
 
 #if UNITY_IOS

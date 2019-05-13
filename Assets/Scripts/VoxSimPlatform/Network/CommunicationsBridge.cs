@@ -13,12 +13,12 @@ namespace VoxSimPlatform {
     namespace Network {
         /// <summary>
         /// Class into which the contents of a socket config file is deserialized.
-        /// An example socket config file is provided parallel to the Assets folder (sample_socket_config.xml).
+        /// A default example socket config file is provided parallel to the Assets folder (sample_socket_config.xml).
         /// </summary>
         public class VoxSimSocketConfig {
             [XmlArray("SocketsList")]
             [XmlArrayItem("Socket")]
-            public List<Endpoint> Sockets = new List<Endpoint>();
+            public List<VoxSimSocket> Sockets = new List<VoxSimSocket>();
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace VoxSimPlatform {
         ///  URL (including port), Type (name of user-defined class that must inherit from either
         ///  SocketConnection or RestClient), and Enabled value.
         /// </summary>
-        public class Endpoint {
+        public class VoxSimSocket {
             public string Name = "";
             public string URL = "";
             public string Type = "";
@@ -41,7 +41,7 @@ namespace VoxSimPlatform {
         	}
         }
 
-        public class PluginImport : MonoBehaviour {
+        public class CommunicationsBridge : MonoBehaviour {
         	private INLParser _parser;
         	private CmdServer _cmdServer;
         	private FusionSocket _fusionSocket;
