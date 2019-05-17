@@ -2,6 +2,7 @@
 using UnityEngine;
 
 using RootMotion.FinalIK;
+using VoxSimPlatform.Animation;
 using VoxSimPlatform.Global;
 
 namespace EditorMenus {
@@ -43,11 +44,63 @@ namespace EditorMenus {
                 return;
             }
 
+
             // clone it, parent it to the same object as the original, and apply the requisite transformations
             GameObject clone = Instantiate(obj);
 			clone.transform.parent = obj.transform.parent;
-			// mirror along the X-axis
-			clone.transform.localScale = new Vector3(-obj.transform.localScale.x,
+
+            //Find rotations
+            Component[] rotations = clone.transform.parent.GetComponents(typeof(FixHandRotation));
+            bool rot_right = false;
+            bool rot_left = false;
+            bool to_mirror_right = clone.name.StartsWith("r");
+            FixHandRotation new_rot = null; // For if there is a corresponding rotation
+            GameObject target_joint = null;
+            FullBodyBipedEffector target_hand = FullBodyBipedEffector.RightHand;
+            Vector3 target_direction = new Vector3(0,0,0);
+            InteractionSystem target_interaction_system = null;
+            foreach (FixHandRotation rot in rotations) {
+                // Check if rotations exist for both sides, and keep track of mirrored data
+                if (rot.rootJoint.ToString().StartsWith("r")) {
+                    rot_right = true;
+                    string target_joint_name = "l" + rot.rootJoint.name.ToString().Substring(1);
+                    target_interaction_system = rot.interactionSystem; // Interaction System
+                    target_joint = GameObject.Find(target_joint_name); // Root Joint
+                    target_hand = FullBodyBipedEffector.LeftHand; // Effector Type
+                    target_direction = new Vector3(-rot.localDirection.x, rot.localDirection.y, rot.localDirection.z); // Local Direction
+                    GameObject orig_joint = rot.rootJoint; // The shoulder (or whatever else) we start with.
+                    if (target_joint == null || target_joint.transform.root != orig_joint.transform.root) {
+                        Debug.Log("No mirror joint or wrong parent");
+                    }
+                }
+                else if (rot.rootJoint.ToString().StartsWith("l")) {
+                    // See above block
+                    rot_left = true;
+                    string target_joint_name = "r" + rot.rootJoint.name.ToString().Substring(1);
+                    target_interaction_system = rot.interactionSystem;
+                    target_joint = GameObject.Find(target_joint_name);
+                    target_hand = FullBodyBipedEffector.RightHand;
+                    target_direction = new Vector3(-rot.localDirection.x, rot.localDirection.y, rot.localDirection.z);
+                    GameObject orig_joint = rot.rootJoint;
+                    if (target_joint == null || target_joint.transform.root != orig_joint.transform.root) {
+                        Debug.Log("No mirror joint or wrong parent");
+                    }
+                }
+            }
+            // Only need to make a new rotation if we're missing exactly one for the new function.
+            // And only if old one matches with the one we're mirroring.
+            if (rot_right ^ rot_left && rot_right == to_mirror_right) {
+                // Set parameters for new rotation that we now know we need.
+                Debug.Log(target_joint);
+                new_rot = clone.transform.parent.gameObject.AddComponent<FixHandRotation>();
+                new_rot.rootJoint = target_joint;
+                new_rot.effectorType = target_hand;
+                new_rot.localDirection = target_direction;
+                new_rot.interactionSystem = target_interaction_system;
+            }
+
+            // mirror along the X-axis
+            clone.transform.localScale = new Vector3(-obj.transform.localScale.x,
 				obj.transform.localScale.y, obj.transform.localScale.z);
 			// mirror its local position across the YZ-plane (along the X-axis)
 			clone.transform.localPosition = new Vector3(-obj.transform.localPosition.x,
