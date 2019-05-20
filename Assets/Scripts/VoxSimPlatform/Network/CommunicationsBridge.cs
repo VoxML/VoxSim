@@ -28,8 +28,8 @@ namespace VoxSimPlatform {
         /// </summary>
         public class VoxSimSocket {
             public string Name = "";
-            public string URL = "";
             public string Type = "";
+            public string URL = "";
             public bool Enabled = false;
         }
 
