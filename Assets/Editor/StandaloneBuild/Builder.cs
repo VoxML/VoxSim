@@ -9,11 +9,11 @@ using System.Xml.Serialization;
 using VoxSimPlatform.Global;
 
 namespace StandaloneBuild {
-    /// <summary>
-    /// Class into which the contents of a build config file is deserialized.
-    /// An example build config file is provided parallel to the Assets folder (sample_build_config.xml).
-    /// </summary>
-    public class VoxSimBuildConfig {
+	/// <summary>
+	/// Class into which the contents of a build config file is deserialized.
+	/// An example build config file is provided parallel to the Assets folder (sample_build_config.xml).
+	/// </summary>
+	public class VoxSimBuildConfig {
 		[XmlArray("ScenesList")]
         [XmlArrayItem("SceneFile")]
 		public List<SceneFile> Scenes = new List<SceneFile>();
@@ -56,14 +56,10 @@ namespace StandaloneBuild {
 						// all scenes specified in build config must be in the Scenes folder
 						string scenePath = Application.dataPath + "/Scenes/" + s.Path;
 						if (File.Exists(scenePath)) {
-                            // found a file
-                            // write the name of the scene to ScenesList
-                            // no other path information, no file extension
-                            // jin: sceneName seems to be redundant and probably could be deleted according to the comments above.
-                            // jin: But if "Assets/Scenes/" path information needs to be included in the name of the scene 
-                            // jin: to be written in ScenesList.txt, then line: file.WriteLine(s.Path.Replace(".unity", ""));
-                            // jin: need to changed into file.WriteLine(sceneName.Replace(".unity", ""));
-                            string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
+							// found a file
+							// write the name of the scene to ScenesList
+							// no other path information, no file extension
+							string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
 							file.WriteLine(s.Path.Replace(".unity", ""));
 						}
 						else {
