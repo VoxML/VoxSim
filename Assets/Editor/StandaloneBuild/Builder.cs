@@ -7,7 +7,9 @@ using System.Linq;
 using System.Xml.Serialization;
 
 using VoxSimPlatform.Global;
-
+// Question: We run the builder shell with "sample_build_config.xml" on mac, unity popped up and then gone,
+// no errors but didn't create the .app file as expected. What is the correct way to run the builder 
+// shell? Should we rerun with the correct unity path and a different build_config.xml? 
 namespace StandaloneBuild {
 	/// <summary>
 	/// Class into which the contents of a build config file is deserialized.
@@ -59,7 +61,7 @@ namespace StandaloneBuild {
 							// found a file
 							// write the name of the scene to ScenesList
 							// no other path information, no file extension
-							string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
+							// string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
 							file.WriteLine(s.Path.Replace(".unity", ""));
 						}
 						else {
