@@ -11,7 +11,10 @@ namespace EditorMenus {
     /// CreateSelectedHandPose takes a selected hand (currently attached to an unfortunate character model)
     /// and lops it off to be used as reference for the pose to pick up objects.
     /// Only enabled if a hand is currently selected (doesn't *need* to be on a person).
-    ///  "Valid hand pose" is here defined as an object whose name begins with "[lr]Hand."
+    /// "Valid hand pose" is here defined as an object whose name begins with "[lr]Hand."
+    /// 
+    /// Warning: make sure the hand you are turning into a pose is on a COPY of an agent.
+    /// Whatever agent it is attached to will be deleted.
     /// </summary>
 
     public class CreateHandPose : MonoBehaviour {
@@ -21,6 +24,10 @@ namespace EditorMenus {
         static void CreateSelectedHandPose() {
             /// <summary>
             /// Removes the person from the hand and creates an InteractionTarget
+            /// 
+            /// Warning: make sure the hand you are turning into a pose is on a COPY of an agent.
+            /// Whatever agent it is attached to will be deleted.
+            /// 
             /// IN: none
             /// OUT: none
             /// </summary>
@@ -74,6 +81,7 @@ namespace EditorMenus {
             clone.name = clone.name.Replace("(Clone)", "");
 
             // yeet the rest of the body
+            // assumes agent is a clone deformed by the posing process anyway
             if (clone.transform.root != obj.transform.root) { // edge case where you were already sans body
                 DestroyImmediate(root_person);
             }
