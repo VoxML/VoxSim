@@ -11,13 +11,13 @@ namespace VoxSimPlatform {
     namespace Logging {
         public class StateExtractor : MonoBehaviour {
         	EventManager em;
-        	PluginImport commBridge;
+        	CommunicationsBridge commBridge;
         	ObjectSelector objectSelector;
 
         	// Use this for initialization
         	void Start() {
         		em = gameObject.GetComponent<EventManager>();
-        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
         		objectSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
         		em.QueueEmpty += QueueEmpty;

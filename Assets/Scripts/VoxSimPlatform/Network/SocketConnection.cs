@@ -9,6 +9,9 @@ using UnityEngine;
 namespace VoxSimPlatform {
     namespace Network {
     	public class SocketConnection {
+            public CommunicationsBridge owner;
+            public Type IOClientType;
+
     		public event EventHandler EventSequenceReceived;
 
     		public void OnEventSequenceReceived(object sender, EventArgs e) {
@@ -39,15 +42,19 @@ namespace VoxSimPlatform {
     		protected Queue<string> _messages;
     		protected byte[] _ok = new byte[] {0x20};
 
-    		string _address;
-
+    		string _label;
+            public string Label {
+                get { return _label; }
+                set { _label = value; }
+            }
+                
+            string _address;
     		public string Address {
     			get { return _address; }
     			set { _address = value; }
     		}
 
     		int _port;
-
     		public int Port {
     			get { return _port; }
     			set { _port = value; }
@@ -78,12 +85,9 @@ namespace VoxSimPlatform {
     			//_client.Connect(address, port);
     			_t = new Thread(Loop);
     			_t.Start();
-    			Debug.Log("I am connected to " +
-    			          ((IPEndPoint) _client.Client.RemoteEndPoint).Address +
-    			          " on port " + ((IPEndPoint) _client.Client.RemoteEndPoint).Port);
-    			Debug.Log("I am connected from " +
-    			          ((IPEndPoint) _client.Client.LocalEndPoint).Address +
-    			          " on port " + ((IPEndPoint) _client.Client.LocalEndPoint).Port);
+                Debug.Log(string.Format("VoxSim ({0}) is connected to {1} on port {2} with outbound port {3}",
+                    ((IPEndPoint)_client.Client.LocalEndPoint).Address, ((IPEndPoint)_client.Client.RemoteEndPoint).Address,
+                    ((IPEndPoint)_client.Client.RemoteEndPoint).Port, ((IPEndPoint)_client.Client.LocalEndPoint).Port));
     		}
 
     		protected virtual void Loop() {

@@ -1,9 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 
 using GracesGames.SimpleFileBrowser.Scripts;
+using VoxSimPlatform.Network;
 using VoxSimPlatform.UI.Launcher;
 using VoxSimPlatform.VideoCapture;
 
@@ -53,106 +55,39 @@ namespace VoxSimPlatform {
             		base.DoUIButton(buttonID);
             	}
 
-            	void ImportPrefs(string data) {
-            		string[] lines = data.Split('\n');
-            		foreach (string line in lines) {
-            			switch (line.Split(',')[0]) {
-            				case "Listener Port":
-            					launcher.inPort = line.Split(',')[1].Trim();
-            					break;
+            	void ImportPrefs(VoxSimUserPrefs userPrefs) {
+                    launcher.makeLogs = userPrefs.MakeLogs;
+                    launcher.logsPrefix = userPrefs.LogsPrefix;
+                    launcher.actionsOnly = userPrefs.ActionOnlyLogs;
+                    launcher.fullState = userPrefs.FullStateInfo;
+                    launcher.logTimestamps = userPrefs.LogTimestamps;
 
-            				case "Make Logs":
-            					launcher.makeLogs = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Logs Prefix":
-            					launcher.logsPrefix = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Actions Only Logs":
-            					launcher.actionsOnly = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Full State Info":
-            					launcher.actionsOnly = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Log Timestamps":
-            					launcher.actionsOnly = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "URLs":
-            					launcher.urlLabels.Clear();
-            					launcher.urls.Clear();
-            					launcher.numUrls = 0;
-            					string urlsString = PlayerPrefs.GetString("URLs");
-            					foreach (string urlString in line.Split(',')[1].Trim().Split(';')) {
-            						if (urlString.Contains("=")) {
-            							launcher.urlLabels.Add(urlString.Split('=')[0]);
-            							launcher.urls.Add(urlString.Split('=')[1]);
-            							launcher.numUrls++;
-            						}
-            					}
-
-            					break;
-
-            				case "Capture Video":
-            					launcher.captureVideo = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Capture Params":
-            					launcher.captureParams = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Video Capture Mode":
-            					launcher.videoCaptureMode = (VideoCaptureMode) Convert.ToInt32(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Reset Between Events":
-            					launcher.resetScene = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Event Reset Counter":
-            					launcher.eventResetCounter = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Video Capture Filename Type":
-            					launcher.videoCaptureFilenameType =
-            						(VideoCaptureFilenameType) Convert.ToInt32(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Sort By Event String":
-            					launcher.sortByEventString = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				case "Custom Video Filename Prefix":
-            					launcher.customVideoFilenamePrefix = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Auto Events List":
-            					launcher.autoEventsList = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Start Index":
-            					launcher.startIndex = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Video Capture DB":
-            					launcher.captureDB = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Video Output Directory":
-            					launcher.videoOutputDir = line.Split(',')[1].Trim();
-            					break;
-
-            				case "Make Voxemes Editable":
-            					launcher.editableVoxemes = Convert.ToBoolean(line.Split(',')[1].Trim());
-            					break;
-
-            				default:
-            					break;
-            			}
-            		}
+                    launcher.numUrls = 0;
+                    launcher.urlLabels.Clear();
+                    launcher.urlTypes.Clear();
+                    launcher.urls.Clear();
+                    launcher.urlActiveStatuses.Clear();
+                    foreach (VoxSimSocket socket in userPrefs.SocketConfig.Sockets) {
+                        launcher.urlLabels.Add(socket.Name);
+                        launcher.urlTypes.Add(socket.Type);
+                        launcher.urls.Add(socket.URL);
+                        launcher.urlActiveStatuses.Add(socket.Enabled);
+                        launcher.numUrls++;
+                    }
+                        
+                    launcher.captureVideo = userPrefs.CapturePrefs.CaptureVideo;
+                    launcher.captureParams = userPrefs.CapturePrefs.CaptureParams;
+                    Enum.TryParse<VideoCaptureMode>(userPrefs.CapturePrefs.VideoCaptureMode, out launcher.videoCaptureMode);
+                    launcher.resetScene = userPrefs.CapturePrefs.ResetBetweenEvents;
+                    launcher.eventResetCounter = userPrefs.CapturePrefs.EventResetCounter.ToString(); 
+                    Enum.TryParse<VideoCaptureFilenameType>(userPrefs.CapturePrefs.VideoCaptureFilenameType, out launcher.videoCaptureFilenameType);
+                    launcher.sortByEventString = userPrefs.CapturePrefs.SortByEventString;
+                    launcher.customVideoFilenamePrefix = userPrefs.CapturePrefs.CustomVideoFilenamePrefix;
+                    launcher.autoEventsList = userPrefs.CapturePrefs.AutoEventsList;
+                    launcher.startIndex = userPrefs.CapturePrefs.StartIndex.ToString();
+                    launcher.captureDB = userPrefs.CapturePrefs.VideoCaptureDB;
+                    launcher.videoOutputDir = userPrefs.CapturePrefs.VideoOutputDirectory;
+                    launcher.editableVoxemes = userPrefs.MakeVoxemesEditable;
             	}
 
             	// Open a file browser to save and load files
@@ -164,7 +99,7 @@ namespace VoxSimPlatform {
             		FileBrowser fileBrowserScript = fileBrowserObject.GetComponent<FileBrowser>();
             		fileBrowserScript.SetupFileBrowser(ViewMode.Landscape);
             		if (fileBrowserMode == FileBrowserMode.Load) {
-            			fileBrowserScript.OpenFilePanel(new string[] {"txt"});
+            			fileBrowserScript.OpenFilePanel(new string[] {"xml"});
             			fileBrowserScript.OnFileSelect += LoadFileUsingPath;
             		}
 
@@ -185,15 +120,12 @@ namespace VoxSimPlatform {
             	// Loads a file using a path
             	private void LoadFileUsingPath(string path) {
             		if (path.Length != 0) {
-            			BinaryFormatter bFormatter = new BinaryFormatter();
-            			// Open the file using the path
-            			FileStream file = File.OpenRead(path);
-            			// Convert the file from a byte array into a string
-            			string fileData = bFormatter.Deserialize(file) as string;
-            			// We're done working with the file so we can close it
-            			file.Close();
-            			// Set the LoadedText with the value of the file
-            			ImportPrefs(fileData);
+                        XmlSerializer serializer = new XmlSerializer(typeof(VoxSimUserPrefs));
+                        using (var stream = new FileStream(path, FileMode.Open)) {
+                            VoxSimUserPrefs userPrefs = serializer.Deserialize(stream) as VoxSimUserPrefs;
+                            ImportPrefs(userPrefs);
+                        }
+
             			launcher.Draw = true;
             		}
             		else {

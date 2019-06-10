@@ -49,7 +49,7 @@ public class UnderspecificationVideoAutoCapture : MonoBehaviour {
 	InputController inputController;
 	EventManager eventManager;
 	ObjectSelector objSelector;
-	PluginImport commBridge;
+	CommunicationsBridge commBridge;
 	Predicates preds;
 
 	public double eventTimeoutTime = 15000.0f;
@@ -101,7 +101,7 @@ public class UnderspecificationVideoAutoCapture : MonoBehaviour {
 		inputController = GameObject.Find("IOController").GetComponent<InputController>();
 		eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
 		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 		preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
 
 		captureVideo = (PlayerPrefs.GetInt("Capture Video") == 1);
@@ -176,7 +176,7 @@ public class UnderspecificationVideoAutoCapture : MonoBehaviour {
 					inputFile.Substring(inputFile.LastIndexOf('/') + 1), eventIndex.ToString(),
 					PlayerPrefs.GetString("Listener Port")
 				};
-				string result = Marshal.PtrToStringAuto(PluginImport.PythonCall(
+				string result = Marshal.PtrToStringAuto(CommunicationsBridge.PythonCall(
 					Application.dataPath + "/Externals/python/", "auto_event_script", "send_next_event_to_port",
 					args, args.Length));
 				eventIndex = Convert.ToInt32(result);
@@ -538,7 +538,7 @@ public class UnderspecificationVideoAutoCapture : MonoBehaviour {
 					inputFile.Substring(inputFile.LastIndexOf('/') + 1), eventIndex.ToString(),
 					PlayerPrefs.GetString("Listener Port")
 				};
-				string result = Marshal.PtrToStringAuto(PluginImport.PythonCall(
+				string result = Marshal.PtrToStringAuto(CommunicationsBridge.PythonCall(
 					Application.dataPath + "/Externals/python/", "auto_event_script", "send_next_event_to_port",
 					args, args.Length));
 				eventIndex = Convert.ToInt32(result);

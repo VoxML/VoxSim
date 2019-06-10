@@ -35,9 +35,10 @@ public class SelectionEventArgs : EventArgs {
 
 public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
+    KSIMSocket ksimSocket;
 	EventManager eventManager;
 	ObjectSelector objSelector;
-	PluginImport commBridge;
+	CommunicationsBridge commBridge;
 	RelationTracker relationTracker;
 	Predicates predicates;
 
@@ -220,7 +221,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 		windowScaleFactor.y = (float) Screen.height / (float) Screen.currentResolution.height;
 
 		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 
 		eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
 		eventManager.EventComplete += ReturnToRest;
@@ -256,7 +257,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 			dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 		}
 
-		fusionSocket = commBridge.GetComponent<PluginImport>().FusionSocket;
+		fusionSocket = (FusionSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("Fusion");
 		//TODO: What if there is no CSUClient address assigned?
 		if (fusionSocket != null) {
 			fusionSocket.ConnectionMade += ConnectionMade;
@@ -264,7 +265,9 @@ public class JointGestureDemo : SingleAgentInteraction {
 			fusionSocket.ConnectionLost += ConnectionLost;
 		}
 
-		leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+        ksimSocket = (KSIMSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("KSIM");
+
+  		leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 		gestureController = Diana.GetComponent<AvatarGestureController>();
 		ik = Diana.GetComponent<FullBodyBipedIK>();
@@ -3190,11 +3193,11 @@ public class JointGestureDemo : SingleAgentInteraction {
 	}
 
 	public void StartLearn(object[] content) {
-		if ((commBridge.KSIMSocket != null) && (commBridge.KSIMSocket.IsConnected())) {
+		if ((ksimSocket != null) && (ksimSocket.IsConnected())) {
 			string command = "learn";
 			byte[] bytes = new byte[] {0x03}.Concat(new byte[] {0x01}).Concat(BitConverter.GetBytes(64 | 128))
 				.Concat(BitConverter.GetBytes(command.Length)).Concat(Encoding.ASCII.GetBytes(command)).ToArray<byte>();
-			commBridge.KSIMSocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+			ksimSocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
 		}
 	}
 

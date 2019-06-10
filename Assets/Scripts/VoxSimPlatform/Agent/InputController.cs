@@ -52,7 +52,7 @@ namespace VoxSimPlatform {
         	EventManager eventManager;
         	Macros macros;
 
-        	PluginImport commBridge;
+        	CommunicationsBridge commBridge;
 
         	ObjectSelector objSelector;
         	//ExitToMenuUIButton exitToMenu;
@@ -93,7 +93,7 @@ namespace VoxSimPlatform {
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		//exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
 
-        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<PluginImport>();
+        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 
         		labelStyle = new GUIStyle("Label");
         		textFieldStyle = new GUIStyle("TextField");
