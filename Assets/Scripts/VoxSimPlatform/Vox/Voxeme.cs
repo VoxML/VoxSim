@@ -46,8 +46,26 @@ namespace VoxSimPlatform {
         	}
 
         	public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
-        	public Vector3 targetRotation;
-        	public Vector3 targetScale;
+            private Vector3 _targetRotation;
+
+        	public Vector3 targetRotation {
+                get { return _targetRotation; }
+                set {
+                    OnTargetRotationChanged(_targetRotation, value);
+                    _targetRotation = value;
+                }
+            }
+
+        	private Vector3 _targetScale;
+
+            public Vector3 targetScale {
+                get { return _targetScale; }
+                set {
+                    OnTargetScaleChanged(_targetScale, value);
+                    _targetScale = value;
+                }
+            }
+
         	public float moveSpeed = 1.0f;
         	public float turnSpeed = 5.0f;
         	public float defaultMoveSpeed = 0.0f;
@@ -629,6 +647,16 @@ namespace VoxSimPlatform {
         		Debug.Log(string.Format("==================== Target position changed ==================== {0}: {1}->{2}",
         			gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
         	}
+
+            void OnTargetRotationChanged(Vector3 oldVal, Vector3 newVal) {
+                Debug.Log(string.Format("==================== Target rotation changed ==================== {0}: {1}->{2}",
+                    gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
+            }
+
+            void OnTargetScaleChanged(Vector3 oldVal, Vector3 newVal) {
+                Debug.Log(string.Format("==================== Target scale changed ==================== {0}: {1}->{2}",
+                    gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
+            }
 
         	void OnCollisionEnter(Collision other) {
         		if (other.gameObject.tag == "MainCamera") {

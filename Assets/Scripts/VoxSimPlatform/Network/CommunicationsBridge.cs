@@ -142,73 +142,75 @@ namespace VoxSimPlatform {
                         socketActiveStatuses.Add(bool.Parse(segments[3]));  // is this socket to be active?
 
                         // split the URL into IP and port
-                        string[] socketAddress = segments[2].Split(':');
-                        if (!string.IsNullOrEmpty(socketAddress[0])) {
-                            Type socketType = null;
-                            socketType = Type.GetType(segments[1]);
-                            if (socketType != null) {
-                                if (socketType.IsSubclassOf(typeof(SocketConnection))) {
-                                    SocketConnection newSocket = null;
-                                    try {
-                                        Debug.Log(string.Format("Creating new socket {0} of type {1}", segments[0], socketType));
-                                        newSocket = ConnectSocket(socketAddress[0], Convert.ToInt32(socketAddress[1]),
-                                            socketType);
-                                        newSocket.Label = segments[0];
-                                        _socketConnections.Add(newSocket);
+                        if (socketActiveStatuses[i] == true) {
+                            string[] socketAddress = segments[2].Split(':');
+                            if (!string.IsNullOrEmpty(socketAddress[0])) {
+                                Type socketType = null;
+                                socketType = Type.GetType(segments[1]);
+                                if (socketType != null) {
+                                    if (socketType.IsSubclassOf(typeof(SocketConnection))) {
+                                        SocketConnection newSocket = null;
+                                        try {
+                                            Debug.Log(string.Format("Creating new socket {0} of type {1}", segments[0], socketType));
+                                            newSocket = ConnectSocket(socketAddress[0], Convert.ToInt32(socketAddress[1]),
+                                                socketType);
+                                            newSocket.Label = segments[0];
+                                            _socketConnections.Add(newSocket);
 
-                                        // add socket's IOClientType component to CommunicationsBridge
-                                        gameObject.AddComponent(newSocket.IOClientType);
-                                    }
-                                    catch (Exception e) {
-                                        Debug.Log(e.Message);
-                                    }
-
-                                    if (newSocket != null) {
-                                        if (newSocket.IsConnected()) {
-                                            connected.Add(segments[2]);
+                                            // add socket's IOClientType component to CommunicationsBridge
+                                            gameObject.AddComponent(newSocket.IOClientType);
                                         }
-                                        else {
-                                            if (!tryAgainSockets.ContainsKey(newSocket.Label)) {
-                                                Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainSockets", newSocket.Label, segments[2]));
-                                                tryAgainSockets.Add(segments[2], socketType);
+                                        catch (Exception e) {
+                                            Debug.Log(e.Message);
+                                        }
+
+                                        if (newSocket != null) {
+                                            if (newSocket.IsConnected()) {
+                                                connected.Add(segments[2]);
+                                            }
+                                            else {
+                                                if (!tryAgainSockets.ContainsKey(newSocket.Label)) {
+                                                    Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainSockets", newSocket.Label, segments[2]));
+                                                    tryAgainSockets.Add(segments[2], socketType);
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                else if (socketType.IsSubclassOf(typeof(RestClient))) {
-                                    RestClient newSocket = null;
-                                    try {
-                                        Debug.Log(string.Format("Creating new REST interface {0} of type {1}", segments[0], socketType));
-                                        newSocket = CreateRestClient(socketAddress[0], Convert.ToInt32(socketAddress[1]), socketType);
-                                        newSocket.name = segments[0];
-                                        _restClients.Add(newSocket);
+                                    else if (socketType.IsSubclassOf(typeof(RestClient))) {
+                                        RestClient newSocket = null;
+                                        try {
+                                            Debug.Log(string.Format("Creating new REST interface {0} of type {1}", segments[0], socketType));
+                                            newSocket = CreateRestClient(socketAddress[0], Convert.ToInt32(socketAddress[1]), socketType);
+                                            newSocket.name = segments[0];
+                                            _restClients.Add(newSocket);
 
-                                        // add socket's IOClientType component to CommunicationsBridge
-                                        gameObject.AddComponent(newSocket.clientType);
-                                    }
-                                    catch (Exception e) {
-                                        Debug.Log(e.Message);
-                                    }
-
-                                    if (newSocket != null) {
-                                        if (newSocket.isConnected) {
-                                            connected.Add(segments[2]);
+                                            // add socket's IOClientType component to CommunicationsBridge
+                                            gameObject.AddComponent(newSocket.clientType);
                                         }
-                                        else {
-                                            if (!tryAgainSockets.ContainsKey(newSocket.name)) {
-                                                Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainRest", newSocket.name, segments[2]));
-                                                tryAgainSockets.Add(segments[2], socketType);
+                                        catch (Exception e) {
+                                            Debug.Log(e.Message);
+                                        }
+
+                                        if (newSocket != null) {
+                                            if (newSocket.isConnected) {
+                                                connected.Add(segments[2]);
+                                            }
+                                            else {
+                                                if (!tryAgainSockets.ContainsKey(newSocket.name)) {
+                                                    Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainRest", newSocket.name, segments[2]));
+                                                    tryAgainSockets.Add(segments[2], socketType);
+                                                }
                                             }
                                         }
+                                    }
+                                    else {
+                                        Debug.Log(string.Format("CommunicationsBridge.Start: Specified type {0} is not subclass of SocketConnection or RestClient.",
+                                            socketType));
                                     }
                                 }
                                 else {
-                                    Debug.Log(string.Format("CommunicationsBridge.Start: Specified type {0} is not subclass of SocketConnection or RestClient.",
-                                        socketType));
+                                        Debug.Log(string.Format("CommunicationsBridge.Start: No type {0} found for socket", segments[1]));
                                 }
-                            }
-                            else {
-                                    Debug.Log(string.Format("CommunicationsBridge.Start: No type {0} found for socket", segments[1]));
                             }
                         }
                     }
