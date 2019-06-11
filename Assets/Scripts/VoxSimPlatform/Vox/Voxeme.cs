@@ -643,16 +643,31 @@ namespace VoxSimPlatform {
         		return offset;
         	}
 
+            /// <summary>
+            /// Triggered when the gameObject's target position changes
+            /// </summary>
+            // IN: oldVal -- previous value of gameObject's targetPosition
+            //      newVal -- new or current value of gameObject's targetPosition
         	void OnTargetPositionChanged(Vector3 oldVal, Vector3 newVal) {
         		Debug.Log(string.Format("==================== Target position changed ==================== {0}: {1}->{2}",
         			gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
         	}
 
+            /// <summary>
+            /// Triggered when the gameObject's target rotation changes
+            /// </summary>
+            // IN: oldVal -- previous value of gameObject's targetRotation
+            //      newVal -- new or current value of gameObject's targetRotation
             void OnTargetRotationChanged(Vector3 oldVal, Vector3 newVal) {
                 Debug.Log(string.Format("==================== Target rotation changed ==================== {0}: {1}->{2}",
                     gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
             }
 
+            /// <summary>
+            /// Triggered when the gameObject's target scale changes
+            /// </summary>
+            // IN: oldVal -- previous value of gameObject's targetScale
+            //      newVal -- new or current value of gameObject's targetScale
             void OnTargetScaleChanged(Vector3 oldVal, Vector3 newVal) {
                 Debug.Log(string.Format("==================== Target scale changed ==================== {0}: {1}->{2}",
                     gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
