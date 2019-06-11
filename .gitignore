@@ -156,7 +156,7 @@ Logs*
 # ignore EpiSim user models folder
 EpiSim/UserModels*
 
-# include local configurations folder
+# ignore local configurations folder
 local_config
 
 # ignore NuGet packages (e.g. Nunit)
