@@ -27,6 +27,11 @@ namespace VoxSimPlatform {
                 public VoxSimSocketConfig SocketConfig = null;
                 public CapturePrefs CapturePrefs = null;
                 public bool MakeVoxemesEditable = false;
+
+                public VoxSimUserPrefs() {
+                    CapturePrefs = new CapturePrefs();
+                    SocketConfig = new VoxSimSocketConfig();
+                }
             }
 
             public class CapturePrefs {
@@ -382,26 +387,63 @@ namespace VoxSimPlatform {
                     if (GUILayout.Button("Load Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
                         // read in the socket config file and deserialize it to an instance of VoxSimSocketConfig
                         XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
-                        using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Open)) {
-                            VoxSimSocketConfig config = serializer.Deserialize(stream) as VoxSimSocketConfig;
+                        try {
+                            using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Open)) {
+                                VoxSimSocketConfig config = serializer.Deserialize(stream) as VoxSimSocketConfig;
 
-                            urlLabels.Clear();
-                            urlTypes.Clear();
-                            urls.Clear();
-                            urlActiveStatuses.Clear();
-                            numUrls = 0;
+                                urlLabels.Clear();
+                                urlTypes.Clear();
+                                urls.Clear();
+                                urlActiveStatuses.Clear();
+                                numUrls = 0;
 
-                            Debug.Log(config.Sockets.Count);
-                            foreach (VoxSimSocket socket in config.Sockets) {
-                                urlLabels.Add(socket.Name);
-                                urlTypes.Add(socket.Type);
-                                urls.Add(socket.URL);
-                                urlActiveStatuses.Add(socket.Enabled);
-                                numUrls++;
+                                foreach (VoxSimSocket socket in config.Sockets) {
+                                    urlLabels.Add(socket.Name);
+                                    urlTypes.Add(socket.Type);
+                                    urls.Add(socket.URL);
+                                    urlActiveStatuses.Add(socket.Enabled);
+                                    numUrls++;
+                                }
+                            }
+                        }
+                        catch (FileNotFoundException ex) {
+                            // if local_config/socket_config.xml has been removed or renamed
+                            //  create a new, empty one
+                            using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
+                                serializer.Serialize(stream, new VoxSimSocketConfig());
+
+                                urlLabels.Clear();
+                                urlTypes.Clear();
+                                urls.Clear();
+                                urlActiveStatuses.Clear();
+                                numUrls = 0;
                             }
                         }
                     }
                     if (GUILayout.Button("Save Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
+                        XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
+                        using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
+                            VoxSimSocketConfig socketConfig = new VoxSimSocketConfig();
+                            for (int i = 0; i < numUrls; i++) {
+                                VoxSimSocket socket = new VoxSimSocket();
+                                socket.Name = urlLabels[i];
+                                socket.Type = urlTypes[i];
+                                socket.URL = urls[i];
+                                socket.Enabled = urlActiveStatuses[i];
+                                socketConfig.Sockets.Add(socket);
+                            }
+
+                            List<string> urlStrings = new List<string>();
+                            string urlsString = string.Empty;
+                            for (int i = 0; i < numUrls; i++) {
+                                urlStrings.Add(string.Format("{0}|{1}={2},{3}", urlLabels[i], urlTypes[i], urls[i], urlActiveStatuses[i].ToString()));
+                            }
+                            urlsString = string.Join(";", urlStrings);
+
+                            PlayerPrefs.SetString("URLs", urlsString);
+
+                            serializer.Serialize(stream, socketConfig);
+                        }
                     }
                     GUILayout.EndHorizontal();
             		GUILayout.EndArea();
@@ -772,7 +814,8 @@ namespace VoxSimPlatform {
             		eulaAccepted = (PlayerPrefs.GetInt("EULA Accepted") == 1);
             	}
 
-            	public void SavePrefs() {
+            	public VoxSimUserPrefs SavePrefs() {
+                    VoxSimUserPrefs userPrefs = new VoxSimUserPrefs();
             		if ((eventResetCounter == string.Empty) || (eventResetCounter == "0")) {
             			eventResetCounter = "1";
             		}
@@ -811,6 +854,38 @@ namespace VoxSimPlatform {
             		PlayerPrefs.SetString("Video Capture DB", captureDB);
             		PlayerPrefs.SetString("Video Output Directory", videoOutputDir);
             		PlayerPrefs.SetInt("Make Voxemes Editable", Convert.ToInt32(editableVoxemes));
+
+                    userPrefs.MakeLogs = makeLogs;
+                    userPrefs.LogsPrefix = logsPrefix;
+                    userPrefs.ActionOnlyLogs = actionsOnly;
+                    userPrefs.FullStateInfo = fullState;
+                    userPrefs.LogTimestamps = logTimestamps;
+
+                    for (int i = 0; i < numUrls; i++) {
+                        VoxSimSocket socket = new VoxSimSocket();
+                        socket.Name = urlLabels[i];
+                        socket.Type = urlTypes[i];
+                        socket.URL = urls[i];
+                        socket.Enabled = urlActiveStatuses[i];
+                        userPrefs.SocketConfig.Sockets.Add(socket);
+                    }
+
+                    userPrefs.CapturePrefs.CaptureVideo = captureVideo;
+                    userPrefs.CapturePrefs.CaptureParams = captureParams;
+                    userPrefs.CapturePrefs.VideoCaptureMode = videoCaptureMode.ToString();
+                    userPrefs.CapturePrefs.ResetBetweenEvents = resetScene;
+                    userPrefs.CapturePrefs.EventResetCounter = Convert.ToInt32(eventResetCounter);
+                    userPrefs.CapturePrefs.VideoCaptureFilenameType = videoCaptureFilenameType.ToString();
+                    userPrefs.CapturePrefs.SortByEventString = captureVideo;
+                    userPrefs.CapturePrefs.CustomVideoFilenamePrefix = customVideoFilenamePrefix;
+                    userPrefs.CapturePrefs.AutoEventsList = autoEventsList;
+                    userPrefs.CapturePrefs.StartIndex = Convert.ToInt32(startIndex);
+                    userPrefs.CapturePrefs.VideoCaptureDB = captureDB;
+                    userPrefs.CapturePrefs.VideoOutputDirectory = videoOutputDir;
+
+                    userPrefs.MakeVoxemesEditable = editableVoxemes;
+
+                    return userPrefs;
             	}
             }
         }

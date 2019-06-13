@@ -35,6 +35,7 @@ public class SelectionEventArgs : EventArgs {
 
 public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
+    KSIMSocket ksimSocket;
 	EventManager eventManager;
 	ObjectSelector objSelector;
 	CommunicationsBridge commBridge;
@@ -256,7 +257,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 			dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 		}
 
-		fusionSocket = commBridge.GetComponent<CommunicationsBridge>().FusionSocket;
+		fusionSocket = (FusionSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("Fusion");
 		//TODO: What if there is no CSUClient address assigned?
 		if (fusionSocket != null) {
 			fusionSocket.ConnectionMade += ConnectionMade;
@@ -264,7 +265,9 @@ public class JointGestureDemo : SingleAgentInteraction {
 			fusionSocket.ConnectionLost += ConnectionLost;
 		}
 
-		leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+        ksimSocket = (KSIMSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("KSIM");
+
+  		leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 		gestureController = Diana.GetComponent<AvatarGestureController>();
 		ik = Diana.GetComponent<FullBodyBipedIK>();
@@ -3190,11 +3193,11 @@ public class JointGestureDemo : SingleAgentInteraction {
 	}
 
 	public void StartLearn(object[] content) {
-		if ((commBridge.KSIMSocket != null) && (commBridge.KSIMSocket.IsConnected())) {
+		if ((ksimSocket != null) && (ksimSocket.IsConnected())) {
 			string command = "learn";
 			byte[] bytes = new byte[] {0x03}.Concat(new byte[] {0x01}).Concat(BitConverter.GetBytes(64 | 128))
 				.Concat(BitConverter.GetBytes(command.Length)).Concat(Encoding.ASCII.GetBytes(command)).ToArray<byte>();
-			commBridge.KSIMSocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+			ksimSocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
 		}
 	}
 
@@ -4799,7 +4802,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	}
 
 	public void RespondAndUpdate(string utterance, bool forceUtterance = false) {
-		if (OutputHelper.GetCurrentOutputString(Role.Affector) != utterance) {
+		if (OutputHelper2.GetCurrentOutputString(Role.Affector, "Diana") != utterance) { //// add agent
 			if (!logActionsOnly) {
 				logger.OnLogEvent(this, new LoggerArgs(
 					string.Format("{0}\t{1}\t{2}",
@@ -4809,10 +4812,12 @@ public class JointGestureDemo : SingleAgentInteraction {
 			}
 		}
 
-		OutputHelper.PrintOutput(Role.Affector, utterance, forceUtterance);
+        OutputHelper2.SpeakOutput(Role.Affector, utterance, "Diana", forceUtterance);
+        OutputHelper2.PrintOutput(Role.Affector, utterance, "Diana", forceUtterance);
 
-		// get all linguistic concepts
-		if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
+
+        // get all linguistic concepts
+        if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
 			return;
 		}
 
