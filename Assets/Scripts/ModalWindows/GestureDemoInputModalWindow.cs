@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using VoxSimPlatform.Network;
 using VoxSimPlatform.UI.ModalWindow;
 
 public class GestureDemoInputModalWindow : ModalWindow {
-	FusionSocket fusionClient;
+	FusionSocket fusionSocket;
 
 	public int fontSize = 12;
 
@@ -39,10 +40,11 @@ public class GestureDemoInputModalWindow : ModalWindow {
 
 	// Update is called once per frame
 	void Update() {
-		if (fusionClient == null) {
-			fusionClient = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>().FusionSocket;
-			if (fusionClient != null) {
-				fusionClient.FusionReceived += ReceivedGesture;
+		if (fusionSocket == null) {
+			fusionSocket = (FusionSocket)GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>().
+                FindSocketConnectionByLabel("Fusion");
+			if (fusionSocket != null) {
+				fusionSocket.FusionReceived += ReceivedGesture;
 			}
 		}
 	}

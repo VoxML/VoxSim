@@ -14,14 +14,18 @@ public class FusionEventArgs : EventArgs {
 }
 
 public class FusionSocket : SocketConnection {
-	public event EventHandler FusionReceived;
+   	public event EventHandler FusionReceived;
 
 	public void OnFusionReceived(object sender, EventArgs e) {
 		if (FusionReceived != null) {
 			FusionReceived(this, e);
 		}
 	}
-
+     
+    public FusionSocket() {
+        IOClientType = typeof(FusionIOClient);
+    }
+           
 	protected override void Loop() {
 		while (IsConnected()) {
 			NetworkStream stream = _client.GetStream();

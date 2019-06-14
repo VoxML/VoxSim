@@ -1,25 +1,31 @@
 ﻿using UnityEngine;
 
-namespace UnityStandardAssets.Utility {
-	public class SmoothFollow : MonoBehaviour {
+namespace UnityStandardAssets.Utility
+{
+	public class SmoothFollow : MonoBehaviour
+	{
+
 		// The target we are following
-		[SerializeField] private Transform target;
-
+		[SerializeField]
+		private Transform target;
 		// The distance in the x-z plane to the target
-		[SerializeField] private float distance = 10.0f;
-
+		[SerializeField]
+		private float distance = 10.0f;
 		// the height we want the camera to be above the target
-		[SerializeField] private float height = 5.0f;
+		[SerializeField]
+		private float height = 5.0f;
 
-		[SerializeField] private float rotationDamping;
-		[SerializeField] private float heightDamping;
+		[SerializeField]
+		private float rotationDamping;
+		[SerializeField]
+		private float heightDamping;
 
 		// Use this for initialization
-		void Start() {
-		}
+		void Start() { }
 
 		// Update is called once per frame
-		void LateUpdate() {
+		void LateUpdate()
+		{
 			// Early out if we don't have a target
 			if (!target)
 				return;
@@ -32,8 +38,7 @@ namespace UnityStandardAssets.Utility {
 			var currentHeight = transform.position.y;
 
 			// Damp the rotation around the y-axis
-			currentRotationAngle =
-				Mathf.LerpAngle(currentRotationAngle, wantedRotationAngle, rotationDamping * Time.deltaTime);
+			currentRotationAngle = Mathf.LerpAngle(currentRotationAngle, wantedRotationAngle, rotationDamping * Time.deltaTime);
 
 			// Damp the height
 			currentHeight = Mathf.Lerp(currentHeight, wantedHeight, heightDamping * Time.deltaTime);
@@ -47,7 +52,7 @@ namespace UnityStandardAssets.Utility {
 			transform.position -= currentRotation * Vector3.forward * distance;
 
 			// Set the height of the camera
-			transform.position = new Vector3(transform.position.x, currentHeight, transform.position.z);
+			transform.position = new Vector3(transform.position.x ,currentHeight , transform.position.z);
 
 			// Always look at the target
 			transform.LookAt(target);

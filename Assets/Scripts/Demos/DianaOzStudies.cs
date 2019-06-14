@@ -55,7 +55,7 @@ public class DianaOzStudies : MonoBehaviour {
 	// Use this for initialization
 	void Start() {
 		restClient = new GameObject("RestClient");
-		restClient.AddComponent<RestClient>();
+		//restClient.AddComponent<RestClient>();
 
 		behaviorController = GameObject.Find("BehaviorController");
 		world = GameObject.Find("JointGestureDemo").GetComponent<JointGestureDemo>();
@@ -70,7 +70,7 @@ public class DianaOzStudies : MonoBehaviour {
 					cmdrUrlString = url.Split('=')[1];
 					cmdrUrl = !cmdrUrlString.StartsWith("http://") ? "http://" + cmdrUrlString : cmdrUrlString;
 //					Debug.Log (cmdrUrl);
-					restClient.GetComponent<RestClient>().Post(cmdrUrl + "/init", "", "okay", "error");
+					//restClient.GetComponent<RestClient>().Post(cmdrUrl + "/init", "", "okay", "error");
 					break;
 				}
 			}
@@ -100,7 +100,7 @@ public class DianaOzStudies : MonoBehaviour {
 	}
 
 	IEnumerator GetCommanderInput() {
-		restClient.GetComponent<RestClient>().Get(cmdrUrl + "/server", "okay", "error");
+		//restClient.GetComponent<RestClient>().Get(cmdrUrl + "/server", "okay", "error");
 		yield return null;
 	}
 
@@ -177,22 +177,22 @@ public class DianaOzStudies : MonoBehaviour {
 		string color = (((SelectionEventArgs) e).Content as GameObject).GetComponent<Voxeme>().voxml.Attributes.Attrs[0]
 			.Value;
 
-		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "",
-				string.Format("the {0} block", color), "")),
-			"okay", "error");
+		//restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
+			//JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "",
+			//	string.Format("the {0} block", color), "")),
+			//"okay", "error");
 	}
 
 	void PointClicked(object sender, EventArgs e) {
-		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "",
-				Helper.VectorToParsable((Vector3) ((SelectionEventArgs) e).Content), "")),
-			"okay", "error");
+		//restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
+			//JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "",
+			//	Helper.VectorToParsable((Vector3) ((SelectionEventArgs) e).Content), "")),
+			//"okay", "error");
 	}
 
 	void EventCompleted(object sender, EventArgs e) {
-		restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
-			JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "", "", "")),
-			"okay", "error");
+		//restClient.GetComponent<RestClient>().Post(cmdrUrl + "/server",
+			//JsonUtility.ToJson(new CommanderStatus("", "", "", "", "", "", "", "")),
+			//"okay", "error");
 	}
 }
