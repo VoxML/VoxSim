@@ -4802,7 +4802,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	}
 
 	public void RespondAndUpdate(string utterance, bool forceUtterance = false) {
-		if (OutputHelper2.GetCurrentOutputString(Role.Affector, "Diana") != utterance) { //// add agent
+		if (OutputHelper2.GetCurrentOutputString(Role.Affector, "Diana") != utterance) {
 			if (!logActionsOnly) {
 				logger.OnLogEvent(this, new LoggerArgs(
 					string.Format("{0}\t{1}\t{2}",
