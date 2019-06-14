@@ -17,7 +17,6 @@ namespace VoxSimPlatform {
             public VoiceController2 voice; // Also attached to the agent
             public String outputString; // The string currently being expressed.
 
-
             private void Start() {
                 if (gameObject.GetComponent<OutputFontManager>()) {
                     fontman = gameObject.GetComponent<OutputFontManager>();
@@ -69,22 +68,19 @@ namespace VoxSimPlatform {
             }
         }
 
+        // Simply finds the controller on a given agent, then passes commands to it
+        // Useful as a static class to call in demos
         public static class OutputHelper2 {
             /// <param name="role"> Whether speaker is a Planner or Affector .</param>
             /// <param name="str"> The output string.</param>
             /// <param name="agentName">Agent's name.</param>
             /// <param name="forceSpeak">If set to true, force speak even if identical to previous utterance.</param>
             public static void PrintOutput(Role role, String str, string agentName, bool forceSpeak = false) {
-                OutputController2[] outputs;
-
+                OutputController2 outputController;
                 // Find output controller(s) attached to agent with the right name
-                outputs = GameObject.Find(agentName).GetComponents<OutputController2>();
-
-                // Since perhaps there will be more than one in some implementation
-                foreach (OutputController2 outputController in outputs) {
-                    if (outputController.role == role) {
-                        outputController.PrintOutput(str);
-                    }
+                outputController = GameObject.Find(agentName).GetComponent<OutputController2>();
+                if (outputController.role == role) {
+                    outputController.PrintOutput(str);
                 }
             }
 
@@ -93,16 +89,12 @@ namespace VoxSimPlatform {
             /// <param name="agentName">Agent's name.</param>
             /// <param name="forceSpeak">If set to true, force speak even if identical to previous utterance.</param>
             public static void SpeakOutput(Role role, String str, string agentName, bool forceSpeak = false) {
-                OutputController2[] outputs;
+                OutputController2 outputController;
                 //// Find Diana specifically, then find in her components
-                outputs = GameObject.Find(agentName).GetComponents<OutputController2>(); //attach to Diana instead
-
-                foreach (OutputController2 outputController in outputs) {
-                    if (outputController.role == role) {
-                        outputController.SpeakOutput(str, forceSpeak);
-                    }
+                outputController = GameObject.Find(agentName).GetComponent<OutputController2>(); //attach to Diana instead
+                if (outputController.role == role) {
+                    outputController.SpeakOutput(str, forceSpeak);
                 }
-
             }
 
             /// returns the current output string by grabbing it from OutputController2
@@ -110,18 +102,12 @@ namespace VoxSimPlatform {
             /// <param name="role">Role.</param>
             /// <param name="agentName">Agent name.</param>
             public static string GetCurrentOutputString(Role role, String agentName) {
-
                 string output = string.Empty;
-                OutputController2[] outputs;
-                outputs = GameObject.Find(agentName).GetComponents<OutputController2>();
-
-                foreach (OutputController2 outputController in outputs) {
-                    if (outputController.role == role) {
-                        output = outputController.outputString;
-                        break;
-                    }
+                OutputController2 outputController;
+                outputController = GameObject.Find(agentName).GetComponent<OutputController2>();
+                if(outputController.role == role) {
+                    output = outputController.outputString;
                 }
-
                 return output;
             }
 
@@ -130,13 +116,10 @@ namespace VoxSimPlatform {
             /// <param name="role">Role.</param>
             /// <param name="agentName">Agent name.</param>
             public static void ForceRepeat(Role role, String agentName) {
-                OutputController2[] outputs;
-                outputs = GameObject.Find(agentName).GetComponents<OutputController2>();
-
-                foreach (OutputController2 outputController in outputs) {
-                    if (outputController.role == role) {
-                        outputController.ForceRepeat();
-                    }
+                OutputController2 outputController;
+                outputController = GameObject.Find(agentName).GetComponent<OutputController2>();
+                if (outputController.role == role) {
+                    outputController.ForceRepeat();
                 }
             }
         }
