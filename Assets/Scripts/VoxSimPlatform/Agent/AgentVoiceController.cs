@@ -6,7 +6,7 @@ using Crosstales.RTVoice.Model;
 
 namespace VoxSimPlatform {
     namespace Agent {
-        public class VoiceController2 : MonoBehaviour {
+        public class AgentVoiceController : MonoBehaviour {
             /// <summary>
             /// For attaching to the agent insead of to an IOController
             /// </summary>

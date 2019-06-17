@@ -5,7 +5,7 @@ using VoxSimPlatform.UI;
 
 namespace VoxSimPlatform {
     namespace Agent {
-        public class OutputFontManager : FontManager {
+        public class AgentTextController : FontManager {
             //// For handling the fonty, texty bits of output. Gonna name it fontman.
             public enum Alignment {
                 Left,
