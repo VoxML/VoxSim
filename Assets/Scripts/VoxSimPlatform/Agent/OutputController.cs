@@ -3,6 +3,8 @@ using System;
 
 using VoxSimPlatform.UI;
 
+// TODO: to be deprecated by end of refactor
+
 namespace VoxSimPlatform {
     namespace Agent {
         public class OutputController : FontManager {
@@ -122,7 +124,7 @@ namespace VoxSimPlatform {
         					outputController.outputString = str;
 
         					// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
-        					VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
+        					VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>(); // Should be on agent
         					foreach (VoiceController voice in voices) {
         						if (voice.role == role) {
         							Debug.Log(string.Format("Speaking: \"{0}\"", str));

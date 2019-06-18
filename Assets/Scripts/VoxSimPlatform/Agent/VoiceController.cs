@@ -4,6 +4,8 @@ using System;
 using Crosstales.RTVoice;
 using Crosstales.RTVoice.Model;
 
+// TODO: to be deprecated by end of refactor
+
 namespace VoxSimPlatform {
     namespace Agent {
     	public class VoiceController : MonoBehaviour {
