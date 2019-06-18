@@ -4802,7 +4802,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	}
 
 	public void RespondAndUpdate(string utterance, bool forceUtterance = false) {
-		if (OutputHelper.GetCurrentOutputString(Role.Affector) != utterance) {
+		if (AgentOutputHelper.GetCurrentOutputString(Role.Affector, "Diana") != utterance) { //// add agent
 			if (!logActionsOnly) {
 				logger.OnLogEvent(this, new LoggerArgs(
 					string.Format("{0}\t{1}\t{2}",
@@ -4812,10 +4812,12 @@ public class JointGestureDemo : SingleAgentInteraction {
 			}
 		}
 
-		OutputHelper.PrintOutput(Role.Affector, utterance, forceUtterance);
+        AgentOutputHelper.SpeakOutput(Role.Affector, utterance, "Diana", forceUtterance);
+        AgentOutputHelper.PrintOutput(Role.Affector, utterance, "Diana", forceUtterance);
 
-		// get all linguistic concepts
-		if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
+
+        // get all linguistic concepts
+        if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
 			return;
 		}
 
