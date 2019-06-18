@@ -868,15 +868,16 @@ namespace VoxSimPlatform {
     				}
     			}
 
-    			// non-relation-based reasoning from affordances
+                // non-relation-based reasoning from affordances
+                Debug.Log(affStr.Affordances.Keys.Count);
     			foreach (int objHabitat in affStr.Affordances.Keys) {
     				if (TestHabitat(obj.gameObject, objHabitat)) {
     					// test habitats
     					for (int i = 0; i < affStr.Affordances[objHabitat].Count; i++) {
     						// condition/event/result list for this habitat index
     						string ev = affStr.Affordances[objHabitat][i].Item2.Item1;
-    //						Debug.Log (ev);
-    						if (ev.Contains(program)) {
+    						Debug.Log (string.Format("Testing {0}",ev));
+    						if (Helper.GetTopPredicate(ev) == program) {
     							bool relationIndependent = true;
     							foreach (string rel in supportedRelations) {
     								Regex r = new Regex(rel);
@@ -890,16 +891,15 @@ namespace VoxSimPlatform {
     //								Debug.Log (program);
 
     								result = affStr.Affordances[objHabitat][i].Item2.Item2;
-    //								Debug.Log (result);
+    								Debug.Log (result);
 
     								if (result != "") {
-    									result = result.Replace("x", obj.gameObject.name);
+    									//result = result.Replace("x", obj.gameObject.name);
     									// any component reentrancy ultimately inherits from the parent voxeme itself
     									result = reentrancyForm.Replace(result, obj.gameObject.name);
-    									result = Helper.GetTopPredicate(result);
-    									Debug.Log(string.Format("{0}: {1} {2}.pp",
-    										affStr.Affordances[objHabitat][i].Item2.Item1, obj.gameObject.name, result));
-    									if (result != "release") {
+    									Debug.Log(string.Format("Event: {0}; Result: {1}",
+    										affStr.Affordances[objHabitat][i].Item2.Item1, result));
+    									if (Helper.GetTopPredicate(result) != "release") {
     										// TODO: maybe switch object order here below => passivize relation?
     										relationTracker.AddNewRelation(new List<GameObject> {obj.gameObject}, result);
     									}
@@ -996,7 +996,7 @@ namespace VoxSimPlatform {
     				}
     			}
 
-    			Debug.Log(string.Format("H[{0}]:{1}", habitatIndex, r));
+    			Debug.Log(string.Format("{0}: H[{1}]:{2}", obj.name, habitatIndex, r));
     			return r;
     		}
 

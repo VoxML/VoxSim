@@ -52,6 +52,7 @@ namespace VoxSimPlatform {
 
         	public void AddNewRelation(List<GameObject> objs, string relation, bool recurse = true) {
         		VoxML voxml = null;
+                // TODO: check all relations in Data + primitives (i.e., is HOLD a primitive?)
         		try {
         			using (StreamReader sr = new StreamReader(
         				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("relations/{0}.xml", relation)))) {

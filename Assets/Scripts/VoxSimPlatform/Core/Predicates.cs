@@ -11,7 +11,7 @@ using Random = System.Random;
 using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.CogPhysics;
-using VoxSimPlatform.Core;
+using VoxSimPlatform.GenLex;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Pathfinding;
 using VoxSimPlatform.SpatialReasoning;
@@ -1130,30 +1130,30 @@ namespace VoxSimPlatform {
         		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 
         		// add agent-dependent preconditions
-        		if (agent != null) {
-        			if (args[0] is GameObject) {
-        				// add preconditions
-        				//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-        				//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-        				//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-        				//				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-        				//				eventManager.RemoveEvent (3);
-        				//				return;
-        				//			}
-        				//			else {
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
-        					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
-        					eventManager.InsertEvent(
-        						eventManager.evalOrig[
-        							string.Format("put({0},{1})", (args[0] as GameObject).name,
-        								Helper.VectorToParsable((Vector3) args[1]))], 1);
-        					eventManager.RemoveEvent(2);
-        					return;
-        				}
+        		//if (agent != null) {
+        		//	if (args[0] is GameObject) {
+        		//		// add preconditions
+        		//		//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+        		//		//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+        		//		//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+        		//		//				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
+        		//		//				eventManager.RemoveEvent (3);
+        		//		//				return;
+        		//		//			}
+        		//		//			else {
+        		//		if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        		//			eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+        		//			eventManager.InsertEvent(
+        		//				eventManager.evalOrig[
+        		//					string.Format("put({0},{1})", (args[0] as GameObject).name,
+        		//						Helper.VectorToParsable((Vector3) args[1]))], 1);
+        		//			eventManager.RemoveEvent(2);
+        		//			return;
+        		//		}
 
-        				//			}
-        			}
-        		}
+        		//		//			}
+        		//	}
+        		//}
 
         		// add agent-independent preconditions
         		if (prep == "_under") {
@@ -1242,14 +1242,14 @@ namespace VoxSimPlatform {
         		}
 
 
-        		if (agent != null) {
-        			// add agent-dependent postconditions
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
-        				}
-        			}
-        		}
+        		//if (agent != null) {
+        		//	// add agent-dependent postconditions
+        		//	if (args[args.Length - 1] is bool) {
+        		//		if ((bool) args[args.Length - 1] == true) {
+        		//			eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
+        		//		}
+        		//	}
+        		//}
 
         		// override physics rigging
         		foreach (object arg in args) {
@@ -6511,39 +6511,45 @@ namespace VoxSimPlatform {
         		return;
         	}
 
+            /// <summary>
+            /// Composes an event from primitives using a VoxML encoding file (.xml)
+            /// </summary>
+            // IN: VoxML event encoding, arguments
+            // OUT: none
         	public void ComposeSubevents(VoxML voxml, object[] args) {
-        		//List<GameObject> typedArgs = new List<GameObject> ();
-
+                string agentVar = string.Empty;
+                // interate through all the arguments specified in the event structure
         		for (int i = 0; i < voxml.Type.Args.Count; i++) {
-        			VoxTypeArg arg = voxml.Type.Args[i];
-        			Debug.Log(arg.Value.Split(':')[0]);
-        			Debug.Log(arg.Value.Split(':')[1]);
+        			VoxTypeArg typedArg = voxml.Type.Args[i];    // take the current arg
+                    string argName = typedArg.Value.Split(':')[0];
+                    string argType = typedArg.Value.Split(':')[1];
 
-        			if (arg.Value.Split(':')[0].Contains("[]")) {
-        				List<GameObject> filteredArgs =
-        					args.Where(a => (a.GetType() == typeof(GameObject))).Cast<GameObject>().ToList();
-        				filteredArgs = filteredArgs.Where(a => a.GetComponent<Voxeme>() != null).ToList();
-        				filteredArgs = filteredArgs
-        					.Where(a => a.GetComponent<Voxeme>().voxml.Lex.Type.Contains(arg.Value.Split(':')[1])).ToList();
-        				filteredArgs = filteredArgs.Where(a => !eventManager.globalVars.ContainsValue(a)).ToList();
+        			Debug.Log(string.Format("{0}.TYPE.ARGS = [A{1} = {2}:{3}]", voxml.Lex.Pred, i, argName, argType));
 
-        				if (filteredArgs.Count > 0) {
-        					eventManager.globalVars.Add(arg.Value.Split(':')[0], filteredArgs);
-        				}
-        			}
-        			else {
-        				List<GameObject> filteredArgs =
-        					args.Where(a => (a.GetType() == typeof(GameObject))).Cast<GameObject>().ToList();
-        				filteredArgs = filteredArgs.Where(a => a.GetComponent<Voxeme>() != null).ToList();
-        				filteredArgs = filteredArgs
-        					.Where(a => a.GetComponent<Voxeme>().voxml.Lex.Type.Contains(arg.Value.Split(':')[1])).ToList();
-        				filteredArgs = filteredArgs.Where(a => !eventManager.globalVars.ContainsValue(a)).ToList();
+                    if (GenLex.GenLex.GetGLType(argType) == GLType.Agent) {
+                        agentVar = argName;
+                    }
+                    else {
+                        // extractedArgs = the list of provided arguments that are the same GL type as args[i]
+                        // 1. get everything in args that is the correct GL type (i.e., same GL type as args[i])
+                        // 2. from that get those that are not already global variables in the
+                        //  event manager
+                        List<object> extractedArgs = args.Where(a => GenLex.GenLex.IsGLType(a, GenLex.GenLex.GetGLType(argType))).ToList();
+                        extractedArgs = extractedArgs.Where(a => !eventManager.globalVars.ContainsValue(a)).ToList();
 
-        				if (filteredArgs.Count > 0) {
-        					//typedArgs.Add (filteredArgs [0]);
-        					eventManager.globalVars.Add(arg.Value.Split(':')[0], filteredArgs[0]);
-        				}
-        			}
+                        if (argName.Contains("[]")) {
+                            // if it's a list, add the whole list to eventManager.globalVars under argName
+            				if (extractedArgs.Count > 0) {
+            					eventManager.globalVars.Add(argName, extractedArgs);
+            				}
+            			}
+            			else {
+                            // if it's not a list just add the first one
+              				if (extractedArgs.Count > 0) {
+            					eventManager.globalVars.Add(argName, extractedArgs[0]);
+            				}
+            			}
+                    }
         		}
 
         		foreach (string key in eventManager.globalVars.Keys) {
@@ -6562,6 +6568,15 @@ namespace VoxSimPlatform {
         					String replace = match.Replace("(", "{").Replace(")", "}").Replace(",", ":");
         					modifiedCommand = command.Replace(match, replace);
         				}
+
+                        // if there is a variable representing an agent
+                        if (agentVar != string.Empty) {
+                            // if that variable is the first argument of the event
+                            //  remove it/"factor it out" to turn the event into an
+                            //  imperative format
+                            Regex r = new Regex("(?<=\\()"+agentVar+",?\\s?");
+                            modifiedCommand = r.Replace(modifiedCommand,string.Empty);
+                        }
 
         				eventManager.InsertEvent(modifiedCommand, index);
         				index++;

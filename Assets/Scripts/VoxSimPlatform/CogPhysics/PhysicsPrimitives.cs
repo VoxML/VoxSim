@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Timers;
 
 using VoxSimPlatform.Core;
@@ -54,6 +56,26 @@ namespace VoxSimPlatform {
         				predString = (String) entry.Key;
         				argsStrings = ((String) entry.Value).Split(new char[] {','});
         			}
+
+                    // if any object in argsStrings VoxML contains affordances with event predString
+                    //  reason the consequences of those affordances
+                    foreach (String argString in argsStrings) {
+                        // find the GameObject of this name
+                        GameObject argObj = GameObject.Find(argString);
+                        if (argObj != null) {
+                            // get its Voxeme component
+                            Voxeme argVox = argObj.GetComponent<Voxeme>();
+                            if (argVox != null) {
+                                // find all affordances in argVox.voxml.Afford_Str (that is, in the object's affordance structure)
+                                //  that contain predString in the event E (not the result R) -- viz. affordance encoding format H->[E]R
+                                // Regex matches [predString(...)]
+                                Regex r = new Regex("\\["+predString+"\\(.+\\)\\]");
+                                if (argVox.voxml.Afford_Str.Affordances.Where(a => r.IsMatch(a.Formula)).ToList().Count > 0) {
+                                    SatisfactionTest.ReasonFromAffordances(predString, argVox);
+                                }
+                            }
+                        }
+                    }
 
         			// TODO: better than this
         			// which predicates result in affordance-based consequence?

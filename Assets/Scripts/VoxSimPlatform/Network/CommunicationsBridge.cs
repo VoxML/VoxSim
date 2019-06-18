@@ -702,6 +702,22 @@ namespace VoxSimPlatform {
                 return socket;
             }
 
+            public SocketConnection FindSocketConnectionByType(Type type) {
+                SocketConnection socket = null;
+
+                socket = _socketConnections.FirstOrDefault(s => s.GetType() == type);
+
+                return socket;
+            }
+
+            public RestClient FindRestClientByType(Type type) {
+                RestClient socket = null;
+
+                socket = _restClients.FirstOrDefault(s => s.GetType() == type);
+
+                return socket;
+            }
+
             void OnDestroy() {
                 if (_cmdServer != null) {
                     _cmdServer.Close();
