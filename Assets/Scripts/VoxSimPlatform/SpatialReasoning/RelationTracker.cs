@@ -163,7 +163,7 @@ namespace VoxSimPlatform {
 
         	public void SurveyRelations() {
         		foreach (Voxeme voxeme in objectSelector.allVoxemes) {
-        			SatisfactionTest.ReasonFromAffordances("put", voxeme);
+        			SatisfactionTest.ReasonFromAffordances(null, null, "put", voxeme);
         		}
 
         		UpdateRelationStrings();

@@ -12,7 +12,6 @@ using System.Timers;
 
 using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
-using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Pathfinding;
 using VoxSimPlatform.Vox;
@@ -20,6 +19,8 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace Core {
         public class EventManagerArgs : EventArgs {
+            // TODO: transition this over to take a VoxML encoding as the argument
+            public VoxML VoxML { get; set; }
         	public string EventString { get; set; }
         	public bool MacroEvent { get; set; }
 
@@ -27,6 +28,12 @@ namespace VoxSimPlatform {
         		this.EventString = str;
         		this.MacroEvent = macroEvent;
         	}
+
+            public EventManagerArgs(VoxML voxml, string eventStr) {
+                this.VoxML = voxml;
+                this.EventString = eventStr;
+                this.MacroEvent = (voxml.Type.Body.Count > 1);
+            }
         }
 
         public class EventReferentArgs : EventArgs {
@@ -52,6 +59,7 @@ namespace VoxSimPlatform {
         }
 
         public class EventManager : MonoBehaviour {
+            public GameObject agent;    // TODO: make event-manager agent specific; this is just there for now to route commands correctly
         	public FullBodyBipedIK bodyIk;
         	public InteractionLookAt lookAt = new InteractionLookAt();
         	public InteractionSystem interactionSystem;
@@ -228,10 +236,25 @@ namespace VoxSimPlatform {
         						string pred = Helper.GetTopPredicate(completedEvent);
         						MethodInfo method = preds.GetType().GetMethod(pred.ToUpper());
         						if ((method != null) && (method.ReturnType == typeof(void))) {
+                                    EventManagerArgs eventArgs = null;
+                                    // is a program
+                                    Debug.Log(string.Format("Completed {0}", completedEvent));
+                                    string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", pred));
+                                    if (File.Exists(testPath)) {
+                                        VoxML voxml = null;
+                                        using (StreamReader sr = new StreamReader(testPath)) {
+                                            voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        }
+                                        eventArgs = new EventManagerArgs(voxml, completedEvent);
+                                    }
+                                    else {
+                                       eventArgs = new EventManagerArgs(completedEvent);
+                                    }
+                                    OnEventComplete(this, eventArgs);
         							// is a program
-        							Debug.Log(string.Format("Completed {0}", completedEvent));
-        							EventManagerArgs eventArgs = new EventManagerArgs(completedEvent);
-        							OnEventComplete(this, eventArgs);
+        							//Debug.Log(string.Format("Completed {0}", completedEvent));
+        							//EventManagerArgs eventArgs = new EventManagerArgs(completedEvent);
+        							//OnEventComplete(this, eventArgs);
         						}
         					}
         				}

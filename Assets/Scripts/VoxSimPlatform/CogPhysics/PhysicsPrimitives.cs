@@ -18,8 +18,7 @@ namespace VoxSimPlatform {
         	const double PHYSICS_CATCHUP_TIME = 100.0;
         	Timer catchupTimer;
 
-        	bool macroEventSatisfied;
-        	string testSatisfied;
+        	EventManagerArgs testSatisfied;
 
         	// Use this for initialization
         	void Start() {
@@ -42,13 +41,13 @@ namespace VoxSimPlatform {
         		//if (Input.GetKeyDown (KeyCode.R)) {
         		if (resolveDiscrepancies) {
         			//Debug.Log ("resolving");
-        			PhysicsHelper.ResolveAllPhysicsDiscrepancies(macroEventSatisfied);
+        			PhysicsHelper.ResolveAllPhysicsDiscrepancies(testSatisfied.MacroEvent);
         			//Debug.Break ();
         			if (eventManager.events.Count > 0) {
         				catchupTimer.Interval = 1;
         			}
 
-        			Hashtable predArgs = Helper.ParsePredicate(testSatisfied);
+        			Hashtable predArgs = Helper.ParsePredicate(testSatisfied.EventString);
         			String predString = "";
         			String[] argsStrings = null;
 
@@ -70,8 +69,10 @@ namespace VoxSimPlatform {
                                 //  that contain predString in the event E (not the result R) -- viz. affordance encoding format H->[E]R
                                 // Regex matches [predString(...)]
                                 Regex r = new Regex("\\["+predString+"\\(.+\\)\\]");
+                                // if there's >0 affordances in argObj's affordance structure that match predString
+                                // reason the consequences of those affordances
                                 if (argVox.voxml.Afford_Str.Affordances.Where(a => r.IsMatch(a.Formula)).ToList().Count > 0) {
-                                    SatisfactionTest.ReasonFromAffordances(predString, argVox);
+                                    SatisfactionTest.ReasonFromAffordances(eventManager, testSatisfied.VoxML, predString, argVox);
                                 }
                             }
                         }
@@ -82,7 +83,7 @@ namespace VoxSimPlatform {
         			if ((predString == "ungrasp") || (predString == "lift") ||
         			    (predString == "turn") || (predString == "roll") ||
         			    (predString == "slide") || (predString == "put")) {
-        				SatisfactionTest.ReasonFromAffordances(predString,
+        				SatisfactionTest.ReasonFromAffordances(eventManager, null, predString,
         					GameObject.Find(argsStrings[0] as String)
         						.GetComponent<Voxeme>()); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
         			}
@@ -92,11 +93,12 @@ namespace VoxSimPlatform {
         	}
 
         	void EventSatisfied(object sender, EventArgs e) {
-        		Debug.Log("Satisfaction received");
+                testSatisfied = (EventManagerArgs)e;
         		resolveDiscrepancies = true;
         		catchupTimer.Enabled = true;
-        		macroEventSatisfied = ((EventManagerArgs) e).MacroEvent;
-        		testSatisfied = ((EventManagerArgs) e).EventString;
+
+                Debug.Log(string.Format("Satisfaction condition met for {0} specification {1}",
+                    testSatisfied.VoxML.Lex.Pred,testSatisfied.EventString));
         	}
 
         	void Resolve(object sender, ElapsedEventArgs e) {

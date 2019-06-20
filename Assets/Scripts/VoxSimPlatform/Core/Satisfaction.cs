@@ -217,7 +217,7 @@ namespace VoxSimPlatform {
     						}
 
     						satisfied = true;
-    						ReasonFromAffordances(predString,
+    						ReasonFromAffordances(em, null, predString,
     							voxComponent); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
     					}
     					else if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
@@ -347,11 +347,21 @@ namespace VoxSimPlatform {
     			if (satisfied) {
     				MethodInfo method = preds.GetType().GetMethod(predString.ToUpper());
     				if ((method != null) && (method.ReturnType == typeof(void))) {
+                        EventManagerArgs eventArgs = null;
     					// is a program
     					Debug.Log(predString);
-    					EventManagerArgs eventArgs = new EventManagerArgs(test, isMacroEvent);
-    					em.OnEventComplete(em, eventArgs);
-    					//				ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+                        string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", predString));
+                        if (File.Exists(testPath)) {
+                            VoxML voxml = null;
+                            using (StreamReader sr = new StreamReader(testPath)) {
+                                voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                            }
+                            eventArgs = new EventManagerArgs(voxml, test);
+                        }
+                        else {
+    					   eventArgs = new EventManagerArgs(test, isMacroEvent);
+                        }
+                        em.OnEventComplete(em, eventArgs);
     				}
     			}
 
@@ -551,7 +561,7 @@ namespace VoxSimPlatform {
     			return true;
     		}
 
-    		public static void ReasonFromAffordances(String program, Voxeme obj) {
+    		public static void ReasonFromAffordances(EventManager eventManager, VoxML program, String predString, Voxeme obj) {
     			Regex reentrancyForm = new Regex(@"\[[0-9]+\]");
     			Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\], .*x.*)"); // check the order of the arguments
     			Regex groundComponentSecond = new Regex(@".*(x, .*\[[0-9]+\].*)");
@@ -693,7 +703,7 @@ namespace VoxSimPlatform {
     										// condition/event/result list for this habitat index
     										string ev = test.opVox.Affordance.Affordances[testHabitat][i].Item2.Item1;
     										Debug.Log(ev);
-    										if (ev.Contains(program) || ev.Contains("put")) {
+    										if (ev.Contains(predString) || ev.Contains("put")) {
     											// TODO: resultant states should persist
     //												Debug.Break ();
     //												Debug.Log (ev);
@@ -877,7 +887,7 @@ namespace VoxSimPlatform {
     						// condition/event/result list for this habitat index
     						string ev = affStr.Affordances[objHabitat][i].Item2.Item1;
     						Debug.Log (string.Format("Testing {0}",ev));
-    						if (Helper.GetTopPredicate(ev) == program) {
+    						if (Helper.GetTopPredicate(ev) == predString) {
     							bool relationIndependent = true;
     							foreach (string rel in supportedRelations) {
     								Regex r = new Regex(rel);
@@ -890,18 +900,45 @@ namespace VoxSimPlatform {
     //								Debug.Log (obj.opVox.Lex.Pred);
     //								Debug.Log (program);
 
-    								result = affStr.Affordances[objHabitat][i].Item2.Item2;
-    								Debug.Log (result);
+    								result = affStr.Affordances[objHabitat][i].Item2.Item2.Replace(" ",string.Empty);
+    								//Debug.Log (result);
 
     								if (result != "") {
-    									//result = result.Replace("x", obj.gameObject.name);
+                                        // look for agent in program VoxML arg structure
+                                        string agentVar = string.Empty;
+                                        //Debug.Log(program.Lex.Pred);
+                                        foreach (VoxTypeArg arg in program.Type.Args) {
+                                            string argName = arg.Value.Split(':')[0];
+                                            string argType = arg.Value.Split(':')[1];
+
+                                            if (argType == "agent") {
+                                                agentVar = argName; 
+                                            }
+                                        }
+
+                                        if (agentVar != string.Empty) {
+                                            result = result.Replace(agentVar, eventManager.agent.name);
+                                        }
+
     									// any component reentrancy ultimately inherits from the parent voxeme itself
     									result = reentrancyForm.Replace(result, obj.gameObject.name);
     									Debug.Log(string.Format("Event: {0}; Result: {1}",
     										affStr.Affordances[objHabitat][i].Item2.Item1, result));
-    									if (Helper.GetTopPredicate(result) != "release") {
+
+                                        string resultPred = Helper.GetTopPredicate(result);
+
+                                        Hashtable predArgs = Helper.ParsePredicate(result);
+                                        var objs = eventManager.ExtractObjects(resultPred, (String)predArgs[resultPred]);
+                                        List<GameObject> relationObjs = new List<GameObject>();
+                                        foreach (object o in objs) {
+                                            if (o is GameObject) {
+                                                relationObjs.Add(o as GameObject);
+                                            }
+                                        }
+
+    									if (resultPred != "release") {
     										// TODO: maybe switch object order here below => passivize relation?
-    										relationTracker.AddNewRelation(new List<GameObject> {obj.gameObject}, result);
+    										relationTracker.AddNewRelation(relationObjs, resultPred);
     									}
 
     									//Debug.Break ();

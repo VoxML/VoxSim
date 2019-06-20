@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
@@ -6574,16 +6575,39 @@ namespace VoxSimPlatform {
                             // if that variable is the first argument of the event
                             //  remove it/"factor it out" to turn the event into an
                             //  imperative format
+                            // Regex matches agentVar+optional comma and whitespace following an open paren
                             Regex r = new Regex("(?<=\\()"+agentVar+",?\\s?");
                             modifiedCommand = r.Replace(modifiedCommand,string.Empty);
                         }
 
+                        // TODO: send to agent's event manager
         				eventManager.InsertEvent(modifiedCommand, index);
         				index++;
         				//Debug.Log (eventManager.EvaluateCommand (command));
         			}
         		}
         	}
+
+            // IN: Condition (Expression), Event (string)
+            // OUT: none
+            public void WHILE(object[] args) {
+                // while(condition,event)
+                // while the condition is true, keep the event in the eventManager
+                // if the condition is not true, remove the event from the eventManager
+                //  do we need to force satisfaction in this case?
+                Expression<Func<List<String>, bool>> condition;   // List<String>: individual con/disjunctions of the condition to be tested
+                                                                  // bool: return value of the conditional
+
+                // is args[0] List<String>
+                if ((args[0] is IList) && (args[0].GetType().IsGenericType) &&
+                    (args[0].GetType().IsAssignableFrom(typeof(List<String>)))) {
+
+                    // do stuff here
+
+                    if (args[1] is String) {
+                    }
+                }
+            }
         }
     }
 }
