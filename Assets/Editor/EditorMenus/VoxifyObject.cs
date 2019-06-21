@@ -60,17 +60,17 @@ namespace EditorMenus {
             if(obj.GetComponents<FixHandRotation>().Length == 0) {
                 hand_rot1 = obj.AddComponent<FixHandRotation>();
                 hand_rot2 = obj.AddComponent<FixHandRotation>();
+                hand_rot1.effectorType = FullBodyBipedEffector.LeftHand;
+                hand_rot2.effectorType = FullBodyBipedEffector.RightHand;
+                hand_rot1.localDirection.x = -hand_rot1.localDirection.x; // Mirror
+
                 if (agent != null) {
                     hand_rot1.interactionSystem = agent.GetComponent<InteractionSystem>();
                     hand_rot1.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.leftUpperArm.gameObject;
-                    hand_rot1.effectorType = FullBodyBipedEffector.LeftHand;
-                    //Local direction cannot be automated since it depends on the object :(
                     hand_rot1.overrideDirection = true;
 
                     hand_rot2.interactionSystem = agent.GetComponent<InteractionSystem>();
                     hand_rot2.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.rightUpperArm.gameObject;
-                    hand_rot2.effectorType = FullBodyBipedEffector.RightHand;
-                    //Local direction cannot be automated since it depends on the object :(
                     hand_rot2.overrideDirection = true;
                 }
             }
@@ -97,8 +97,6 @@ namespace EditorMenus {
         // OUT: bool
         [MenuItem("VoxSim/Voxify Object %#v", true)]
         static bool ValidateVoxify() {
-            // Return false if no transform is selected, or if the selected transform does not contain
-            //  an InteractionTarget component or does not begin with "[lr]Hand"
             return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
                    (Selection.activeGameObject.GetComponentsInChildren<MeshRenderer>().Length > 0);
         }
