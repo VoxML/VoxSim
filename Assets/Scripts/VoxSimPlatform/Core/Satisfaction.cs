@@ -917,7 +917,7 @@ namespace VoxSimPlatform {
                                         }
 
                                         if (agentVar != string.Empty) {
-                                            result = result.Replace(agentVar, eventManager.agent.name);
+                                            result = result.Replace(agentVar, eventManager.GetActiveAgent().name);
                                         }
 
     									// any component reentrancy ultimately inherits from the parent voxeme itself
