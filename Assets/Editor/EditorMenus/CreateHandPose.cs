@@ -42,8 +42,8 @@ namespace EditorMenus {
             GameObject clone = Instantiate(obj);
 
             //Find parent (e.g. Diana)
-            GameObject root_person = obj.transform.root.gameObject;
-            Debug.Log(root_person);
+            GameObject rootPerson = obj.transform.root.gameObject;
+            Debug.Log(rootPerson);
 
             // Make sure new hand is in the same place as old one
             clone.transform.position = obj.transform.position;
@@ -67,14 +67,14 @@ namespace EditorMenus {
             InteractionTarget target = clone.GetComponent<InteractionTarget>();
             if (target == null) { // Only want to make one if it doesn't already exist.
                                   // Make a new one that says what hand to use and such
-                InteractionTarget to_assign_target = clone.AddComponent<InteractionTarget>() as InteractionTarget;
+                InteractionTarget newTarget = clone.AddComponent<InteractionTarget>() as InteractionTarget;
                 if (clone.name.StartsWith("r")) {
-                    to_assign_target.effectorType = FullBodyBipedEffector.RightHand;
+                    newTarget.effectorType = FullBodyBipedEffector.RightHand;
                 }
                 else if (clone.name.StartsWith("l")) {
-                    to_assign_target.effectorType = FullBodyBipedEffector.LeftHand;
+                    newTarget.effectorType = FullBodyBipedEffector.LeftHand;
                 }
-                to_assign_target.twistAxis = new Vector3(0, 0, 1); // specs say z axis, for wrist.
+                newTarget.twistAxis = new Vector3(0, 0, 1); // specs say z axis, for wrist.
             }
 
             // remove "(Clone)" from name
@@ -83,7 +83,7 @@ namespace EditorMenus {
             // yeet the rest of the body
             // assumes agent is a clone deformed by the posing process anyway
             if (clone.transform.root != obj.transform.root) { // edge case where you were already sans body
-                DestroyImmediate(root_person);
+                DestroyImmediate(rootPerson);
             }
 
             // Set new handpose as the new selection (since we deleted the old one)
