@@ -6467,16 +6467,16 @@ namespace VoxSimPlatform {
         		if (args[1] is string) {
         			string val = ((string) args[1]).Replace("\"", "").Replace("\'", "");
         			Debug.Log(string.Format("{0} : {1}", val, args[0]));
-        			if (!eventManager.globalVars.ContainsKey(val)) {
-        				eventManager.globalVars.Add(val, args[0]);
+        			if (!eventManager.macroVars.ContainsKey(val)) {
+        				eventManager.macroVars.Add(val, args[0]);
         			}
         			else {
-        				eventManager.globalVars[val] = args[0];
+        				eventManager.macroVars[val] = args[0];
         			}
         		}
 
-        		foreach (string key in eventManager.globalVars.Keys) {
-        			Debug.Log(string.Format("{0} : {1}", key, eventManager.globalVars[key]));
+        		foreach (string key in eventManager.macroVars.Keys) {
+        			Debug.Log(string.Format("{0} : {1}", key, eventManager.macroVars[key]));
         		}
 
         		return;
@@ -6492,7 +6492,7 @@ namespace VoxSimPlatform {
         	// IN: Object (single element array)
         	// OUT: String
         	public void CLEAR_GLOBALS(object[] args) {
-        		eventManager.globalVars.Clear();
+        		eventManager.macroVars.Clear();
 
         		return;
         	}
@@ -6540,6 +6540,7 @@ namespace VoxSimPlatform {
 
                     if (GenLex.GenLex.GetGLType(argType) == GLType.Agent) {
                         agentVar = argName;
+                        eventManager.macroVars[agentVar] = eventManager.GetActiveAgent();
                     }
                     else {
                         // extractedArgs = the list of provided arguments that are the same GL type as args[i]
@@ -6547,28 +6548,25 @@ namespace VoxSimPlatform {
                         // 2. from that get those that are not already macro variables in the
                         //  event manager
                         List<object> extractedArgs = args.Where(a => GenLex.GenLex.IsGLType(a, GenLex.GenLex.GetGLType(argType))).ToList();
-                        extractedArgs = extractedArgs.Where(a => !eventManager.globalVars.ContainsValue(a)).ToList();
+                        extractedArgs = extractedArgs.Where(a => !eventManager.macroVars.ContainsValue(a)).ToList();
 
                         if (argName.Contains("[]")) {
-                            // if it's a list, add the whole list to eventManager.globalVars under argName
+                            // if it's a list, add the whole list to eventManager.macroVars under argName
             				if (extractedArgs.Count > 0) {
-            					eventManager.globalVars.Add(argName, extractedArgs);
+            					eventManager.macroVars.Add(argName, extractedArgs);
             				}
             			}
             			else {
                             // if it's not a list just add the first one
               				if (extractedArgs.Count > 0) {
-            					eventManager.globalVars.Add(argName, extractedArgs[0]);
+            					eventManager.macroVars.Add(argName, extractedArgs[0]);
             				}
             			}
                     }
         		}
-
-                // define any macro variables
-                //eventManager.macroVars[agentVar] = eventManager
-
-        		foreach (string key in eventManager.globalVars.Keys) {
-        			Debug.Log(string.Format("{0} : {1}", key, eventManager.globalVars[key]));
+                    
+        		foreach (string key in eventManager.macroVars.Keys) {
+        			Debug.Log(string.Format("{0} : {1}", key, eventManager.macroVars[key]));
         		}
 
         		int index = 1;

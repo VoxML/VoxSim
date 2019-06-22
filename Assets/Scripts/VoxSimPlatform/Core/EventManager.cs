@@ -59,7 +59,6 @@ namespace VoxSimPlatform {
         }
 
         public class EventManager : MonoBehaviour {
-            public GameObject agent;    
         	public FullBodyBipedIK bodyIk;
         	public InteractionLookAt lookAt = new InteractionLookAt();
         	public InteractionSystem interactionSystem;
@@ -77,7 +76,7 @@ namespace VoxSimPlatform {
         	//public string lastObjectResolved = string.Empty;
         	public Dictionary<String, String> evalOrig = new Dictionary<String, String>();
         	public Dictionary<String, String> evalResolved = new Dictionary<String, String>();
-        	public Hashtable globalVars = new Hashtable();
+        	public Hashtable macroVars = new Hashtable();
 
         	public ReferentStore referents;
 
@@ -326,7 +325,7 @@ namespace VoxSimPlatform {
         	}
 
         	public void ClearGlobalVars(object sender, EventArgs e) {
-        		globalVars.Clear();
+        		macroVars.Clear();
         	}
 
         	public void WaitComplete(object sender, EventArgs e) {
@@ -787,7 +786,7 @@ namespace VoxSimPlatform {
         		                 temp.Count(f => f == ')');
         		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
-        		foreach (DictionaryEntry kv in globalVars) {
+        		foreach (DictionaryEntry kv in macroVars) {
         			if (kv.Value is Vector3) {
         				outString = outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
         			}
