@@ -5991,6 +5991,17 @@ namespace VoxSimPlatform {
         		}
         	}
 
+            /// <summary>
+            /// VoxML Primitive Events
+            /// 
+            /// These primitive events have specific operationalizations in the C#
+            ///  code because they must be realized spatially and geometrically in order to be
+            ///  composed into macro-events.
+            /// e.g. GRASP is a primitive so it's encoded here but also has a VoxML encoding
+            ///  accessible (Data/voxml/programs/grasp.xml) so that objects that afford grasping
+            ///  can be reasoning about w.r.t. the afforded consequences of being grasped
+            /// </summary>
+
         	// IN: Objects
         	// OUT: none
         	public void GRASP(object[] args) {
@@ -6533,7 +6544,7 @@ namespace VoxSimPlatform {
                     else {
                         // extractedArgs = the list of provided arguments that are the same GL type as args[i]
                         // 1. get everything in args that is the correct GL type (i.e., same GL type as args[i])
-                        // 2. from that get those that are not already global variables in the
+                        // 2. from that get those that are not already macro variables in the
                         //  event manager
                         List<object> extractedArgs = args.Where(a => GenLex.GenLex.IsGLType(a, GenLex.GenLex.GetGLType(argType))).ToList();
                         extractedArgs = extractedArgs.Where(a => !eventManager.globalVars.ContainsValue(a)).ToList();
@@ -6552,6 +6563,9 @@ namespace VoxSimPlatform {
             			}
                     }
         		}
+
+                // define any macro variables
+                //eventManager.macroVars[agentVar] = eventManager
 
         		foreach (string key in eventManager.globalVars.Keys) {
         			Debug.Log(string.Format("{0} : {1}", key, eventManager.globalVars[key]));
@@ -6579,7 +6593,7 @@ namespace VoxSimPlatform {
                             Regex r = new Regex("(?<=\\()"+agentVar+",?\\s?");
                             modifiedCommand = r.Replace(modifiedCommand,string.Empty);
                         }
-
+                            
                         // TODO: send to agent's event manager
         				eventManager.InsertEvent(modifiedCommand, index);
         				index++;
