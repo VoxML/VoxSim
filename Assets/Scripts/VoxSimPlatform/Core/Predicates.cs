@@ -6509,6 +6509,8 @@ namespace VoxSimPlatform {
         						if (args[1] is string) {
         							Debug.Log((string) args[1]);
         							for (int j = 0; j < i; j++) {
+                                        // take the event string to be repeated
+                                        //  and re-replace the substitutions made in ComposeSubevents
         								eventManager.InsertEvent(((string) args[1]).Replace("{", "(").Replace("}", ")")
         									.Replace(":", ",")
         									.Replace("\"", "").Replace("\'", ""), eventManager.events.Count);

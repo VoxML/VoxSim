@@ -352,7 +352,7 @@ namespace VoxSimPlatform {
         	public void ExecuteNextCommand() {
         		//PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
         		Debug.Log("Next Command: " + events[0]);
-
+                
         		if (!EvaluateCommand(events[0])) {
         			return;
         		}
@@ -371,12 +371,13 @@ namespace VoxSimPlatform {
         	public bool EvaluateCommand(String command) {
         		ClearRDFTriples();
         		ClearSkolems();
+
         		ParseCommand(command);
 
         		string globalsApplied = ApplyGlobals(command);
 
         		FinishSkolemization();
-        		skolemized = Skolemize(globalsApplied);
+                skolemized = Skolemize(globalsApplied);
         		Debug.Log("Skolemized command: " + skolemized);
         		//EvaluateSkolemizedCommand(skolemized);
 
@@ -456,20 +457,20 @@ namespace VoxSimPlatform {
         						objs.Add(arg as String);
         					}
         					else {
-        						Debug.Log(arg as String);
+        						//Debug.Log(arg as String);
         						List<GameObject> matches = new List<GameObject>();
         						foreach (Voxeme voxeme in objSelector.allVoxemes) {
         							if (voxeme.voxml.Lex.Pred.Equals(arg as String)) {
-        								Debug.Log(voxeme.gameObject);
+        								//Debug.Log(voxeme.gameObject);
         								matches.Add(voxeme.gameObject);
         							}
         						}
 
         						if (matches.Count <= 1) {
-        							Debug.Log(arg as String);
+        							//Debug.Log(arg as String);
         							if (!(arg as String).Contains('(')) {
         								GameObject go = GameObject.Find(arg as String);
-        								Debug.Log(go);
+        								//Debug.Log(go);
         								if (go == null) {
         									for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
         										if (objSelector.disabledObjects[j].name == (arg as String)) {
@@ -761,6 +762,8 @@ namespace VoxSimPlatform {
         		int parenCount = temp.Count(f => f == '(') +
         		                 temp.Count(f => f == ')');
         		Debug.Log("Skolemize: parenCount = " + parenCount);
+
+                return outString;
 
         		do {
         			foreach (DictionaryEntry kv in skolems) {

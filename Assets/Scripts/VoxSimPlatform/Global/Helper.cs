@@ -25,16 +25,21 @@ namespace VoxSimPlatform {
             public static Regex l = new Regex("[\'\"].*[\'\"]");
 
             // DATA METHODS
+            // IN: String: predicateString representing the entire predicate-argument format of the input
+            // OUT: Hashtable of format { predicate : argument }
             public static Hashtable ParsePredicate(String predicateString) {
                 Hashtable predArgs = new Hashtable();
 
+                // split predicateString on open paren, returning a maximum of two substrings
                 Queue<String> split =
                     new Queue<String>(predicateString.Split(new char[] {'('}, 2, StringSplitOptions.None));
                 if (split.Count > 1) {
-                    String pred = split.ElementAt(0);
-                    String args = split.ElementAt(1);
+                    String pred = split.ElementAt(0);   // portion before (
+                    String args = split.ElementAt(1);   // portion after (
+                    // remove the close paren from the end of args
+                    //  this is the close paren corresponding to the open paren on which we split the string
                     args = args.Remove(args.Length - 1);
-                    predArgs.Add(pred, args);
+                    predArgs.Add(pred, args);   // add to hashtable
                 }
 
                 return predArgs;
