@@ -20,9 +20,9 @@ namespace VoxSimPlatform {
         /// Helper class
         /// </summary>
         public static class Helper {
-            public static Regex v = new Regex(@"<.*>");
-            public static Regex cv = new Regex(@",<.*>");
-            public static Regex l = new Regex("[\'\"].*[\'\"]");
+            public static Regex vec = new Regex(@"<.*>"); // vector form regex
+            public static Regex commaVec = new Regex(@",<.*>");   // comma + vector form regex
+            public static Regex quoted = new Regex("[\'\"].*[\'\"]");    // quoted form regex
 
             // DATA METHODS
             // IN: String: predicateString representing the entire predicate-argument format of the input
@@ -31,8 +31,8 @@ namespace VoxSimPlatform {
                 Hashtable predArgs = new Hashtable();
 
                 // split predicateString on open paren, returning a maximum of two substrings
-                Queue<String> split =
-                    new Queue<String>(predicateString.Split(new char[] {'('}, 2, StringSplitOptions.None));
+                List<String> split =
+                    new List<String>(predicateString.Split(new char[] {'('}, 2, StringSplitOptions.None));
                 if (split.Count > 1) {
                     String pred = split.ElementAt(0);   // portion before (
                     String args = split.ElementAt(1);   // portion after (
@@ -46,13 +46,17 @@ namespace VoxSimPlatform {
             }
 
             public static String GetTopPredicate(String formula) {
-                Queue<String> split = new Queue<String>(formula.Split(new char[] {'('}, 2, StringSplitOptions.None));
+                List<String> split = new List<String>(formula.Split(new char[] {'('}, 2, StringSplitOptions.None));
                 return split.ElementAt(0);
             }
 
             public static void PrintKeysAndValues(Hashtable ht) {
-                foreach (DictionaryEntry entry in ht)
-                    Debug.Log(entry.Key + " : " + entry.Value);
+                List<string> output = new List<string>();
+                foreach (DictionaryEntry entry in ht) {
+                    output.Add(entry.Key + " : " + entry.Value);
+                }
+
+                Debug.Log("{ " + string.Join(", ", output.ToArray()) + " }");
             }
 
             public static String VectorToParsable(Vector3 vector) {
@@ -97,7 +101,7 @@ namespace VoxSimPlatform {
                 // fix for multiple RDF triples
                 Triple<String, String, String> triple = new Triple<String, String, String>("", "", "");
                 Debug.Log("MakeRDFTriple: " + formula);
-                formula = cv.Replace(formula, "");
+                formula = commaVec.Replace(formula, "");
                 String[] components = formula.Replace('(', '/').Replace(')', '/').Replace(',', '/').Split('/');
 
         //          //Debug.Log (components.Length);
@@ -137,7 +141,7 @@ namespace VoxSimPlatform {
                                         triple.Item3 = s;
                                     }
                                 }
-                                else if (l.IsMatch(s)) {
+                                else if (quoted.IsMatch(s)) {
                                     if (triple.Item1 == "") {
                                         triple.Item1 = s;
                                     }
@@ -146,12 +150,12 @@ namespace VoxSimPlatform {
                                     triple.Item2 = triple.Item2 + s + "_";
                                 }
                             }
-                            else if (v.IsMatch(s)) {
+                            else if (vec.IsMatch(s)) {
                                 if (triple.Item3 == "") {
                                     triple.Item3 = s;
                                 }
                             }
-                            else if (l.IsMatch(s)) {
+                            else if (quoted.IsMatch(s)) {
                                 if (triple.Item3 == "") {
                                     triple.Item3 = s;
                                 }

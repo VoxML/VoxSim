@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
+using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform { 
@@ -19,16 +22,40 @@ namespace VoxSimPlatform {
                         glType = GLType.Agent;
                         break;
 
+                    case "agent[]":
+                        glType = GLType.AgentList;
+                        break;
+
                     case "artifact":
                         glType = GLType.Artifact;
+                        break;
+
+                    case "artifact[]":
+                        glType = GLType.ArtifactList;
                         break;
                     
                     case "location":
                         glType = GLType.Location;
                         break;
 
+                    case "location[]":
+                        glType = GLType.LocationList;
+                        break;
+
                     case "physobj":
                         glType = GLType.PhysObj;
+                        break;
+
+                    case "physob[]":
+                        glType = GLType.PhysObjList;
+                        break;
+
+                    case "vector":
+                        glType = GLType.Vector;
+                        break;
+
+                    case "vector[]":
+                        glType = GLType.VectorList;
                         break;
 
                     default:
@@ -62,6 +89,15 @@ namespace VoxSimPlatform {
                         }
                         break;
 
+                    case GLType.AgentList:
+                        if ((obj is IList) && (obj.GetType().IsGenericType) &&
+                            (obj.GetType().IsAssignableFrom(typeof(List<GameObject>)))) {
+                            if (((List<GameObject>)obj).All(o => o.tag == "Agent")) {
+                                isType = true;
+                            }
+                        }
+                        break;
+
                     case GLType.Artifact:
                         if (obj is GameObject) {
                             Voxeme voxComponent = (obj as GameObject).GetComponent<Voxeme>();
@@ -73,10 +109,38 @@ namespace VoxSimPlatform {
                             }
                         }
                         break;
+                    
+                    case GLType.ArtifactList:
+                        if ((obj is IList) && (obj.GetType().IsGenericType) &&
+                            (obj.GetType().IsAssignableFrom(typeof(List<GameObject>)))) {
+                            List<Voxeme> voxComponents = ((List<GameObject>)obj).Select(o => o.GetComponent<Voxeme>()).ToList();
+                            if (voxComponents.Count > 0) {
+                                if (voxComponents.Select(v => v.voxml.Lex.Type.Split('*')).ToList().All(t => t.Contains("artifact"))) {
+                                    isType = true;
+                                }
+                            }
+                        }
+                        break;
 
                     case GLType.Location:
                         if (obj is Vector3) {
                             isType = true;
+                        }
+                        else if ((obj is string) && (Helper.vec.IsMatch(obj as string))) {
+                            isType = true;
+                        }
+                        break;
+                    
+                    case GLType.LocationList:
+                        if ((obj is IList) && (obj.GetType().IsGenericType)) {
+                            if (obj.GetType().IsAssignableFrom(typeof(List<Vector3>))) {
+                                isType = true;
+                            }
+                            else if (obj.GetType().IsAssignableFrom(typeof(List<string>))) {
+                                if (((List<string>)obj).All(o => Helper.vec.IsMatch(o))) {
+                                    isType = true;
+                                }
+                            }
                         }
                         break;
 
@@ -86,6 +150,40 @@ namespace VoxSimPlatform {
                             if (voxComponent != null) {
                                 string[] types = voxComponent.voxml.Lex.Type.Split('*');
                                 if (types.Where(t => GetGLType(t) == GLType.PhysObj).ToList().Count > 0) {
+                                    isType = true;
+                                }
+                            }
+                        }
+                        break;
+
+                    case GLType.PhysObjList:
+                        if ((obj is IList) && (obj.GetType().IsGenericType) &&
+                            (obj.GetType().IsAssignableFrom(typeof(List<GameObject>)))) {
+                            List<Voxeme> voxComponents = ((List<GameObject>)obj).Select(o => o.GetComponent<Voxeme>()).ToList();
+                            if (voxComponents.Count > 0) {
+                                if (voxComponents.Select(v => v.voxml.Lex.Type.Split('*')).ToList().All(t => t.Contains("artifact"))) {
+                                    isType = true;
+                                }
+                            }
+                        }
+                        break;
+
+                    case GLType.Vector:
+                        if (obj is Vector3) {
+                            isType = true;
+                        }
+                        else if ((obj is string) && (Helper.vec.IsMatch(obj as string))) {
+                            isType = true;
+                        }
+                        break;
+
+                    case GLType.VectorList:
+                        if ((obj is IList) && (obj.GetType().IsGenericType)) {
+                            if (obj.GetType().IsAssignableFrom(typeof(List<Vector3>))) {
+                                isType = true;
+                            }
+                            else if (obj.GetType().IsAssignableFrom(typeof(List<string>))) {
+                                if (((List<string>)obj).All(o => Helper.vec.IsMatch(o))) {
                                     isType = true;
                                 }
                             }

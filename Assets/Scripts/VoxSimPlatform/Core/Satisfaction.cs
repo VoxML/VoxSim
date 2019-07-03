@@ -383,7 +383,7 @@ namespace VoxSimPlatform {
     				while (argsStrings.Count > 0) {
     					object arg = argsStrings.Dequeue();
 
-    					if (Helper.v.IsMatch((String) arg)) {
+    					if (Helper.vec.IsMatch((String) arg)) {
     						// if arg is vector form
     						objs.Add(Helper.ParsableToVector((String) arg));
     					}
@@ -922,7 +922,7 @@ namespace VoxSimPlatform {
 
     									// any component reentrancy ultimately inherits from the parent voxeme itself
     									result = reentrancyForm.Replace(result, obj.gameObject.name);
-    									Debug.Log(string.Format("Event: {0}; Result: {1}",
+    									Debug.Log(string.Format("Satisfied event: {0}; Result: {1}",
     										affStr.Affordances[objHabitat][i].Item2.Item1, result));
 
                                         string resultPred = Helper.GetTopPredicate(result);

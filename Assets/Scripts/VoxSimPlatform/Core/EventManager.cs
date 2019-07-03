@@ -95,7 +95,7 @@ namespace VoxSimPlatform {
         	int argVarIndex = 0;
         	Hashtable skolems = new Hashtable();
         	string argVarPrefix = @"_ARG";
-        	Regex r = new Regex(@".*\(.*\)");
+        	Regex r = new Regex(@"[^(]+\(.+\)");
         	String nextIncompleteEvent;
         	bool stayExecution = false;
 
@@ -444,7 +444,7 @@ namespace VoxSimPlatform {
 
         		while (argsStrings.Count > 0) {
         			object arg = argsStrings.Dequeue();
-        			if (Helper.v.IsMatch((String) arg)) {
+        			if (Helper.vec.IsMatch((String) arg)) {
         				// if arg is vector form
         				objs.Add(Helper.ParsableToVector((String) arg));
         			}
@@ -606,7 +606,7 @@ namespace VoxSimPlatform {
         						if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
         							using (StreamReader sr =
         								new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-        								preds.ComposeSubevents(VoxML.LoadFromText(sr.ReadToEnd()), objs.ToArray());
+        								preds.ComposeProgram(VoxML.LoadFromText(sr.ReadToEnd()), objs.ToArray());
         							}
         						}
         					}
@@ -674,42 +674,77 @@ namespace VoxSimPlatform {
         	public void ParseCommand(String command) {
         		Hashtable predArgs;
         		String predString = null;
-        		Queue<String> argsStrings = null;
+        		List<String> argsStrings = null;
 
-        		if (r.IsMatch(command)) {
-        			// if command matches predicate form
-        			//Debug.Log ("ParseCommand: " + command);
-        			// make RDF triples only after resolving attributives to atomics (but before evaluating relations and functions)
-        			/*Triple<String,String,String> triple = Helper.MakeRDFTriples(command);
-        			if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
-        				preds.rdfTriples.Add(triple);
-        				Helper.PrintRDFTriples(preds.rdfTriples);
-        			}
-        			else {
-        				Debug.Log ("Failed to make RDF triple");
-        			}*/
+        		if (r.IsMatch(command)) {   // if command matches predicate form
+                                            //Debug.Log ("ParseCommand: " + command);
+                                            // make RDF triples only after resolving attributives to atomics (but before evaluating relations and functions)
+                                            /*Triple<String,String,String> triple = Helper.MakeRDFTriples(command);
+                                            if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
+                                                preds.rdfTriples.Add(triple);
+                                                Helper.PrintRDFTriples(preds.rdfTriples);
+                                            }
+                                            else {
+                                                Debug.Log ("Failed to make RDF triple");
+                                            }*/
+
+                    // get the main predicate and its argument
+                    Debug.Log(string.Format("Parsing predicate: {0}", command));
         			predArgs = Helper.ParsePredicate(command);
-        			foreach (DictionaryEntry entry in predArgs) {
-        				predString = (String) entry.Key;
-        				argsStrings = new Queue<String>(((String) entry.Value).Split(new char[] {','}));
 
+                    // foreach key-value pair
+        			foreach (DictionaryEntry entry in predArgs) {
+                        // pred string is the key
+        				predString = (String) entry.Key;
+
+                        // split the args at delimiters/operators, assuming they don't fall inside another subpredicate
+                        argsStrings = new List<String>(Regex.Split(((String) entry.Value),
+                            @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*),|(?<=\)[^(]*)[,|^](?=[^)]*\())"));
+
+                        for (int i = 0; i < argsStrings.Count; i++) {   // get rid of any dangling close parens
+                            int extraParens = argsStrings[i].Count(f => f == ')') -     //  that might be left over from an imperfect
+                                argsStrings[i].Count(f => f == '(');                    //  regex split
+
+                            for (int j = 0; j < extraParens; j++) {
+                                argsStrings[i] = argsStrings[i].Remove(argsStrings[i].Length - 1);
+                            }
+                        }
+
+                        // turn argsStrings in to another string representing a list of all args
         				StringBuilder sb = new StringBuilder("[");
         				foreach (String arg in argsStrings) {
         					sb.Append(arg + ",");
         				}
-
         				sb.Remove(sb.Length - 1, 1);
         				sb.Append("]");
         				String argsList = sb.ToString();
+
         				//Debug.Log(predString + " : " + argsList);
 
         				for (int i = 0; i < argsStrings.Count; i++) {
-        					Debug.Log("Input: " + argsStrings.ElementAt(i));
-        					if (r.IsMatch(argsStrings.ElementAt(i))) {
-        						String v = argVarPrefix + argVarIndex;
-        						skolems[v] = argsStrings.ElementAt(i);
-        						Debug.Log(v + " : " + skolems[v]);
-        						argVarIndex++;
+        					Debug.Log(string.Format("argsStrings@{0}: {1}", i, argsStrings.ElementAt(i)));
+        					if (r.IsMatch(argsStrings[i])) {
+                                string symbol = argsStrings[i];
+                                //if (symbol.Contains('!')) {
+                                //    symbol = symbol.Replace("!", "not(");
+
+                                //    for (int j = symbol.Count(c => c == ')'); j < symbol.Count(c => c == '('); j++) {
+                                //        symbol += ")";
+                                //    }
+                                //}
+
+                                // if return type of top predicate of symbol is not void
+                                //  add it as a skolem constant
+                                //if (File.Exists(Data.voxmlDataPath + string.Format("/attributes/{0}.xml", Helper.GetTopPredicate(symbol))) ||
+                                //    File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", Helper.GetTopPredicate(symbol))) ||
+                                //    File.Exists(Data.voxmlDataPath + string.Format("/functions/{0}.xml", Helper.GetTopPredicate(symbol)))) {
+                                    String v = argVarPrefix + argVarIndex;
+                                    skolems[v] = symbol;
+                                    Debug.Log(string.Format("Adding skolem constant {0}: {1}", v, skolems[v]));
+                                    argVarIndex++;
+                                //}
+
+                                argsStrings[i] = symbol;
 
         						sb = new StringBuilder(sb.ToString());
         						foreach (DictionaryEntry kv in skolems) {
@@ -763,20 +798,20 @@ namespace VoxSimPlatform {
         		                 temp.Count(f => f == ')');
         		Debug.Log("Skolemize: parenCount = " + parenCount);
 
-                return outString;
+                //return outString;
 
-        		do {
+        		//do {
         			foreach (DictionaryEntry kv in skolems) {
         				outString = outString.Replace((String) kv.Value, (String) kv.Key);
         				//Debug.Log (outString);
         			}
 
-        			temp = outString;
-        			parenCount = temp.Count(f => f == '(') +
-        			             temp.Count(f => f == ')');
+        			//temp = outString;
+        			//parenCount = temp.Count(f => f == '(') +
+        			//             temp.Count(f => f == ')');
         			//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
         			//move(mug,from(edge(table)),to(edge(table)))
-        		} while (parenCount > 2);
+        		//} while (parenCount > 2);
 
         		return outString;
         	}
@@ -792,6 +827,13 @@ namespace VoxSimPlatform {
         		foreach (DictionaryEntry kv in macroVars) {
         			if (kv.Value is Vector3) {
         				outString = outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+                        Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
+                            .ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value)
+                            .Where(kkv => kkv.Value.Contains((String) kv.Key))
+                            .ToDictionary(kkv => kkv.Key, kkv => kkv.Value);
+                        foreach (string key in changeValues.Keys) {
+                            skolems[key] = changeValues[key].Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+                        }
         			}
         			else if (kv.Value is GameObject) {
         				outString = outString.Replace((String) kv.Key, ((GameObject) kv.Value).name);
@@ -802,11 +844,6 @@ namespace VoxSimPlatform {
         				foreach (string key in changeValues.Keys) {
         					skolems[key] = changeValues[key].Replace((String) kv.Key, ((GameObject) kv.Value).name);
         				}
-
-        				Helper.PrintKeysAndValues(skolems);
-        //				foreach (string key in changeValues.Keys) {
-        //					Debug.Log (key + ":" + changeValues [key]);
-        //				}
         			}
         			else if (kv.Value is List<GameObject>) {
         				String list = String.Join(":", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray());
@@ -833,6 +870,8 @@ namespace VoxSimPlatform {
         		parenCount = temp.Count(f => f == '(') +
         		             temp.Count(f => f == ')');
         		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+
+                //Helper.PrintKeysAndValues(skolems);
 
         		Debug.Log(outString);
         		return outString;
@@ -877,6 +916,8 @@ namespace VoxSimPlatform {
         		Queue<String> argsStrings;
         		bool doSkolemReplacement = false;
         		Triple<String, String, String> replaceSkolems = null;
+                bool validPredExists;
+                VoxML voxml = null;
 
         		foreach (DictionaryEntry kv in skolems) {
         			Debug.Log(kv.Key + " : " + kv.Value);
@@ -896,7 +937,7 @@ namespace VoxSimPlatform {
         						while (argsStrings.Count > 0) {
         							object arg = argsStrings.Dequeue();
 
-        							if (Helper.v.IsMatch((String) arg)) {
+        							if (Helper.vec.IsMatch((String) arg)) {
         								// if arg is vector form
         								objs.Add(Helper.ParsableToVector((String) arg));
         							}
@@ -918,7 +959,7 @@ namespace VoxSimPlatform {
         										}
         									}
 
-        									Debug.Log(string.Format("{0} matches", matches.Count));
+        									Debug.Log(string.Format("{0} matches: [{1}]", matches.Count, string.Join(",",matches.Select(go => go.name).ToList())));
 
         									if (matches.Count == 0) {
         										Debug.Log(arg as String);
@@ -946,8 +987,12 @@ namespace VoxSimPlatform {
         										//}
         									}
         									else if (matches.Count == 1) {
-        										if (preds.GetType().GetMethod(pred.ToUpper()).ReturnType != typeof(String)) {
-        											// if predicate not going to return string (as in "AS")
+                                                // check if the predicate over this argument exists in our primitive list
+                                                //  or exists in VoxML
+                                                validPredExists = (((preds.GetType().GetMethod(pred.ToUpper()) != null) &&
+                                                    (preds.GetType().GetMethod(pred.ToUpper()).ReturnType != typeof(String))) ||
+                                                    (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
+                                                if (validPredExists) {
         											GameObject go = matches[0];
         											if (go == null) {
         												for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
@@ -1057,19 +1102,47 @@ namespace VoxSimPlatform {
         							}
         						}
 
-        						methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                validPredExists = ((methodToCall != null) ||
+                                                    (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
 
-        						if (methodToCall == null) {
+        						if (!validPredExists) {
+                                    this.GetActiveAgent().GetComponent<AgentOutputController>().GiveOutput("Sorry, what does " + "\"" + pred + "\" mean?");
         							OutputHelper.PrintOutput(Role.Affector, "Sorry, what does " + "\"" + pred + "\" mean?");
         							return false;
         						}
+                                else if (methodToCall == null) {
+                                    if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                        using (StreamReader sr =
+                                            new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                            voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        }
+                                        methodToCall = preds.GetType().GetMethod("ComposeProgram");
+                                    }
+                                    else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
+                                        using (StreamReader sr =
+                                            new StreamReader(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
+                                            voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        }
+                                        methodToCall = preds.GetType().GetMethod("ComposeRelation");
+                                    }
+                                }
 
         						if (pass == EvaluationPass.Attributes) {
-        							if ((methodToCall.ReturnType == typeof(String)) ||
-        							    (methodToCall.ReturnType == typeof(List<String>))) {
-        								Debug.Log("EvaluateSkolemConstants: invoke " + methodToCall.Name);
-        								object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
-        								Debug.Log(obj);
+        							//if ((methodToCall.ReturnType == typeof(String)) ||
+        							//    (methodToCall.ReturnType == typeof(List<String>))) {
+                                    if (methodToCall.ReturnType != typeof(void)) {
+                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
+                                            pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+                                        object obj = null;
+                                        if (voxml == null) {
+                                            obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                        }
+                                        else {
+                                            obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                                        } 
+                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): {1} returns {2} (typeof({3}))",
+                                            pass, methodToCall.Name, obj, obj.GetType()));
 
         								if (obj is String) {
         									if ((obj as String).Length == 0) {
@@ -1090,9 +1163,17 @@ namespace VoxSimPlatform {
         						else if (pass == EvaluationPass.RelationsAndFunctions) {
         							if ((methodToCall.ReturnType == typeof(Vector3)) ||
         							    (methodToCall.ReturnType == typeof(object))) {
-        								Debug.Log("EvaluateSkolemConstants: invoke " + methodToCall.Name);
-        								object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
-        								Debug.Log(obj);
+                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
+                                            pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+         								object obj = null;
+                                        if (voxml == null) {
+                                            obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                        }
+                                        else {
+                                            obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                                        } 
+        								Debug.Log(string.Format("EvaluateSkolemConstants ({0}): {1} returns {2} (typeof({3}))",
+                                            pass, methodToCall.Name, obj, obj.GetType()));
 
         								temp[kv.Key] = obj;
         							}
@@ -1166,18 +1247,45 @@ namespace VoxSimPlatform {
 
         				if (argsMatch.Groups[0].Value.Length > 0) {
         					string pred = argsMatch.Groups[0].Value.Split('(')[0];
-        					Debug.Log(pred);
-        					methodToCall = preds.GetType().GetMethod(pred.ToUpper());
-        					Debug.Log(methodToCall);
+                            methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                            validPredExists = ((methodToCall != null) ||
+                                                (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
+
+                            if (!validPredExists) {
+                                this.GetActiveAgent().GetComponent<AgentOutputController>().GiveOutput("Sorry, what does " + "\"" + pred + "\" mean?");
+                                OutputHelper.PrintOutput(Role.Affector, "Sorry, what does " + "\"" + pred + "\" mean?");
+                                return false;
+                            }
+                            else if (methodToCall == null) {
+                                if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                    using (StreamReader sr =
+                                        new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                        voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                    }
+                                    methodToCall = preds.GetType().GetMethod("ComposeProgram");
+                                }
+                                else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
+                                    using (StreamReader sr =
+                                        new StreamReader(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
+                                        voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                    }
+                                    methodToCall = preds.GetType().GetMethod("ComposeRelation");
+                                }
+                            }
+
+                            Debug.Log(string.Format("EvaluateSkolemConstants ({0}): queue new call to {1} (pred = \"{2}\")", pass, methodToCall.Name, pred));
 
         					if (methodToCall != null) {
         						if (((methodToCall.ReturnType == typeof(String)) ||
-        						     (methodToCall.ReturnType == typeof(List<String>))) &&
+                                    (methodToCall.ReturnType == typeof(List<String>)) ||
+                                    (methodToCall.Name == "ComposeAttribute")) &&
         						    (pass == EvaluationPass.Attributes)) {
         							newEvaluations++;
         						}
 
-        						if ((methodToCall.ReturnType == typeof(Vector3)) &&
+        						if (((methodToCall.ReturnType == typeof(Vector3)) ||
+                                    (methodToCall.Name == "ComposeRelation") || 
+                                    (methodToCall.Name == "ComposeFunction")) &&
         						    (pass == EvaluationPass.RelationsAndFunctions)) {
         							newEvaluations++;
         						}

@@ -13,18 +13,18 @@ namespace VoxSimPlatform {
         public class AgentOutputController : MonoBehaviour { //// Make it so it has a FontManager instead
 
             public Role role;
-            public AgentTextController fontman; // Based on former implementation of outputcontroller
+            public AgentTextController fontManager; // Based on former implementation of outputcontroller
             public AgentVoiceController voice; // Also attached to the agent
             public String outputString; // The string currently being expressed.
 
             private void Start() {
                 if (gameObject.GetComponent<AgentTextController>()) {
-                    fontman = gameObject.GetComponent<AgentTextController>();
+                    fontManager = gameObject.GetComponent<AgentTextController>();
                 }
                 if (gameObject.GetComponent<AgentVoiceController>()) {
                     voice = gameObject.GetComponent<AgentVoiceController>();
                 }
-                if (!fontman && !voice) {
+                if (!fontManager && !voice) {
                     Debug.LogWarning("No FontManager or VoiceController on agent. I have no mouth and I must scream.");
                 }
             }
@@ -41,8 +41,8 @@ namespace VoxSimPlatform {
 
             internal void PrintOutput(String str) {
                 outputString = str;
-                if (fontman && fontman.outputString != outputString) {
-                    fontman.outputString = outputString;
+                if (fontManager && fontManager.outputString != outputString) {
+                    fontManager.outputString = outputString;
                 }
                 else {
                     Debug.LogWarning("No output text box to print to");

@@ -5,9 +5,15 @@
         public enum GLType {
             None,
             Agent,  // substitute for GL Human type
+            AgentList,
             Artifact,
+            ArtifactList,
             Location,
-            PhysObj
+            LocationList,
+            PhysObj,
+            PhysObjList,
+            Vector,
+            VectorList
         }
     }
 }

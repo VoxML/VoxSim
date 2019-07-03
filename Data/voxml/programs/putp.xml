@@ -20,10 +20,13 @@
       <Subevent Value="grasp(x,y)" />
       <Subevent Value="while(hold(x,y)^!at(y,z))" />
       <!--while(hold(block6)^!at(block6,<0.549; 0.8942753; -0.11>))-->
+      <!--while((hold(block6)^!at(block6,<0.549; 0.8942753; -0.11>))|(!hold(block6)|at(block6,<0.549; 0.8942753; -0.11>)))-->
       <!--Subevent Value="while(hold(x,y)^!at(y,z)):move_1(x,y,z,VoxSimPlatform.Pathfinding.AStarSearch.PlanPath2)" /-->
+      <!--Subevent Value="while(hold(x,y)^loc(y)!=z):move_1(x,y,z,VoxSimPlatform.Pathfinding.AStarSearch.PlanPath2)" /-->
       <!--Subevent Value="put(x,y,z)" /-->
       <!--move_1(x,y,to(z)) U at(y,z)-->
       <Subevent Value="at(y,z)-&gt;ungrasp(x,y)" /> <!--at(y,z)-&gt;ungrasp(x,y)-->
+      <Subevent Value="if(at(y,z)):ungrasp(x,y)" /> <!--at(y,z)-&gt;ungrasp(x,y)-->
     </Body>
     <Scale />
     <Arity />

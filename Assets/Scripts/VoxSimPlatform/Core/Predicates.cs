@@ -6530,46 +6530,36 @@ namespace VoxSimPlatform {
             /// </summary>
             // IN: VoxML event encoding, arguments
             // OUT: none
-        	public void ComposeSubevents(VoxML voxml, object[] args) {
+        	public void ComposeProgram(VoxML voxml, object[] args) {
+                eventManager.macroVars.Clear();
+
                 string agentVar = string.Empty;
-                // interate through all the arguments specified in the event structure
+                int argIndex = 0;
+                // iterate through all the arguments specified in the event structure
         		for (int i = 0; i < voxml.Type.Args.Count; i++) {
         			VoxTypeArg typedArg = voxml.Type.Args[i];    // take the current arg
-                    string argName = typedArg.Value.Split(':')[0];
-                    string argType = typedArg.Value.Split(':')[1];
+                    string curArgName = typedArg.Value.Split(':')[0];
+                    string[] curArgTypes = typedArg.Value.Split(':')[1].Split('*');
 
-        			Debug.Log(string.Format("{0}.TYPE.ARGS = [A{1} = {2}:{3}]", voxml.Lex.Pred, i, argName, argType));
+                    Debug.Log(string.Format("{0}.TYPE.ARGS = [A{1} = {2}:{3}]",
+                        voxml.Lex.Pred, i, curArgName, string.Join("*",curArgTypes)));
 
-                    if (GenLex.GenLex.GetGLType(argType) == GLType.Agent) {
-                        agentVar = argName;
+                    if ((curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                        (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
+                        // TODO: figure out what to do if you have multiple agents as an argument
+                        //  (i.e. group action -> put(x:agent[], y:physobj, z:location))
+                        agentVar = curArgName;
                         eventManager.macroVars[agentVar] = eventManager.GetActiveAgent();
                     }
                     else {
-                        // extractedArgs = the list of provided arguments that are the same GL type as args[i]
-                        // 1. get everything in args that is the correct GL type (i.e., same GL type as args[i])
-                        // 2. from that get those that are not already macro variables in the
-                        //  event manager
-                        List<object> extractedArgs = args.Where(a => GenLex.GenLex.IsGLType(a, GenLex.GenLex.GetGLType(argType))).ToList();
-                        extractedArgs = extractedArgs.Where(a => !eventManager.macroVars.ContainsValue(a)).ToList();
-
-                        if (argName.Contains("[]")) {
-                            // if it's a list, add the whole list to eventManager.macroVars under argName
-            				if (extractedArgs.Count > 0) {
-            					eventManager.macroVars.Add(argName, extractedArgs);
-            				}
-            			}
-            			else {
-                            // if it's not a list just add the first one
-              				if (extractedArgs.Count > 0) {
-            					eventManager.macroVars.Add(argName, extractedArgs[0]);
-            				}
-            			}
+                        if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[argIndex],GenLex.GenLex.GetGLType(t)))) {
+                            eventManager.macroVars.Add(curArgName, args[argIndex]);
+                        }
+                        argIndex++;
                     }
         		}
-                    
-        		foreach (string key in eventManager.macroVars.Keys) {
-        			Debug.Log(string.Format("{0} : {1}", key, eventManager.macroVars[key]));
-        		}
+                 
+                Helper.PrintKeysAndValues(eventManager.macroVars);
 
         		int index = 1;
         		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
@@ -6602,9 +6592,38 @@ namespace VoxSimPlatform {
         		}
         	}
 
+            /// <summary>
+            /// Composes a relation from primitives using a VoxML encoding file (.xml)
+            /// </summary>
+            // IN: VoxML event encoding, arguments
+            // OUT: none
+            public object ComposeRelation(VoxML voxml, object[] args) {
+                eventManager.macroVars.Clear();
+
+                object retVal = null;
+
+                // iterate through all the arguments specified in the event structure
+                for (int i = 0; i < voxml.Type.Args.Count; i++) {
+                    VoxTypeArg typedArg = voxml.Type.Args[i];    // take the current arg
+                    string curArgName = typedArg.Value.Split(':')[0];
+                    string[] curArgTypes = typedArg.Value.Split(':')[1].Split('*');
+
+                    Debug.Log(string.Format("{0}.TYPE.ARGS = [A{1} = {2}:{3}]",
+                        voxml.Lex.Pred, i, curArgName, string.Join("*",curArgTypes)));
+
+                    if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[i],GenLex.GenLex.GetGLType(t)))) {
+                        eventManager.macroVars.Add(curArgName, args[i]);
+                    }
+                }
+                    
+                Helper.PrintKeysAndValues(eventManager.macroVars);
+
+                return retVal;
+            }
+
             // IN: Condition (Expression), Event (string)
             // OUT: none
-            public void WHILE(object[] args) {
+            public bool WHILE(object[] args) {
                 // while(condition,event)
                 // while the condition is true, keep the event in the eventManager
                 // if the condition is not true, remove the event from the eventManager
@@ -6621,6 +6640,8 @@ namespace VoxSimPlatform {
                     if (args[1] is String) {
                     }
                 }
+
+                return true;
             }
         }
     }
