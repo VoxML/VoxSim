@@ -6602,21 +6602,49 @@ namespace VoxSimPlatform {
 
                 object retVal = null;
 
-                // iterate through all the arguments specified in the event structure
-                for (int i = 0; i < voxml.Type.Args.Count; i++) {
-                    VoxTypeArg typedArg = voxml.Type.Args[i];    // take the current arg
-                    string curArgName = typedArg.Value.Split(':')[0];
-                    string[] curArgTypes = typedArg.Value.Split(':')[1].Split('*');
+                // iterate through all the arguments provided to compose operation
+                // we treat relations in a special fashion
+                //  - if multiple arguments are provided (e.g., "at(block6,L)", "on(block6,block4)"),
+                //  we have to evaluate the satisfaction of the relation
+                //  - if only one argument in provided (e.g., "at(block6)", "on(block4)"),
+                //  we treat the relation as an interpretation, or causal result, and return the R3 element denoted
+                //  by a configurational relation, or the (for now, physics activation signal -- let's see how this works -- it cannot be a boolean) denoted by a force dynamic relation
+                for (int i = 0; i < args.Length; i++) {
+                    VoxTypeArg voxmlArg = voxml.Type.Args[i];    // take the corresponding arg from VoxML
+                    string voxmlArgName = voxmlArg.Value.Split(':')[0];
+                    string[] voxmlArgTypes = voxmlArg.Value.Split(':')[1].Split('*');
 
                     Debug.Log(string.Format("{0}.TYPE.ARGS = [A{1} = {2}:{3}]",
-                        voxml.Lex.Pred, i, curArgName, string.Join("*",curArgTypes)));
+                        voxml.Lex.Pred, i, voxmlArgName, string.Join("*",voxmlArgTypes)));
 
-                    if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[i],GenLex.GenLex.GetGLType(t)))) {
-                        eventManager.macroVars.Add(curArgName, args[i]);
+                    if (voxmlArgTypes.Any(t => GenLex.GenLex.IsGLType(args[i],GenLex.GenLex.GetGLType(t)))) {
+                        eventManager.macroVars.Add(voxmlArgName, args[i]);
                     }
                 }
                     
                 Helper.PrintKeysAndValues(eventManager.macroVars);
+
+                if (args.Length == voxml.Type.Args.Count) { // all arguments specified
+                    // calc IsSatisfied result
+                    retVal = false;
+                    //retVal = SatisfactionTest.IsSatisfied(voxml, args);
+                }
+                else {                                      // otherwise calc location/region
+                    string relStr = string.Empty;
+
+                    switch (voxml.Type.Class) {
+                        case "config":
+                            relStr = voxml.Type.Value;
+                            break;
+
+                        case "force_dynamic":
+                            break;
+
+                        default:
+                            Debug.Log(string.Format("ComposeRelation: unknown relation class: {0}", voxml.Type.Class));
+                            break;
+                    }
+                }
 
                 return retVal;
             }

@@ -415,7 +415,7 @@ namespace VoxSimPlatform {
         		events[events.IndexOf(command)] = evaluated;
 
         		Triple<String, String, String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
-        		Debug.Log(evalOrig[evaluated]);
+                Debug.Log(string.Format("Event string {0} with skolems resolved -> {1}",evalOrig[evaluated],evalResolved[evaluated]));
         		Debug.Log(evalResolved[evaluated]);
         		Debug.Log(triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 
@@ -437,8 +437,9 @@ namespace VoxSimPlatform {
         		Queue<String> argsStrings = new Queue<String>(predArg.Split(new char[] {
         			','
         		}));
+
                 // Match referent stack to whoever is being talked to
-                if(GetActiveAgent() != null) {
+                if (GetActiveAgent() != null) {
                     referents = GetActiveAgent().GetComponent<ReferentStore>();
                 }
 
@@ -897,6 +898,9 @@ namespace VoxSimPlatform {
         				String list = String.Join(",", ((List<String>) kv.Value).ToArray());
         				outString = outString.Replace((String) kv.Key, list);
         			}
+                    else if (kv.Value is bool) {
+                        outString = outString.Replace((String) kv.Key, ((bool) kv.Value).ToString());
+                    }
         		}
 
         		temp = outString;
@@ -920,6 +924,7 @@ namespace VoxSimPlatform {
                 VoxML voxml = null;
 
         		foreach (DictionaryEntry kv in skolems) {
+                    voxml = null;
         			Debug.Log(kv.Key + " : " + kv.Value);
         			objs.Clear();
         			if (kv.Value is String) {
@@ -993,6 +998,7 @@ namespace VoxSimPlatform {
                                                     (preds.GetType().GetMethod(pred.ToUpper()).ReturnType != typeof(String))) ||
                                                     (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
                                                 if (validPredExists) {
+                                                    Debug.Log(string.Format("Predicate found: {0}", pred));
         											GameObject go = matches[0];
         											if (go == null) {
         												for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
@@ -1131,6 +1137,8 @@ namespace VoxSimPlatform {
         						if (pass == EvaluationPass.Attributes) {
         							//if ((methodToCall.ReturnType == typeof(String)) ||
         							//    (methodToCall.ReturnType == typeof(List<String>))) {
+                                    // non-void return type
+                                    // (attribute, relation, function)
                                     if (methodToCall.ReturnType != typeof(void)) {
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
                                             pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
@@ -1159,8 +1167,26 @@ namespace VoxSimPlatform {
 
         								temp[kv.Key] = obj;
         							}
-        						}
-        						else if (pass == EvaluationPass.RelationsAndFunctions) {
+                                    else   // void return type: program
+                                    {
+                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke IsSatisfied({1}) with {2}{3}",
+                                            pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+                                        object obj = null;
+                                        if (voxml == null) {
+                                            obj = SatisfactionTest.IsSatisfied(methodToCall.Name, objs);
+                                            //obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                        }
+                                        else {
+                                            obj = SatisfactionTest.IsSatisfied(voxml, objs);
+                                            //obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                                        } 
+                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): IsSatisfied({1}) returns {2} (typeof({3}))",
+                                            pass, methodToCall.Name, obj, obj.GetType()));
+
+                                        temp[kv.Key] = obj;
+                                    }
+                                }
+                                else if (pass == EvaluationPass.RelationsAndFunctions) {
         							if ((methodToCall.ReturnType == typeof(Vector3)) ||
         							    (methodToCall.ReturnType == typeof(object))) {
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
@@ -1225,14 +1251,18 @@ namespace VoxSimPlatform {
         							replaced = ((String) skolems[kv.Key]).Replace((String) argsMatch.Groups[0].Value,
         								Helper.VectorToParsable((Vector3) replaceWith));
         						}
+                                else if (replaceWith is bool) {
+                                    replaced = ((String) skolems[kv.Key]).Replace(argsMatch.Groups[0].Value,
+                                        (String) replaceWith);
+                                }
 
-        						Debug.Log(replaced);
-        						//if (replace is Vector3) {
+        						Debug.Log(string.Format("Replacing {0} with {1}", skolems[kv.Key], replaced));
         						skolems[kv.Key] = replaced;
         					}
         				}
         			}
         			else {
+                        Debug.Log(string.Format("Replacing {0} with {1}", skolems[kv.Key], temp[kv.Key]));
         				skolems[kv.Key] = temp[kv.Key];
         			}
         		}
@@ -1289,6 +1319,12 @@ namespace VoxSimPlatform {
         						    (pass == EvaluationPass.RelationsAndFunctions)) {
         							newEvaluations++;
         						}
+
+                                if (((methodToCall.ReturnType == typeof(void)) ||
+                                    ((methodToCall.Name == "ComposeProgram"))) &&
+                                    (pass == EvaluationPass.Attributes)) {
+                                    newEvaluations++;
+                                }
         					}
         				}
         			}

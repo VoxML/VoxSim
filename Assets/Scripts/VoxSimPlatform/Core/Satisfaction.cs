@@ -22,6 +22,14 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace Core {
     	public static class SatisfactionTest {
+            public static bool IsSatisfied(String pred, List<object> args) {
+                return true;
+            }
+
+            public static bool IsSatisfied(VoxML voxml, List<object> args) {
+                return true;
+            }
+
     		public static bool IsSatisfied(String test) {
     			bool satisfied = false;
     			Hashtable predArgs = Helper.ParsePredicate(test);

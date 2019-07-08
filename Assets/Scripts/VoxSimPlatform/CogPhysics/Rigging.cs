@@ -7,6 +7,11 @@ using VoxSimPlatform.SpatialReasoning;
 
 namespace VoxSimPlatform {
     namespace CogPhysics {
+        public enum PhysicsActivationSignal {
+            Activate,
+            Deactivate
+        }
+
         public class Rigging : MonoBehaviour {
         	//[HideInInspector]
         	public bool usePhysicsRig = true;
