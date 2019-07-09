@@ -95,6 +95,8 @@ namespace VoxSimPlatform {
             public Dictionary<string, Type> tryAgainRest = new Dictionary<string, Type>();
 
             public List<string> connected = new List<string>();
+            public long httpResponseCode;
+            public long httpSuccessCode = 405; 
 
             // Make our calls from the Plugin
             [DllImport("CommunicationsBridge")]
@@ -104,9 +106,7 @@ namespace VoxSimPlatform {
             public event EventHandler PortOpened;
 
             public void OnPortOpened(object sender, EventArgs e) {
-                if (PortOpened != null) {
-                    PortOpened(this, e);
-                }
+                PortOpened?.Invoke(this, e);
             }
 
             public int connectionRetryTimerTime;
@@ -115,6 +115,7 @@ namespace VoxSimPlatform {
 
             void Start() {
                 _socketConnections = new List<SocketConnection>();
+                _restClients = new List<RestClient>();
                 connectionRetryTimer = new Timer(connectionRetryTimerTime);
                 connectionRetryTimer.Enabled = true;
                 connectionRetryTimer.Elapsed += RetryConnections;
@@ -181,6 +182,7 @@ namespace VoxSimPlatform {
                                         try {
                                             Debug.Log(string.Format("Creating new REST interface {0} of type {1}", segments[0], socketType));
                                             newSocket = CreateRestClient(socketAddress[0], Convert.ToInt32(socketAddress[1]), socketType);
+
                                             newSocket.name = segments[0];
                                             _restClients.Add(newSocket);
 
@@ -192,13 +194,13 @@ namespace VoxSimPlatform {
                                         }
 
                                         if (newSocket != null) {
-                                            if (newSocket.isConnected) {
+                                            if (newSocket.isConnected && httpResponseCode == httpSuccessCode) {
                                                 connected.Add(segments[2]);
                                             }
                                             else {
-                                                if (!tryAgainSockets.ContainsKey(newSocket.name)) {
+                                                if (!tryAgainRest.ContainsKey(newSocket.name)) {
                                                     Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainRest", newSocket.name, segments[2]));
-                                                    tryAgainSockets.Add(segments[2], socketType);
+                                                    tryAgainRest.Add(segments[2], socketType);
                                                 }
                                             }
                                         }
@@ -509,6 +511,55 @@ namespace VoxSimPlatform {
                     }
                 }
 
+                if (retryConnections && tryAgainRest.Keys.Count > 0)
+                {
+                    foreach (string connectionUrl in tryAgainRest.Keys)
+                    {
+                        RestClient client = _restClients.FirstOrDefault(s => s.GetType() == tryAgainRest[connectionUrl]); 
+                        if (client != null)
+                        {
+                            if (!client.isConnected && httpResponseCode != httpSuccessCode)
+                            {
+                                Debug.Log(string.Format("Retrying connection {0}@{1}", tryAgainRest[connectionUrl],
+                                        connectionUrl));
+                                // try again
+                                try
+                                {
+                                    string[] url = connectionUrl.Split(':');
+                                    string address = url[0];
+                                    if (address != "")
+                                    {
+                                        int port = Convert.ToInt32(url[1]);
+                                        try
+                                        {
+                                            StartCoroutine(TryConnectRestClient(client, address, port));
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Debug.Log(e.Message);
+                                        }
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.Log(e.Message);
+                                }
+
+
+
+                                if (client.isConnected && httpResponseCode == httpSuccessCode)
+                                {
+                                    connected.Add(connectionUrl);
+                                }
+                                else
+                                {
+                                    Debug.Log(string.Format("Connection to {0} is lost!", client.GetType()));
+                                }
+                            }
+                        }
+                    }
+                }
+
                 if ((retryConnections) && (tryAgainSockets.Keys.Count > 0)) {
                     foreach (string connectionUrl in tryAgainSockets.Keys) {
                         if (tryAgainSockets[connectionUrl] != null) {
@@ -582,7 +633,7 @@ namespace VoxSimPlatform {
                 connectionRetryTimer.Interval = connectionRetryTimerTime;
                 retryConnections = true;
             }
-
+            
             public SocketConnection ConnectSocket(string address, int port, Type socketType) {
                 Debug.Log(string.Format("Trying connection to {0}:{1} as type {2}", address, port, socketType));
 
@@ -642,6 +693,7 @@ namespace VoxSimPlatform {
                         //Debug.Log(result.result.GetType());
                         Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port,
                             client.isConnected, socketType));
+                        client.WebRequestSucceeded += OnWebRequestSucceeded;
                     }
                     catch (Exception e) {
                         Debug.Log(e.Message);
@@ -657,7 +709,7 @@ namespace VoxSimPlatform {
 
             private IEnumerator TryConnectRestClient(RestClient client, string address, int port) {
                 RestDataContainer result = new RestDataContainer(this, client.TryConnect(address, port));
-                Debug.Log(string.Format("Result: {0}",((UnityWebRequestAsyncOperation)result.result).webRequest.responseCode));
+                //Debug.Log(string.Format("Result: {0}",((UnityWebRequestAsyncOperation)result.result).webRequest.responseCode));
                 yield return result.coroutine;
             }
 
@@ -738,6 +790,12 @@ namespace VoxSimPlatform {
 
             void OnApplicationQuit() {
                 OnDestroy();
+            }
+
+            public void OnWebRequestSucceeded(object source, WebRequestEventArgs args)
+            {
+                Debug.Log("Response code printed from CommunicationsBridge class: " + args.ResponseCode);
+                httpResponseCode = args.ResponseCode; 
             }
         }
     }
