@@ -73,6 +73,8 @@ namespace VoxSimPlatform {
 
         	public string lastParse = string.Empty;
 
+            public List<string> eventHistory = new List<string>();
+
         	//public string lastObjectResolved = string.Empty;
         	public Dictionary<String, String> evalOrig = new Dictionary<String, String>();
         	public Dictionary<String, String> evalResolved = new Dictionary<String, String>();
@@ -88,8 +90,18 @@ namespace VoxSimPlatform {
         	Timer eventWaitTimer;
         	bool eventWaitCompleted = false;
 
+            MethodInfo _methodToCall;
+            public MethodInfo methodToCall {
+                get { return _methodToCall; }
+                set {
+                    if (_methodToCall != value) {
+                        OnMethodToCallChanged(_methodToCall, value);
+                    }
+                    _methodToCall = value;
+                }
+            }
+
         	string skolemized, evaluated;
-        	MethodInfo methodToCall;
         	public Predicates preds;
         	String nextQueuedEvent = "";
         	int argVarIndex = 0;
@@ -317,6 +329,7 @@ namespace VoxSimPlatform {
 
         	public void QueueEvent(String commandString) {
         		// not using a Queue because I'm horrible
+                Debug.Log(string.Format("Queueing@{0}: {1}", events.Count, commandString));
         		events.Add(commandString);
         	}
 
@@ -352,7 +365,8 @@ namespace VoxSimPlatform {
         	public void ExecuteNextCommand() {
         		//PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
         		Debug.Log("Next Command: " + events[0]);
-                
+                eventHistory.Add(events[0]);
+
         		if (!EvaluateCommand(events[0])) {
         			return;
         		}
@@ -375,6 +389,7 @@ namespace VoxSimPlatform {
         		ParseCommand(command);
 
         		string globalsApplied = ApplyGlobals(command);
+                Debug.Log("Command with global variables applied: " + globalsApplied);
 
         		FinishSkolemization();
                 skolemized = Skolemize(globalsApplied);
@@ -402,6 +417,7 @@ namespace VoxSimPlatform {
         			return false;
         		}
 
+                Debug.Log(string.Format("Skolemized command@{0}: {1}", events.IndexOf(command), skolemized));
         		evaluated = ApplySkolems(skolemized);
         		Debug.Log(string.Format("Evaluated command@{0}: {1}", events.IndexOf(command), evaluated));
         		if (!evalOrig.ContainsKey(evaluated)) {
@@ -416,7 +432,6 @@ namespace VoxSimPlatform {
 
         		Triple<String, String, String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
                 Debug.Log(string.Format("Event string {0} with skolems resolved -> {1}",evalOrig[evaluated],evalResolved[evaluated]));
-        		Debug.Log(evalResolved[evaluated]);
         		Debug.Log(triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 
         		if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
@@ -424,7 +439,7 @@ namespace VoxSimPlatform {
         			Helper.PrintRDFTriples(preds.rdfTriples);
         		}
         		else {
-        			Debug.Log("Failed to make RDF triple");
+        			Debug.Log("Failed to make valid RDF triple");
         		}
 
         		//OnExecuteEvent (this, new EventManagerArgs (evaluated));
@@ -550,13 +565,26 @@ namespace VoxSimPlatform {
 
                 if (predArgs.Count > 0) {
         			try {
-        				var objs = ExtractObjects(pred, (String) predArgs[pred]);
+                        List<object> objs = new List<object>();
+                        // found a method
+                        if (((methodToCall != null) && (methodToCall.ReturnType != typeof(bool))) ||
+                            (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) ||
+                            (File.Exists(Data.voxmlDataPath + string.Format("/attributes/{0}.xml", pred))) ||
+                            (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) ||
+                            (File.Exists(Data.voxmlDataPath + string.Format("/functions/{0}.xml", pred)))) {
+                            //Debug.Log(pred);
+                            //if (methodToCall != null) {
+                            //    Debug.Log(methodToCall.Name);
+                            //    Debug.Log(methodToCall.ReturnType);
+                            //}
+                            objs = ExtractObjects(pred, (String) predArgs[pred]);
+                        }
 
+                        // found a method
         				if (methodToCall != null) {
-        					// found a method
+                            // is it a program?
         					if (methodToCall.ReturnType == typeof(void)) {
-        						// is it a program?
-        						foreach (var obj in objs) {
+        						foreach (object obj in objs) {
         							if (obj is GameObject) {
         								if ((obj as GameObject).GetComponent<Voxeme>() != null) {
         									if ((referents.stack.Count == 0) ||
@@ -607,7 +635,10 @@ namespace VoxSimPlatform {
         						if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
         							using (StreamReader sr =
         								new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-        								preds.ComposeProgram(VoxML.LoadFromText(sr.ReadToEnd()), objs.ToArray());
+                                        VoxML voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        Debug.Log(string.Format("Invoke ComposeProgram with {0}{1}",
+                                           (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+        								preds.ComposeProgram(voxml, objs.ToArray());
         							}
         						}
         					}
@@ -788,7 +819,7 @@ namespace VoxSimPlatform {
         			Debug.Log("FinishSkolemization: " + skolems[kv.Key]);
         		}
 
-        		Helper.PrintKeysAndValues(skolems);
+        		Helper.PrintKeysAndValues("skolems", skolems);
         	}
 
         	public String Skolemize(String inString) {
@@ -827,43 +858,62 @@ namespace VoxSimPlatform {
 
         		foreach (DictionaryEntry kv in macroVars) {
         			if (kv.Value is Vector3) {
-        				outString = outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
+                        for (int i = 0; i < matches.Count; i++) {
+                            outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key,
+                                Helper.VectorToParsable((Vector3) kv.Value));
+                        }
+                        // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
-                            .ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value)
-                            .Where(kkv => kkv.Value.Contains((String) kv.Key))
-                            .ToDictionary(kkv => kkv.Key, kkv => kkv.Value);
+                            .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
+                            .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+                            .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
                         foreach (string key in changeValues.Keys) {
                             skolems[key] = changeValues[key].Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
                         }
         			}
         			else if (kv.Value is GameObject) {
-        				outString = outString.Replace((String) kv.Key, ((GameObject) kv.Value).name);
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
+                        for (int i = 0; i < matches.Count; i++) {
+                            outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, ((GameObject) kv.Value).name);
+                        }
+                        // get the entries in "skolems" where the values contain the string equal to current key under question
         				Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
-        					.ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value)
-        					.Where(kkv => kkv.Value.Contains((String) kv.Key))
-        					.ToDictionary(kkv => kkv.Key, kkv => kkv.Value);
+        					.ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
+        					.Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+        					.ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
         				foreach (string key in changeValues.Keys) {
         					skolems[key] = changeValues[key].Replace((String) kv.Key, ((GameObject) kv.Value).name);
         				}
         			}
         			else if (kv.Value is List<GameObject>) {
         				String list = String.Join(":", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray());
-        				outString = outString.Replace((String) kv.Key, list);
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
+                        for (int i = 0; i < matches.Count; i++) {
+                            outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, list);
+                        }
         				list = String.Join(",", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray());
-        				Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
-        					.ToDictionary(kkv => (String) kkv.Key, kkv => (String) kkv.Value)
-        					.Where(kkv => (kkv.Value).Contains((String) kv.Key))
-        					.ToDictionary(kkv => kkv.Key, kkv => kkv.Value);
+        				// get the entries in "skolems" where the values contain the string equal to current key under question
+                        Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
+                            .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
+                            .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+                            .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
         				foreach (string key in changeValues.Keys) {
         					skolems[key] = changeValues[key].Replace((String) kv.Key, list);
         				}
         			}
         			else if (kv.Value is String) {
-        				outString = outString.Replace((String) kv.Key, (String) kv.Value);
-        			}
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
+                        for (int i = 0; i < matches.Count; i++) {
+                            outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, (String) kv.Value);
+                        }
+           			}
         			else if (kv.Value is List<String>) {
-        				String list = String.Join(",", ((List<String>) kv.Value).ToArray());
-        				outString = outString.Replace((String) kv.Key, list);
+                        String list = String.Join(",", ((List<String>) kv.Value).ToArray());
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
+                        for (int i = 0; i < matches.Count; i++) {
+                            outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, list);
+                        }
         			}
         		}
 
@@ -872,9 +922,9 @@ namespace VoxSimPlatform {
         		             temp.Count(f => f == ')');
         		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
-                //Helper.PrintKeysAndValues(skolems);
+                Helper.PrintKeysAndValues("skolems", skolems);
 
-        		Debug.Log(outString);
+        		//Debug.Log(outString);
         		return outString;
         	}
 
@@ -899,7 +949,26 @@ namespace VoxSimPlatform {
         				outString = outString.Replace((String) kv.Key, list);
         			}
                     else if (kv.Value is bool) {
-                        outString = outString.Replace((String) kv.Key, ((bool) kv.Value).ToString());
+                        Dictionary<string, string> toReplace = new Dictionary<string, string>();
+                        List<int> indicesOfArg = outString.FindAllIndicesOf((String)kv.Key);
+                        foreach (int index in indicesOfArg) {
+                            //Debug.Log(string.Format("{0}:{1}:{2}", (String)kv.Key, index, outString[index-1]));
+                            if ((index > 0) && 
+                                (outString[index-1] == '!')) {
+                                if (!toReplace.ContainsKey('!' + (String)kv.Key)) {
+                                    toReplace.Add('!' + (String)kv.Key, (!(bool)kv.Value).ToString());
+                                }
+                            }
+                            else {
+                                if (!toReplace.ContainsKey((String)kv.Key)) {
+                                    toReplace.Add((String)kv.Key, ((bool)kv.Value).ToString());
+                                }
+                            }
+                        }
+                            
+                        foreach (KeyValuePair<string,string> kkv in toReplace.OrderByDescending(e => e.Key.Length)) {
+                            outString = outString.Replace(kkv.Key, toReplace[kkv.Key]);
+                        }
                     }
         		}
 
@@ -922,6 +991,8 @@ namespace VoxSimPlatform {
         		Triple<String, String, String> replaceSkolems = null;
                 bool validPredExists;
                 VoxML voxml = null;
+
+                methodToCall = null;
 
         		foreach (DictionaryEntry kv in skolems) {
                     voxml = null;
@@ -1113,7 +1184,7 @@ namespace VoxSimPlatform {
                                                     (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
 
         						if (!validPredExists) {
-                                    this.GetActiveAgent().GetComponent<AgentOutputController>().GiveOutput("Sorry, what does " + "\"" + pred + "\" mean?");
+                                    this.GetActiveAgent().GetComponent<AgentOutputController>().PromptOutput("Sorry, what does " + "\"" + pred + "\" mean?");
         							OutputHelper.PrintOutput(Role.Affector, "Sorry, what does " + "\"" + pred + "\" mean?");
         							return false;
         						}
@@ -1267,7 +1338,7 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		Helper.PrintKeysAndValues(skolems);
+        		Helper.PrintKeysAndValues("skolems", skolems);
 
         		int newEvaluations = 0;
         		foreach (DictionaryEntry kv in skolems) {
@@ -1282,7 +1353,7 @@ namespace VoxSimPlatform {
                                                 (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
 
                             if (!validPredExists) {
-                                this.GetActiveAgent().GetComponent<AgentOutputController>().GiveOutput("Sorry, what does " + "\"" + pred + "\" mean?");
+                                this.GetActiveAgent().GetComponent<AgentOutputController>().PromptOutput("Sorry, what does " + "\"" + pred + "\" mean?");
                                 OutputHelper.PrintOutput(Role.Affector, "Sorry, what does " + "\"" + pred + "\" mean?");
                                 return false;
                             }
@@ -1339,6 +1410,17 @@ namespace VoxSimPlatform {
 
         		return true;
         	}
+
+            /// <summary>
+            /// Triggered when the methodToCall field changes
+            /// </summary>
+            // IN: oldVal -- previous methodToCall
+            //      newVal -- new or current methodToCall
+            void OnMethodToCallChanged(MethodInfo oldMethod, MethodInfo newMethod) {
+                Debug.Log(string.Format("==================== Method to call changed ==================== {0}->{1}",
+                    (oldMethod == null) ? "NULL" : oldMethod.Name,
+                    (newMethod == null) ? "NULL" : newMethod.Name));
+            }
         }
     }
 }

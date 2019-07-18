@@ -13,7 +13,9 @@
             PhysObj,
             PhysObjList,
             Vector,
-            VectorList
+            VectorList,
+            Routine,
+            RoutineList
         }
     }
 }

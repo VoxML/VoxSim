@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
@@ -56,6 +57,14 @@ namespace VoxSimPlatform {
 
                     case "vector[]":
                         glType = GLType.VectorList;
+                        break;
+
+                    case "routine":
+                        glType = GLType.Routine;
+                        break;
+
+                    case "routine[]":
+                        glType = GLType.RoutineList;
                         break;
 
                     default:
@@ -190,7 +199,18 @@ namespace VoxSimPlatform {
                         }
                         break;
 
+                    case GLType.Routine:
+                        if (obj is MethodInfo) {
+                            isType = true;
+                        }
+                        break;
+
                     default:
+                        if ((obj is IList) && (obj.GetType().IsGenericType)) {
+                            if (obj.GetType().IsAssignableFrom(typeof(List<MethodInfo>))) {
+                                isType = true;
+                            }
+                        }
                         break;
                 }
 

@@ -40,7 +40,9 @@ namespace VoxSimPlatform {
         	public Vector3 targetPosition {
         		get { return _targetPosition; }
         		set {
-        			OnTargetPositionChanged(_targetPosition, value);
+                    if (_targetPosition != value) {
+            			OnTargetPositionChanged(_targetPosition, value);
+                    }
         			_targetPosition = value;
         		}
         	}
@@ -51,7 +53,9 @@ namespace VoxSimPlatform {
         	public Vector3 targetRotation {
                 get { return _targetRotation; }
                 set {
-                    OnTargetRotationChanged(_targetRotation, value);
+                    if (_targetRotation != value) {
+                        OnTargetRotationChanged(_targetRotation, value);
+                    }
                     _targetRotation = value;
                 }
             }
@@ -61,7 +65,9 @@ namespace VoxSimPlatform {
             public Vector3 targetScale {
                 get { return _targetScale; }
                 set {
-                    OnTargetScaleChanged(_targetScale, value);
+                    if (_targetScale != value) {
+                        OnTargetScaleChanged(_targetScale, value);
+                    }
                     _targetScale = value;
                 }
             }

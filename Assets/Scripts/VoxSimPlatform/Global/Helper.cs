@@ -50,13 +50,17 @@ namespace VoxSimPlatform {
                 return split.ElementAt(0);
             }
 
-            public static void PrintKeysAndValues(Hashtable ht) {
+            public static void PrintKeysAndValues(string name, Hashtable ht) {
+                if (ht.Count == 0) {
+                    return;
+                }
+
                 List<string> output = new List<string>();
                 foreach (DictionaryEntry entry in ht) {
                     output.Add(entry.Key + " : " + entry.Value);
                 }
 
-                Debug.Log("{ " + string.Join(", ", output.ToArray()) + " }");
+                Debug.Log(name + ": { " + string.Join(", ", output.ToArray()) + " }");
             }
 
             public static String VectorToParsable(Vector3 vector) {
@@ -95,6 +99,34 @@ namespace VoxSimPlatform {
 
             public static int StringToInt(String inString) {
                 return Convert.ToInt32(inString);
+            }
+
+            public static List<int> FindAllIndicesOf(this string str, string value) {
+                if (String.IsNullOrEmpty(value))
+                    throw new ArgumentException("String to find may not be empty", nameof(value));
+                List<int> indexes = new List<int>();
+                for (int index = 0;; index += value.Length) {
+                    index = str.IndexOf(value, index);
+                    if (index == -1)
+                        return indexes;
+                    indexes.Add(index);
+                }
+            }
+
+            public static string ReplaceFirst(this string text, string search, string replace) {
+                int pos = text.IndexOf(search);
+                if (pos < 0) {
+                    return text;
+                }
+                return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+            }
+
+            public static string ReplaceFirstStartingAt(this string text, int startIndex, string search, string replace) {
+                int pos = text.Substring(startIndex, text.Length-startIndex).IndexOf(search);
+                if (pos < 0) {
+                    return text;
+                }
+                return text.Substring(0, startIndex + pos) + replace + text.Substring(startIndex + pos + search.Length);
             }
 
             public static Triple<String, String, String> MakeRDFTriples(String formula) {

@@ -306,7 +306,7 @@ namespace VoxSimPlatform {
         					}
         				}
 
-        				Debug.Log("Parsed as: " + functionalCommand);
+        				Debug.Log("Raw input parsed as: " + functionalCommand);
         				InputEventArgs parseArgs = new InputEventArgs(functionalCommand);
         				OnParseComplete(this, parseArgs);
 
@@ -314,10 +314,8 @@ namespace VoxSimPlatform {
         					OutputHelper.PrintOutput(Role.Affector, "OK.");
         					OutputHelper.PrintOutput(Role.Planner, "");
         				}
-
-        				Debug.Log(functionalCommand);
-
-        				commands = functionalCommand.Split(';');
+                            
+        				commands = functionalCommand.Split(new char[] { ';', ':' });
         				foreach (String commandString in commands) {
         					string command = commandString;
         					foreach (string vector in vectors.Keys) {

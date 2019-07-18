@@ -48,6 +48,7 @@ namespace VoxSimPlatform {
                     Debug.LogWarning("No output text box to print to");
                 }
             }
+
             internal void SpeakOutput(String str, bool forceSpeak = false) {
                 if (voice) {
                     if(str != outputString || forceSpeak) {
@@ -60,9 +61,10 @@ namespace VoxSimPlatform {
                     Debug.LogWarning("No voice to speak of");
                 }
             }
+
             // Generified version of SpeakOutPut and PrintOutput, so you don't need to know
             // the available output formats in order to use them.
-            internal void GiveOutput(String str, bool forceSpeak = false) {
+            internal void PromptOutput(String str, bool forceSpeak = false) {
                 SpeakOutput(str, forceSpeak); // Note: Order matters here
                 PrintOutput(str); // since outputString gets changed in PrintOutput
             }

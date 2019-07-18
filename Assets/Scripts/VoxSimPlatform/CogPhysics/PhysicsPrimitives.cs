@@ -97,8 +97,9 @@ namespace VoxSimPlatform {
         		resolveDiscrepancies = true;
         		catchupTimer.Enabled = true;
 
-                Debug.Log(string.Format("Satisfaction condition met for {0} specification {1}",
-                    testSatisfied.VoxML.Lex.Pred,testSatisfied.EventString));
+                Debug.Log(string.Format("Satisfaction condition met for {0}specification {1}",
+                    (testSatisfied.VoxML != null) ? testSatisfied.VoxML.Lex.Pred + " " : string.Empty,
+                    testSatisfied.EventString));
         	}
 
         	void Resolve(object sender, ElapsedEventArgs e) {

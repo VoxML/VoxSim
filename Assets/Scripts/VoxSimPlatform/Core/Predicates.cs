@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -6123,64 +6124,6 @@ namespace VoxSimPlatform {
         				}
         			}
         		}
-
-        //			Bounds bounds = Helper.GetObjectWorldSize((args[0] as GameObject));
-        //			Animator anim = agent.GetComponentInChildren<Animator> ();
-        //			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-        //			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-        //			GameObject grasper;
-        //			Transform leftGraspTracker = agent.GetComponent<IKControl> ().leftHandObj;
-        //			Transform rightGraspTracker = agent.GetComponent<IKControl> ().rightHandObj;
-        //			Vector3 offset = agent.GetComponent<GraspScript> ().graspTrackerOffset;
-        //
-        //			// make sure we're reaching toward the object first
-        //			if (!bounds.Contains(leftGraspTracker.position-offset) && 
-        //				!bounds.Contains(rightGraspTracker.position-offset)) {
-        //				eventManager.InsertEvent (string.Format ("reach({0})", (args[0] as GameObject).name), 0);
-        //				//eventManager.RemoveEvent (eventManager.events.Count - 1);
-        //				return;
-        //			}
-        //
-        //			if (args [args.Length - 1] is bool) {
-        //				if ((bool)args [args.Length - 1] == true) {
-        //					foreach (object arg in args) {
-        //						if (arg is GameObject) {
-        //							//Debug.Log (rightGrasper.GetComponent<BoxCollider> ().bounds);
-        //							//Debug.Log (bounds);
-        //							if (leftGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
-        //								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-        //								if (rigging != null) {
-        //									rigging.ActivatePhysics (false);
-        //								}
-        //
-        //								RiggingHelper.RigTo ((arg as GameObject), leftGrasper);
-        //								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
-        //								voxeme.enabled = true;
-        //								voxeme.isGrasped = true;
-        //								voxeme.graspTracker = agent.GetComponent<IKControl>().leftHandObj;
-        //								voxeme.grasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
-        //							}
-        //							else if (rightGrasper.GetComponent<BoxCollider>().bounds.Intersects(bounds)) {
-        //								Rigging rigging = (arg as GameObject).GetComponent<Rigging> ();
-        //								if (rigging != null) {
-        //									rigging.ActivatePhysics (false);
-        //								}
-        //
-        //								RiggingHelper.RigTo ((arg as GameObject), rightGrasper);
-        //								Voxeme voxeme = (arg as GameObject).GetComponent<Voxeme> ();
-        //								voxeme.enabled = true;
-        //								voxeme.isGrasped = true;
-        //								voxeme.graspTracker = agent.GetComponent<IKControl>().rightHandObj;
-        //								voxeme.grasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
-        //							}
-        //							else {
-        //								OutputHelper.PrintOutput(Role.Affector,"I can't grasp the " + (arg as GameObject).name + ".  I'm not touching it."); 
-        //							}
-        //						}
-        //					}
-        //				}
-        //			}
-        //		}
         	}
 
         	// IN: Objects
@@ -6248,50 +6191,40 @@ namespace VoxSimPlatform {
         				}
         			}
         		}
-
-        //		GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
-        //		if (agent != null) {
-        //			Animator anim = agent.GetComponentInChildren<Animator> ();
-        //			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-        //			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-        //			GameObject grasper = null;
-        //			Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
-        //			Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
-        //			GraspScript graspController = agent.GetComponent<GraspScript> ();
-        //
-        //			if (args [args.Length - 1] is bool) {
-        //				if ((bool)args [args.Length - 1] == true) {
-        //					foreach (object arg in args) {
-        //						if (arg is GameObject) {
-        //							Voxeme voxComponent = (arg as GameObject).GetComponent<Voxeme> ();
-        //							if (voxComponent != null) {
-        //								if (voxComponent.isGrasped) {
-        //									//voxComponent.transform.position = voxComponent.transform.position + 
-        //									//	(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
-        //
-        //									if (voxComponent.grasperCoord == leftGrasperCoord) {
-        //										grasper = leftGrasper;
-        //									}
-        //									else if (voxComponent.grasperCoord == rightGrasperCoord) {
-        //										grasper = rightGrasper;
-        //									}
-        //									RiggingHelper.UnRig ((arg as GameObject), grasper);
-        //									graspController.grasper = (int)Gestures.HandPose.Neutral;
-        //									//agent.GetComponent<GraspScript>().isGrasping = false;
-        //									agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
-        //									agent.GetComponent<IKControl> ().rightHandObj.position = graspController.rightDefaultPosition;
-        //
-        //									voxComponent.isGrasped = false;
-        //									voxComponent.graspTracker = null;
-        //									voxComponent.grasperCoord = null;
-        //								}
-        //							}
-        //						}
-        //					}
-        //				}
-        //			}
-        //		}
         	}
+
+            // IN: Objects
+            // OUT: none
+            public void HOLD(object[] args) {
+                // look for agent
+                GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                if (agent != null) {
+                    // add preconditions
+                    if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name))) {
+                        eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
+                        eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
+                        eventManager.InsertEvent(
+                            eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
+                        eventManager.RemoveEvent(3);
+                        return;
+                    }
+                    else {
+                        if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+                            eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+                            eventManager.InsertEvent(
+                                eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
+                            eventManager.RemoveEvent(2);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // IN: Objects
+            // OUT: none
+            public void MOVE_1(object[] args) {
+                return;
+            }
 
         	// IN: Objects
         	// OUT: none
@@ -6344,34 +6277,7 @@ namespace VoxSimPlatform {
         				}
         			}
         		}
-        	}
-
-        	// IN: Objects
-        	// OUT: none
-        	public void HOLD(object[] args) {
-        		// look for agent
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        		if (agent != null) {
-        			// add preconditions
-        			if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name))) {
-        				eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
-        				eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
-        				eventManager.InsertEvent(
-        					eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
-        				eventManager.RemoveEvent(3);
-        				return;
-        			}
-        			else {
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
-        					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
-        					eventManager.InsertEvent(
-        						eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
-        					eventManager.RemoveEvent(2);
-        					return;
-        				}
-        			}
-        		}
-        	}
+            }
 
         	// IN: Objects
         	// OUT: none
@@ -6559,11 +6465,11 @@ namespace VoxSimPlatform {
                     }
         		}
                  
-                Helper.PrintKeysAndValues(eventManager.macroVars);
+                Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
 
         		int index = 1;
         		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
-        			string[] commands = subevent.Value.Split(';');
+        			string[] commands = subevent.Value.Split(new char[] { ';', ':' });
         			foreach (string command in commands) {
         				string modifiedCommand = command;
         				Regex q = new Regex("[\'\"].*[\'\"]");
@@ -6585,7 +6491,7 @@ namespace VoxSimPlatform {
                         }
                             
                         // TODO: send to agent's event manager
-        				eventManager.InsertEvent(modifiedCommand, index);
+        				eventManager.InsertEvent(eventManager.ApplyGlobals(modifiedCommand), index);
         				index++;
         				//Debug.Log (eventManager.EvaluateCommand (command));
         			}
@@ -6622,12 +6528,12 @@ namespace VoxSimPlatform {
                     }
                 }
                     
-                Helper.PrintKeysAndValues(eventManager.macroVars);
+                Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
 
                 if (args.Length == voxml.Type.Args.Count) { // all arguments specified
                     // calc IsSatisfied result
-                    retVal = false;
-                    //retVal = SatisfactionTest.IsSatisfied(voxml, args);
+                    //retVal = false;
+                    retVal = SatisfactionTest.IsSatisfied(voxml, args.ToList());
                 }
                 else {                                      // otherwise calc location/region
                     string relStr = string.Empty;
@@ -6656,16 +6562,19 @@ namespace VoxSimPlatform {
                 // while the condition is true, keep the event in the eventManager
                 // if the condition is not true, remove the event from the eventManager
                 //  do we need to force satisfaction in this case?
-                Expression<Func<List<String>, bool>> condition;   // List<String>: individual con/disjunctions of the condition to be tested
-                                                                  // bool: return value of the conditional
-
-                // is args[0] List<String>
-                if ((args[0] is IList) && (args[0].GetType().IsGenericType) &&
-                    (args[0].GetType().IsAssignableFrom(typeof(List<String>)))) {
+              
+                if (args[0] is String) {
 
                     // do stuff here
+                    string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
+                    DataTable dt = new DataTable();
+                    bool result = (bool)(dt.Compute(expression, null));
+                    Debug.Log(string.Format("Result ({0}): {1}", eventManager.evalOrig[eventManager.events[0]], result));
 
-                    if (args[1] is String) {
+                    if (result) {
+                        if (eventManager.events.Count > 1) {
+                            Debug.Log(eventManager.events[1]);
+                        }
                     }
                 }
 

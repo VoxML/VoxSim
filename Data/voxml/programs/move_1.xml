@@ -2,7 +2,7 @@
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Entity Type="Program" />
   <Lex>
-    <Pred>grasp</Pred>
+    <Pred>move</Pred>
     <Type>transition_event</Type>
   </Lex>
   <Type>
@@ -14,9 +14,11 @@
     <Args>
       <Arg Value="x:agent" />
       <Arg Value="y:physobj" />
+      <Arg Value="z:location" />
+      <Arg Value="p:routine" />
     </Args>
     <Body>
-      <Subevent Value="grasp(x,y)" />
+      <Subevent Value="move_1(x,y,z,p)" />
     </Body>
     <Scale />
     <Arity />
