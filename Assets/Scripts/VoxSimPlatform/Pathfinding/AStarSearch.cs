@@ -12,16 +12,16 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace Pathfinding {
         public class AStarSearch : MonoBehaviour {
-        	public bool debugNodes = false;
+        	//public bool debugNodes = false;
 
         	public GameObject embeddingSpace;
         	Bounds embeddingSpaceBounds;
-        	List<GameObject> debugVisual = new List<GameObject>();
+        	//List<GameObject> debugVisual = new List<GameObject>();
 
         	public Vector3 defaultIncrement = Vector3.one;
         	//public Vector3 increment;
-        	public List<PathNode> nodes = new List<PathNode>();
-        	public List<Pair<PathNode, PathNode>> arcs = new List<Pair<PathNode, PathNode>>();
+        	//public List<PathNode> nodes = new List<PathNode>();
+        	//public List<Pair<PathNode, PathNode>> arcs = new List<Pair<PathNode, PathNode>>();
         	public List<Vector3> path;
 
         	public Vector3 start = new Vector3();
