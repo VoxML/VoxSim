@@ -2,6 +2,8 @@
 
 using VoxSimPlatform.UI;
 
+// TODO: to be deprecated by end of refactor
+
 namespace VoxSimPlatform {
     namespace Agent {
         public class OutputModality : FontManager {
