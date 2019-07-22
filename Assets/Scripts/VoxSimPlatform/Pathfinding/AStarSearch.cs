@@ -134,11 +134,11 @@ namespace VoxSimPlatform {
         	Dictionary<Vector3, float> hScore;
         	HashSet<Vector3> specialNodes = new HashSet<Vector3>();
 
-        	public class BetterHeuristic : Comparer<Vector3> {
+        	public class ComparisonHeuristic : Comparer<Vector3> {
         		Dictionary<Vector3, float> gScore;
         		Dictionary<Vector3, float> hScore;
 
-        		public BetterHeuristic(Dictionary<Vector3, float> gScore, Dictionary<Vector3, float> hScore) {
+        		public ComparisonHeuristic(Dictionary<Vector3, float> gScore, Dictionary<Vector3, float> hScore) {
         			this.gScore = gScore;
         			this.hScore = hScore;
         		}
@@ -254,7 +254,11 @@ namespace VoxSimPlatform {
         		// init empty path
         		path = new List<Vector3>();
 
-        		MinHeap<Vector3> openSet = new MinHeap<Vector3>(new BetterHeuristic(gScore, hScore));
+                // the compare method in ComparisonHeuristic class is called in 
+                // Dominates method in VoxSimPlatform.Global.MinHeap class.
+                // Dominates is called in bubble up and bubble down operation of the heap, 
+                // which are called when openSet.Add(startPos),openSet.Add(neighbor) and openSet.Update(neighbor) are called. 
+                MinHeap<Vector3> openSet = new MinHeap<Vector3>(new ComparisonHeuristic(gScore, hScore));
         		var openSetForCheck = new HashSet<Vector3>();
 
         		// Closed set can be used because euclidean distance is monotonic
