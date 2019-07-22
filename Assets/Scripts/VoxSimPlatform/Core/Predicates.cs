@@ -2191,7 +2191,7 @@ namespace VoxSimPlatform {
         			if (aStarSearch.path.Count == 0) {
         				aStarSearch.start = (args[0] as GameObject).transform.position;
         				aStarSearch.goal = targetPosition;
-        				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
+        				aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
         					(args[0] as GameObject),
         					GameObject.Find(rdfTriples[0].Item3) != null
         						? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
@@ -2931,7 +2931,7 @@ namespace VoxSimPlatform {
 
         				aStarSearch.start = (args[0] as GameObject).transform.position;
         				aStarSearch.goal = targetPosition;
-        				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
+        				aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
         					(args[0] as GameObject),
         					GameObject.Find(rdfTriples[0].Item3) != null
         						? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
@@ -3494,7 +3494,7 @@ namespace VoxSimPlatform {
 
         				aStarSearch.start = (args[0] as GameObject).transform.position;
         				aStarSearch.goal = targetPosition;
-        				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
+        				aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
         					(args[0] as GameObject),
         					((GameObject.Find(rdfTriples[0].Item1) != null) && (GameObject.Find(rdfTriples[0].Item3) != null))
         						? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
