@@ -2187,23 +2187,25 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		Debug.Log("========== Before plan ========= " + Helper.VectorToParsable(targetPosition));
-        		// plan path to destination
-        		if (!Helper.VectorIsNaN(targetPosition)) {
-        			if (aStarSearch.path.Count == 0) {
-        				aStarSearch.start = (args[0] as GameObject).transform.position;
-        				aStarSearch.goal = targetPosition;
-        				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
-        					(args[0] as GameObject),
-        					GameObject.Find(rdfTriples[0].Item3) != null
-        						? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
-        						: null);
+                if (args[args.Length - 1] is bool) {
+                    if ((bool)args[args.Length - 1] == true) {
+                        Debug.Log("========== Before plan ========= " + Helper.VectorToParsable(targetPosition));
+                        // plan path to destination
+                        if (!Helper.VectorIsNaN(targetPosition)) {
+                            aStarSearch.start = (args[0] as GameObject).transform.position;
+                            aStarSearch.goal = targetPosition;
+                            List<Vector3> path = aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal,
+                                (args[0] as GameObject),
+                                GameObject.Find(rdfTriples[0].Item3) != null
+                                    ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
+                                    : null);
 
-        				foreach (Vector3 node in aStarSearch.path) {
-        					(args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
-        				}
-        			}
-        		}
+                            foreach (Vector3 node in path) {
+                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                            }
+                        }
+                    }
+                }
 
         		return;
         	}
@@ -2919,31 +2921,33 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		// plan path to destination
-        		if (!Helper.VectorIsNaN(targetPosition)) {
-        			if (aStarSearch.path.Count == 0) {
-        				Bounds surfaceBounds =
-        					Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
-        				Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
-        				Bounds embeddingSpaceBounds = new Bounds();
-        				embeddingSpaceBounds.SetMinMax(
-        					new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y,
-        						surfaceBounds.min.z + (objBounds.size.z / 2)),
-        					new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
+                if (args[args.Length - 1] is bool) {
+                    if ((bool)args[args.Length - 1] == true) {
+                        // plan path to destination
+                        if (!Helper.VectorIsNaN(targetPosition)) {
+                            Bounds surfaceBounds =
+                                Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
+                            Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
+                            Bounds embeddingSpaceBounds = new Bounds();
+                            embeddingSpaceBounds.SetMinMax(
+                                new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y,
+                                    surfaceBounds.min.z + (objBounds.size.z / 2)),
+                                new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
 
-        				aStarSearch.start = (args[0] as GameObject).transform.position;
-        				aStarSearch.goal = targetPosition;
-        				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
-        					(args[0] as GameObject),
-        					GameObject.Find(rdfTriples[0].Item3) != null
-        						? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
-        						: null, "Y");
+                            aStarSearch.start = (args[0] as GameObject).transform.position;
+                            aStarSearch.goal = targetPosition;
+                            List<Vector3> path = aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal,
+                                (args[0] as GameObject),
+                                GameObject.Find(rdfTriples[0].Item3) != null
+                                    ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
+                                    : null, "Y");
 
-        				foreach (Vector3 node in aStarSearch.path) {
-        					(args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
-        				}
-        			}
-        		}
+                            foreach (Vector3 node in path) {
+                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                            }
+                        }
+                    }
+                }
 
         		return;
         	}
@@ -3482,31 +3486,33 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		// plan path to destination
-        		if (!Helper.VectorIsNaN(targetPosition)) {
-        			if (aStarSearch.path.Count == 0) {
-        				Bounds surfaceBounds =
-        					Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
-        				Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
-        				Bounds embeddingSpaceBounds = new Bounds();
-        				embeddingSpaceBounds.SetMinMax(
-        					new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y,
-        						surfaceBounds.min.z + (objBounds.size.z / 2)),
-        					new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
+                if (args[args.Length - 1] is bool) {
+                    if ((bool)args[args.Length - 1] == true) {
+                        // plan path to destination
+                        if (!Helper.VectorIsNaN(targetPosition)) {
+                            Bounds surfaceBounds =
+                                Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
+                            Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
+                            Bounds embeddingSpaceBounds = new Bounds();
+                            embeddingSpaceBounds.SetMinMax(
+                                new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y,
+                                    surfaceBounds.min.z + (objBounds.size.z / 2)),
+                                new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
 
-        				aStarSearch.start = (args[0] as GameObject).transform.position;
-        				aStarSearch.goal = targetPosition;
-        				aStarSearch.PlanPath2(aStarSearch.start, aStarSearch.goal, out aStarSearch.path,
-        					(args[0] as GameObject),
-        					((GameObject.Find(rdfTriples[0].Item1) != null) && (GameObject.Find(rdfTriples[0].Item3) != null))
-        						? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
-        						: null, "Y");
+                            aStarSearch.start = (args[0] as GameObject).transform.position;
+                            aStarSearch.goal = targetPosition;
+                            List<Vector3> path = aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal,
+                                (args[0] as GameObject),
+                                ((GameObject.Find(rdfTriples[0].Item1) != null) && (GameObject.Find(rdfTriples[0].Item3) != null))
+                                    ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
+                                    : null, "Y");
 
-        				foreach (Vector3 node in aStarSearch.path) {
-        					(args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
-        				}
-        			}
-        		}
+                            foreach (Vector3 node in path) {
+                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                            }
+                        }
+                    }
+                }
 
         		return;
         	}

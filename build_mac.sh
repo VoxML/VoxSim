@@ -23,6 +23,8 @@ else
         osascript -e 'quit app "Unity"'
         if [ -z "$UNITYPATH" ]; then
             UNITYPATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
+        elif [[ "$UNITYPATH" == *"/Unity.app" ]]; then
+            UNITYPATH+="/Contents/MacOS/Unity"
         fi
         "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
     elif [[ "$OSTYPE" == "msys" ]]; then

@@ -143,6 +143,7 @@ Assets/FlashbackRecorder*
 Assets/GracesGames*
 Assets/SimpleFileBrowser* 
 Assets/Editor\ Default\ Resources/crosstales*
+Assets/Plugins/ConsoleE*
 
 # ignore UntrackedScenes folder
 Assets/UntrackedScenes*
