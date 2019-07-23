@@ -22,7 +22,6 @@ namespace VoxSimPlatform {
         	//public Vector3 increment;
         	//public List<PathNode> nodes = new List<PathNode>();
         	//public List<Pair<PathNode, PathNode>> arcs = new List<Pair<PathNode, PathNode>>();
-        	public List<Vector3> path;
 
         	public Vector3 start = new Vector3();
         	public Vector3 goal = new Vector3();
@@ -194,7 +193,7 @@ namespace VoxSimPlatform {
         	}
 
         	List<Vector3> ReconstructPath(Vector3 firstNode, Vector3 lastNode) {
-        		path = new List<Vector3>();
+                List<Vector3> path = new List<Vector3>();
         		Vector3 node = lastNode;
 
         		//path.Add (lastNode.position);
@@ -243,16 +242,16 @@ namespace VoxSimPlatform {
         	}
 
         	// A plan path that run faster and more smooth
-        	public void PlanPath(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj,
+        	public List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
         		params object[] constraints) {
-        		Debug.Log("========== In plan ========= " + goalPos);
+        		Debug.Log("========== In plan ========= " + Helper.VectorToParsable(goalPos));
         		cameFrom = new Dictionary<Vector3, Vector3>();
         		gScore = new Dictionary<Vector3, float>();
         		hScore = new Dictionary<Vector3, float>();
         		specialNodes = new HashSet<Vector3>();
 
-        		// init empty path
-        		path = new List<Vector3>();
+                // init empty path
+                List<Vector3> path = new List<Vector3>();
 
                 // the compare method in ComparisonHeuristic class is called in 
                 // Dominates method in VoxSimPlatform.Global.MinHeap class.
@@ -372,12 +371,9 @@ namespace VoxSimPlatform {
         					// extend path to goal node (goal position)
         					cameFrom[goalPos] = curPos;
         					path = ReconstructPath(startPos, goalPos);
-        					Debug.Log("====== path ===== ");
-        					foreach (var point in path) {
-        						Debug.Log(Helper.VectorToParsable(point));
-        					}
+                            Debug.Log(string.Format("====== path ====== {0}", string.Join(",", path.Select(n => Helper.VectorToParsable(n)).ToArray())));
 
-        					return;
+                            return path;
         				}
 
         				closedSet.Add(curPos);
@@ -421,10 +417,9 @@ namespace VoxSimPlatform {
         		}
 
         		path = ReconstructPath(startPos, bestLastPos);
-        		Debug.Log("====== path ===== ");
-        		foreach (var point in path) {
-        			Debug.Log(point);
-        		}
+        		Debug.Log(string.Format("====== path ====== {0}",string.Join(",",path.Select(n => Helper.VectorToParsable(n)).ToArray())));
+
+                return path;
         	}
         }
     }

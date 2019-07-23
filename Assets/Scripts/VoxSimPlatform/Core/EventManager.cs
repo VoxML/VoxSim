@@ -225,7 +225,6 @@ namespace VoxSimPlatform {
         			bool q = SatisfactionTest.IsSatisfied(events[0]);
 
         			if (q) {
-        				GameObject.Find("VoxWorld").GetComponent<AStarSearch>().path.Clear();
         				Debug.Log("Satisfied " + events[0]);
 
         				for (int i = 0; i < events.Count - 1; i++) {
