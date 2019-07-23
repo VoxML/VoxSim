@@ -415,9 +415,30 @@ namespace VoxSimPlatform {
         						if ((arg as String) != string.Empty) {
         							Regex q = new Regex("[\'\"].*[\'\"]");
         							int i;
-        							if ((q.IsMatch(arg as String)) || (int.TryParse(arg as String, out i))) {
-                                        Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg as String));
-        								objs.Add(arg as String);
+                                    if (int.TryParse(arg as String, out i)) {
+                                        Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",i));
+                                        objs.Add(i);
+                                    }
+                                    else if (q.IsMatch(arg as String)) {
+                                        String[] tryMethodPath = (arg as String).Replace("\'",string.Empty)
+                                            .Replace("\"",string.Empty).Split('.');
+
+                                        // Get the Type for the class
+                                        Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                        if (routineCallingType != null) {
+                                            MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
+                                            if (routineMethod != null) {
+                                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",routineMethod));
+                                                objs.Add(routineMethod);
+                                            }
+                                            else {
+                                                Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
+                                            }
+                                        } 
+                                        else {
+                                            Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg as String));
+                                            objs.Add(arg as String);
+                                        }
         							}
         							else {
         								GameObject go = null;

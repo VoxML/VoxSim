@@ -59,12 +59,12 @@ namespace VoxSimPlatform {
                         glType = GLType.VectorList;
                         break;
 
-                    case "routine":
-                        glType = GLType.Routine;
+                    case "method":
+                        glType = GLType.Method;
                         break;
 
-                    case "routine[]":
-                        glType = GLType.RoutineList;
+                    case "method[]":
+                        glType = GLType.MethodList;
                         break;
 
                     default:
@@ -199,18 +199,21 @@ namespace VoxSimPlatform {
                         }
                         break;
 
-                    case GLType.Routine:
+                    case GLType.Method:
                         if (obj is MethodInfo) {
                             isType = true;
                         }
                         break;
 
-                    default:
+                    case GLType.MethodList:
                         if ((obj is IList) && (obj.GetType().IsGenericType)) {
                             if (obj.GetType().IsAssignableFrom(typeof(List<MethodInfo>))) {
                                 isType = true;
                             }
                         }
+                        break;
+
+                    default:
                         break;
                 }
 

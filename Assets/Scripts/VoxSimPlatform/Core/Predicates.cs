@@ -6223,6 +6223,40 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void MOVE_1(object[] args) {
+                // required types
+                // args[0]: GameObject
+                // args[1]: Vector3
+                // args[2]: MethodInfo (return List<Vector3>)
+                if (args[args.Length - 1] is bool) {
+                    if ((bool) args[args.Length - 1] == true) {
+                        for (int i = 0; i < args.Length; i++) {
+                            Debug.Log(string.Format("MOVE_1: args@{0}: {1} typeof({2})", i, args[i], args[i].GetType()));
+                        }
+
+                        if (args[0] is GameObject) {
+                            if (args[1] is Vector3) {
+                                if (args[2] != null) {
+                                    if (args[2] is MethodInfo) {
+                                        Debug.Log("Type signature match");
+                                        foreach (ParameterInfo param in ((MethodInfo)args[2]).GetParameters()) {
+                                            //Debug.Log(param.ParameterType.);
+                                            Debug.Log(param.ParameterType.IsByRef);
+                                        }
+                                        if (((MethodInfo)args[2]).ReturnType == typeof(List<Vector3>)) {
+                                            Debug.Log(string.Format("{0} parameters contains {1}",((MethodInfo)args[2]).Name,typeof(List<Vector3>)));
+                                        }
+                                    }
+                                    else { 
+                                        Debug.Log(string.Format("MOVE_1: args@2: {0} must be of type MethodInfo! (is {1})", args[2], args[2].GetType()));
+                                    }
+                                }
+                                else {
+                                    // no path given, move directly
+                                }
+                            }
+                        }
+                    }
+                }
                 return;
             }
 
@@ -6558,7 +6592,7 @@ namespace VoxSimPlatform {
             // IN: Condition (Expression), Event (string)
             // OUT: none
             public bool WHILE(object[] args) {
-                // while(condition,event)
+                // while(condition):event
                 // while the condition is true, keep the event in the eventManager
                 // if the condition is not true, remove the event from the eventManager
                 //  do we need to force satisfaction in this case?
@@ -6568,12 +6602,19 @@ namespace VoxSimPlatform {
                     // do stuff here
                     string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
                     DataTable dt = new DataTable();
-                    bool result = (bool)(dt.Compute(expression, null));
+                    bool result = (bool)dt.Compute(expression, null);
                     Debug.Log(string.Format("Result ({0}): {1}", eventManager.evalOrig[eventManager.events[0]], result));
 
+                    // if the condition evaluates to true, compute the next iteration of the event
+                    //  put that into the event manager,
+                    //  then reinsert the while(condition):event loop following it
+                    // this keeps us in the loop until the condition evaluates to false
                     if (result) {
                         if (eventManager.events.Count > 1) {
-                            Debug.Log(eventManager.events[1]);
+                            string eventIteration = eventManager.events[1];
+
+                            eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
+                            eventManager.InsertEvent(eventManager.events[1], 3);
                         }
                     }
                 }

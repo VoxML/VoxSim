@@ -462,15 +462,38 @@ namespace VoxSimPlatform {
         			object arg = argsStrings.Dequeue();
         			if (Helper.vec.IsMatch((String) arg)) {
         				// if arg is vector form
+                        Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,Helper.ParsableToVector((String) arg)));
         				objs.Add(Helper.ParsableToVector((String) arg));
         			}
         			else if (arg is String) {
         				// if arg is String
         				if ((arg as String) != string.Empty) {
-        					Regex q = new Regex("[\'\"].*[\'\"]");
-        					int i;
-        					if ((q.IsMatch(arg as String)) || (int.TryParse(arg as String, out i))) {
-        						objs.Add(arg as String);
+                            Regex q = new Regex("[\'\"].*[\'\"]");
+                            int i;
+                            if (int.TryParse(arg as String, out i)) {
+                                Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,i));
+                                objs.Add(i);
+                            }
+                            else if (q.IsMatch(arg as String)) {
+                                String[] tryMethodPath = (arg as String).Replace("\'",string.Empty)
+                                    .Replace("\"",string.Empty).Split('.');
+
+                                // Get the Type for the class
+                                Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                if (routineCallingType != null) {
+                                    MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
+                                    if (routineMethod != null) {
+                                        Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,routineMethod));
+                                        objs.Add(routineMethod);
+                                    }
+                                    else {
+                                        Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
+                                    }
+                                } 
+                                else {
+                                    Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,arg as String));
+                                    objs.Add(arg as String);
+                                }
         					}
         					else {
         						//Debug.Log(arg as String);
@@ -516,6 +539,7 @@ namespace VoxSimPlatform {
         									}
         								}
 
+                                        Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,go));
         								objs.Add(go);
         							}
         							else {
@@ -535,6 +559,7 @@ namespace VoxSimPlatform {
         										}
         									}
 
+                                            Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,o));
         									objs.Add(o);
         								}
         							}
@@ -757,13 +782,6 @@ namespace VoxSimPlatform {
         					Debug.Log(string.Format("argsStrings@{0}: {1}", i, argsStrings.ElementAt(i)));
         					if (r.IsMatch(argsStrings[i])) {
                                 string symbol = argsStrings[i];
-                                //if (symbol.Contains('!')) {
-                                //    symbol = symbol.Replace("!", "not(");
-
-                                //    for (int j = symbol.Count(c => c == ')'); j < symbol.Count(c => c == '('); j++) {
-                                //        symbol += ")";
-                                //    }
-                                //}
 
                                 // if return type of top predicate of symbol is not void
                                 //  add it as a skolem constant
@@ -1015,6 +1033,7 @@ namespace VoxSimPlatform {
 
         							if (Helper.vec.IsMatch((String) arg)) {
         								// if arg is vector form
+                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",Helper.ParsableToVector((String) arg)));
         								objs.Add(Helper.ParsableToVector((String) arg));
         							}
         							else if (arg is String) {
@@ -1059,6 +1078,7 @@ namespace VoxSimPlatform {
         											}
         										}
 
+                                                Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
         										objs.Add(go);
         										//}
         									}
@@ -1088,6 +1108,7 @@ namespace VoxSimPlatform {
         												}
         											}
 
+                                                    Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
         											objs.Add(go);
         											doSkolemReplacement = true;
         											replaceSkolems = new Triple<String, String, String>(kv.Key as String,
@@ -1095,6 +1116,7 @@ namespace VoxSimPlatform {
         											//skolems[kv] = go.name;
         										}
         										else {
+                                                    Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",matches[0]));
         											objs.Add(matches[0]);
         										}
         									}
@@ -1160,6 +1182,7 @@ namespace VoxSimPlatform {
         										else {
         											foreach (GameObject match in matches) {
         												//Debug.Log(match);
+                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",match));
         												objs.Add(match);
         											}
         										}
@@ -1169,11 +1192,35 @@ namespace VoxSimPlatform {
         								if (objs.Count == 0) {
         									Regex q = new Regex("[\'\"].*[\'\"]");
         									int i;
-        									if ((q.IsMatch(arg as String)) || (int.TryParse(arg as String, out i))) {
+        									if (int.TryParse(arg as String, out i)) {
+                                                Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",arg as String));
         										objs.Add(arg as String);
         									}
+                                            else if (q.IsMatch(arg as String)) {
+                                                String[] tryMethodPath = (arg as String).Replace("\'",string.Empty)
+                                                    .Replace("\"",string.Empty).Split('.');
+
+                                                // Get the Type for the class
+                                                Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                                if (routineCallingType != null) {
+                                                    MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
+                                                    if (routineMethod != null) {
+                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",routineMethod));
+                                                        objs.Add(routineMethod);
+                                                    }
+                                                    else {
+                                                        Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
+                                                    }
+                                                } 
+                                                else {
+                                                    Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",arg as String));
+                                                    objs.Add(arg as String);
+                                                }
+                                            }
         									else {
-        										objs.Add(GameObject.Find(arg as String));
+                                                GameObject go = GameObject.Find(arg as String);
+                                                Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
+        										objs.Add(go);
         									}
         								}
         							}
