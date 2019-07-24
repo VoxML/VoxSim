@@ -7,10 +7,13 @@ using System.Text;
 namespace VoxSimPlatform {
     namespace Network {
         public class RestDataContainer {
+            // Coroutine in which this is instantiated
             public Coroutine coroutine { get; private set; }
+            // Current item from target
             public object result;
             private IEnumerator target;
             public RestDataContainer(MonoBehaviour owner, IEnumerator target) {
+                // e.g. client.TryConnect(address, port)
                 this.target = target;
                 this.coroutine = owner.StartCoroutine(Run());
             }
@@ -67,10 +70,10 @@ namespace VoxSimPlatform {
                 get { return errorStr; }
             }
 
-            public IEnumerator TryConnect(string _address, int _port) {
-                Debug.Log(string.Format("RestClient TryConnect to {0}", string.Format("{0}:{1}", address, port)));
+            public virtual IEnumerator TryConnect(string _address, int _port) {
                 address = _address;
                 port = _port;
+
                 RestDataContainer result = new RestDataContainer(owner, Post("","0"));
                 //Debug.Log(string.Format("RestClient.TryConnect: {0}", result));
                 yield return result.result;
@@ -117,14 +120,16 @@ namespace VoxSimPlatform {
                 //Debug.Log(r.GetType());
                 //Debug.Log(r.Current);
                 //Debug.Log(r.Current.GetType());
-
+                //url = url.Replace(":0/", ""); // filler port from before. Might as well handle it here
+                //Debug.LogWarning("URL for request: " + url);
                 Debug.Log(string.Format("RestClient Request {1} to {0}", url, method));
                 RestDataContainer result = new RestDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
                 //Debug.Log(string.Format("RestClient.Request: {0}", result));
                 yield return result.result;
             }
 
-            private IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+            public virtual IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+                // In this method, we actually invoke a request to the outside server
                 Debug.Log(string.Format("RestClient AsyncRequest {1} to {0}", url, method));
                 var webRequest = new UnityWebRequest(url, method);
                 var payloadBytes = string.IsNullOrEmpty(jsonPayload)
@@ -135,7 +140,7 @@ namespace VoxSimPlatform {
                 webRequest.uploadHandler = upload;
                 webRequest.downloadHandler = new DownloadHandlerBuffer();
                 webRequest.SetRequestHeader("Content-Type", "application/json");
-                //Debug.Log(string.Format("RestClient.AsyncRequest: {0}", webRequest));
+                Debug.LogWarning(string.Format("ALL THE WAY TO ASYNCREQUEST RestClient.AsyncRequest: {0}", webRequest));
                 yield return webRequest.SendWebRequest();    // 2017.2
                 //yield return webRequest.Send();
 
@@ -152,7 +157,7 @@ namespace VoxSimPlatform {
                 //}
             }
 
-            void POST_okay(object parameter) { 
+            protected void POST_okay(object parameter) { 
                 isConnected = true;
             }
 

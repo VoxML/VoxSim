@@ -299,9 +299,10 @@ public class JointGestureDemo : SingleAgentInteraction {
 		regionHighlight.tag = "UnPhysic";
 		regionHighlight.GetComponent<Renderer>().material = activeHighlightMaterial;
 		regionHighlight.gameObject.layer = 5;
-		//regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
-//		regionHighlight.GetComponent<Renderer> ().enabled = false;
-		Destroy(regionHighlight.GetComponent<Collider>());
+
+        //regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
+        //		regionHighlight.GetComponent<Renderer> ().enabled = false;
+        Destroy(regionHighlight.GetComponent<Collider>());
 
 		highlightTimeoutTimer = new Timer(highlightTimeoutTime);
 		highlightTimeoutTimer.Enabled = false;
@@ -343,6 +344,8 @@ public class JointGestureDemo : SingleAgentInteraction {
 		directionVectors.Add("up", Vector3.up);
 		directionVectors.Add("down", Vector3.down);
 	}
+
+
 
 	// Update is called once per frame
 	void Update() {
@@ -1820,6 +1823,17 @@ public class JointGestureDemo : SingleAgentInteraction {
 				break;
 		}
 	}
+
+    /// <summary>
+    /// After being notified by broadcast that there is a new parse
+    /// from the external server, actually carry out the task.
+    /// This code is copypasta'd from other places we add stuff to the stack
+    /// because I don't actually know exactly what it does/how it works
+    /// </summary>
+    public void LookForNewParse() {
+        string parse = commBridge.GrabParse();
+        PromptEvent(parse);
+    }
 
 	public void ParseNP(object[] content) {
 		// type check
