@@ -73,7 +73,7 @@ namespace VoxSimPlatform {
         	//	debugVisual.Add(cube);
         	//}
 
-        	bool testClear(GameObject obj, Vector3 curPoint) {
+        	bool TestClear(GameObject obj, Vector3 curPoint) {
         		Bounds objBounds = Helper.GetObjectWorldSize(obj);
         		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
         		// get all objects
@@ -104,7 +104,7 @@ namespace VoxSimPlatform {
         			if (i * i == step * step || j * j == step * step || k * k == step * step) {
         				Vector3 newNode = new Vector3(curPos.x + i * increment.x, curPos.y + j * increment.y,
         					curPos.z + k * increment.z);
-        				if (testClear(obj, newNode))
+        				if (TestClear(obj, newNode))
         					neighbors.Add(newNode);
         			}
         		}
@@ -173,7 +173,7 @@ namespace VoxSimPlatform {
         					Vector3 candidate = new Vector3(x * increment.x + obj.transform.position.x,
         						y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
 
-        					if (testClear(obj, candidate)) {
+        					if (TestClear(obj, candidate)) {
         						float temp = (candidate - goalPos).magnitude;
 
         						if (dist > temp) {
