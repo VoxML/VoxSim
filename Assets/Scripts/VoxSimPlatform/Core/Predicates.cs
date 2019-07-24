@@ -33,7 +33,6 @@ namespace VoxSimPlatform {
         	public Timer waitTimer = new Timer();
 
         	EventManager eventManager;
-        	AStarSearch aStarSearch;
         	ObjectSelector objSelector;
         	RelationTracker relationTracker;
         	Macros macros;
@@ -56,7 +55,6 @@ namespace VoxSimPlatform {
 
         	void Start() {
         		eventManager = gameObject.GetComponent<EventManager>();
-        		aStarSearch = GameObject.Find("VoxWorld").GetComponent<AStarSearch>();
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
         		macros = GameObject.Find("BehaviorController").GetComponent<Macros>();
@@ -2192,9 +2190,7 @@ namespace VoxSimPlatform {
                         Debug.Log("========== Before plan ========= " + Helper.VectorToParsable(targetPosition));
                         // plan path to destination
                         if (!Helper.VectorIsNaN(targetPosition)) {
-                            aStarSearch.start = (args[0] as GameObject).transform.position;
-                            aStarSearch.goal = targetPosition;
-                            List<Vector3> path = aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal,
+                            List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
                                 (args[0] as GameObject),
                                 GameObject.Find(rdfTriples[0].Item3) != null
                                     ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
@@ -2934,9 +2930,7 @@ namespace VoxSimPlatform {
                                     surfaceBounds.min.z + (objBounds.size.z / 2)),
                                 new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
 
-                            aStarSearch.start = (args[0] as GameObject).transform.position;
-                            aStarSearch.goal = targetPosition;
-                            List<Vector3> path = aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal,
+                            List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
                                 (args[0] as GameObject),
                                 GameObject.Find(rdfTriples[0].Item3) != null
                                     ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
@@ -3499,9 +3493,7 @@ namespace VoxSimPlatform {
                                     surfaceBounds.min.z + (objBounds.size.z / 2)),
                                 new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
 
-                            aStarSearch.start = (args[0] as GameObject).transform.position;
-                            aStarSearch.goal = targetPosition;
-                            List<Vector3> path = aStarSearch.PlanPath(aStarSearch.start, aStarSearch.goal,
+                            List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
                                 (args[0] as GameObject),
                                 ((GameObject.Find(rdfTriples[0].Item1) != null) && (GameObject.Find(rdfTriples[0].Item3) != null))
                                     ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()

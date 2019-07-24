@@ -6,63 +6,13 @@ using System.Linq;
 using Arc = VoxSimPlatform.Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
 using Debug = UnityEngine.Debug;
 using RootMotion.FinalIK;
+using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Pathfinding {
-        public class AStarSearch : MonoBehaviour {
-        	//public bool debugNodes = false;
-
-        	public GameObject embeddingSpace;
-        	Bounds embeddingSpaceBounds;
-        	//List<GameObject> debugVisual = new List<GameObject>();
-
-        	public Vector3 defaultIncrement = Vector3.one;
-        	//public Vector3 increment;
-        	//public List<PathNode> nodes = new List<PathNode>();
-        	//public List<Pair<PathNode, PathNode>> arcs = new List<Pair<PathNode, PathNode>>();
-
-        	public Vector3 start = new Vector3();
-        	public Vector3 goal = new Vector3();
-
-        	public int counterMax = 20;
-
-        	public float rigAttractionWeight;
-        	public FullBodyBipedIK bodyIk;
-
-
-        	// Use this for initialization
-        	void Start() {
-        		Renderer r = embeddingSpace.GetComponent<Renderer>();
-        		embeddingSpaceBounds = r.bounds;
-        		Debug.Log(embeddingSpaceBounds.min);
-        		Debug.Log(embeddingSpaceBounds.max);
-        	}
-
-        	// Update is called once per frame
-        	void Update() {
-        		/*if ((goal - start).magnitude > 0.0f) {
-        			Debug.Log ("Start: " + start);
-        			Debug.Log ("Goal: " + goal);
-
-        			//PlanPath (start, goal, out plannedPath);
-
-        			// clear debug visualization
-        			foreach (GameObject o in debugVisual) {
-        				GameObject.Destroy(o);
-        			}
-        				
-        			foreach (Vector3 coord in plannedPath) {
-        				if (nodes.Contains(coord)) {
-        					AddDebugCube(coord);
-        				}
-        			}
-
-        			goal = start;	// temp hack to stop reprints
-        		}*/
-        	}
-
+        public static class AStarSearch {
             // not referenced anywhere
         	//void AddDebugCube(Vector3 coord) {
         	//	GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -73,11 +23,11 @@ namespace VoxSimPlatform {
         	//	debugVisual.Add(cube);
         	//}
 
-        	bool TestClear(GameObject obj, Vector3 curPoint) {
+        	static bool TestClear(GameObject obj, Vector3 curPoint) {
         		Bounds objBounds = Helper.GetObjectWorldSize(obj);
         		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
         		// get all objects
-        		GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        		GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
 
         		bool spaceClear = true;
         		foreach (GameObject o in allObjects) {
@@ -92,7 +42,8 @@ namespace VoxSimPlatform {
         		return spaceClear;
         	}
 
-        	List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step) {
+        	static List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step,
+                HashSet<Vector3> specialNodes) {
         		// In general 
         		// step * increment = size of object
         		var neighbors = new List<Vector3>();
@@ -117,7 +68,7 @@ namespace VoxSimPlatform {
         	/*
         	 * Check if the path from first to second with objBounds width is blocked
         	 */
-        	bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
+        	static bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
         		RaycastHit hitInfo;
         		Vector3 dir = (second - first);
         		float dist = dir.magnitude;
@@ -126,12 +77,7 @@ namespace VoxSimPlatform {
         		blocked |= Physics.Raycast(first + objBounds.extents, dir.normalized, out hitInfo, dist);
 
         		return blocked;
-        	}
-
-        	Dictionary<Vector3, Vector3> cameFrom;
-        	Dictionary<Vector3, float> gScore;
-        	Dictionary<Vector3, float> hScore;
-        	HashSet<Vector3> specialNodes = new HashSet<Vector3>();
+            }
 
         	public class ComparisonHeuristic : Comparer<Vector3> {
         		Dictionary<Vector3, float> gScore;
@@ -155,7 +101,7 @@ namespace VoxSimPlatform {
         	/*
         	 * Look for closest point to goalPos that make a quantized distance to obj
         	 */
-        	Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
+        	static Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
         		float dist = Mathf.Infinity;
         		Vector3 closest = goalPos;
 
@@ -185,14 +131,11 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		//if ((closest - obj.transform.position).magnitude > distance.magnitude) {
-        		//    closest = goalPos;
-        		//}
-
         		return closest;
         	}
 
-        	List<Vector3> ReconstructPath(Vector3 firstNode, Vector3 lastNode) {
+        	static List<Vector3> ReconstructPath(Vector3 firstNode, Vector3 lastNode,
+                Dictionary<Vector3, Vector3> cameFrom) {
                 List<Vector3> path = new List<Vector3>();
         		Vector3 node = lastNode;
 
@@ -206,35 +149,38 @@ namespace VoxSimPlatform {
         		return path;
         	}
 
-            //not referenced anywhere 
-            //float GetGScore(Vector3 fromPoint, Vector3 explorePoint) {
-            //	return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
-            //}
-
-            //not referenced anywhere 
-            //float GetHScore(Vector3 explorePoint, Vector3 goalPoint) {
-            //	return (goalPoint - explorePoint).magnitude;
-            //}
-
-            float GetErgonomicScore(Vector3 point) {
+            static float GetErgonomicScore(FullBodyBipedIK bodyIk, Vector3 point) {
         		return (bodyIk.solver.rightArmChain.nodes[0].transform.position - point).magnitude;
         	}
 
-        	float GetGScoreErgonomic(Vector3 fromPoint, Vector3 explorePoint) {
-        		if (bodyIk != null) {
-        			return gScore[fromPoint] + (explorePoint - fromPoint).magnitude *
-        			       (1 + rigAttractionWeight * (GetErgonomicScore(fromPoint) + GetErgonomicScore(explorePoint)));
+        	static float GetGScoreErgonomic(GameObject agent, Vector3 fromPoint, Vector3 explorePoint, float rigAttractionWeight,
+                Dictionary<Vector3, float> gScoreDict) {
+                FullBodyBipedIK bodyIk = null;
+
+                if (agent != null) {
+                    bodyIk = agent.GetComponent<FullBodyBipedIK>();
+                }
+        		
+                if (bodyIk != null) {
+        			return gScoreDict[fromPoint] + (explorePoint - fromPoint).magnitude *
+        			       (1 + rigAttractionWeight * (GetErgonomicScore(bodyIk, fromPoint) + GetErgonomicScore(bodyIk, explorePoint)));
         		}
         		else {
-        			return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
+        			return gScoreDict[fromPoint] + (explorePoint - fromPoint).magnitude;
         		}
         	}
 
-        	float GetHScoreErgonomic(Vector3 explorePoint, Vector3 goalPoint) {
-        		// a discount factor of 2 so that the algorith would be faster
+        	static float GetHScoreErgonomic(GameObject agent, Vector3 explorePoint, Vector3 goalPoint, float rigAttractionWeight) {
+                FullBodyBipedIK bodyIk = null;
+
+                if (agent != null) {
+                    bodyIk = agent.GetComponent<FullBodyBipedIK>();
+                }
+
+        		// a discount factor of 2 so that the algorithm is faster
         		if (bodyIk != null) {
         			return (goalPoint - explorePoint).magnitude *
-        			       (1 + rigAttractionWeight / 2 * (GetErgonomicScore(goalPoint) + GetErgonomicScore(explorePoint)));
+        			       (1 + rigAttractionWeight / 2 * (GetErgonomicScore(bodyIk, goalPoint) + GetErgonomicScore(bodyIk, explorePoint)));
         		}
         		else {
         			return (goalPoint - explorePoint).magnitude;
@@ -242,17 +188,21 @@ namespace VoxSimPlatform {
         	}
 
         	// A plan path that run faster and more smooth
-        	public List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
+        	public static List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
         		params object[] constraints) {
-        		Debug.Log("========== In plan ========= " + Helper.VectorToParsable(goalPos));
-        		cameFrom = new Dictionary<Vector3, Vector3>();
-        		gScore = new Dictionary<Vector3, float>();
-        		hScore = new Dictionary<Vector3, float>();
-        		specialNodes = new HashSet<Vector3>();
+
+                EventManager eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                AStarSearchPrefs prefs = GameObject.Find("VoxWorld").GetComponent<AStarSearchPrefs>();
+
+        		Dictionary<Vector3, Vector3> cameFrom = new Dictionary<Vector3, Vector3>();
+        		Dictionary<Vector3, float> gScore = new Dictionary<Vector3, float>();
+        		Dictionary<Vector3, float> hScore = new Dictionary<Vector3, float>();
+        		HashSet<Vector3> specialNodes = new HashSet<Vector3>();
 
                 // init empty path
                 List<Vector3> path = new List<Vector3>();
 
+                Debug.Log("========== In plan ========= " + Helper.VectorToParsable(goalPos));
                 // the compare method in ComparisonHeuristic class is called in 
                 // Dominates method in VoxSimPlatform.Global.MinHeap class.
                 // Dominates is called in bubble up and bubble down operation of the heap, 
@@ -267,7 +217,7 @@ namespace VoxSimPlatform {
 
         		Vector3 size = Helper.GetObjectWorldSize(obj).size;
 
-        		Vector3 increment = defaultIncrement;
+        		Vector3 increment = prefs.defaultIncrement;
 
         		foreach (object constraint in constraints) {
         			if (constraint is string) {
@@ -288,7 +238,7 @@ namespace VoxSimPlatform {
         		int step = 1;
 
         		Debug.Log(" ======== size.magnitude ====== " + size.magnitude);
-        		Debug.Log(" ======== defaultIncrement.magnitude ====== " + defaultIncrement.magnitude);
+        		Debug.Log(" ======== defaultIncrement.magnitude ====== " + prefs.defaultIncrement.magnitude);
 
 
         //		if (size.magnitude > defaultIncrement.magnitude) {
@@ -329,7 +279,7 @@ namespace VoxSimPlatform {
 
         		gScore[startPos] = 0;
         		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
-        		hScore[startPos] = GetHScoreErgonomic(startPos, goalPos);
+        		hScore[startPos] = GetHScoreErgonomic(eventManager.GetActiveAgent(), startPos, goalPos, prefs.rigAttractionWeight);
 
         		Debug.Log(" ========= obj.transform.position ======== " + Helper.VectorToParsable(obj.transform.position));
         		Debug.Log(" ======== start ====== " + Helper.VectorToParsable(startPos));
@@ -351,7 +301,7 @@ namespace VoxSimPlatform {
         				(goalPos - startPos).magnitude));
         			Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(endPos),
         				(goalPos - endPos).magnitude));
-        			while (openSet.Count > 0 && counter < counterMax) {
+        			while (openSet.Count > 0 && counter < prefs.counterMax) {
         				// O(1)
         				curPos = openSet.TakeMin();
 
@@ -370,7 +320,7 @@ namespace VoxSimPlatform {
         					Debug.Log("=== counter === " + counter);
         					// extend path to goal node (goal position)
         					cameFrom[goalPos] = curPos;
-        					path = ReconstructPath(startPos, goalPos);
+        					path = ReconstructPath(startPos, goalPos, cameFrom);
                             Debug.Log(string.Format("====== path ====== {0}", string.Join(",", path.Select(n => Helper.VectorToParsable(n)).ToArray())));
 
                             return path;
@@ -378,18 +328,18 @@ namespace VoxSimPlatform {
 
         				closedSet.Add(curPos);
 
-        				var neighbors = GetNeighborNodes(obj, curPos, increment, step);
+        				var neighbors = GetNeighborNodes(obj, curPos, increment, step, specialNodes);
 
         				foreach (var neighbor in neighbors) {
         					if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor)) {
-        						float tentativeGScore = GetGScoreErgonomic(curPos, neighbor);
+        						float tentativeGScore = GetGScoreErgonomic(eventManager.GetActiveAgent(), curPos, neighbor, prefs.rigAttractionWeight, gScore);
 
         						if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
         							continue;
 
         						cameFrom[neighbor] = curPos;
         						gScore[neighbor] = tentativeGScore;
-        						hScore[neighbor] = GetHScoreErgonomic(neighbor, goalPos);
+        						hScore[neighbor] = GetHScoreErgonomic(eventManager.GetActiveAgent(), neighbor, goalPos, prefs.rigAttractionWeight);
         						// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
 
         						// If neighbor is not yet in openset 
@@ -416,7 +366,7 @@ namespace VoxSimPlatform {
         			bestLastPos = goalPos;
         		}
 
-        		path = ReconstructPath(startPos, bestLastPos);
+        		path = ReconstructPath(startPos, bestLastPos, cameFrom);
         		Debug.Log(string.Format("====== path ====== {0}",string.Join(",",path.Select(n => Helper.VectorToParsable(n)).ToArray())));
 
                 return path;
