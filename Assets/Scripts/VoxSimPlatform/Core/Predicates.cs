@@ -6229,10 +6229,10 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void MOVE_1(object[] args) {
-                // required types
+                // required types (see Data/voxml/programs/move_1.xml)
                 // args[0]: GameObject
                 // args[1]: Vector3
-                // args[2]: MethodInfo (return List<Vector3>)
+                // args[2]: List<Vector3> or MethodInfo (return List<Vector3>)
                 if (args[args.Length - 1] is bool) {
                     if ((bool) args[args.Length - 1] == true) {
                         for (int i = 0; i < args.Length; i++) {
@@ -6243,17 +6243,39 @@ namespace VoxSimPlatform {
                             if (args[1] is Vector3) {
                                 if (args[2] != null) {
                                     if (args[2] is MethodInfo) {
-                                        Debug.Log("Type signature match");
-                                        foreach (ParameterInfo param in ((MethodInfo)args[2]).GetParameters()) {
-                                            //Debug.Log(param.ParameterType.);
-                                            Debug.Log(param.ParameterType.IsByRef);
+                                        Debug.Log("Type signature match.");
+                                        if (((MethodInfo)args[2]).IsStatic) {
+                                            // path not already computed
+                                            if (((MethodInfo)args[2]).ReturnType == typeof(List<Vector3>)) {
+                                                Debug.Log(string.Format("{0} returns {1}",((MethodInfo)args[2]).Name,typeof(List<Vector3>)));
+                                                // compute path
+                                                // iterate motion over the path supplied by method
+                                                // compute the next target position along the path from the current position
+                                                object path = ((MethodInfo)args[2]).Invoke(null, new object[] { 
+                                                    (args[0] as GameObject).transform.position,
+                                                    (Vector3)args[1],
+                                                    (args[0] as GameObject), new object[] { } });
+                                                if ((path is IList) && (path.GetType().IsGenericType) &&
+                                                    (path.GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
+                                                    Debug.Log("Successfully computed path");
+                                                }
+                                            }
+                                            else {
+                                                Debug.Log(string.Format("MOVE_1: {0} must return {1}!",((MethodInfo)args[2]).Name,typeof(List<Vector3>)));
+                                            }
                                         }
-                                        if (((MethodInfo)args[2]).ReturnType == typeof(List<Vector3>)) {
-                                            Debug.Log(string.Format("{0} parameters contains {1}",((MethodInfo)args[2]).Name,typeof(List<Vector3>)));
+                                        else {
+                                            Debug.Log(string.Format("MOVE_1: {0} is not static!  VoxML interpreted \"method\" types must call static code!",
+                                                ((MethodInfo)args[2]).Name));
                                         }
                                     }
+                                    else if ((args[2] is IList) && (args[2].GetType().IsGenericType) &&
+                                        (args[2].GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
+                                        // iterate motion over the path supplied by method
+                                        // compute the next target position along the path from the current position
+                                    }
                                     else { 
-                                        Debug.Log(string.Format("MOVE_1: args@2: {0} must be of type MethodInfo! (is {1})", args[2], args[2].GetType()));
+                                        Debug.Log(string.Format("MOVE_1: args@2: {0} must be of type MethodInfo or type List<Vector3>! (is {1})", args[2], args[2].GetType()));
                                     }
                                 }
                                 else {

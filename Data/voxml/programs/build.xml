@@ -1,21 +1,21 @@
+<!-- a test file to sort out the semantics of methods -->
 <?xml version="1.0" encoding="us-ascii"?>
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Entity Type="Program" />
   <Lex>
-    <Pred>move</Pred>
-    <Type>process</Type>
+    <Pred>build</Pred>
+    <Type>transition_event</Type>
   </Lex>
   <Type>
-    <Head>process</Head>
+    <Head>transition</Head>
     <Components />
     <Concavity />
     <RotatSym />
     <ReflSym />
     <Args>
       <Arg Value="x:agent" />
-      <Arg Value="y:physobj" />
-      <Arg Value="z:location" />
-      <Arg Value="p:method" />
+      <Arg Value="y:physobj[]" />
+      <Arg Value="z:method" />
       <!--<Arg Value="a:untyped[]" /> can we have "untyped" objects-->
     </Args>
     <Body>
