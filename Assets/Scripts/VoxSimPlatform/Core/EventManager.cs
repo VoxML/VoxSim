@@ -177,13 +177,13 @@ namespace VoxSimPlatform {
                     referents = activeAgent.GetComponent<ReferentStore>();
                 }
             }
-            public void setActiveAgent(GameObject agent) {
+            public void SetActiveAgent(GameObject agent) {
                 if (agent != null) {
                     activeAgent = agent;
                     referents = activeAgent.GetComponent<ReferentStore>();
                 }
             }
-            public GameObject getActiveAgent() {
+            public GameObject GetActiveAgent() {
                 return activeAgent;
             }
 
@@ -410,8 +410,8 @@ namespace VoxSimPlatform {
         			','
         		}));
                 // Match referent stack to whoever is being talked to
-                if(getActiveAgent() != null) {
-                    referents = getActiveAgent().GetComponent<ReferentStore>();
+                if(GetActiveAgent() != null) {
+                    referents = GetActiveAgent().GetComponent<ReferentStore>();
                 }
 
         		while (argsStrings.Count > 0) {
@@ -515,8 +515,8 @@ namespace VoxSimPlatform {
         		String pred = Helper.GetTopPredicate(evaluatedCommand);
 
                 // Match referent stack to whoever is being talked to
-                if (getActiveAgent() != null) {
-                    referents = getActiveAgent().GetComponent<ReferentStore>();
+                if (GetActiveAgent() != null) {
+                    referents = GetActiveAgent().GetComponent<ReferentStore>();
                 }
 
                 if (predArgs.Count > 0) {
