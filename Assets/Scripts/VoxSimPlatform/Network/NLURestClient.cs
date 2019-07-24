@@ -12,19 +12,18 @@ namespace VoxSimPlatform {
             String payload = ""; //Json payload
             public String last_read = "";
 
+            /// <summary>
+            /// Name to match, that's about it.
+            /// </summary>
             public NLURestClient() {
                 clientType = typeof(NLUIOClient);
             }
 
-            public override IEnumerator TryConnect(string _address, int _port) {
-                address = _address;
-                port = _port;
-                RestDataContainer result = new RestDataContainer(owner, Post("", "0"));
-                yield return result.result;
-            }
 
+            /// <summary>
+            /// In this method, we actually invoke a request to the outside server
+            /// </summary>
             public override IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
-                // In this method, we actually invoke a request to the outside server
                 if (!url.StartsWith("http")) {
                     url = "http://" + url;
                 }
@@ -34,10 +33,11 @@ namespace VoxSimPlatform {
 
                 if (jsonPayload != "0") {
                     var form = new WWWForm();
-                    form.AddField("sentence", jsonPayload);
+                    form.AddField("sentence", jsonPayload); // IMPORTANT: Assumes there is a form with THIS PARICULAR NAME OF FIELD
                     webRequest = UnityWebRequest.Post(url, form);
                 }
                 else {
+                    // Only really handles the initialization step, to see if the server is, in fact, real
                     webRequest = new UnityWebRequest(url + route, method); // route is specific page as directed by server
                     var payloadBytes = string.IsNullOrEmpty(jsonPayload)
                         ? Encoding.UTF8.GetBytes("{}")
@@ -51,10 +51,10 @@ namespace VoxSimPlatform {
 
                 webRequest.SendWebRequest();
                 int count = 0; // Try several times before failing
-                while (count < 20) { // 2 seconds max is good?
+                while (count < 20) { // 2 seconds max is good? Probably.
                     yield return new WaitForSeconds((float)0.1); // Totally sufficient
                     if (webRequest.isNetworkError || webRequest.isHttpError) {
-                        Debug.LogWarning("Some sort of network error: " + webRequest.error + "  " + url);
+                        Debug.LogWarning("Some sort of network error: " + webRequest.error + " from " + url);
                     }
                     else {
                         // Show results as text            

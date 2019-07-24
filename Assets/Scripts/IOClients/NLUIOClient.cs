@@ -7,6 +7,10 @@ using VoxSimPlatform.NLU;
 
 public class NLUIOClient : MonoBehaviour {
     NLURestClient _nluSocket;
+
+    /// <summary>
+    /// Pretty much the same as the EpiSimIOClient, but with name changes
+    /// </summary>
     public NLURestClient nlurestclient {
         get { return _nluSocket; }
         set { _nluSocket = value; }

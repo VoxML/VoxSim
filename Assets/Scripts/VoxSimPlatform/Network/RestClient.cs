@@ -70,12 +70,10 @@ namespace VoxSimPlatform {
                 get { return errorStr; }
             }
 
-            public virtual IEnumerator TryConnect(string _address, int _port) {
+            public IEnumerator TryConnect(string _address, int _port) {
                 address = _address;
                 port = _port;
-
                 RestDataContainer result = new RestDataContainer(owner, Post("","0"));
-                //Debug.Log(string.Format("RestClient.TryConnect: {0}", result));
                 yield return result.result;
             }
 

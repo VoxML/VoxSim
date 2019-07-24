@@ -1,17 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
-//using System.Management;
 using UnityEngine;
-using Debug = UnityEngine.Debug; // Ambiguity wooo
 using Newtonsoft.Json;
-using VoxSimPlatform;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
-using UnityEngine.Networking;
-using System.Collections;
-using System.Timers;
-using VoxSimPlatform.Network;
+
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -23,46 +15,19 @@ namespace VoxSimPlatform {
             //NLUServerHandler nlu_server = null;
             NLUIOClient nluIOClient = null;
             string route = ""; // Don't expect to be setting it anytime soon
-            private static System.Timers.Timer aTimer;
 
+            public void InitParserService(NLUIOClient nluIO = null) {
+                //Look, the SimpleParser doesn't do anything here either
+                nluIOClient = nluIO;
+            }
 
             public string NLParse(string rawSent) {
                 string to_return = "";
                 //to_return = ExecuteCommand(rawSent);
                 if (nluIOClient != null) {
-
-                    // Format into a good little JSON to pass in.
-                    //string jsonSent = "{'sentence':" + rawSent + "}";
-                    //Debug.LogWarning(nluIOClient.nlurestclient);
                     nluIOClient.Post(route, rawSent);
                 }
-                //else if (nlu_server != null) {
-                //    nlu_server.SetPost(rawSent);
-                //}
                 return "WAIT";
-            }
-
-
-            public void InitParserService(NLUIOClient nluIO = null) {
-                //Look, the SimpleParser doesn't do anything here either
-                //It'll do URL lookups in a different class, I guess
-                nluIOClient = nluIO;
-            }
-
-
-            //public string ExecuteCommand() {
-
-            //}
-
-
-            private static string JsonToFormat(string json_result) {
-                string to_return = "";
-                var settings = new JsonSerializerSettings();
-
-                JObject jsonParsed = JsonConvert.DeserializeObject<JObject>(json_result, settings);
-                GenericSyntax syntax = new GenericSyntax(jsonParsed);
-                to_return = syntax.ExportTagOrWords(true);
-                return to_return;
             }
 
             /// <summary>
@@ -82,6 +47,16 @@ namespace VoxSimPlatform {
                 }
                 to_return = JsonToFormat(to_print);
                 return to_return; // And here it'll crash lol            }
+            }
+
+            private static string JsonToFormat(string json_result) {
+                string to_return = "";
+                var settings = new JsonSerializerSettings();
+
+                JObject jsonParsed = JsonConvert.DeserializeObject<JObject>(json_result, settings);
+                GenericSyntax syntax = new GenericSyntax(jsonParsed);
+                to_return = syntax.ExportTagOrWords(true);
+                return to_return;
             }
 
 

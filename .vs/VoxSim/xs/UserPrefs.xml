@@ -1,19 +1,12 @@
 ﻿<Properties StartupConfiguration="{B6C01316-E063-C0DD-8D3C-275566B430D7}|">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Demos/JointGestureDemo.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/VoxSimPlatform/Network/CommunicationsBridge.cs">
     <Files>
-      <File FileName="Assets/Scripts/Demos/DianaOzStudies.cs" Line="120" Column="49" />
+      <File FileName="Assets/Scripts/Demos/JointGestureDemo.cs" Line="1878" Column="62" />
+      <File FileName="Assets/Scripts/VoxSimPlatform/Network/CommunicationsBridge.cs" Line="315" Column="7" />
       <File FileName="Assets/Scripts/VoxSimPlatform/Network/RestClient.cs" Line="98" Column="44" />
-      <File FileName="Assets/Scripts/VoxSimPlatform/Core/EventManager.cs" />
-      <File FileName="Assets/Scripts/IOClients/NLUIOClient.cs" Line="71" Column="1" />
-      <File FileName="Assets/Scripts/Demos/JointGestureDemo.cs" Line="1835" Column="28" />
-      <File FileName="Assets/Scripts/VoxSimPlatform/Interaction/SingleAgentInteraction.cs" />
-      <File FileName="Assets/Scripts/VoxSimPlatform/Network/CommunicationsBridge.cs" Line="292" Column="54" NotebookId="1" />
-      <File FileName="Assets/Scripts/VoxSimPlatform/NLU/PythonJSONparser2.cs" Line="22" Column="38" NotebookId="1" />
-      <File FileName="Assets/Scripts/VoxSimPlatform/Episteme/EpistemicState.cs" NotebookId="1" />
+      <File FileName="Assets/Scripts/IOClients/NLUIOClient.cs" Line="71" Column="1" NotebookId="1" />
       <File FileName="Assets/Scripts/VoxSimPlatform/Network/NLURestClient.cs" Line="21" Column="30" NotebookId="1" />
-      <File FileName="Assets/Plugins/crosstales/RTVoice/Editor/Util/EditorHelper.cs" NotebookId="1" />
-      <File FileName="Assets/Scripts/IOClients/FusionIOClient.cs" NotebookId="1" />
-      <File FileName="Assets/Scripts/IOClients/EpiSimIOClient.cs" NotebookId="1" />
+      <File FileName="Assets/Scripts/VoxSimPlatform/NLU/PythonJSONparser2.cs" Line="192" Column="2" NotebookId="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -32,9 +25,7 @@
               <Node name="Scenes" expanded="True" />
               <Node name="Scripts" expanded="True">
                 <Node name="Agents" expanded="True" />
-                <Node name="Demos" expanded="True">
-                  <Node name="JointGestureDemo.cs" selected="True" />
-                </Node>
+                <Node name="Demos" expanded="True" />
                 <Node name="IOClients" expanded="True" />
                 <Node name="SocketConnections" expanded="True" />
                 <Node name="VoxSimPlatform" expanded="True">
@@ -42,7 +33,9 @@
                   <Node name="Core" expanded="True" />
                   <Node name="Episteme" expanded="True" />
                   <Node name="Interaction" expanded="True" />
-                  <Node name="Network" expanded="True" />
+                  <Node name="Network" expanded="True">
+                    <Node name="CommunicationsBridge.cs" selected="True" />
+                  </Node>
                   <Node name="NLU" expanded="True" />
                   <Node name="UI" expanded="True">
                     <Node name="Launcher" expanded="True" />
