@@ -138,7 +138,6 @@ namespace VoxSimPlatform {
                 webRequest.uploadHandler = upload;
                 webRequest.downloadHandler = new DownloadHandlerBuffer();
                 webRequest.SetRequestHeader("Content-Type", "application/json");
-                Debug.LogWarning(string.Format("ALL THE WAY TO ASYNCREQUEST RestClient.AsyncRequest: {0}", webRequest));
                 yield return webRequest.SendWebRequest();    // 2017.2
                 //yield return webRequest.Send();
 

@@ -23,25 +23,25 @@ namespace VoxSimPlatform {
             /// <summary>
             /// In this method, we actually invoke a request to the outside server
             /// </summary>
-            public override IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+            public override IEnumerator AsyncRequest(string payload, string method, string url, string success, string error) {
                 if (!url.StartsWith("http")) {
                     url = "http://" + url;
                 }
                 UnityWebRequest webRequest;
 
-                Debug.Log("Payload is: " + jsonPayload);
+                Debug.Log("Payload is: " + payload);
 
-                if (jsonPayload != "0") {
+                if (payload != "0") {
                     var form = new WWWForm();
-                    form.AddField("sentence", jsonPayload); // IMPORTANT: Assumes there is a form with THIS PARICULAR NAME OF FIELD
+                    form.AddField("sentence", payload); // IMPORTANT: Assumes there is a form with THIS PARICULAR NAME OF FIELD
                     webRequest = UnityWebRequest.Post(url, form);
                 }
                 else {
                     // Only really handles the initialization step, to see if the server is, in fact, real
                     webRequest = new UnityWebRequest(url + route, method); // route is specific page as directed by server
-                    var payloadBytes = string.IsNullOrEmpty(jsonPayload)
+                    var payloadBytes = string.IsNullOrEmpty(payload)
                         ? Encoding.UTF8.GetBytes("{}")
-                        : Encoding.UTF8.GetBytes(jsonPayload);
+                        : Encoding.UTF8.GetBytes(payload);
 
                     UploadHandler upload = new UploadHandlerRaw(payloadBytes);
                     webRequest.uploadHandler = upload;
