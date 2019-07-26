@@ -177,13 +177,13 @@ namespace VoxSimPlatform {
                     referents = activeAgent.GetComponent<ReferentStore>();
                 }
             }
-            public void SetActiveAgent(GameObject agent) {
+            public void setActiveAgent(GameObject agent) {
                 if (agent != null) {
                     activeAgent = agent;
                     referents = activeAgent.GetComponent<ReferentStore>();
                 }
             }
-            public GameObject GetActiveAgent() {
+            public GameObject getActiveAgent() {
                 return activeAgent;
             }
 
@@ -225,6 +225,7 @@ namespace VoxSimPlatform {
         			bool q = SatisfactionTest.IsSatisfied(events[0]);
 
         			if (q) {
+        				GameObject.Find("VoxWorld").GetComponent<AStarSearch>().path.Clear();
         				Debug.Log("Satisfied " + events[0]);
 
         				for (int i = 0; i < events.Count - 1; i++) {
@@ -410,8 +411,8 @@ namespace VoxSimPlatform {
         			','
         		}));
                 // Match referent stack to whoever is being talked to
-                if(GetActiveAgent() != null) {
-                    referents = GetActiveAgent().GetComponent<ReferentStore>();
+                if(getActiveAgent() != null) {
+                    referents = getActiveAgent().GetComponent<ReferentStore>();
                 }
 
         		while (argsStrings.Count > 0) {
@@ -515,8 +516,8 @@ namespace VoxSimPlatform {
         		String pred = Helper.GetTopPredicate(evaluatedCommand);
 
                 // Match referent stack to whoever is being talked to
-                if (GetActiveAgent() != null) {
-                    referents = GetActiveAgent().GetComponent<ReferentStore>();
+                if (getActiveAgent() != null) {
+                    referents = getActiveAgent().GetComponent<ReferentStore>();
                 }
 
                 if (predArgs.Count > 0) {
