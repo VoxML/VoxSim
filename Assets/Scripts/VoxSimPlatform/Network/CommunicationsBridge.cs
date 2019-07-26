@@ -9,6 +9,7 @@ using System.Timers;
 using System.Xml.Serialization;
 
 using VoxSimPlatform.NLU;
+using VoxSimPlatform.Network;
 using VoxSimPlatform.Agent;
 
 namespace VoxSimPlatform {
@@ -92,6 +93,7 @@ namespace VoxSimPlatform {
             public List<RestClient> RestClients {
                 get { return _restClients; }
             }
+
             public Dictionary<string, Type> tryAgainRest = new Dictionary<string, Type>();
 
             public List<string> connected = new List<string>();
@@ -115,6 +117,7 @@ namespace VoxSimPlatform {
 
             void Start() {
                 _socketConnections = new List<SocketConnection>();
+                _restClients = new List<RestClient>();
                 connectionRetryTimer = new Timer(connectionRetryTimerTime);
                 connectionRetryTimer.Enabled = true;
                 connectionRetryTimer.Elapsed += RetryConnections;
@@ -127,10 +130,10 @@ namespace VoxSimPlatform {
                     Debug.Log("No listener port specified. Skipping interface startup.");
                 }
 
-                InitParser();
-
                 if (PlayerPrefs.HasKey("URLs")) {
                     // TODO: Refactor generically
+                    //// Sets up sockets for external connections?
+                    //// Not actually entirely clear what refers to socketLabels et al
 
                     List<string> socketStrings = PlayerPrefs.GetString("URLs").Split(';').ToList();
                     int numSockets = socketStrings.Count;
@@ -142,11 +145,17 @@ namespace VoxSimPlatform {
                         socketActiveStatuses.Add(bool.Parse(segments[3]));  // is this socket to be active?
 
                         // split the URL into IP and port
+                        Debug.Log(segments[0] + " " + segments[1] + " " + segments[2]);
                         if (socketActiveStatuses[i] == true) {
-                            string[] socketAddress = segments[2].Split(':');
+                            string[] socketAddress = segments[2].Split(':'); //// Assumes in form of IP address, not url
                             if (!string.IsNullOrEmpty(socketAddress[0])) {
                                 Type socketType = null;
                                 socketType = Type.GetType(segments[1]);
+                                if(socketType == null) {
+                                    //socketType = typeof(NLURestClient);
+                                    socketType = Type.GetType("VoxSimPlatform.Network." + segments[1]); //ugh, GetType doesn't find it by default
+                                }
+                                //socketType = Type.GetType("String");
                                 if (socketType != null) {
                                     if (socketType.IsSubclassOf(typeof(SocketConnection))) {
                                         SocketConnection newSocket = null;
@@ -204,7 +213,7 @@ namespace VoxSimPlatform {
                                         }
                                     }
                                     else {
-                                        Debug.Log(string.Format("CommunicationsBridge.Start: Specified type {0} is not subclass of SocketConnection or RestClient.",
+                                        Debug.LogWarning(string.Format("CommunicationsBridge.Start: Specified type {0} is not subclass of SocketConnection or RestClient.",
                                             socketType));
                                     }
                                 }
@@ -214,230 +223,23 @@ namespace VoxSimPlatform {
                             }
                         }
                     }
-
-                    /**********/
-                    /* FUSION */
-                    /**********/
-                    // CSU
-
-                    //string fusionUrlString = string.Empty;
-                    //foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-                    //    if (url.Split('=')[0] == "Fusion URL") {
-                    //        fusionUrlString = url.Split('=')[1];
-                    //        break;
-                    //    }
-                    //}
-
-                    //string[] fusionUrl = fusionUrlString.Split(':');
-                    //string fusionAddress = fusionUrl[0];
-                    //if (fusionAddress != "") {
-                    //    int fusionPort = Convert.ToInt32(fusionUrl[1]);
-                    //    try {
-                    //        _fusionSocket = (FusionSocket) ConnectSocket(fusionAddress, fusionPort, typeof(FusionSocket));
-                    //        socketConnections.Add(_fusionSocket);
-                    //    }
-                    //    catch (Exception e) {
-                    //        Debug.Log(e.Message);
-                    //    }
-
-                    //    if (!_fusionSocket.IsConnected()) {
-                    //        if (!tryAgain.ContainsKey(fusionUrlString)) {
-                    //            // TODO this was commented out on networking fix (cleanup branch), make sure this doesn't break the fix
-                    //            tryAgain.Add(fusionUrlString, typeof(FusionSocket));
-                    //        }
-                    //    }
-                    //}
-                    //else {
-                    //    Debug.Log("Fusion socket is not specified.");
-                    //}
-
-                    /******************/
-                    /* EVENT LEARNING */
-                    /******************/
-                    // Brandeis
-
-                    //string eventLearnerUrlString = string.Empty;
-                    //foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-                    //    if (url.Split('=')[0] == "Event Learner URL") {
-                    //        eventLearnerUrlString = url.Split('=')[1];
-                    //        break;
-                    //    }
-                    //}
-
-                    //string[] eventLearnerUrl = eventLearnerUrlString.Split(':');
-                    //string eventLearnerAddress = eventLearnerUrl[0];
-                    //if (eventLearnerAddress != "") {
-                    //    int eventLearnerPort = Convert.ToInt32(eventLearnerUrl[1]);
-                    //    try {
-                    //        //_eventLearningClient = (EventLearningClient)ConnectSocket (eventLearnerAddress, eventLearnerPort, typeof(EventLearningClient));
-                    //    }
-                    //    catch (Exception e) {
-                    //        Debug.Log(e.Message);
-                    //    }
-                    //}
-                    //else {
-                    //    Debug.Log("Event learner socket is not specified.");
-                    //}
-
-                    /**********************/
-                    /* STRUCTURE LEARNING */
-                    /**********************/
-                    // Brandeis
-
-                    //string structureLearnerUrlString = string.Empty;
-                    //foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-                    //    if (url.Split('=')[0] == "Structure Learner URL") {
-                    //        structureLearnerUrlString = url.Split('=')[1];
-                    //        break;
-                    //    }
-                    //}
-
-                    //string[] structureLearnerUrl = structureLearnerUrlString.Split(':');
-                    //string structureLearnerAddress = structureLearnerUrl[0];
-                    //if (structureLearnerAddress != "") {
-                    //    int structureLearnerPort = Convert.ToInt32(structureLearnerUrl[1]);
-                    //    try {
-                    //        _structureLearningSocket = (StructureLearningSocket) ConnectSocket(structureLearnerAddress,
-                    //            structureLearnerPort, typeof(StructureLearningSocket));
-                    //    }
-                    //    catch (Exception e) {
-                    //        Debug.Log(e.Message);
-                    //    }
-                    //}
-                    //else {
-                    //    Debug.Log("Structure learner socket is not specified.");
-                    //}
-
-                    /*************/
-                    /* COMMANDER */
-                    /*************/
-                    // Oz studies (UF)
-
-                    //string commanderUrlString = string.Empty;
-                    //foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-                    //    if (url.Split('=')[0] == "Commander URL") {
-                    //        commanderUrlString = url.Split('=')[1];
-                    //        break;
-                    //    }
-                    //}
-
-                    //string[] commanderUrl = commanderUrlString.Split(':');
-                    //string commanderAddress = commanderUrl[0];
-                    //if (commanderAddress != "") {
-                    //    int commanderPort = Convert.ToInt32(commanderUrl[1]);
-                    //    try {
-                    //        _commanderSocket =
-                    //            (CommanderSocket) ConnectSocket(commanderAddress, commanderPort, typeof(CommanderSocket));
-                    //    }
-                    //    catch (Exception e) {
-                    //        Debug.Log(e.Message);
-                    //    }
-                    //}
-                    //else {
-                    //    Debug.Log("Commander socket is not specified.");
-                    //}
-
-                    /********/
-                    /* KSIM */
-                    /********/
-                    // CSU
-
-                    //string ksimUrlString = string.Empty;
-                    //foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-                    //    if (url.Split('=')[0] == "KSIM URL") {
-                    //        ksimUrlString = url.Split('=')[1];
-                    //        break;
-                    //    }
-                    //}
-
-                    //string[] ksimUrl = ksimUrlString.Split(':');
-                    //string ksimAddress = ksimUrl[0];
-                    //if (ksimAddress != "") {
-                    //    int ksimPort = Convert.ToInt32(ksimUrl[1]);
-                    //    try {
-                    //        _ksimSocket = (KSIMSocket) ConnectSocket(ksimAddress, ksimPort, typeof(KSIMSocket));
-                    //        _socketConnections.Add(_ksimSocket);
-                    //    }
-                    //    catch (Exception e) {
-                    //        Debug.Log(e.Message);
-                    //    }
-
-                    //    if (_ksimSocket != null) {
-                    //        if (!_ksimSocket.IsConnected()) {
-                    //            Debug.Log("KSIM socket failed to connect.");
-
-                    //            if (!tryAgainSockets.ContainsKey(ksimUrlString)) {
-                    //                tryAgainSockets.Add(ksimUrlString, typeof(KSIMSocket));
-                    //            }
-                    //        }
-                    //        else {
-                    //            // register VoxSim
-                    //            byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] {0x02}).ToArray<byte>();
-                    //            _ksimSocket.Write(bytes);
-                    //        }
-                    //    }
-                    //}
-                    //else {
-                    //    Debug.Log("KSIM socket is not specified.");
-                    //}
-
-                    /*******/
-                    /* ADE */
-                    /*******/
-                    // Tufts
-
-                    //string adeUrlString = string.Empty;
-                    //foreach (string url in PlayerPrefs.GetString("URLs").Split(';')) {
-                    //    if (url.Split('=')[0] == "ADE URL") {
-                    //        adeUrlString = url.Split('=')[1];
-                    //        break;
-                    //    }
-                    //}
-
-                    //string[] adeUrl = adeUrlString.Split(':');
-                    //string adeAddress = adeUrl[0];
-                    //if (adeAddress != "") {
-                    //    int adePort = Convert.ToInt32(adeUrl[1]);
-                    //    try {
-                    //        _adeSocket = (ADESocket) ConnectSocket(adeAddress, adePort, typeof(ADESocket));
-                    //        _socketConnections.Add(_adeSocket);
-                    //    }
-                    //    catch (Exception e) {
-                    //        Debug.Log(e.Message);
-                    //    }
-
-                    //    if (_adeSocket != null) {
-                    //        if (!_adeSocket.IsConnected()) {
-                    //            Debug.Log("ADE socket failed to connect.");
-
-                    //            if (!tryAgainSockets.ContainsKey(adeUrlString)) {
-                    //                tryAgainSockets.Add(adeUrlString, typeof(ADESocket));
-                    //            }
-                    //        }
-                    //        else {
-                    //        }
-                    //    }
-                    //}
-                    //else {
-                    //    Debug.Log("ADE socket is not specified.");
-                    //}
                 }
                 else {
                     Debug.Log("No input URLs specified.");
                 }
+                InitParser(); // Gotta come after, since depends on url prefs now.
+
             }
 
             public void InitParser() {
-                var parserUrl = PlayerPrefs.GetString("Parser URL");
-                if (parserUrl.Length == 0) {
-                    Debug.Log("Initializing Simple Parser");
+                NLUIOClient nluIO = gameObject.GetComponent<NLUIOClient>();
+                if (nluIO == null) {
                     _parser = new SimpleParser();
+
                 }
-                else {
-                    Debug.Log("Initializing Stanford Dependency Parser");
-                    //parser = new StanfordWrapper();
-                    Debug.Log("Finding Stanford service at " + parserUrl);
-                    _parser.InitParserService(parserUrl);
+                else { // I think that using the IO handlers is what's expected here
+                    _parser = new PythonJSONParser();
+                    _parser.InitParserService(nluIO);
                 }
             }
 
@@ -541,7 +343,7 @@ namespace VoxSimPlatform {
                                         connected.Add(connectionUrl);
                                     }
                                     else {
-                                        Debug.Log(string.Format("Connection to {0} is lost!", socket.GetType()));
+                                        //Debug.Log(string.Format("Connection to {0} is lost!", socket.GetType()));
                                     }
 
                                     if (tryAgainSockets[connectionUrl] == typeof(FusionSocket)) {
@@ -618,7 +420,7 @@ namespace VoxSimPlatform {
                     }
                     catch (Exception e) {
                         socket.OnConnectionLost(this, null);
-                        Debug.Log(e.Message);
+                        //Debug.Log(e.Message);
                     }
                 }
                 else {
@@ -631,7 +433,6 @@ namespace VoxSimPlatform {
                 Debug.Log(string.Format("Trying connection to {0}:{1} as type {2}", address, port, socketType));
 
                 RestClient client = (RestClient)Activator.CreateInstance(socketType);
-
                 if (client != null) {
                     client.owner = this;
                     try {
@@ -656,9 +457,24 @@ namespace VoxSimPlatform {
             }
 
             private IEnumerator TryConnectRestClient(RestClient client, string address, int port) {
+                // Tries a connection, stores result in a RestDataContainer for future reference.
                 RestDataContainer result = new RestDataContainer(this, client.TryConnect(address, port));
-                Debug.Log(string.Format("Result: {0}",((UnityWebRequestAsyncOperation)result.result).webRequest.responseCode));
+                //Debug.Log(string.Format("Result: {0}",((UnityWebRequestAsyncOperation)result.result).webRequest.responseCode));
                 yield return result.coroutine;
+                // HERE we can make the check whether it is connected or not. Connection to CommBridge comes later.
+                Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1}", address, port,
+                            client.isConnected));
+                //ADD TO LIST
+                var clientIO = gameObject.GetComponent(client.clientType);
+                if (client.isConnected) { // Currently failing
+                    connected.Add(client.address);
+                }
+                else {
+                    if (!tryAgainSockets.ContainsKey(client.name)) {
+                        Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainRest", client.name, client.address));
+                        tryAgainSockets.Add(client.address, client.clientType);
+                    }
+                }
             }
 
             public void OpenPortInternal(string port) {
@@ -681,9 +497,19 @@ namespace VoxSimPlatform {
         //        string[] args = new string[]{input};
         //        string result = Marshal.PtrToStringAuto(PythonCall (Application.dataPath + "/Externals/python/", "change_to_forms", "parse_sent", args, args.Length));
                 var result = _parser.NLParse(input);
-                Debug.Log("Parsed as: " + result);
-
+                //Debug.LogWarning("Parsed as: " + result);
+                if(result == "WAIT"){
+                    return "";
+                }
                 return result;
+            }
+
+            /// <summary>
+            /// After waiting around for a new parse, collect it and send it on upward.
+            /// </summary>
+            /// <returns></returns>
+            public string GrabParse() {
+                return _parser.ConcludeNLParse();
             }
 
             public SocketConnection FindSocketConnectionByLabel(string label) {

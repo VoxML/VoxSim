@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using VoxSimPlatform.Network;
+
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -73,7 +75,10 @@ namespace VoxSimPlatform {
     			"{0}"
     		});
 
-
+            /// <summary>
+            /// A super simple mapping of plural to singular. Surprisingly, I'm not the one to name it this.
+            /// To be deleted???
+            /// </summary>
     		private Dictionary<string, string> shittyPorterStemmer = new Dictionary<string, string>() {
     			// not even a goddamn stemmer
     			{"blocks", "block"},
@@ -142,6 +147,7 @@ namespace VoxSimPlatform {
     			"rightmost"
     		});
 
+            // A far from exhaustive list. of determiners
     		private List<string> _determiners = new List<string>(new[] {
     			"the",
     			"a",
@@ -152,6 +158,12 @@ namespace VoxSimPlatform {
 
     		private List<string> _exclude = new List<string>();
 
+            /// <summary>
+            /// Only called in one place. Splits on any amount of spaces
+            /// "paper sheet" is some kind of special case
+            /// </summary>
+            /// <param name="sent"></param>
+            /// <returns>a list of tokens (as strings) </returns>
     		private string[] SentSplit(string sent) {
     			sent = sent.ToLower().Replace("paper sheet", "paper_sheet");
     			var tokens = new List<string>(Regex.Split(sent, " +"));
@@ -159,6 +171,7 @@ namespace VoxSimPlatform {
     		}
 
     		public string NLParse(string rawSent) {
+                //No plurals allowed
     			foreach (string plural in shittyPorterStemmer.Keys) {
     				rawSent = rawSent.Replace(plural, shittyPorterStemmer[plural]);
     			}
@@ -174,6 +187,8 @@ namespace VoxSimPlatform {
     					form += ",";
     					cur++;
     				}
+                    // 'in front of X' > in_front(X)
+                    // And other such prepositional mappings
     				else if (cur + 2 < end &&
     				         tokens[cur] == "in" && tokens[cur + 1] == "front" && tokens[cur + 2] == "of") {
     					form += ",in_front(";
@@ -212,6 +227,9 @@ namespace VoxSimPlatform {
 
     					cur += 1;
     				}
+
+                    /// Lots of potential categories.
+                    //??? Just "{1}"
     				else if (_relationVars.Contains(tokens[cur])) {
     					form += "," + tokens[cur];
     					cur += 1;
@@ -244,9 +262,9 @@ namespace VoxSimPlatform {
     					cur++;
     				}
 
-    				//Debug.Log(cur);
-    				//Debug.Log(form);
-    			}
+                    Debug.LogWarning(cur);
+                    Debug.LogWarning(form);
+                }
 
     			form = MatchParens(form);
     			//			form += string.Concat(Enumerable.Repeat(")", opens - closes));
@@ -259,6 +277,11 @@ namespace VoxSimPlatform {
     			return form;
     		}
 
+            /// <summary>
+            /// Fills in all the parentheses needed to get out to top level 
+            /// </summary>
+            /// <param name="input"></param>
+            /// <returns></returns>
     		private string MatchParens(string input) {
     			for (int i = input.Count(c => c == ')'); i < input.Count(c => c == '('); i++) {
     				input += ")";
@@ -309,9 +332,7 @@ namespace VoxSimPlatform {
     					cur++;
     				}
     				else {
-    					//Debug.Log(parsed);
     					MatchParens(parsed);
-    					//Debug.Log(parsed);
     					break;
     				}
     			}
@@ -319,9 +340,17 @@ namespace VoxSimPlatform {
     			return ++cur;
     		}
 
-    		public void InitParserService(string address) {
-    			// do nothing
-    		}
-    	}
+    		//public void InitParserService(NLUServerHandler nlu = null) {
+    		//	// do nothing
+    		//}
+
+            public void InitParserService(NLUIOClient nluIO) {
+                throw new System.NotImplementedException();
+            }
+
+            public string ConcludeNLParse() {
+                throw new System.NotImplementedException();
+            }
+        }
     }
 }
