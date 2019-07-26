@@ -4,7 +4,8 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// This class create a VoxmlDatadictionary with key value pairs of filename and foldername.
+/// This class create a VoxmlDatadictionary with key value pairs of xml filename and entity type(foldername), 
+/// and a VoxmlObectDict with key value pairs of xml filename and VoxML object. 
 /// </summary>
 public class CreateVoxmlDataDict : MonoBehaviour
 {
@@ -54,7 +55,7 @@ public class CreateVoxmlDataDict : MonoBehaviour
         string s = ""; 
         foreach (KeyValuePair<string, VoxSimPlatform.Vox.VoxML> kvp in VoxmlObjectDict)
         {
-            s += string.Format("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+            s += string.Format("Key = {0}, Value = {1}\n", kvp.Key, kvp.Value);
         }
         Debug.Log("Now printing dictionary**********:" + s); 
     }

@@ -203,14 +203,13 @@ namespace VoxSimPlatform {
             public static event EventHandler<VoxMLObjectEventArgs> LoadedFromText; 
 
             //Loads the xml directly from the given string. Useful in combination with www.text.
-            public static VoxML LoadFromText(string text) {
+            public static VoxML LoadFromText(string text, string filename) {
                 XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
                 VoxML voxML = serializer.Deserialize(new StringReader(text)) as VoxML;
 
-                var parsedXml = XElement.Parse(text);
-                string filename = parsedXml.Element("Lex").Element("Pred").Value;  
+                //var parsedXml = XElement.Parse(text);
+                //string filename = parsedXml.Element("Lex").Element("Pred").Value;  
                 voxML.OnLoadedFromText(filename, voxML);
-                //Debug.Log("the filename of the xml file is" + filename); 
                 return voxML; 
     		}
 
