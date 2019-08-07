@@ -42,7 +42,12 @@ namespace VoxSimPlatform {
         				// (i.e.) flatten any pos/rot inconsistencies in modeling or prefab setup due to human error
         				voxeme = go.GetComponent<Voxeme>();
         				Rigging rigging = go.GetComponent<Rigging>();
-        				if ((voxeme != null) && (voxeme.enabled) && (rigging == null)) {
+                        //if(voxeme != null) {
+                        //    Debug.LogWarning(go.name);
+
+                        //}
+                        if ((voxeme != null) && (voxeme.enabled) && (rigging == null)) {
+                            //Debug.LogWarning(go.name + "is proper voxeme");
         					// object has Voxeme component and no Rigging
         					GameObject container = new GameObject(go.name, typeof(Voxeme), typeof(Rigging));
 
@@ -53,7 +58,8 @@ namespace VoxSimPlatform {
 
         					container.transform.position = go.transform.position;
         					container.transform.rotation = go.transform.rotation;
-        					go.transform.parent = container.transform;
+                            go.transform.SetParent(container.transform);
+        					//go.transform.parent = container.transform;
         					go.name += "*";
         					voxeme.enabled = false;
         					//container.GetComponent<Entity> ().enabled = false;

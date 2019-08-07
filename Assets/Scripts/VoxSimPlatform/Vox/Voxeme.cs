@@ -107,6 +107,8 @@ namespace VoxSimPlatform {
 
         	public event EventHandler VoxMLLoaded;
 
+            public bool is_phrase = false; // Whether this voxeme is a word in a word cloud. (limit rotations 
+
         	public void OnVoxMLLoaded(object sender, EventArgs e) {
         		if (VoxMLLoaded != null) {
         			VoxMLLoaded(this, e);
@@ -259,7 +261,7 @@ namespace VoxSimPlatform {
         			// no queued sequence
         			if (!Helper.VectorIsNaN(targetRotation)) {
         				// has valid target
-        				if (!isGrasped) {
+        				if (!isGrasped && !is_phrase) { // phrases don't get rotation overridden
         					if (transform.rotation != Quaternion.Euler(targetRotation)) {
         						//Debug.Log (transform.eulerAngles);
         						float offset = RotateToward(targetRotation);
@@ -296,10 +298,13 @@ namespace VoxSimPlatform {
         					//Debug.Log (Quaternion.Angle(transform.rotation,Quaternion.Euler (interimTarget)));
         					//if ((Mathf.Deg2Rad * Quaternion.Angle (transform.rotation, Quaternion.Euler (interimTarget))) < 0.01f) {
         					if ((Mathf.Deg2Rad * offset) < 0.01f) {
-        						transform.rotation = Quaternion.Euler(interimTarget);
+                                if (!is_phrase) {
+                                    transform.rotation = Quaternion.Euler(interimTarget);
 
-        						//Debug.Log (interimTarget);
-        						interTargetRotations.Dequeue();
+                                }
+
+                                //Debug.Log (interimTarget);
+                                interTargetRotations.Dequeue();
         						//Debug.Log (interTargetRotations.Peek ());
         					}
         				}
@@ -598,16 +603,21 @@ namespace VoxSimPlatform {
         				}
         			}
 
-        			transform.rotation = rot;
-        			//GameObject.Find ("ReachObject").transform.position = transform.position;
+                    if (!is_phrase) {
+                        transform.rotation = rot;
 
-        			foreach (Voxeme child in children) {
+                    }
+                    //GameObject.Find ("ReachObject").transform.position = transform.position;
+
+                    foreach (Voxeme child in children) {
         				if (child.isActiveAndEnabled) {
         					if (child.gameObject != gameObject) {
-        						child.transform.localRotation = parentToChildRotationOffset[child.gameObject];
-        						child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
-        						child.targetRotation = child.transform.rotation.eulerAngles;
-        						child.transform.localPosition = Helper.RotatePointAroundPivot(
+                                if (!is_phrase) {
+                                    child.transform.localRotation = parentToChildRotationOffset[child.gameObject];
+                                    child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
+                                    child.targetRotation = child.transform.rotation.eulerAngles;
+                                }
+                                child.transform.localPosition = Helper.RotatePointAroundPivot(
         							parentToChildPositionOffset[child.gameObject],
         							Vector3.zero, gameObject.transform.eulerAngles);
         						child.transform.position = gameObject.transform.position + child.transform.localPosition;

@@ -509,7 +509,10 @@ namespace VoxSimPlatform {
             /// </summary>
             /// <returns></returns>
             public string GrabParse() {
-                return _parser.ConcludeNLParse();
+                string to_return = _parser.ConcludeNLParse();
+                //Debug.LogWarning(to_return);
+                //Debug.Break();
+                return to_return;
             }
 
             public SocketConnection FindSocketConnectionByLabel(string label) {

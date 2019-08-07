@@ -810,6 +810,7 @@ namespace VoxSimPlatform {
         	}
 
         	public String ApplySkolems(String inString) {
+                //Debug.LogWarning(inString);
         		String outString = inString;
         		String temp = inString;
 
@@ -834,8 +835,8 @@ namespace VoxSimPlatform {
         		temp = outString;
         		parenCount = temp.Count(f => f == '(') +
         		             temp.Count(f => f == ')');
-        		//Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
-
+                //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
+                //Debug.LogWarning(outString);
         		return outString;
         	}
 
