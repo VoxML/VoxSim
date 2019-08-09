@@ -160,9 +160,6 @@ EpiSim/UserModels*
 # ignore local configurations folder
 local_config
 
-# ignore NuGet packages (e.g. Nunit)
-packages*
-
 # ctag files
 **/.tags
 **/tags

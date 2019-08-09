@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "edu.brandeis.llc.voxsimdependencies": "ssh://git@morbius.cs-i.brandeis.edu/voxworld/unity-voxsimdependencies.git#2019.8.9"
+  },
+  "lock": {
+    "edu.brandeis.llc.voxsimdependencies": {
+      "hash": "075a9e08c9ccd45a687fc768b160fc2b61d0d318",
+      "revision": "2019.8.9"
+    }
+  }
+}
