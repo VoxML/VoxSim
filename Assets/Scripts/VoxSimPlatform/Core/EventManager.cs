@@ -278,7 +278,7 @@ namespace VoxSimPlatform {
                                     if (File.Exists(testPath)) {
                                         VoxML voxml = null;
                                         using (StreamReader sr = new StreamReader(testPath)) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                                         }
                                         eventArgs = new EventManagerArgs(voxml, completedEvent);
                                     }
@@ -659,7 +659,7 @@ namespace VoxSimPlatform {
         						if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
         							using (StreamReader sr =
         								new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                        VoxML voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        VoxML voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                                         Debug.Log(string.Format("Invoke ComposeProgram with {0}{1}",
                                            (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
         								preds.ComposeProgram(voxml, objs.ToArray());
@@ -1148,7 +1148,7 @@ namespace VoxSimPlatform {
 
         										if (path != string.Empty) {
         											using (StreamReader sr = new StreamReader(Data.voxmlDataPath + path)) {
-        												predVoxeme = VoxML.LoadFromText(sr.ReadToEnd());
+        												predVoxeme = VoxML.LoadFromText(sr.ReadToEnd(), pred);
         											}
 
         											Debug.Log(predVoxeme);
@@ -1248,14 +1248,14 @@ namespace VoxSimPlatform {
                                     if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
                                         using (StreamReader sr =
                                             new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                                         }
                                         methodToCall = preds.GetType().GetMethod("ComposeProgram");
                                     }
                                     else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
                                         using (StreamReader sr =
                                             new StreamReader(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                                         }
                                         methodToCall = preds.GetType().GetMethod("ComposeRelation");
                                     }
@@ -1417,14 +1417,14 @@ namespace VoxSimPlatform {
                                 if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
                                     using (StreamReader sr =
                                         new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                        voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                                     }
                                     methodToCall = preds.GetType().GetMethod("ComposeProgram");
                                 }
                                 else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
                                     using (StreamReader sr =
                                         new StreamReader(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                        voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                        voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                                     }
                                     methodToCall = preds.GetType().GetMethod("ComposeRelation");
                                 }

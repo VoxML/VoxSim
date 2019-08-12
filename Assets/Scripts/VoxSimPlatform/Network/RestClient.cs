@@ -18,7 +18,7 @@ namespace VoxSimPlatform {
             private IEnumerator Run() {
                 while (target.MoveNext()) {
                     result = target.Current;
-                    //Debug.Log(result.GetType());
+                    Debug.Log("result's type: "+result.GetType());
                     yield return result;
                 }
             }

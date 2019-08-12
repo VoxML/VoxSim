@@ -167,4 +167,5 @@ packages*
 **/.tags
 **/tags
 
-/.vs/VoxSim/v15/Server/sqlite3
+# .vs
+.vs

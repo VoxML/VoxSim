@@ -56,8 +56,8 @@ namespace VoxSimPlatform {
         		try {
         			using (StreamReader sr = new StreamReader(
         				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("relations/{0}.xml", relation)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd());
-        			}
+        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), relation);
+                    }
         		}
         		catch (Exception e) {
         			Debug.Log(e.Message);
@@ -112,7 +112,7 @@ namespace VoxSimPlatform {
         		try {
         			using (StreamReader sr = new StreamReader(
         				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("relations/{0}.xml", relation)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd());
+        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), relation);
         			}
         		}
         		catch (Exception e) {

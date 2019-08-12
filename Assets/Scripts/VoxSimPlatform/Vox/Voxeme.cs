@@ -693,7 +693,7 @@ namespace VoxSimPlatform {
         		try {
         			using (StreamReader sr = new StreamReader(
         				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", gameObject.name)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd());
+        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), gameObject.name);
         			}
         		}
         		catch (FileNotFoundException ex) {

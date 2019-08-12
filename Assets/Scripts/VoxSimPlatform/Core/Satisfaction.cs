@@ -430,7 +430,7 @@ namespace VoxSimPlatform {
                         if (File.Exists(testPath)) {
                             VoxML voxml = null;
                             using (StreamReader sr = new StreamReader(testPath)) {
-                                voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                voxml = VoxML.LoadFromText(sr.ReadToEnd(), predString);
                             }
                             eventArgs = new EventManagerArgs(voxml, test);
                         }
@@ -463,7 +463,7 @@ namespace VoxSimPlatform {
                         if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
                             using (StreamReader sr =
                                 new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                voxml = VoxML.LoadFromText(sr.ReadToEnd());
+                                voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
                             }
                             methodToCall = preds.GetType().GetMethod("ComposeProgram");
                         }
