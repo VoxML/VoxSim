@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Timers;
@@ -2197,7 +2196,7 @@ namespace VoxSimPlatform {
                                     : null);
 
                             foreach (Vector3 node in path) {
-                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.AddLast(node);
                             }
                         }
                     }
@@ -2937,7 +2936,7 @@ namespace VoxSimPlatform {
                                     : null, "Y");
 
                             foreach (Vector3 node in path) {
-                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.AddLast(node);
                             }
                         }
                     }
@@ -3500,7 +3499,7 @@ namespace VoxSimPlatform {
                                     : null, "Y");
 
                             foreach (Vector3 node in path) {
-                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.Enqueue(node);
+                                (args[0] as GameObject).GetComponent<Voxeme>().interTargetPositions.AddLast(node);
                             }
                         }
                     }
@@ -3825,13 +3824,13 @@ namespace VoxSimPlatform {
         				while (degrees < -90.0f) {
         					targetRotation = Quaternion.AngleAxis(-80.0f, worldRotAxis) * targetRotation;
         					//Debug.Log (targetRotation.eulerAngles);
-        					voxComponent.interTargetRotations.Enqueue(targetRotation.eulerAngles);
+        					voxComponent.interTargetRotations.AddLast(targetRotation.eulerAngles);
         					degrees += 90.0f;
         				}
 
         				targetRotation = Quaternion.AngleAxis(degrees, worldRotAxis) * targetRotation;
         				//Debug.Log (targetRotation.eulerAngles);
-        				voxComponent.interTargetRotations.Enqueue(targetRotation.eulerAngles);
+        				voxComponent.interTargetRotations.AddLast(targetRotation.eulerAngles);
         				//	}
         				//}
 
@@ -6225,10 +6224,12 @@ namespace VoxSimPlatform {
                 // args[0]: GameObject
                 // args[1]: Vector3
                 // args[2]: List<Vector3> or MethodInfo (return List<Vector3>)
+                object path = null;
                 if (args[args.Length - 1] is bool) {
                     if ((bool) args[args.Length - 1] == true) {
                         for (int i = 0; i < args.Length; i++) {
-                            Debug.Log(string.Format("MOVE_1: args@{0}: {1} typeof({2})", i, args[i], args[i].GetType()));
+                            Debug.Log(string.Format("{0}: args@{1}: {2} typeof({3})",
+                                MethodBase.GetCurrentMethod().Name, i, args[i], args[i].GetType()));
                         }
 
                         if (args[0] is GameObject) {
@@ -6239,41 +6240,116 @@ namespace VoxSimPlatform {
                                         if (((MethodInfo)args[2]).IsStatic) {
                                             // path not already computed
                                             if (((MethodInfo)args[2]).ReturnType == typeof(List<Vector3>)) {
-                                                Debug.Log(string.Format("{0} returns {1}",((MethodInfo)args[2]).Name,typeof(List<Vector3>)));
+                                                Debug.Log(string.Format("{0} returns {1}", ((MethodInfo)args[2]).Name, typeof(List<Vector3>)));
                                                 // compute path
                                                 // iterate motion over the path supplied by method
                                                 // compute the next target position along the path from the current position
-                                                object path = ((MethodInfo)args[2]).Invoke(null, new object[] { 
-                                                    (args[0] as GameObject).transform.position,
-                                                    (Vector3)args[1],
-                                                    (args[0] as GameObject), new object[] { } });
+
+                                                // numMethodParams = number of parameters the method requires
+                                                // we subtract 1 because all custom methods need a final argument of type
+                                                //  params object[]
+                                                // this gets passed as an object array containing all arguments
+                                                //  extracted from the VoxML encoding between index numMethodParams and the end,
+                                                //  though this array may be empty
+                                                int numMethodParams = ((MethodInfo)args[2]).GetParameters().Length - 1;
+                                                Debug.Log(string.Format("{0} takes {1} required parameters + additional params array",
+                                                    ((MethodInfo)args[2]).Name, ((MethodInfo)args[2]).GetParameters().Length));
+                                                object[] additionalParams = new ArraySegment<object>(
+                                                    args, 3 + numMethodParams, args.Length - (4 + numMethodParams)).ToArray();
+                                                Debug.Log(string.Format("{0} additional parameters supplied",
+                                                    additionalParams.Length));
+
+                                                // new ArraySegment slices args starting at 3
+                                                //  - the first index after the specified method -
+                                                //  and ending at 1 before the end of args (i.e., slice 
+                                                //  a segment of count args.Length-3-1)
+                                                // we then append additional params as a single argument
+                                                //  because custom-defined methods need a params argument
+                                                //  though this may be an empty array
+                                                object[] requiredParams = new ArraySegment<object>(args, 3, args.Length - 4).ToArray();
+
+                                                // now invoke the specified method (must be static in order to pass null),
+                                                //  with requiredParams concatenated with the additional params array as an object
+                                                path = ((MethodInfo)args[2]).Invoke(null,
+                                                    requiredParams.Concat(new object[] { additionalParams }).ToArray());
+
                                                 if ((path is IList) && (path.GetType().IsGenericType) &&
                                                     (path.GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
                                                     Debug.Log("Successfully computed path");
                                                 }
+                                                else {
+                                                    Debug.Log(string.Format("{0} called from {2} did not return a path (got typeof{1}).  " +
+                                                        "Check your implementation of {0}, or there may be an bug in {2}",
+                                                    ((MethodInfo)args[2]).Name, path.GetType(),
+                                                        MethodBase.GetCurrentMethod().Name));
+                                                }
                                             }
                                             else {
-                                                Debug.Log(string.Format("MOVE_1: {0} must return {1}!",((MethodInfo)args[2]).Name,typeof(List<Vector3>)));
+                                                Debug.Log(string.Format("{0}: {1} must return {2}!", MethodBase.GetCurrentMethod().Name,
+                                                    ((MethodInfo)args[2]).Name, typeof(List<Vector3>)));
                                             }
                                         }
                                         else {
-                                            Debug.Log(string.Format("MOVE_1: {0} is not static!  VoxML interpreted \"method\" types must call static code!",
-                                                ((MethodInfo)args[2]).Name));
+                                            Debug.Log(string.Format("{0}: {1} is not static!  " +
+                                                "VoxML interpreted \"method\" types must call static code!",
+                                                MethodBase.GetCurrentMethod().Name, ((MethodInfo)args[2]).Name));
                                         }
                                     }
                                     else if ((args[2] is IList) && (args[2].GetType().IsGenericType) &&
                                         (args[2].GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
+                                        path = (List<Vector3>)args[2];
+                                    }
+                                    else {
+                                        Debug.Log(string.Format("{0}: args@2: {1} must be of type MethodInfo or type List<Vector3>! (is {2})",
+                                            MethodBase.GetCurrentMethod().Name, args[2], args[2].GetType()));
+                                    }
+                                }
+
+                                Voxeme voxComponent = (args[0] as GameObject).GetComponent<Voxeme>();
+                                if (voxComponent != null) {
+                                    if (path == null) {
+                                        // no path given, move directly
+                                        voxComponent.targetPosition = (Vector3)args[1];
+                                    }
+                                    else {
                                         // iterate motion over the path supplied by method
                                         // compute the next target position along the path from the current position
-                                    }
-                                    else { 
-                                        Debug.Log(string.Format("MOVE_1: args@2: {0} must be of type MethodInfo or type List<Vector3>! (is {1})", args[2], args[2].GetType()));
+                                        foreach (Vector3 node in (List<Vector3>)path) {
+                                            if (!voxComponent.interTargetPositions.Contains(node)) {
+                                                voxComponent.interTargetPositions.AddLast(node);
+                                            }
+                                        }
+
+                                        //Vector3 nextInterimTarget = voxComponent.interTargetPositions.ElementAt(0);
+                                        //Vector3 iteratedTarget = voxComponent.MoveToward(nextInterimTarget) + 
+                                        //    nextInterimTarget;
+                                        //Debug.Log(string.Format("Adding {1} to front of {0} interim targets (first in list was {2})",
+                                        //    voxComponent.gameObject,Helper.VectorToParsable(iteratedTarget),
+                                        //    Helper.VectorToParsable(nextInterimTarget)));
+                                        //voxComponent.interTargetPositions.AddFirst(iteratedTarget);
+
+                                        //Debug.Log(string.Format("Path is now:"));
+                                        //foreach (Vector3 node in voxComponent.interTargetPositions) {
+                                        //    Debug.Log(Helper.VectorToParsable(node));
+                                        //}
+                                        //Debug.Log(string.Format("End of path"));
                                     }
                                 }
                                 else {
-                                    // no path given, move directly
+                                    Debug.Log(string.Format("{0}: {1} has no Voxeme component!",
+                                        MethodBase.GetCurrentMethod().Name, (args[0] as GameObject)));
                                 }
                             }
+                            else {
+                                Debug.Log(string.Format("{0}: args@1 must be of type Vector3! (is {1})  " +
+                                	"Check the encoding of the predicate calling {0} as a subevent!",
+                                    MethodBase.GetCurrentMethod().Name, args[1].GetType()));
+                            }
+                        }
+                        else {
+                            Debug.Log(string.Format("{0}: args@0 must be of type GameObject! (is {1})  " +
+                                "Check the encoding of the predicate calling {0} as a subevent!",
+                                MethodBase.GetCurrentMethod().Name, args[0].GetType()));
                         }
                     }
                 }
@@ -6389,15 +6465,6 @@ namespace VoxSimPlatform {
         				}
         			}
         		}
-        	}
-
-        	// IN: Objects
-        	// OUT: bool
-        	public bool IF(object[] args) {
-        		bool r = false;
-        		//TestRelation();
-
-        		return r;
         	}
 
         	// IN: Objects
@@ -6521,35 +6588,39 @@ namespace VoxSimPlatform {
                  
                 Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
 
-        		int index = 1;
-        		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
-        			string[] commands = subevent.Value.Split(new char[] { ';', ':' });
-        			foreach (string command in commands) {
-        				string modifiedCommand = command;
-        				Regex q = new Regex("[\'\"].*[\'\"]");
-        				MatchCollection matches = q.Matches(command);
-        				for (int i = 0; i < matches.Count; i++) {
-        					String match = matches[i].Value;
-        					String replace = match.Replace("(", "{").Replace(")", "}").Replace(",", ":");
-        					modifiedCommand = command.Replace(match, replace);
-        				}
+                if (args[args.Length - 1] is bool) {
+                    if ((bool)args[args.Length - 1]) {
+                		int index = 1;
+                		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
+                			string[] commands = subevent.Value.Split(new char[] { ';', ':' });
+                			foreach (string command in commands) {
+                				string modifiedCommand = command;
+                				Regex q = new Regex("[\'\"].*[\'\"]");
+                				MatchCollection matches = q.Matches(command);
+                				for (int i = 0; i < matches.Count; i++) {
+                					String match = matches[i].Value;
+                					String replace = match.Replace("(", "{").Replace(")", "}").Replace(",", ":");
+                					modifiedCommand = command.Replace(match, replace);
+                				}
 
-                        // if there is a variable representing an agent
-                        if (agentVar != string.Empty) {
-                            // if that variable is the first argument of the event
-                            //  remove it/"factor it out" to turn the event into an
-                            //  imperative format
-                            // Regex matches agentVar+optional comma and whitespace following an open paren
-                            Regex r = new Regex("(?<=\\()"+agentVar+",?\\s?");
-                            modifiedCommand = r.Replace(modifiedCommand,string.Empty);
-                        }
-                            
-                        // TODO: send to agent's event manager
-        				eventManager.InsertEvent(eventManager.ApplyGlobals(modifiedCommand), index);
-        				index++;
-        				//Debug.Log (eventManager.EvaluateCommand (command));
-        			}
-        		}
+                                // if there is a variable representing an agent
+                                if (agentVar != string.Empty) {
+                                    // if that variable is the first argument of the event
+                                    //  remove it/"factor it out" to turn the event into an
+                                    //  imperative format
+                                    // Regex matches agentVar+optional comma and whitespace following an open paren
+                                    Regex r = new Regex("(?<=\\()"+agentVar+",?\\s?");
+                                    modifiedCommand = r.Replace(modifiedCommand,string.Empty);
+                                }
+                                    
+                                // TODO: send to agent's event manager
+                				eventManager.InsertEvent(eventManager.ApplyGlobals(modifiedCommand), index);
+                				index++;
+                				//Debug.Log (eventManager.EvaluateCommand (command));
+                			}
+                		}
+                    }
+                }
         	}
 
             /// <summary>
@@ -6586,7 +6657,26 @@ namespace VoxSimPlatform {
 
                 if (args.Length == voxml.Type.Args.Count) { // all arguments specified
                     // calc IsSatisfied result
-                    //retVal = false;
+                    // extract ObjBounds from GameObjects
+                    args = args.ToList().Select(a => (a is GameObject) ? Helper.GetObjectOrientedSize((GameObject)a) : a).ToArray();
+                    // convert Vector3 to ObjBounds
+                    // assume the provided coordinates are the center of the bounds object
+                    // take the extents from the other object in the relation
+                    //  (that is, the first object in relation of type ObjBounds,
+                    //  or create ObjBounds of 0 extents if no ObjBounds to copy exists)
+                    ObjBounds boundsToCopy = (ObjBounds)args.ToList().FirstOrDefault(a => a.GetType() == typeof(ObjBounds));
+                    // transform boundsToCopy bounds by (target-origin)
+                    Debug.Log(Helper.VectorToParsable((Vector3)args[1]));
+                    Debug.Log(Helper.VectorToParsable(boundsToCopy.Center));
+                    args = args.ToList().Select(a => (a is Vector3) ? ((boundsToCopy != null) ? new ObjBounds((Vector3)a, 
+                        boundsToCopy.Points.Select(p => p + ((Vector3)a-boundsToCopy.Center)).ToList()) :
+                        new ObjBounds((Vector3)a)) : a).ToArray();
+                    Debug.Log(string.Format("ComposeRelation: \"{0}\" test bounds:\n{1}: {2} {3}\n{4}: {5} {6}",
+                        voxml.Lex.Pred,
+                        voxml.Type.Args[0].Value.Split(':')[0], Helper.VectorToParsable((args[0] as ObjBounds).Center),
+                            string.Join(", ", (args[0] as ObjBounds).Points.Select(p => Helper.VectorToParsable(p))),
+                        voxml.Type.Args[1].Value.Split(':')[0], Helper.VectorToParsable((args[1] as ObjBounds).Center),
+                            string.Join(", ", (args[1] as ObjBounds).Points.Select(p => Helper.VectorToParsable(p)))));
                     retVal = SatisfactionTest.IsSatisfied(voxml, args.ToList());
                 }
                 else {                                      // otherwise calc location/region
@@ -6598,11 +6688,51 @@ namespace VoxSimPlatform {
                             break;
 
                         case "force_dynamic":
+                            relStr = voxml.Type.Value;
                             break;
 
                         default:
                             Debug.Log(string.Format("ComposeRelation: unknown relation class: {0}", voxml.Type.Class));
                             break;
+                    }
+
+                    if (relStr != string.Empty) {
+                        // Get the Type for the calling class
+                        //  class must be within namespace VoxSimPlatform.SpatialReasoning.QSR
+                        String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
+                        Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                        if (methodCallingType != null) {
+                            MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1]);
+                            if (method != null) {
+                                Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}", voxml.Lex.Pred, methodCallingType.Name, method.Name));
+                            }
+                            else {  // no method found
+                                // throw this to ComposeQSR
+                                method = methodCallingType.GetMethod("ComposeQSR");
+                                Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}", voxml.Lex.Pred, methodCallingType.Name, method.Name));
+                            }
+                        }
+                        else {
+                            Debug.Log(string.Format("ComposeRelation: No type {0} found!",
+                                string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1))));
+                        }
+
+
+                        //            if (method != null) {
+                        //                Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,method));
+                        //                objs.Add(method);
+                        //            }
+                        //            else {
+                        //                Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),methodCallingType.Name));
+                        //            }
+                        //        } 
+                        //        else {
+                        //            Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,arg as String));
+                        //            objs.Add(arg as String);
+                        //        }
+                        //    }
+                        //((MethodInfo)args[2]).Invoke(null,
+                            //requiredParams.Concat(new object[] { additionalParams }).ToArray());
                     }
                 }
 
@@ -6610,19 +6740,20 @@ namespace VoxSimPlatform {
             }
 
             // IN: Condition (Expression), Event (string)
-            // OUT: none
+            // OUT: bool
             public bool WHILE(object[] args) {
                 // while(condition):event
                 // while the condition is true, keep the event in the eventManager
                 // if the condition is not true, remove the event from the eventManager
                 //  do we need to force satisfaction in this case?
-              
-                if (args[0] is String) {
 
+                bool result = false;
+
+                if (args[0] is String) {
                     // do stuff here
                     string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
                     DataTable dt = new DataTable();
-                    bool result = (bool)dt.Compute(expression, null);
+                    result = (bool)dt.Compute(expression, null);
                     Debug.Log(string.Format("Result ({0}): {1}", eventManager.evalOrig[eventManager.events[0]], result));
 
                     // if the condition evaluates to true, compute the next iteration of the event
@@ -6630,16 +6761,44 @@ namespace VoxSimPlatform {
                     //  then reinsert the while(condition):event loop following it
                     // this keeps us in the loop until the condition evaluates to false
                     if (result) {
-                        if (eventManager.events.Count > 1) {
-                            string eventIteration = eventManager.events[1];
-
+                        //if (eventManager.events.Count > 1) {
                             eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
-                            eventManager.InsertEvent(eventManager.events[1], 3);
+                            //eventManager.InsertEvent(eventManager.events[1], 3);
+                            //eventManager.InsertEvent(eventManager.events[1], 2);
+                        //}
+                    }
+                    else {
+                        //eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
+                    }
+                }
+
+                return result;
+            }
+
+            // IN: Condition (Expression), Event (string)
+            // OUT: bool
+            public bool IF(object[] args) {
+                bool result = false;
+
+                if (args[0] is String) {
+                    // do stuff here
+                    string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
+                    DataTable dt = new DataTable();
+                    result = (bool)dt.Compute(expression, null);
+                    Debug.Log(string.Format("Result ({0}): {1}", eventManager.evalOrig[eventManager.events[0]], result));
+
+                    // if the condition evaluates to true, compute the next iteration of the event
+                    //  put that into the event manager,
+                    //  then reinsert the while(condition):event loop following it
+                    // this keeps us in the loop until the condition evaluates to false
+                    if (!result) {
+                        if (eventManager.events.Count > 1) {
+                            eventManager.RemoveEvent(1);
                         }
                     }
                 }
 
-                return true;
+                return result;
             }
         }
     }

@@ -73,7 +73,7 @@ namespace VoxSimPlatform {
 
         	public string lastParse = string.Empty;
 
-            public List<string> eventHistory = new List<string>();
+            public List<string> executedEventHistory = new List<string>();
 
         	//public string lastObjectResolved = string.Empty;
         	public Dictionary<String, String> evalOrig = new Dictionary<String, String>();
@@ -364,7 +364,6 @@ namespace VoxSimPlatform {
         	public void ExecuteNextCommand() {
         		//PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
         		Debug.Log("Next Command: " + events[0]);
-                eventHistory.Add(events[0]);
 
         		if (!EvaluateCommand(events[0])) {
         			return;
@@ -478,15 +477,15 @@ namespace VoxSimPlatform {
                                     .Replace("\"",string.Empty).Split('.');
 
                                 // Get the Type for the class
-                                Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
-                                if (routineCallingType != null) {
-                                    MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
-                                    if (routineMethod != null) {
-                                        Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,routineMethod));
-                                        objs.Add(routineMethod);
+                                Type methodCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                if (methodCallingType != null) {
+                                    MethodInfo method = methodCallingType.GetMethod(tryMethodPath.Last());
+                                    if (method != null) {
+                                        Debug.Log(string.Format("ExtractObjects ({0}): extracted {1}",pred,method));
+                                        objs.Add(method);
                                     }
                                     else {
-                                        Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
+                                        Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),methodCallingType.Name));
                                     }
                                 } 
                                 else {
@@ -579,6 +578,7 @@ namespace VoxSimPlatform {
 
         	public void ExecuteCommand(String evaluatedCommand) {
         		Debug.Log("Execute command: " + evaluatedCommand);
+                executedEventHistory.Add(evaluatedCommand);
         		Hashtable predArgs = Helper.ParsePredicate(evaluatedCommand);
         		String pred = Helper.GetTopPredicate(evaluatedCommand);
 
@@ -753,9 +753,19 @@ namespace VoxSimPlatform {
                         // pred string is the key
         				predString = (String) entry.Key;
 
+                        Debug.Log(string.Format("{0} : {1}", entry.Key, entry.Value));
+
                         // split the args at delimiters/operators, assuming they don't fall inside another subpredicate
+                        // 1. check the VoxML data dictionary to see what entity type this predicate signifies
+                        // 2. split appropriately
+
+                        // if predicate is a relation {
+                            //@"(!|^\(|\((?=\()|(?<=(\n|\^)[^(]*\(?[^(]*),(?=[^)]*\)?[^)]*(\n|\^))|(?<=\)[^(]*)[,|^](?=[^)]*\())"));    // use for relational predicates
+                        //}
+                        // else {
                         argsStrings = new List<String>(Regex.Split(((String) entry.Value),
-                            @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*),|(?<=\)[^(]*)[,|^](?=[^)]*\())"));
+                            @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*),|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicates
+                        //}
 
                         for (int i = 0; i < argsStrings.Count; i++) {   // get rid of any dangling close parens
                             int extraParens = argsStrings[i].Count(f => f == ')') -     //  that might be left over from an imperfect

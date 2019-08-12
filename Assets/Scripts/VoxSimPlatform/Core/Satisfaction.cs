@@ -16,7 +16,6 @@ using VoxSimPlatform.CogPhysics;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
-using VoxSimPlatform.SpatialReasoning.RCC;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
@@ -27,7 +26,56 @@ namespace VoxSimPlatform {
             }
 
             public static bool IsSatisfied(VoxML voxml, List<object> args) {
-                return false;
+                bool satisfied = false;
+
+                if (voxml.Entity.Type == VoxEntity.EntityType.Program) {
+                }
+                else if (voxml.Entity.Type == VoxEntity.EntityType.Relation) {
+
+                    string relStr = string.Empty;
+
+                    switch (voxml.Type.Class) {
+                        case "config":
+                            relStr = voxml.Type.Value;
+                            break;
+
+                        case "force_dynamic":
+                            relStr = voxml.Type.Value;
+                            break;
+
+                        default:
+                            Debug.Log(string.Format("IsSatisfied: unknown relation class: {0}", voxml.Type.Class));
+                            break;
+                    }
+
+                    if (relStr != string.Empty) {
+                        // Get the Type for the calling class
+                        //  class must be within namespace VoxSimPlatform.SpatialReasoning.QSR
+                        String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
+                        Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                        if (methodCallingType != null) {
+                            MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], args.Select(a => a.GetType()).ToArray());
+                            if (method != null) {
+                                Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                    methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                object obj = method.Invoke(null, args.ToArray());
+                                satisfied = (bool)obj;
+                            }
+                            else {  // no method found
+                                // throw this to ComposeQSR
+                                method = methodCallingType.GetMethod("ComposeQSR");
+                                Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                    methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                            }
+                        }
+                        else {
+                            Debug.Log(string.Format("IsSatisfied: No type {0} found!",
+                                string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1))));
+                        }
+                    }
+                }
+
+                return satisfied;
             }
 
     		public static bool IsSatisfied(String test) {
@@ -53,7 +101,27 @@ namespace VoxSimPlatform {
 
     			//Debug.Log (test);
 
-    			if (predString == "put") {
+    			if (predString == "move_1") {
+                    // satisfy move_1
+                    GameObject theme = GameObject.Find(argsStrings[0] as String);
+                    if (theme != null) {
+                        Voxeme voxComponent = theme.GetComponent<Voxeme>();
+                        Vector3 testLocation = voxComponent.isGrasped
+                            ? voxComponent.graspTracker.transform.position
+                            : theme.transform.position;
+
+                        Debug.Log(string.Format("{0} : {1}", Helper.VectorToParsable(testLocation),argsStrings[1]));
+                        if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                            if (voxComponent.isGrasped) {
+                                theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
+                                theme.transform.rotation = Quaternion.identity;
+                            }
+
+                            satisfied = true;
+                        }
+                    }
+                }
+                else if (predString == "put") {
     				// satisfy put
     				GameObject theme = GameObject.Find(argsStrings[0] as String);
     				if (theme != null) {
@@ -424,15 +492,15 @@ namespace VoxSimPlatform {
                                             .Replace("\"",string.Empty).Split('.');
 
                                         // Get the Type for the class
-                                        Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
-                                        if (routineCallingType != null) {
-                                            MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
-                                            if (routineMethod != null) {
-                                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",routineMethod));
-                                                objs.Add(routineMethod);
+                                        Type methodCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                        if (methodCallingType != null) {
+                                            MethodInfo method = methodCallingType.GetMethod(tryMethodPath.Last());
+                                            if (method != null) {
+                                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",method));
+                                                objs.Add(method);
                                             }
                                             else {
-                                                Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
+                                                Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),methodCallingType.Name));
                                             }
                                         } 
                                         else {
@@ -1324,22 +1392,22 @@ namespace VoxSimPlatform {
     			// TODO: must transform to camera perspective if relative persp is on
     			else if (relation == "behind") {
     				r = QSR.Behind(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     //				r = (Vector3.Distance (
     //					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
     //					obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -1357,22 +1425,22 @@ namespace VoxSimPlatform {
     //				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.Finishes(bounds1,bounds2,MajorAxis.X,true)));
 
     				r = QSR.InFront(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     //				r = (Vector3.Distance (
     //					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
     //					obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -1398,22 +1466,22 @@ namespace VoxSimPlatform {
     //				Debug.Log (string.Format ("{1} finishes {0}:{2}", obj1, obj2, QSR.Finishes (bounds1, bounds2, MajorAxis.Y, true)));
 
     				r = QSR.Left(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     				//(Vector3.Distance (
     				//new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
     				//obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -1421,22 +1489,22 @@ namespace VoxSimPlatform {
     			}
     			else if (relation == "right") {
     				r = QSR.Right(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     //				r = (Vector3.Distance (
     //					new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
     //					obj2.gameObject.transform.position) <= Constants.EPSILON);

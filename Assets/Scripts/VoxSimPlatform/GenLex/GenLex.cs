@@ -16,7 +16,7 @@ namespace VoxSimPlatform {
             // IN: string
             // OUT: GLType
             public static GLType GetGLType(string typeStr) {
-                GLType glType = GLType.None;
+                GLType glType = GLType.T;
 
                 switch(typeStr) {
                     case "agent":
@@ -68,7 +68,6 @@ namespace VoxSimPlatform {
                         break;
 
                     default:
-                        glType = GLType.None;
                         break;
                 }
 
@@ -86,8 +85,7 @@ namespace VoxSimPlatform {
                 bool isType = false;
 
                 switch(glType) {
-                    case GLType.None:
-                        // an entity should never have no type
+                    case GLType.T:
                         break;
 
                     case GLType.Agent:
@@ -170,7 +168,7 @@ namespace VoxSimPlatform {
                             (obj.GetType().IsAssignableFrom(typeof(List<GameObject>)))) {
                             List<Voxeme> voxComponents = ((List<GameObject>)obj).Select(o => o.GetComponent<Voxeme>()).ToList();
                             if (voxComponents.Count > 0) {
-                                if (voxComponents.Select(v => v.voxml.Lex.Type.Split('*')).ToList().All(t => t.Contains("artifact"))) {
+                                if (voxComponents.Select(v => v.voxml.Lex.Type.Split('*')).ToList().All(t => t.Contains("physobj"))) {
                                     isType = true;
                                 }
                             }

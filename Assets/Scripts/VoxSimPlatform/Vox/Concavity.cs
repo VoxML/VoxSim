@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using VoxSimPlatform.CogPhysics;
 using VoxSimPlatform.Global;
-using VoxSimPlatform.SpatialReasoning.RCC;
+using VoxSimPlatform.SpatialReasoning.QSR;
 
 namespace VoxSimPlatform {
     namespace Vox {

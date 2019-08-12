@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Entity Type="Relation" />
+  <Lex>
+    <Pred>at</Pred>
+  </Lex>
+  <Type>
+    <Class>config</Class>
+    <Value>'eq'</Value>
+    <Args>
+        <Arg Value="x:physobj" />
+        <Arg Value="y:vector" />
+        <Arg Value="z:T[]" />
+    </Args>
+    <Constr />
+    <Corresps>
+        <!--<VoxSimPlatform.SpatialReasoning.QSR.ComposeQSR(x,y,'rcc8')>-->
+        <Corresp Value="z:'rcc8'" />
+    </Corresps>
+  </Type>
+</VoxML>

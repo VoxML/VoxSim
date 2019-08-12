@@ -34,7 +34,8 @@ namespace VoxSimPlatform {
 
         	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
-        	public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
+            public LinkedList<Vector3> interTargetPositions = new LinkedList<Vector3>();
+        	//public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
 
             [SerializeField]
             private Vector3 _targetPosition;
@@ -48,7 +49,8 @@ namespace VoxSimPlatform {
         		}
         	}
 
-        	public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
+            public LinkedList<Vector3> interTargetRotations = new LinkedList<Vector3>();
+        	//public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
 
             [SerializeField]
             private Vector3 _targetRotation;
@@ -227,7 +229,7 @@ namespace VoxSimPlatform {
         			}
         		}
         		else {
-        			Vector3 interimTarget = interTargetPositions.Peek();
+        			Vector3 interimTarget = interTargetPositions.ElementAt(0);
         			if (!isGrasped) {
         				//if (transform.position != interimTarget) {
         				Vector3 offset = MoveToward(interimTarget);
@@ -244,7 +246,7 @@ namespace VoxSimPlatform {
         						}
         					}
 
-        					interTargetPositions.Dequeue();
+        					interTargetPositions.RemoveFirst();
         				}
 
         				//}
@@ -256,7 +258,7 @@ namespace VoxSimPlatform {
 
         				if (offset.sqrMagnitude <= Constants.EPSILON) {
         					graspTracker.transform.position = interimTarget; //+graspController.graspTrackerOffset;
-        					interTargetPositions.Dequeue();
+        					interTargetPositions.RemoveFirst();
         				}
 
         				//}
@@ -295,7 +297,7 @@ namespace VoxSimPlatform {
         			}
         		}
         		else {
-        			Vector3 interimTarget = interTargetRotations.Peek();
+        			Vector3 interimTarget = interTargetRotations.ElementAt(0);
         			if (!isGrasped) {
         				if (transform.rotation != Quaternion.Euler(interimTarget)) {
         					//Debug.Log (transform.rotation == Quaternion.Euler (targetRotation));
@@ -307,7 +309,7 @@ namespace VoxSimPlatform {
         						transform.rotation = Quaternion.Euler(interimTarget);
 
         						//Debug.Log (interimTarget);
-        						interTargetRotations.Dequeue();
+        						interTargetRotations.RemoveFirst();
         						//Debug.Log (interTargetRotations.Peek ());
         					}
         				}
@@ -528,7 +530,7 @@ namespace VoxSimPlatform {
         		targetScale = startScale;
         	}
 
-        	Vector3 MoveToward(Vector3 target) {
+        	public Vector3 MoveToward(Vector3 target) {
         		//Debug.Log (string.Format("{0}: {1}",gameObject.name,Helper.VectorToParsable(target)));
         		if (!isGrasped) {
         			Vector3 offset = transform.position - target;
@@ -585,7 +587,7 @@ namespace VoxSimPlatform {
         		}
         	}
 
-        	float RotateToward(Vector3 target) {
+        	public float RotateToward(Vector3 target) {
         		float offset = 0.0f;
         		if (!isGrasped) {
         			//Quaternion offset = Quaternion.FromToRotation (transform.eulerAngles, targetRotation);

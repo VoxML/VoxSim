@@ -16,7 +16,7 @@
       <Arg Value="y:physobj" />
       <Arg Value="z:location" />
       <Arg Value="p:method" />
-      <!--<Arg Value="a:untyped[]" /> can we have "untyped" objects-->
+      <Arg Value="a:T[]" />
     </Args>
     <Body>
       <Subevent Value="move_1(x,y,z,p)" />

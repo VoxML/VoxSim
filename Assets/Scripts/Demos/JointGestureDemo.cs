@@ -22,7 +22,6 @@ using VoxSimPlatform.Logging;
 using VoxSimPlatform.Network;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
-using VoxSimPlatform.SpatialReasoning.RCC;
 using VoxSimPlatform.Vox;
 
 public class SelectionEventArgs : EventArgs {

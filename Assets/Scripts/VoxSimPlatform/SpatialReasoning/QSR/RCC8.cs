@@ -8,7 +8,7 @@ using VoxSimPlatform.Global;
 // grossly underspecified for now
 namespace VoxSimPlatform {
     namespace SpatialReasoning {
-        namespace RCC {
+        namespace QSR {
         	public static class RCC8 {
         		// disconnected
         		public static bool DC(Bounds x, Bounds y) {
@@ -256,6 +256,18 @@ namespace VoxSimPlatform {
 
         			return eq;
         		}
+
+                public static bool EQ(ObjBounds x, ObjBounds y) {
+                    bool eq = true;
+
+                    for (int i = 0; i < x.Points.Count; i++) {
+                        if ((x.Points[i]-y.Points[i]).magnitude > Constants.EPSILON) {
+                            eq = false;
+                        }
+                    }
+
+                    return eq;
+                }
 
         		public static bool TPP(Bounds x, Bounds y) {
         			bool tpp = false;
