@@ -8,7 +8,7 @@ using VoxSimPlatform.Global;
 namespace VoxSimPlatform {
     namespace Vox {
         /// <summary>
-        /// This class creates a VoxMLEntityTypeDict with key value pairs of xml filename and entity type(foldername), 
+        /// This class creates a VoxMLEntityTypeDict with key value pairs of xml filename and entity type (folder name), 
         /// and a VoxMLObjectDict with key value pairs of xml filename and VoxML object. 
         /// </summary>
         public class VoxMLLoader : MonoBehaviour {
