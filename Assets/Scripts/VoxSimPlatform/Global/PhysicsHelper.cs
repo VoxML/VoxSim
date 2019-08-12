@@ -164,6 +164,7 @@ namespace VoxSimPlatform {
             public static void ResolvePhysicsPositionDiscrepancies(GameObject obj, bool macroEventSatisfied) {
                 Voxeme voxComponent = obj.GetComponent<Voxeme>();
                 //Debug.Break ();
+                Debug.Log(string.Format("Before resolution: {0} position = {1}", obj.name, Helper.VectorToParsable(obj.transform.position)));
                 // find the displacement between the main body and this rigidbody
                 float displacement = float.MaxValue;
                 Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();
@@ -189,13 +190,17 @@ namespace VoxSimPlatform {
                 }
 
                 if (displacement > Constants.EPSILON) {
-    //              Debug.Log (obj.name);
+                    Debug.Log (string.Format("{0} position displacement magnitude = {1}", obj.name, displacement));
     //              Debug.Log (displacement);
                     if (voxComponent != null) {
                         if (rigidbodies.Length > 0) {
-    //                      Debug.Log (rigidbodies [0].name);
-    //                      Debug.Log (rigidbodies [0].transform.position);
-    //                      Debug.Log (Helper.VectorToParsable(voxComponent.displacement [rigidbodies[0].gameObject]));
+                            //                      Debug.Log (rigidbodies [0].name);
+                            //                      Debug.Log (rigidbodies [0].transform.position);
+                            //                      Debug.Log (Helper.VectorToParsable(voxComponent.displacement [rigidbodies[0].gameObject]));
+                            Debug.Log(string.Format("{0} position = {1}", rigidbodies[0].name, Helper.VectorToParsable(rigidbodies[0].transform.position)));
+                            Debug.Log(string.Format("{0} position displacement = {1}", rigidbodies[0].name, Helper.VectorToParsable(voxComponent.displacement[rigidbodies[0].gameObject])));
+                            Debug.Log(string.Format("{0} rotation * position displacement = {1}", rigidbodies[0].name, Helper.VectorToParsable((obj.transform.rotation *
+                                                      voxComponent.displacement[rigidbodies[0].gameObject]))));
                             obj.transform.position = rigidbodies[0].transform.position -
                                                      (obj.transform.rotation *
                                                       voxComponent.displacement[rigidbodies[0].gameObject]);
@@ -213,7 +218,7 @@ namespace VoxSimPlatform {
 
                             foreach (Rigidbody rigidbody in rigidbodies) {
                                 if (voxComponent.displacement.ContainsKey(rigidbody.gameObject)) {
-                                    //                              Debug.Log (rigidbody.name);
+                                    Debug.Log (string.Format("{0} position displacement = {1}",rigidbody.name,Helper.VectorToParsable(voxComponent.displacement[rigidbody.gameObject])));
                                     rigidbody.transform.localPosition = voxComponent.displacement[rigidbody.gameObject];
                                 }
                             }
@@ -238,6 +243,7 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
+                Debug.Log(string.Format("After resolution: {0} position = {1}", obj.name, Helper.VectorToParsable(obj.transform.position)));
             }
 
             public static float GetConcavityMinimum(GameObject obj) {

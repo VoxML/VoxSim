@@ -73,7 +73,8 @@ public class JointGestureDemo : SingleAgentInteraction {
 	public AvatarGestureController gestureController;
 	public VisualMemory dianaMemory;
 
-	public GameObject demoSurface;
+
+    public GameObject demoSurface;
 	public BoxCollider demoSurfaceCollider;
 	public List<GameObject> availableObjs;
 	public GameObject indicatedObj = null;
@@ -229,6 +230,8 @@ public class JointGestureDemo : SingleAgentInteraction {
 		eventManager.EntityReferenced += ReferentIndicated;
 		eventManager.NonexistentEntityError += NonexistentReferent;
 		eventManager.DisambiguationError += Disambiguate;
+        // Could set active agent here, but we'll pass it in directly after we set a Diana variable.
+        //eventManager.setActiveAgent("Diana");
 
 		relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
 
@@ -248,12 +251,13 @@ public class JointGestureDemo : SingleAgentInteraction {
 		logIndex = 0;
 
 		Diana = GameObject.Find("Diana");
-		UseTeaching = interactionPrefs.useTeachingAgent;
+        eventManager.SetActiveAgent(Diana); // This would need called again any time we switch who we talk to
+        UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel>();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic>();
 		interactionLogic.AttentionShift += AttentionShift;
 
-		if (GameObject.Find("DianaMemory") != null) {
+        if (GameObject.Find("DianaMemory") != null) {
 			dianaMemory = GameObject.Find("DianaMemory").GetComponent<VisualMemory>();
 		}
 
@@ -4802,7 +4806,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	}
 
 	public void RespondAndUpdate(string utterance, bool forceUtterance = false) {
-		if (OutputHelper.GetCurrentOutputString(Role.Affector) != utterance) {
+		if (AgentOutputHelper.GetCurrentOutputString(Role.Affector, "Diana") != utterance) { //// add agent
 			if (!logActionsOnly) {
 				logger.OnLogEvent(this, new LoggerArgs(
 					string.Format("{0}\t{1}\t{2}",
@@ -4812,10 +4816,12 @@ public class JointGestureDemo : SingleAgentInteraction {
 			}
 		}
 
-		OutputHelper.PrintOutput(Role.Affector, utterance, forceUtterance);
+        AgentOutputHelper.SpeakOutput(Role.Affector, utterance, "Diana", forceUtterance);
+        AgentOutputHelper.PrintOutput(Role.Affector, utterance, "Diana", forceUtterance);
 
-		// get all linguistic concepts
-		if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
+
+        // get all linguistic concepts
+        if ((!UseTeaching) || (!interactionLogic.useEpistemicModel)) {
 			return;
 		}
 

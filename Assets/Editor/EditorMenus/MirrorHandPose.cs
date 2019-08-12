@@ -51,52 +51,52 @@ namespace EditorMenus {
 
             //Find rotations
             Component[] rotations = clone.transform.parent.GetComponents(typeof(FixHandRotation));
-            bool rot_right = false;
-            bool rot_left = false;
-            bool to_mirror_right = clone.name.StartsWith("r");
-            FixHandRotation new_rot = null; // For if there is a corresponding rotation
-            GameObject target_joint = null;
-            FullBodyBipedEffector target_hand = FullBodyBipedEffector.RightHand;
-            Vector3 target_direction = new Vector3(0,0,0);
-            InteractionSystem target_interaction_system = null;
+            bool rotRight = false;
+            bool rotLeft = false;
+            bool toMirrorRight = clone.name.StartsWith("r");
+            FixHandRotation newRot = null; // For if there is a corresponding rotation
+            GameObject targetJoint = null;
+            FullBodyBipedEffector targetHand = FullBodyBipedEffector.RightHand;
+            Vector3 targetDir = new Vector3(0,0,0);
+            InteractionSystem targetInteractionSystem = null;
             foreach (FixHandRotation rot in rotations) {
                 // Check if rotations exist for both sides, and keep track of mirrored data
                 if (rot.rootJoint.ToString().StartsWith("r")) {
-                    rot_right = true;
-                    string target_joint_name = "l" + rot.rootJoint.name.ToString().Substring(1);
-                    target_interaction_system = rot.interactionSystem; // Interaction System
-                    target_joint = GameObject.Find(target_joint_name); // Root Joint
-                    target_hand = FullBodyBipedEffector.LeftHand; // Effector Type
-                    target_direction = new Vector3(-rot.localDirection.x, rot.localDirection.y, rot.localDirection.z); // Local Direction
-                    GameObject orig_joint = rot.rootJoint; // The shoulder (or whatever else) we start with.
-                    if (target_joint == null || target_joint.transform.root != orig_joint.transform.root) {
+                    rotRight = true;
+                    string targetJointName = "l" + rot.rootJoint.name.ToString().Substring(1);
+                    targetInteractionSystem = rot.interactionSystem; // Interaction System
+                    targetJoint = GameObject.Find(targetJointName); // Root Joint
+                    targetHand = FullBodyBipedEffector.LeftHand; // Effector Type
+                    targetDir = new Vector3(-rot.localDirection.x, rot.localDirection.y, rot.localDirection.z); // Local Direction
+                    GameObject origJoint = rot.rootJoint; // The shoulder (or whatever else) we start with.
+                    if (targetJoint == null || targetJoint.transform.root != origJoint.transform.root) {
                         Debug.Log("No mirror joint or wrong parent");
                     }
                 }
                 else if (rot.rootJoint.ToString().StartsWith("l")) {
                     // See above block
-                    rot_left = true;
-                    string target_joint_name = "r" + rot.rootJoint.name.ToString().Substring(1);
-                    target_interaction_system = rot.interactionSystem;
-                    target_joint = GameObject.Find(target_joint_name);
-                    target_hand = FullBodyBipedEffector.RightHand;
-                    target_direction = new Vector3(-rot.localDirection.x, rot.localDirection.y, rot.localDirection.z);
-                    GameObject orig_joint = rot.rootJoint;
-                    if (target_joint == null || target_joint.transform.root != orig_joint.transform.root) {
+                    rotLeft = true;
+                    string targetJointName = "r" + rot.rootJoint.name.ToString().Substring(1);
+                    targetInteractionSystem = rot.interactionSystem;
+                    targetJoint = GameObject.Find(targetJointName);
+                    targetHand = FullBodyBipedEffector.RightHand;
+                    targetDir = new Vector3(-rot.localDirection.x, rot.localDirection.y, rot.localDirection.z);
+                    GameObject origJoint = rot.rootJoint;
+                    if (targetJoint == null || targetJoint.transform.root != origJoint.transform.root) {
                         Debug.Log("No mirror joint or wrong parent");
                     }
                 }
             }
             // Only need to make a new rotation if we're missing exactly one for the new function.
             // And only if old one matches with the one we're mirroring.
-            if (rot_right ^ rot_left && rot_right == to_mirror_right) {
+            if (rotRight ^ rotLeft && rotRight == toMirrorRight) {
                 // Set parameters for new rotation that we now know we need.
-                Debug.Log(target_joint);
-                new_rot = clone.transform.parent.gameObject.AddComponent<FixHandRotation>();
-                new_rot.rootJoint = target_joint;
-                new_rot.effectorType = target_hand;
-                new_rot.localDirection = target_direction;
-                new_rot.interactionSystem = target_interaction_system;
+                Debug.Log(targetJoint);
+                newRot = clone.transform.parent.gameObject.AddComponent<FixHandRotation>();
+                newRot.rootJoint = targetJoint;
+                newRot.effectorType = targetHand;
+                newRot.localDirection = targetDir;
+                newRot.interactionSystem = targetInteractionSystem;
             }
 
             // mirror along the X-axis

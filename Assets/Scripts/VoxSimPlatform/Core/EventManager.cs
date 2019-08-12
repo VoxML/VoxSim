@@ -71,7 +71,8 @@ namespace VoxSimPlatform {
         	public Dictionary<String, String> evalResolved = new Dictionary<String, String>();
         	public Hashtable globalVars = new Hashtable();
 
-        	public ReferentStore referents; // TODO: make agent-specific
+        	public ReferentStore referents;
+            public GameObject activeAgent; // new, used to swap around the referents in agent-specific way
         	//public List<object> antecedents = new List<object>();
 
         	public double eventWaitTime = 2000.0;
@@ -168,12 +169,32 @@ namespace VoxSimPlatform {
         		}
         	}
 
+            // Just getters/setters for the active agent
+            public void setActiveAgent(String name) {
+                GameObject temp = GameObject.Find(name);
+                if (temp != null) {
+                    activeAgent = GameObject.Find(name);
+                    referents = activeAgent.GetComponent<ReferentStore>();
+                }
+            }
+            public void SetActiveAgent(GameObject agent) {
+                if (agent != null) {
+                    activeAgent = agent;
+                    referents = activeAgent.GetComponent<ReferentStore>();
+                }
+            }
+            public GameObject GetActiveAgent() {
+                return activeAgent;
+            }
+
         	// Use this for initialization
         	void Start() {
         		preds = gameObject.GetComponent<Predicates>();
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		inputController = GameObject.Find("IOController").GetComponent<InputController>();
-        		referents = gameObject.GetComponent<ReferentStore>();
+
+                // Deprecated. referents should be set from whatever is the activeAgent. But that only happens inf activeAgent exists
+                //referents = gameObject.GetComponent<ReferentStore>(); 
 
         		inputController.ParseComplete += StoreParse;
         		inputController.ParseComplete += ClearGlobalVars;
@@ -204,7 +225,6 @@ namespace VoxSimPlatform {
         			bool q = SatisfactionTest.IsSatisfied(events[0]);
 
         			if (q) {
-        				GameObject.Find("VoxWorld").GetComponent<AStarSearch>().path.Clear();
         				Debug.Log("Satisfied " + events[0]);
 
         				for (int i = 0; i < events.Count - 1; i++) {
@@ -389,6 +409,10 @@ namespace VoxSimPlatform {
         		Queue<String> argsStrings = new Queue<String>(predArg.Split(new char[] {
         			','
         		}));
+                // Match referent stack to whoever is being talked to
+                if(GetActiveAgent() != null) {
+                    referents = GetActiveAgent().GetComponent<ReferentStore>();
+                }
 
         		while (argsStrings.Count > 0) {
         			object arg = argsStrings.Dequeue();
@@ -490,7 +514,12 @@ namespace VoxSimPlatform {
         		Hashtable predArgs = Helper.ParsePredicate(evaluatedCommand);
         		String pred = Helper.GetTopPredicate(evaluatedCommand);
 
-        		if (predArgs.Count > 0) {
+                // Match referent stack to whoever is being talked to
+                if (GetActiveAgent() != null) {
+                    referents = GetActiveAgent().GetComponent<ReferentStore>();
+                }
+
+                if (predArgs.Count > 0) {
         			try {
         				var objs = ExtractObjects(pred, (String) predArgs[pred]);
 
