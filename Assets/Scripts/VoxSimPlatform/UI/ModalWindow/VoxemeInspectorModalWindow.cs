@@ -233,8 +233,8 @@ namespace VoxSimPlatform {
             			using (StreamReader sr = new StreamReader(string.Format("{0}/{1}", Data.voxmlDataPath,
             				string.Format("{0}.xml", InspectorVoxeme)))) {
             				String markup = sr.ReadToEnd();
-            				if (!ObjectLoaded(markup)) {
-            					loadedObject = LoadMarkup(markup);
+            				if (!ObjectLoaded(markup, InspectorVoxeme)) {
+            					loadedObject = LoadMarkup(markup, InspectorVoxeme);
             					windowTitle = InspectorVoxeme.Substring(InspectorVoxeme.LastIndexOf('/') + 1);
             					markupCleared = false;
             				}
@@ -1689,7 +1689,7 @@ namespace VoxSimPlatform {
             			using (StreamReader sr = new StreamReader(((ImportMarkupEventArgs) e).ImportPath)) {
             				String markup = sr.ReadToEnd();
             				//if (!ObjectLoaded (markup)) {
-            				loadedObject = LoadMarkup(markup);
+            				loadedObject = LoadMarkup(markup, Path.GetFileNameWithoutExtension(((ImportMarkupEventArgs)e).ImportPath));
             				//windowTitle = InspectorVoxeme.Substring (InspectorVoxeme.LastIndexOf ('/') + 1);
             				//}
             			}
@@ -1746,7 +1746,7 @@ namespace VoxSimPlatform {
             				using (StreamReader sr = new StreamReader(string.Format("{0}/{1}", Data.voxmlDataPath,
             					string.Format("{0}.xml", InspectorVoxeme)))) {
             					String markup = sr.ReadToEnd();
-            					loadedObject = LoadMarkup(markup);
+            					loadedObject = LoadMarkup(markup, InspectorVoxeme);
             					windowTitle = InspectorVoxeme.Substring(InspectorVoxeme.LastIndexOf('/') + 1);
             				}
             			}
@@ -1902,11 +1902,11 @@ namespace VoxSimPlatform {
             		return voxml;
             	}
 
-            	VoxML LoadMarkup(string text) {
+            	VoxML LoadMarkup(string text, string filename) {
             		VoxML voxml = new VoxML();
 
             		try {
-            			voxml = VoxML.LoadFromText(text);
+            			voxml = VoxML.LoadFromText(text, filename);
 
             			AssignVoxMLValues(voxml);
             		}
@@ -2040,11 +2040,11 @@ namespace VoxSimPlatform {
             		return r;
             	}
 
-            	bool ObjectLoaded(string text) {
+            	bool ObjectLoaded(string text, string filename) {
             		bool r = false;
 
             		try {
-            			r = ((VoxML.LoadFromText(text)).Lex.Pred == loadedObject.Lex.Pred);
+            			r = ((VoxML.LoadFromText(text, filename)).Lex.Pred == loadedObject.Lex.Pred);
             		}
             		catch (FileNotFoundException ex) {
             		}
