@@ -22,7 +22,7 @@ public class NLUIOClient : MonoBehaviour {
     void Start() {
         commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
         //_nlurestclient = (EpistemicState)commBridge.FindRestClientByLabel("EpiSim");
-        _nluSocket = (NLURestClient)commBridge.FindRestClientByLabel("EpiSim");
+        _nluSocket = (NLURestClient)commBridge.FindRestClientByLabel("NLTK");
     }
 
     // Update is called once per frame
@@ -32,7 +32,7 @@ public class NLUIOClient : MonoBehaviour {
             if (_nluSocket.isConnected) {
                 if (commBridge.tryAgainSockets.ContainsKey(epiSimUrl)) {
                     if (commBridge.tryAgainSockets[epiSimUrl] == typeof(FusionSocket)) {
-                        _nluSocket = (NLURestClient)commBridge.FindRestClientByLabel("Parser URL"); // Maybe wrong
+                        _nluSocket = (NLURestClient)commBridge.FindRestClientByLabel("NLTK"); // Maybe wrong
                         //Debug.Log(_fusionSocket.IsConnected());
                     }
                 }

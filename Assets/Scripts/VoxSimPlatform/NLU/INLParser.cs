@@ -10,8 +10,9 @@ namespace VoxSimPlatform {
             string ConcludeNLParse();
 
 
-    		//void InitParserService(NLUServerHandler nlu_server = null);
-            void InitParserService(NLUIOClient nluIO);
+            //void InitParserService(NLUServerHandler nlu_server = null);
+            void InitParserService(SocketConnection socketConnection);
+            void InitParserService(RestClient restClient);
         }
     }
 }

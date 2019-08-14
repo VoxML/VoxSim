@@ -70,6 +70,8 @@ namespace VoxSimPlatform {
                 get { return errorStr; }
             }
 
+            public UnityWebRequest webRequest;
+
             public IEnumerator TryConnect(string _address, int _port) {
                 address = _address;
                 port = _port;
@@ -81,14 +83,14 @@ namespace VoxSimPlatform {
                 isConnected = false;
             }
 
-            public IEnumerator Get(string route) {
+            public virtual IEnumerator Get(string route) {
                 Debug.Log(string.Format("RestClient GET from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
                 RestDataContainer result = new RestDataContainer(owner,
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "GET", null, "GET_" + successStr, "GET_" + errorStr));
                 yield return result.coroutine;
             }
 
-            public IEnumerator Post(string route, string jsonPayload) {
+            public virtual IEnumerator Post(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient POST to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
                 RestDataContainer result = new RestDataContainer(owner,
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + successStr, "POST_" + errorStr));
@@ -96,21 +98,21 @@ namespace VoxSimPlatform {
                 yield return result.result;
             }
 
-            public IEnumerator Put(string route, string jsonPayload) {
+            public virtual IEnumerator Put(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient PUT to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
                 RestDataContainer result = new RestDataContainer(owner,
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "PUT", jsonPayload, "PUT_" + successStr, "PUT_" + errorStr));
                 yield return result.coroutine;
             }
 
-            public IEnumerator Delete(string route, string jsonPayload) {
+            public virtual IEnumerator Delete(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient DELETE from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
                 RestDataContainer result = new RestDataContainer(owner,
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "DELETE", jsonPayload, "DELETE_" + successStr, "DELETE_" + errorStr));
                 yield return result.coroutine;
             }
 
-            private IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
+            public virtual IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
                 //StartCoroutine(AsyncRequest(jsonPayload, method, url, success, error));
                 //IEnumerator r = AsyncRequest(jsonPayload, method, url, success, error);
                 //yield return r;
@@ -129,7 +131,7 @@ namespace VoxSimPlatform {
             public virtual IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
                 // In this method, we actually invoke a request to the outside server
                 Debug.Log(string.Format("RestClient AsyncRequest {1} to {0}", url, method));
-                var webRequest = new UnityWebRequest(url, method);
+                webRequest = new UnityWebRequest(url, method);
                 var payloadBytes = string.IsNullOrEmpty(jsonPayload)
                     ? Encoding.UTF8.GetBytes("{}")
                     : Encoding.UTF8.GetBytes(jsonPayload);

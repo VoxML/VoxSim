@@ -51,6 +51,11 @@ namespace VoxSimPlatform {
             List<bool> socketActiveStatuses = new List<bool>();
 
             private INLParser _parser;
+            public INLParser parser {
+                get { return _parser; }
+                set { _parser = value; }
+            }
+
             private CmdServer _cmdServer;
             //private FusionSocket _fusionSocket;
             private EventLearningSocket _eventLearningSocket;
@@ -151,10 +156,10 @@ namespace VoxSimPlatform {
                             if (!string.IsNullOrEmpty(socketAddress[0])) {
                                 Type socketType = null;
                                 socketType = Type.GetType(segments[1]);
-                                if(socketType == null) {
+                                //if(socketType == null) {
                                     //socketType = typeof(NLURestClient);
-                                    socketType = Type.GetType("VoxSimPlatform.Network." + segments[1]); //ugh, GetType doesn't find it by default
-                                }
+                                //    socketType = Type.GetType("VoxSimPlatform.Network." + segments[1]); //ugh, GetType doesn't find it by default
+                                //}
                                 //socketType = Type.GetType("String");
                                 if (socketType != null) {
                                     if (socketType.IsSubclassOf(typeof(SocketConnection))) {
@@ -227,21 +232,24 @@ namespace VoxSimPlatform {
                 else {
                     Debug.Log("No input URLs specified.");
                 }
-                InitParser(); // Gotta come after, since depends on url prefs now.
-
+                InitDefaultParser(); // Init the default (simple) parser
             }
 
-            public void InitParser() {
-                NLUIOClient nluIO = gameObject.GetComponent<NLUIOClient>();
-                if (nluIO == null) {
-                    _parser = new SimpleParser();
-
-                }
-                else { // I think that using the IO handlers is what's expected here
-                    _parser = new PythonJSONParser();
-                    _parser.InitParserService(nluIO);
-                }
+            public void InitDefaultParser() {
+                _parser = new SimpleParser();
             }
+
+            //public void InitParser() {
+            //    NLUIOClient nluIO = gameObject.GetComponent<NLUIOClient>();
+            //    if (nluIO == null) {
+            //        _parser = new SimpleParser();
+                    //
+            //    }
+            //    else { // I think that using the IO handlers is what's expected here
+            //        _parser = new PythonJSONParser();
+            //        _parser.InitParserService(nluIO);
+            //    }
+            //}
 
             void Update() {
                 //if (_fusionSocket != null) {

@@ -340,11 +340,11 @@ namespace VoxSimPlatform {
     			return ++cur;
     		}
 
-    		//public void InitParserService(NLUServerHandler nlu = null) {
-    		//	// do nothing
-    		//}
+            public void InitParserService(SocketConnection socketConnection) {
+                throw new System.NotImplementedException();
+            }
 
-            public void InitParserService(NLUIOClient nluIO) {
+            public void InitParserService(RestClient restClient) {
                 throw new System.NotImplementedException();
             }
 

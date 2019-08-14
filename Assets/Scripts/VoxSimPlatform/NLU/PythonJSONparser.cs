@@ -1,9 +1,10 @@
-﻿using System;
-using UnityEngine;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using VoxSimPlatform.Network;
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -13,19 +14,28 @@ namespace VoxSimPlatform {
         /// </summary>
         public class PythonJSONParser : INLParser {
             //NLUServerHandler nlu_server = null;
-            NLUIOClient nluIOClient = null;
+            SocketConnection nluSocketConnection = null;
+            RestClient nluRestClient = null;
             string route = ""; // Don't expect to be setting it anytime soon
 
-            public void InitParserService(NLUIOClient nluIO = null) {
+            public void InitParserService(SocketConnection socketConnection = null) {
                 //Look, the SimpleParser doesn't do anything here either
-                nluIOClient = nluIO;
+                nluSocketConnection = socketConnection;
+            }
+
+            public void InitParserService(RestClient restClient = null) {
+                //Look, the SimpleParser doesn't do anything here either
+                nluRestClient = restClient;
             }
 
             public string NLParse(string rawSent) {
                 string to_return = "";
                 //to_return = ExecuteCommand(rawSent);
-                if (nluIOClient != null) {
-                    nluIOClient.Post(route, rawSent);
+                if (nluSocketConnection != null) {
+                    // do stuff here
+                }
+                else if (nluRestClient != null) {
+                    nluRestClient.Post(route, rawSent);
                 }
                 return "WAIT";
             }
@@ -38,10 +48,16 @@ namespace VoxSimPlatform {
                 string to_return = "";
 
                 String to_print = "";
-                if (nluIOClient != null) {
+                if (nluSocketConnection != null) {
                     // Grab the result
-                    to_print = nluIOClient.nlurestclient.last_read;
+                    // do stuff here
                 }
+                else if (nluRestClient != null) {
+                    // Grab the result
+                    //to_print = nluRestClient.last_read;
+                    to_print = nluRestClient.webRequest.downloadHandler.text;
+                }
+
                 if (to_print == "empty" || to_print == null || to_print == "") {
                     return "";
                 }

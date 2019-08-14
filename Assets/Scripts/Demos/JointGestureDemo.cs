@@ -36,7 +36,8 @@ public class SelectionEventArgs : EventArgs {
 public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
     KSIMSocket ksimSocket;
-	EventManager eventManager;
+    NLURestClient nluRestClient;
+    EventManager eventManager;
 	ObjectSelector objSelector;
 	CommunicationsBridge commBridge;
 	RelationTracker relationTracker;
@@ -108,9 +109,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	public Vector2 windowScaleFactor;
 	public float kinectToSurfaceHeight = .63f; //m
 
-	public bool
-		transformToScreenPointing =
-			false; // false = assume table in demo space and use its coords to mirror table coords
+	public bool transformToScreenPointing = false; // false = assume table in demo space and use its coords to mirror table coords
 
 	public Vector2 receivedPointingCoord = Vector2.zero;
 	public Vector2 receivedPointingVariance = Vector2.zero;
@@ -271,7 +270,12 @@ public class JointGestureDemo : SingleAgentInteraction {
 
         ksimSocket = (KSIMSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("KSIM");
 
-  		leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+        // set up the parser we want to use in this scene
+        nluRestClient = (NLURestClient)commBridge.GetComponent<CommunicationsBridge>().FindRestClientByLabel("NLTK");
+        commBridge.parser = new VoxSimPlatform.NLU.PythonJSONParser();
+        commBridge.parser.InitParserService(nluRestClient);
+
+        leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 		gestureController = Diana.GetComponent<AvatarGestureController>();
 		ik = Diana.GetComponent<FullBodyBipedIK>();
