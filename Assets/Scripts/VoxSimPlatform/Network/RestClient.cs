@@ -2,6 +2,7 @@
 using UnityEngine.Networking;
 using System;
 using System.Collections;
+using System.Reflection;
 using System.Text;
 
 namespace VoxSimPlatform {
@@ -39,11 +40,27 @@ namespace VoxSimPlatform {
             public CommunicationsBridge owner;
             public Type clientType;
 
-            public event EventHandler GotData;
+            public event EventHandler GetOkay;
 
-            public void OnGotData(object sender, EventArgs e) {
-                if (GotData != null) {
-                    GotData(this, e);
+            public void OnGetOkay(object sender, EventArgs e) {
+                if (GetOkay != null) {
+                    GetOkay(this, e);
+                }
+            }
+
+            public event EventHandler GetError;
+
+            public void OnGetError(object sender, EventArgs e) {
+                if (GetError != null) {
+                    GetError(this, e);
+                }
+            }
+
+            public event EventHandler PostOkay;
+
+            public void OnPostOkay(object sender, EventArgs e) {
+                if (PostOkay != null) {
+                    PostOkay(this, e);
                 }
             }
 
@@ -85,31 +102,37 @@ namespace VoxSimPlatform {
 
             public virtual IEnumerator Get(string route) {
                 Debug.Log(string.Format("RestClient GET from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "GET", null, "GET_" + successStr, "GET_" + errorStr));
-                yield return result.coroutine;
+                yield return result.result;
+                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Post(string route, string jsonPayload) {
+                Debug.Log(route);
+                Debug.Log(jsonPayload);
                 Debug.Log(string.Format("RestClient POST to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + successStr, "POST_" + errorStr));
                 //Debug.Log(string.Format("RestClient.Post: {0}", result));
                 yield return result.result;
+                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Put(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient PUT to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "PUT", jsonPayload, "PUT_" + successStr, "PUT_" + errorStr));
-                yield return result.coroutine;
+                yield return result.result;
+                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Delete(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient DELETE from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "DELETE", jsonPayload, "DELETE_" + successStr, "DELETE_" + errorStr));
-                yield return result.coroutine;
+                yield return result.result;
+                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
@@ -126,6 +149,7 @@ namespace VoxSimPlatform {
                 RestDataContainer result = new RestDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
                 //Debug.Log(string.Format("RestClient.Request: {0}", result));
                 yield return result.result;
+                Debug.Log(result.result);
             }
 
             public virtual IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
@@ -143,21 +167,27 @@ namespace VoxSimPlatform {
                 yield return webRequest.SendWebRequest();    // 2017.2
                 //yield return webRequest.Send();
 
-                //if (webRequest.isNetworkError) {
-                //    gameObject.BroadcastMessage(error, webRequest.error, SendMessageOptions.DontRequireReceiver);
-                //}
-                //else if (webRequest.responseCode < 200 || webRequest.responseCode >= 400) {
-                //    gameObject.BroadcastMessage(error, webRequest.downloadHandler.text,
-                //        SendMessageOptions.DontRequireReceiver);
-                //}
-                //else {
-                //    //Debug.Log (webRequest.downloadHandler.text);
-                //    gameObject.BroadcastMessage(success, webRequest.downloadHandler.text);
-                //}
+                if (webRequest.isNetworkError) {
+                    MethodInfo responseMethod = GetType().GetMethod(error);
+                    responseMethod.Invoke(this, new object[] { webRequest.error });
+                    //gameObject.BroadcastMessage(error, webRequest.error, SendMessageOptions.DontRequireReceiver);
+                }
+                else if (webRequest.responseCode < 200 || webRequest.responseCode >= 400) {
+                    MethodInfo responseMethod = GetType().GetMethod(error);
+                    responseMethod.Invoke(this, new object[] { webRequest.downloadHandler.text });
+                    //gameObject.BroadcastMessage(error, webRequest.downloadHandler.text,
+                    //    SendMessageOptions.DontRequireReceiver);
+                }
+                else {
+                    MethodInfo responseMethod = GetType().GetMethod(success);
+                    responseMethod.Invoke(this, new object[] { webRequest.downloadHandler.text });
+                    //gameObject.BroadcastMessage(success, webRequest.downloadHandler.text);
+                }
             }
 
-            protected void POST_okay(object parameter) { 
+            public void POST_okay(object parameter) {
                 isConnected = true;
+                OnPostOkay(this, null);
             }
 
             void POST_error(object parameter) {
@@ -165,7 +195,7 @@ namespace VoxSimPlatform {
             }
 
             void GET_okay(object parameter) {
-                OnGotData(this, new RestEventArgs(parameter));
+                OnGetOkay(this, new RestEventArgs(parameter));
             }
         }
     }

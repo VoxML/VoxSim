@@ -205,17 +205,17 @@ namespace VoxSimPlatform {
                                             Debug.Log(e.Message);
                                         }
 
-                                        if (newSocket != null) {
-                                            if (newSocket.isConnected) {
-                                                connected.Add(segments[2]);
-                                            }
-                                            else {
-                                                if (!tryAgainSockets.ContainsKey(newSocket.name)) {
-                                                    Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainRest", newSocket.name, segments[2]));
-                                                    tryAgainSockets.Add(segments[2], socketType);
-                                                }
-                                            }
-                                        }
+                                        //if (newSocket != null) {
+                                        //    if (newSocket.isConnected) {
+                                        //        connected.Add(segments[2]);
+                                        //    }
+                                        //    else {
+                                        //        if (!tryAgainSockets.ContainsKey(newSocket.name)) {
+                                        //            Debug.Log(string.Format("Adding socket {0}@{1} to tryAgainRest", newSocket.name, segments[2]));
+                                        //            tryAgainSockets.Add(segments[2], socketType);
+                                        //        }
+                                        //    }
+                                        //}
                                     }
                                     else {
                                         Debug.LogWarning(string.Format("CommunicationsBridge.Start: Specified type {0} is not subclass of SocketConnection or RestClient.",
@@ -449,8 +449,6 @@ namespace VoxSimPlatform {
                         //Debug.Log(result.GetType());
                         //Debug.Log(result.coroutine.GetType());
                         //Debug.Log(result.result.GetType());
-                        Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port,
-                            client.isConnected, socketType));
                     }
                     catch (Exception e) {
                         Debug.Log(e.Message);
@@ -468,13 +466,15 @@ namespace VoxSimPlatform {
                 // Tries a connection, stores result in a RestDataContainer for future reference.
                 RestDataContainer result = new RestDataContainer(this, client.TryConnect(address, port));
                 //Debug.Log(string.Format("Result: {0}",((UnityWebRequestAsyncOperation)result.result).webRequest.responseCode));
-                yield return result.coroutine;
-                // HERE we can make the check whether it is connected or not. Connection to CommBridge comes later.
-                Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1}", address, port,
-                            client.isConnected));
-                //ADD TO LIST
-                var clientIO = gameObject.GetComponent(client.clientType);
-                if (client.isConnected) { // Currently failing
+                yield return result.result;
+                // here make the check whether it is connected or not
+                // unlike SocketConnection, RestClient needs to let the server yield
+                // connection to commBridge comes later
+                Debug.Log(result.result);
+                Debug.Log(string.Format("{2} :: Connected to client @ {0}:{1} as {3}", address, port,
+                            client.isConnected, client.GetType()));
+
+                if (client.isConnected) {
                     connected.Add(client.address);
                 }
                 else {

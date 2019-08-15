@@ -19,23 +19,22 @@ namespace VoxSimPlatform {
             string route = ""; // Don't expect to be setting it anytime soon
 
             public void InitParserService(SocketConnection socketConnection = null) {
-                //Look, the SimpleParser doesn't do anything here either
+                // just set the connection instance
                 nluSocketConnection = socketConnection;
             }
 
             public void InitParserService(RestClient restClient = null) {
-                //Look, the SimpleParser doesn't do anything here either
+                // just sent the REST client instance
                 nluRestClient = restClient;
             }
 
             public string NLParse(string rawSent) {
-                string to_return = "";
-                //to_return = ExecuteCommand(rawSent);
                 if (nluSocketConnection != null) {
                     // do stuff here
                 }
                 else if (nluRestClient != null) {
-                    nluRestClient.Post(route, rawSent);
+                    RestDataContainer result = new RestDataContainer(nluRestClient.owner, nluRestClient.Post(route, rawSent));
+                    Debug.Log("Parse result: " + result.result);
                 }
                 return "WAIT";
             }
@@ -45,9 +44,9 @@ namespace VoxSimPlatform {
             /// </summary>
             /// <returns></returns>
             public string ConcludeNLParse() {
-                string to_return = "";
+                string returnVal = "";
 
-                String to_print = "";
+                String toPrint = "";
                 if (nluSocketConnection != null) {
                     // Grab the result
                     // do stuff here
@@ -55,24 +54,24 @@ namespace VoxSimPlatform {
                 else if (nluRestClient != null) {
                     // Grab the result
                     //to_print = nluRestClient.last_read;
-                    to_print = nluRestClient.webRequest.downloadHandler.text;
+                    toPrint = nluRestClient.webRequest.downloadHandler.text;
                 }
 
-                if (to_print == "empty" || to_print == null || to_print == "") {
+                if (toPrint == "empty" || toPrint == null || toPrint == "") {
                     return "";
                 }
-                to_return = JsonToFormat(to_print);
-                return to_return; // And here it'll crash lol            }
+                returnVal = JsonToFormat(toPrint);
+                return returnVal; // And here it'll crash lol   //??
             }
 
             private static string JsonToFormat(string json_result) {
-                string to_return = "";
+                string toReturn = "";
                 var settings = new JsonSerializerSettings();
 
                 JObject jsonParsed = JsonConvert.DeserializeObject<JObject>(json_result, settings);
                 GenericSyntax syntax = new GenericSyntax(jsonParsed);
-                to_return = syntax.ExportTagOrWords(true);
-                return to_return;
+                toReturn = syntax.ExportTagOrWords(true);
+                return toReturn;
             }
 
 
@@ -83,19 +82,20 @@ namespace VoxSimPlatform {
             public class GenericSyntax : JObject {
                 public IDictionary<string, GenericSyntax> gs_dict = new Dictionary<string, GenericSyntax>()
                 {
-                {"S", null },
-                {"PP", null },
-                {"NP", null },
-                {"VP", null }
-            };
+                    {"S", null },
+                    {"PP", null },
+                    {"NP", null },
+                    {"VP", null }
+                };
+
                 public IDictionary<string, string> leaf_dict = new Dictionary<string, string>()
                 {
-                {"Det", string.Empty },
-                {"N", string.Empty },
-                {"V", string.Empty },
-                {"P", string.Empty },
-                {"Adj", string.Empty }
-            };
+                    {"Det", string.Empty },
+                    {"N", string.Empty },
+                    {"V", string.Empty },
+                    {"P", string.Empty },
+                    {"Adj", string.Empty }
+                };
 
                 public GenericSyntax(JObject jo) {
                     if (jo == null) {

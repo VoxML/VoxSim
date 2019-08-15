@@ -272,7 +272,7 @@ namespace VoxSimPlatform {
         				inputString = v.Replace(inputString, string.Format("V@{0}", match.Index), 1);
         			}
 
-        			Debug.Log(inputString);
+        			Debug.Log("Formatted as: " + inputString);
 
         			if (!r.IsMatch(inputString)) {
         				// is not already functional form

@@ -2,6 +2,7 @@
 using UnityEngine.Networking;
 using System;
 using System.Collections;
+using System.Reflection;
 using System.Text;
 
 using VoxSimPlatform.Interaction;
@@ -17,51 +18,6 @@ public class NLURestClient : RestClient {
     /// </summary>
     public NLURestClient() {
         clientType = typeof(NLUIOClient);
-    }
-
-    public override IEnumerator Get(string route) {
-        Debug.Log(string.Format("RestClient GET from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-        RestDataContainer result = new RestDataContainer(owner,
-            Request(string.Format("{0}:{1}/{2}", address, port, route), "GET", null, "GET_" + SuccessStr, "GET_" + ErrorStr));
-        yield return result.coroutine;
-    }
-
-    public override IEnumerator Post(string route, string jsonPayload) {
-        Debug.Log(string.Format("RestClient POST to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-        RestDataContainer result = new RestDataContainer(owner,
-            Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + SuccessStr, "POST_" + ErrorStr));
-        //Debug.Log(string.Format("RestClient.Post: {0}", result));
-        yield return result.result;
-    }
-
-    public override IEnumerator Put(string route, string jsonPayload) {
-        Debug.Log(string.Format("RestClient PUT to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-        RestDataContainer result = new RestDataContainer(owner,
-            Request(string.Format("{0}:{1}/{2}", address, port, route), "PUT", jsonPayload, "PUT_" + SuccessStr, "PUT_" + ErrorStr));
-        yield return result.coroutine;
-    }
-
-    public override IEnumerator Delete(string route, string jsonPayload) {
-        Debug.Log(string.Format("RestClient DELETE from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-        RestDataContainer result = new RestDataContainer(owner,
-            Request(string.Format("{0}:{1}/{2}", address, port, route), "DELETE", jsonPayload, "DELETE_" + SuccessStr, "DELETE_" + ErrorStr));
-        yield return result.coroutine;
-    }
-
-    public override IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
-        //StartCoroutine(AsyncRequest(jsonPayload, method, url, success, error));
-        //IEnumerator r = AsyncRequest(jsonPayload, method, url, success, error);
-        //yield return r;
-        //Debug.Log((UnityWebRequest)r);
-        //Debug.Log(r.GetType());
-        //Debug.Log(r.Current);
-        //Debug.Log(r.Current.GetType());
-        //url = url.Replace(":0/", ""); // filler port from before. Might as well handle it here
-        //Debug.LogWarning("URL for request: " + url);
-        Debug.Log(string.Format("RestClient Request {1} to {0}", url, method));
-        RestDataContainer result = new RestDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
-        //Debug.Log(string.Format("RestClient.Request: {0}", result));
-        yield return result.result;
     }
 
     /// <summary>
@@ -115,7 +71,7 @@ public class NLURestClient : RestClient {
                     }
 
                     Debug.Log("Server took " + count * 0.1 + " seconds");
-                    POST_okay(count * 0.1); // Parameter literally means nothing here.
+                    //POST_okay(count * 0.1); // Parameter literally means nothing here.
                     break;
                 }
             }
@@ -124,6 +80,39 @@ public class NLURestClient : RestClient {
 
         if (count >= 20) {
             Debug.LogWarning("Server took 2+ seconds ");
+        }
+
+        // look for response method in this class first
+        // then if null, see if one has been implemented in the base class
+        if (webRequest.isNetworkError) {
+            MethodInfo responseMethod = GetType().GetMethod(error);
+
+            if (responseMethod != null) {
+                responseMethod.Invoke(this, new object[] { webRequest.error });
+            }
+            else {
+                throw new NullReferenceException();
+            }
+        }
+        else if (webRequest.responseCode < 200 || webRequest.responseCode >= 400) {
+            MethodInfo responseMethod = GetType().GetMethod(error);
+
+            if (responseMethod != null) {
+                responseMethod.Invoke(this, new object[] { webRequest.downloadHandler.text });
+            }
+            else {
+                throw new NullReferenceException();
+            }
+        }
+        else {
+            MethodInfo responseMethod = GetType().GetMethod(success);
+
+            if (responseMethod != null) {
+                responseMethod.Invoke(this, new object[] { webRequest.downloadHandler.text });
+            }
+            else {
+                throw new NullReferenceException();
+            }
         }
     }
 }

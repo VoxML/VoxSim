@@ -56,7 +56,7 @@ public class NLUIOClient : MonoBehaviour {
     }
 
     public void Get(string route) {
-        RestDataContainer result = new RestDataContainer(this, nlurestclient.Get(route));
+        nlurestclient.Get(route);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_nlurestclient.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
@@ -72,7 +72,7 @@ public class NLUIOClient : MonoBehaviour {
     }
 
     public void Post(string route, string content) {
-        RestDataContainer result = new RestDataContainer(this, nlurestclient.Post(route,content));
+        nlurestclient.Post(route,content);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_nlurestclient.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
@@ -88,7 +88,7 @@ public class NLUIOClient : MonoBehaviour {
     }
 
     public void Put(string route, string content) {
-        RestDataContainer result = new RestDataContainer(this, nlurestclient.Put(route, content));
+        nlurestclient.Put(route, content);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_nlurestclient.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
@@ -104,7 +104,7 @@ public class NLUIOClient : MonoBehaviour {
     }
 
     public void Delete(string route, string content) {
-        RestDataContainer result = new RestDataContainer(this, nlurestclient.Delete(route, content));
+        nlurestclient.Delete(route, content);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_nlurestclient.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
