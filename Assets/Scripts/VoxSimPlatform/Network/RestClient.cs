@@ -22,7 +22,6 @@ namespace VoxSimPlatform {
             private IEnumerator Run() {
                 while (target.MoveNext()) {
                     result = target.Current;
-                    Debug.Log("result's type: "+result.GetType());
                     yield return result;
                 }
             }
@@ -72,6 +71,38 @@ namespace VoxSimPlatform {
                 }
             }
 
+            public event EventHandler PutOkay;
+
+            public void OnPutOkay(object sender, EventArgs e) {
+                if (PutOkay != null) {
+                    PutOkay(this, e);
+                }
+            }
+
+            public event EventHandler PutError;
+
+            public void OnPutError(object sender, EventArgs e) {
+                if (PutError != null) {
+                    PutError(this, e);
+                }
+            }
+
+            public event EventHandler DeleteOkay;
+
+            public void OnDeleteOkay(object sender, EventArgs e) {
+                if (DeleteOkay != null) {
+                    DeleteOkay(this, e);
+                }
+            }
+
+            public event EventHandler DeleteError;
+
+            public void OnDeleteError(object sender, EventArgs e) {
+                if (DeleteError != null) {
+                    DeleteError(this, e);
+                }
+            }
+
             public string name;
             public string address;
             public int port;
@@ -105,7 +136,6 @@ namespace VoxSimPlatform {
                 RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "GET", null, "GET_" + successStr, "GET_" + errorStr));
                 yield return result.result;
-                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Post(string route, string jsonPayload) {
@@ -116,7 +146,6 @@ namespace VoxSimPlatform {
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + successStr, "POST_" + errorStr));
                 //Debug.Log(string.Format("RestClient.Post: {0}", result));
                 yield return result.result;
-                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Put(string route, string jsonPayload) {
@@ -124,7 +153,6 @@ namespace VoxSimPlatform {
                 RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "PUT", jsonPayload, "PUT_" + successStr, "PUT_" + errorStr));
                 yield return result.result;
-                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Delete(string route, string jsonPayload) {
@@ -132,7 +160,6 @@ namespace VoxSimPlatform {
                 RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "DELETE", jsonPayload, "DELETE_" + successStr, "DELETE_" + errorStr));
                 yield return result.result;
-                Debug.Log(result.result);
             }
 
             public virtual IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
@@ -149,7 +176,6 @@ namespace VoxSimPlatform {
                 RestDataContainer result = new RestDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
                 //Debug.Log(string.Format("RestClient.Request: {0}", result));
                 yield return result.result;
-                Debug.Log(result.result);
             }
 
             public virtual IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
@@ -185,17 +211,37 @@ namespace VoxSimPlatform {
                 }
             }
 
+            public void GET_okay(object parameter) {
+                OnGetOkay(this, new RestEventArgs(parameter));
+            }
+
+            public void GET_error(object parameter) {
+                OnGetError(this, new RestEventArgs(parameter));
+            }
+
             public void POST_okay(object parameter) {
                 isConnected = true;
                 OnPostOkay(this, null);
             }
 
-            void POST_error(object parameter) {
+            public void POST_error(object parameter) {
                 OnPostError(this, null);
             }
 
-            void GET_okay(object parameter) {
-                OnGetOkay(this, new RestEventArgs(parameter));
+            public void PUT_okay(object parameter) {
+                OnPutOkay(this, null);
+            }
+
+            public void PUT_error(object parameter) {
+                OnPutError(this, null);
+            }
+
+            public void DELETE_okay(object parameter) {
+                OnDeleteOkay(this, null);
+            }
+
+            public void DELETE_error(object parameter) {
+                OnDeleteError(this, null);
             }
         }
     }

@@ -272,8 +272,13 @@ public class JointGestureDemo : SingleAgentInteraction {
 
         // set up the parser we want to use in this scene
         nluRestClient = (NLURestClient)commBridge.GetComponent<CommunicationsBridge>().FindRestClientByLabel("NLTK");
-        commBridge.parser = new VoxSimPlatform.NLU.PythonJSONParser();
-        commBridge.parser.InitParserService(nluRestClient,typeof(NLTKSyntax));
+        if (nluRestClient.isConnected) {
+            // if this client is not connected,
+            //  we should back off to the default parser,
+            //  which is initialized in commBridge by, well, default
+            commBridge.parser = new PythonJSONParser();
+            commBridge.parser.InitParserService(nluRestClient,typeof(NLTKSyntax));
+        }
 
         leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
