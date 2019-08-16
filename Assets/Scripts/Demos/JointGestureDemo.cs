@@ -10,7 +10,6 @@ using System.Timers;
 
 using MajorAxes;
 using RootMotion.FinalIK;
-using VoxSimPlatform;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.Agent.CharacterLogic;
 using VoxSimPlatform.Agent.SyntheticVision;
@@ -20,6 +19,7 @@ using VoxSimPlatform.Global;
 using VoxSimPlatform.Interaction;
 using VoxSimPlatform.Logging;
 using VoxSimPlatform.Network;
+using VoxSimPlatform.NLU;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
 using VoxSimPlatform.SpatialReasoning.RCC;
@@ -273,7 +273,7 @@ public class JointGestureDemo : SingleAgentInteraction {
         // set up the parser we want to use in this scene
         nluRestClient = (NLURestClient)commBridge.GetComponent<CommunicationsBridge>().FindRestClientByLabel("NLTK");
         commBridge.parser = new VoxSimPlatform.NLU.PythonJSONParser();
-        commBridge.parser.InitParserService(nluRestClient);
+        commBridge.parser.InitParserService(nluRestClient,typeof(NLTKSyntax));
 
         leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;

@@ -1,4 +1,6 @@
-﻿using VoxSimPlatform.Network;
+﻿using System;
+
+using VoxSimPlatform.Network;
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -11,8 +13,8 @@ namespace VoxSimPlatform {
 
 
             //void InitParserService(NLUServerHandler nlu_server = null);
-            void InitParserService(SocketConnection socketConnection);
-            void InitParserService(RestClient restClient);
+            void InitParserService(SocketConnection socketConnection = null, Type expectedSyntax = null);
+            void InitParserService(RestClient restClient = null, Type expectedSyntax = null);
         }
     }
 }

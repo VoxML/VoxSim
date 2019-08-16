@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using VoxSimPlatform.Network;
 
+using VoxSimPlatform.Network;
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -340,11 +341,11 @@ namespace VoxSimPlatform {
     			return ++cur;
     		}
 
-            public void InitParserService(SocketConnection socketConnection) {
+            public void InitParserService(SocketConnection socketConnection, Type expectedSyntax) {
                 throw new System.NotImplementedException();
             }
 
-            public void InitParserService(RestClient restClient) {
+            public void InitParserService(RestClient restClient, Type expectedSyntax) {
                 throw new System.NotImplementedException();
             }
 
