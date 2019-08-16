@@ -35,8 +35,9 @@ namespace VoxSimPlatform {
         	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
         	public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
-        	private Vector3 _targetPosition;
 
+            [SerializeField]
+            private Vector3 _targetPosition;
         	public Vector3 targetPosition {
         		get { return _targetPosition; }
         		set {
@@ -46,8 +47,9 @@ namespace VoxSimPlatform {
         	}
 
         	public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
-            private Vector3 _targetRotation;
 
+            [SerializeField]
+            private Vector3 _targetRotation;
         	public Vector3 targetRotation {
                 get { return _targetRotation; }
                 set {
@@ -56,8 +58,8 @@ namespace VoxSimPlatform {
                 }
             }
 
-        	private Vector3 _targetScale;
-
+            [SerializeField]
+            private Vector3 _targetScale;
             public Vector3 targetScale {
                 get { return _targetScale; }
                 set {
@@ -683,7 +685,7 @@ namespace VoxSimPlatform {
         		try {
         			using (StreamReader sr = new StreamReader(
         				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", gameObject.name)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd());
+        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), gameObject.name);
         			}
         		}
         		catch (FileNotFoundException ex) {

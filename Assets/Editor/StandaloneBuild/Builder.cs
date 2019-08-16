@@ -7,7 +7,6 @@ using System.Linq;
 using System.Xml.Serialization;
 
 using VoxSimPlatform.Global;
-
 namespace StandaloneBuild {
 	/// <summary>
 	/// Class into which the contents of a build config file is deserialized.
@@ -59,7 +58,6 @@ namespace StandaloneBuild {
 							// found a file
 							// write the name of the scene to ScenesList
 							// no other path information, no file extension
-							string sceneName = scenePath.Remove(0, Application.dataPath.Length - "Assets".Length);
 							file.WriteLine(s.Path.Replace(".unity", ""));
 						}
 						else {

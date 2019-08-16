@@ -6,193 +6,28 @@ using System.Linq;
 using Arc = VoxSimPlatform.Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
 using Debug = UnityEngine.Debug;
 using RootMotion.FinalIK;
+using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Pathfinding {
-        public class AStarSearch : MonoBehaviour {
-        	public bool debugNodes = false;
+        public static class AStarSearch {
+            // not referenced anywhere
+        	//void AddDebugCube(Vector3 coord) {
+        	//	GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        	//	cube.transform.position = coord;
+        	//	cube.transform.localScale = new Vector3(increment.x / 10, increment.y / 10, increment.z / 10);
+        	//	cube.tag = "UnPhysic";
 
-        	public GameObject embeddingSpace;
-        	Bounds embeddingSpaceBounds;
-        	List<GameObject> debugVisual = new List<GameObject>();
+        	//	debugVisual.Add(cube);
+        	//}
 
-        	public Vector3 defaultIncrement = Vector3.one;
-        	public Vector3 increment;
-        	public List<PathNode> nodes = new List<PathNode>();
-        	public List<Pair<PathNode, PathNode>> arcs = new List<Pair<PathNode, PathNode>>();
-        	public Dictionary<Vector3, bool> quantizedSpaceToClear = new Dictionary<Vector3, bool>();
-        	public List<Vector3> path;
-
-        	public Vector3 start = new Vector3();
-        	public Vector3 goal = new Vector3();
-
-        	public int counterMax = 20;
-
-        	public float rigAttractionWeight;
-        	public FullBodyBipedIK bodyIk;
-
-
-        	// Use this for initialization
-        	void Start() {
-        		Renderer r = embeddingSpace.GetComponent<Renderer>();
-        		embeddingSpaceBounds = r.bounds;
-        		Debug.Log(embeddingSpaceBounds.min);
-        		Debug.Log(embeddingSpaceBounds.max);
-        	}
-
-        	// Update is called once per frame
-        	void Update() {
-        		/*if ((goal - start).magnitude > 0.0f) {
-        			Debug.Log ("Start: " + start);
-        			Debug.Log ("Goal: " + goal);
-
-        			//PlanPath (start, goal, out plannedPath);
-
-        			// clear debug visualization
-        			foreach (GameObject o in debugVisual) {
-        				GameObject.Destroy(o);
-        			}
-        				
-        			foreach (Vector3 coord in plannedPath) {
-        				if (nodes.Contains(coord)) {
-        					AddDebugCube(coord);
-        				}
-        			}
-
-        			goal = start;	// temp hack to stop reprints
-        		}*/
-        	}
-
-        	void AddDebugCube(Vector3 coord) {
-        		GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        		cube.transform.position = coord;
-        		cube.transform.localScale = new Vector3(increment.x / 10, increment.y / 10, increment.z / 10);
-        		cube.tag = "UnPhysic";
-
-        		debugVisual.Add(cube);
-        	}
-
-        	/**
-        	 * It is unclear why do you need a GameObject here
-        	 * 
-        	 * We shouldn't quantize the space before hand
-        	 */
-        	void QuantizeSpace(GameObject obj, Bounds embeddingSpaceBounds, Vector3 increment, params object[] constraints) {
-        		// fill the space with boxes!
-        		float xStart, yStart, zStart;
-        		float xEnd, yEnd, zEnd;
-        		Vector3 origin = obj.transform.position;
-        		Bounds objBounds = Helper.GetObjectWorldSize(obj);
-        		Vector3 originToCenterOffset = objBounds.center - origin;
-
-        		for (xStart = origin.x; xStart > embeddingSpaceBounds.min.x; xStart -= increment.x) {
-        		}
-
-        		xEnd = embeddingSpaceBounds.max.x;
-
-        		for (yStart = origin.y; yStart > embeddingSpaceBounds.min.y; yStart -= increment.y) {
-        		}
-
-        		yEnd = embeddingSpaceBounds.max.y;
-
-        		for (zStart = origin.z; zStart > embeddingSpaceBounds.min.z; zStart -= increment.z) {
-        		}
-
-        		zEnd = embeddingSpaceBounds.max.z;
-
-        //		Debug.Log(string.Format("X: ({0},{1})",xStart,xEnd));
-        //		Debug.Log(string.Format("Y: ({0},{1})",yStart,yEnd));
-        //		Debug.Log(string.Format("Z: ({0},{1})",zStart,zEnd));
-
-        		if (constraints.Length > 0) {
-        			foreach (object constraint in constraints) {
-        				Debug.Log(constraint);
-        				if (constraint is Bounds) {
-        					xStart = (((Bounds) constraint).min.x > xStart) ? ((Bounds) constraint).min.x : xStart;
-        					xEnd = (((Bounds) constraint).max.x < xEnd) ? ((Bounds) constraint).max.x : xEnd;
-
-        					yStart = (((Bounds) constraint).min.y > yStart) ? ((Bounds) constraint).min.y : yStart;
-        					yEnd = (((Bounds) constraint).max.y < yEnd) ? ((Bounds) constraint).max.y : yEnd;
-
-        					zStart = (((Bounds) constraint).min.z > zStart) ? ((Bounds) constraint).min.z : zStart;
-        					zEnd = (((Bounds) constraint).max.z < zEnd) ? ((Bounds) constraint).max.z : zEnd;
-        				}
-        				else if (constraint is string) {
-        					if ((constraint as string).Contains('X')) {
-        						xStart = origin.x;
-        						xEnd = origin.x + increment.x;
-        					}
-
-        					if ((constraint as string).Contains('Y')) {
-        						yStart = origin.y;
-        						yEnd = origin.y + increment.y;
-        					}
-
-        					if ((constraint as string).Contains('Z')) {
-        						zStart = origin.z;
-        						zEnd = origin.z + increment.z;
-        					}
-        				}
-        			}
-        		}
-
-        //		Debug.Log(string.Format("X: ({0},{1})",xStart,xEnd));
-        //		Debug.Log(string.Format("Y: ({0},{1})",yStart,yEnd));
-        //		Debug.Log(string.Format("Z: ({0},{1})",zStart,zEnd));
-
-        		for (float fx = xStart; fx < xEnd; fx += increment.x) {
-        			for (float fy = yStart; fy < yEnd; fy += increment.y) {
-        				for (float fz = zStart; fz < zEnd; fz += increment.z) {
-        					// create test bounding box
-        					//Bounds testBounds = new Bounds(new Vector3 (fx+(increment.x/2), fy+(increment.y/2), fz+(increment.z/2)),
-        					//	new Vector3 (increment.x, increment.y, increment.z));
-
-        					Bounds testBounds = new Bounds(new Vector3(fx, fy, fz) + originToCenterOffset, objBounds.size);
-        					// get all objects
-        					GameObject[] allObjects = FindObjectsOfType<GameObject>();
-
-        					bool spaceClear = true;
-        					foreach (GameObject o in allObjects) {
-        						if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
-        							if (testBounds.Intersects(Helper.GetObjectWorldSize(o))) {
-        								spaceClear = false;
-        								break;
-        							}
-        						}
-        					}
-
-        					if (spaceClear) {
-        						// add node
-        						//Vector3 node = new Vector3 (fx + (increment.x / 2), fy + (increment.y / 2), fz + (increment.z / 2));
-        						Vector3 node = new Vector3(fx, fy, fz);
-        						nodes.Add(new PathNode(node));
-
-        						//Debug.Log (node);
-
-        						if (debugNodes) {
-        							GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        							cube.transform.position = node;
-        							cube.transform.localScale =
-        								new Vector3(increment.x / 10, increment.y / 10, increment.z / 10);
-        							cube.tag = "UnPhysic";
-        							cube.GetComponent<Renderer>().enabled = true;
-        							Destroy(cube.GetComponent<Collider>());
-
-        							debugVisual.Add(cube);
-        						}
-        					}
-        				}
-        			}
-        		}
-        	}
-
-        	bool testClear(GameObject obj, Vector3 curPoint) {
+        	static bool TestClear(GameObject obj, Vector3 curPoint) {
         		Bounds objBounds = Helper.GetObjectWorldSize(obj);
         		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
         		// get all objects
-        		GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        		GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
 
         		bool spaceClear = true;
         		foreach (GameObject o in allObjects) {
@@ -207,7 +42,8 @@ namespace VoxSimPlatform {
         		return spaceClear;
         	}
 
-        	List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step) {
+        	static List<Vector3> GetNeighborNodes(GameObject obj, Vector3 curPos, Vector3 increment, int step,
+                HashSet<Vector3> specialNodes) {
         		// In general 
         		// step * increment = size of object
         		var neighbors = new List<Vector3>();
@@ -219,7 +55,7 @@ namespace VoxSimPlatform {
         			if (i * i == step * step || j * j == step * step || k * k == step * step) {
         				Vector3 newNode = new Vector3(curPos.x + i * increment.x, curPos.y + j * increment.y,
         					curPos.z + k * increment.z);
-        				if (testClear(obj, newNode))
+        				if (TestClear(obj, newNode))
         					neighbors.Add(newNode);
         			}
         		}
@@ -230,28 +66,9 @@ namespace VoxSimPlatform {
         	}
 
         	/*
-        	* PlotArcs is not necessary 
-        	*/
-        	public void PlotArcs(Bounds objBounds) {
-        		RaycastHit hitInfo;
-        		for (int i = 0; i < nodes.Count - 1; i++) {
-        			for (int j = i + 1; j < nodes.Count; j++) {
-        				Vector3 dir = (nodes[j].position - nodes[i].position);
-        				float dist = dir.magnitude;
-        				bool blocked = Physics.Raycast(nodes[i].position, dir.normalized, out hitInfo, dist);
-        				blocked |= Physics.Raycast(nodes[i].position - objBounds.extents, dir.normalized, out hitInfo, dist);
-        				blocked |= Physics.Raycast(nodes[i].position + objBounds.extents, dir.normalized, out hitInfo, dist);
-        				if (!blocked) {
-        					arcs.Add(new Pair<PathNode, PathNode>(nodes[i], nodes[j]));
-        				}
-        			}
-        		}
-        	}
-
-        	/*
         	 * Check if the path from first to second with objBounds width is blocked
         	 */
-        	bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
+        	static bool IsBlocked(Bounds objBounds, Vector3 first, Vector3 second) {
         		RaycastHit hitInfo;
         		Vector3 dir = (second - first);
         		float dist = dir.magnitude;
@@ -260,18 +77,13 @@ namespace VoxSimPlatform {
         		blocked |= Physics.Raycast(first + objBounds.extents, dir.normalized, out hitInfo, dist);
 
         		return blocked;
-        	}
+            }
 
-        	Dictionary<Vector3, Vector3> cameFrom;
-        	Dictionary<Vector3, float> gScore;
-        	Dictionary<Vector3, float> hScore;
-        	HashSet<Vector3> specialNodes = new HashSet<Vector3>();
-
-        	public class BetterHeuristic : Comparer<Vector3> {
+        	public class ComparisonHeuristic : Comparer<Vector3> {
         		Dictionary<Vector3, float> gScore;
         		Dictionary<Vector3, float> hScore;
 
-        		public BetterHeuristic(Dictionary<Vector3, float> gScore, Dictionary<Vector3, float> hScore) {
+        		public ComparisonHeuristic(Dictionary<Vector3, float> gScore, Dictionary<Vector3, float> hScore) {
         			this.gScore = gScore;
         			this.hScore = hScore;
         		}
@@ -286,21 +98,10 @@ namespace VoxSimPlatform {
         		}
         	}
 
-        	public class BetterHeuristicOld : Comparer<PathNode> {
-        		// Compares by Length, Height, and Width.
-        		public override int Compare(PathNode x, PathNode y) {
-        			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore)
-        				return -1;
-        			if (x.scoreFromStart + x.heuristicScore < y.scoreFromStart + y.heuristicScore)
-        				return 1;
-        			return 0;
-        		}
-        	}
-
         	/*
         	 * Look for closest point to goalPos that make a quantized distance to obj
         	 */
-        	Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
+        	static Vector3 LookForClosest(Vector3 goalPos, GameObject obj, Vector3 increment) {
         		float dist = Mathf.Infinity;
         		Vector3 closest = goalPos;
 
@@ -318,7 +119,7 @@ namespace VoxSimPlatform {
         					Vector3 candidate = new Vector3(x * increment.x + obj.transform.position.x,
         						y * increment.y + obj.transform.position.y, z * increment.z + obj.transform.position.z);
 
-        					if (testClear(obj, candidate)) {
+        					if (TestClear(obj, candidate)) {
         						float temp = (candidate - goalPos).magnitude;
 
         						if (dist > temp) {
@@ -330,15 +131,12 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		//if ((closest - obj.transform.position).magnitude > distance.magnitude) {
-        		//    closest = goalPos;
-        		//}
-
         		return closest;
         	}
 
-        	List<Vector3> ReconstructPath2(Vector3 firstNode, Vector3 lastNode) {
-        		path = new List<Vector3>();
+        	static List<Vector3> ReconstructPath(Vector3 firstNode, Vector3 lastNode,
+                Dictionary<Vector3, Vector3> cameFrom) {
+                List<Vector3> path = new List<Vector3>();
         		Vector3 node = lastNode;
 
         		//path.Add (lastNode.position);
@@ -351,33 +149,38 @@ namespace VoxSimPlatform {
         		return path;
         	}
 
-        	float GetGScore(Vector3 fromPoint, Vector3 explorePoint) {
-        		return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
-        	}
-
-        	float GetHScore(Vector3 explorePoint, Vector3 goalPoint) {
-        		return (goalPoint - explorePoint).magnitude;
-        	}
-
-        	float GetErgonomicScore(Vector3 point) {
+            static float GetErgonomicScore(FullBodyBipedIK bodyIk, Vector3 point) {
         		return (bodyIk.solver.rightArmChain.nodes[0].transform.position - point).magnitude;
         	}
 
-        	float GetGScoreErgonomic(Vector3 fromPoint, Vector3 explorePoint) {
-        		if (bodyIk != null) {
-        			return gScore[fromPoint] + (explorePoint - fromPoint).magnitude *
-        			       (1 + rigAttractionWeight * (GetErgonomicScore(fromPoint) + GetErgonomicScore(explorePoint)));
+        	static float GetGScoreErgonomic(GameObject agent, Vector3 fromPoint, Vector3 explorePoint, float rigAttractionWeight,
+                Dictionary<Vector3, float> gScoreDict) {
+                FullBodyBipedIK bodyIk = null;
+
+                if (agent != null) {
+                    bodyIk = agent.GetComponent<FullBodyBipedIK>();
+                }
+        		
+                if (bodyIk != null) {
+        			return gScoreDict[fromPoint] + (explorePoint - fromPoint).magnitude *
+        			       (1 + rigAttractionWeight * (GetErgonomicScore(bodyIk, fromPoint) + GetErgonomicScore(bodyIk, explorePoint)));
         		}
         		else {
-        			return gScore[fromPoint] + (explorePoint - fromPoint).magnitude;
+        			return gScoreDict[fromPoint] + (explorePoint - fromPoint).magnitude;
         		}
         	}
 
-        	float GetHScoreErgonomic(Vector3 explorePoint, Vector3 goalPoint) {
-        		// a discount factor of 2 so that the algorith would be faster
+        	static float GetHScoreErgonomic(GameObject agent, Vector3 explorePoint, Vector3 goalPoint, float rigAttractionWeight) {
+                FullBodyBipedIK bodyIk = null;
+
+                if (agent != null) {
+                    bodyIk = agent.GetComponent<FullBodyBipedIK>();
+                }
+
+        		// a discount factor of 2 so that the algorithm is faster
         		if (bodyIk != null) {
         			return (goalPoint - explorePoint).magnitude *
-        			       (1 + rigAttractionWeight / 2 * (GetErgonomicScore(goalPoint) + GetErgonomicScore(explorePoint)));
+        			       (1 + rigAttractionWeight / 2 * (GetErgonomicScore(bodyIk, goalPoint) + GetErgonomicScore(bodyIk, explorePoint)));
         		}
         		else {
         			return (goalPoint - explorePoint).magnitude;
@@ -385,18 +188,26 @@ namespace VoxSimPlatform {
         	}
 
         	// A plan path that run faster and more smooth
-        	public void PlanPath2(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj,
+        	public static List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
         		params object[] constraints) {
-        		Debug.Log("========== In plan ========= " + goalPos);
-        		cameFrom = new Dictionary<Vector3, Vector3>();
-        		gScore = new Dictionary<Vector3, float>();
-        		hScore = new Dictionary<Vector3, float>();
-        		specialNodes = new HashSet<Vector3>();
 
-        		// init empty path
-        		path = new List<Vector3>();
+                EventManager eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                AStarSearchPrefs prefs = GameObject.Find("VoxWorld").GetComponent<AStarSearchPrefs>();
 
-        		MinHeap<Vector3> openSet = new MinHeap<Vector3>(new BetterHeuristic(gScore, hScore));
+        		Dictionary<Vector3, Vector3> cameFrom = new Dictionary<Vector3, Vector3>();
+        		Dictionary<Vector3, float> gScore = new Dictionary<Vector3, float>();
+        		Dictionary<Vector3, float> hScore = new Dictionary<Vector3, float>();
+        		HashSet<Vector3> specialNodes = new HashSet<Vector3>();
+
+                // init empty path
+                List<Vector3> path = new List<Vector3>();
+
+                Debug.Log("========== In plan ========= " + Helper.VectorToParsable(goalPos));
+                // the compare method in ComparisonHeuristic class is called in 
+                // Dominates method in VoxSimPlatform.Global.MinHeap class.
+                // Dominates is called in bubble up and bubble down operation of the heap, 
+                // which are called when openSet.Add(startPos),openSet.Add(neighbor) and openSet.Update(neighbor) are called. 
+                MinHeap<Vector3> openSet = new MinHeap<Vector3>(new ComparisonHeuristic(gScore, hScore));
         		var openSetForCheck = new HashSet<Vector3>();
 
         		// Closed set can be used because euclidean distance is monotonic
@@ -406,7 +217,7 @@ namespace VoxSimPlatform {
 
         		Vector3 size = Helper.GetObjectWorldSize(obj).size;
 
-        		Vector3 increment = defaultIncrement;
+        		Vector3 increment = prefs.defaultIncrement;
 
         		foreach (object constraint in constraints) {
         			if (constraint is string) {
@@ -427,7 +238,7 @@ namespace VoxSimPlatform {
         		int step = 1;
 
         		Debug.Log(" ======== size.magnitude ====== " + size.magnitude);
-        		Debug.Log(" ======== defaultIncrement.magnitude ====== " + defaultIncrement.magnitude);
+        		Debug.Log(" ======== defaultIncrement.magnitude ====== " + prefs.defaultIncrement.magnitude);
 
 
         //		if (size.magnitude > defaultIncrement.magnitude) {
@@ -468,7 +279,7 @@ namespace VoxSimPlatform {
 
         		gScore[startPos] = 0;
         		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
-        		hScore[startPos] = GetHScoreErgonomic(startPos, goalPos);
+        		hScore[startPos] = GetHScoreErgonomic(eventManager.GetActiveAgent(), startPos, goalPos, prefs.rigAttractionWeight);
 
         		Debug.Log(" ========= obj.transform.position ======== " + Helper.VectorToParsable(obj.transform.position));
         		Debug.Log(" ======== start ====== " + Helper.VectorToParsable(startPos));
@@ -490,7 +301,7 @@ namespace VoxSimPlatform {
         				(goalPos - startPos).magnitude));
         			Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(endPos),
         				(goalPos - endPos).magnitude));
-        			while (openSet.Count > 0 && counter < counterMax) {
+        			while (openSet.Count > 0 && counter < prefs.counterMax) {
         				// O(1)
         				curPos = openSet.TakeMin();
 
@@ -509,29 +320,26 @@ namespace VoxSimPlatform {
         					Debug.Log("=== counter === " + counter);
         					// extend path to goal node (goal position)
         					cameFrom[goalPos] = curPos;
-        					path = ReconstructPath2(startPos, goalPos);
-        					Debug.Log("====== path ===== ");
-        					foreach (var point in path) {
-        						Debug.Log(Helper.VectorToParsable(point));
-        					}
+        					path = ReconstructPath(startPos, goalPos, cameFrom);
+                            Debug.Log(string.Format("====== path ====== {0}", string.Join(",", path.Select(n => Helper.VectorToParsable(n)).ToArray())));
 
-        					return;
+                            return path;
         				}
 
         				closedSet.Add(curPos);
 
-        				var neighbors = GetNeighborNodes(obj, curPos, increment, step);
+        				var neighbors = GetNeighborNodes(obj, curPos, increment, step, specialNodes);
 
         				foreach (var neighbor in neighbors) {
         					if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor)) {
-        						float tentativeGScore = GetGScoreErgonomic(curPos, neighbor);
+        						float tentativeGScore = GetGScoreErgonomic(eventManager.GetActiveAgent(), curPos, neighbor, prefs.rigAttractionWeight, gScore);
 
         						if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
         							continue;
 
         						cameFrom[neighbor] = curPos;
         						gScore[neighbor] = tentativeGScore;
-        						hScore[neighbor] = GetHScoreErgonomic(neighbor, goalPos);
+        						hScore[neighbor] = GetHScoreErgonomic(eventManager.GetActiveAgent(), neighbor, goalPos, prefs.rigAttractionWeight);
         						// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
 
         						// If neighbor is not yet in openset 
@@ -558,225 +366,10 @@ namespace VoxSimPlatform {
         			bestLastPos = goalPos;
         		}
 
-        		path = ReconstructPath2(startPos, bestLastPos);
-        		Debug.Log("====== path ===== ");
-        		foreach (var point in path) {
-        			Debug.Log(point);
-        		}
-        	}
+        		path = ReconstructPath(startPos, bestLastPos, cameFrom);
+        		Debug.Log(string.Format("====== path ====== {0}",string.Join(",",path.Select(n => Helper.VectorToParsable(n)).ToArray())));
 
-
-        	// constraints should be the target object!
-        	// Plan path uses a heuristic function h(n) of manhattan distance
-        	// Just change to the Euclidian distance for better performance
-        	public void PlanPath(Vector3 startPos, Vector3 goalPos, out List<Vector3> path, GameObject obj,
-        		params object[] constraints) {
-        		Debug.Log("====== startPos ===== " + startPos);
-        		Debug.Log("====== goalPos ===== " + goalPos);
-        		// clear nodes
-        		nodes.Clear();
-
-        		// init empty path
-        		List<PathNode> plannedPath = new List<PathNode>();
-
-        		//List<PathNode> openSet = new List<PathNode> ();
-        		MinHeap<PathNode> openSet = new MinHeap<PathNode>(new BetterHeuristicOld());
-        		List<PathNode> closedSet = new List<PathNode>();
-
-        		PathNode endNode = null;
-
-        		path = new List<Vector3>();
-
-        		Vector3 size = Helper.GetObjectWorldSize(obj).size;
-        		//increment = size.magnitude/2  > defaultIncrement.magnitude ? new Vector3(size.x/2, size.y/2, size.z/2) : defaultIncrement;
-        		increment = size.magnitude > defaultIncrement.magnitude ? size : defaultIncrement;
-
-        		var watch = Stopwatch.StartNew();
-
-        		PathNode startNode = new PathNode(startPos);
-        		startNode.scoreFromStart = 0;
-
-        		// Manhattan distance
-        		startNode.heuristicScore = Mathf.Abs(goalPos.x - startNode.position.x) +
-        		                           Mathf.Abs(goalPos.y - startNode.position.y) +
-        		                           Mathf.Abs(goalPos.z - startNode.position.z);
-        		// Euclidan distance
-        //		startNode.heuristicScore = new Vector3 (goalPos.x - startNode.position.x, goalPos.y - startNode.position.y, goalPos.z - startNode.position.z).magnitude;
-        		nodes.Add(startNode);
-        		openSet.Add(startNode);
-        		QuantizeSpace(obj, embeddingSpaceBounds, increment,
-        			constraints); // set increment to moving object size, clean up after each run
-
-        		watch.Stop();
-        		Debug.Log("========= Time to quantize space " + watch.ElapsedMilliseconds);
-        		// find closest node to goal
-        		// TODO: if goal is inside concave object (concave voxeme provided as constraint)
-        		//	find closest node to goal such that arc from testNode to goal
-        		//	does not intersect non-concave component of object
-
-        		// if constraints contain a voxeme
-        		Voxeme testTarget = constraints.OfType<Voxeme>().FirstOrDefault();
-        		if (testTarget != null) {
-        			// if that object is concave (e.g. cup)
-        			// if goalPos is within the bounds of target (e.g. in cup)
-        			if (testTarget.voxml.Type.Concavity.Contains("Concave") &&
-        			    Helper.GetObjectWorldSize(testTarget.gameObject).Contains(goalPos)) {
-        				endNode = new PathNode(new Vector3(goalPos.x,
-        					Helper.GetObjectWorldSize(testTarget.gameObject).max.y + size.y, goalPos.z));
-        				nodes.Add(endNode);
-        				//Debug.Break();
-        			}
-        			else {
-        				float dist = Mathf.Infinity;
-        				foreach (PathNode node in nodes) {
-        					if ((node.position - goalPos).magnitude < dist) {
-        						// if dist from this node to goal < dstance from previous node in list to goal
-        						dist = (node.position - goalPos).magnitude;
-        						endNode = node;
-        					}
-        				}
-        			}
-        		}
-        		else {
-        			float dist = Mathf.Infinity;
-        			foreach (PathNode node in nodes) {
-        				if ((node.position - goalPos).magnitude < dist) {
-        					// if dist from this node to goal < dstance from previous node in list to goal
-        					dist = (node.position - goalPos).magnitude;
-        					endNode = node;
-        				}
-        			}
-        		}
-
-        		Debug.Log("========= endNode ========== " + endNode);
-
-        		//PathNode endNode = new PathNode(goalPos);
-        		//nodes.Add (endNode);
-
-        		watch = Stopwatch.StartNew();
-
-        		PlotArcs(Helper.GetObjectWorldSize(obj));
-
-        		watch.Stop();
-
-        		Debug.Log("========= Time to plot arcs " + watch.ElapsedMilliseconds);
-        		//return;
-
-        		//path.Add(startPos);
-
-        		PathNode nextNode = new PathNode(embeddingSpaceBounds.max + Vector3.one);
-
-        		plannedPath.Add(new PathNode(startPos));
-
-        		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
-        		// using best node found until endNode reached
-        		while (openSet.Count > 0) {
-        			Debug.Log(" ======== openSet.Count ====== " + openSet.Count);
-
-        			// O(1)
-        			PathNode curNode = openSet.TakeMin();
-
-        			// O(n)
-        			//			PathNode curNode = null;
-        //
-        //			float testHeuristicScore = Mathf.Infinity;
-        //			foreach (PathNode node in openSet) {
-        //				if (node.heuristicScore < testHeuristicScore) {
-        //					testHeuristicScore = node.heuristicScore;
-        //					curNode = node;
-        //				}
-        //			}
-
-        			//nextNode = embeddingSpaceBounds.max + Vector3.one;
-        			//dist = (nextNode - endNode).magnitude;
-        			//float dist = ((embeddingSpaceBounds.max + Vector3.one)-endNode.position).magnitude;
-
-        			// if reached end node
-        			if ((curNode.position - endNode.position).magnitude < Constants.EPSILON) {
-        				// extend path to goal node (goal position)
-        				PathNode goalNode = new PathNode(goalPos);
-        				goalNode.cameFrom = curNode;
-        				path = ReconstructPath(startNode, goalNode);
-        				Debug.Log("====== path ===== ");
-        				foreach (var point in path) {
-        					Debug.Log(point);
-        				}
-
-        				break;
-        			}
-
-        			closedSet.Add(curNode);
-
-
-        			var arcList = arcs.Where(n => ((n.Item1.position - curNode.position).magnitude < Constants.EPSILON) ||
-        			                              (n.Item2.position - curNode.position).magnitude < Constants.EPSILON).ToList();
-        			foreach (var arc in arcList) {
-        				float testScore;
-        				if ((arc.Item1.position - curNode.position).magnitude < Constants.EPSILON) {
-        					if (!closedSet.Contains(arc.Item2)) {
-        						testScore = curNode.scoreFromStart + (arc.Item2.position - curNode.position).magnitude;
-        						if (testScore < arc.Item2.scoreFromStart) {
-        							nextNode = arc.Item2;
-        							arc.Item2.cameFrom = curNode;
-        							arc.Item2.scoreFromStart = testScore;
-        							// Manhattan distance
-        //							arc.Item2.heuristicScore = arc.Item2.scoreFromStart + 
-        //								(Mathf.Abs(goalPos.x - arc.Item2.position.x) + Mathf.Abs(goalPos.y - arc.Item2.position.y) +
-        //									Mathf.Abs(goalPos.z - arc.Item2.position.z));
-
-        							// Euclidian distance
-        							arc.Item2.heuristicScore = arc.Item2.scoreFromStart +
-        							                           new Vector3(goalPos.x - arc.Item2.position.x,
-        								                           goalPos.y - arc.Item2.position.y,
-        								                           goalPos.z - arc.Item2.position.z).magnitude;
-
-        							if (!openSet.Contains(arc.Item2)) {
-        								openSet.Add(arc.Item2);
-        							}
-        						}
-        					}
-        				}
-        				else if ((arc.Item2.position - curNode.position).magnitude < Constants.EPSILON) {
-        					if (!closedSet.Contains(arc.Item1)) {
-        						testScore = curNode.scoreFromStart + (arc.Item1.position - curNode.position).magnitude;
-        						if (testScore < arc.Item1.scoreFromStart) {
-        							nextNode = arc.Item1;
-        							arc.Item1.cameFrom = curNode;
-        							arc.Item1.scoreFromStart = testScore;
-
-        							// Manhattan distance
-        //							arc.Item1.heuristicScore = arc.Item1.scoreFromStart + 
-        //								(Mathf.Abs(goalPos.x - arc.Item1.position.x) + Mathf.Abs(goalPos.y - arc.Item1.position.y) +
-        //									Mathf.Abs(goalPos.z - arc.Item1.position.z));
-
-        							// Euclidian distance
-        							arc.Item1.heuristicScore = arc.Item1.scoreFromStart +
-        							                           new Vector3(goalPos.x - arc.Item1.position.x,
-        								                           goalPos.y - arc.Item1.position.y,
-        								                           goalPos.z - arc.Item1.position.z).magnitude;
-
-        							if (!openSet.Contains(arc.Item1)) {
-        								openSet.Add(arc.Item1);
-        							}
-        						}
-        					}
-        				}
-        			}
-        		}
-        	}
-
-        	List<Vector3> ReconstructPath(PathNode firstNode, PathNode lastNode) {
-        		path = new List<Vector3>();
-        		PathNode node = lastNode;
-
-        		//path.Add (lastNode.position);
-
-        		while (node != firstNode) {
-        			path.Insert(0, node.position);
-        			node = node.cameFrom;
-        		}
-
-        		return path;
+                return path;
         	}
         }
     }

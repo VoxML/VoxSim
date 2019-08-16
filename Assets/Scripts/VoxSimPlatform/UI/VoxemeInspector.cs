@@ -226,8 +226,8 @@ namespace UI {
     						string.Format("objects/{0}.xml", inspectorObject.name)))) {
     					String markup = sr.ReadToEnd();
     					//if (markup != null) {
-    					if (!ObjectLoaded(markup)) {
-    						loadedObject = LoadMarkup(markup);
+    					if (!ObjectLoaded(markup, inspectorObject.name)) {
+    						loadedObject = LoadMarkup(markup, inspectorObject.name);
     						inspectorTitle = inspectorObject.name;
     						markupCleared = false;
     					}
@@ -734,11 +734,11 @@ namespace UI {
     		return voxml;
     	}
 
-    	VoxML LoadMarkup(string text) {
+    	VoxML LoadMarkup(string text, string filename) {
     		VoxML voxml = new VoxML();
 
     		try {
-    			voxml = VoxML.LoadFromText(text);
+    			voxml = VoxML.LoadFromText(text, filename);
 
     			AssignVoxMLValues(voxml);
     		}
@@ -839,11 +839,11 @@ namespace UI {
     		return r;
     	}
 
-    	bool ObjectLoaded(string text) {
+    	bool ObjectLoaded(string text, string filename) {
     		bool r = false;
 
     		try {
-    			r = ((VoxML.LoadFromText(text)).Lex.Pred == loadedObject.Lex.Pred);
+    			r = ((VoxML.LoadFromText(text, filename)).Lex.Pred == loadedObject.Lex.Pred);
     		}
     		catch (FileNotFoundException ex) {
     		}

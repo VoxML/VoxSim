@@ -177,13 +177,13 @@ namespace VoxSimPlatform {
                     referents = activeAgent.GetComponent<ReferentStore>();
                 }
             }
-            public void setActiveAgent(GameObject agent) {
+            public void SetActiveAgent(GameObject agent) {
                 if (agent != null) {
                     activeAgent = agent;
                     referents = activeAgent.GetComponent<ReferentStore>();
                 }
             }
-            public GameObject getActiveAgent() {
+            public GameObject GetActiveAgent() {
                 return activeAgent;
             }
 
@@ -225,7 +225,6 @@ namespace VoxSimPlatform {
         			bool q = SatisfactionTest.IsSatisfied(events[0]);
 
         			if (q) {
-        				GameObject.Find("VoxWorld").GetComponent<AStarSearch>().path.Clear();
         				Debug.Log("Satisfied " + events[0]);
 
         				for (int i = 0; i < events.Count - 1; i++) {
@@ -411,8 +410,8 @@ namespace VoxSimPlatform {
         			','
         		}));
                 // Match referent stack to whoever is being talked to
-                if(getActiveAgent() != null) {
-                    referents = getActiveAgent().GetComponent<ReferentStore>();
+                if(GetActiveAgent() != null) {
+                    referents = GetActiveAgent().GetComponent<ReferentStore>();
                 }
 
         		while (argsStrings.Count > 0) {
@@ -516,8 +515,8 @@ namespace VoxSimPlatform {
         		String pred = Helper.GetTopPredicate(evaluatedCommand);
 
                 // Match referent stack to whoever is being talked to
-                if (getActiveAgent() != null) {
-                    referents = getActiveAgent().GetComponent<ReferentStore>();
+                if (GetActiveAgent() != null) {
+                    referents = GetActiveAgent().GetComponent<ReferentStore>();
                 }
 
                 if (predArgs.Count > 0) {
@@ -579,7 +578,7 @@ namespace VoxSimPlatform {
         						if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
         							using (StreamReader sr =
         								new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-        								preds.ComposeSubevents(VoxML.LoadFromText(sr.ReadToEnd()), objs.ToArray());
+        								preds.ComposeSubevents(VoxML.LoadFromText(sr.ReadToEnd(), pred), objs.ToArray());
         							}
         						}
         					}
@@ -966,7 +965,7 @@ namespace VoxSimPlatform {
 
         										if (path != string.Empty) {
         											using (StreamReader sr = new StreamReader(Data.voxmlDataPath + path)) {
-        												predVoxeme = VoxML.LoadFromText(sr.ReadToEnd());
+        												predVoxeme = VoxML.LoadFromText(sr.ReadToEnd(), pred);
         											}
 
         											Debug.Log(predVoxeme);

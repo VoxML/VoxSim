@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 
 namespace VoxSimPlatform {
     namespace Vox {
@@ -165,10 +167,16 @@ namespace VoxSimPlatform {
     		}
     	}
 
-    	/// <summary>
-    	///  VOXEME
-    	/// </summary>
-    	public class VoxML {
+        public class VoxMLObjectEventArgs : EventArgs
+        {
+            public string Filename { get; set; }
+            public VoxML VoxML { get; set; }
+        }
+
+        /// <summary>
+        ///  VOXEME
+        /// </summary>
+        public class VoxML {
     		// all VoxML entities encode a subset of the following structures
     		public VoxEntity Entity = new VoxEntity();
     		public VoxLex Lex = new VoxLex();
@@ -192,11 +200,24 @@ namespace VoxSimPlatform {
     			}
     		}
 
-    		//Loads the xml directly from the given string. Useful in combination with www.text.
-    		public static VoxML LoadFromText(string text) {
-    			XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
-    			return serializer.Deserialize(new StringReader(text)) as VoxML;
+            public static event EventHandler<VoxMLObjectEventArgs> LoadedFromText; 
+
+            //Loads the xml directly from the given string. Useful in combination with www.text.
+            public static VoxML LoadFromText(string text, string filename) {
+                XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
+                VoxML voxML = serializer.Deserialize(new StringReader(text)) as VoxML;
+
+                //var parsedXml = XElement.Parse(text);
+                //string filename = parsedXml.Element("Lex").Element("Pred").Value;  
+                voxML.OnLoadedFromText(filename, voxML);
+                return voxML; 
     		}
-    	}
+
+            protected virtual void OnLoadedFromText(string filename, VoxML voxML)
+            {
+                LoadedFromText?.Invoke(this, new VoxMLObjectEventArgs { Filename = filename, VoxML = voxML});
+            }
+
+        }
     }
 }

@@ -1,9 +1,9 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Linq;
 
 using RootMotion.FinalIK;
 using VoxSimPlatform.Animation;
-using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
 
 namespace EditorMenus {
@@ -24,8 +24,8 @@ namespace EditorMenus {
             GameObject agent = null;
             GameObject[] selected = Selection.gameObjects;
             Voxeme vox;
-            FixHandRotation hand_rot1;
-            FixHandRotation hand_rot2;
+            FixHandRotation lHandRot;
+            FixHandRotation rHandRot;
 
 
             obj.layer = 10;//blocks=perceived layer
@@ -58,20 +58,20 @@ namespace EditorMenus {
             // Rotate With Me
             // Fix Hand Rotation (one for each hand)
             if(obj.GetComponents<FixHandRotation>().Length == 0) {
-                hand_rot1 = obj.AddComponent<FixHandRotation>();
-                hand_rot2 = obj.AddComponent<FixHandRotation>();
-                hand_rot1.effectorType = FullBodyBipedEffector.LeftHand;
-                hand_rot2.effectorType = FullBodyBipedEffector.RightHand;
-                hand_rot1.localDirection.x = -hand_rot1.localDirection.x; // Mirror
+                lHandRot = obj.AddComponent<FixHandRotation>();
+                rHandRot = obj.AddComponent<FixHandRotation>();
+                lHandRot.effectorType = FullBodyBipedEffector.LeftHand;
+                rHandRot.effectorType = FullBodyBipedEffector.RightHand;
+                lHandRot.localDirection.x = -lHandRot.localDirection.x; // Mirror
 
                 if (agent != null) {
-                    hand_rot1.interactionSystem = agent.GetComponent<InteractionSystem>();
-                    hand_rot1.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.leftUpperArm.gameObject;
-                    hand_rot1.overrideDirection = true;
+                    lHandRot.interactionSystem = agent.GetComponent<InteractionSystem>();
+                    lHandRot.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.leftUpperArm.gameObject;
+                    lHandRot.overrideDirection = true;
 
-                    hand_rot2.interactionSystem = agent.GetComponent<InteractionSystem>();
-                    hand_rot2.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.rightUpperArm.gameObject;
-                    hand_rot2.overrideDirection = true;
+                    rHandRot.interactionSystem = agent.GetComponent<InteractionSystem>();
+                    rHandRot.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.rightUpperArm.gameObject;
+                    rHandRot.overrideDirection = true;
                 }
             }
             
@@ -80,9 +80,9 @@ namespace EditorMenus {
                 obj.AddComponent<InteractionObject>();
             }
             if(obj.GetComponent<RotateWithMe>() != null) {
-                RotateWithMe rotwme = obj.AddComponent<RotateWithMe>();
-                rotwme.source = agent;
-                rotwme.rotateAround = RotateWithMe.Axis.Y;
+                RotateWithMe rotWithMe = obj.AddComponent<RotateWithMe>();
+                rotWithMe.source = agent;
+                rotWithMe.rotateAround = RotateWithMe.Axis.Y;
             }
 
             // v Unnecessary Components v
@@ -98,7 +98,8 @@ namespace EditorMenus {
         [MenuItem("VoxSim/Voxify Object %#v", true)]
         static bool ValidateVoxify() {
             return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
-                   (Selection.activeGameObject.GetComponentsInChildren<MeshRenderer>().Length > 0);
+                   (Selection.activeGameObject.GetComponentsInChildren<MeshRenderer>().Where(
+                       r => r.enabled).ToList().Count > 0);
         }
     }
 }

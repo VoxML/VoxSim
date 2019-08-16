@@ -250,7 +250,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 		logIndex = 0;
 
 		Diana = GameObject.Find("Diana");
-        eventManager.setActiveAgent(Diana); // This would need called again any time we switch who we talk to
+        eventManager.SetActiveAgent(Diana); // This would need called again any time we switch who we talk to
         UseTeaching = interactionPrefs.useTeachingAgent;
 		epistemicModel = Diana.GetComponent<EpistemicModel>();
 		interactionLogic = Diana.GetComponent<DianaInteractionLogic>();
