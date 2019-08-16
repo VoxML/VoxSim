@@ -14,11 +14,16 @@ public class WordSelector : MonoBehaviour {
 
     private GameObject currentWord;
 
+    Camera main_camera;
+
+    private void Start() {
+        main_camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+    }
+
     // Update is called once per frame
     void Update() {
-        transform.position = transform.parent.position;
+        //transform.position = transform.parent.position;
         // Hmmm, min camera may be wrong to use.
-        Camera main_camera = GameObject.Find("Main Camera").GetComponent<Camera>();
         Ray ray;
         if (main_camera != null) {
             //Debug.LogWarning("Found main camera");
@@ -46,21 +51,16 @@ public class WordSelector : MonoBehaviour {
                 if (currentWord != null) {
                     // Highlight
                     TextMeshPro phraseText = hit.transform.GetComponent<TextMeshPro>();
+                    unhighlighted = phraseText.color;
                     phraseText.color = highlighted;
+                    
                 }
             }
-
             // An okay place to set the active word. Reorganize words based on it.
             if (Input.GetMouseButtonDown(0))
-                Debug.Log("Pressed primary button.");
-
-            if (Input.GetMouseButtonDown(1))
-                Debug.Log("Pressed secondary button.");
-
-            if (Input.GetMouseButtonDown(2))
-                Debug.Log("Pressed middle click.");
-
+                Debug.LogWarning("Pressed primary button: " + hit.transform.parent.parent.gameObject.name); // Double parent to get to *actual name*
         }
+
         else {
             //Debug.Log("No hits");
             //Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * 200, Color.yellow);

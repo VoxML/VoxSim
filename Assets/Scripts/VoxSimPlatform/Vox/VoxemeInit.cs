@@ -21,14 +21,25 @@ namespace VoxSimPlatform {
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		Macros macros = GameObject.Find("BehaviorController").GetComponent<Macros>();
 
-        		InitializeVoxemes();
+                float start_time;
+                float end_time;
+                start_time = Time.realtimeSinceStartup;
+                InitializeVoxemes();
+                end_time = Time.realtimeSinceStartup;
+                Debug.LogWarning("Initializing took " + (end_time - start_time) + " ... seconds?");
 
-        		objSelector.InitDisabledObjects();
+                start_time = Time.realtimeSinceStartup;
+                objSelector.InitDisabledObjects();
         		macros.PopulateMacros();
-        	}
+                end_time = Time.realtimeSinceStartup;
+                Debug.LogWarning("Second step took " + (end_time - start_time) + " ... seconds?");
 
-        	public void InitializeVoxemes() {
-        		preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
+            }
+
+            public void InitializeVoxemes() {
+
+
+                preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
 
         		/* MAKE GLOBAL OBJECT RUNTIME ALTERATIONS */
 
@@ -198,6 +209,7 @@ namespace VoxSimPlatform {
         				    (go.transform.root.tag != "Agent")) {
         					BoxCollider boxCollider = go.GetComponent<BoxCollider>();
         					if (boxCollider != null) {
+                                //Debug.LogWarning("Destroying a boxcollider on " + go.name);
         						Destroy(boxCollider);
         					}
 
@@ -231,7 +243,10 @@ namespace VoxSimPlatform {
         				}
         			}
         		}
-        	}
+
+
+
+            }
 
         	// Update is called once per frame
         	void Update() {

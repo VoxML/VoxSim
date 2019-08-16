@@ -15,23 +15,24 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow)) {
             Vector3 position = this.transform.position;
-            position.x--;
+            position.x++;
             this.transform.position = position;
         }
         if (Input.GetKeyDown(KeyCode.RightArrow)) {
             Vector3 position = this.transform.position;
-            position.x++;
+            position.x--;
             this.transform.position = position;
         }
         if (Input.GetKeyDown(KeyCode.UpArrow)) {
             Vector3 position = this.transform.position;
-            position.y++;
+            position.z--;
             this.transform.position = position;
         }
         if (Input.GetKeyDown(KeyCode.DownArrow)) {
             Vector3 position = this.transform.position;
-            position.y--;
+            position.z++;
             this.transform.position = position;
         }
+        this.transform.LookAt(GameObject.Find("WordCloud").transform);//.position - this.transform.position);
     }
 }

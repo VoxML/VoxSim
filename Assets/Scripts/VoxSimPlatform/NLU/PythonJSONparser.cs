@@ -56,6 +56,7 @@ namespace VoxSimPlatform {
                 JObject jsonParsed = JsonConvert.DeserializeObject<JObject>(json_result, settings);
                 GenericSyntax syntax = new GenericSyntax(jsonParsed);
                 to_return = syntax.ExportTagOrWords(true);
+                //Debug.LogWarning(to_return);
                 return to_return;
             }
 

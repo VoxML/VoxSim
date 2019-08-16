@@ -35,8 +35,9 @@ namespace VoxSimPlatform {
         	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
         	public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
+            [SerializeField] // Just changed
         	private Vector3 _targetPosition;
-
+            // WHAT TO LOOK AT
         	public Vector3 targetPosition {
         		get { return _targetPosition; }
         		set {
@@ -185,6 +186,8 @@ namespace VoxSimPlatform {
         						if (offset.sqrMagnitude <= Constants.EPSILON) {
         							transform.position = targetPosition;
 
+                                    // Define child position relative to parent.
+                                    // This matters since voxemes change parents frequently.
         							foreach (Voxeme child in children) {
         								if (child.isActiveAndEnabled) {
         									if (child.gameObject != gameObject) {
