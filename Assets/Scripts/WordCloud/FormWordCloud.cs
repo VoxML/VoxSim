@@ -12,7 +12,7 @@ using System.IO;
 
 // Based on code from Andrew Sage: https://medium.com/@SymboticaAndrew/a-vr-word-cloud-in-unity-f7cb8cf17b6b
 
-namespace VoxSimPlatform {
+namespace WordCloud {
 
     public class Phrase {
         // From tutorial. But the 'occurrences' should be remappable to whatever importance metric we wind up using.
