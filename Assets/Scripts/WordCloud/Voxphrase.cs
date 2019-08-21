@@ -38,12 +38,18 @@ namespace WordCloud {
             // Make sure the integrity of the voxphrase has withstood the evils of VoxemeInit
             Transform child = gameObject.transform.Find("phrase_text");
             BoxCollider bc = child.GetComponent<BoxCollider>();
+            TextMeshPro phraseText = child.GetComponent<TextMeshPro>();
+
             if (bc == null) {
-                TextMeshPro phraseText = child.GetComponent<TextMeshPro>();
                 bc = child.gameObject.AddComponent<BoxCollider>(); // The same level down as the phrase itself
-                Vector3 dimensions = phraseText.GetPreferredValues(phraseText.text, 800, Mathf.Infinity);
-                bc.size = dimensions; //Make the hit box about the right size
             }
+            else {
+                phraseText.enabled = false; // this is, perhaps, not the best way to fix a visual glitch where new words show up translucent
+                phraseText.enabled = true;
+            }
+            Vector3 dimensions = phraseText.GetPreferredValues(phraseText.text, 800, Mathf.Infinity);
+            bc.size = dimensions; //Make the hit box about the right size
+
         }
 
         // Give a number of parameters. Break away stuff from Sphere() in FormWordCloud to do it.
@@ -52,12 +58,23 @@ namespace WordCloud {
 
             phraseText.text = phrase.term.ToUpper();
 
-            gameObject.name = phrase.term;
+            if (gameObject.name.EndsWith("*")) {
+                //new_child = Instantiate(childObject, pos, Quaternion.identity) as GameObject;
+                gameObject.transform.parent.name = phrase.term;
+
+            }
+            else {
+                // Ugh, workaround due to voxemeinit moving around what's the direct child.
+                //new_child = Instantiate(childObject.transform.parent.gameObject, pos, Quaternion.identity) as GameObject;
+                gameObject.name = phrase.term;
+
+            }
 
             phrase.obj = gameObject;
             phrase.ideal_position = gameObject.transform.position; // Not happy, but we also don't want it moving
                                                                    //precious_children[child.name].size = phraseText.fontSize;
-            phrase.size = gameObject.transform.localScale;
+                                                                   //phrase.size = gameObject.transform.localScale; // We started setting this outside, I guess.
+            
         }
     }
 }
