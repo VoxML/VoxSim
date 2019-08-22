@@ -21,6 +21,7 @@ namespace VoxSimPlatform {
         /// </summary>
         public static class Helper {
             public static Regex vec = new Regex(@"<.*>"); // vector form regex
+            public static Regex listVec = new Regex(@"\[<.*>\]");   // list of vectors form regex
             public static Regex commaVec = new Regex(@",<.*>");   // comma + vector form regex
             public static Regex quoted = new Regex("[\'\"].*[\'\"]");    // quoted form regex
 
@@ -70,11 +71,22 @@ namespace VoxSimPlatform {
             }
 
             public static Vector3 ParsableToVector(String parsable) {
+                Vector3 retVal = new Vector3();
                 List<String> components =
                     new List<String>((parsable.Replace("<", "").Replace(">", "")).Split(';'));
-                return new Vector3(Convert.ToSingle(components[0]),
-                    Convert.ToSingle(components[1]),
-                    Convert.ToSingle(components[2]));
+                try {
+                    retVal = new Vector3(Convert.ToSingle(components[0]),
+                        Convert.ToSingle(components[1]),
+                        Convert.ToSingle(components[2]));
+                }
+                catch (Exception ex) {
+                    if (ex is FormatException) {
+                        Debug.LogError(string.Format("Input string \"{0}\" was not in a correct format", parsable));
+                    }
+                    throw ex;
+                }
+
+                return retVal; 
             }
 
             public static String QuaternionToParsable(Quaternion quat) {

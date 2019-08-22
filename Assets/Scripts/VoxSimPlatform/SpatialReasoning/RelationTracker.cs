@@ -91,7 +91,7 @@ namespace VoxSimPlatform {
         		}
 
         		try {
-        			Debug.Log(string.Format("Adding {0} {1} {2}", relation, objs[0], objs[1]));
+        			Debug.Log(string.Format("Adding {0} {1} {2} to current relations", relation, objs[0], objs[1]));
         		}
         		catch (Exception e) {
         		}

@@ -6,10 +6,10 @@
   </Lex>
   <Type>
     <Class>config</Class>
-    <Value>EC</Value>
+    <Value>RCC8.EC</Value>
     <Args>
-        <Arg Value="x:3D" />
-        <Arg Value="y:3D" />
+        <Arg Value="x:physobj" />
+        <Arg Value="y:physobj" />
     </Args>
     <Constr>Y(x) &gt; Y(y)</Constr>
     <Corresps />

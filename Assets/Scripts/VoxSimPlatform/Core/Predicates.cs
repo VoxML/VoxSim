@@ -6275,7 +6275,11 @@ namespace VoxSimPlatform {
 
                                                 if ((path is IList) && (path.GetType().IsGenericType) &&
                                                     (path.GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
+                                                    Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
                                                     Debug.Log("Successfully computed path");
+                                                    eventManager.macroVars.Add(string.Format("'{0}.{1}'",
+                                                        ((MethodInfo)args[2]).ReflectedType.FullName, ((MethodInfo)args[2]).Name), path);
+                                                    Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
                                                 }
                                                 else {
                                                     Debug.Log(string.Format("{0} called from {2} did not return a path (got typeof{1}).  " +
@@ -6297,6 +6301,7 @@ namespace VoxSimPlatform {
                                     }
                                     else if ((args[2] is IList) && (args[2].GetType().IsGenericType) &&
                                         (args[2].GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
+                                        Debug.Log(string.Format("Path is a {0}", args[2].GetType()));
                                         path = (List<Vector3>)args[2];
                                     }
                                     else {
@@ -6320,19 +6325,20 @@ namespace VoxSimPlatform {
                                             }
                                         }
 
-                                        //Vector3 nextInterimTarget = voxComponent.interTargetPositions.ElementAt(0);
-                                        //Vector3 iteratedTarget = voxComponent.MoveToward(nextInterimTarget) + 
-                                        //    nextInterimTarget;
-                                        //Debug.Log(string.Format("Adding {1} to front of {0} interim targets (first in list was {2})",
-                                        //    voxComponent.gameObject,Helper.VectorToParsable(iteratedTarget),
-                                        //    Helper.VectorToParsable(nextInterimTarget)));
-                                        //voxComponent.interTargetPositions.AddFirst(iteratedTarget);
+                                        Debug.Log(string.Format("Path is: [{0}]",
+                                            string.Join(", ",voxComponent.interTargetPositions.Select(n => Helper.VectorToParsable(n)))));
 
-                                        //Debug.Log(string.Format("Path is now:"));
-                                        //foreach (Vector3 node in voxComponent.interTargetPositions) {
-                                        //    Debug.Log(Helper.VectorToParsable(node));
-                                        //}
-                                        //Debug.Log(string.Format("End of path"));
+                                        Vector3 nextInterimTarget = voxComponent.interTargetPositions.ElementAt(0);
+                                        voxComponent.MoveToward(nextInterimTarget);
+                                        Vector3 iteratedTarget = voxComponent.transform.position;
+                                        Debug.Log(Helper.VectorToParsable(iteratedTarget));
+                                        Debug.Log(string.Format("Adding {1} to front of {0} interim targets (first in list was {2})",
+                                            voxComponent.gameObject,Helper.VectorToParsable(iteratedTarget),
+                                            Helper.VectorToParsable(nextInterimTarget)));
+                                        voxComponent.interTargetPositions.AddFirst(iteratedTarget);
+
+                                        Debug.Log(string.Format("Path is now: [{0}]",
+                                            string.Join(", ",voxComponent.interTargetPositions.Select(n => Helper.VectorToParsable(n)))));
                                     }
                                 }
                                 else {
@@ -6519,7 +6525,7 @@ namespace VoxSimPlatform {
         	// IN: Object (single element array)
         	// OUT: String
         	public void CLEAR_GLOBALS(object[] args) {
-        		eventManager.macroVars.Clear();
+        		eventManager.ClearGlobalVars(null, null);
 
         		return;
         	}
@@ -6558,7 +6564,7 @@ namespace VoxSimPlatform {
             // IN: VoxML event encoding, arguments
             // OUT: none
         	public void ComposeProgram(VoxML voxml, object[] args) {
-                eventManager.macroVars.Clear();
+                eventManager.ClearGlobalVars(null, null);
 
                 string agentVar = string.Empty;
                 int argIndex = 0;
@@ -6574,7 +6580,7 @@ namespace VoxSimPlatform {
                     if ((curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
                         (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
                         // TODO: figure out what to do if you have multiple agents as an argument
-                        //  (i.e. group action -> put(x:agent[], y:physobj, z:location))
+                        //  (i.e. group action -> "Alex and Bill put the couch in the corner of the room"/put(x:agent[], y:physobj, z:location))
                         agentVar = curArgName;
                         eventManager.macroVars[agentVar] = eventManager.GetActiveAgent();
                     }
@@ -6629,7 +6635,7 @@ namespace VoxSimPlatform {
             // IN: VoxML event encoding, arguments
             // OUT: none
             public object ComposeRelation(VoxML voxml, object[] args) {
-                eventManager.macroVars.Clear();
+                //eventManager.ClearGlobalVars(null, null);
 
                 object retVal = null;
 
@@ -6649,7 +6655,14 @@ namespace VoxSimPlatform {
                         voxml.Lex.Pred, i, voxmlArgName, string.Join("*",voxmlArgTypes)));
 
                     if (voxmlArgTypes.Any(t => GenLex.GenLex.IsGLType(args[i],GenLex.GenLex.GetGLType(t)))) {
-                        eventManager.macroVars.Add(voxmlArgName, args[i]);
+                        // if this key already exists in macroVars, just replace it
+                        //  other macroVars assigned during program composition may need to be persistent
+                        if (eventManager.macroVars.Contains(voxmlArgName)) {
+                            eventManager.macroVars[voxmlArgName] = args[i];
+                        }
+                        else {
+                            eventManager.macroVars.Add(voxmlArgName, args[i]);
+                        }
                     }
                 }
                     
@@ -6754,21 +6767,25 @@ namespace VoxSimPlatform {
                     string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
                     DataTable dt = new DataTable();
                     result = (bool)dt.Compute(expression, null);
-                    Debug.Log(string.Format("Result ({0}): {1}", eventManager.evalOrig[eventManager.events[0]], result));
+                    Debug.Log(string.Format("Result of {0}: {1}", eventManager.evalOrig[eventManager.events[0]], result));
 
-                    // if the condition evaluates to true, compute the next iteration of the event
-                    //  put that into the event manager,
-                    //  then reinsert the while(condition):event loop following it
-                    // this keeps us in the loop until the condition evaluates to false
-                    if (result) {
-                        //if (eventManager.events.Count > 1) {
-                            eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
-                            //eventManager.InsertEvent(eventManager.events[1], 3);
-                            //eventManager.InsertEvent(eventManager.events[1], 2);
-                        //}
-                    }
-                    else {
-                        //eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool) args[args.Length - 1] == true) {
+                            // if the condition evaluates to true, compute the next iteration of the event
+                            //  put that into the event manager,
+                            //  then reinsert the while(condition):event loop following it
+                            // this keeps us in the loop until the condition evaluates to false
+                            if (result) {
+                                //if (eventManager.events.Count > 1) {
+                                    eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
+                                    eventManager.InsertEvent(eventManager.events[1], 3);
+                                    //eventManager.InsertEvent(eventManager.events[1], 2);
+                                //}
+                            }
+                            else {
+                                //eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
+                            }
+                        }
                     }
                 }
 
@@ -6785,15 +6802,19 @@ namespace VoxSimPlatform {
                     string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
                     DataTable dt = new DataTable();
                     result = (bool)dt.Compute(expression, null);
-                    Debug.Log(string.Format("Result ({0}): {1}", eventManager.evalOrig[eventManager.events[0]], result));
+                    Debug.Log(string.Format("Result of {0}: {1}", eventManager.evalOrig[eventManager.events[0]], result));
 
-                    // if the condition evaluates to true, compute the next iteration of the event
-                    //  put that into the event manager,
-                    //  then reinsert the while(condition):event loop following it
-                    // this keeps us in the loop until the condition evaluates to false
-                    if (!result) {
-                        if (eventManager.events.Count > 1) {
-                            eventManager.RemoveEvent(1);
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool) args[args.Length - 1] == true) {
+                            // if the condition evaluates to true, compute the next iteration of the event
+                            //  put that into the event manager,
+                            //  then reinsert the while(condition):event loop following it
+                            // this keeps us in the loop until the condition evaluates to false
+                            if (!result) {
+                                if (eventManager.events.Count > 1) {
+                                    eventManager.RemoveEvent(1);
+                                }
+                            }
                         }
                     }
                 }

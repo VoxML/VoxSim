@@ -12,7 +12,16 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace CogPhysics {
         public class PhysicsPrimitives : MonoBehaviour {
-        	bool resolveDiscrepancies;
+        	bool _resolveDiscrepancies;
+            public bool resolveDiscrepancies {
+                get { return _resolveDiscrepancies; }
+                set {
+                    if (_resolveDiscrepancies != value) {
+                        OnResolveDiscrepanciesChanged(_resolveDiscrepancies, value);
+                    }
+                    _resolveDiscrepancies = value;
+                }
+            }
         	EventManager eventManager;
 
         	const double PHYSICS_CATCHUP_TIME = 100.0;
@@ -40,7 +49,7 @@ namespace VoxSimPlatform {
         	void LateUpdate() {
         		//if (Input.GetKeyDown (KeyCode.R)) {
         		if (resolveDiscrepancies) {
-        			//Debug.Log ("resolving");
+        			Debug.Log ("Resolving discrepancies between physics bodies and voxemes");
         			PhysicsHelper.ResolveAllPhysicsDiscrepancies(testSatisfied.MacroEvent);
         			//Debug.Break ();
         			if (eventManager.events.Count > 0) {
@@ -61,6 +70,7 @@ namespace VoxSimPlatform {
                     foreach (String argString in argsStrings) {
                         // find the GameObject of this name
                         GameObject argObj = GameObject.Find(argString);
+                        Debug.Log(string.Format("Found {0}game object {1}", (argObj == null) ? "no " : string.Empty, argString));
                         if (argObj != null) {
                             // get its Voxeme component
                             Voxeme argVox = argObj.GetComponent<Voxeme>();
@@ -71,7 +81,9 @@ namespace VoxSimPlatform {
                                 Regex r = new Regex("\\["+predString+"\\(.+\\)\\]");
                                 // if there's >0 affordances in argObj's affordance structure that match predString
                                 // reason the consequences of those affordances
+                                Debug.Log(predString);
                                 if (argVox.voxml.Afford_Str.Affordances.Where(a => r.IsMatch(a.Formula)).ToList().Count > 0) {
+                                    Debug.Log(string.Format("Reasoning from affordances over {0}({1})", predString, argVox));
                                     SatisfactionTest.ReasonFromAffordances(eventManager, testSatisfied.VoxML, predString, argVox);
                                 }
                             }
@@ -80,7 +92,7 @@ namespace VoxSimPlatform {
 
         			// TODO: better than this
         			// which predicates result in affordance-based consequence?
-        			if ((predString == "ungrasp") || (predString == "lift") ||
+        			if ((predString == "lift") ||
         			    (predString == "turn") || (predString == "roll") ||
         			    (predString == "slide") || (predString == "put")) {
         				SatisfactionTest.ReasonFromAffordances(eventManager, null, predString,
@@ -96,6 +108,7 @@ namespace VoxSimPlatform {
                 testSatisfied = (EventManagerArgs)e;
         		resolveDiscrepancies = true;
         		catchupTimer.Enabled = true;
+                eventManager.stayExecution = true;
 
                 Debug.Log(string.Format("Satisfaction condition met for {0}specification {1}",
                     (testSatisfied.VoxML != null) ? testSatisfied.VoxML.Lex.Pred + " " : string.Empty,
@@ -103,10 +116,22 @@ namespace VoxSimPlatform {
         	}
 
         	void Resolve(object sender, ElapsedEventArgs e) {
+                Debug.Log ("Catching up.  Next frame, event manager can run the full update loop again.");
         		catchupTimer.Enabled = false;
         		catchupTimer.Interval = PHYSICS_CATCHUP_TIME;
         		resolveDiscrepancies = false;
+                //eventManager.stayExecution = false;
         	}
+
+            /// <summary>
+            /// Triggered when the resolveDiscrepancies flag changes
+            /// </summary>
+            // IN: oldVal -- previous value of resolveDiscrepancies flag
+            //      newVal -- new or current value of resolveDiscrepancies flag
+            void OnResolveDiscrepanciesChanged(bool oldVal, bool newVal) {
+                Debug.Log(string.Format("==================== resolveDiscrepancies flag changed ==================== {0}->{1}",
+                    oldVal, newVal));
+            }
         }
     }
 }

@@ -4986,9 +4986,8 @@ public class JointGestureDemo : SingleAgentInteraction {
 								interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1]);
 						graspedObject = eventManager.ExtractObjects(pred,
 								(String) Helper.ParsePredicate(
-									interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1])[pred])[0]
-							as
-							GameObject;
+									interactionLogic.
+                                        ActionOptions[interactionLogic.ActionOptions.Count - 1])[pred])[0] as GameObject;
 						//}
 						interactionLogic.RewriteStack(new PDAStackOperation(
 							PDAStackOperation.PDAStackOperationType.Rewrite,

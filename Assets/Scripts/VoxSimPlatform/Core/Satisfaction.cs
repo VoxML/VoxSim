@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -101,6 +102,7 @@ namespace VoxSimPlatform {
 
     			//Debug.Log (test);
 
+                // PRIMITIVE MOTIONS
     			if (predString == "move_1") {
                     // satisfy move_1
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
@@ -110,7 +112,7 @@ namespace VoxSimPlatform {
                             ? voxComponent.graspTracker.transform.position
                             : theme.transform.position;
 
-                        Debug.Log(string.Format("{0} : {1}", Helper.VectorToParsable(testLocation),argsStrings[1]));
+                        //Debug.Log(string.Format("{0} : {1}", Helper.VectorToParsable(testLocation),argsStrings[1]));
                         if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
                             if (voxComponent.isGrasped) {
                                 theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
@@ -121,6 +123,42 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
+                // PRIMITIVE FUNCTIONAL OPERATORS
+                // conditionals
+                else if (predString == "if") {
+                    string expression = (argsStrings[0] as String).Replace("^", " AND ").Replace("|", " OR ");
+                    DataTable dt = new DataTable();
+                    try {
+                        // don't do anything with this
+                        //  the "satisfaction" of a conditional is just a check
+                        //  to see if the constituent conditions have been successfully evaluated
+                        bool result = (bool)dt.Compute(expression, null);
+                        satisfied = true;
+                    }
+                    catch (Exception ex) {
+                        if (ex is EvaluateException) {
+                            satisfied = false;
+                        }
+                    }
+                }
+                else if (predString == "while") {
+                    string expression = (argsStrings[0] as String).Replace("^", " AND ").Replace("|", " OR ");
+                    DataTable dt = new DataTable();
+                    try {
+                        // don't do anything with this
+                        //  the "satisfaction" of a conditional is just a check
+                        //  to see if the constituent conditions have been successfully evaluated
+                        bool result = (bool)dt.Compute(expression, null);
+                        satisfied = true;
+                    }
+                    catch (Exception ex) {
+                        if (ex is EvaluateException) {
+                            satisfied = false;
+                        }
+                    }
+                }
+
+                // COMPLEX MOTION (TODO: remove)
                 else if (predString == "put") {
     				// satisfy put
     				GameObject theme = GameObject.Find(argsStrings[0] as String);
@@ -474,9 +512,21 @@ namespace VoxSimPlatform {
         					object arg = argsStrings.Dequeue();
 
         					if (Helper.vec.IsMatch((String) arg)) {
-        						// if arg is vector form
-                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",Helper.ParsableToVector((String) arg)));
-        						objs.Add(Helper.ParsableToVector((String) arg));
+                                if (Helper.listVec.IsMatch((String) arg)) {
+                                    // if arg is list of vectors form
+                                    List<Vector3> vecList = new List<Vector3>();
+
+                                    foreach (string vecString in ((String) arg).Replace("[","").Replace("]","").Split(':')) {
+                                        vecList.Add(Helper.ParsableToVector(vecString));
+                                    }
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",vecList));
+                                    objs.Add(vecList);
+                                }
+                                else {
+            						// if arg is vector form
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",Helper.ParsableToVector((String) arg)));
+            						objs.Add(Helper.ParsableToVector((String) arg));
+                                }
         					}
         					else if (arg is String) {
         						// if arg is String
@@ -754,13 +804,13 @@ namespace VoxSimPlatform {
     			List<GameObject> components = objSelector.allVoxemes.SelectMany((v, c) =>
     				v.opVox.Type.Components.Where(comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList();
 
-    			foreach (GameObject go in components) {
-    				Debug.Log(go);
-    			}
+    			//foreach (GameObject go in components) {
+    			//	Debug.Log(go);
+    			//}
 
-    			foreach (Voxeme v in allVoxemes) {
-    				Debug.Log(v);
-    			}
+    			//foreach (Voxeme v in allVoxemes) {
+    			//	Debug.Log(v);
+    			//}
     //			objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)
 
     //				UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => 
@@ -1024,14 +1074,14 @@ namespace VoxSimPlatform {
     			}
 
                 // non-relation-based reasoning from affordances
-                Debug.Log(affStr.Affordances.Keys.Count);
+                Debug.Log(string.Format("{0} # habitat indices = {1}", obj.name, affStr.Affordances.Keys.Count));
     			foreach (int objHabitat in affStr.Affordances.Keys) {
     				if (TestHabitat(obj.gameObject, objHabitat)) {
     					// test habitats
     					for (int i = 0; i < affStr.Affordances[objHabitat].Count; i++) {
     						// condition/event/result list for this habitat index
     						string ev = affStr.Affordances[objHabitat][i].Item2.Item1;
-    						Debug.Log (string.Format("Testing {0}",ev));
+    						Debug.Log (string.Format("{0}: Testing {1}",obj.name, ev));
     						if (Helper.GetTopPredicate(ev) == predString) {
     							bool relationIndependent = true;
     							foreach (string rel in supportedRelations) {
@@ -1043,8 +1093,7 @@ namespace VoxSimPlatform {
 
     							if (relationIndependent) {
     //								Debug.Log (obj.opVox.Lex.Pred);
-    //								Debug.Log (program);
-
+                            
     								result = affStr.Affordances[objHabitat][i].Item2.Item2.Replace(" ",string.Empty);
     								//Debug.Log (result);
 
@@ -1052,12 +1101,21 @@ namespace VoxSimPlatform {
                                         // look for agent in program VoxML arg structure
                                         string agentVar = string.Empty;
                                         //Debug.Log(program.Lex.Pred);
-                                        foreach (VoxTypeArg arg in program.Type.Args) {
-                                            string argName = arg.Value.Split(':')[0];
-                                            string argType = arg.Value.Split(':')[1];
+                                        try {
+                                            foreach (VoxTypeArg arg in program.Type.Args) {
+                                                string argName = arg.Value.Split(':')[0];
+                                                string argType = arg.Value.Split(':')[1];
 
-                                            if (argType == "agent") {
-                                                agentVar = argName; 
+                                                if (argType == "agent") {
+                                                    agentVar = argName; 
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex) {
+                                            if (ex is NullReferenceException) {
+                                                if (program == null) {
+                                                    Debug.LogWarning(string.Format("Check if VoxML encoding exists for \"{0}!\"",Helper.GetTopPredicate(ev)));
+                                                }
                                             }
                                         }
 
@@ -1087,7 +1145,7 @@ namespace VoxSimPlatform {
     									}
 
     									//Debug.Break ();
-    									if (result == "hold") {
+    									if (resultPred == "hold") {
     										reactivatePhysics = false;
     									}
     								}
