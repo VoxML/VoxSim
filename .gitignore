@@ -160,3 +160,5 @@ packages*
 **/.tags
 **/tags
 
+# Visual Studio directory
+.vs/
