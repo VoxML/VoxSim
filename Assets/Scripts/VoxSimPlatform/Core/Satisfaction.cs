@@ -119,6 +119,7 @@ namespace VoxSimPlatform {
                                 theme.transform.rotation = Quaternion.identity;
                             }
 
+                            Debug.Log(Helper.VectorToParsable(theme.transform.position));
                             satisfied = true;
                         }
                     }
@@ -463,7 +464,6 @@ namespace VoxSimPlatform {
     				if ((method != null) && (method.ReturnType == typeof(void))) {
                         EventManagerArgs eventArgs = null;
     					// is a program
-    					Debug.Log(predString);
                         string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", predString));
                         if (File.Exists(testPath)) {
                             VoxML voxml = null;

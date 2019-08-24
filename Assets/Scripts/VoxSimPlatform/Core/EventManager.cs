@@ -1020,7 +1020,7 @@ namespace VoxSimPlatform {
                         }
                     }
                     else if (kv.Value is List<Vector3>) {
-                        Debug.Log(kv.Value + "is List<Vector3>");
+                        Debug.Log(kv.Value + " is List<Vector3>");
                         String list = string.Format("[{0}]",String.Join(":",
                             ((List<Vector3>) kv.Value).Select(v => Helper.VectorToParsable(v)).ToArray()));
                         MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");

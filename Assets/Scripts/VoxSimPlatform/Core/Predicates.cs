@@ -6110,6 +6110,11 @@ namespace VoxSimPlatform {
 
         									//(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
         								}
+
+                                        Rigging rigging = (args[0] as GameObject).GetComponent<Rigging>();
+                                        if (rigging != null) {
+                                            rigging.ActivatePhysics(false);
+                                        }
         							}
         							else {
         								OutputHelper.PrintOutput(Role.Affector, "I can't interact with that object.");
@@ -6179,6 +6184,11 @@ namespace VoxSimPlatform {
         									.GetComponent<Voxeme>().interactionTargets) {
         									interactionTarget.gameObject.SetActive(true);
         								}
+
+                                        Rigging rigging = (args[0] as GameObject).GetComponent<Rigging>();
+                                        if (rigging != null) {
+                                            rigging.ActivatePhysics(false);
+                                        }
         							}
         							else {
         								OutputHelper.PrintOutput(Role.Affector, "I can't interact with that object.");
@@ -6229,7 +6239,8 @@ namespace VoxSimPlatform {
                     if ((bool) args[args.Length - 1] == true) {
                         for (int i = 0; i < args.Length; i++) {
                             Debug.Log(string.Format("{0}: args@{1}: {2} typeof({3})",
-                                MethodBase.GetCurrentMethod().Name, i, args[i], args[i].GetType()));
+                                MethodBase.GetCurrentMethod().Name, i,
+                                    (args[i] is Vector3) ? Helper.VectorToParsable((Vector3)args[i]) : args[i], args[i].GetType()));
                         }
 
                         if (args[0] is GameObject) {
@@ -6319,26 +6330,69 @@ namespace VoxSimPlatform {
                                     else {
                                         // iterate motion over the path supplied by method
                                         // compute the next target position along the path from the current position
-                                        foreach (Vector3 node in (List<Vector3>)path) {
-                                            if (!voxComponent.interTargetPositions.Contains(node)) {
-                                                voxComponent.interTargetPositions.AddLast(node);
-                                            }
-                                        }
+                                        //foreach (Vector3 node in (List<Vector3>)path) {
+                                        //    if (!voxComponent.interTargetPositions.Contains(node)) {
+                                        //        voxComponent.interTargetPositions.AddLast(node);
+                                        //    }
+                                        //}
 
                                         Debug.Log(string.Format("Path is: [{0}]",
-                                            string.Join(", ",voxComponent.interTargetPositions.Select(n => Helper.VectorToParsable(n)))));
+                                            string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
 
-                                        Vector3 nextInterimTarget = voxComponent.interTargetPositions.ElementAt(0);
+                                        Vector3 nextInterimTarget = ((List<Vector3>)path).ElementAt(0);
+                                        Debug.Log(string.Format("Executing primitive {0}, nextInterimTarget is {1}",
+                                            Helper.GetTopPredicate(eventManager.events[0]),
+                                            Helper.VectorToParsable(nextInterimTarget)));
                                         voxComponent.MoveToward(nextInterimTarget);
                                         Vector3 iteratedTarget = voxComponent.transform.position;
-                                        Debug.Log(Helper.VectorToParsable(iteratedTarget));
-                                        Debug.Log(string.Format("Adding {1} to front of {0} interim targets (first in list was {2})",
-                                            voxComponent.gameObject,Helper.VectorToParsable(iteratedTarget),
-                                            Helper.VectorToParsable(nextInterimTarget)));
-                                        voxComponent.interTargetPositions.AddFirst(iteratedTarget);
+                                        voxComponent.targetPosition = iteratedTarget;
 
-                                        Debug.Log(string.Format("Path is now: [{0}]",
-                                            string.Join(", ",voxComponent.interTargetPositions.Select(n => Helper.VectorToParsable(n)))));
+                                        if (Helper.CloseEnough(voxComponent.targetPosition,((List<Vector3>)path)[0])) {
+                                            Debug.Log(string.Format("Executing primitive {0}, {1} ~= {2}, removing {2} from path",
+                                                Helper.GetTopPredicate(eventManager.events[0]),
+                                                Helper.VectorToParsable(voxComponent.targetPosition),
+                                                Helper.VectorToParsable(((List<Vector3>)path)[0])));
+                                            //Debug.Log(eventManager.macroVars.Values.Cast<object>().ToList().Where(
+                                            //    v => (v is List<Vector3>) && ((List<Vector3>)v).SequenceEqual((List<Vector3>)path)).Count() == 1);
+                                            //Debug.Log(eventManager.macroVars.Keys.OfType<String>().
+                                                    //FirstOrDefault(v => (eventManager.macroVars[v] is List<Vector3>) && ((List<Vector3>)eventManager.macroVars[v]).SequenceEqual((List<Vector3>)path)));
+                                            bool pathStored = (eventManager.macroVars.Values.Cast<object>().ToList().Where(
+                                                v => (v is List<Vector3>) && ((List<Vector3>)v).SequenceEqual((List<Vector3>)path)).Count() == 1);
+                                            if (pathStored) {
+                                                string pathKey = eventManager.macroVars.Keys.OfType<String>().
+                                                    FirstOrDefault(v => (eventManager.macroVars[v] is List<Vector3>) && 
+                                                        ((List<Vector3>)eventManager.macroVars[v]).SequenceEqual((List<Vector3>)path));
+                                                ((List<Vector3>)path).RemoveAt(0);
+                                                eventManager.macroVars[pathKey] = path;
+                                                Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                                            }
+                                            Debug.Log(string.Format("Path is now: [{0}]",
+                                                string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
+                                        }
+
+                                        Debug.Log(string.Format("Executing primitive {0}, iteratedTarget is {1}",
+                                            Helper.GetTopPredicate(eventManager.events[0]),
+                                            Helper.VectorToParsable(iteratedTarget)));
+
+                                        if (((List<Vector3>)path).Count > 0) {
+                                            Debug.Log(string.Format("Executing primitive {0}, replacing first occurrence of {1} with {2}",
+                                                Helper.GetTopPredicate(eventManager.events[0]),
+                                                Helper.VectorToParsable(((List<Vector3>)path).Last()),
+                                                Helper.VectorToParsable(iteratedTarget)));
+                                            eventManager.events[0] = eventManager.events[0].ReplaceFirst(
+                                                Helper.VectorToParsable(((List<Vector3>)path).Last()),
+                                                Helper.VectorToParsable(iteratedTarget));
+                                        }
+
+                                        Debug.Log(string.Format("Executing primitive {0}, event string is now: {1}",
+                                            Helper.GetTopPredicate(eventManager.events[0]), eventManager.events[0]));
+                                        //Debug.Log(string.Format("Adding {1} to front of {0} interim targets (first in list was {2})",
+                                        //    voxComponent.gameObject,Helper.VectorToParsable(iteratedTarget),
+                                        //    Helper.VectorToParsable(nextInterimTarget)));
+                                        //voxComponent.interTargetPositions.AddFirst(iteratedTarget);
+
+                                        //Debug.Log(string.Format("Path is now: [{0}]",
+                                        //    string.Join(", ",voxComponent.interTargetPositions.Select(n => Helper.VectorToParsable(n)))));
                                     }
                                 }
                                 else {

@@ -81,7 +81,7 @@ namespace VoxSimPlatform {
                                 Regex r = new Regex("\\["+predString+"\\(.+\\)\\]");
                                 // if there's >0 affordances in argObj's affordance structure that match predString
                                 // reason the consequences of those affordances
-                                Debug.Log(predString);
+                                Debug.Log(string.Format("Completed event {0}",predString));
                                 if (argVox.voxml.Afford_Str.Affordances.Where(a => r.IsMatch(a.Formula)).ToList().Count > 0) {
                                     Debug.Log(string.Format("Reasoning from affordances over {0}({1})", predString, argVox));
                                     SatisfactionTest.ReasonFromAffordances(eventManager, testSatisfied.VoxML, predString, argVox);
