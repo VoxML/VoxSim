@@ -464,12 +464,14 @@ namespace VoxSimPlatform {
     				if ((method != null) && (method.ReturnType == typeof(void))) {
                         EventManagerArgs eventArgs = null;
     					// is a program
-                        string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", predString));
-                        if (File.Exists(testPath)) {
-                            VoxML voxml = null;
-                            using (StreamReader sr = new StreamReader(testPath)) {
-                                voxml = VoxML.LoadFromText(sr.ReadToEnd(), predString);
-                            }
+                        if (em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(predString) && 
+                            em.voxmlLibrary.VoxMLEntityTypeDict[predString] == "programs") {
+                        //string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", predString));
+                        //if (File.Exists(testPath)) {
+                            VoxML voxml = em.voxmlLibrary.VoxMLObjectDict[predString];
+                            //using (StreamReader sr = new StreamReader(testPath)) {
+                            //    voxml = VoxML.LoadFromText(sr.ReadToEnd(), predString);
+                            //}
                             eventArgs = new EventManagerArgs(voxml, test);
                         }
                         else {
@@ -498,11 +500,9 @@ namespace VoxSimPlatform {
 
                     methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                     if (methodToCall == null) {
-                        if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                            using (StreamReader sr =
-                                new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                            }
+                        if ((em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                            (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
+                            voxml = em.voxmlLibrary.VoxMLObjectDict[pred];
                             methodToCall = preds.GetType().GetMethod("ComposeProgram");
                         }
                     }
@@ -528,6 +528,9 @@ namespace VoxSimPlatform {
             						objs.Add(Helper.ParsableToVector((String) arg));
                                 }
         					}
+                            else if (Helper.emptyList.IsMatch((String) arg)) {
+                                objs.Add(new List<object>());
+                            }
         					else if (arg is String) {
         						// if arg is String
         						if ((arg as String) != string.Empty) {
@@ -585,7 +588,8 @@ namespace VoxSimPlatform {
         												//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
         												em.OnNonexistentEntityError(null,
         													new EventReferentArgs((arg as String)));
-        												return false; // abort
+                                                        Debug.Log(string.Format("ComputeSatisfactionConditions: no object named {0}",
+                                                            (arg as String)));
         											}
         										}
         										else {
@@ -614,7 +618,9 @@ namespace VoxSimPlatform {
         										if (go == null) {
         											//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
         											em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
-        											return false; // abort
+                                                    Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                                        em.events[0]));
+            										return false; // abort
         										}
 
                                                 Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",go));
@@ -623,14 +629,9 @@ namespace VoxSimPlatform {
         									else {
         										if (methodToCall != null) {
         											// found a method
-        											String path = string.Empty;
         											Debug.Log(pred);
-        											if (File.Exists(
-        												Data.voxmlDataPath + string.Format("/attributes/{0}.xml", pred))) {
-        												path = string.Format("/attributes/{0}.xml", pred);
-        											}
-
-        											if (path == string.Empty) {
+                                                    if ((!em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) ||
+                                                        (em.voxmlLibrary.VoxMLEntityTypeDict[pred] != "attributes")) {
         												//if (methodToCall.ReturnType == typeof(void)) {
         												//if (!em.evalOrig.ContainsKey(command)){
         												Debug.Log(string.Format("Which {0}?", (arg as String)));
@@ -638,6 +639,8 @@ namespace VoxSimPlatform {
         												em.OnDisambiguationError(null, new EventDisambiguationArgs(command,
         													string.Empty, string.Empty,
         													matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
+                                                        Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                                            em.events[0]));
         												return false; // abort
         											}
 
@@ -706,6 +709,9 @@ namespace VoxSimPlatform {
     							if (GameObject.Find(obj as String) == null) {
     								em.OnNonexistentEntityError(null, new EventReferentArgs(
     									new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
+                                    Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                        em.events[0]));
+                                    return false;
     							}
     							else {
     								if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
@@ -722,10 +728,13 @@ namespace VoxSimPlatform {
     				else {
     					// no coded-behavior
     					// see if a VoxML markup exists
-    					// if so, we might be able to figure this out,
-    					if (!File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+    					// if so, we might be able to figure this out
+                        if ((!em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) ||
+                            (em.voxmlLibrary.VoxMLEntityTypeDict[pred] != "programs")) {
     						// otherwise return error
     						OutputHelper.PrintOutput(Role.Affector, "Sorry, what does " + "\"" + pred + "\" mean?");
+                            Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                em.events[0]));
     						return false;
     					}
     				}
@@ -749,6 +758,8 @@ namespace VoxSimPlatform {
     				else {
     					em.OnNonexistentEntityError(null, new EventReferentArgs(pred));
     					//OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
+                        Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                            em.events[0]));
     					return false;
     				}
     			}

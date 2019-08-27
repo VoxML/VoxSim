@@ -213,8 +213,7 @@ namespace VoxSimPlatform {
                 return voxML; 
     		}
 
-            protected virtual void OnLoadedFromText(string filename, VoxML voxML)
-            {
+            protected virtual void OnLoadedFromText(string filename, VoxML voxML) {
                 LoadedFromText?.Invoke(this, new VoxMLObjectEventArgs { Filename = filename, VoxML = voxML});
             }
 

@@ -54,11 +54,10 @@ namespace VoxSimPlatform {
 
             void Start() {
                 VoxMLEntityTypeDict = new Dictionary<string, string>();
-                WalkDir(Data.voxmlDataPath);
-
                 VoxMLObjectDict = new Dictionary<string, VoxML>();
                 VoxML.LoadedFromText += OnLoadedFromText;
 
+                WalkDir(Data.voxmlDataPath);
             }
 
             private void WalkDir(string sDir) {
@@ -68,12 +67,15 @@ namespace VoxSimPlatform {
                         foreach (string f in Directory.GetFiles(d, "*.xml")) {
                             Debug.Log(string.Format("Adding VoxML Entity: {0}", Path.GetFileNameWithoutExtension(f)));
                             VoxMLEntityTypeDict.Add(Path.GetFileNameWithoutExtension(f), Path.GetFileName(d));
+                            using (StreamReader sr = new StreamReader(f)) {
+                                VoxML.LoadFromText(sr.ReadToEnd(), Path.GetFileNameWithoutExtension(f));
+                            }
                         }
                         WalkDir(d);
                     }
                 }
                 catch (Exception excpt) {
-                    Debug.Log(excpt.Message);
+                    Debug.LogError(excpt.Message);
                 }
             }
 

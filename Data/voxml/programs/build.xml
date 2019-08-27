@@ -1,5 +1,5 @@
-<!-- a test file to sort out the semantics of methods -->
 <?xml version="1.0" encoding="us-ascii"?>
+<!-- a test file to sort out the semantics of methods -->
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Entity Type="Program" />
   <Lex>

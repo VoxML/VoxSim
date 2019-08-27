@@ -127,7 +127,7 @@ namespace VoxSimPlatform {
                 get { return _stayExecution; }
                 set {
                     Debug.Log(string.Format("==================== stayExecution flag changed ==================== {0}: {1}->{2}",
-                        events[0], _stayExecution, value));
+                        (events.Count > 0) ? events[0] : "NULL", _stayExecution, value));
                     _stayExecution = value;
                 }
             }
@@ -290,12 +290,14 @@ namespace VoxSimPlatform {
                                     EventManagerArgs eventArgs = null;
                                     // is a program
                                     Debug.Log(string.Format("Completed {0}", completedEvent));
-                                    string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", pred));
-                                    if (File.Exists(testPath)) {
-                                        VoxML voxml = null;
-                                        using (StreamReader sr = new StreamReader(testPath)) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                        }
+                                    if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) && 
+                                        voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+                                    //string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", pred));
+                                    //if (File.Exists(testPath)) {
+                                        VoxML voxml = voxmlLibrary.VoxMLObjectDict[pred];
+                                        //using (StreamReader sr = new StreamReader(testPath)) {
+                                        //    voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
+                                        //}
                                         eventArgs = new EventManagerArgs(voxml, completedEvent);
                                     }
                                     else {
@@ -324,12 +326,14 @@ namespace VoxSimPlatform {
                                     EventManagerArgs eventArgs = null;
                                     // is a program
                                     Debug.Log(string.Format("Completed {0}", completedEvent));
-                                    string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", pred));
-                                    if (File.Exists(testPath)) {
-                                        VoxML voxml = null;
-                                        using (StreamReader sr = new StreamReader(testPath)) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                        }
+                                    if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) && 
+                                        voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+                                    //string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", pred));
+                                    //if (File.Exists(testPath)) {
+                                        VoxML voxml = voxmlLibrary.VoxMLObjectDict[pred];
+                                        //using (StreamReader sr = new StreamReader(testPath)) {
+                                        //    voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
+                                        //}
                                         eventArgs = new EventManagerArgs(voxml, completedEvent);
                                     }
                                     else {
@@ -528,6 +532,10 @@ namespace VoxSimPlatform {
                             Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,Helper.ParsableToVector((String) arg)));
                             objs.Add(Helper.ParsableToVector((String) arg));
                         }
+                    }
+                    else if (Helper.emptyList.IsMatch((String) arg)) {
+                        Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,new List<object>()));
+                        objs.Add(new List<object>());
                     }
                     else if (arg is String) {
                         // if arg is String
@@ -739,14 +747,16 @@ namespace VoxSimPlatform {
                                 }
                             }
                             else {
-                                if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                    using (StreamReader sr =
-                                        new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                        VoxML voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
+                                if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) && 
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
+                                //if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                    //using (StreamReader sr =
+                                        //new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+                                        VoxML voxml = voxmlLibrary.VoxMLObjectDict[pred];
                                         Debug.Log(string.Format("Invoke ComposeProgram with {0}{1}",
                                            (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
                                         preds.ComposeProgram(voxml, objs.ToArray());
-                                    }
+                                    //}
                                 }
                             }
                         }
@@ -1234,7 +1244,9 @@ namespace VoxSimPlatform {
                                                 //  or exists in VoxML
                                                 validPredExists = (((preds.GetType().GetMethod(pred.ToUpper()) != null) &&
                                                     (preds.GetType().GetMethod(pred.ToUpper()).ReturnType != typeof(String))) ||
-                                                    (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
+                                                    ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
+                                                    //(File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
                                                 if (validPredExists) {
                                                     Debug.Log(string.Format("Predicate found: {0}", pred));
                                                     GameObject go = matches[0];
@@ -1272,25 +1284,14 @@ namespace VoxSimPlatform {
                                                 VoxML predVoxeme = new VoxML();
                                                 String path = string.Empty;
                                                 Debug.Log(pred);
-                                                if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                                    path = string.Format("/programs/{0}.xml", pred);
-                                                }
-                                                else if (File.Exists(
-                                                    Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                                    path = string.Format("/relations/{0}.xml", pred);
-                                                }
-                                                else if (File.Exists(
-                                                    Data.voxmlDataPath + string.Format("/functions/{0}.xml", pred))) {
-                                                    path = string.Format("/functions/{0}.xml", pred);
-                                                }
-
-                                                if (path != string.Empty) {
-                                                    using (StreamReader sr = new StreamReader(Data.voxmlDataPath + path)) {
-                                                        predVoxeme = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                                    }
+                                                if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                                                    ((voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
+                                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") ||
+                                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "functions"))) {
+                                                    predVoxeme = voxmlLibrary.VoxMLObjectDict[pred];
 
                                                     Debug.Log(predVoxeme);
-                                                    if (path.Contains("functions")) {
+                                                    if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "functions") {
                                                         Debug.Log(predVoxeme.Type.Mapping);
                                                         int arity;
                                                         bool isInt = Int32.TryParse(predVoxeme.Type.Mapping.Split(':')[1],
@@ -1375,7 +1376,8 @@ namespace VoxSimPlatform {
 
                                 methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                                 validPredExists = ((methodToCall != null) ||
-                                                    (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
+                                    ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
 
                                 if (!validPredExists) {
                                     this.GetActiveAgent().GetComponent<AgentOutputController>().PromptOutput("Sorry, what does " + "\"" + pred + "\" mean?");
@@ -1383,18 +1385,14 @@ namespace VoxSimPlatform {
                                     return false;
                                 }
                                 else if (methodToCall == null) {
-                                    if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                        using (StreamReader sr =
-                                            new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                        }
+                                    if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                        (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs"))) {
+                                        voxml = voxmlLibrary.VoxMLObjectDict[pred];
                                         methodToCall = preds.GetType().GetMethod("ComposeProgram");
                                     }
-                                    else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                        using (StreamReader sr =
-                                            new StreamReader(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                            voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                        }
+                                    else if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                        (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))) {
+                                        voxml = voxmlLibrary.VoxMLObjectDict[pred];
                                         methodToCall = preds.GetType().GetMethod("ComposeRelation");
                                     }
                                 }
@@ -1544,7 +1542,8 @@ namespace VoxSimPlatform {
                             string pred = argsMatch.Groups[0].Value.Split('(')[0];
                             methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                             validPredExists = ((methodToCall != null) ||
-                                                (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
+                                ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
 
                             if (!validPredExists) {
                                 this.GetActiveAgent().GetComponent<AgentOutputController>().PromptOutput("Sorry, what does " + "\"" + pred + "\" mean?");
@@ -1552,18 +1551,14 @@ namespace VoxSimPlatform {
                                 return false;
                             }
                             else if (methodToCall == null) {
-                                if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                    using (StreamReader sr =
-                                        new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                        voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                    }
+                                if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
+                                    voxml = voxmlLibrary.VoxMLObjectDict[pred];
                                     methodToCall = preds.GetType().GetMethod("ComposeProgram");
                                 }
-                                else if (File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                    using (StreamReader sr =
-                                        new StreamReader(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))) {
-                                        voxml = VoxML.LoadFromText(sr.ReadToEnd(), pred);
-                                    }
+                                else if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations")) {
+                                    voxml = voxmlLibrary.VoxMLObjectDict[pred];
                                     methodToCall = preds.GetType().GetMethod("ComposeRelation");
                                 }
                             }

@@ -6187,7 +6187,7 @@ namespace VoxSimPlatform {
 
                                         Rigging rigging = (args[0] as GameObject).GetComponent<Rigging>();
                                         if (rigging != null) {
-                                            rigging.ActivatePhysics(false);
+                                            rigging.ActivatePhysics(true);
                                         }
         							}
         							else {
@@ -6639,8 +6639,17 @@ namespace VoxSimPlatform {
                         eventManager.macroVars[agentVar] = eventManager.GetActiveAgent();
                     }
                     else {
-                        if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[argIndex],GenLex.GenLex.GetGLType(t)))) {
-                            eventManager.macroVars.Add(curArgName, args[argIndex]);
+                        try {
+                            if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[argIndex],GenLex.GenLex.GetGLType(t)))) {
+                                eventManager.macroVars.Add(curArgName, args[argIndex]);
+                            }
+                        }
+                        catch (Exception ex) {
+                            if (ex is IndexOutOfRangeException) {
+                                Debug.LogError(string.Format("IndexOutOfRangeException: Index {0} was outside the bounds of the array {1}.",
+                                    argIndex, "args"));
+                                Debug.Log(string.Format("args is [{0}]", string.Join(", ", args)));
+                            }
                         }
                         argIndex++;
                     }
