@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 
 using MajorAxes;
 using VoxSimPlatform.Global;
@@ -74,6 +75,13 @@ namespace VoxSimPlatform {
         			}
 
         			return above;
+                }
+
+                // Custom composition
+                public static bool ComposeQSR(Bounds x, Bounds y) {
+                    throw new NotImplementedException();
+
+                    return false;
                 }
         	}
         }

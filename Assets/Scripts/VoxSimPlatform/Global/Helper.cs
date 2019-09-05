@@ -20,11 +20,12 @@ namespace VoxSimPlatform {
         /// Helper class
         /// </summary>
         public static class Helper {
-            public static Regex vec = new Regex(@"<.*>"); // vector form regex
-            public static Regex listVec = new Regex(@"\[<.*>\]");   // list of vectors form regex
-            public static Regex commaVec = new Regex(@",<.*>");   // comma + vector form regex
-            public static Regex emptyList = new Regex(@"\[\]");   // empty list form regex (not really a regex but just doing this for consistency
-            public static Regex quoted = new Regex("[\'\"].*[\'\"]");    // quoted form regex
+            public static Regex vec = new Regex(@"<.*>");               // vector form regex
+            public static Regex listVec = new Regex(@"\[<.*>\]");       // list of vectors form regex
+            public static Regex commaVec = new Regex(@",<.*>");         // comma + vector form regex
+            public static Regex emptyList = new Regex(@"\[\]");         // empty list form regex (not really a regex but just doing this for consistency
+            public static Regex quoted = new Regex("[\'\"].*[\'\"]");   // quoted form regex
+            public static Regex pred = new Regex(@"[^(]+\(.+\)");       // predicate form regex
 
             // DATA METHODS
             // IN: String: predicateString representing the entire predicate-argument format of the input

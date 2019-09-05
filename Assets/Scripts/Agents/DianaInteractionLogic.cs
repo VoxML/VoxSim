@@ -95,11 +95,11 @@ public class StackSymbolContent : IEquatable<Object> {
 		       ActionOptions.GetHashCode() ^ ActionSuggestions.GetHashCode();
 	}
 
-	public static bool operator ==(StackSymbolContent tuple1, StackSymbolContent tuple2) {
+	public static bool operator == (StackSymbolContent tuple1, StackSymbolContent tuple2) {
 		return tuple1.Equals(tuple2);
 	}
 
-	public static bool operator !=(StackSymbolContent tuple1, StackSymbolContent tuple2) {
+	public static bool operator != (StackSymbolContent tuple1, StackSymbolContent tuple2) {
 		return !tuple1.Equals(tuple2);
 	}
 }

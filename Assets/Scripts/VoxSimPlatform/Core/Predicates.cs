@@ -6612,6 +6612,57 @@ namespace VoxSimPlatform {
         		return;
         	}
 
+            // IN: Object (single element array)
+            // OUT: float (x value of object coordinate)
+            public float X(object[] args) {
+                float x = 0.0f;
+
+                if (args.Length > 0) {
+                    if (args[0] is GameObject) {
+                        x = (args[0] as GameObject).transform.position.x;
+                    }
+                    else if (args[0] is Vector3) {
+                        x = ((Vector3)args[0]).x;
+                    }
+                }
+
+                return x;
+            }
+
+            // IN: Object (single element array)
+            // OUT: float (y value of object coordinate)
+            public float Y(object[] args) {
+                float y = 0.0f;
+
+                if (args.Length > 0) {
+                    if (args[0] is GameObject) {
+                        y = (args[0] as GameObject).transform.position.y;
+                    }
+                    else if (args[0] is Vector3) {
+                        y = ((Vector3)args[0]).y;
+                    }
+                }
+
+                return y;
+            }
+
+            // IN: Object (single element array)
+            // OUT: float (z value of object coordinate)
+            public float Z(object[] args) {
+                float z = 0.0f;
+
+                if (args.Length > 0) {
+                    if (args[0] is GameObject) {
+                        z = (args[0] as GameObject).transform.position.z;
+                    }
+                    else if (args[0] is Vector3) {
+                        z = ((Vector3)args[0]).z;
+                    }
+                }
+
+                return z;
+            }
+
             /// <summary>
             /// Composes an event from primitives using a VoxML encoding file (.xml)
             /// </summary>
@@ -6708,7 +6759,7 @@ namespace VoxSimPlatform {
                 //  we have to evaluate the satisfaction of the relation
                 //  - if only one argument in provided (e.g., "at(block6)", "on(block4)"),
                 //  we treat the relation as an interpretation, or causal result, and return the R3 element denoted
-                //  by a configurational relation, or the (for now, physics activation signal -- let's see how this works -- it cannot be a boolean) denoted by a force dynamic relation
+                //  by a configurational relation, or the (TODO: for now, physics activation signal -- let's see how this works -- it cannot be a boolean) denoted by a force dynamic relation
                 for (int i = 0; i < args.Length; i++) {
                     VoxTypeArg voxmlArg = voxml.Type.Args[i];    // take the corresponding arg from VoxML
                     string voxmlArgName = voxmlArg.Value.Split(':')[0];
@@ -6742,8 +6793,6 @@ namespace VoxSimPlatform {
                     //  or create ObjBounds of 0 extents if no ObjBounds to copy exists)
                     ObjBounds boundsToCopy = (ObjBounds)args.ToList().FirstOrDefault(a => a.GetType() == typeof(ObjBounds));
                     // transform boundsToCopy bounds by (target-origin)
-                    Debug.Log(Helper.VectorToParsable((Vector3)args[1]));
-                    Debug.Log(Helper.VectorToParsable(boundsToCopy.Center));
                     args = args.ToList().Select(a => (a is Vector3) ? ((boundsToCopy != null) ? new ObjBounds((Vector3)a, 
                         boundsToCopy.Points.Select(p => p + ((Vector3)a-boundsToCopy.Center)).ToList()) :
                         new ObjBounds((Vector3)a)) : a).ToArray();
@@ -6772,20 +6821,50 @@ namespace VoxSimPlatform {
                             break;
                     }
 
+                    // extract constraints to pass to the params argument of the invoked method
+                    object[] constraints = voxml.Type.Constr.Split(',');
+                            
                     if (relStr != string.Empty) {
                         // Get the Type for the calling class
                         //  class must be within namespace VoxSimPlatform.SpatialReasoning.QSR
                         String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
                         Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
                         if (methodCallingType != null) {
-                            MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1]);
-                            if (method != null) {
-                                Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}", voxml.Lex.Pred, methodCallingType.Name, method.Name));
+                            try {
+                                List<Type> typesList = args.ToList().Select(a => (a is GameObject) ? typeof(ObjBounds) : a.GetType()).ToList();
+                                typesList.Add(typeof(object[]));
+                                MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], typesList.ToArray());
+                                if (method != null) {
+                                    Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                        methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                    retVal = method.Invoke(null, args.ToList().Select(a => (a is GameObject) ? 
+                                        Helper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
+                                }
+                                else {  // no method found
+                                    // throw this to ComposeQSR
+                                    methodCallingType = Type.GetType("VoxSimPlatform.SpatialReasoning.QSR.QSR");
+                                    method = methodCallingType.GetMethod("ComposeQSR");
+                                    Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                        methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                    retVal = method.Invoke(null, args.ToList().Select(a => (a is GameObject) ? 
+                                        Helper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
+                                }
+
+                                Debug.Log(string.Format("Result of method {0}.{1}({2}) is {3}",
+                                    methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType)),
+                                    retVal));
+
+                                // adjust retVal so that final position of x does not interpenetrate bounds of y
                             }
-                            else {  // no method found
-                                // throw this to ComposeQSR
-                                method = methodCallingType.GetMethod("ComposeQSR");
-                                Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}", voxml.Lex.Pred, methodCallingType.Name, method.Name));
+                            catch (Exception ex) {
+                                if (ex is AmbiguousMatchException) {
+                                    Debug.LogError(string.Format("Ambiguous match found. Query was GetMethod(\"{0}\",[{1}]) in namespace {2}.",
+                                        relStr.Split('.')[1], string.Join(", ",args.Select(a => a.GetType().ToString()).ToArray()),
+                                        methodCallingType.ToString()));
+                                }
+                                else {
+                                    Debug.LogError(ex);
+                                }
                             }
                         }
                         else {

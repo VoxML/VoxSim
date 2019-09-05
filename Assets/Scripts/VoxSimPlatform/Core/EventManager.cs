@@ -108,7 +108,6 @@ namespace VoxSimPlatform {
             int argVarIndex = 0;
             Hashtable skolems = new Hashtable();
             string argVarPrefix = @"_ARG";
-            Regex r = new Regex(@"[^(]+\(.+\)");
             String nextIncompleteEvent;
 
             MethodInfo _methodToCall;
@@ -839,7 +838,7 @@ namespace VoxSimPlatform {
                 String predString = null;
                 List<String> argsStrings = null;
 
-                if (r.IsMatch(command)) {   // if command matches predicate form
+                if (Helper.pred.IsMatch(command)) {   // if command matches predicate form
                                             //Debug.Log ("ParseCommand: " + command);
                                             // make RDF triples only after resolving attributives to atomics (but before evaluating relations and functions)
                                             /*Triple<String,String,String> triple = Helper.MakeRDFTriples(command);
@@ -918,7 +917,7 @@ namespace VoxSimPlatform {
 
                         for (int i = 0; i < argsStrings.Count; i++) {
                             Debug.Log(string.Format("argsStrings@{0}: {1}", i, argsStrings.ElementAt(i)));
-                            if (r.IsMatch(argsStrings[i])) {
+                            if (Helper.pred.IsMatch(argsStrings[i])) {
                                 string symbol = argsStrings[i];
 
                                 // if return type of top predicate of symbol is not void
@@ -1454,7 +1453,7 @@ namespace VoxSimPlatform {
                                         (methodToCall.ReturnType == typeof(object))) {
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
                                             pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
-                                         object obj = null;
+                                        object obj = null;
                                         if (voxml == null) {
                                             obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
                                         }
@@ -1536,7 +1535,7 @@ namespace VoxSimPlatform {
                 foreach (DictionaryEntry kv in skolems) {
                     Debug.Log(kv.Key + " : " + kv.Value);
                     if (kv.Value is String) {
-                        argsMatch = r.Match((String) kv.Value);
+                        argsMatch = Helper.pred.Match((String) kv.Value);
 
                         if (argsMatch.Groups[0].Value.Length > 0) {
                             string pred = argsMatch.Groups[0].Value.Split('(')[0];

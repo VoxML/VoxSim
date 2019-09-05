@@ -55,18 +55,32 @@ namespace VoxSimPlatform {
                         String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
                         Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
                         if (methodCallingType != null) {
-                            MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], args.Select(a => a.GetType()).ToArray());
-                            if (method != null) {
-                                Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
-                                    methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
-                                object obj = method.Invoke(null, args.ToArray());
-                                satisfied = (bool)obj;
+                            try {
+                                MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], args.Select(a => a.GetType()).ToArray());
+                                if (method != null) {
+                                    Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                        methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                    object obj = method.Invoke(null, args.ToArray());
+                                    satisfied = (bool)obj;
+                                }
+                                else {  // no method found
+                                    // throw this to ComposeQSR
+                                    method = Type.GetType("VoxSimPlatform.SpatialReasoning.QSR.QSR").GetMethod("ComposeQSR");
+                                    Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                        methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                    object obj = method.Invoke(null, args.ToArray());
+                                    satisfied = (bool)obj;
+                                }
                             }
-                            else {  // no method found
-                                // throw this to ComposeQSR
-                                method = methodCallingType.GetMethod("ComposeQSR");
-                                Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
-                                    methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                            catch (Exception ex) {
+                                if (ex is AmbiguousMatchException) {
+                                    Debug.LogError(string.Format("Ambiguous match found. Query was GetMethod(\"{0}\",[{1}]) in namespace {2}.",
+                                        relStr.Split('.')[1], string.Join(", ",args.Select(a => a.GetType().ToString()).ToArray()),
+                                        methodCallingType.ToString()));
+                                }
+                                else {
+                                    Debug.LogError(ex);
+                                }
                             }
                         }
                         else {

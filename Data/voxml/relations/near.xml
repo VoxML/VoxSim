@@ -15,7 +15,7 @@
     </Args>
     <Constr />
     <Corresps>
-        <!--<VoxSimPlatform.SpatialReasoning.QSR.ComposeQSR(x,y,tpcc)>-->
+        <!--<VoxSimPlatform.SpatialReasoning.QSR.ComposeQSR(x,y,'tpcc')>-->
         <Corresp Value="z:'tpcc'" />
     </Corresps>
   </Type>
