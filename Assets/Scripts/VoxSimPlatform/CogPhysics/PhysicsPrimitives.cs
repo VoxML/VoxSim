@@ -107,14 +107,22 @@ namespace VoxSimPlatform {
         	void EventSatisfied(object sender, EventArgs e) {
                 testSatisfied = (EventManagerArgs)e;
 
+                // if there are events in the event history and the last one is not a "while" predicate
+                //  OR
+                // if there is more than one event in the event queue and the next one up is not a "while" predicate
                 if (((eventManager.eventHistory.Count > 0) &&
-                    (Helper.GetTopPredicate(eventManager.eventHistory.Last()) != "while")) && 
+                    (Helper.GetTopPredicate(eventManager.eventHistory.Last()) != "while")) || 
                     ((eventManager.events.Count > 1) && (Helper.GetTopPredicate(eventManager.events[1]) != "while"))) {
             		resolveDiscrepancies = true;
                     catchupTimer.Enabled = true;
                 }
 
-                eventManager.stayExecution = true;
+                if (eventManager.events.Count > 0) {
+                    eventManager.stayExecution = true;
+                }
+                else {
+                    eventManager.stayExecution = false;
+                }
 
                 Debug.Log(string.Format("Satisfaction condition met for {0}specification {1}",
                     (testSatisfied.VoxML != null) ? testSatisfied.VoxML.Lex.Pred + " " : string.Empty,

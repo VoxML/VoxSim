@@ -6202,30 +6202,30 @@ namespace VoxSimPlatform {
 
             // IN: Objects
             // OUT: none
-            public void HOLD(object[] args) {
-                // look for agent
-                GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-                if (agent != null) {
-                    // add preconditions
-                    if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name))) {
-                        eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
-                        eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
-                        eventManager.InsertEvent(
-                            eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
-                        eventManager.RemoveEvent(3);
-                        return;
-                    }
-                    else {
-                        if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
-                            eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
-                            eventManager.InsertEvent(
-                                eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
-                            eventManager.RemoveEvent(2);
-                            return;
-                        }
-                    }
-                }
-            }
+            //public void HOLD(object[] args) {
+            //    // look for agent
+            //    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+            //    if (agent != null) {
+            //        // add preconditions
+            //        if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name))) {
+            //            eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
+            //            eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
+            //            eventManager.InsertEvent(
+            //                eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
+            //            eventManager.RemoveEvent(3);
+            //            return;
+            //        }
+            //        else {
+            //            if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+            //                eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+            //                eventManager.InsertEvent(
+            //                    eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
+            //                eventManager.RemoveEvent(2);
+            //                return;
+            //            }
+            //        }
+            //    }
+            //}
 
             // IN: Objects
             // OUT: none
@@ -6330,69 +6330,60 @@ namespace VoxSimPlatform {
                                     else {
                                         // iterate motion over the path supplied by method
                                         // compute the next target position along the path from the current position
-                                        //foreach (Vector3 node in (List<Vector3>)path) {
-                                        //    if (!voxComponent.interTargetPositions.Contains(node)) {
-                                        //        voxComponent.interTargetPositions.AddLast(node);
-                                        //    }
-                                        //}
+                                        foreach (Vector3 node in (List<Vector3>)path) {
+                                            if (!voxComponent.interTargetPositions.Contains(node)) {
+                                                voxComponent.interTargetPositions.AddLast(node);
+                                            }
+                                        }
+
+                                        voxComponent.targetPosition = voxComponent.interTargetPositions.Last();
 
                                         Debug.Log(string.Format("Path is: [{0}]",
                                             string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
 
-                                        Vector3 nextInterimTarget = ((List<Vector3>)path).ElementAt(0);
-                                        Debug.Log(string.Format("Executing primitive {0}, nextInterimTarget is {1}",
-                                            Helper.GetTopPredicate(eventManager.events[0]),
-                                            Helper.VectorToParsable(nextInterimTarget)));
-                                        voxComponent.MoveToward(nextInterimTarget);
-                                        Vector3 iteratedTarget = voxComponent.transform.position;
-                                        voxComponent.targetPosition = iteratedTarget;
-
-                                        if (Helper.CloseEnough(voxComponent.targetPosition,((List<Vector3>)path)[0])) {
-                                            Debug.Log(string.Format("Executing primitive {0}, {1} ~= {2}, removing {2} from path",
-                                                Helper.GetTopPredicate(eventManager.events[0]),
-                                                Helper.VectorToParsable(voxComponent.targetPosition),
-                                                Helper.VectorToParsable(((List<Vector3>)path)[0])));
-                                            //Debug.Log(eventManager.macroVars.Values.Cast<object>().ToList().Where(
-                                            //    v => (v is List<Vector3>) && ((List<Vector3>)v).SequenceEqual((List<Vector3>)path)).Count() == 1);
-                                            //Debug.Log(eventManager.macroVars.Keys.OfType<String>().
-                                                    //FirstOrDefault(v => (eventManager.macroVars[v] is List<Vector3>) && ((List<Vector3>)eventManager.macroVars[v]).SequenceEqual((List<Vector3>)path)));
-                                            bool pathStored = (eventManager.macroVars.Values.Cast<object>().ToList().Where(
-                                                v => (v is List<Vector3>) && ((List<Vector3>)v).SequenceEqual((List<Vector3>)path)).Count() == 1);
-                                            if (pathStored) {
-                                                string pathKey = eventManager.macroVars.Keys.OfType<String>().
-                                                    FirstOrDefault(v => (eventManager.macroVars[v] is List<Vector3>) && 
-                                                        ((List<Vector3>)eventManager.macroVars[v]).SequenceEqual((List<Vector3>)path));
-                                                ((List<Vector3>)path).RemoveAt(0);
-                                                eventManager.macroVars[pathKey] = path;
-                                                Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
-                                            }
-                                            Debug.Log(string.Format("Path is now: [{0}]",
-                                                string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
-                                        }
-
-                                        Debug.Log(string.Format("Executing primitive {0}, iteratedTarget is {1}",
-                                            Helper.GetTopPredicate(eventManager.events[0]),
-                                            Helper.VectorToParsable(iteratedTarget)));
-
-                                        if (((List<Vector3>)path).Count > 0) {
-                                            Debug.Log(string.Format("Executing primitive {0}, replacing first occurrence of {1} with {2}",
-                                                Helper.GetTopPredicate(eventManager.events[0]),
-                                                Helper.VectorToParsable(((List<Vector3>)path).Last()),
-                                                Helper.VectorToParsable(iteratedTarget)));
-                                            eventManager.events[0] = eventManager.events[0].ReplaceFirst(
-                                                Helper.VectorToParsable(((List<Vector3>)path).Last()),
-                                                Helper.VectorToParsable(iteratedTarget));
-                                        }
-
-                                        Debug.Log(string.Format("Executing primitive {0}, event string is now: {1}",
-                                            Helper.GetTopPredicate(eventManager.events[0]), eventManager.events[0]));
-                                        //Debug.Log(string.Format("Adding {1} to front of {0} interim targets (first in list was {2})",
-                                        //    voxComponent.gameObject,Helper.VectorToParsable(iteratedTarget),
+                                        //Vector3 nextInterimTarget = ((List<Vector3>)path).ElementAt(0);
+                                        //Debug.Log(string.Format("Executing primitive {0}, nextInterimTarget is {1}",
+                                        //    Helper.GetTopPredicate(eventManager.events[0]),
                                         //    Helper.VectorToParsable(nextInterimTarget)));
-                                        //voxComponent.interTargetPositions.AddFirst(iteratedTarget);
+                                        //voxComponent.MoveToward(nextInterimTarget);
+                                        //Vector3 iteratedTarget = voxComponent.transform.position;
+                                        //voxComponent.targetPosition = iteratedTarget;
 
-                                        //Debug.Log(string.Format("Path is now: [{0}]",
-                                        //    string.Join(", ",voxComponent.interTargetPositions.Select(n => Helper.VectorToParsable(n)))));
+                                        //if (Helper.CloseEnough(voxComponent.targetPosition,((List<Vector3>)path)[0])) {
+                                        //    Debug.Log(string.Format("Executing primitive {0}, {1} ~= {2}, removing {2} from path",
+                                        //        Helper.GetTopPredicate(eventManager.events[0]),
+                                        //        Helper.VectorToParsable(voxComponent.targetPosition),
+                                        //        Helper.VectorToParsable(((List<Vector3>)path)[0])));
+                                        //    bool pathStored = (eventManager.macroVars.Values.Cast<object>().ToList().Where(
+                                        //        v => (v is List<Vector3>) && ((List<Vector3>)v).SequenceEqual((List<Vector3>)path)).Count() == 1);
+                                        //    if (pathStored) {
+                                        //        string pathKey = eventManager.macroVars.Keys.OfType<String>().
+                                        //            FirstOrDefault(v => (eventManager.macroVars[v] is List<Vector3>) && 
+                                        //                ((List<Vector3>)eventManager.macroVars[v]).SequenceEqual((List<Vector3>)path));
+                                        //        ((List<Vector3>)path).RemoveAt(0);
+                                        //        eventManager.macroVars[pathKey] = path;
+                                        //        Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                                        //    }
+                                        //    Debug.Log(string.Format("Path is now: [{0}]",
+                                        //        string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
+                                        //}
+
+                                        //Debug.Log(string.Format("Executing primitive {0}, iteratedTarget is {1}",
+                                        //    Helper.GetTopPredicate(eventManager.events[0]),
+                                        //    Helper.VectorToParsable(iteratedTarget)));
+
+                                        //if (((List<Vector3>)path).Count > 0) {
+                                        //    Debug.Log(string.Format("Executing primitive {0}, replacing first occurrence of {1} with {2}",
+                                        //        Helper.GetTopPredicate(eventManager.events[0]),
+                                        //        Helper.VectorToParsable(((List<Vector3>)path).Last()),
+                                        //        Helper.VectorToParsable(iteratedTarget)));
+                                        //    eventManager.events[0] = eventManager.events[0].ReplaceFirst(
+                                        //        Helper.VectorToParsable(((List<Vector3>)path).Last()),
+                                        //        Helper.VectorToParsable(iteratedTarget));
+                                        //}
+
+                                        //Debug.Log(string.Format("Executing primitive {0}, event string is now: {1}",
+                                            //Helper.GetTopPredicate(eventManager.events[0]), eventManager.events[0]));
                                     }
                                 }
                                 else {
@@ -6663,6 +6654,58 @@ namespace VoxSimPlatform {
                 return z;
             }
 
+            // IN: Object (single element array)
+            // OUT: float (z value of object coordinate)
+            public Vector3 OFFSET(object[] args) {
+                Vector3 offset = Vector3.zero;
+
+                if (args.Length > 0) {
+                    if (args[0] is string) {
+                        if (args[1] is Vector3) {
+                            offset = (Vector3)args[1];
+                            if (args[2] is float) {
+                                switch(args[0] as string) {
+                                    case "<X":
+                                        offset = new Vector3(((Vector3)args[1]).x - (float)args[2],
+                                            ((Vector3)args[1]).y, ((Vector3)args[1]).z);
+                                        break;
+                                    
+                                    case ">X":
+                                        offset = new Vector3(((Vector3)args[1]).x + (float)args[2],
+                                            ((Vector3)args[1]).y, ((Vector3)args[1]).z);
+                                        break;
+
+                                    case "<Y":
+                                        offset = new Vector3(((Vector3)args[1]).x,
+                                            ((Vector3)args[1]).y - (float)args[2], ((Vector3)args[1]).z);
+                                        break;
+                                    
+                                    case ">Y":
+                                        offset = new Vector3(((Vector3)args[1]).x,
+                                            ((Vector3)args[1]).y + (float)args[2], ((Vector3)args[1]).z);
+                                        break;
+
+                                    case "<Z":
+                                        offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y,
+                                            ((Vector3)args[1]).z - (float)args[2]);
+                                        break;
+                                    
+                                    case ">Z":
+                                        offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y,
+                                            ((Vector3)args[1]).z + (float)args[2]);
+                                        break;
+
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return offset;
+            }
+
             /// <summary>
             /// Composes an event from primitives using a VoxML encoding file (.xml)
             /// </summary>
@@ -6692,20 +6735,88 @@ namespace VoxSimPlatform {
                     else {
                         try {
                             if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[argIndex],GenLex.GenLex.GetGLType(t)))) {
-                                eventManager.macroVars.Add(curArgName, args[argIndex]);
+                                object argToAdd = args[argIndex];
+                                // if the arg is a location, it may need adjusting to avoid interpenetration
+                                if (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Location).ToList().Count > 0) {
+                                    // retrieve positional relation predicate
+                                    string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace(string.Format("{0}_",voxml.Lex.Pred), "") : "";
+
+                                    // find VoxML for this relation
+                                    VoxML relVoxml = null;
+                                    if ((eventManager.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(prep)) && 
+                                        (eventManager.voxmlLibrary.VoxMLEntityTypeDict[prep] == "relations")) {
+                                        relVoxml = eventManager.voxmlLibrary.VoxMLObjectDict[prep];
+
+                                        object[] constraints = relVoxml.Type.Constr.Split(',');
+                                        for (int j = 0; j < constraints.Length; j++) {
+                                            if (constraints[j] is string) {
+                                                // z of this program should currently be the return value of prep(prep's 2nd arg)
+                                                //  ~ prep(y)
+                                                // look in the constraints and for all constraints that contain an inequality operator
+                                                //  over an axis over y/prep's 2nd arg, adjust z value by the extents of y along that axis
+                                                //  in that direction
+                                                Regex ineq = new Regex(@"[<>]=?");
+                                                MatchCollection ineqOperators = ineq.Matches(constraints[j] as string);
+                                                string[] constraintValues = ineq.Split(constraints[j] as string).Select(c => c.Trim()).ToArray();
+                                               
+                                                if (ineqOperators.Count > 0) {  // inequality operators found in constraint formula
+                                                    foreach (Match match in ineqOperators) {
+                                                        foreach (string value in constraintValues) {
+                                                            // if index of this constraint value > index of the matched inquality operator
+                                                            //  i.e., if the constraint value formula follows (is scoped by) the inequality
+                                                            if ((constraints[j] as string).IndexOf(value) > match.Index) {
+                                                                MethodInfo methodToCall = this.GetType().GetMethod("OFFSET");
+
+                                                                // assumption: in any event encoding, the theme object (typed as physobj)
+                                                                //  will be the first non-agent arg
+                                                                if (methodToCall != null) {
+                                                                    List<object> objs = new List<object>{
+                                                                        string.Format("{0}{1}",match.Value,Helper.GetTopPredicate(value)) };
+
+                                                                    if (args[argIndex] is Vector3) {
+                                                                        objs.Add((Vector3)args[argIndex]);
+                                                                    }
+
+                                                                    if (args[0] is GameObject) {
+                                                                        // TODO: calculate the offset using ObjBounds type for non-axis aligned motions
+                                                                        //  e.g., "lean"
+                                                                        objs.Add(Helper.GetObjectWorldSize(args[0] as GameObject).extents.y);
+                                                                    }
+
+                                                                    Debug.Log(string.Format("ComposeProgram: calling OFFSET(\"{0}\",{1},{2})",
+                                                                        string.Format("{0}{1}",match.Value,Helper.GetTopPredicate(value)),
+                                                                        Helper.VectorToParsable((Vector3)args[argIndex]),
+                                                                        Helper.GetObjectWorldSize(args[0] as GameObject).extents.y));
+
+                                                                    object offset = methodToCall.Invoke(this, new object[]{ objs.ToArray() });
+
+                                                                    if (offset is Vector3) {
+                                                                        argToAdd = (Vector3)offset;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                eventManager.macroVars.Add(curArgName, argToAdd);
                             }
                         }
                         catch (Exception ex) {
                             if (ex is IndexOutOfRangeException) {
-                                Debug.LogError(string.Format("IndexOutOfRangeException: Index {0} was outside the bounds of the array {1}.",
-                                    argIndex, "args"));
+                                Debug.LogError(string.Format("IndexOutOfRangeException: Index {0} was outside the bounds of the array args.",
+                                    argIndex));
                                 Debug.Log(string.Format("args is [{0}]", string.Join(", ", args)));
                             }
                         }
                         argIndex++;
                     }
         		}
-                 
+
                 Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
 
                 if (args[args.Length - 1] is bool) {
@@ -6853,8 +6964,6 @@ namespace VoxSimPlatform {
                                 Debug.Log(string.Format("Result of method {0}.{1}({2}) is {3}",
                                     methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType)),
                                     retVal));
-
-                                // adjust retVal so that final position of x does not interpenetrate bounds of y
                             }
                             catch (Exception ex) {
                                 if (ex is AmbiguousMatchException) {
@@ -6894,7 +7003,7 @@ namespace VoxSimPlatform {
                 return retVal;
             }
 
-            // IN: Condition (Expression), Event (string)
+            // IN: Condition (string)
             // OUT: bool
             public bool WHILE(object[] args) {
                 // while(condition):event
@@ -6913,19 +7022,15 @@ namespace VoxSimPlatform {
 
                     if (args[args.Length - 1] is bool) {
                         if ((bool) args[args.Length - 1] == true) {
-                            // if the condition evaluates to true, compute the next iteration of the event
-                            //  put that into the event manager,
-                            //  then reinsert the while(condition):event loop following it
-                            // this keeps us in the loop until the condition evaluates to false
-                            if (result) {
-                                //if (eventManager.events.Count > 1) {
-                                    eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
-                                    eventManager.InsertEvent(eventManager.events[1], 3);
-                                    //eventManager.InsertEvent(eventManager.events[1], 2);
-                                //}
-                            }
-                            else {
-                                //eventManager.InsertEvent(eventManager.evalOrig[eventManager.events[0]], 2);
+                            // if the condition evaluates to true, execute the next event
+                            // for each condition in the while loop, set up an appropriate event listener
+                            //  in case the satisfaction of that condition changes
+
+                            // except for setting up the event listeners, WHILE behaves the same as IF at this point
+                            if (!result) {
+                                if (eventManager.events.Count > 1) {
+                                    eventManager.RemoveEvent(1);
+                                }
                             }
                         }
                     }

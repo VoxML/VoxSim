@@ -2,7 +2,7 @@
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Entity Type="Program" />
   <Lex>
-    <Pred>put</Pred>
+    <Pred>putp</Pred>
     <Type>transition_event</Type>
   </Lex>
   <Type>

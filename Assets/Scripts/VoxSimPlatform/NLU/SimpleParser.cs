@@ -111,6 +111,10 @@ namespace VoxSimPlatform {
     			"in",
     			"on",
                 "atop", // prithee sirrah, put the black block atop the yellow block
+                "port",
+                "starboard",
+                "afore",
+                "astern",
     			"at",
     			"behind",
     			"in front of",

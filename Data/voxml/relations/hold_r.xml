@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Entity Type="Relation" />
+    <Lex>
+        <Pred>hold</Pred>
+    </Lex>
+    <Type>
+        <Class>force_dynamic</Class>
+        <Value>deactivate_phys</Value>
+        <Args>
+            <Arg Value="x:agent" />
+            <Arg Value="y:physobj" />
+        </Args>
+        <Constr />
+        <Corresps />
+    </Type>
+</VoxML>

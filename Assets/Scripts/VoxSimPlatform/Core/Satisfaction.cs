@@ -14,6 +14,7 @@ using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.CogPhysics;
+using VoxSimPlatform.GenLex;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
@@ -23,13 +24,59 @@ namespace VoxSimPlatform {
     namespace Core {
     	public static class SatisfactionTest {
             public static bool IsSatisfied(String pred, List<object> args) {
-                return true;
+                bool satisfied = false;
+
+                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
+
+                if (em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) {
+                    if (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+
+                    }
+                    else if (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") {
+                        foreach (List<object> key in relationTracker.relations.Keys.OfType<List<object>>().Where(k => k.SequenceEqual(args))) {
+                            if (relationTracker.relations[key].ToString().Contains(pred)) {
+                                satisfied = true;
+                            }
+                        }
+                    }
+                }
+
+                return satisfied;
             }
 
             public static bool IsSatisfied(VoxML voxml, List<object> args) {
                 bool satisfied = false;
 
+                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
+
                 if (voxml.Entity.Type == VoxEntity.EntityType.Program) {
+                    for (int i = 0; i < voxml.Type.Args.Count; i++) {
+                        string argName = voxml.Type.Args[i].Value.Split(':')[0];
+                        string[] argType = voxml.Type.Args[i].Value.Split(':')[1].Split('*');
+
+                        if ((argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                            (argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
+                            args.Insert(i, em.GetActiveAgent()); 
+                        }
+                    }
+
+                    foreach (object arg in args) {
+                        Debug.Log(arg.GetType());
+                    }
+
+                    // for now, a program is considered "satisfied" in this sense if a synonymous program exists in the relation tracker
+                    //  at the moment, this effectively only works with "hold"
+                    // TODO: something better
+                    Debug.Log(relationTracker.relations.Keys.Count);
+                    Debug.Log(relationTracker.relations.Keys.OfType<List<GameObject>>().ToList().Count);
+                    Debug.Log(relationTracker.relations.Keys.OfType<List<GameObject>>().Where(k => k.SequenceEqual(args)).ToList().Count);
+                    foreach (List<GameObject> key in relationTracker.relations.Keys.OfType<List<GameObject>>().Where(k => k.SequenceEqual(args))) {
+                        if (relationTracker.relations[key].ToString().Contains(voxml.Lex.Pred)) {
+                            satisfied = true;
+                        }
+                    }
                 }
                 else if (voxml.Entity.Type == VoxEntity.EntityType.Relation) {
 
@@ -50,42 +97,61 @@ namespace VoxSimPlatform {
                     }
 
                     if (relStr != string.Empty) {
-                        // Get the Type for the calling class
-                        //  class must be within namespace VoxSimPlatform.SpatialReasoning.QSR
-                        String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
-                        Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
-                        if (methodCallingType != null) {
-                            try {
-                                MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], args.Select(a => a.GetType()).ToArray());
-                                if (method != null) {
-                                    Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
-                                        methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
-                                    object obj = method.Invoke(null, args.ToArray());
-                                    satisfied = (bool)obj;
-                                }
-                                else {  // no method found
-                                    // throw this to ComposeQSR
-                                    method = Type.GetType("VoxSimPlatform.SpatialReasoning.QSR.QSR").GetMethod("ComposeQSR");
-                                    Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
-                                        methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
-                                    object obj = method.Invoke(null, args.ToArray());
-                                    satisfied = (bool)obj;
-                                }
-                            }
-                            catch (Exception ex) {
-                                if (ex is AmbiguousMatchException) {
-                                    Debug.LogError(string.Format("Ambiguous match found. Query was GetMethod(\"{0}\",[{1}]) in namespace {2}.",
-                                        relStr.Split('.')[1], string.Join(", ",args.Select(a => a.GetType().ToString()).ToArray()),
-                                        methodCallingType.ToString()));
-                                }
-                                else {
-                                    Debug.LogError(ex);
-                                }
+                        for (int i = 0; i < voxml.Type.Args.Count; i++) {
+                            string argName = voxml.Type.Args[i].Value.Split(':')[0];
+                            string[] argType = voxml.Type.Args[i].Value.Split(':')[1].Split('*');
+                            
+                            if ((argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                                (argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
+                                args.Insert(i, em.GetActiveAgent()); 
                             }
                         }
-                        else {
-                            Debug.Log(string.Format("IsSatisfied: No type {0} found!",
-                                string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1))));
+
+                        if (voxml.Type.Class == "config") {
+                            // Get the Type for the calling class
+                            //  class must be within namespace VoxSimPlatform.SpatialReasoning.QSR
+                            String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
+                            Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                            if (methodCallingType != null) {
+                                try {
+                                    MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], args.Select(a => a.GetType()).ToArray());
+                                    if (method != null) {
+                                        Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                            methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                        object obj = method.Invoke(null, args.ToArray());
+                                        satisfied = (bool)obj;
+                                    }
+                                    else {  // no method found
+                                        // throw this to ComposeQSR
+                                        method = Type.GetType("VoxSimPlatform.SpatialReasoning.QSR.QSR").GetMethod("ComposeQSR");
+                                        Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                            methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                        object obj = method.Invoke(null, args.ToArray());
+                                        satisfied = (bool)obj;
+                                    }
+                                }
+                                catch (Exception ex) {
+                                    if (ex is AmbiguousMatchException) {
+                                        Debug.LogError(string.Format("Ambiguous match found. Query was GetMethod(\"{0}\",[{1}]) in namespace {2}.",
+                                            relStr.Split('.')[1], string.Join(", ",args.Select(a => a.GetType().ToString()).ToArray()),
+                                            methodCallingType.ToString()));
+                                    }
+                                    else {
+                                        Debug.LogError(ex);
+                                    }
+                                }
+                            }
+                            else {
+                                Debug.Log(string.Format("IsSatisfied: No type {0} found!",
+                                    string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1))));
+                            }
+                        }
+                        else if (voxml.Type.Class == "force_dynamic") {
+                            foreach (List<object> key in relationTracker.relations.Keys.OfType<List<object>>().Where(k => k.SequenceEqual(args))) {
+                                if (relationTracker.relations[key].ToString().Contains(voxml.Lex.Pred)) {
+                                    satisfied = true;
+                                }
+                            }
                         }
                     }
                 }
@@ -1129,9 +1195,10 @@ namespace VoxSimPlatform {
                                         try {
                                             foreach (VoxTypeArg arg in program.Type.Args) {
                                                 string argName = arg.Value.Split(':')[0];
-                                                string argType = arg.Value.Split(':')[1];
+                                                string[] argType = arg.Value.Split(':')[1].Split('*');
 
-                                                if (argType == "agent") {
+                                                if ((argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                                                    (argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
                                                     agentVar = argName; 
                                                 }
                                             }
@@ -1168,6 +1235,9 @@ namespace VoxSimPlatform {
     										// TODO: maybe switch object order here below => passivize relation?
     										relationTracker.AddNewRelation(relationObjs, resultPred);
     									}
+                                        else {
+                                            relationTracker.RemoveRelation(relationObjs, "hold");
+                                        }
 
     									//Debug.Break ();
     									if (resultPred == "hold") {

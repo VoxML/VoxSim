@@ -293,7 +293,7 @@ namespace VoxSimPlatform {
                                 //Debug.Log(constraintForm);
 
                                 //string[] operators = new string[] { "<", "<=", "=", "!=", ">=", ">", "^", "|" };
-                                Regex operators = new Regex(@"(?<![()])\w?(<=?|=|!=?|>=?|\^|\|)\w?(?![()])");
+                                Regex operators = new Regex(@"(?<![()])\w?([<>!]=?|[\^|=])\w?(?![()])");
 
                                 string[] constraintValues = operators.Split(constraintForm).Select(c => c.Trim()).ToArray();
 

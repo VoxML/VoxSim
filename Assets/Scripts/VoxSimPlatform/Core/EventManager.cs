@@ -478,9 +478,15 @@ namespace VoxSimPlatform {
                 if (!evalOrig.ContainsKey(evaluated)) {
                     evalOrig.Add(evaluated, command);
                 }
+                else {
+                    evalOrig[evaluated] = command;
+                }
 
                 if (!evalResolved.ContainsKey(evaluated)) {
                     evalResolved.Add(evaluated, objectResolved);
+                }
+                else {
+                    evalResolved[evaluated] = objectResolved;
                 }
 
                 events[events.IndexOf(command)] = evaluated;
@@ -868,7 +874,7 @@ namespace VoxSimPlatform {
                         if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(Helper.GetTopPredicate((String)entry.Value))) {
                             // look in VoxML entity type dictionary
                             string predType = voxmlLibrary.VoxMLEntityTypeDict[Helper.GetTopPredicate((String)entry.Value)];
-                            Debug.Log(string.Format("Predicate \"{0}\" is of type {1}", Helper.GetTopPredicate((String)entry.Value),
+                            Debug.Log(string.Format("Voxmeme \"{0}\" is of type {1}", Helper.GetTopPredicate((String)entry.Value),
                                 predType));
                             // if predicate is a relation
                             if (predType == "relations") {
@@ -1376,7 +1382,8 @@ namespace VoxSimPlatform {
                                 methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                                 validPredExists = ((methodToCall != null) ||
                                     ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
-                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
+                                    ((voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations")))));
 
                                 if (!validPredExists) {
                                     this.GetActiveAgent().GetComponent<AgentOutputController>().PromptOutput("Sorry, what does " + "\"" + pred + "\" mean?");
@@ -1429,10 +1436,10 @@ namespace VoxSimPlatform {
 
                                         temp[kv.Key] = obj;
                                     }
-                                    else   // void return type: program
-                                    {
-                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke IsSatisfied({1}) with {2}{3}",
-                                            pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+                                    else {  // void return type: program
+                                        Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke IsSatisfied{1} with {2}{3}",
+                                            pass, (voxml == null) ? string.Format("({0})",methodToCall.Name) : string.Empty,
+                                                (voxml == null) ? string.Empty : string.Format("\"{0}\" ",voxml.Lex.Pred), objs));
                                         object obj = null;
                                         if (voxml == null) {
                                             obj = SatisfactionTest.IsSatisfied(methodToCall.Name, objs);
@@ -1443,7 +1450,8 @@ namespace VoxSimPlatform {
                                             //obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
                                         } 
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): IsSatisfied({1}) returns {2} (typeof({3}))",
-                                            pass, methodToCall.Name, obj, obj.GetType()));
+                                            pass, (voxml == null) ? methodToCall.Name : string.Format("\"{0}\" ",voxml.Lex.Pred),
+                                                obj, obj.GetType()));
 
                                         temp[kv.Key] = obj;
                                     }
@@ -1605,7 +1613,7 @@ namespace VoxSimPlatform {
             // IN: oldVal -- previous methodToCall
             //      newVal -- new or current methodToCall
             void OnMethodToCallChanged(MethodInfo oldMethod, MethodInfo newMethod) {
-                Debug.Log(string.Format("==================== Method to call changed ==================== {0}->{1}",
+                Debug.Log(string.Format("==================== EventManager Method to call changed ==================== {0}->{1}",
                     (oldMethod == null) ? "NULL" : oldMethod.Name,
                     (newMethod == null) ? "NULL" : newMethod.Name));
             }
