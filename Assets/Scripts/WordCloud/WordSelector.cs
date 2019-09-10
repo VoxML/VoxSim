@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using TMPro;
+using WordCloud;
 
 
 // Based on code from Andrew Sage: https://medium.com/@SymboticaAndrew/a-vr-word-cloud-in-unity-f7cb8cf17b6b
 
-    /// <summary>
-    /// Uses line-of-sight by default, since originally meant for Oculus Rift.
-    /// Probably want to change that.
-    /// </summary>
+/// <summary>
+/// Uses line-of-sight by default, since originally meant for Oculus Rift.
+/// Probably want to change that.
+/// </summary>
 public class WordSelector : MonoBehaviour {
     public Color highlighted = Color.yellow;
     public Color unhighlighted = Color.white;
@@ -41,24 +42,32 @@ public class WordSelector : MonoBehaviour {
         if (Physics.Raycast(ray, out hit) && (hit.transform.gameObject.tag == "Word")) {
             //Debug.Log("Hit something");
             hitWord = hit.transform.gameObject;
+            GameObject wordcloud = hitWord;
+            TextMeshPro phraseText;
+            while (wordcloud != null && wordcloud.GetComponent<FormWordCloud>() == null) {
+                wordcloud = wordcloud.transform.parent.gameObject;
+            }
             if (currentWord != hitWord) {
                 if (currentWord != null) {
                     // Unhighlight
-                    TextMeshPro phraseText = currentWord.transform.GetComponent<TextMeshPro>();
+                    phraseText = currentWord.transform.GetComponent<TextMeshPro>();
                     phraseText.color = unhighlighted;
                 }
                 currentWord = hitWord;
                 if (currentWord != null) {
                     // Highlight
-                    TextMeshPro phraseText = hit.transform.GetComponent<TextMeshPro>();
+                    phraseText = hit.transform.GetComponent<TextMeshPro>();
                     unhighlighted = phraseText.color;
                     phraseText.color = highlighted;
                     
                 }
             }
             // An okay place to set the active word. Reorganize words based on it.
-            if (Input.GetMouseButtonDown(0))
+            if (Input.GetMouseButtonDown(0)) {
                 Debug.LogWarning("Pressed primary button: " + hit.transform.parent.parent.gameObject.name); // Double parent to get to *actual name*
+                // Kinda wordy way to get to the word itself, there's probably a faster way.
+                wordcloud.GetComponent<FormWordCloud>().HighlightWord(hit.transform.parent.parent.gameObject.name.ToLower());
+            }
         }
 
         else {

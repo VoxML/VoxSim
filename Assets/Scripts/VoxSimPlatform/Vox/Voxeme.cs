@@ -941,71 +941,71 @@ namespace VoxSimPlatform {
 
         		OnVoxMLLoaded(this, new VoxMLEventArgs(gameObject, voxml));
 
-        #if UNITY_EDITOR
-        		using (StreamWriter file =
-        			new StreamWriter(gameObject.name + @".txt")) {
-        			file.WriteLine("PRED");
-        			file.WriteLine("{0,-20}", opVox.Lex.Pred);
-        			file.WriteLine("\n");
-        			file.WriteLine("TYPE");
-        			file.WriteLine("COMPONENTS");
-        			foreach (Triple<string, GameObject, int> component in opVox.Type.Components) {
-        				file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
-        					"Name: " + component.Item1,
-        					"\t",
-        					"GameObject name: " + component.Item2.name,
-        					"\t",
-        					"Index: " + component.Item3));
-        			}
+        //#if UNITY_EDITOR
+        //		using (StreamWriter file =
+        //			new StreamWriter(gameObject.name + @".txt")) {
+        //			file.WriteLine("PRED");
+        //			file.WriteLine("{0,-20}", opVox.Lex.Pred);
+        //			file.WriteLine("\n");
+        //			file.WriteLine("TYPE");
+        //			file.WriteLine("COMPONENTS");
+        //			foreach (Triple<string, GameObject, int> component in opVox.Type.Components) {
+        //				file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
+        //					"Name: " + component.Item1,
+        //					"\t",
+        //					"GameObject name: " + component.Item2.name,
+        //					"\t",
+        //					"Index: " + component.Item3));
+        //			}
 
-        			file.WriteLine("CONCAVITY");
-        			file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
-        				"Name: " + opVox.Type.Concavity.Item1,
-        				"\t",
-        				"GameObject name: " + opVox.Type.Concavity.Item2.name,
-        				"\t",
-        				"Index: " + opVox.Type.Concavity.Item3));
-        			file.WriteLine("SYMMETRY");
-        			file.Write("ROT\t");
-        			foreach (string s in opVox.Type.RotatSym) {
-        				file.Write(String.Format("{0}\t", s));
-        			}
+        //			file.WriteLine("CONCAVITY");
+        //			file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
+        //				"Name: " + opVox.Type.Concavity.Item1,
+        //				"\t",
+        //				"GameObject name: " + opVox.Type.Concavity.Item2.name,
+        //				"\t",
+        //				"Index: " + opVox.Type.Concavity.Item3));
+        //			file.WriteLine("SYMMETRY");
+        //			file.Write("ROT\t");
+        //			foreach (string s in opVox.Type.RotatSym) {
+        //				file.Write(String.Format("{0}\t", s));
+        //			}
 
-        			file.Write("REFL\t");
-        			foreach (string s in opVox.Type.ReflSym) {
-        				file.Write(String.Format("{0}\t", s));
-        			}
+        //			file.Write("REFL\t");
+        //			foreach (string s in opVox.Type.ReflSym) {
+        //				file.Write(String.Format("{0}\t", s));
+        //			}
 
-        			file.WriteLine("\n");
-        			file.WriteLine("HABITATS");
-        			file.WriteLine("INTRINSIC");
-        			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.IntrinsicHabitats) {
-        				file.Write("Index: " + kv.Key);
-        				foreach (string formula in kv.Value) {
-        					file.Write("\t\tFormula: " + formula + "\n");
-        				}
-        			}
+        //			file.WriteLine("\n");
+        //			file.WriteLine("HABITATS");
+        //			file.WriteLine("INTRINSIC");
+        //			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.IntrinsicHabitats) {
+        //				file.Write("Index: " + kv.Key);
+        //				foreach (string formula in kv.Value) {
+        //					file.Write("\t\tFormula: " + formula + "\n");
+        //				}
+        //			}
 
-        			file.WriteLine("EXTRINSIC");
-        			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.ExtrinsicHabitats) {
-        				file.Write("Index: " + kv.Key);
-        				foreach (string formula in kv.Value) {
-        					file.Write("\t\tFormula: " + formula + "\n");
-        				}
-        			}
+        //			file.WriteLine("EXTRINSIC");
+        //			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.ExtrinsicHabitats) {
+        //				file.Write("Index: " + kv.Key);
+        //				foreach (string formula in kv.Value) {
+        //					file.Write("\t\tFormula: " + formula + "\n");
+        //				}
+        //			}
 
-        			file.WriteLine("\n");
-        			file.WriteLine("AFFORDANCES");
-        			foreach (KeyValuePair<int, List<Pair<string, Pair<string, string>>>> kv in opVox.Affordance.Affordances) {
-        				file.Write("Habitat index: " + kv.Key);
-        				foreach (Pair<string, Pair<string, string>> affordance in kv.Value) {
-        					file.Write("\t\tCondition: " + ((affordance.Item1 != "") ? affordance.Item1 : "None") +
-        					           "\t\tEvents: " + affordance.Item2.Item1 + "\t\tResult: " +
-        					           ((affordance.Item2.Item2 != "") ? affordance.Item2.Item2 : "None") + "\n");
-        				}
-        			}
-        		}
-        #endif
+        //			file.WriteLine("\n");
+        //			file.WriteLine("AFFORDANCES");
+        //			foreach (KeyValuePair<int, List<Pair<string, Pair<string, string>>>> kv in opVox.Affordance.Affordances) {
+        //				file.Write("Habitat index: " + kv.Key);
+        //				foreach (Pair<string, Pair<string, string>> affordance in kv.Value) {
+        //					file.Write("\t\tCondition: " + ((affordance.Item1 != "") ? affordance.Item1 : "None") +
+        //					           "\t\tEvents: " + affordance.Item2.Item1 + "\t\tResult: " +
+        //					           ((affordance.Item2.Item2 != "") ? affordance.Item2.Item2 : "None") + "\n");
+        //				}
+        //			}
+        //		}
+        //#endif
         	}
         }
     }

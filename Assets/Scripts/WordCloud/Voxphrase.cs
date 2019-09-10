@@ -50,6 +50,8 @@ namespace WordCloud {
             Vector3 dimensions = phraseText.GetPreferredValues(phraseText.text, 800, Mathf.Infinity);
             bc.size = dimensions; //Make the hit box about the right size
 
+
+            // Maybe check if there is a highlight point below??? Nah, put that in its own class
         }
 
         // Give a number of parameters. Break away stuff from Sphere() in FormWordCloud to do it.

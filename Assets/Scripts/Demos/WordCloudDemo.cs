@@ -4287,6 +4287,7 @@ public class WordCloudDemo : SingleAgentInteraction {
 		Diana.GetComponent<IKControl>().targetRotation = Quaternion.LookRotation(offset, Vector3.up).eulerAngles;
 	}
 
+    /// Turns a pointing vector into a point on the surface. And ONLY the surface. ~ guess by Mark
 	Vector3 TransformToSurface(List<float> vector, Vector2 bias) {
 		Vector3 coord = Vector3.zero;
 		vector[0] += bias.x;

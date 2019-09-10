@@ -23,6 +23,12 @@ namespace WordCloud {
         public GameObject obj; // Probably want an actual pointer to the object lol
         public GameObject asterisk; // The asterisk-level object. Just less of a hassle to have a pointer to each tbh
         public bool toggle_text = false; // Flag to fix a visual glitch
+
+        // To hold... I guess distance information. Could be pretty large on a per-term level.
+        // It would be a vector. N-dimensional.
+        public List<float> distanceVector = new List<float>();
+        public bool is_highlighted; // Stuff that is brought forward becomes highlighted.
+
     }
 
     public class FormWordCloud : MonoBehaviour {
@@ -36,8 +42,12 @@ namespace WordCloud {
         private Dictionary<string, Phrase> precious_children = new Dictionary<string, Phrase>(); // For fast lookup
                                                                                                  //private List<Phrase> randomisedPhrases = new List<Phrase>();
         Transform camera1;
+        List<GameObject> highlight_points = new List<GameObject>(); // When things become children to these, they become highlighted.
+
         private float totalOccurrences = 0.0f;
         private float maxOccurrences = 0;
+        // Highlighted phrases, selected phrases, whathaveyou
+        private List<Phrase> highlighted_phrases = new List<Phrase>(); // List because I imagine multiple in future.
 
         // To get grabbed from somewhere else in future.
         // jsonString2 is identical, except values for spoon and fork are swapped.
@@ -46,11 +56,17 @@ namespace WordCloud {
 
         void Start() {
             Camera main_camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+            
             if (main_camera != null) {
                 camera1 = main_camera.transform;
             }
             else {
                 camera1 = Camera.main.transform;
+            }
+
+            // Gather all points connected to the camera. Will all highlight positions be children to the camera? Maybe not, but it's a start
+            foreach(Voxeme vox in camera1.GetComponentsInChildren<Voxeme>()) {
+                highlight_points.Add(vox.gameObject);
             }
 
             //Pull from somewhere more real in future.
@@ -60,6 +76,7 @@ namespace WordCloud {
             float end_time;
             start_time = Time.realtimeSinceStartup;
             NewSphere(jsonString);
+            //NewSphere(csv_filepath:"Assets/Resources/combined1699OvlapedGenes.csv");
             end_time = Time.realtimeSinceStartup;
             Debug.LogWarning("Sphere took " + (end_time - start_time) + " ... seconds?");
         }
@@ -84,6 +101,12 @@ namespace WordCloud {
                 }
                 if (child.obj.transform.parent != transform) {
                     // Someone has stolen my child :o
+
+                    // Quick check if its parent is in our list of highlight spots
+                    if (child.obj.transform.parent != null && highlight_points.Contains(child.obj.transform.parent.gameObject)) {
+                        child.is_highlighted = true;
+                        Debug.LogWarning("Got " + child.term + " highlighted.");
+                    }
                     child.obj.transform.SetParent(transform);
                 }
                 Voxeme vx = child.obj.transform.GetComponent<Voxeme>(); // Kinda awkward to do this here.
@@ -124,16 +147,63 @@ namespace WordCloud {
             }
         }
 
+        float vector_distance(List<float> v1, List<float> v2) {
+            float to_return = 0;
+            float total = 0;
+            for (int i = 0; i < Mathf.Min(v1.Count, v2.Count); i++) {
+                total += Mathf.Pow(v1[i] - v2[i], 2);
+            }
+            to_return = Mathf.Sqrt(total);
+            return to_return;
+        }
+
+        // If something is highlighted, account for that in positions of words.
+        // Specifically, closer words to the front.
+        void ReorderForHighlights(List<Phrase> to_reorder) {
+            if (highlighted_phrases.Count > 0) {
+                // Reorder based on proximity to highlights.
+                // Initially, just the, uh, first one. For my sake
+                Phrase highlighted_phrase = highlighted_phrases[0];
+                //to_reorder.Remove(highlighted_phrase); // CHANGED
+
+                // Sort by distances to highlighted phrase
+                to_reorder.Sort((x, y) =>vector_distance(x.distanceVector, highlighted_phrase.distanceVector).CompareTo(vector_distance(y.distanceVector, highlighted_phrase.distanceVector)));
+
+                // Closest is highlighted.
+                //to_reorder.Insert(0, highlighted_phrase);
+            }
+        }
+
         // Create new locations for sphere and populating those locations with voxphrases
-        void NewSphere(string new_json) {
+        void NewSphere(string new_json = "", string csv_filepath = "") {
             Dictionary<string, Phrase> old_children = precious_children;
             precious_children = new Dictionary<string, Phrase>();
 
-            List<Phrase> new_phrases = ProcessWords(new_json); // fills in precious children
+            List<Phrase> new_phrases;
             Dictionary<string, Phrase> new_precious_children = new Dictionary<string, Phrase>();
-            List<Vector3>.Enumerator point_locations = MakePointList(new_phrases.Count);
+            
+            List<Vector3>.Enumerator point_locations;
+
+            if (new_json != "") {
+                new_phrases = ProcessWords(new_json); // fills in precious children
+                point_locations = MakePointList(new_phrases.Count);
+            }
+            else if(csv_filepath != "") {
+                new_phrases = ProcessCSV(csv_filepath); // fills in precious children
+                point_locations = MakePointList(new_phrases.Count);
+            }
+            else {
+                // idk, default or zero-length garbage.
+                new_phrases = new List<Phrase>();
+                point_locations = MakePointList(0);
+            }
+
+
+            
 
             point_locations.MoveNext();
+
+            ReorderForHighlights(new_phrases);
 
             foreach (Phrase child in new_phrases) {
                 new_precious_children.Add(child.term, child);
@@ -253,41 +323,111 @@ namespace WordCloud {
             // Open up a CSV file, make the structure we want.
             // But right this moment, it just returns a list of proteins connected to one gene.
 
+            // NOW will store the numbers in a list of floats. Use for, uh, calculating distances between nums.
+
             List<Phrase> to_return = new List<Phrase>();
             totalOccurrences = 0;
 
             StreamReader reader = new StreamReader(path);
             string first_line = reader.ReadLine();
-            string second_line = reader.ReadLine();
+            //string second_line = reader.ReadLine();
+            //reader.Close();
+
+            string[] first_line_list = first_line.Split(','); // Not really used now.
+            int cutoff = 50;
+            while (!reader.EndOfStream && totalOccurrences < cutoff) {
+                string line = reader.ReadLine();
+                string[] line_list = line.Split(',');
+                Phrase phrase = new Phrase();
+                phrase.term = line_list[0].ToLower();//first_line_list[i].Replace('.', '_').ToLower();
+                phrase.occurrences = 1; // temp val
+                maxOccurrences = 1;
+                float k = -20f; // Just very low. Exact value may need changing later, but I don't see actual readings below -10 or above 10.
+
+                for (int i = 2; i < first_line_list.Length - 1; i++) {
+                    float correlation;
+                    if (line_list[i] == "NA") {
+                        correlation = k;
+                    }
+                    else {
+                        correlation = float.Parse(line_list[i]) + k;
+                    }
+                    phrase.distanceVector.Add(correlation);
+                }
+                totalOccurrences += phrase.occurrences;
+                to_return.Add(phrase);
+            }
             reader.Close();
 
-            string[] first_line_list = first_line.Split(',');
-            string[] second_line_list = second_line.Split(',');
-            for (int i = 2; i < first_line_list.Length - 1; i++) {
-                Phrase phrase = new Phrase();
-                phrase.term = first_line_list[i].Replace('.','_').ToLower();
-                float correlation = float.Parse(second_line_list[i]);
-                if(correlation > 0) {
-                    phrase.occurrences = correlation;
-                    to_return.Add(phrase);
-                    totalOccurrences += phrase.occurrences;
-                    if(correlation > maxOccurrences) {
-                        maxOccurrences = correlation;
-                    }
-                }
+            //totalOccurrences = count; // Just so long as I don't know how to order genes.
+
+            //string[] second_line_list = second_line.Split(',');
+            //for (int i = 2; i < first_line_list.Length - 1; i++) {
+            //    Phrase phrase = new Phrase();
+            //    phrase.term = first_line_list[i].Replace('.','_').ToLower();
+            //    float correlation = float.Parse(second_line_list[i]);
+            //    if(correlation > 0) {
+            //        phrase.occurrences = correlation;
+            //        to_return.Add(phrase);
+            //        totalOccurrences += phrase.occurrences;
+            //        if(correlation > maxOccurrences) {
+            //            maxOccurrences = correlation;
+            //        }
+            //    }
+            //}
+            return to_return;
+        }
+
+        public void HighlightWord(string text, bool on_or_off = true) {
+            if (on_or_off) {
+                highlighted_phrases = new List<Phrase>(); // Clear it out
             }
+            if (precious_children.Keys.Contains(text)) {
+                // Highlight that word
+                precious_children[text].is_highlighted = on_or_off;
+                //Debug.LogWarning("ktcgkytd " + precious_children[text].is_highlighted);
+                highlighted_phrases.Add(precious_children[text]);
+
+            }
+            else {
+                Debug.LogWarning("Tried to highlight a key that isn't in the cloud? - " + text);
+            }
+        }
+
+        public List<Phrase> GetPhrases() {
+            List<Phrase> to_return = precious_children.Values.ToList();
+            //to_return.Add(highlighted_phrases);
+            //to_return.Add(phrases);
+            ReorderForHighlights(to_return);
             return to_return;
         }
 
         [MenuItem("VoxSim/New WordCloud &#w")]
         static void NewWordCloud() {
             FormWordCloud wc = Selection.activeGameObject.GetComponent<FormWordCloud>();
-            wc.NewSphere(wc.jsonString2); // Will need 'real' new json someday
+            string jsonString = "{ \"took\": 52, \"timed_out\": false, \"_shards\": { \"total\": 5, \"successful\": 5, \"skipped\": 0, \"failed\": 0 }, \"hits\": { \"total\": 389, \"max_score\": 0, \"hits\": [] }, \"aggregations\": { \"2\": { \"doc_count_error_upper_bound\": 271, \"sum_other_doc_count\": 20928, \"buckets\": [ { \"key\": \"garbage\", \"doc_count\": 590 }, { \"key\": \"spoon1\", \"doc_count\": 600 }, { \"key\": \"fork\", \"doc_count\": 700 }, { \"key\": \"base\", \"doc_count\": 1000 }, { \"key\": \"given\", \"doc_count\": 387 }, { \"key\": \"graph\", \"doc_count\": 387 }, { \"key\": \"number\", \"doc_count\": 387 }, { \"key\": \"power\", \"doc_count\": 387 }, { \"key\": \"social\", \"doc_count\": 387 }, { \"key\": \"system\", \"doc_count\": 387 }, { \"key\": \"consider\", \"doc_count\": 386 }, { \"key\": \"control\", \"doc_count\": 386 }, { \"key\": \"failure\", \"doc_count\": 500 }, { \"key\": \"figure\", \"doc_count\": 386 }, { \"key\": \"hybrid\", \"doc_count\": 100 }, { \"key\": \"scenario\", \"doc_count\": 386 }, { \"key\": \"smart\", \"doc_count\": 386 }, { \"key\": \"spread\", \"doc_count\": 386 }, { \"key\": \"using\", \"doc_count\": 386 }, { \"key\": \"values\", \"doc_count\": 400 }, { \"key\": \"propose\", \"doc_count\": 385 }, { \"key\": \"degree\", \"doc_count\": 384 }, { \"key\": \"forecast\", \"doc_count\": 200 }, { \"key\": \"algorithm\", \"doc_count\": 382 }, { \"key\": \"generation\", \"doc_count\": 382 }, { \"key\": \"high-order\", \"doc_count\": 382 }, { \"key\": \"hosploc\", \"doc_count\": 382 }, { \"key\": \"markov\", \"doc_count\": 382 }, { \"key\": \"structure\", \"doc_count\": 382 }, { \"key\": \"function\", \"doc_count\": 379 }, { \"key\": \"fraction\", \"doc_count\": 378 }, { \"key\": \"random\", \"doc_count\": 375 }, { \"key\": \"component\", \"doc_count\": 374 }, { \"key\": \"distribution\", \"doc_count\": 374 }, { \"key\": \"provide\", \"doc_count\": 371 }, { \"key\": \"problem\", \"doc_count\": 367 }, { \"key\": \"optimal\", \"doc_count\": 363 }, { \"key\": \"attack\", \"doc_count\": 362 }, { \"key\": \"percolation\", \"doc_count\": 362 }, { \"key\": \"communication\", \"doc_count\": 355 }, { \"key\": \"domain\", \"doc_count\": 355 }, { \"key\": \"represent\", \"doc_count\": 355 }, { \"key\": \"service\", \"doc_count\": 355 }, { \"key\": \"services\", \"doc_count\": 355 }, { \"key\": \"vertex\", \"doc_count\": 355 }, { \"key\": \"result\", \"doc_count\": 354 }, { \"key\": \"probability\", \"doc_count\": 353 }, { \"key\": \"autophagy\", \"doc_count\": 346 }, { \"key\": \"combination\", \"doc_count\": 346 }, { \"key\": \"drug\", \"doc_count\": 346 } ] } }, \"status\": 200 }";
+            wc.NewSphere(new_json: jsonString); // Will need 'real' new json someday
+            //wc.NewSphere(csv_filepath:"Assets/Resources/combined1699OvlapedGenes.csv"); // Will need 'real' new json someday
+        }
+
+        [MenuItem("VoxSim/New WordCloudGenes &#w")]
+        static void NewWordCloud2() {
+            FormWordCloud wc = Selection.activeGameObject.GetComponent<FormWordCloud>();
+            //string jsonString = "{ \"took\": 52, \"timed_out\": false, \"_shards\": { \"total\": 5, \"successful\": 5, \"skipped\": 0, \"failed\": 0 }, \"hits\": { \"total\": 389, \"max_score\": 0, \"hits\": [] }, \"aggregations\": { \"2\": { \"doc_count_error_upper_bound\": 271, \"sum_other_doc_count\": 20928, \"buckets\": [ { \"key\": \"garbage\", \"doc_count\": 590 }, { \"key\": \"spoon\", \"doc_count\": 700 }, { \"key\": \"fork\", \"doc_count\": 600 }, { \"key\": \"base\", \"doc_count\": 388 }, { \"key\": \"given\", \"doc_count\": 387 }, { \"key\": \"graph\", \"doc_count\": 387 }, { \"key\": \"number\", \"doc_count\": 387 }, { \"key\": \"power\", \"doc_count\": 387 }, { \"key\": \"social\", \"doc_count\": 387 }, { \"key\": \"system\", \"doc_count\": 387 }, { \"key\": \"consider\", \"doc_count\": 386 }, { \"key\": \"control\", \"doc_count\": 386 }, { \"key\": \"failure\", \"doc_count\": 500 }, { \"key\": \"figure\", \"doc_count\": 386 }, { \"key\": \"hybrid\", \"doc_count\": 100 }, { \"key\": \"scenario\", \"doc_count\": 386 }, { \"key\": \"smart\", \"doc_count\": 386 }, { \"key\": \"spread\", \"doc_count\": 386 }, { \"key\": \"using\", \"doc_count\": 386 }, { \"key\": \"values\", \"doc_count\": 400 }, { \"key\": \"propose\", \"doc_count\": 385 }, { \"key\": \"degree\", \"doc_count\": 384 }, { \"key\": \"forecast\", \"doc_count\": 200 }, { \"key\": \"algorithm\", \"doc_count\": 382 }, { \"key\": \"generation\", \"doc_count\": 382 }, { \"key\": \"high-order\", \"doc_count\": 382 }, { \"key\": \"hosploc\", \"doc_count\": 382 }, { \"key\": \"markov\", \"doc_count\": 382 }, { \"key\": \"structure\", \"doc_count\": 382 }, { \"key\": \"function\", \"doc_count\": 379 }, { \"key\": \"fraction\", \"doc_count\": 378 }, { \"key\": \"random\", \"doc_count\": 375 }, { \"key\": \"component\", \"doc_count\": 374 }, { \"key\": \"distribution\", \"doc_count\": 374 }, { \"key\": \"provide\", \"doc_count\": 371 }, { \"key\": \"problem\", \"doc_count\": 367 }, { \"key\": \"optimal\", \"doc_count\": 363 }, { \"key\": \"attack\", \"doc_count\": 362 }, { \"key\": \"percolation\", \"doc_count\": 362 }, { \"key\": \"communication\", \"doc_count\": 355 }, { \"key\": \"domain\", \"doc_count\": 355 }, { \"key\": \"represent\", \"doc_count\": 355 }, { \"key\": \"service\", \"doc_count\": 355 }, { \"key\": \"services\", \"doc_count\": 355 }, { \"key\": \"vertex\", \"doc_count\": 355 }, { \"key\": \"result\", \"doc_count\": 354 }, { \"key\": \"probability\", \"doc_count\": 353 }, { \"key\": \"autophagy\", \"doc_count\": 346 }, { \"key\": \"combination\", \"doc_count\": 346 }, { \"key\": \"drug\", \"doc_count\": 346 } ] } }, \"status\": 200 }";
+            //wc.NewSphere(new_json: jsonString); // Will need 'real' new json someday
+            wc.NewSphere(csv_filepath: "Assets/Resources/combined1699OvlapedGenes.csv"); // Will need 'real' new json someday
         }
 
         // Makes sure that we have this object selected yo
         [MenuItem("VoxSim/New WordCloud &#w", true)]
         static bool ValidateNewWordCloud() {
+            return (Selection.activeGameObject != null) &&
+                   (Selection.activeGameObject.GetComponent<FormWordCloud>() != null);
+        }
+
+        // Makes sure that we have this object selected yo
+        [MenuItem("VoxSim/New WordCloud2 &#w", true)]
+        static bool ValidateNewWordCloud2() {
             return (Selection.activeGameObject != null) &&
                    (Selection.activeGameObject.GetComponent<FormWordCloud>() != null);
         }

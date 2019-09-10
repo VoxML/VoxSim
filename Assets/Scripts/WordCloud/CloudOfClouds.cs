@@ -16,6 +16,14 @@ public class CloudOfClouds : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        // Probably not much in here. Maybe prevent clouds from overlapping each other? That'd be about it.
 
+    }
+
+    void MakeNewClouds() {
+        // Reorganize clouds into something that is aesthetic?
+        // Account for currently highlighted words, distribute other words by their proximity to those words?
+        // Probably need subfunctions to compute ordering at least.
+        // This is why this class is getting written later, if ever.
     }
 }
