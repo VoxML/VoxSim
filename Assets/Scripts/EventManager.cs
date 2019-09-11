@@ -379,9 +379,12 @@ public class EventManager : MonoBehaviour {
 		if (!evalResolved.ContainsKey (evaluated)) {
 			evalResolved.Add (evaluated, objectResolved);
 		}
-		events [events.IndexOf (command)] = evaluated;
 
-		Triple<String,String,String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
+        if (events.Contains(command)) {
+		    events [events.IndexOf (command)] = evaluated;
+        }
+
+        Triple<String,String,String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
 		Debug.Log(evalOrig[evaluated]);
 		Debug.Log(evalResolved[evaluated]);
 		Debug.Log (triple.Item1 + " " + triple.Item2 + " " + triple.Item3);

@@ -402,7 +402,7 @@ public class Voxeme : MonoBehaviour {
 						Helper.GetObjectWorldSize (gameObject), true)) {
 						supportingSurface = hit.collider.gameObject;
 
-                        if (!grasped) {
+                        //if (!grasped) {
 							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme (gameObject).GetComponent<Voxeme> ().voxml.Type.Concavity.Contains ("Concave"));
 							bool themeIsUpright = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
 							bool themeIsUpsideDown = (Vector3.Dot (gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
@@ -446,7 +446,7 @@ public class Voxeme : MonoBehaviour {
 							}
 
 							break;
-						}
+						//}
 					}
 				}
 			}

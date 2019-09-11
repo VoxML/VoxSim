@@ -1454,7 +1454,7 @@ public class JointGestureDemo : AgentInteraction {
 					foreach (DictionaryEntry relation in relationTracker.relations) {
 						// longest relation set == most relevant
 						
-						if ((relation.Key as List<GameObject>).Contains (blockObj)) {
+						if ((relation.Key as List<GameObject>).Contains (blockObj) && !(relation.Key as List<GameObject>).Contains(demoSurface)) {
 							relationsInForce.Add (new Pair<Pair<GameObject, GameObject>, string> (
 								new Pair<GameObject,GameObject> ((relation.Key as List<GameObject>) [0], (relation.Key as List<GameObject>) [1]),
 								relation.Value as string));
@@ -2250,7 +2250,10 @@ public class JointGestureDemo : AgentInteraction {
             else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch (interactionLogic.ActionOptions [0])) {
 				RespondAndUpdate ("What should I put there?");
 			}
-			else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch (interactionLogic.ActionOptions [0])) ||
+            else if ((new Regex(@"put\(.+,\{0\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                RespondAndUpdate("Where should I put that?");
+            }
+            else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch (interactionLogic.ActionOptions [0])) ||
 				(interactionLogic.RemoveInputSymbolType(interactionLogic.ActionOptions [0], 
 					interactionLogic.GetInputSymbolType(interactionLogic.ActionOptions[0])).StartsWith("grab move"))) {
 				RespondAndUpdate ("What should I move?");
@@ -2368,8 +2371,16 @@ public class JointGestureDemo : AgentInteraction {
         // see if this object has a learned conventional grasp pose associated with it
         List<object> objs = new List<object>();
         if (interactionLogic.ActionOptions.Count > 0) {
-            objs = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
-                (String)Helper.ParsePredicate(interactionLogic.ActionOptions[0])[Helper.GetTopPredicate(interactionLogic.ActionOptions[0])]);
+            string actionCmd = interactionLogic.ActionOptions[0];
+            eventManager.ParseCommand(actionCmd);
+            eventManager.FinishSkolemization();
+            string skolemized = eventManager.Skolemize(actionCmd);
+            if (eventManager.EvaluateSkolemConstants(EventManager.EvaluationPass.Attributes)) {
+                actionCmd = eventManager.ApplySkolems(skolemized);
+            }
+             
+            objs = eventManager.ExtractObjects(Helper.GetTopPredicate(actionCmd),
+                (String)Helper.ParsePredicate(actionCmd)[Helper.GetTopPredicate(actionCmd)]);
 
             //if ((obj != null) && (interactionLogic.ActionOptions.Count > 0)) {
             //    if (InteractionHelper.GetCloserHand(Diana, obj) == leftGrasper) {
