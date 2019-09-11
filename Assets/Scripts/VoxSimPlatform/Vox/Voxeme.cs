@@ -433,67 +433,67 @@ namespace VoxSimPlatform {
         						Helper.GetObjectWorldSize(gameObject), true)) {
         						supportingSurface = hit.collider.gameObject;
 
-        						if (!grasped) {
-        							bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme(gameObject)
-        								.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
-        							bool themeIsUpright =
-        								(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
-        							bool themeIsUpsideDown =
-        								(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
+        						//if (!grasped) {
+        						bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme(gameObject)
+        							.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
+        						bool themeIsUpright =
+        							(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
+        						bool themeIsUpsideDown =
+        							(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
 
-        							bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme(supportingSurface)
-        								.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
-        							bool supportIsUpright =
-        								(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
-        							bool supportIsUpsideDown =
-        								(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) < -0.5f);
+                                bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme(supportingSurface)
+        							.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
+        						bool supportIsUpright =
+        							(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
+        						bool supportIsUpsideDown =
+        							(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) < -0.5f);
 
-        							// if theme is concave, the concavity isn't enabled, and the object is on top of an object that fits inside of it
-        							// e.g. cup on top of ball
-        							if ((themeIsConcave) &&
-        							    (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(gameObject))) &&
-        							    (Helper.FitsIn(Helper.GetObjectWorldSize(supportingSurface.transform.root.gameObject),
-        								    Helper.GetObjectWorldSize(gameObject)))) {
-        								minYBound = Helper.GetObjectWorldSize(supportingSurface).min.y;
-        								//flip the plate.  flip the cup.  put the plate under the cup
-        								//flip the cup.  put the ball under the cup
-        							}
-        							else {
-        								// otherwise
-        								if (supportIsConcave) {
-        									// if the object under this object is concave
-        									if (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(supportingSurface))) {
-        										// if the object under this object has its concavity enabled
-        										minYBound = PhysicsHelper.GetConcavityMinimum(supportingSurface.transform.root
-        											.gameObject);
-        										//										Debug.Log (gameObject.name);
-        										//										Debug.Log (supportingSurface.name);
-        										//										Debug.Log (minYBound);
-        										//Debug.Break ();
-        									}
-        									else {
-        										// if the object under this object is not upright
-        										//Debug.Break ();
-        										minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
-        										//								Debug.Log (minYBound);
-        										//Debug.Log (minYBound);
-        									}
-        								}
-        								else {
-        									// if the object under this object is not concave
-        									minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
-        									//							Debug.Log (minYBound);
+        						// if theme is concave, the concavity isn't enabled, and the object is on top of an object that fits inside of it
+        						// e.g. cup on top of ball
+        						if ((themeIsConcave) &&
+        						    (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(gameObject))) &&
+        						    (Helper.FitsIn(Helper.GetObjectWorldSize(supportingSurface.transform.root.gameObject),
+        							    Helper.GetObjectWorldSize(gameObject)))) {
+        							minYBound = Helper.GetObjectWorldSize(supportingSurface).min.y;
+        							//flip the plate.  flip the cup.  put the plate under the cup
+        							//flip the cup.  put the ball under the cup
+        						}
+        						else {
+        							// otherwise
+        							if (supportIsConcave) {
+        								// if the object under this object is concave
+        								if (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(supportingSurface))) {
+        									// if the object under this object has its concavity enabled
+        									minYBound = PhysicsHelper.GetConcavityMinimum(supportingSurface.transform.root
+        										.gameObject);
+        									//										Debug.Log (gameObject.name);
+        									//										Debug.Log (supportingSurface.name);
+        									//										Debug.Log (minYBound);
         									//Debug.Break ();
         								}
-
-        								//**
-        								//Bug list:
-        								// put the plate under the cup jitter
+        								else {
+        									// if the object under this object is not upright
+        									//Debug.Break ();
+        									minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
+        									//								Debug.Log (minYBound);
+        									//Debug.Log (minYBound);
+        								}
+        							}
+        							else {
+        								// if the object under this object is not concave
+        								minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
+        								//							Debug.Log (minYBound);
+        								//Debug.Break ();
         							}
 
-        							break;
+        							//**
+        							//Bug list:
+        							// put the plate under the cup jitter
         						}
+
+        						break;
         					}
+        					//}
         				}
         			}
         		}

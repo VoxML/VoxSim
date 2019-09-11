@@ -384,9 +384,11 @@ namespace VoxSimPlatform {
         			evalResolved.Add(evaluated, objectResolved);
         		}
 
-        		events[events.IndexOf(command)] = evaluated;
+                if (events.Contains(command)) {
+                    events[events.IndexOf(command)] = evaluated;
+                }
 
-        		Triple<String, String, String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
+                Triple<String, String, String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
         		Debug.Log(evalOrig[evaluated]);
         		Debug.Log(evalResolved[evaluated]);
         		Debug.Log(triple.Item1 + " " + triple.Item2 + " " + triple.Item3);

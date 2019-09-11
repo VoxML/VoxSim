@@ -64,6 +64,7 @@ namespace VoxSimPlatform {
     			"block4",
     			"block5",
     			"block6",
+                "block7",
     			"blocks",
     			"lid",
     			"stack",

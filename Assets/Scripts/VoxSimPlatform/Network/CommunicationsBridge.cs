@@ -144,11 +144,42 @@ namespace VoxSimPlatform {
                     int numSockets = socketStrings.Count;
                     for (int i = 0; i < numSockets; i++) {
                         string[] segments = socketStrings[i].Split(new char[] { '|', '=', ',' });
-                        socketLabels.Add(segments[0]);  // the current socket label
-                        socketTypes.Add(segments[1]);   // the current socket specified type (as string)
-                        socketUrls.Add(segments[2]);    // the current socket URL
-                        socketActiveStatuses.Add(bool.Parse(segments[3]));  // is this socket to be active?
+                        try {
+                            socketLabels.Add(segments[0]);  // the current socket label
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex is ArgumentOutOfRangeException)
+                            {
+                                Debug.LogError(string.Format("Argument 0 (label) for socket #{0} is not specified!  Try resaving socket connections from the main menu!", i));
+                            }
+                        }
 
+                        try {
+                            socketTypes.Add(segments[1]);   // the current socket specified type (as string)
+                        }
+                        catch (Exception ex) {
+                            if (ex is ArgumentOutOfRangeException) {
+                                Debug.LogError(string.Format("Argument 1 (type) for socket #{0} is not specified!  Try resaving socket connections from the main menu!", i));
+                            }
+                        }
+                        try {
+                            socketUrls.Add(segments[2]);    // the current socket URL
+                        }
+                        catch (Exception ex) {
+                            if (ex is ArgumentOutOfRangeException) {
+                                Debug.LogError(string.Format("Argument 2 (URL) for socket #{0} is not specified!  Try resaving socket connections from the main menu!", i));
+                            }
+                        }
+
+                        try {
+                            socketActiveStatuses.Add(bool.Parse(segments[3]));  // is this socket to be active?
+                        }
+                        catch (Exception ex) {
+                            if (ex is ArgumentOutOfRangeException) {
+                                Debug.LogError(string.Format("Argument 3 (active status) for socket #{0} is not specified!  Try resaving socket connections from the main menu!", i));
+                            }
+                        }
                         // split the URL into IP and port
                         Debug.Log(segments[0] + " " + segments[1] + " " + segments[2]);
                         if (socketActiveStatuses[i] == true) {
