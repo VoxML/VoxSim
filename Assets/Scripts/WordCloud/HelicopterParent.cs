@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//NOTE: Unused. FormWordCloud keeps track of all children itself
+// Exporting that could *maybe* make FormWordCloud cleaner, but would mean passing around the list of children more
+
 public class HelicopterParent : MonoBehaviour {
     public Transform helicopter;
 

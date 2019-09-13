@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//NOTE: Not used. There was a tag in some of the core code that allows camera movement when unchecked.
+// That's in Ghost Free Roam.
+
 public class Movement : MonoBehaviour
 {
     // Start is called before the first frame update

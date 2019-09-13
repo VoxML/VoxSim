@@ -2,6 +2,8 @@
 using System.Collections;
 using WordCloud;
 
+// NOTE: Not used right now. Would be the script to make a cloud rotate in place.
+
 
 public class CloudRotator : MonoBehaviour {
     GameObject wordcloud;

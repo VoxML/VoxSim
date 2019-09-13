@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//NOTE: Not currently used. Placeholder in case of handling multiple clouds at once
+
 public class CloudOfClouds : MonoBehaviour {
     // CLOUD OF CLOUDS
     // FOR EV ER

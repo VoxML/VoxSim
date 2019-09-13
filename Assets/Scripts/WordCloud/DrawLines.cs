@@ -35,6 +35,7 @@ namespace WordCloud {
             //    ClearAllPoints();
             //}
 
+            // Very limited, only the top 6 points (so the hihlighted and 5 closest to it)
             if (Input.GetKeyDown("e")) {
                 GenerateNewLine(6);
             }
@@ -54,13 +55,14 @@ namespace WordCloud {
 
 
         // Draw lines from the highlighted word (at position 0) to all the other ones.
+        // Only makes sense with a distance calculation
         private void GenerateNewLine(int howmany) {
             List<Phrase> phrases = transform.GetComponent<FormWordCloud>().GetPhrases();
             //GameObject[] allPoints = from phrase in phrases select phrase.obj;
             //GameObject[] allPoints = GameObject.FindGameObjectsWithTag("PointMarker");
 
             Vector3[] allPointPositions = new Vector3[Math.Min(phrases.Count, howmany + 1)];
-            Debug.LogWarning("erqiuguergbiuegr" + phrases + " " + phrases.Count);
+            //Debug.LogWarning("erqiuguergbiuegr" + phrases + " " + phrases.Count);
             if (phrases.Count > 1) {
                 // Need at least 2 lol
                 for (int i = 1; i < Math.Min(phrases.Count, howmany + 1); i++) {

@@ -35,9 +35,8 @@ namespace VoxSimPlatform {
         	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
         	public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
-            [SerializeField] // Just changed
         	private Vector3 _targetPosition;
-            // WHAT TO LOOK AT
+
         	public Vector3 targetPosition {
         		get { return _targetPosition; }
         		set {
@@ -107,8 +106,6 @@ namespace VoxSimPlatform {
         	public Vector3 startScale;
 
         	public event EventHandler VoxMLLoaded;
-
-            public bool is_phrase = false; // Whether this voxeme is a word in a word cloud. (limit rotations 
 
         	public void OnVoxMLLoaded(object sender, EventArgs e) {
         		if (VoxMLLoaded != null) {
@@ -186,8 +183,6 @@ namespace VoxSimPlatform {
         						if (offset.sqrMagnitude <= Constants.EPSILON) {
         							transform.position = targetPosition;
 
-                                    // Define child position relative to parent.
-                                    // This matters since voxemes change parents frequently.
         							foreach (Voxeme child in children) {
         								if (child.isActiveAndEnabled) {
         									if (child.gameObject != gameObject) {
@@ -264,7 +259,7 @@ namespace VoxSimPlatform {
         			// no queued sequence
         			if (!Helper.VectorIsNaN(targetRotation)) {
         				// has valid target
-        				if (!isGrasped && !is_phrase) { // phrases don't get rotation overridden
+        				if (!isGrasped) {
         					if (transform.rotation != Quaternion.Euler(targetRotation)) {
         						//Debug.Log (transform.eulerAngles);
         						float offset = RotateToward(targetRotation);
@@ -301,13 +296,10 @@ namespace VoxSimPlatform {
         					//Debug.Log (Quaternion.Angle(transform.rotation,Quaternion.Euler (interimTarget)));
         					//if ((Mathf.Deg2Rad * Quaternion.Angle (transform.rotation, Quaternion.Euler (interimTarget))) < 0.01f) {
         					if ((Mathf.Deg2Rad * offset) < 0.01f) {
-                                if (!is_phrase) {
-                                    transform.rotation = Quaternion.Euler(interimTarget);
+        						transform.rotation = Quaternion.Euler(interimTarget);
 
-                                }
-
-                                //Debug.Log (interimTarget);
-                                interTargetRotations.Dequeue();
+        						//Debug.Log (interimTarget);
+        						interTargetRotations.Dequeue();
         						//Debug.Log (interTargetRotations.Peek ());
         					}
         				}
@@ -606,21 +598,16 @@ namespace VoxSimPlatform {
         				}
         			}
 
-                    if (!is_phrase) {
-                        transform.rotation = rot;
+        			transform.rotation = rot;
+        			//GameObject.Find ("ReachObject").transform.position = transform.position;
 
-                    }
-                    //GameObject.Find ("ReachObject").transform.position = transform.position;
-
-                    foreach (Voxeme child in children) {
+        			foreach (Voxeme child in children) {
         				if (child.isActiveAndEnabled) {
         					if (child.gameObject != gameObject) {
-                                if (!is_phrase) {
-                                    child.transform.localRotation = parentToChildRotationOffset[child.gameObject];
-                                    child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
-                                    child.targetRotation = child.transform.rotation.eulerAngles;
-                                }
-                                child.transform.localPosition = Helper.RotatePointAroundPivot(
+        						child.transform.localRotation = parentToChildRotationOffset[child.gameObject];
+        						child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
+        						child.targetRotation = child.transform.rotation.eulerAngles;
+        						child.transform.localPosition = Helper.RotatePointAroundPivot(
         							parentToChildPositionOffset[child.gameObject],
         							Vector3.zero, gameObject.transform.eulerAngles);
         						child.transform.position = gameObject.transform.position + child.transform.localPosition;
@@ -941,71 +928,71 @@ namespace VoxSimPlatform {
 
         		OnVoxMLLoaded(this, new VoxMLEventArgs(gameObject, voxml));
 
-        //#if UNITY_EDITOR
-        //		using (StreamWriter file =
-        //			new StreamWriter(gameObject.name + @".txt")) {
-        //			file.WriteLine("PRED");
-        //			file.WriteLine("{0,-20}", opVox.Lex.Pred);
-        //			file.WriteLine("\n");
-        //			file.WriteLine("TYPE");
-        //			file.WriteLine("COMPONENTS");
-        //			foreach (Triple<string, GameObject, int> component in opVox.Type.Components) {
-        //				file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
-        //					"Name: " + component.Item1,
-        //					"\t",
-        //					"GameObject name: " + component.Item2.name,
-        //					"\t",
-        //					"Index: " + component.Item3));
-        //			}
+        #if UNITY_EDITOR
+        		using (StreamWriter file =
+        			new StreamWriter(gameObject.name + @".txt")) {
+        			file.WriteLine("PRED");
+        			file.WriteLine("{0,-20}", opVox.Lex.Pred);
+        			file.WriteLine("\n");
+        			file.WriteLine("TYPE");
+        			file.WriteLine("COMPONENTS");
+        			foreach (Triple<string, GameObject, int> component in opVox.Type.Components) {
+        				file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
+        					"Name: " + component.Item1,
+        					"\t",
+        					"GameObject name: " + component.Item2.name,
+        					"\t",
+        					"Index: " + component.Item3));
+        			}
 
-        //			file.WriteLine("CONCAVITY");
-        //			file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
-        //				"Name: " + opVox.Type.Concavity.Item1,
-        //				"\t",
-        //				"GameObject name: " + opVox.Type.Concavity.Item2.name,
-        //				"\t",
-        //				"Index: " + opVox.Type.Concavity.Item3));
-        //			file.WriteLine("SYMMETRY");
-        //			file.Write("ROT\t");
-        //			foreach (string s in opVox.Type.RotatSym) {
-        //				file.Write(String.Format("{0}\t", s));
-        //			}
+        			file.WriteLine("CONCAVITY");
+        			file.Write(String.Format("{0,-20}{1,-20}{2,-20}{3,-20}{4,-20}\n",
+        				"Name: " + opVox.Type.Concavity.Item1,
+        				"\t",
+        				"GameObject name: " + opVox.Type.Concavity.Item2.name,
+        				"\t",
+        				"Index: " + opVox.Type.Concavity.Item3));
+        			file.WriteLine("SYMMETRY");
+        			file.Write("ROT\t");
+        			foreach (string s in opVox.Type.RotatSym) {
+        				file.Write(String.Format("{0}\t", s));
+        			}
 
-        //			file.Write("REFL\t");
-        //			foreach (string s in opVox.Type.ReflSym) {
-        //				file.Write(String.Format("{0}\t", s));
-        //			}
+        			file.Write("REFL\t");
+        			foreach (string s in opVox.Type.ReflSym) {
+        				file.Write(String.Format("{0}\t", s));
+        			}
 
-        //			file.WriteLine("\n");
-        //			file.WriteLine("HABITATS");
-        //			file.WriteLine("INTRINSIC");
-        //			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.IntrinsicHabitats) {
-        //				file.Write("Index: " + kv.Key);
-        //				foreach (string formula in kv.Value) {
-        //					file.Write("\t\tFormula: " + formula + "\n");
-        //				}
-        //			}
+        			file.WriteLine("\n");
+        			file.WriteLine("HABITATS");
+        			file.WriteLine("INTRINSIC");
+        			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.IntrinsicHabitats) {
+        				file.Write("Index: " + kv.Key);
+        				foreach (string formula in kv.Value) {
+        					file.Write("\t\tFormula: " + formula + "\n");
+        				}
+        			}
 
-        //			file.WriteLine("EXTRINSIC");
-        //			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.ExtrinsicHabitats) {
-        //				file.Write("Index: " + kv.Key);
-        //				foreach (string formula in kv.Value) {
-        //					file.Write("\t\tFormula: " + formula + "\n");
-        //				}
-        //			}
+        			file.WriteLine("EXTRINSIC");
+        			foreach (KeyValuePair<int, List<string>> kv in opVox.Habitat.ExtrinsicHabitats) {
+        				file.Write("Index: " + kv.Key);
+        				foreach (string formula in kv.Value) {
+        					file.Write("\t\tFormula: " + formula + "\n");
+        				}
+        			}
 
-        //			file.WriteLine("\n");
-        //			file.WriteLine("AFFORDANCES");
-        //			foreach (KeyValuePair<int, List<Pair<string, Pair<string, string>>>> kv in opVox.Affordance.Affordances) {
-        //				file.Write("Habitat index: " + kv.Key);
-        //				foreach (Pair<string, Pair<string, string>> affordance in kv.Value) {
-        //					file.Write("\t\tCondition: " + ((affordance.Item1 != "") ? affordance.Item1 : "None") +
-        //					           "\t\tEvents: " + affordance.Item2.Item1 + "\t\tResult: " +
-        //					           ((affordance.Item2.Item2 != "") ? affordance.Item2.Item2 : "None") + "\n");
-        //				}
-        //			}
-        //		}
-        //#endif
+        			file.WriteLine("\n");
+        			file.WriteLine("AFFORDANCES");
+        			foreach (KeyValuePair<int, List<Pair<string, Pair<string, string>>>> kv in opVox.Affordance.Affordances) {
+        				file.Write("Habitat index: " + kv.Key);
+        				foreach (Pair<string, Pair<string, string>> affordance in kv.Value) {
+        					file.Write("\t\tCondition: " + ((affordance.Item1 != "") ? affordance.Item1 : "None") +
+        					           "\t\tEvents: " + affordance.Item2.Item1 + "\t\tResult: " +
+        					           ((affordance.Item2.Item2 != "") ? affordance.Item2.Item2 : "None") + "\n");
+        				}
+        			}
+        		}
+        #endif
         	}
         }
     }

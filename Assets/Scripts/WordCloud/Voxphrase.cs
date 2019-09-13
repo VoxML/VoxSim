@@ -13,6 +13,9 @@ using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using TMPro;
 
+
+// Mostly handles some initializing. Also helps some collision/parent/child and graphics bugs in kinda hacky ways.
+
 namespace WordCloud {
 
 
@@ -28,7 +31,7 @@ namespace WordCloud {
     //    public GameObject obj; // Probably want an actual pointer to the object lol
     //}
 
-    // New class, doe sthe direct manipulation of voxemes.
+    // New class, does the direct manipulation of voxemes.
     public class Voxphrase : MonoBehaviour {
 
         private void Start() {

@@ -5,6 +5,8 @@ using System.Linq;
 using VoxSimPlatform.Network;
 using VoxSimPlatform.NLU;
 
+// NOTE: no successful connection to outside has been established yet.
+// But that's mostly a matter of putting together the right call to outside in the rest client
 
 public class WordCloudIOClient : MonoBehaviour {
     WordCloudRestClient _cloudSocket;

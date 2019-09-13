@@ -110,7 +110,7 @@ namespace WordCloud {
                     child.obj.transform.SetParent(transform);
                 }
                 Voxeme vx = child.obj.transform.GetComponent<Voxeme>(); // Kinda awkward to do this here.
-                vx.is_phrase = true; //Every frame, like taking a sledghammer to a banana
+                //vx.is_phrase = true; //Every frame, like taking a sledghammer to a banana
                 vx.moveSpeed = 0.5f;//
                 // Look at the camera
                 Quaternion toRotation1;

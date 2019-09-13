@@ -5,6 +5,10 @@ using System.Text;
 using UnityEngine;
 using VoxSimPlatform.Interaction;
 
+// NOTE: no successful connection to outside has been established yet.
+// But that's mostly a matter of putting together the right call to outside in the rest client (that's this one)
+// May be awkward timing things to pick up from server. Solution is *probably* to send some kind of message, that's what made NLURestClient work (see Rest Clients folder)
+
 namespace VoxSimPlatform {
     namespace Network {
         public class WordCloudRestClient : RestClient {
@@ -66,6 +70,8 @@ namespace VoxSimPlatform {
                             last_read = webRequest.downloadHandler.text;
                             //BroadcastMessage("LookForNewParse"); // Tell something, in JointGestureDemo for instance, to grab the result
                             if (webRequest.downloadHandler.text != "connected") {
+                                // Really needs to change. SingleAgentInteraction isn't gonna be extensible in our package-based future
+                                // And I didn't ever put together that LookForNewParse function either, this section is just a ghost :P
                                 SingleAgentInteraction sai = GameObject.FindObjectOfType<SingleAgentInteraction>();
                                 sai.SendMessage("LookForNewParse");
                             }
