@@ -1129,30 +1129,30 @@ namespace VoxSimPlatform {
         		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 
         		// add agent-dependent preconditions
-        		//if (agent != null) {
-        		//	if (args[0] is GameObject) {
-        		//		// add preconditions
-        		//		//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
-        		//		//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
-        		//		//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
-        		//		//				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
-        		//		//				eventManager.RemoveEvent (3);
-        		//		//				return;
-        		//		//			}
-        		//		//			else {
-        		//		if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
-        		//			eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
-        		//			eventManager.InsertEvent(
-        		//				eventManager.evalOrig[
-        		//					string.Format("put({0},{1})", (args[0] as GameObject).name,
-        		//						Helper.VectorToParsable((Vector3) args[1]))], 1);
-        		//			eventManager.RemoveEvent(2);
-        		//			return;
-        		//		}
+        		if (agent != null) {
+        			if (args[0] is GameObject) {
+        				// add preconditions
+        				//			if (!SatisfactionTest.IsSatisfied (string.Format ("reach({0})", (args [0] as GameObject).name))) {
+        				//				eventManager.InsertEvent (string.Format ("reach({0})", (args [0] as GameObject).name), 0);
+        				//				eventManager.InsertEvent (string.Format ("grasp({0})", (args [0] as GameObject).name), 1);
+        				//				eventManager.InsertEvent (eventManager.evalOrig [string.Format ("put({0},{1})", (args [0] as GameObject).name, Helper.VectorToParsable ((Vector3)args [1]))], 2);
+        				//				eventManager.RemoveEvent (3);
+        				//				return;
+        				//			}
+        				//			else {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
+        					eventManager.InsertEvent(
+        						eventManager.evalOrig[
+        							string.Format("put({0},{1})", (args[0] as GameObject).name,
+        								Helper.VectorToParsable((Vector3) args[1]))], 1);
+        					eventManager.RemoveEvent(2);
+        					return;
+        				}
 
-        		//		//			}
-        		//	}
-        		//}
+        				//			}
+        			}
+        		}
 
         		// add agent-independent preconditions
         		if (prep == "_under") {
@@ -1241,14 +1241,14 @@ namespace VoxSimPlatform {
         		}
 
 
-        		//if (agent != null) {
-        		//	// add agent-dependent postconditions
-        		//	if (args[args.Length - 1] is bool) {
-        		//		if ((bool) args[args.Length - 1] == true) {
-        		//			eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
-        		//		}
-        		//	}
-        		//}
+        		if (agent != null) {
+        			// add agent-dependent postconditions
+        			if (args[args.Length - 1] is bool) {
+        				if ((bool) args[args.Length - 1] == true) {
+        					eventManager.InsertEvent(string.Format("ungrasp({0})", (args[0] as GameObject).name), 1);
+        				}
+        			}
+        		}
 
         		// override physics rigging
         		foreach (object arg in args) {
