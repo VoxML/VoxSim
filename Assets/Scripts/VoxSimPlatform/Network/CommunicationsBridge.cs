@@ -559,10 +559,26 @@ namespace VoxSimPlatform {
                 return socket;
             }
 
+            public SocketConnection FindSocketConnectionByType(Type type) {
+                SocketConnection socket = null;
+
+                socket = _socketConnections.FirstOrDefault(s => s.IOClientType == type);
+
+                return socket;
+            }
+
             public RestClient FindRestClientByLabel(string label) {
                 RestClient socket = null;
 
                 socket = _restClients.FirstOrDefault(s => s.name == label);
+
+                return socket;
+            }
+
+            public RestClient FindRestClientByType(Type type) {
+                RestClient socket = null;
+
+                socket = _restClients.FirstOrDefault(s => s.clientType == type);
 
                 return socket;
             }
@@ -580,25 +596,31 @@ namespace VoxSimPlatform {
                     }
                 }
 
+                for (int i = 0; i < _restClients.Count; i++) {
+                    if (_restClients[i] != null && _restClients[i].isConnected) {
+                        _restClients[i] = null;
+                    }
+                }
+
                 //if (_fusionSocket != null && _fusionSocket.IsConnected()) {
                 //    _fusionSocket.Close();
                 //    _fusionSocket = null;
                 //}
 
-                if (_commanderSocket != null && _commanderSocket.IsConnected()) {
-                    _commanderSocket.Close();
-                    _commanderSocket = null;
-                }
+                //if (_commanderSocket != null && _commanderSocket.IsConnected()) {
+                //    _commanderSocket.Close();
+                //    _commanderSocket = null;
+                //}
 
-                if (_ksimSocket != null && _ksimSocket.IsConnected()) {
-                    _ksimSocket.Close();
-                    _ksimSocket = null;
-                }
+                //if (_ksimSocket != null && _ksimSocket.IsConnected()) {
+                //    _ksimSocket.Close();
+                //    _ksimSocket = null;
+                //}
 
-                if (_adeSocket != null && _adeSocket.IsConnected()) {
-                    _adeSocket.Close();
-                    _adeSocket = null;
-                }
+                //if (_adeSocket != null && _adeSocket.IsConnected()) {
+                //    _adeSocket.Close();
+                //    _adeSocket = null;
+                //}
             }
 
             void OnApplicationQuit() {

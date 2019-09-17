@@ -1,0 +1,2 @@
+PyYAML==5.1.2
+python-igraph==0.7.1.post6

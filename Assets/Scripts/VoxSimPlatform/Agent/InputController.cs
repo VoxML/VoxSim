@@ -264,6 +264,13 @@ namespace VoxSimPlatform {
 
         			Debug.Log("User entered: " + inputString);
 
+                    if (inputString.StartsWith("qsr:")) {
+                        SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
+                            (SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
+                        qsrLibSocket.SendQSRRequest(inputString);
+                        return;
+                    }
+
         			Dictionary<string, string> vectors = new Dictionary<string, string>();
 
         			foreach (Match match in v.Matches(inputString)) {
