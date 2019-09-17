@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Entity Type="Program" />
+  <Lex>
+    <Pred>move</Pred>
+    <Type>process</Type>
+  </Lex>
+  <Type>
+    <Head>process</Head>
+    <Components />
+    <Concavity />
+    <RotatSym />
+    <ReflSym />
+    <Args>
+      <Arg Value="x:agent" />
+      <Arg Value="y:physobj" />
+      <Arg Value="z:location" />
+      <Arg Value="p:method" />
+      <Arg Value="a:T[]" />
+    </Args>
+    <Body>
+      <Subevent Value="move_1(x,y,z,p)" />
+      <!--<Subevent Value="move_1(x,y,z,p,a)" />-->
+    </Body>
+    <Scale />
+    <Arity />
+    <Class />
+    <Value />
+    <Constr />
+  </Type>
+  <Habitat>
+    <Intrinsic />
+    <Extrinsic />
+  </Habitat>
+  <Afford_Str>
+    <Affordances />
+  </Afford_Str>
+  <Embodiment>
+    <Scale />
+    <Movable>false</Movable>
+  </Embodiment>
+  <Attributes>
+    <Attrs />
+  </Attributes>
+</VoxML>

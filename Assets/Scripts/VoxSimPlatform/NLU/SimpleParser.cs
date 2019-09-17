@@ -109,6 +109,7 @@ namespace VoxSimPlatform {
     			{"corks", "cork"}
     			// sorry about this, Keigh
     			// let us delete this when EACL is over and never speak of it again
+                // 2019: still haven't deleted this crap (:
     		};
 
 
@@ -116,6 +117,11 @@ namespace VoxSimPlatform {
     			"touching",
     			"in",
     			"on",
+                "atop", // prithee sirrah, put the black block atop the yellow block
+                "port",
+                "starboard",
+                "afore",
+                "astern",
     			"at",
     			"behind",
     			"in front of",

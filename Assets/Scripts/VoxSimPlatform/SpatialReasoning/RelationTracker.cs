@@ -52,6 +52,7 @@ namespace VoxSimPlatform {
 
         	public void AddNewRelation(List<GameObject> objs, string relation, bool recurse = true) {
         		VoxML voxml = null;
+                // TODO: check all relations in Data + primitives (i.e., is HOLD a primitive?)
         		try {
         			using (StreamReader sr = new StreamReader(
         				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("relations/{0}.xml", relation)))) {
@@ -90,7 +91,7 @@ namespace VoxSimPlatform {
         		}
 
         		try {
-        			Debug.Log(string.Format("Adding {0} {1} {2}", relation, objs[0], objs[1]));
+        			Debug.Log(string.Format("Adding {0} {1} {2} to current relations", relation, objs[0], objs[1]));
         		}
         		catch (Exception e) {
         		}
@@ -162,7 +163,7 @@ namespace VoxSimPlatform {
 
         	public void SurveyRelations() {
         		foreach (Voxeme voxeme in objectSelector.allVoxemes) {
-        			SatisfactionTest.ReasonFromAffordances("put", voxeme);
+        			SatisfactionTest.ReasonFromAffordances(null, null, "put", voxeme);
         		}
 
         		UpdateRelationStrings();

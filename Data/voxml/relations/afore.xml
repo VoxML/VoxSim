@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Entity Type="Relation" />
+  <Lex>
+    <Pred>afore</Pred>
+  </Lex>
+  <Type>
+    <Class>config</Class>
+    <Value>RCC8.EC</Value>
+    <Args>
+        <Arg Value="x:physobj" />
+        <Arg Value="y:physobj" />
+    </Args>
+    <Constr>Z(x) &lt; Z(y)</Constr>
+    <Corresps />
+  </Type>
+</VoxML>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Entity Type="Relation" />
+  <Lex>
+    <Pred>at</Pred>
+  </Lex>
+  <Type>
+    <Class>config</Class>
+    <Value>RCC8.EQ</Value>
+    <!--<VoxSimPlatform.SpatialReasoning.QSR.RCC8.EQ>-->
+    <!--Value must either be a method that evaluates to True or False-->
+    <!-- or the return value of a method that is given as an argument in args (type T[])-->
+    <!-- and given specific value in Corresps ("at_1.xml" should be computationally equivalent to this)-->
+    <Args>
+        <Arg Value="x:physobj" /> <!--How will we handle bounds?  A point can EQ or DC a point, a point cannot EC a point (this is meaningless)-->
+        <Arg Value="y:physobj*vector" />
+    </Args>
+    <Constr />
+    <Corresps />
+  </Type>
+</VoxML>

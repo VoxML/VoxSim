@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- a test file to sort out the semantics of calling external calculi operations (here TPCC) -->
+<VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <Entity Type="Relation" />
+  <Lex>
+    <Pred>near</Pred>
+  </Lex>
+  <Type>
+    <Class>config</Class>
+    <Value>'c[slbfr][blfr]'</Value>
+    <Args>
+        <Arg Value="x:physobj*vector" />
+        <Arg Value="y:vector" />
+        <Arg Value="z:T[]" />
+    </Args>
+    <Constr />
+    <Corresps>
+        <!--<VoxSimPlatform.SpatialReasoning.QSR.ComposeQSR(x,y,'tpcc')>-->
+        <Corresp Value="z:'tpcc'" />
+    </Corresps>
+  </Type>
+</VoxML>

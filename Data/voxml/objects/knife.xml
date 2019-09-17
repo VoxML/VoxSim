@@ -20,6 +20,7 @@
   </Habitat>
   <Afford_Str>
     <Affordances>
+        <Affordance Formula="H-&gt;[grasp(x, [1])]hold(x, [1])" />
         <Affordance Formula="H-&gt;[lift(x, [1])]hold(x, [1])" />
         <Affordance Formula="H-&gt;[put([1], in(x))]contain(x, [1])]" />
     </Affordances>

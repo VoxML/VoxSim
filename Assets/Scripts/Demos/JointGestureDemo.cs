@@ -22,7 +22,6 @@ using VoxSimPlatform.Network;
 using VoxSimPlatform.NLU;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
-using VoxSimPlatform.SpatialReasoning.RCC;
 using VoxSimPlatform.Vox;
 
 public class SelectionEventArgs : EventArgs {
@@ -5020,9 +5019,8 @@ public class JointGestureDemo : SingleAgentInteraction {
 								interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1]);
 						graspedObject = eventManager.ExtractObjects(pred,
 								(String) Helper.ParsePredicate(
-									interactionLogic.ActionOptions[interactionLogic.ActionOptions.Count - 1])[pred])[0]
-							as
-							GameObject;
+									interactionLogic.
+                                        ActionOptions[interactionLogic.ActionOptions.Count - 1])[pred])[0] as GameObject;
 						//}
 						interactionLogic.RewriteStack(new PDAStackOperation(
 							PDAStackOperation.PDAStackOperationType.Rewrite,

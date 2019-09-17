@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -13,15 +14,151 @@ using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.CogPhysics;
+using VoxSimPlatform.GenLex;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
-using VoxSimPlatform.SpatialReasoning.RCC;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Core {
     	public static class SatisfactionTest {
+            public static bool IsSatisfied(String pred, List<object> args) {
+                bool satisfied = false;
+
+                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
+
+                if (em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) {
+                    if (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+
+                    }
+                    else if (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") {
+                        foreach (List<object> key in relationTracker.relations.Keys.OfType<List<object>>().Where(k => k.SequenceEqual(args))) {
+                            if (relationTracker.relations[key].ToString().Contains(pred)) {
+                                satisfied = true;
+                            }
+                        }
+                    }
+                }
+
+                return satisfied;
+            }
+
+            public static bool IsSatisfied(VoxML voxml, List<object> args) {
+                bool satisfied = false;
+
+                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
+
+                if (voxml.Entity.Type == VoxEntity.EntityType.Program) {
+                    for (int i = 0; i < voxml.Type.Args.Count; i++) {
+                        string argName = voxml.Type.Args[i].Value.Split(':')[0];
+                        string[] argType = voxml.Type.Args[i].Value.Split(':')[1].Split('*');
+
+                        if ((argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                            (argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
+                            args.Insert(i, em.GetActiveAgent()); 
+                        }
+                    }
+
+                    foreach (object arg in args) {
+                        Debug.Log(arg.GetType());
+                    }
+
+                    // for now, a program is considered "satisfied" in this sense if a synonymous program exists in the relation tracker
+                    //  at the moment, this effectively only works with "hold"
+                    // TODO: something better
+                    Debug.Log(relationTracker.relations.Keys.Count);
+                    Debug.Log(relationTracker.relations.Keys.OfType<List<GameObject>>().ToList().Count);
+                    Debug.Log(relationTracker.relations.Keys.OfType<List<GameObject>>().Where(k => k.SequenceEqual(args)).ToList().Count);
+                    foreach (List<GameObject> key in relationTracker.relations.Keys.OfType<List<GameObject>>().Where(k => k.SequenceEqual(args))) {
+                        if (relationTracker.relations[key].ToString().Contains(voxml.Lex.Pred)) {
+                            satisfied = true;
+                        }
+                    }
+                }
+                else if (voxml.Entity.Type == VoxEntity.EntityType.Relation) {
+
+                    string relStr = string.Empty;
+
+                    switch (voxml.Type.Class) {
+                        case "config":
+                            relStr = voxml.Type.Value;
+                            break;
+
+                        case "force_dynamic":
+                            relStr = voxml.Type.Value;
+                            break;
+
+                        default:
+                            Debug.Log(string.Format("IsSatisfied: unknown relation class: {0}", voxml.Type.Class));
+                            break;
+                    }
+
+                    if (relStr != string.Empty) {
+                        for (int i = 0; i < voxml.Type.Args.Count; i++) {
+                            string argName = voxml.Type.Args[i].Value.Split(':')[0];
+                            string[] argType = voxml.Type.Args[i].Value.Split(':')[1].Split('*');
+                            
+                            if ((argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                                (argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
+                                args.Insert(i, em.GetActiveAgent()); 
+                            }
+                        }
+
+                        if (voxml.Type.Class == "config") {
+                            // Get the Type for the calling class
+                            //  class must be within namespace VoxSimPlatform.SpatialReasoning.QSR
+                            String[] tryMethodPath = string.Format("VoxSimPlatform.SpatialReasoning.QSR.{0}", relStr).Split('.');
+                            Type methodCallingType = Type.GetType(string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                            if (methodCallingType != null) {
+                                try {
+                                    MethodInfo method = methodCallingType.GetMethod(relStr.Split('.')[1], args.Select(a => a.GetType()).ToArray());
+                                    if (method != null) {
+                                        Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                            methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                        object obj = method.Invoke(null, args.ToArray());
+                                        satisfied = (bool)obj;
+                                    }
+                                    else {  // no method found
+                                        // throw this to ComposeQSR
+                                        method = Type.GetType("VoxSimPlatform.SpatialReasoning.QSR.QSR").GetMethod("ComposeQSR");
+                                        Debug.Log(string.Format("Testing predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
+                                            methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
+                                        object obj = method.Invoke(null, args.ToArray());
+                                        satisfied = (bool)obj;
+                                    }
+                                }
+                                catch (Exception ex) {
+                                    if (ex is AmbiguousMatchException) {
+                                        Debug.LogError(string.Format("Ambiguous match found. Query was GetMethod(\"{0}\",[{1}]) in namespace {2}.",
+                                            relStr.Split('.')[1], string.Join(", ",args.Select(a => a.GetType().ToString()).ToArray()),
+                                            methodCallingType.ToString()));
+                                    }
+                                    else {
+                                        Debug.LogError(ex);
+                                    }
+                                }
+                            }
+                            else {
+                                Debug.Log(string.Format("IsSatisfied: No type {0} found!",
+                                    string.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1))));
+                            }
+                        }
+                        else if (voxml.Type.Class == "force_dynamic") {
+                            foreach (List<object> key in relationTracker.relations.Keys.OfType<List<object>>().Where(k => k.SequenceEqual(args))) {
+                                if (relationTracker.relations[key].ToString().Contains(voxml.Lex.Pred)) {
+                                    satisfied = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return satisfied;
+            }
+
     		public static bool IsSatisfied(String test) {
     			bool satisfied = false;
     			Hashtable predArgs = Helper.ParsePredicate(test);
@@ -45,7 +182,65 @@ namespace VoxSimPlatform {
 
     			//Debug.Log (test);
 
-    			if (predString == "put") {
+                // PRIMITIVE MOTIONS
+    			if (predString == "move_1") {
+                    // satisfy move_1
+                    GameObject theme = GameObject.Find(argsStrings[0] as String);
+                    if (theme != null) {
+                        Voxeme voxComponent = theme.GetComponent<Voxeme>();
+                        Vector3 testLocation = voxComponent.isGrasped
+                            ? voxComponent.graspTracker.transform.position
+                            : theme.transform.position;
+
+                        //Debug.Log(string.Format("{0} : {1}", Helper.VectorToParsable(testLocation),argsStrings[1]));
+                        if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                            if (voxComponent.isGrasped) {
+                                theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
+                                theme.transform.rotation = Quaternion.identity;
+                            }
+
+                            Debug.Log(Helper.VectorToParsable(theme.transform.position));
+                            satisfied = true;
+                        }
+                    }
+                }
+                // PRIMITIVE FUNCTIONAL OPERATORS
+                // conditionals
+                else if (predString == "if") {
+                    string expression = (argsStrings[0] as String).Replace("^", " AND ").Replace("|", " OR ");
+                    DataTable dt = new DataTable();
+                    try {
+                        // don't do anything with this
+                        //  the "satisfaction" of a conditional is just a check
+                        //  to see if the constituent conditions have been successfully evaluated
+                        bool result = (bool)dt.Compute(expression, null);
+                        satisfied = true;
+                    }
+                    catch (Exception ex) {
+                        if (ex is EvaluateException) {
+                            satisfied = false;
+                        }
+                    }
+                }
+                else if (predString == "while") {
+                    string expression = (argsStrings[0] as String).Replace("^", " AND ").Replace("|", " OR ");
+                    DataTable dt = new DataTable();
+                    try {
+                        // don't do anything with this
+                        //  the "satisfaction" of a conditional is just a check
+                        //  to see if the constituent conditions have been successfully evaluated
+                        bool result = (bool)dt.Compute(expression, null);
+                        satisfied = true;
+                    }
+                    catch (Exception ex) {
+                        if (ex is EvaluateException) {
+                            satisfied = false;
+                        }
+                    }
+                }
+
+                // COMPLEX MOTION (TODO: remove)
+                else if (predString == "put") {
     				// satisfy put
     				GameObject theme = GameObject.Find(argsStrings[0] as String);
     				if (theme != null) {
@@ -217,7 +412,7 @@ namespace VoxSimPlatform {
     						}
 
     						satisfied = true;
-    						ReasonFromAffordances(predString,
+    						ReasonFromAffordances(em, null, predString,
     							voxComponent); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
     					}
     					else if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
@@ -347,11 +542,22 @@ namespace VoxSimPlatform {
     			if (satisfied) {
     				MethodInfo method = preds.GetType().GetMethod(predString.ToUpper());
     				if ((method != null) && (method.ReturnType == typeof(void))) {
+                        EventManagerArgs eventArgs = null;
     					// is a program
-    					Debug.Log(predString);
-    					EventManagerArgs eventArgs = new EventManagerArgs(test, isMacroEvent);
-    					em.OnEventComplete(em, eventArgs);
-    					//				ReasonFromAffordances (predString, GameObject.Find (argsStrings [0] as String).GetComponent<Voxeme>());	// we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
+                        if (em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(predString) && 
+                            em.voxmlLibrary.VoxMLEntityTypeDict[predString] == "programs") {
+                        //string testPath = string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("programs/{0}.xml", predString));
+                        //if (File.Exists(testPath)) {
+                            VoxML voxml = em.voxmlLibrary.VoxMLObjectDict[predString];
+                            //using (StreamReader sr = new StreamReader(testPath)) {
+                            //    voxml = VoxML.LoadFromText(sr.ReadToEnd(), predString);
+                            //}
+                            eventArgs = new EventManagerArgs(voxml, test);
+                        }
+                        else {
+    					   eventArgs = new EventManagerArgs(test, isMacroEvent);
+                        }
+                        em.OnEventComplete(em, eventArgs);
     				}
     			}
 
@@ -363,124 +569,193 @@ namespace VoxSimPlatform {
     			String pred = Helper.GetTopPredicate(command);
     			ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
     			EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                bool validPredExists = false;
 
     			if (predArgs.Count > 0) {
     				Queue<String> argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
     				List<object> objs = new List<object>();
     				Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
     				MethodInfo methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                    VoxML voxml = null;
 
-    				while (argsStrings.Count > 0) {
-    					object arg = argsStrings.Dequeue();
+                    methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                    if (methodToCall == null) {
+                        if ((em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                            (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
+                            voxml = em.voxmlLibrary.VoxMLObjectDict[pred];
+                            methodToCall = preds.GetType().GetMethod("ComposeProgram");
+                        }
+                    }
 
-    					if (Helper.v.IsMatch((String) arg)) {
-    						// if arg is vector form
-    						objs.Add(Helper.ParsableToVector((String) arg));
-    					}
-    					else if (arg is String) {
-    						// if arg is String
-    						if ((arg as String) != string.Empty) {
-    							Regex q = new Regex("[\'\"].*[\'\"]");
-    							int i;
-    							if ((q.IsMatch(arg as String)) || (int.TryParse(arg as String, out i))) {
-    								objs.Add(arg as String);
-    							}
-    							else {
-    								GameObject go = null;
-    								if ((arg as String).Count(f => f == '(') +
-    								    (arg as String).Count(f => f == ')') == 0) {
-    									List<GameObject> matches = new List<GameObject>();
-    									foreach (Voxeme voxeme in objSelector.allVoxemes) {
-    										if (voxeme.voxml.Lex.Pred.Equals(arg)) {
-    											matches.Add(voxeme.gameObject);
-    										}
-    									}
+                    if (methodToCall.ReturnType == typeof(void)) {
+        				while (argsStrings.Count > 0) {
+        					object arg = argsStrings.Dequeue();
 
-    									Debug.Log(matches.Count);
+        					if (Helper.vec.IsMatch((String) arg)) {
+                                if (Helper.listVec.IsMatch((String) arg)) {
+                                    // if arg is list of vectors form
+                                    List<Vector3> vecList = new List<Vector3>();
 
-    									if (matches.Count == 0) {
-    										go = GameObject.Find(arg as String);
-    										if (go == null) {
-    											for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
-    												if (objSelector.disabledObjects[j].name == (arg as String)) {
-    													go = objSelector.disabledObjects[j];
-    													break;
-    												}
-    											}
+                                    foreach (string vecString in ((String) arg).Replace("[","").Replace("]","").Split(':')) {
+                                        vecList.Add(Helper.ParsableToVector(vecString));
+                                    }
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",vecList));
+                                    objs.Add(vecList);
+                                }
+                                else {
+            						// if arg is vector form
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",Helper.ParsableToVector((String) arg)));
+            						objs.Add(Helper.ParsableToVector((String) arg));
+                                }
+        					}
+                            else if (Helper.emptyList.IsMatch((String) arg)) {
+                                objs.Add(new List<object>());
+                            }
+        					else if (arg is String) {
+        						// if arg is String
+        						if ((arg as String) != string.Empty) {
+        							Regex q = new Regex("[\'\"].*[\'\"]");
+        							int i;
+                                    if (int.TryParse(arg as String, out i)) {
+                                        Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",i));
+                                        objs.Add(i);
+                                    }
+                                    else if (q.IsMatch(arg as String)) {
+                                        String[] tryMethodPath = (arg as String).Replace("\'",string.Empty)
+                                            .Replace("\"",string.Empty).Split('.');
 
-    											if (go == null) {
-    												//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-    												em.OnNonexistentEntityError(null,
-    													new EventReferentArgs((arg as String)));
-    												return false; // abort
-    											}
-    										}
-    										else {
-    											if (go.GetComponent<Voxeme>() != null) {
-    												if ((em.referents.stack.Count == 0) ||
-    												    (!em.referents.stack.Peek().Equals(go.name))) {
-    													em.referents.stack.Push(go.name);
-    												}
+                                        // Get the Type for the class
+                                        Type methodCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                        if (methodCallingType != null) {
+                                            MethodInfo method = methodCallingType.GetMethod(tryMethodPath.Last());
+                                            if (method != null) {
+                                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",method));
+                                                objs.Add(method);
+                                            }
+                                            else {
+                                                Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),methodCallingType.Name));
+                                            }
+                                        } 
+                                        else {
+                                            Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg as String));
+                                            objs.Add(arg as String);
+                                        }
+        							}
+        							else {
+        								GameObject go = null;
+        								if ((arg as String).Count(f => f == '(') +
+        								    (arg as String).Count(f => f == ')') == 0) {
+        									List<GameObject> matches = new List<GameObject>();
+        									foreach (Voxeme voxeme in objSelector.allVoxemes) {
+        										if (voxeme.voxml.Lex.Pred.Equals(arg)) {
+        											matches.Add(voxeme.gameObject);
+        										}
+        									}
 
-    												em.OnEntityReferenced(null, new EventReferentArgs(go.name));
-    											}
-    										}
+        									//Debug.Log(string.Format("# voxeme predicate matches to string {0}: {1}",(arg as String),matches.Count));
 
-    										objs.Add(go);
-    									}
-    									else if (matches.Count == 1) {
-    										go = matches[0];
-    										for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
-    											if (objSelector.disabledObjects[j].name == (arg as String)) {
-    												go = objSelector.disabledObjects[j];
-    												break;
-    											}
-    										}
+        									if (matches.Count == 0) {
+        										go = GameObject.Find(arg as String);
+        										if (go == null) {
+        											for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
+        												if (objSelector.disabledObjects[j].name == (arg as String)) {
+        													go = objSelector.disabledObjects[j];
+        													break;
+        												}
+        											}
 
-    										if (go == null) {
-    											//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-    											em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
-    											return false; // abort
-    										}
+        											if (go == null) {
+        												//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+        												em.OnNonexistentEntityError(null,
+        													new EventReferentArgs((arg as String)));
+                                                        Debug.Log(string.Format("ComputeSatisfactionConditions: no object named {0}",
+                                                            (arg as String)));
+        											}
+        										}
+        										else {
+        											if (go.GetComponent<Voxeme>() != null) {
+        												if ((em.referents.stack.Count == 0) ||
+        												    (!em.referents.stack.Peek().Equals(go.name))) {
+        													em.referents.stack.Push(go.name);
+        												}
 
-    										objs.Add(go);
-    									}
-    									else {
-    										if (methodToCall != null) {
-    											// found a method
-    											String path = string.Empty;
-    											Debug.Log(pred);
-    											if (File.Exists(
-    												Data.voxmlDataPath + string.Format("/attributes/{0}.xml", pred))) {
-    												path = string.Format("/attributes/{0}.xml", pred);
-    											}
+        												em.OnEntityReferenced(null, new EventReferentArgs(go.name));
+        											}
+        										}
 
-    											if (path == string.Empty) {
-    												//if (methodToCall.ReturnType == typeof(void)) {
-    												//if (!em.evalOrig.ContainsKey(command)){
-    												Debug.Log(string.Format("Which {0}?", (arg as String)));
-    												//OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
-    												em.OnDisambiguationError(null, new EventDisambiguationArgs(command,
-    													string.Empty, string.Empty,
-    													matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
-    												return false; // abort
-    											}
+                                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",go));
+        										objs.Add(go);
+        									}
+        									else if (matches.Count == 1) {
+        										go = matches[0];
+        										for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
+        											if (objSelector.disabledObjects[j].name == (arg as String)) {
+        												go = objSelector.disabledObjects[j];
+        												break;
+        											}
+        										}
 
-    											//}
-    											foreach (GameObject match in matches) {
-    												objs.Add(match);
-    											}
-    										}
+        										if (go == null) {
+        											//OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+        											em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
+                                                    Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                                        em.events[0]));
+            										return false; // abort
+        										}
 
-    										//}
-    									}
-    								}
+                                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",go));
+        										objs.Add(go);
+        									}
+        									else {
+        										if (methodToCall != null) {
+        											// found a method
+        											Debug.Log(pred);
+                                                    if ((!em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) ||
+                                                        (em.voxmlLibrary.VoxMLEntityTypeDict[pred] != "attributes")) {
+        												//if (methodToCall.ReturnType == typeof(void)) {
+        												//if (!em.evalOrig.ContainsKey(command)){
+        												Debug.Log(string.Format("Which {0}?", (arg as String)));
+        												//OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
+        												em.OnDisambiguationError(null, new EventDisambiguationArgs(command,
+        													string.Empty, string.Empty,
+        													matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
+                                                        Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                                            em.events[0]));
+        												return false; // abort
+        											}
 
-    								//							objs.Add (GameObject.Find (arg as String));
-    							}
-    						}
-    					}
-    				}
+        											//}
+        											foreach (GameObject match in matches) {
+                                                        Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",match));
+        												objs.Add(match);
+        											}
+        										}
+
+        										//}
+        									}
+        								}
+
+        								//							objs.Add (GameObject.Find (arg as String));
+        							}
+        						}
+        					}
+        				}
+                    }
+                    else if (methodToCall.ReturnType == typeof(bool)) {
+                        while (argsStrings.Count > 0) {
+                            object arg = argsStrings.Dequeue();
+
+                            if (arg is String) {
+                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
+                                objs.Add(arg);
+                            }
+                        }
+                    }
+                    else {
+                        // not a program or conditional
+                        Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program or conditional! Returns {1}",
+                            methodToCall.Name, methodToCall.ReturnType));
+                    }
 
     				objs.Add(false);
 
@@ -488,12 +763,25 @@ namespace VoxSimPlatform {
     					// found a method
     					if (methodToCall.ReturnType == typeof(void)) {
     						// is it a program?
-    						Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
-    						object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                            Debug.Log(string.Format("ComputeSatisfactionConditions: invoke {0} with {1}{2}",
+                                methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+                            object obj = null;
+ 
+                            if (voxml == null) {
+                                obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                            }
+                            else {
+                                obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                            } 
     					}
+                        else if (methodToCall.ReturnType == typeof(bool)) {
+                            // is it a conditional?
+                            Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
+                            object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                        }
     					else {
-    						// not a program
-    						Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program! Returns {1}",
+    						// not a program or conditional
+    						Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program or conditional! Returns {1}",
     							methodToCall.Name, methodToCall.ReturnType));
     						object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
     						if (obj is String) {
@@ -501,6 +789,9 @@ namespace VoxSimPlatform {
     							if (GameObject.Find(obj as String) == null) {
     								em.OnNonexistentEntityError(null, new EventReferentArgs(
     									new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
+                                    Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                        em.events[0]));
+                                    return false;
     							}
     							else {
     								if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
@@ -517,10 +808,13 @@ namespace VoxSimPlatform {
     				else {
     					// no coded-behavior
     					// see if a VoxML markup exists
-    					// if so, we might be able to figure this out,
-    					if (!File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
+    					// if so, we might be able to figure this out
+                        if ((!em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) ||
+                            (em.voxmlLibrary.VoxMLEntityTypeDict[pred] != "programs")) {
     						// otherwise return error
     						OutputHelper.PrintOutput(Role.Affector, "Sorry, what does " + "\"" + pred + "\" mean?");
+                            Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                em.events[0]));
     						return false;
     					}
     				}
@@ -544,6 +838,8 @@ namespace VoxSimPlatform {
     				else {
     					em.OnNonexistentEntityError(null, new EventReferentArgs(pred));
     					//OutputHelper.PrintOutput (Role.Affector,"Sorry, I don't understand \"" + command + ".\"");
+                        Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                            em.events[0]));
     					return false;
     				}
     			}
@@ -551,7 +847,7 @@ namespace VoxSimPlatform {
     			return true;
     		}
 
-    		public static void ReasonFromAffordances(String program, Voxeme obj) {
+    		public static void ReasonFromAffordances(EventManager eventManager, VoxML program, String predString, Voxeme obj) {
     			Regex reentrancyForm = new Regex(@"\[[0-9]+\]");
     			Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\], .*x.*)"); // check the order of the arguments
     			Regex groundComponentSecond = new Regex(@".*(x, .*\[[0-9]+\].*)");
@@ -599,13 +895,13 @@ namespace VoxSimPlatform {
     			List<GameObject> components = objSelector.allVoxemes.SelectMany((v, c) =>
     				v.opVox.Type.Components.Where(comp => comp.Item2 != v.gameObject).Select(comp => comp.Item2)).ToList();
 
-    			foreach (GameObject go in components) {
-    				Debug.Log(go);
-    			}
+    			//foreach (GameObject go in components) {
+    			//	Debug.Log(go);
+    			//}
 
-    			foreach (Voxeme v in allVoxemes) {
-    				Debug.Log(v);
-    			}
+    			//foreach (Voxeme v in allVoxemes) {
+    			//	Debug.Log(v);
+    			//}
     //			objSelector.allVoxemes.Where(v => v.opVox.Type.Components.Where(c => c.Item2 == a.gameObject).ToList().Count == 0)
 
     //				UnityEngine.Object.FindObjectsOfType<Voxeme>().Where(a => 
@@ -693,7 +989,7 @@ namespace VoxSimPlatform {
     										// condition/event/result list for this habitat index
     										string ev = test.opVox.Affordance.Affordances[testHabitat][i].Item2.Item1;
     										Debug.Log(ev);
-    										if (ev.Contains(program) || ev.Contains("put")) {
+    										if (ev.Contains(predString) || ev.Contains("put")) {
     											// TODO: resultant states should persist
     //												Debug.Break ();
     //												Debug.Log (ev);
@@ -868,15 +1164,16 @@ namespace VoxSimPlatform {
     				}
     			}
 
-    			// non-relation-based reasoning from affordances
+                // non-relation-based reasoning from affordances
+                Debug.Log(string.Format("{0} # habitat indices = {1}", obj.name, affStr.Affordances.Keys.Count));
     			foreach (int objHabitat in affStr.Affordances.Keys) {
     				if (TestHabitat(obj.gameObject, objHabitat)) {
     					// test habitats
     					for (int i = 0; i < affStr.Affordances[objHabitat].Count; i++) {
     						// condition/event/result list for this habitat index
     						string ev = affStr.Affordances[objHabitat][i].Item2.Item1;
-    //						Debug.Log (ev);
-    						if (ev.Contains(program)) {
+    						Debug.Log (string.Format("{0}: Testing {1}",obj.name, ev));
+    						if (Helper.GetTopPredicate(ev) == predString) {
     							bool relationIndependent = true;
     							foreach (string rel in supportedRelations) {
     								Regex r = new Regex(rel);
@@ -887,25 +1184,63 @@ namespace VoxSimPlatform {
 
     							if (relationIndependent) {
     //								Debug.Log (obj.opVox.Lex.Pred);
-    //								Debug.Log (program);
-
-    								result = affStr.Affordances[objHabitat][i].Item2.Item2;
-    //								Debug.Log (result);
+                            
+    								result = affStr.Affordances[objHabitat][i].Item2.Item2.Replace(" ",string.Empty);
+    								//Debug.Log (result);
 
     								if (result != "") {
-    									result = result.Replace("x", obj.gameObject.name);
+                                        // look for agent in program VoxML arg structure
+                                        string agentVar = string.Empty;
+                                        //Debug.Log(program.Lex.Pred);
+                                        try {
+                                            foreach (VoxTypeArg arg in program.Type.Args) {
+                                                string argName = arg.Value.Split(':')[0];
+                                                string[] argType = arg.Value.Split(':')[1].Split('*');
+
+                                                if ((argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
+                                                    (argType.Where(a => GenLex.GenLex.GetGLType(a) == GLType.AgentList).ToList().Count > 0)) {
+                                                    agentVar = argName; 
+                                                }
+                                            }
+                                        }
+                                        catch (Exception ex) {
+                                            if (ex is NullReferenceException) {
+                                                if (program == null) {
+                                                    Debug.LogWarning(string.Format("Check if VoxML encoding exists for \"{0}!\"",Helper.GetTopPredicate(ev)));
+                                                }
+                                            }
+                                        }
+
+                                        if (agentVar != string.Empty) {
+                                            result = result.Replace(agentVar, eventManager.GetActiveAgent().name);
+                                        }
+
     									// any component reentrancy ultimately inherits from the parent voxeme itself
     									result = reentrancyForm.Replace(result, obj.gameObject.name);
-    									result = Helper.GetTopPredicate(result);
-    									Debug.Log(string.Format("{0}: {1} {2}.pp",
-    										affStr.Affordances[objHabitat][i].Item2.Item1, obj.gameObject.name, result));
-    									if (result != "release") {
+    									Debug.Log(string.Format("Satisfied event: {0}; Result: {1}",
+    										affStr.Affordances[objHabitat][i].Item2.Item1, result));
+
+                                        string resultPred = Helper.GetTopPredicate(result);
+
+                                        Hashtable predArgs = Helper.ParsePredicate(result);
+                                        var objs = eventManager.ExtractObjects(resultPred, (String)predArgs[resultPred]);
+                                        List<GameObject> relationObjs = new List<GameObject>();
+                                        foreach (object o in objs) {
+                                            if (o is GameObject) {
+                                                relationObjs.Add(o as GameObject);
+                                            }
+                                        }
+
+    									if (resultPred != "release") {
     										// TODO: maybe switch object order here below => passivize relation?
-    										relationTracker.AddNewRelation(new List<GameObject> {obj.gameObject}, result);
+    										relationTracker.AddNewRelation(relationObjs, resultPred);
     									}
+                                        else {
+                                            relationTracker.RemoveRelation(relationObjs, "hold");
+                                        }
 
     									//Debug.Break ();
-    									if (result == "hold") {
+    									if (resultPred == "hold") {
     										reactivatePhysics = false;
     									}
     								}
@@ -996,7 +1331,7 @@ namespace VoxSimPlatform {
     				}
     			}
 
-    			Debug.Log(string.Format("H[{0}]:{1}", habitatIndex, r));
+    			Debug.Log(string.Format("{0}: H[{1}]:{2}", obj.name, habitatIndex, r));
     			return r;
     		}
 
@@ -1210,22 +1545,22 @@ namespace VoxSimPlatform {
     			// TODO: must transform to camera perspective if relative persp is on
     			else if (relation == "behind") {
     				r = QSR.Behind(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     //				r = (Vector3.Distance (
     //					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
     //					obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -1243,22 +1578,22 @@ namespace VoxSimPlatform {
     //				Debug.Log(string.Format("{0} {1}:{2}",obj1,obj2,QSR.Finishes(bounds1,bounds2,MajorAxis.X,true)));
 
     				r = QSR.InFront(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.X, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     //				r = (Vector3.Distance (
     //					new Vector3 (obj1.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj2.gameObject.transform.position.z),
     //					obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -1284,22 +1619,22 @@ namespace VoxSimPlatform {
     //				Debug.Log (string.Format ("{1} finishes {0}:{2}", obj1, obj2, QSR.Finishes (bounds1, bounds2, MajorAxis.Y, true)));
 
     				r = QSR.Left(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     				//(Vector3.Distance (
     				//new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
     				//obj2.gameObject.transform.position) <= Constants.EPSILON);
@@ -1307,22 +1642,22 @@ namespace VoxSimPlatform {
     			}
     			else if (relation == "right") {
     				r = QSR.Right(bounds1, bounds2) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
-    				    (QSR.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.During(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y) ||
-    				     QSR.Finishes(bounds1, bounds2, MajorAxis.Y, true));
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z, true)) &&
+    				    (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.During(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Y, true) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y) ||
+    				     RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Y, true));
     //				r = (Vector3.Distance (
     //					new Vector3 (obj2.gameObject.transform.position.x, obj1.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
     //					obj2.gameObject.transform.position) <= Constants.EPSILON);

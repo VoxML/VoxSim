@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="us-ascii"?>
+<!-- a test file to sort out the semantics of ternary (or > binary) relations -->
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <Entity Type="Relation" />
   <Lex>
-    <Pred>on</Pred>
+    <Pred>at</Pred>
   </Lex>
   <Type>
     <Class>config</Class>
-    <Value>EC</Value>
+    <Value>EQ</Value>
     <Args>
-        <Arg Value="x:3D" />
-        <Arg Value="y:3D" />
+        <Arg Value="x:physobj" />
+        <Arg Value="y:vector*physobj" />
+        <Arg Value="z:vector*physobj" />
     </Args>
-    <Constr>Y(x) &gt; Y(y)</Constr>
+    <Constr />
     <Corresps />
   </Type>
 </VoxML>

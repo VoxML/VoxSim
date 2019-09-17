@@ -2,7 +2,7 @@
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Entity Type="Program" />
   <Lex>
-    <Pred>put</Pred>
+    <Pred>ungrasp</Pred>
     <Type>transition_event</Type>
   </Lex>
   <Type>
@@ -14,12 +14,9 @@
     <Args>
       <Arg Value="x:agent" />
       <Arg Value="y:physobj" />
-      <Arg Value="z:location" />
     </Args>
     <Body>
-      <Subevent Value="grasp(x,y)" />
-      <Subevent Value="put(y,z)" /> <!--while(hold(x,y),move(x,y))-->
-      <Subevent Value="ungrasp(x,y)" /> <!--at(y,z)-&gt;ungrasp(x,y)-->
+      <Subevent Value="ungrasp(x,y)" />
     </Body>
     <Scale />
     <Arity />

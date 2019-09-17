@@ -34,26 +34,32 @@ namespace VoxSimPlatform {
 
         	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
-        	public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
+            public LinkedList<Vector3> interTargetPositions = new LinkedList<Vector3>();
+        	//public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
 
             [SerializeField]
             private Vector3 _targetPosition;
         	public Vector3 targetPosition {
         		get { return _targetPosition; }
         		set {
-        			OnTargetPositionChanged(_targetPosition, value);
+                    if (_targetPosition != value) {
+            			OnTargetPositionChanged(_targetPosition, value);
+                    }
         			_targetPosition = value;
         		}
         	}
 
-        	public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
+            public LinkedList<Vector3> interTargetRotations = new LinkedList<Vector3>();
+        	//public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
 
             [SerializeField]
             private Vector3 _targetRotation;
         	public Vector3 targetRotation {
                 get { return _targetRotation; }
                 set {
-                    OnTargetRotationChanged(_targetRotation, value);
+                    if (_targetRotation != value) {
+                        OnTargetRotationChanged(_targetRotation, value);
+                    }
                     _targetRotation = value;
                 }
             }
@@ -63,7 +69,9 @@ namespace VoxSimPlatform {
             public Vector3 targetScale {
                 get { return _targetScale; }
                 set {
-                    OnTargetScaleChanged(_targetScale, value);
+                    if (_targetScale != value) {
+                        OnTargetScaleChanged(_targetScale, value);
+                    }
                     _targetScale = value;
                 }
             }
@@ -182,24 +190,18 @@ namespace VoxSimPlatform {
         					if (transform.position != targetPosition) {
         						Vector3 offset = MoveToward(targetPosition);
 
-        						if (offset.sqrMagnitude <= Constants.EPSILON) {
-        							transform.position = targetPosition;
+        						//if (offset.sqrMagnitude <= Constants.EPSILON) {
+        						//	transform.position = targetPosition;
 
-        							foreach (Voxeme child in children) {
-        								if (child.isActiveAndEnabled) {
-        									if (child.gameObject != gameObject) {
-        										child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
-        										child.targetPosition = child.transform.position;
-        									}
-        								}
-        							}
-
-        //							foreach (Rigidbody rigidbody in rigging.rigidbodies) {
-        //								if (rotationalDisplacement.ContainsKey (rigidbody.gameObject)) {
-        //									rigidbody.transform.localEulerAngles = rotationalDisplacement [rigidbody.gameObject];
-        //								}
-        //							}
-        						}
+        						//	foreach (Voxeme child in children) {
+        						//		if (child.isActiveAndEnabled) {
+        						//			if (child.gameObject != gameObject) {
+        						//				child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
+        						//				child.targetPosition = child.transform.position;
+        						//			}
+        						//		}
+        						//	}
+        						//}
         					}
         				}
         				else {
@@ -207,9 +209,9 @@ namespace VoxSimPlatform {
         					if (graspTracker.transform.position != targetPosition + graspController.graspTrackerOffset) {
         						Vector3 offset = MoveToward(targetPosition + graspController.graspTrackerOffset);
 
-        						if (offset.sqrMagnitude <= Constants.EPSILON) {
-        							graspTracker.transform.position = targetPosition + graspController.graspTrackerOffset;
-        						}
+        						//if (offset.sqrMagnitude <= Constants.EPSILON) {
+        						//	graspTracker.transform.position = targetPosition + graspController.graspTrackerOffset;
+        						//}
         					}
         				}
         			}
@@ -221,24 +223,25 @@ namespace VoxSimPlatform {
         			}
         		}
         		else {
-        			Vector3 interimTarget = interTargetPositions.Peek();
+        			Vector3 interimTarget = interTargetPositions.ElementAt(0);
         			if (!isGrasped) {
         				//if (transform.position != interimTarget) {
         				Vector3 offset = MoveToward(interimTarget);
 
         				if (offset.sqrMagnitude <= Constants.EPSILON) {
-        					transform.position = interimTarget;
+                            //transform.position = interimTarget;
 
-        					foreach (Voxeme child in children) {
-        						if (child.isActiveAndEnabled) {
-        							if (child.gameObject != gameObject) {
-        								child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
-        								child.targetPosition = child.transform.position;
-        							}
-        						}
-        					}
+                            //foreach (Voxeme child in children) {
+                            //	if (child.isActiveAndEnabled) {
+                            //		if (child.gameObject != gameObject) {
+                            //			child.transform.localPosition = parentToChildPositionOffset[child.gameObject];
+                            //			child.targetPosition = child.transform.position;
+                            //		}
+                            //	}
+                            //}
 
-        					interTargetPositions.Dequeue();
+                            Debug.Log(string.Format("Removing {0} from {1}.interTargetPositions", Helper.VectorToParsable(interimTarget), gameObject.name));
+        					interTargetPositions.RemoveFirst();
         				}
 
         				//}
@@ -249,8 +252,8 @@ namespace VoxSimPlatform {
         				Vector3 offset = MoveToward(interimTarget + graspController.graspTrackerOffset);
 
         				if (offset.sqrMagnitude <= Constants.EPSILON) {
-        					graspTracker.transform.position = interimTarget; //+graspController.graspTrackerOffset;
-        					interTargetPositions.Dequeue();
+        					//graspTracker.transform.position = interimTarget; //+graspController.graspTrackerOffset;
+        					interTargetPositions.RemoveFirst();
         				}
 
         				//}
@@ -289,7 +292,7 @@ namespace VoxSimPlatform {
         			}
         		}
         		else {
-        			Vector3 interimTarget = interTargetRotations.Peek();
+        			Vector3 interimTarget = interTargetRotations.ElementAt(0);
         			if (!isGrasped) {
         				if (transform.rotation != Quaternion.Euler(interimTarget)) {
         					//Debug.Log (transform.rotation == Quaternion.Euler (targetRotation));
@@ -301,7 +304,7 @@ namespace VoxSimPlatform {
         						transform.rotation = Quaternion.Euler(interimTarget);
 
         						//Debug.Log (interimTarget);
-        						interTargetRotations.Dequeue();
+        						interTargetRotations.RemoveFirst();
         						//Debug.Log (interTargetRotations.Peek ());
         					}
         				}
@@ -522,11 +525,15 @@ namespace VoxSimPlatform {
         		targetScale = startScale;
         	}
 
-        	Vector3 MoveToward(Vector3 target) {
-        		//Debug.Log (string.Format("{0}: {1}",gameObject.name,Helper.VectorToParsable(target)));
+        	public Vector3 MoveToward(Vector3 target) {
+        		Debug.Log (string.Format("{0}: at {1}, moving toward {2}",gameObject.name,
+                    Helper.VectorToParsable(transform.position),Helper.VectorToParsable(target)));
         		if (!isGrasped) {
         			Vector3 offset = transform.position - target;
         			Vector3 normalizedOffset = Vector3.Normalize(offset);
+
+                    Debug.Log (string.Format("{0}: {1}, {2}",gameObject.name,
+                        Helper.VectorToParsable(offset),Helper.VectorToParsable(normalizedOffset)));
 
         			if (rigging.usePhysicsRig) {
         				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
@@ -542,6 +549,12 @@ namespace VoxSimPlatform {
         				transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
         				transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
 
+                    Debug.Log (string.Format("{0}: {1}",gameObject.name,
+                        offset.sqrMagnitude));
+
+                    if (offset.sqrMagnitude <= Constants.EPSILON) {
+                        transform.position = target;
+                    }
 
         			foreach (Voxeme child in children) {
         				if (child.isActiveAndEnabled) {
@@ -551,9 +564,10 @@ namespace VoxSimPlatform {
         						child.targetPosition = child.transform.position;
         					}
         				}
-        			}
+                    }
 
-        			//GameObject.Find ("ReachObject").transform.position = transform.position;
+                    Debug.Log (string.Format("{0}: {1}, {2}",gameObject.name,
+                        Helper.VectorToParsable(transform.position), Helper.VectorToParsable(target)));
 
         			return offset;
         		}
@@ -579,7 +593,7 @@ namespace VoxSimPlatform {
         		}
         	}
 
-        	float RotateToward(Vector3 target) {
+        	public float RotateToward(Vector3 target) {
         		float offset = 0.0f;
         		if (!isGrasped) {
         			//Quaternion offset = Quaternion.FromToRotation (transform.eulerAngles, targetRotation);

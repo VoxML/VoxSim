@@ -20,34 +20,50 @@ namespace VoxSimPlatform {
         /// Helper class
         /// </summary>
         public static class Helper {
-            public static Regex v = new Regex(@"<.*>");
-            public static Regex cv = new Regex(@",<.*>");
-            public static Regex l = new Regex("[\'\"].*[\'\"]");
+            public static Regex vec = new Regex(@"<.*>");               // vector form regex
+            public static Regex listVec = new Regex(@"\[<.*>\]");       // list of vectors form regex
+            public static Regex commaVec = new Regex(@",<.*>");         // comma + vector form regex
+            public static Regex emptyList = new Regex(@"\[\]");         // empty list form regex (not really a regex but just doing this for consistency
+            public static Regex quoted = new Regex("[\'\"].*[\'\"]");   // quoted form regex
+            public static Regex pred = new Regex(@"[^(]+\(.+\)");       // predicate form regex
 
             // DATA METHODS
+            // IN: String: predicateString representing the entire predicate-argument format of the input
+            // OUT: Hashtable of format { predicate : argument }
             public static Hashtable ParsePredicate(String predicateString) {
                 Hashtable predArgs = new Hashtable();
 
-                Queue<String> split =
-                    new Queue<String>(predicateString.Split(new char[] {'('}, 2, StringSplitOptions.None));
+                // split predicateString on open paren, returning a maximum of two substrings
+                List<String> split =
+                    new List<String>(predicateString.Split(new char[] {'('}, 2, StringSplitOptions.None));
                 if (split.Count > 1) {
-                    String pred = split.ElementAt(0);
-                    String args = split.ElementAt(1);
+                    String pred = split.ElementAt(0);   // portion before (
+                    String args = split.ElementAt(1);   // portion after (
+                    // remove the close paren from the end of args
+                    //  this is the close paren corresponding to the open paren on which we split the string
                     args = args.Remove(args.Length - 1);
-                    predArgs.Add(pred, args);
+                    predArgs.Add(pred, args);   // add to hashtable
                 }
 
                 return predArgs;
             }
 
             public static String GetTopPredicate(String formula) {
-                Queue<String> split = new Queue<String>(formula.Split(new char[] {'('}, 2, StringSplitOptions.None));
+                List<String> split = new List<String>(formula.Split(new char[] {'('}, 2, StringSplitOptions.None));
                 return split.ElementAt(0);
             }
 
-            public static void PrintKeysAndValues(Hashtable ht) {
-                foreach (DictionaryEntry entry in ht)
-                    Debug.Log(entry.Key + " : " + entry.Value);
+            public static void PrintKeysAndValues(string name, Hashtable ht) {
+                if (ht.Count == 0) {
+                    return;
+                }
+
+                List<string> output = new List<string>();
+                foreach (DictionaryEntry entry in ht) {
+                    output.Add(entry.Key + " : " + entry.Value);
+                }
+
+                Debug.Log(name + ": { " + string.Join(", ", output.ToArray()) + " }");
             }
 
             public static String VectorToParsable(Vector3 vector) {
@@ -57,11 +73,22 @@ namespace VoxSimPlatform {
             }
 
             public static Vector3 ParsableToVector(String parsable) {
+                Vector3 retVal = new Vector3();
                 List<String> components =
                     new List<String>((parsable.Replace("<", "").Replace(">", "")).Split(';'));
-                return new Vector3(Convert.ToSingle(components[0]),
-                    Convert.ToSingle(components[1]),
-                    Convert.ToSingle(components[2]));
+                try {
+                    retVal = new Vector3(Convert.ToSingle(components[0]),
+                        Convert.ToSingle(components[1]),
+                        Convert.ToSingle(components[2]));
+                }
+                catch (Exception ex) {
+                    if (ex is FormatException) {
+                        Debug.LogError(string.Format("Input string \"{0}\" was not in a correct format", parsable));
+                    }
+                    throw ex;
+                }
+
+                return retVal; 
             }
 
             public static String QuaternionToParsable(Quaternion quat) {
@@ -88,11 +115,39 @@ namespace VoxSimPlatform {
                 return Convert.ToInt32(inString);
             }
 
+            public static List<int> FindAllIndicesOf(this string str, string value) {
+                if (String.IsNullOrEmpty(value))
+                    throw new ArgumentException("String to find may not be empty", nameof(value));
+                List<int> indexes = new List<int>();
+                for (int index = 0;; index += value.Length) {
+                    index = str.IndexOf(value, index);
+                    if (index == -1)
+                        return indexes;
+                    indexes.Add(index);
+                }
+            }
+
+            public static string ReplaceFirst(this string text, string search, string replace) {
+                int pos = text.IndexOf(search);
+                if (pos < 0) {
+                    return text;
+                }
+                return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+            }
+
+            public static string ReplaceFirstStartingAt(this string text, int startIndex, string search, string replace) {
+                int pos = text.Substring(startIndex, text.Length-startIndex).IndexOf(search);
+                if (pos < 0) {
+                    return text;
+                }
+                return text.Substring(0, startIndex + pos) + replace + text.Substring(startIndex + pos + search.Length);
+            }
+
             public static Triple<String, String, String> MakeRDFTriples(String formula) {
                 // fix for multiple RDF triples
                 Triple<String, String, String> triple = new Triple<String, String, String>("", "", "");
                 Debug.Log("MakeRDFTriple: " + formula);
-                formula = cv.Replace(formula, "");
+                formula = commaVec.Replace(formula, "");
                 String[] components = formula.Replace('(', '/').Replace(')', '/').Replace(',', '/').Split('/');
 
         //          //Debug.Log (components.Length);
@@ -132,7 +187,7 @@ namespace VoxSimPlatform {
                                         triple.Item3 = s;
                                     }
                                 }
-                                else if (l.IsMatch(s)) {
+                                else if (quoted.IsMatch(s)) {
                                     if (triple.Item1 == "") {
                                         triple.Item1 = s;
                                     }
@@ -141,12 +196,12 @@ namespace VoxSimPlatform {
                                     triple.Item2 = triple.Item2 + s + "_";
                                 }
                             }
-                            else if (v.IsMatch(s)) {
+                            else if (vec.IsMatch(s)) {
                                 if (triple.Item3 == "") {
                                     triple.Item3 = s;
                                 }
                             }
-                            else if (l.IsMatch(s)) {
+                            else if (quoted.IsMatch(s)) {
                                 if (triple.Item3 == "") {
                                     triple.Item3 = s;
                                 }

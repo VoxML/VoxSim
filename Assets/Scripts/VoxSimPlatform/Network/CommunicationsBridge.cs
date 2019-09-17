@@ -574,7 +574,7 @@ namespace VoxSimPlatform {
 
                 return socket;
             }
-
+                
             public RestClient FindRestClientByType(Type type) {
                 RestClient socket = null;
 
