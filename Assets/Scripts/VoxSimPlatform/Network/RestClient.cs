@@ -2,15 +2,19 @@
 using UnityEngine.Networking;
 using System;
 using System.Collections;
+using System.Reflection;
 using System.Text;
 
 namespace VoxSimPlatform {
     namespace Network {
         public class RestDataContainer {
+            // Coroutine in which this is instantiated
             public Coroutine coroutine { get; private set; }
+            // Current item from target
             public object result;
             private IEnumerator target;
             public RestDataContainer(MonoBehaviour owner, IEnumerator target) {
+                // e.g. client.TryConnect(address, port)
                 this.target = target;
                 this.coroutine = owner.StartCoroutine(Run());
             }
@@ -18,7 +22,6 @@ namespace VoxSimPlatform {
             private IEnumerator Run() {
                 while (target.MoveNext()) {
                     result = target.Current;
-                    Debug.Log("result's type: "+result.GetType());
                     yield return result;
                 }
             }
@@ -36,11 +39,27 @@ namespace VoxSimPlatform {
             public CommunicationsBridge owner;
             public Type clientType;
 
-            public event EventHandler GotData;
+            public event EventHandler GetOkay;
 
-            public void OnGotData(object sender, EventArgs e) {
-                if (GotData != null) {
-                    GotData(this, e);
+            public void OnGetOkay(object sender, EventArgs e) {
+                if (GetOkay != null) {
+                    GetOkay(this, e);
+                }
+            }
+
+            public event EventHandler GetError;
+
+            public void OnGetError(object sender, EventArgs e) {
+                if (GetError != null) {
+                    GetError(this, e);
+                }
+            }
+
+            public event EventHandler PostOkay;
+
+            public void OnPostOkay(object sender, EventArgs e) {
+                if (PostOkay != null) {
+                    PostOkay(this, e);
                 }
             }
 
@@ -49,6 +68,38 @@ namespace VoxSimPlatform {
             public void OnPostError(object sender, EventArgs e) {
                 if (PostError != null) {
                     PostError(this, e);
+                }
+            }
+
+            public event EventHandler PutOkay;
+
+            public void OnPutOkay(object sender, EventArgs e) {
+                if (PutOkay != null) {
+                    PutOkay(this, e);
+                }
+            }
+
+            public event EventHandler PutError;
+
+            public void OnPutError(object sender, EventArgs e) {
+                if (PutError != null) {
+                    PutError(this, e);
+                }
+            }
+
+            public event EventHandler DeleteOkay;
+
+            public void OnDeleteOkay(object sender, EventArgs e) {
+                if (DeleteOkay != null) {
+                    DeleteOkay(this, e);
+                }
+            }
+
+            public event EventHandler DeleteError;
+
+            public void OnDeleteError(object sender, EventArgs e) {
+                if (DeleteError != null) {
+                    DeleteError(this, e);
                 }
             }
 
@@ -67,12 +118,12 @@ namespace VoxSimPlatform {
                 get { return errorStr; }
             }
 
+            public UnityWebRequest webRequest;
+
             public IEnumerator TryConnect(string _address, int _port) {
-                Debug.Log(string.Format("RestClient TryConnect to {0}", string.Format("{0}:{1}", address, port)));
                 address = _address;
                 port = _port;
                 RestDataContainer result = new RestDataContainer(owner, Post("","0"));
-                //Debug.Log(string.Format("RestClient.TryConnect: {0}", result));
                 yield return result.result;
             }
 
@@ -80,36 +131,38 @@ namespace VoxSimPlatform {
                 isConnected = false;
             }
 
-            public IEnumerator Get(string route) {
+            public virtual IEnumerator Get(string route) {
                 Debug.Log(string.Format("RestClient GET from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "GET", null, "GET_" + successStr, "GET_" + errorStr));
-                yield return result.coroutine;
+                yield return result.result;
             }
 
-            public IEnumerator Post(string route, string jsonPayload) {
+            public virtual IEnumerator Post(string route, string jsonPayload) {
+                Debug.Log(route);
+                Debug.Log(jsonPayload);
                 Debug.Log(string.Format("RestClient POST to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + successStr, "POST_" + errorStr));
                 //Debug.Log(string.Format("RestClient.Post: {0}", result));
                 yield return result.result;
             }
 
-            public IEnumerator Put(string route, string jsonPayload) {
+            public virtual IEnumerator Put(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient PUT to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "PUT", jsonPayload, "PUT_" + successStr, "PUT_" + errorStr));
-                yield return result.coroutine;
+                yield return result.result;
             }
 
-            public IEnumerator Delete(string route, string jsonPayload) {
+            public virtual IEnumerator Delete(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient DELETE from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner,
+                RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "DELETE", jsonPayload, "DELETE_" + successStr, "DELETE_" + errorStr));
-                yield return result.coroutine;
+                yield return result.result;
             }
 
-            private IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
+            public virtual IEnumerator Request(string url, string method, string jsonPayload, string success, string error) {
                 //StartCoroutine(AsyncRequest(jsonPayload, method, url, success, error));
                 //IEnumerator r = AsyncRequest(jsonPayload, method, url, success, error);
                 //yield return r;
@@ -117,16 +170,18 @@ namespace VoxSimPlatform {
                 //Debug.Log(r.GetType());
                 //Debug.Log(r.Current);
                 //Debug.Log(r.Current.GetType());
-
+                //url = url.Replace(":0/", ""); // filler port from before. Might as well handle it here
+                //Debug.LogWarning("URL for request: " + url);
                 Debug.Log(string.Format("RestClient Request {1} to {0}", url, method));
                 RestDataContainer result = new RestDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
                 //Debug.Log(string.Format("RestClient.Request: {0}", result));
                 yield return result.result;
             }
 
-            private IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+            public virtual IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+                // In this method, we actually invoke a request to the outside server
                 Debug.Log(string.Format("RestClient AsyncRequest {1} to {0}", url, method));
-                var webRequest = new UnityWebRequest(url, method);
+                webRequest = new UnityWebRequest(url, method);
                 var payloadBytes = string.IsNullOrEmpty(jsonPayload)
                     ? Encoding.UTF8.GetBytes("{}")
                     : Encoding.UTF8.GetBytes(jsonPayload);
@@ -135,33 +190,58 @@ namespace VoxSimPlatform {
                 webRequest.uploadHandler = upload;
                 webRequest.downloadHandler = new DownloadHandlerBuffer();
                 webRequest.SetRequestHeader("Content-Type", "application/json");
-                //Debug.Log(string.Format("RestClient.AsyncRequest: {0}", webRequest));
                 yield return webRequest.SendWebRequest();    // 2017.2
                 //yield return webRequest.Send();
 
-                //if (webRequest.isNetworkError) {
-                //    gameObject.BroadcastMessage(error, webRequest.error, SendMessageOptions.DontRequireReceiver);
-                //}
-                //else if (webRequest.responseCode < 200 || webRequest.responseCode >= 400) {
-                //    gameObject.BroadcastMessage(error, webRequest.downloadHandler.text,
-                //        SendMessageOptions.DontRequireReceiver);
-                //}
-                //else {
-                //    //Debug.Log (webRequest.downloadHandler.text);
-                //    gameObject.BroadcastMessage(success, webRequest.downloadHandler.text);
-                //}
+                if (webRequest.isNetworkError) {
+                    MethodInfo responseMethod = GetType().GetMethod(error);
+                    responseMethod.Invoke(this, new object[] { webRequest.error });
+                    //gameObject.BroadcastMessage(error, webRequest.error, SendMessageOptions.DontRequireReceiver);
+                }
+                else if (webRequest.responseCode < 200 || webRequest.responseCode >= 400) {
+                    MethodInfo responseMethod = GetType().GetMethod(error);
+                    responseMethod.Invoke(this, new object[] { webRequest.downloadHandler.text });
+                    //gameObject.BroadcastMessage(error, webRequest.downloadHandler.text,
+                    //    SendMessageOptions.DontRequireReceiver);
+                }
+                else {
+                    MethodInfo responseMethod = GetType().GetMethod(success);
+                    responseMethod.Invoke(this, new object[] { webRequest.downloadHandler.text });
+                    //gameObject.BroadcastMessage(success, webRequest.downloadHandler.text);
+                }
             }
 
-            void POST_okay(object parameter) { 
+            public void GET_okay(object parameter) {
+                OnGetOkay(this, new RestEventArgs(parameter));
+            }
+
+            public void GET_error(object parameter) {
+                OnGetError(this, new RestEventArgs(parameter));
+            }
+
+            public void POST_okay(object parameter) {
                 isConnected = true;
+                OnPostOkay(this, null);
             }
 
-            void POST_error(object parameter) {
+            public void POST_error(object parameter) {
                 OnPostError(this, null);
             }
 
-            void GET_okay(object parameter) {
-                OnGotData(this, new RestEventArgs(parameter));
+            public void PUT_okay(object parameter) {
+                OnPutOkay(this, null);
+            }
+
+            public void PUT_error(object parameter) {
+                OnPutError(this, null);
+            }
+
+            public void DELETE_okay(object parameter) {
+                OnDeleteOkay(this, null);
+            }
+
+            public void DELETE_error(object parameter) {
+                OnDeleteError(this, null);
             }
         }
     }

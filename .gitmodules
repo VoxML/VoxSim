@@ -1,0 +1,3 @@
+[submodule "Assets/Externals/python/qsrlib_interface/strands_qsr_lib"]
+	path = Assets/Externals/python/qsrlib_interface/strands_qsr_lib
+	url = https://github.com/strands-project/strands_qsr_lib.git

@@ -76,7 +76,7 @@ public class DianaOzStudies : MonoBehaviour {
 			}
 		}
 
-		restClient.GetComponent<RestClient>().GotData += ConsumeData;
+		restClient.GetComponent<RestClient>().GetOkay += ConsumeData;
 		world.ObjectSelected += BlockClicked;
 		world.PointSelected += PointClicked;
 		eventManager.EventComplete += EventCompleted;

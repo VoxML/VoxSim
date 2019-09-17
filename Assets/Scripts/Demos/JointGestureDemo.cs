@@ -10,7 +10,6 @@ using System.Timers;
 
 using MajorAxes;
 using RootMotion.FinalIK;
-using VoxSimPlatform;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.Agent.CharacterLogic;
 using VoxSimPlatform.Agent.SyntheticVision;
@@ -20,6 +19,7 @@ using VoxSimPlatform.Global;
 using VoxSimPlatform.Interaction;
 using VoxSimPlatform.Logging;
 using VoxSimPlatform.Network;
+using VoxSimPlatform.NLU;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
 using VoxSimPlatform.Vox;
@@ -35,7 +35,8 @@ public class SelectionEventArgs : EventArgs {
 public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
     KSIMSocket ksimSocket;
-	EventManager eventManager;
+    NLURestClient nluRestClient;
+    EventManager eventManager;
 	ObjectSelector objSelector;
 	CommunicationsBridge commBridge;
 	RelationTracker relationTracker;
@@ -107,9 +108,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	public Vector2 windowScaleFactor;
 	public float kinectToSurfaceHeight = .63f; //m
 
-	public bool
-		transformToScreenPointing =
-			false; // false = assume table in demo space and use its coords to mirror table coords
+	public bool transformToScreenPointing = false; // false = assume table in demo space and use its coords to mirror table coords
 
 	public Vector2 receivedPointingCoord = Vector2.zero;
 	public Vector2 receivedPointingVariance = Vector2.zero;
@@ -270,7 +269,17 @@ public class JointGestureDemo : SingleAgentInteraction {
 
         ksimSocket = (KSIMSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("KSIM");
 
-  		leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+        // set up the parser we want to use in this scene
+        nluRestClient = (NLURestClient)commBridge.GetComponent<CommunicationsBridge>().FindRestClientByLabel("NLTK");
+        if (nluRestClient.isConnected) {
+            // if this client is not connected,
+            //  we should back off to the default parser,
+            //  which is initialized in commBridge by, well, default
+            commBridge.parser = new PythonJSONParser();
+            commBridge.parser.InitParserService(nluRestClient,typeof(NLTKSyntax));
+        }
+
+        leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 		gestureController = Diana.GetComponent<AvatarGestureController>();
 		ik = Diana.GetComponent<FullBodyBipedIK>();
@@ -298,9 +307,10 @@ public class JointGestureDemo : SingleAgentInteraction {
 		regionHighlight.tag = "UnPhysic";
 		regionHighlight.GetComponent<Renderer>().material = activeHighlightMaterial;
 		regionHighlight.gameObject.layer = 5;
-		//regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
-//		regionHighlight.GetComponent<Renderer> ().enabled = false;
-		Destroy(regionHighlight.GetComponent<Collider>());
+
+        //regionHighlight.GetComponent<Renderer> ().material.SetColor("_Color",new Color(1.0f,1.0f,1.0f,0.5f));
+        //		regionHighlight.GetComponent<Renderer> ().enabled = false;
+        Destroy(regionHighlight.GetComponent<Collider>());
 
 		highlightTimeoutTimer = new Timer(highlightTimeoutTime);
 		highlightTimeoutTimer.Enabled = false;
@@ -342,6 +352,8 @@ public class JointGestureDemo : SingleAgentInteraction {
 		directionVectors.Add("up", Vector3.up);
 		directionVectors.Add("down", Vector3.down);
 	}
+
+
 
 	// Update is called once per frame
 	void Update() {
@@ -1593,10 +1605,10 @@ public class JointGestureDemo : SingleAgentInteraction {
 							new List<Pair<Pair<GameObject, GameObject>, string>>();
 
 						foreach (DictionaryEntry relation in relationTracker.relations) {
-							// longest relation set == most relevant
+                            // longest relation set == most relevant
 
-							if ((relation.Key as List<GameObject>).Contains(blockObj)) {
-								relationsInForce.Add(new Pair<Pair<GameObject, GameObject>, string>(
+                            if ((relation.Key as List<GameObject>).Contains(blockObj) && !(relation.Key as List<GameObject>).Contains(demoSurface)) {
+                                relationsInForce.Add(new Pair<Pair<GameObject, GameObject>, string>(
 									new Pair<GameObject, GameObject>((relation.Key as List<GameObject>)[0],
 										(relation.Key as List<GameObject>)[1]),
 									relation.Value as string));
@@ -1819,6 +1831,17 @@ public class JointGestureDemo : SingleAgentInteraction {
 				break;
 		}
 	}
+
+    /// <summary>
+    /// After being notified by broadcast that there is a new parse
+    /// from the external server, actually carry out the task.
+    /// This code is copypasta'd from other places we add stuff to the stack
+    /// because I don't actually know exactly what it does/how it works
+    /// </summary>
+    public void LookForNewParse() {
+        string parse = commBridge.GrabParse();
+        PromptEvent(parse);
+    }
 
 	public void ParseNP(object[] content) {
 		// type check
@@ -2480,7 +2503,10 @@ public class JointGestureDemo : SingleAgentInteraction {
 			else if ((new Regex(@"put\(\{0\},<.+,.+,.+>\)")).IsMatch(interactionLogic.ActionOptions[0])) {
 				RespondAndUpdate("What should I put there?");
 			}
-			else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch(interactionLogic.ActionOptions[0])) ||
+            else if ((new Regex(@"put\(.+,\{0\}\)")).IsMatch(interactionLogic.ActionOptions[0])) {
+                RespondAndUpdate("Where should I put that?");
+            }
+            else if (((new Regex(@"put\(\{0\},.+\)")).IsMatch(interactionLogic.ActionOptions[0])) ||
 			         (interactionLogic.RemoveInputSymbolType(interactionLogic.ActionOptions[0],
 					         interactionLogic.GetInputSymbolType(interactionLogic.ActionOptions[0]))
 				         .StartsWith("grab move"))) {
@@ -2608,20 +2634,27 @@ public class JointGestureDemo : SingleAgentInteraction {
 		// see if this object has a learned conventional grasp pose associated with it
 		List<object> objs = new List<object>();
 		if (interactionLogic.ActionOptions.Count > 0) {
-			objs = eventManager.ExtractObjects(Helper.GetTopPredicate(interactionLogic.ActionOptions[0]),
-				(String) Helper.ParsePredicate(interactionLogic.ActionOptions[0])[
-					Helper.GetTopPredicate(interactionLogic.ActionOptions[0])]);
+            string actionCmd = interactionLogic.ActionOptions[0];
+            eventManager.ParseCommand(actionCmd);
+            eventManager.FinishSkolemization();
+            string skolemized = eventManager.Skolemize(actionCmd);
+            if (eventManager.EvaluateSkolemConstants(EventManager.EvaluationPass.Attributes)) {
+                actionCmd = eventManager.ApplySkolems(skolemized);
+            }
+            
+            objs = eventManager.ExtractObjects(Helper.GetTopPredicate(actionCmd),
+                (String)Helper.ParsePredicate(actionCmd)[Helper.GetTopPredicate(actionCmd)]);
 
-			//if ((obj != null) && (interactionLogic.ActionOptions.Count > 0)) {
-			//    if (InteractionHelper.GetCloserHand(Diana, obj) == leftGrasper) {
-			//        grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
-			//    }
-			//    else if (InteractionHelper.GetCloserHand(Diana, obj) == rightGrasper) {
-			//        grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
-			//    }
-			//}
+            //if ((obj != null) && (interactionLogic.ActionOptions.Count > 0)) {
+            //    if (InteractionHelper.GetCloserHand(Diana, obj) == leftGrasper) {
+            //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "lHand");
+            //    }
+            //    else if (InteractionHelper.GetCloserHand(Diana, obj) == rightGrasper) {
+            //        grabStr = interactionLogic.ActionOptions[0].Replace("*", "rHand");
+            //    }
+            //}
 
-			if ((interactionLogic.IndicatedObj == null) && (interactionLogic.GraspedObj == null)) {
+            if ((interactionLogic.IndicatedObj == null) && (interactionLogic.GraspedObj == null)) {
 				interactionLogic.RewriteStack(new PDAStackOperation(PDAStackOperation.PDAStackOperationType.Rewrite,
 					interactionLogic.GenerateStackSymbol((objs[0] as GameObject), null, null, null, null, null)));
 			}

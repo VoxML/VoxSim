@@ -50,7 +50,7 @@ public class EpiSimIOClient : MonoBehaviour {
     }
 
     public void Get(string route) {
-        RestDataContainer result = new RestDataContainer(this, EpiSimSocket.Get(route));
+        EpiSimSocket.Get(route);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_epiSimSocket.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
@@ -66,7 +66,7 @@ public class EpiSimIOClient : MonoBehaviour {
     }
 
     public void Post(string route, string content) {
-        RestDataContainer result = new RestDataContainer(this, EpiSimSocket.Post(route,content));
+        EpiSimSocket.Post(route,content);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_epiSimSocket.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
@@ -82,7 +82,7 @@ public class EpiSimIOClient : MonoBehaviour {
     }
 
     public void Put(string route, string content) {
-        RestDataContainer result = new RestDataContainer(this, EpiSimSocket.Put(route, content));
+       EpiSimSocket.Put(route, content);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_epiSimSocket.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);
@@ -98,7 +98,7 @@ public class EpiSimIOClient : MonoBehaviour {
     }
 
     public void Delete(string route, string content) {
-        RestDataContainer result = new RestDataContainer(this, EpiSimSocket.Delete(route, content));
+        EpiSimSocket.Delete(route, content);
 
         //if (result.result.webRequest.isNetworkError) {
         //    gameObject.BroadcastMessage(_epiSimSocket.ErrorStr, result.result.webRequest.error, SendMessageOptions.DontRequireReceiver);

@@ -513,7 +513,7 @@ namespace VoxSimPlatform {
                 Queue<String> argsStrings = new Queue<String>(predArg.Split(new char[] {
                     ','
                 }));
-
+                    
                 // Match referent stack to whoever is being talked to
                 if (GetActiveAgent() != null) {
                     referents = GetActiveAgent().GetComponent<ReferentStore>();

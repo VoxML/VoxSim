@@ -135,7 +135,7 @@ namespace VoxSimPlatform {
         		}
 
         		child.transform.parent = parent.transform;
-        		Debug.LogWarning(child.name + " rigged to " + parent.name);
+        		//Debug.LogWarning(child.name + " rigged to " + parent.name);
 
         		if (!child.GetComponent<Rigging>().usePhysicsRig) {
         			if (parent.transform.Find(string.Format("{0}_collision_clone", child.name)) == null) {

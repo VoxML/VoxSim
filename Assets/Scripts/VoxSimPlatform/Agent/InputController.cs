@@ -264,6 +264,13 @@ namespace VoxSimPlatform {
 
         			Debug.Log("User entered: " + inputString);
 
+                    if (inputString.StartsWith("qsr:")) {
+                        SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
+                            (SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
+                        qsrLibSocket.SendQSRRequest(inputString);
+                        return;
+                    }
+
         			Dictionary<string, string> vectors = new Dictionary<string, string>();
 
         			foreach (Match match in v.Matches(inputString)) {
@@ -272,7 +279,7 @@ namespace VoxSimPlatform {
         				inputString = v.Replace(inputString, string.Format("V@{0}", match.Index), 1);
         			}
 
-        			Debug.Log(inputString);
+        			Debug.Log("Formatted as: " + inputString);
 
         			if (!r.IsMatch(inputString)) {
         				// is not already functional form
