@@ -36,6 +36,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 	FusionSocket fusionSocket;
     KSIMSocket ksimSocket;
     NLURestClient nluRestClient;
+    ADESocket adeSocket;
     EventManager eventManager;
 	ObjectSelector objSelector;
 	CommunicationsBridge commBridge;
@@ -269,15 +270,10 @@ public class JointGestureDemo : SingleAgentInteraction {
 
         ksimSocket = (KSIMSocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("KSIM");
 
+        adeSocket = (ADESocket)commBridge.GetComponent<CommunicationsBridge>().FindSocketConnectionByLabel("ADE");
+
         // set up the parser we want to use in this scene
         nluRestClient = (NLURestClient)commBridge.GetComponent<CommunicationsBridge>().FindRestClientByLabel("NLTK");
-        if (nluRestClient.isConnected) {
-            // if this client is not connected,
-            //  we should back off to the default parser,
-            //  which is initialized in commBridge by, well, default
-            commBridge.parser = new PythonJSONParser();
-            commBridge.parser.InitParserService(nluRestClient,typeof(NLTKSyntax));
-        }
 
         leftGrasper = Diana.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
 		rightGrasper = Diana.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
@@ -357,7 +353,18 @@ public class JointGestureDemo : SingleAgentInteraction {
 
 	// Update is called once per frame
 	void Update() {
-		if (demoSurface != Helper.GetMostImmediateParentVoxeme(demoSurface)) {
+        if (nluRestClient.isConnected) {
+            if ((commBridge.parser == null) || (commBridge.parser.GetType() != typeof(PythonJSONParser))) {
+                // if this client is not connected,
+                //  we should back off to the default parser,
+                //  which is initialized in commBridge by, well, default
+                commBridge.parser = new PythonJSONParser();
+                commBridge.parser.InitParserService(nluRestClient, typeof(NLTKSyntax));
+                nluRestClient.PostOkay += LookForNewParse;
+            }
+        }
+
+        if (demoSurface != Helper.GetMostImmediateParentVoxeme(demoSurface)) {
 			demoSurface = Helper.GetMostImmediateParentVoxeme(demoSurface);
 
 			for (int i = 0; i < availableObjs.Count; i++) {
@@ -1838,7 +1845,7 @@ public class JointGestureDemo : SingleAgentInteraction {
     /// This code is copypasta'd from other places we add stuff to the stack
     /// because I don't actually know exactly what it does/how it works
     /// </summary>
-    public void LookForNewParse() {
+    public void LookForNewParse(object sender, EventArgs e) {
         string parse = commBridge.GrabParse();
         PromptEvent(parse);
     }
@@ -4590,13 +4597,13 @@ public class JointGestureDemo : SingleAgentInteraction {
 
 		//LookAt (obj);
 
-		if ((commBridge.ADESocket != null) && (commBridge.ADESocket.IsConnected())) {
+		if ((adeSocket != null) && (adeSocket.IsConnected())) {
 			string goalSemantics = string.Format("moveToObject(self, {0}(X)^{1}(X)",
 				obj.GetComponent<Voxeme>().voxml.Attributes.Attrs[0].Value,
 				obj.GetComponent<Voxeme>().voxml.Lex.Pred);
 			byte[] bytes = BitConverter.GetBytes(goalSemantics.Length).Concat(Encoding.ASCII.GetBytes(goalSemantics))
 				.ToArray<byte>();
-			commBridge.ADESocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
+            adeSocket.Write(BitConverter.GetBytes(bytes.Length).Concat(bytes).ToArray<byte>());
 		}
 
 		if (!logActionsOnly) {

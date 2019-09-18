@@ -130,6 +130,7 @@ public class UnderspecificationVideoAutoCapture : MonoBehaviour {
 		eventObjs = new List<GameObject>();
 
 		if (captureMode == VideoCaptureMode.PerEvent) {
+            // TODO: Default Listener Port no longer active, switch to Commander
 			commBridge.PortOpened += StartAutoInput;
 
 			inputController.InputReceived += PrepareScene;

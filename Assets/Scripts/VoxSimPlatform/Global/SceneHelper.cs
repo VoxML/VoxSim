@@ -20,8 +20,8 @@ namespace VoxSimPlatform {
                     yield return null;
                 }
 
-                CommunicationsBridge commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
-                commBridge.OpenPortInternal(PlayerPrefs.GetString("Listener Port"));
+                //CommunicationsBridge commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
+                //commBridge.OpenPortInternal(PlayerPrefs.GetString("Listener Port"));
 
 #if UNITY_IOS
                 Screen.SetResolution(1280,960,true);

@@ -37,8 +37,10 @@ namespace VoxSimPlatform {
         		}
 
         		if (commBridge != null) {
-        			if (commBridge.CommanderSocket != null) {
-        				commBridge.CommanderSocket.Write("");
+                    CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
+
+                    if (commander != null) {
+                        commander.Write("");
         			}
         		}
         	}

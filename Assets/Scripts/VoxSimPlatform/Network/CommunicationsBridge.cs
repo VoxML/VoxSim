@@ -56,37 +56,37 @@ namespace VoxSimPlatform {
                 set { _parser = value; }
             }
 
-            private CmdServer _cmdServer;
+            //private CmdServer _cmdServer;
             //private FusionSocket _fusionSocket;
-            private EventLearningSocket _eventLearningSocket;
-            private StructureLearningSocket _structureLearningSocket;
-            private CommanderSocket _commanderSocket;
-            private KSIMSocket _ksimSocket;
-            private ADESocket _adeSocket;
+            //private EventLearningSocket _eventLearningSocket;
+            //private StructureLearningSocket _structureLearningSocket;
+            //private CommanderSocket _commanderSocket;
+            //private KSIMSocket _ksimSocket;
+            //private ADESocket _adeSocket;
 
             //public FusionSocket FusionSocket {
             //    get { return _fusionSocket; }
             //}
 
-            public EventLearningSocket EventLearningSocket {
-                get { return _eventLearningSocket; }
-            }
+            //public EventLearningSocket EventLearningSocket {
+            //    get { return _eventLearningSocket; }
+            //}
 
-            public StructureLearningSocket StructureLearningSocket {
-                get { return _structureLearningSocket; }
-            }
+            //public StructureLearningSocket StructureLearningSocket {
+            //    get { return _structureLearningSocket; }
+            //}
 
-            public CommanderSocket CommanderSocket {
-                get { return _commanderSocket; }
-            }
+            //public CommanderSocket CommanderSocket {
+            //    get { return _commanderSocket; }
+            //}
 
             //public KSIMSocket KSIMSocket {
             //    get { return _ksimSocket; }
             //}
 
-            public ADESocket ADESocket {
-                get { return _adeSocket; }
-            }
+            //public ADESocket ADESocket {
+            //    get { return _adeSocket; }
+            //}
 
             List<SocketConnection> _socketConnections;
             public List<SocketConnection> SocketConnections {
@@ -127,13 +127,13 @@ namespace VoxSimPlatform {
                 connectionRetryTimer.Enabled = true;
                 connectionRetryTimer.Elapsed += RetryConnections;
 
-                string port = PlayerPrefs.GetString("Listener Port");
-                if (port != "") {
-                    OpenPortInternal(port);
-                }
-                else {
-                    Debug.Log("No listener port specified. Skipping interface startup.");
-                }
+                //string port = PlayerPrefs.GetString("Listener Port");
+                //if (port != "") {
+                //    OpenPortInternal(port);
+                //}
+                //else {
+                //    Debug.Log("No listener port specified. Skipping interface startup.");
+                //}
 
                 if (PlayerPrefs.HasKey("URLs")) {
                     // TODO: Refactor generically
@@ -147,8 +147,7 @@ namespace VoxSimPlatform {
                         try {
                             socketLabels.Add(segments[0]);  // the current socket label
                         }
-                        catch (Exception ex)
-                        {
+                        catch (Exception ex) {
                             if (ex is ArgumentOutOfRangeException)
                             {
                                 Debug.LogError(string.Format("Argument 0 (label) for socket #{0} is not specified!  Try resaving socket connections from the main menu!", i));
@@ -303,52 +302,52 @@ namespace VoxSimPlatform {
                 //    }
                 //}
 
-                if (_cmdServer != null) {
-                    string inputFromCommander = _cmdServer.GetMessage();
-                    if (inputFromCommander != "") {
-                        Debug.Log(inputFromCommander);
-                        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).inputString =
-                            inputFromCommander.Trim();
-                        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).MessageReceived(
-                            inputFromCommander.Trim());
-                    }
-                }
+                //if (_cmdServer != null) {
+                //    string inputFromCommander = _cmdServer.GetMessage();
+                //    if (inputFromCommander != "") {
+                //        Debug.Log(inputFromCommander);
+                //        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).inputString =
+                //            inputFromCommander.Trim();
+                //        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).MessageReceived(
+                //            inputFromCommander.Trim());
+                //    }
+                //}
 
-                if (_commanderSocket != null) {
-        //            Debug.Log (_commanderClient.IsConnected ());
-                    string inputFromCommander = _commanderSocket.GetMessage();
-                    if (inputFromCommander != "") {
-                        Debug.Log(inputFromCommander);
-                        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).inputString =
-                            inputFromCommander.Trim();
-                        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).MessageReceived(
-                            inputFromCommander.Trim());
-                    }
-                }
+                //if (_commanderSocket != null) {
+        //      //      Debug.Log (_commanderClient.IsConnected ());
+                //    string inputFromCommander = _commanderSocket.GetMessage();
+                //    if (inputFromCommander != "") {
+                //        Debug.Log(inputFromCommander);
+                //        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).inputString =
+                //            inputFromCommander.Trim();
+                //        ((InputController) (GameObject.Find("IOController").GetComponent("InputController"))).MessageReceived(
+                //            inputFromCommander.Trim());
+                //    }
+                //}
 
-                if (_ksimSocket != null) {
-                    if (_ksimSocket.IsConnected()) {
-                    }
-                    else {
-                        _ksimSocket.OnConnectionLost(this, null);
-                        string ksimAddress = string.Format("{0}:{1}", _ksimSocket.Address, _ksimSocket.Port);
-                        if (!tryAgainSockets.ContainsKey(ksimAddress)) {
-                            tryAgainSockets.Add(ksimAddress, _ksimSocket.GetType());
-                        }
-                    }
-                }
+                //if (_ksimSocket != null) {
+                //    if (_ksimSocket.IsConnected()) {
+                //    }
+                //    else {
+                //        _ksimSocket.OnConnectionLost(this, null);
+                //        string ksimAddress = string.Format("{0}:{1}", _ksimSocket.Address, _ksimSocket.Port);
+                //        if (!tryAgainSockets.ContainsKey(ksimAddress)) {
+                //            tryAgainSockets.Add(ksimAddress, _ksimSocket.GetType());
+                //        }
+                //    }
+                //}
 
-                if (_adeSocket != null) {
-                    if (_adeSocket.IsConnected()) {
-                    }
-                    else {
-                        _adeSocket.OnConnectionLost(this, null);
-                        string adeAddress = string.Format("{0}:{1}", _adeSocket.Address, _adeSocket.Port);
-                        if (!tryAgainSockets.ContainsKey(adeAddress)) {
-                            tryAgainSockets.Add(adeAddress, _adeSocket.GetType());
-                        }
-                    }
-                }
+                //if (_adeSocket != null) {
+                //    if (_adeSocket.IsConnected()) {
+                //    }
+                //    else {
+                //        _adeSocket.OnConnectionLost(this, null);
+                //        string adeAddress = string.Format("{0}:{1}", _adeSocket.Address, _adeSocket.Port);
+                //        if (!tryAgainSockets.ContainsKey(adeAddress)) {
+                //            tryAgainSockets.Add(adeAddress, _adeSocket.GetType());
+                //        }
+                //    }
+                //}
 
                 if ((retryConnections) && (tryAgainSockets.Keys.Count > 0)) {
                     foreach (string connectionUrl in tryAgainSockets.Keys) {
@@ -385,23 +384,23 @@ namespace VoxSimPlatform {
                                         //Debug.Log(string.Format("Connection to {0} is lost!", socket.GetType()));
                                     }
 
-                                    if (tryAgainSockets[connectionUrl] == typeof(FusionSocket)) {
+                                    //if (tryAgainSockets[connectionUrl] == typeof(FusionSocket)) {
                                         //_fusionSocket = (FusionSocket) socket;
                                         //Debug.Log(_fusionSocket.IsConnected());
-                                    }
-                                    else if (tryAgainSockets[connectionUrl] == typeof(KSIMSocket)) {
-                                        _ksimSocket = (KSIMSocket) socket;
+                                    //}
+                                    //else if (tryAgainSockets[connectionUrl] == typeof(KSIMSocket)) {
+                                    //    _ksimSocket = (KSIMSocket) socket;
 
-                                        if (_ksimSocket.IsConnected()) {
+                                    //    if (_ksimSocket.IsConnected()) {
                                             // register VoxSim
-                                            byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] {0x02}).ToArray<byte>();
-                                            _ksimSocket.Write(bytes);
-                                        }
-                                    }
-                                    else if (tryAgainSockets[connectionUrl] == typeof(ADESocket)) {
-                                        _adeSocket = (ADESocket) socket;
+                                    //        byte[] bytes = BitConverter.GetBytes(1).Concat(new byte[] {0x02}).ToArray<byte>();
+                                    //        _ksimSocket.Write(bytes);
+                                    //    }
+                                    //}
+                                    //else if (tryAgainSockets[connectionUrl] == typeof(ADESocket)) {
+                                    //    _adeSocket = (ADESocket) socket;
                                         //Debug.Log(_fusionSocket.IsConnected());
-                                    }
+                                    //}
                                 }
                             }
                         }
@@ -516,21 +515,21 @@ namespace VoxSimPlatform {
                 }
             }
 
-            public void OpenPortInternal(string port) {
-                try {
+            //public void OpenPortInternal(string port) {
+            //    try {
                     // pass true as first param to make the server visible only to 'localhost'
                     // (for testing, for exmaple)
-                    _cmdServer = new CmdServer(false, int.Parse(port), 1);
-                    OnPortOpened(this, null);
-                }
-                catch (Exception e) {
-                    Debug.Log("Failed to open port " + port);
-                    Debug.Log(e.Message);
-                    Debug.Log(e.InnerException);
-                    Debug.Log(e.StackTrace);
-                    Debug.Log(e.Data);
-                }
-            }
+                    //_cmdServer = new CmdServer(false, int.Parse(port), 1);
+            //        OnPortOpened(this, null);
+            //    }
+            //    catch (Exception e) {
+            //        Debug.Log("Failed to open port " + port);
+            //        Debug.Log(e.Message);
+            //        Debug.Log(e.InnerException);
+            //        Debug.Log(e.StackTrace);
+            //        Debug.Log(e.Data);
+            //    }
+            //}
 
             public string NLParse(string input) {
         //        string[] args = new string[]{input};
@@ -584,10 +583,10 @@ namespace VoxSimPlatform {
             }
 
             void OnDestroy() {
-                if (_cmdServer != null) {
-                    _cmdServer.Close();
-                    _cmdServer = null;
-                }
+                //if (_cmdServer != null) {
+                //    _cmdServer.Close();
+                //    _cmdServer = null;
+                //}
 
                 for (int i = 0; i < _socketConnections.Count; i++) {
                     if (_socketConnections[i] != null && _socketConnections[i].IsConnected()) {

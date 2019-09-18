@@ -31,7 +31,8 @@ namespace VoxSimPlatform {
 
         	void QueueEmpty(object sender, EventArgs e) {
         		if (commBridge != null) {
-        			if (commBridge.CommanderSocket != null) {
+                    CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
+        			if (commander != null) {
         				StringBuilder sb = new StringBuilder();
         				foreach (string rel in relationTracker.relStrings) {
         					sb = sb.AppendFormat(string.Format("{0}\n", rel));
@@ -51,7 +52,7 @@ namespace VoxSimPlatform {
         						Helper.VectorToParsable(go.transform.eulerAngles)));
         				}
 
-        				commBridge.CommanderSocket.Write(sb.ToString());
+                        commander.Write(sb.ToString());
         			}
         		}
         	}

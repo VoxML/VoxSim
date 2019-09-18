@@ -11,7 +11,6 @@ using VoxSimPlatform.Network;
 public class NLURestClient : RestClient {
     String route = ""; // to be set on the first contact to the server
     String payload = ""; //Json payload
-    public String last_read = "";
 
     /// <summary>
     /// Name to match, that's about it.
@@ -58,20 +57,7 @@ public class NLURestClient : RestClient {
             else {
                 // Show results as text            
                 if (webRequest.downloadHandler.text != "") {
-                    last_read = webRequest.downloadHandler.text;
-                    //BroadcastMessage("LookForNewParse"); // Tell something, in JointGestureDemo for instance, to grab the result
-                    if (webRequest.downloadHandler.text != "connected") {
-                        SingleAgentInteraction sai = GameObject.FindObjectOfType<SingleAgentInteraction>();
-                        sai.SendMessage("LookForNewParse");
-                    }
-                    else {
-                        // Blatantly janky
-                        NLUIOClient parent = GameObject.FindObjectOfType<NLUIOClient>();
-                        parent.nlurestclient = this; // Ew, disgusting
-                    }
-
                     Debug.Log("Server took " + count * 0.1 + " seconds");
-                    //POST_okay(count * 0.1); // Parameter literally means nothing here.
                     break;
                 }
             }
