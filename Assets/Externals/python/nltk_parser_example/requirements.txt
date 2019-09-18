@@ -1,0 +1,4 @@
+gunicorn==19.7.1
+flask==1.1.0
+nltk==3.4.0
+flask-wtf==0.14.2
