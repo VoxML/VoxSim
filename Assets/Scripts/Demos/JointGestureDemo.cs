@@ -353,7 +353,7 @@ public class JointGestureDemo : SingleAgentInteraction {
 
 	// Update is called once per frame
 	void Update() {
-        if (nluRestClient.isConnected) {
+        if ((nluRestClient != null) && (nluRestClient.isConnected)) {
             if ((commBridge.parser == null) || (commBridge.parser.GetType() != typeof(PythonJSONParser))) {
                 // if this client is not connected,
                 //  we should back off to the default parser,

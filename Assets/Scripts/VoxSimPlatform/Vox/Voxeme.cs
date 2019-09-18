@@ -549,7 +549,7 @@ namespace VoxSimPlatform {
         				transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
         				transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
 
-                    Debug.Log (string.Format("{0}: {1}",gameObject.name,
+                    Debug.Log (string.Format("offset.sqrMagnitude({0}) = {1}",gameObject.name,
                         offset.sqrMagnitude));
 
                     if (offset.sqrMagnitude <= Constants.EPSILON) {
