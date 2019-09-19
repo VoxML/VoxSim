@@ -59,13 +59,17 @@ namespace VoxSimPlatform {
         		macros = GameObject.Find("BehaviorController").GetComponent<Macros>();
         	}
 
-        	/// <summary>
-        	/// Relations
-        	/// </summary>
+#region OldPredicates
+            // some of these might still work!
+            // some should be moved to primitives!
+            // if it ends in _1, consider it deprecated!
+            /// <summary>
+            /// Relations
+            /// </summary>
 
-        	// IN: Object (single element array)
-        	// OUT: Location
-        	public Vector3 ON(object[] args) {
+            // IN: Object (single element array)
+            // OUT: Location
+            public Vector3 ON_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// on an object
@@ -295,7 +299,7 @@ namespace VoxSimPlatform {
 
         	// IN: Object (single element array)
         	// OUT: Location
-        	public Vector3 BEHIND(object[] args) {
+        	public Vector3 BEHIND_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// behind an object
@@ -326,7 +330,7 @@ namespace VoxSimPlatform {
 
         	// IN: Object (single element array)
         	// OUT: Location
-        	public Vector3 IN_FRONT(object[] args) {
+        	public Vector3 IN_FRONT_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// in front of an object
@@ -357,7 +361,7 @@ namespace VoxSimPlatform {
 
         	// IN: Object (single element array)
         	// OUT: Location
-        	public Vector3 LEFT(object[] args) {
+        	public Vector3 LEFT_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// left of an object
@@ -388,7 +392,7 @@ namespace VoxSimPlatform {
 
         	// IN: Object (single element array)
         	// OUT: Location
-        	public Vector3 RIGHT(object[] args) {
+        	public Vector3 RIGHT_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// right of an object
@@ -419,7 +423,7 @@ namespace VoxSimPlatform {
 
         	// IN: Object (single element array)
         	// OUT: Location
-        	public Vector3 LEFTDC(object[] args) {
+        	public Vector3 LEFTDC_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// left of an object
@@ -450,7 +454,7 @@ namespace VoxSimPlatform {
 
         	// IN: Object (single element array)
         	// OUT: Location
-        	public Vector3 RIGHTDC(object[] args) {
+        	public Vector3 RIGHTDC_1(object[] args) {
         		Vector3 outValue = Vector3.zero;
         		if (args[0] is GameObject) {
         			// right of an object
@@ -1112,7 +1116,7 @@ namespace VoxSimPlatform {
 
         	// IN: Objects, Location
         	// OUT: none
-        	public void PUT(object[] args) {
+        	public void PUT_1(object[] args) {
         		string originalEval = eventManager.events[0];
 
         		Vector3 targetPosition = Vector3.zero;
@@ -2207,7 +2211,7 @@ namespace VoxSimPlatform {
 
         	// IN: Objects, Location
         	// OUT: none
-        	public void MOVE(object[] args) {
+        	public void MOVE_1(object[] args) {
         		// override physics rigging
         		foreach (object arg in args) {
         			if (arg is GameObject) {
@@ -5867,127 +5871,239 @@ namespace VoxSimPlatform {
 
         	// IN: Objects
         	// OUT: none
-        	public void POINT(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        		if (agent != null) {
-        			Animator anim = agent.GetComponentInChildren<Animator>();
-        			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-        			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-        			GameObject grasper;
+        	//public void POINT(object[] args) {
+        	//	GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+        	//	if (agent != null) {
+        	//		Animator anim = agent.GetComponentInChildren<Animator>();
+        	//		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+        	//		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+        	//		GameObject grasper;
 
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					foreach (object arg in args) {
-        						if (arg is GameObject) {
-        							// find bounds corner closest to grasper
-        							Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
+        	//		if (args[args.Length - 1] is bool) {
+        	//			if ((bool) args[args.Length - 1] == true) {
+        	//				foreach (object arg in args) {
+        	//					if (arg is GameObject) {
+        	//						// find bounds corner closest to grasper
+        	//						Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
 
-        							// which hand is closer?
-        							float leftToGoalDist =
-        								(leftGrasper.transform.position - bounds.ClosestPoint(leftGrasper.transform.position))
-        								.magnitude;
-        							float rightToGoalDist =
-        								(rightGrasper.transform.position - bounds.ClosestPoint(rightGrasper.transform.position))
-        								.magnitude;
+        	//						// which hand is closer?
+        	//						float leftToGoalDist =
+        	//							(leftGrasper.transform.position - bounds.ClosestPoint(leftGrasper.transform.position))
+        	//							.magnitude;
+        	//						float rightToGoalDist =
+        	//							(rightGrasper.transform.position - bounds.ClosestPoint(rightGrasper.transform.position))
+        	//							.magnitude;
 
-        							if (leftToGoalDist < rightToGoalDist) {
-        								grasper = leftGrasper;
-        								agent.GetComponent<GraspScript>().grasper = (int) Gestures.HandPose.LeftPoint;
-        							}
-        							else {
-        								grasper = rightGrasper;
-        								agent.GetComponent<GraspScript>().grasper = (int) Gestures.HandPose.RightPoint;
-        							}
+        	//						if (leftToGoalDist < rightToGoalDist) {
+        	//							grasper = leftGrasper;
+        	//							agent.GetComponent<GraspScript>().grasper = (int) Gestures.HandPose.LeftPoint;
+        	//						}
+        	//						else {
+        	//							grasper = rightGrasper;
+        	//							agent.GetComponent<GraspScript>().grasper = (int) Gestures.HandPose.RightPoint;
+        	//						}
 
-        							IKControl ikControl = agent.GetComponent<IKControl>();
-        							if (ikControl != null) {
-        								Vector3 target;
-        								if (grasper == leftGrasper) {
-        									target = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z);
-        									ikControl.leftHandObj.transform.position = target;
-        								}
-        								else {
-        									target = new Vector3(bounds.max.x, bounds.min.y, bounds.center.z);
-        									ikControl.rightHandObj.transform.position = target;
-        								}
-        							}
-        						}
-        					}
-        				}
-        			}
-        		}
-        	}
+        	//						IKControl ikControl = agent.GetComponent<IKControl>();
+        	//						if (ikControl != null) {
+        	//							Vector3 target;
+        	//							if (grasper == leftGrasper) {
+        	//								target = new Vector3(bounds.min.x, bounds.min.y, bounds.center.z);
+        	//								ikControl.leftHandObj.transform.position = target;
+        	//							}
+        	//							else {
+        	//								target = new Vector3(bounds.max.x, bounds.min.y, bounds.center.z);
+        	//								ikControl.rightHandObj.transform.position = target;
+        	//							}
+        	//						}
+        	//					}
+        	//				}
+        	//			}
+        	//		}
+        	//	}
+        	//}
 
-        	// IN: Objects
-        	// OUT: none
-        	public void REACH(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        		if (agent != null) {
-        			Animator anim = agent.GetComponentInChildren<Animator>();
-        			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-        			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-        			GameObject grasper;
-        			GraspScript graspController = agent.GetComponent<GraspScript>();
-        			Transform leftGrasperCoord = graspController.leftGrasperCoord;
-        			Transform rightGrasperCoord = graspController.rightGrasperCoord;
-        			Vector3 offset = graspController.graspTrackerOffset;
+        	//// IN: Objects
+        	//// OUT: none
+        	//public void REACH(object[] args) {
+        	//	GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+        	//	if (agent != null) {
+        	//		Animator anim = agent.GetComponentInChildren<Animator>();
+        	//		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+        	//		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+        	//		GameObject grasper;
+        	//		GraspScript graspController = agent.GetComponent<GraspScript>();
+        	//		Transform leftGrasperCoord = graspController.leftGrasperCoord;
+        	//		Transform rightGrasperCoord = graspController.rightGrasperCoord;
+        	//		Vector3 offset = graspController.graspTrackerOffset;
 
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					foreach (object arg in args) {
-        						if (arg is GameObject) {
-        							// find bounds corner closest to grasper
-        							Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
+        	//		if (args[args.Length - 1] is bool) {
+        	//			if ((bool) args[args.Length - 1] == true) {
+        	//				foreach (object arg in args) {
+        	//					if (arg is GameObject) {
+        	//						// find bounds corner closest to grasper
+        	//						Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
 
-        							// which hand is closer?
-        							float leftToGoalDist =
-        								(leftGrasper.transform.position - bounds.ClosestPoint(leftGrasper.transform.position))
-        								.magnitude;
-        							float rightToGoalDist =
-        								(rightGrasper.transform.position - bounds.ClosestPoint(rightGrasper.transform.position))
-        								.magnitude;
+        	//						// which hand is closer?
+        	//						float leftToGoalDist =
+        	//							(leftGrasper.transform.position - bounds.ClosestPoint(leftGrasper.transform.position))
+        	//							.magnitude;
+        	//						float rightToGoalDist =
+        	//							(rightGrasper.transform.position - bounds.ClosestPoint(rightGrasper.transform.position))
+        	//							.magnitude;
 
-        							if (leftToGoalDist < rightToGoalDist) {
-        								grasper = leftGrasper;
-        							}
-        							else {
-        								grasper = rightGrasper;
-        							}
+        	//						if (leftToGoalDist < rightToGoalDist) {
+        	//							grasper = leftGrasper;
+        	//						}
+        	//						else {
+        	//							grasper = rightGrasper;
+        	//						}
 
-        							IKControl ikControl = agent.GetComponent<IKControl>();
-        							if (ikControl != null) {
-        								Vector3 target;
-        								if (grasper == leftGrasper) {
-        									//agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.LeftClaw;
-        									if ((grasper.GetComponent<BoxCollider>().bounds.size.x > bounds.size.x) &&
-        									    (grasper.GetComponent<BoxCollider>().bounds.size.z > bounds.size.z)) {
-        										target = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
-        									}
-        									else {
-        										target = new Vector3(bounds.min.x, bounds.center.y, bounds.center.z);
-        									}
+        	//						IKControl ikControl = agent.GetComponent<IKControl>();
+        	//						if (ikControl != null) {
+        	//							Vector3 target;
+        	//							if (grasper == leftGrasper) {
+        	//								//agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.LeftClaw;
+        	//								if ((grasper.GetComponent<BoxCollider>().bounds.size.x > bounds.size.x) &&
+        	//								    (grasper.GetComponent<BoxCollider>().bounds.size.z > bounds.size.z)) {
+        	//									target = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
+        	//								}
+        	//								else {
+        	//									target = new Vector3(bounds.min.x, bounds.center.y, bounds.center.z);
+        	//								}
 
-        									ikControl.leftHandObj.transform.position = target + offset;
-        								}
-        								else {
-        									//agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.RightClaw;
-        									if ((grasper.GetComponent<BoxCollider>().bounds.size.x > bounds.size.x) &&
-        									    (grasper.GetComponent<BoxCollider>().bounds.size.z > bounds.size.z)) {
-        										target = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
-        									}
-        									else {
-        										target = new Vector3(bounds.max.x, bounds.center.y, bounds.center.z);
-        									}
+        	//								ikControl.leftHandObj.transform.position = target + offset;
+        	//							}
+        	//							else {
+        	//								//agent.GetComponent<GraspScript>().grasper = (int)Gestures.HandPose.RightClaw;
+        	//								if ((grasper.GetComponent<BoxCollider>().bounds.size.x > bounds.size.x) &&
+        	//								    (grasper.GetComponent<BoxCollider>().bounds.size.z > bounds.size.z)) {
+        	//									target = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z);
+        	//								}
+        	//								else {
+        	//									target = new Vector3(bounds.max.x, bounds.center.y, bounds.center.z);
+        	//								}
 
-        									ikControl.rightHandObj.transform.position = target + offset;
-        								}
-        							}
-        						}
-        					}
-        				}
-        			}
-        		}
-        	}
+        	//								ikControl.rightHandObj.transform.position = target + offset;
+        	//							}
+        	//						}
+        	//					}
+        	//				}
+        	//			}
+        	//		}
+        	//	}
+        	//}
+
+            // IN: Objects
+            // OUT: none
+            public void DROP(object[] args) {
+                GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                if (agent != null) {
+                    Animator anim = agent.GetComponentInChildren<Animator>();
+                    GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
+                    GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+                    GameObject grasper = null;
+                    Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
+                    Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
+                    GraspScript graspController = agent.GetComponent<GraspScript>();
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool) args[args.Length - 1] == true) {
+                            foreach (object arg in args) {
+                                if (arg is GameObject) {
+                                    Voxeme voxComponent = (arg as GameObject).GetComponent<Voxeme>();
+                                    if (voxComponent != null) {
+                                        if (voxComponent.isGrasped) {
+                                            //voxComponent.transform.position = voxComponent.transform.position + 
+                                            //  (voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
+
+                                            if (voxComponent.grasperCoord == leftGrasperCoord) {
+                                                grasper = leftGrasper;
+                                            }
+                                            else if (voxComponent.grasperCoord == rightGrasperCoord) {
+                                                grasper = rightGrasper;
+                                            }
+
+                                            RiggingHelper.UnRig((arg as GameObject), grasper);
+                                            Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
+                                            if (rigging != null) {
+                                                rigging.ActivatePhysics(true);
+                                            }
+
+                                            graspController.grasper = (int) Gestures.HandPose.Neutral;
+                                            //agent.GetComponent<GraspScript>().isGrasping = false;
+                                            //agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
+                                            //agent.GetComponent<IKControl> ().rightHandObj.position = graspController.rightDefaultPosition;
+
+                                            voxComponent.isGrasped = false;
+                                            voxComponent.graspTracker = null;
+                                            voxComponent.grasperCoord = null;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // IN: Objects
+            // OUT: none
+            public void TOUCH(object[] args) {
+                GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                if (agent != null) {
+                    Animator anim = agent.GetComponentInChildren<Animator>();
+                    GameObject leftGrasper = anim.GetBoneTransform(HumanBodyBones.LeftHand).transform.gameObject;
+                    GameObject rightGrasper = anim.GetBoneTransform(HumanBodyBones.RightHand).transform.gameObject;
+                    GameObject grasper;
+                    GraspScript graspController = agent.GetComponent<GraspScript>();
+                    Transform leftGrasperCoord = graspController.leftGrasperCoord;
+                    Transform rightGrasperCoord = graspController.rightGrasperCoord;
+                    Transform leftFingerCoord = graspController.leftFingerCoord;
+                    Transform rightFingerCoord = graspController.rightFingerCoord;
+
+                    if (args[args.Length - 1] is bool) {
+                        if ((bool) args[args.Length - 1] == true) {
+                            foreach (object arg in args) {
+                                if (arg is GameObject) {
+                                    // find bounds corner closest to grasper
+                                    Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
+
+                                    // which hand is closer?
+                                    Vector3 leftClosestPoint = bounds.ClosestPoint(leftGrasper.transform.position);
+                                    Vector3 rightClosestPoint = bounds.ClosestPoint(rightGrasper.transform.position);
+                                    float leftToGoalDist = (leftGrasper.transform.position - leftClosestPoint).magnitude;
+                                    float rightToGoalDist = (rightGrasper.transform.position - rightClosestPoint).magnitude;
+
+                                    if (leftToGoalDist < rightToGoalDist) {
+                                        grasper = leftGrasper;
+                                    }
+                                    else {
+                                        grasper = rightGrasper;
+                                    }
+
+                                    IKControl ikControl = agent.GetComponent<IKControl>();
+                                    if (ikControl != null) {
+                                        Vector3 target;
+                                        if (grasper == leftGrasper) {
+                                            target = leftClosestPoint;
+                                            Vector3 dir = leftFingerCoord.position - leftGrasper.transform.position;
+                                            dir = leftGrasper.transform.rotation * dir;
+                                            ikControl.leftHandObj.transform.position =
+                                                dir +
+                                                target; //-leftFingerCoord.localPosition;//-(leftGrasper.transform.rotation*leftFingerCoord.localPosition);
+                                        }
+                                        else {
+                                            target = rightClosestPoint;
+                                            ikControl.rightHandObj.transform.position = target; //-rightFingerCoord.position;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+#endregion
 
             /// <summary>
             /// VoxML Primitive Events
@@ -6000,9 +6116,9 @@ namespace VoxSimPlatform {
             ///  can be reasoning about w.r.t. the afforded consequences of being grasped
             /// </summary>
 
-        	// IN: Objects
-        	// OUT: none
-        	public void GRASP(object[] args) {
+            // IN: Objects
+            // OUT: none
+            public void GRASP(object[] args) {
         		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
         		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
         		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
@@ -6202,34 +6318,7 @@ namespace VoxSimPlatform {
 
             // IN: Objects
             // OUT: none
-            //public void HOLD(object[] args) {
-            //    // look for agent
-            //    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-            //    if (agent != null) {
-            //        // add preconditions
-            //        if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name))) {
-            //            eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
-            //            eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
-            //            eventManager.InsertEvent(
-            //                eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
-            //            eventManager.RemoveEvent(3);
-            //            return;
-            //        }
-            //        else {
-            //            if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
-            //                eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
-            //                eventManager.InsertEvent(
-            //                    eventManager.evalOrig[string.Format("hold({0})", (args[0] as GameObject).name)], 1);
-            //                eventManager.RemoveEvent(2);
-            //                return;
-            //            }
-            //        }
-            //    }
-            //}
-
-            // IN: Objects
-            // OUT: none
-            public void MOVE_1(object[] args) {
+            public void MOVE(object[] args) {
                 // required types (see Data/voxml/programs/move_1.xml)
                 // args[0]: GameObject
                 // args[1]: Vector3
@@ -6406,117 +6495,6 @@ namespace VoxSimPlatform {
                 }
                 return;
             }
-
-        	// IN: Objects
-        	// OUT: none
-        	public void DROP(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        		if (agent != null) {
-        			Animator anim = agent.GetComponentInChildren<Animator>();
-        			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-        			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
-        			GameObject grasper = null;
-        			Transform leftGrasperCoord = agent.GetComponent<GraspScript>().leftGrasperCoord;
-        			Transform rightGrasperCoord = agent.GetComponent<GraspScript>().rightGrasperCoord;
-        			GraspScript graspController = agent.GetComponent<GraspScript>();
-
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					foreach (object arg in args) {
-        						if (arg is GameObject) {
-        							Voxeme voxComponent = (arg as GameObject).GetComponent<Voxeme>();
-        							if (voxComponent != null) {
-        								if (voxComponent.isGrasped) {
-        									//voxComponent.transform.position = voxComponent.transform.position + 
-        									//	(voxComponent.grasperCoord.position - voxComponent.gameObject.transform.position);
-
-        									if (voxComponent.grasperCoord == leftGrasperCoord) {
-        										grasper = leftGrasper;
-        									}
-        									else if (voxComponent.grasperCoord == rightGrasperCoord) {
-        										grasper = rightGrasper;
-        									}
-
-        									RiggingHelper.UnRig((arg as GameObject), grasper);
-        									Rigging rigging = (arg as GameObject).GetComponent<Rigging>();
-        									if (rigging != null) {
-        										rigging.ActivatePhysics(true);
-        									}
-
-        									graspController.grasper = (int) Gestures.HandPose.Neutral;
-        									//agent.GetComponent<GraspScript>().isGrasping = false;
-        									//agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
-        									//agent.GetComponent<IKControl> ().rightHandObj.position = graspController.rightDefaultPosition;
-
-        									voxComponent.isGrasped = false;
-        									voxComponent.graspTracker = null;
-        									voxComponent.grasperCoord = null;
-        								}
-        							}
-        						}
-        					}
-        				}
-        			}
-        		}
-            }
-
-        	// IN: Objects
-        	// OUT: none
-        	public void TOUCH(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        		if (agent != null) {
-        			Animator anim = agent.GetComponentInChildren<Animator>();
-        			GameObject leftGrasper = anim.GetBoneTransform(HumanBodyBones.LeftHand).transform.gameObject;
-        			GameObject rightGrasper = anim.GetBoneTransform(HumanBodyBones.RightHand).transform.gameObject;
-        			GameObject grasper;
-        			GraspScript graspController = agent.GetComponent<GraspScript>();
-        			Transform leftGrasperCoord = graspController.leftGrasperCoord;
-        			Transform rightGrasperCoord = graspController.rightGrasperCoord;
-        			Transform leftFingerCoord = graspController.leftFingerCoord;
-        			Transform rightFingerCoord = graspController.rightFingerCoord;
-
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					foreach (object arg in args) {
-        						if (arg is GameObject) {
-        							// find bounds corner closest to grasper
-        							Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
-
-        							// which hand is closer?
-        							Vector3 leftClosestPoint = bounds.ClosestPoint(leftGrasper.transform.position);
-        							Vector3 rightClosestPoint = bounds.ClosestPoint(rightGrasper.transform.position);
-        							float leftToGoalDist = (leftGrasper.transform.position - leftClosestPoint).magnitude;
-        							float rightToGoalDist = (rightGrasper.transform.position - rightClosestPoint).magnitude;
-
-        							if (leftToGoalDist < rightToGoalDist) {
-        								grasper = leftGrasper;
-        							}
-        							else {
-        								grasper = rightGrasper;
-        							}
-
-        							IKControl ikControl = agent.GetComponent<IKControl>();
-        							if (ikControl != null) {
-        								Vector3 target;
-        								if (grasper == leftGrasper) {
-        									target = leftClosestPoint;
-        									Vector3 dir = leftFingerCoord.position - leftGrasper.transform.position;
-        									dir = leftGrasper.transform.rotation * dir;
-        									ikControl.leftHandObj.transform.position =
-        										dir +
-        										target; //-leftFingerCoord.localPosition;//-(leftGrasper.transform.rotation*leftFingerCoord.localPosition);
-        								}
-        								else {
-        									target = rightClosestPoint;
-        									ikControl.rightHandObj.transform.position = target; //-rightFingerCoord.position;
-        								}
-        							}
-        						}
-        					}
-        				}
-        			}
-        		}
-        	}
 
         	// IN: Objects
         	// OUT: bool

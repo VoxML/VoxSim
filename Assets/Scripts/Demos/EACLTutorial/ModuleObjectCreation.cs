@@ -61,6 +61,7 @@ public class ModuleObjectCreation : ModalWindow {
 
 	ObjectSelector objSelector;
 	VoxemeInit voxemeInit;
+    VoxMLLibrary voxmlLibrary;
 	Predicates preds;
 
 	GhostFreeRoamCamera cameraControl;
@@ -83,6 +84,7 @@ public class ModuleObjectCreation : ModalWindow {
 
 		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 		voxemeInit = GameObject.Find("VoxWorld").GetComponent<VoxemeInit>();
+        voxmlLibrary = GameObject.Find("VoxWorld").GetComponent<VoxMLLibrary>();
 		preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
 		//windowManager = GameObject.Find ("VoxWorld").GetComponent<ModalWindowManager> ();
 
@@ -142,7 +144,7 @@ public class ModuleObjectCreation : ModalWindow {
 				if (selectRayhit.collider != null) {
 					if (selectRayhit.collider.gameObject.transform.root.gameObject == sandboxSurface) {
 						Debug.Log(selectRayhit.point.y);
-						if (Mathf.Abs(selectRayhit.point.y - preds.ON(new object[] {sandboxSurface}).y) <=
+						if (Mathf.Abs(selectRayhit.point.y - ((Vector3)preds.ComposeRelation(voxmlLibrary.VoxMLObjectDict["on"], new object[] {sandboxSurface})).y) <=
 						    Constants.EPSILON) {
 							if ((Mathf.Abs(selectRayhit.point.x - Helper.GetObjectWorldSize(sandboxSurface).min.x) >=
 							     Helper.GetObjectWorldSize(selectedObject).extents.x) &&
@@ -153,7 +155,7 @@ public class ModuleObjectCreation : ModalWindow {
 							    (Mathf.Abs(selectRayhit.point.z - Helper.GetObjectWorldSize(sandboxSurface).max.z) >=
 							     Helper.GetObjectWorldSize(selectedObject).extents.z)) {
 								selectedObject.transform.position = new Vector3(selectRayhit.point.x,
-									preds.ON(new object[] {sandboxSurface}).y + surfacePlacementOffset,
+									((Vector3)preds.ComposeRelation(voxmlLibrary.VoxMLObjectDict["on"], new object[] {sandboxSurface})).y + surfacePlacementOffset,
 									selectRayhit.point.z);
 								Voxeme voxComponent = selectedObject.GetComponent<Voxeme>();
 								voxComponent.targetPosition = selectedObject.transform.position;
@@ -325,7 +327,7 @@ public class ModuleObjectCreation : ModalWindow {
 			                         (selectedObject.gameObject.transform.position.y -
 			                          Helper.GetObjectWorldSize(selectedObject.gameObject).center.y);
 			selectedObject.transform.position = new Vector3(go.transform.position.x,
-				preds.ON(new object[] {sandboxSurface}).y + surfacePlacementOffset,
+				((Vector3)preds.ComposeRelation(voxmlLibrary.VoxMLObjectDict["on"], new object[] {sandboxSurface})).y + surfacePlacementOffset,
 				go.transform.position.z);
 			SetShader(selectedObject, ShaderType.Highlight);
 			actionButtonText = "Place";

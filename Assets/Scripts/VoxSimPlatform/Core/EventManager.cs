@@ -534,7 +534,7 @@ namespace VoxSimPlatform {
                         }
                         else {
                             // if arg is vector form
-                            Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,Helper.ParsableToVector((String) arg)));
+                            Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,(String) arg));
                             objs.Add(Helper.ParsableToVector((String) arg));
                         }
                     }

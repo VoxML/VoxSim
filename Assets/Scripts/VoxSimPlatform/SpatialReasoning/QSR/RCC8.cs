@@ -273,12 +273,14 @@ namespace VoxSimPlatform {
 
                     foreach (Vector3 candidate in candidates) {
                         foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                            if (!y.BoundsEqual(Helper.GetObjectOrientedSize(voxeme.gameObject))) {
+                            if (!y.BoundsEqual(Helper.GetObjectOrientedSize(voxeme.gameObject, true))) {
                                 Bounds testBounds = new Bounds(Helper.GetObjectWorldSize(voxeme.gameObject).center,
-                                    new Vector3(Helper.GetObjectWorldSize(voxeme.gameObject).size.x + 2 * Constants.EPSILON,
-                                        Helper.GetObjectWorldSize(voxeme.gameObject).size.y + 2 * Constants.EPSILON,
-                                        Helper.GetObjectWorldSize(voxeme.gameObject).size.z + 2 * Constants.EPSILON));
+                                    new Vector3(Helper.GetObjectWorldSize(voxeme.gameObject, true).size.x + 2 * Constants.EPSILON,
+                                        Helper.GetObjectWorldSize(voxeme.gameObject, true).size.y + 2 * Constants.EPSILON,
+                                        Helper.GetObjectWorldSize(voxeme.gameObject, true).size.z + 2 * Constants.EPSILON));
                                 if (testBounds.Contains(candidate)) {
+                                    Debug.Log(string.Format("Adding {0} to prune list (intersects bounds({1}))",
+                                        Helper.VectorToParsable(candidate), voxeme.name));
                                     pruneCandidates.Add(candidate);
                                 }
                             }
@@ -325,19 +327,14 @@ namespace VoxSimPlatform {
                             Debug.Log(string.Format("Result of {0}: {1}", expression, result));
 
                             if ((!result) && (!pruneCandidates.Contains(candidate))) {
+                                Debug.Log(string.Format("Adding {0} to prune list (violates {1})",
+                                    Helper.VectorToParsable(candidate), eval));
                                 pruneCandidates.Add(candidate);
                             }
                         }
                     }
 
                     candidates = candidates.Except(pruneCandidates).ToList(); 
-                    //for (int i = 0; i < candidates.Count; i++) {
-                    //    if (pruneCandidates.Contains(candidates[i])) {
-                    //        Debug.Log(i);
-                    //        Debug.Log(candidates[i]);
-                    //        candidates.RemoveAt(i);
-                    //    }
-                    //}
 
                     Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}]", candidates.Count,
                         string.Join(", ", candidates.Select(c => Helper.VectorToParsable(c)))));

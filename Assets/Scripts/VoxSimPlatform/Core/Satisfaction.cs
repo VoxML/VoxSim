@@ -183,7 +183,7 @@ namespace VoxSimPlatform {
     			//Debug.Log (test);
 
                 // PRIMITIVE MOTIONS
-    			if (predString == "move_1") {
+    			if (predString == "move") {
                     // satisfy move_1
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
@@ -240,7 +240,7 @@ namespace VoxSimPlatform {
                 }
 
                 // COMPLEX MOTION (TODO: remove)
-                else if (predString == "put") {
+                else if (predString == "put_1") {
     				// satisfy put
     				GameObject theme = GameObject.Find(argsStrings[0] as String);
     				if (theme != null) {

@@ -441,72 +441,24 @@ namespace VoxSimPlatform {
             }
 
             // returns current position-centered object bounds
-            public static ObjBounds GetObjectOrientedSize(GameObject obj) {
+            public static ObjBounds GetObjectOrientedSize(GameObject obj, bool excludeChildren = false) {
                 MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
 
-                Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
-
-                foreach (MeshFilter mesh in meshes) {
-                    Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
-                    Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
-                        temp.min.y * mesh.gameObject.transform.lossyScale.y,
-                        temp.min.z * mesh.gameObject.transform.lossyScale.z);
-                    min = RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
-                    Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
-                        temp.max.y * mesh.gameObject.transform.lossyScale.y,
-                        temp.max.z * mesh.gameObject.transform.lossyScale.z);
-                    max = RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
-                    temp.SetMinMax(min, max);
-                    combinedBounds.Encapsulate(temp);
-                }
-
-                combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
-                    combinedBounds.center + obj.transform.position + combinedBounds.extents);
-
-                List<Vector3> pts = new List<Vector3>(new Vector3[] {
-                    new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
-                    new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
-                    new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
-                    new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
-                    new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
-                    new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
-                    new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
-                    new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
-                    new Vector3(combinedBounds.min.x, combinedBounds.center.y, combinedBounds.center.z),
-                    new Vector3(combinedBounds.max.x, combinedBounds.center.y, combinedBounds.center.z),
-                    new Vector3(combinedBounds.center.x, combinedBounds.min.y, combinedBounds.center.z),
-                    new Vector3(combinedBounds.center.x, combinedBounds.max.y, combinedBounds.center.z),
-                    new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.min.z),
-                    new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.max.z)
-                });
-
-                ObjBounds objBounds = new ObjBounds(combinedBounds.center);
-                List<Vector3> points = new List<Vector3>();
-                foreach (Vector3 pt in pts) {
-                    points.Add(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles));
-                }
-
-                objBounds.Points = new List<Vector3>(points);
-
-                return objBounds;
-            }
-
-            // returns current position-centered object bounds
-            public static ObjBounds GetObjectOrientedSize(GameObject obj, bool excludeChildren) {
-                MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
-
-                // me: I hate computer scientists!  They never document their code properly!
-                // also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
-                //          Debug.Log (obj1);
-                MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
-                    m => (GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
-                         (m.gameObject.GetComponent<Voxeme>() != null) &&
-                         (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
-                             c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
                 List<GameObject> exclude = new List<GameObject>();
-                foreach (MeshFilter mesh in children) {
-                    Debug.Log(mesh.gameObject);
-                    exclude.Add(mesh.gameObject);
+
+                if (excludeChildren) {
+                    // me: I hate computer scientists!  They never document their code properly!
+                    // also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
+                    //          Debug.Log (obj1);
+                    MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
+                        m => (GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
+                             (m.gameObject.GetComponent<Voxeme>() != null) &&
+                             (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
+                                 c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
+                    foreach (MeshFilter mesh in children) {
+                        Debug.Log(mesh.gameObject);
+                        exclude.Add(mesh.gameObject);
+                    }
                 }
 
                 Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
@@ -532,17 +484,12 @@ namespace VoxSimPlatform {
                     }
                 }
 
-                //Debug.Log(string.Format("center({0}):{1}", obj,Helper.VectorToParsable(combinedBounds.center)));
-                //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-                //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+                //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
+                //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
+
                 combinedBounds.SetMinMax(
                     combinedBounds.center + GetObjectWorldSize(obj).center - combinedBounds.extents,
                     combinedBounds.center + GetObjectWorldSize(obj).center + combinedBounds.extents);
-                //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
-                //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-                //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
-
-                Debug.Log(VectorToParsable(combinedBounds.size));
 
                 List<Vector3> pts = new List<Vector3>(new Vector3[] {
                     new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
@@ -563,12 +510,8 @@ namespace VoxSimPlatform {
 
                 Bounds bounds = new Bounds(pts[0], Vector3.zero);
                 ObjBounds objBounds = new ObjBounds(combinedBounds.center);
-                //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(objBounds.Center)));
                 List<Vector3> points = new List<Vector3>();
                 foreach (Vector3 pt in pts) {
-                    //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(pt)));
-                    //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
-                    //points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
                     points.Add(pt);
                     bounds.Encapsulate(pt);
                 }
@@ -578,16 +521,134 @@ namespace VoxSimPlatform {
                 objBounds.Points = new List<Vector3>(points);
 
                 return objBounds;
+
+                //ObjBounds objBounds = new ObjBounds(combinedBounds.center);
+                //List<Vector3> points = new List<Vector3>();
+                //foreach (Vector3 pt in pts) {
+                //    points.Add(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles));
+                //}
+
+                //objBounds.Points = new List<Vector3>(points);
+
+                //return objBounds;
             }
 
+            // returns current position-centered object bounds
+            //public static ObjBounds GetObjectOrientedSize(GameObject obj, bool excludeChildren) {
+            //    MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
+
+            //    // me: I hate computer scientists!  They never document their code properly!
+            //    // also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
+            //    //          Debug.Log (obj1);
+            //    MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
+            //        m => (GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
+            //             (m.gameObject.GetComponent<Voxeme>() != null) &&
+            //             (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
+            //                 c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
+            //    List<GameObject> exclude = new List<GameObject>();
+            //    foreach (MeshFilter mesh in children) {
+            //        Debug.Log(mesh.gameObject);
+            //        exclude.Add(mesh.gameObject);
+            //    }
+
+            //    Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
+
+            //    foreach (MeshFilter mesh in meshes) {
+            //        if (!exclude.Contains(mesh.gameObject)) {
+            //            Debug.Log(string.Format("{0}: Adding {1} to combined bounds", obj, mesh.gameObject));
+            //            // create a temp bounds of size of mesh, centered on origin
+            //            Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
+            //            // scale it by object size
+            //            Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
+            //                temp.min.y * mesh.gameObject.transform.lossyScale.y,
+            //                temp.min.z * mesh.gameObject.transform.lossyScale.z);
+            //            min = RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
+            //            Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
+            //                temp.max.y * mesh.gameObject.transform.lossyScale.y,
+            //                temp.max.z * mesh.gameObject.transform.lossyScale.z);
+            //            max = RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
+            //            // set min and max
+            //            temp.SetMinMax(min, max);
+            //            // combined bounds = current combined bounds stretched to encapsulate this temp
+            //            combinedBounds.Encapsulate(temp);
+            //        }
+            //    }
+
+            //    //Debug.Log(string.Format("center({0}):{1}", obj,Helper.VectorToParsable(combinedBounds.center)));
+            //    //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
+            //    //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+            //    combinedBounds.SetMinMax(
+            //        combinedBounds.center + GetObjectWorldSize(obj).center - combinedBounds.extents,
+            //        combinedBounds.center + GetObjectWorldSize(obj).center + combinedBounds.extents);
+            //    //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
+            //    //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
+            //    //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+
+            //    Debug.Log(VectorToParsable(combinedBounds.size));
+
+            //    List<Vector3> pts = new List<Vector3>(new Vector3[] {
+            //        new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
+            //        new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
+            //        new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
+            //        new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
+            //        new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
+            //        new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
+            //        new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
+            //        new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
+            //        new Vector3(combinedBounds.min.x, combinedBounds.center.y, combinedBounds.center.z),
+            //        new Vector3(combinedBounds.max.x, combinedBounds.center.y, combinedBounds.center.z),
+            //        new Vector3(combinedBounds.center.x, combinedBounds.min.y, combinedBounds.center.z),
+            //        new Vector3(combinedBounds.center.x, combinedBounds.max.y, combinedBounds.center.z),
+            //        new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.min.z),
+            //        new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.max.z)
+            //    });
+
+            //    Bounds bounds = new Bounds(pts[0], Vector3.zero);
+            //    ObjBounds objBounds = new ObjBounds(combinedBounds.center);
+            //    //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(objBounds.Center)));
+            //    List<Vector3> points = new List<Vector3>();
+            //    foreach (Vector3 pt in pts) {
+            //        //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(pt)));
+            //        //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
+            //        //points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
+            //        points.Add(pt);
+            //        bounds.Encapsulate(pt);
+            //    }
+
+            //    Debug.Log(VectorToParsable(bounds.size));
+
+            //    objBounds.Points = new List<Vector3>(points);
+
+            //    return objBounds;
+            //}
+
             // get the bounds of the object in the current world
-            public static Bounds GetObjectWorldSize(GameObject obj) {
+            public static Bounds GetObjectWorldSize(GameObject obj, bool excludeChildren = false) {
                 Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
+
+                List<GameObject> exclude = new List<GameObject>();
+
+                if (excludeChildren) {
+                    // me: I hate computer scientists!  They never document their code properly!
+                    // also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
+                    //          Debug.Log (obj1);
+                    MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
+                        m => (GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
+                             (m.gameObject.GetComponent<Voxeme>() != null) &&
+                             (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
+                                 c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
+                    foreach (MeshFilter mesh in children) {
+                        Debug.Log(mesh.gameObject);
+                        exclude.Add(mesh.gameObject);
+                    }
+                }
 
                 Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
 
                 foreach (Renderer renderer in renderers) {
-                    combinedBounds.Encapsulate(renderer.bounds);
+                    if (!exclude.Contains(renderer.transform.gameObject)) {
+                        combinedBounds.Encapsulate(renderer.bounds);
+                    }
                 }
 
                 return combinedBounds;
@@ -608,6 +669,7 @@ namespace VoxSimPlatform {
 
                 return combinedBounds;
             }
+
 
             // get the collective bounds of the objects in the current world
             public static Bounds GetObjectWorldSize(List<GameObject> objs) {
