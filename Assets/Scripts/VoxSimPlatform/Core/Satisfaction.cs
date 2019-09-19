@@ -1243,7 +1243,7 @@ namespace VoxSimPlatform {
                                         if (resultPred == "hold") {
                                             // unparent the held object from any other objects, unless its current parent is the one
                                             //  doing the holding
-                                            if (obj.gameObject.transform.parent.gameObject != null) {
+                                            if (obj.gameObject.transform.parent != null) {
                                                 if (!relationObjs.Except(new List<GameObject>() { obj.gameObject }).ToList().
                                                     Contains(obj.gameObject.transform.parent.gameObject)) {
                                                     RiggingHelper.UnRig(obj.gameObject, obj.gameObject.transform.parent.gameObject);
