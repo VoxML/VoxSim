@@ -35,13 +35,13 @@ namespace VoxSimPlatform {
     	public static class Data {
     #if UNITY_EDITOR
     		public static string voxmlDataPath = Application.dataPath.Remove(Application.dataPath.LastIndexOf('/') + 1) +
-    		                                     string.Format("Data/voxml");
+    		                                     string.Format("VoxML/voxml");
     #elif UNITY_STANDALONE_OSX
     		public static string voxmlDataPath =
-     Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/Data/voxml");
+     Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/VoxML/voxml");
     #elif UNITY_STANDALONE_WIN
     		public static string voxmlDataPath =
-     Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("Data/voxml");
+     Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("VoxML/voxml");
     #elif UNITY_IOS
     		public static string voxmlDataPath =
      Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("/VoxML/voxml");

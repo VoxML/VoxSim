@@ -137,8 +137,8 @@ namespace StandaloneBuild {
 					EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
 				}
 
-				// copy external Data folder to target location
-				Data.DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/mac/Data", true);
+				// copy external VoxML folder to target location
+				Data.DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/mac/VoxML", true);
 				// build with the specified scenes
 				BuildPipeline.BuildPlayer(scenes.ToArray(), "Build/mac/" + buildName + ".app", BuildTarget.StandaloneOSX, BuildOptions.None);
 			}
@@ -216,8 +216,8 @@ namespace StandaloneBuild {
 					EditorBuildSettings.scenes = editorBuildSettingsScenes.ToArray();
 				}
 
-				// copy external Data folder to target location
-				Data.DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/win/Data", true);
+				// copy external VoxML folder to target location
+				Data.DirectoryCopy(Path.GetFullPath(Data.voxmlDataPath + "/../"), @"Build/win/VoxML", true);
 				// build with the specified scenes
 				BuildPipeline.BuildPlayer(scenes.ToArray(), "Build/win/" + buildName + ".exe", BuildTarget.StandaloneWindows, BuildOptions.None);
 			}
