@@ -44,7 +44,7 @@ namespace VoxSimPlatform {
         			set { stackOperation = value; }
         		}
 
-        		internal PDAInstruction(List<PDAState> _fromStates, List<PDASymbol> _inputSymbols, PDASymbol _stackSymbol,
+        		public PDAInstruction(List<PDAState> _fromStates, List<PDASymbol> _inputSymbols, PDASymbol _stackSymbol,
         			PDAState _toState, PDAStackOperation _stackOperation) {
         			fromStates = _fromStates;
         			inputSymbols = _inputSymbols;
@@ -69,7 +69,7 @@ namespace VoxSimPlatform {
         			set { content = value; }
         		}
 
-        		internal PDAState(string _name, object _content) {
+        		public PDAState(string _name, object _content) {
         			name = _name;
         			content = _content;
         		}
@@ -90,12 +90,12 @@ namespace VoxSimPlatform {
         			set { content = value; }
         		}
 
-        		internal PDASymbol(object _content) {
+        		public PDASymbol(object _content) {
         			content = _content;
         			name = content.ToString();
         		}
 
-        		internal PDASymbol(string _name, object _content) {
+        		public PDASymbol(string _name, object _content) {
         			name = _name;
         			content = _content;
         		}
@@ -124,7 +124,7 @@ namespace VoxSimPlatform {
         			set { content = value; }
         		}
 
-        		internal PDAStackOperation(PDAStackOperationType _type, object _content) {
+        		public PDAStackOperation(PDAStackOperationType _type, object _content) {
         			type = _type;
         			content = _content;
         		}
@@ -140,7 +140,7 @@ namespace VoxSimPlatform {
         			set { function = value; }
         		}
 
-        		internal DelegateFactory(object _function) {
+        		public DelegateFactory(object _function) {
         			function = _function;
         		}
         	}
@@ -167,7 +167,7 @@ namespace VoxSimPlatform {
         			set { condition = value; }
         		}
 
-        		internal TransitionGate(FunctionDelegate _condition, PDAState _rejectState,
+        		public TransitionGate(FunctionDelegate _condition, PDAState _rejectState,
         			PDAStackOperation _rejectStackOperation) {
         			condition = _condition;
         			rejectState = _rejectState;
