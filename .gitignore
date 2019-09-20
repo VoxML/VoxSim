@@ -134,16 +134,13 @@ sysinfo.txt
 *.pyc
 
 ## ignore 3rd-party libraries/large externals (devs should keep local copies)
-Assets/MORPH3D* 
-Assets/StreamingAssets/Morph3D*
-Assets/Plugins/crosstales* 
-Assets/Plugins/RootMotion*
-Assets/RootMotion* 
-Assets/FlashbackRecorder* 
-Assets/GracesGames*
-Assets/SimpleFileBrowser* 
-Assets/Editor\ Default\ Resources/crosstales*
-Assets/Plugins/ConsoleE*
+Assets/VoxSimPlatform/Plugins/crosstales* 
+Assets/VoxSimPlatform/Plugins/RootMotion*
+Assets/VoxSimPlatform/FlashbackRecorder* 
+Assets/VoxSimPlatform/GracesGames*
+Assets/VoxSimPlatform/SimpleFileBrowser* 
+Assets/VoxSimPlatform/Editor\ Default\ Resources/crosstales*
+Assets/VoxSimPlatform/Plugins/ConsoleE*
 
 # ignore UntrackedScenes folder
 Assets/UntrackedScenes*

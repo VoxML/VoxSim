@@ -53,7 +53,7 @@ namespace StandaloneBuild {
 						// for each scene extracted from build config
 						//  see if a scene by that name exists in Assets/Scenes
 						// all scenes specified in build config must be in the Scenes folder
-						string scenePath = Application.dataPath + "/Scenes/" + s.Path;
+						string scenePath = Application.dataPath + "/" + s.Path;
 						if (File.Exists(scenePath)) {
 							// found a file
 							// write the name of the scene to ScenesList
@@ -102,26 +102,26 @@ namespace StandaloneBuild {
 					//  match what is in the build config
 					//  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
 					//  "Agents/Diana.unity" in the build config to include it
-					string scenesDirPath = Application.dataPath + "/Scenes/";
+					string assetsPath = Application.dataPath + "/";
 					// Windows will extract any subdirectories from the build config with a backslash instead of a forward slash
 					//  but Unity/any Unix system needs forward slashes, so replace them
 					// therefore, make sure none of your actual filenames somehow has a backslash in it
 					// but that shouldn't be happening anyway!
-					List<string> fileEntries = Directory.GetFiles(scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList()
+					List<string> fileEntries = Directory.GetFiles(assetsPath, "*.unity", SearchOption.AllDirectories).ToList()
 						.Select(f => f.Replace('\\', '/')).ToList();
 					foreach (string s in scenesList) {
 						if (s != string.Empty) {
 							// scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
-							string scenePath = scenesDirPath + s + ".unity";
+							string scenePath = assetsPath + s + ".unity";
 							if (fileEntries.Contains(scenePath)) {
 								// if the list of files in Scenes contains a config-specified scene
 								if (!scenes.Contains(scenePath)) {
 									// if that scene hasn't already been added to the list of scenes to build
 									Debug.Log(string.Format("Adding scene {0} at path {1}", s, scenePath));
 									// don't double-add scenes to editor build settings
-									if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/Scenes/" + s + ".unity")) {
-										Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/Scenes/" + s + ".unity"));
-										editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/Scenes/" + s + ".unity", true));
+									if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/" + s + ".unity")) {
+										Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/" + s + ".unity"));
+										editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/" + s + ".unity", true));
 									}
 
 									scenes.Add(scenePath);
@@ -181,26 +181,26 @@ namespace StandaloneBuild {
 					//  match what is in the build config
 					//  (e.g., you could have a scene at path "/Assets/Scenes/Agents/Diana.unity", and you would specify 
 					//  "Agents/Diana.unity" in the build config to include it
-					string scenesDirPath = Application.dataPath + "/Scenes/";
+					string assetsPath = Application.dataPath + "/";
 					// Windows will extract any subdirectories from the build config with a backslash instead of a forward slash
 					//  but Unity/any Unix system needs forward slashes, so replace them
 					// therefore, make sure none of your actual filenames somehow has a backslash in it
 					// but that shouldn't be happening anyway!
-					List<string> fileEntries = Directory.GetFiles(scenesDirPath, "*.unity", SearchOption.AllDirectories).ToList()
+					List<string> fileEntries = Directory.GetFiles(assetsPath, "*.unity", SearchOption.AllDirectories).ToList()
 						.Select(f => f.Replace('\\', '/')).ToList();
 					foreach (string s in scenesList) {
 						if (s != string.Empty) {
 							// scene name must not be empty (skips empty lines created by cross-platform line ending confusion)
-							string scenePath = scenesDirPath + s + ".unity";
+							string scenePath = assetsPath + s + ".unity";
 							if (fileEntries.Contains(scenePath)) {
 								// if the list of files in Scenes contains a config-specified scene
 								if (!scenes.Contains(scenePath)) {
 									// if that scene hasn't already been added to the list of scenes to build
 									Debug.Log(string.Format("Adding scene {0} at path {1}", s, scenePath));
 									// don't double-add scenes to editor build settings
-									if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/Scenes/" + s + ".unity")) {
-										Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/Scenes/" + s + ".unity"));
-										editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/Scenes/" + s + ".unity", true));
+									if (!editorBuildSettingsScenes.Any(f => f.enabled && f.path == "Assets/" + s + ".unity")) {
+										Debug.Log(string.Format("Adding scene {0} to Editor Build Settings", "Assets/" + s + ".unity"));
+										editorBuildSettingsScenes.Add(new EditorBuildSettingsScene("Assets/" + s + ".unity", true));
 									}
 
 									scenes.Add(scenePath);

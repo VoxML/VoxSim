@@ -20,14 +20,10 @@ namespace VoxSimPlatform {
 
         	float fontSizeModifier;
 
-        	HelpModalWindow help;
-
         	// Use this for initialization
         	void Start() {
         		fontSizeModifier = (int) (fontSize / defaultFontSize);
-
-        		help = GameObject.Find("Help").GetComponent<HelpModalWindow>();
-        	}
+           	}
 
         	// Update is called once per frame
         	void Update() {
@@ -45,7 +41,7 @@ namespace VoxSimPlatform {
         		float buttonWidth = buttonStyle.CalcSize(new GUIContent(buttonText)).x + (14 * fontSizeModifier);
 
         		if (GUI.Button(new Rect(Screen.width - buttonWidth - 12,
-        			Screen.height - ((10 + (int) (20 * help.FontSizeModifier)) + (5 + (int) (20 * fontSizeModifier))),
+        			Screen.height - ((10 + (int) (20 * fontSizeModifier)) + (5 + (int) (20 * fontSizeModifier))),
         			buttonWidth, 20 * fontSizeModifier), buttonText, buttonStyle)) {
         			modality ^= Modality.Linguistic;
         		}

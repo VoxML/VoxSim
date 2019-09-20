@@ -20,14 +20,12 @@ namespace VoxSimPlatform {
         			set { showFoV = value; }
         		}
 
-        		public JointGestureDemo world;
         		public GameObject agent;
         		public GameObject sensor;
         		public Transform attached;
         		public List<Voxeme> visibleObjects;
 
         		ObjectSelector objSelector;
-        		InteractionPrefsModalWindow interactionPrefs;
 
         		Timer reactionTimer;
         		float reactionDelayInterval = 1000;
@@ -42,7 +40,6 @@ namespace VoxSimPlatform {
         		void Start() {
         			gameObject.GetComponent<Camera>().targetTexture =
         				(RenderTexture) VisionCanvas.GetComponentInChildren<RawImage>().texture;
-        			interactionPrefs = world.GetComponent<InteractionPrefsModalWindow>();
         			if (attached != null) {
         				gameObject.transform.SetParent(attached);
         			}
@@ -56,7 +53,8 @@ namespace VoxSimPlatform {
         				return;
         			}
 
-        			ShowFoV = interactionPrefs.showSyntheticVision;
+                    // interaction prefs windows (e.g., InteractionPrefsModalWindow should action ShowFoV
+                    //  instead of the other way around
         			if (!ShowFoV) {
         				VisionCanvas.SetActive(false);
         			}

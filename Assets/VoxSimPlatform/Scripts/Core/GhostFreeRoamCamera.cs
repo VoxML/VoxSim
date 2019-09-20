@@ -45,14 +45,12 @@ namespace VoxSimPlatform {
 
         	private float angle = 0;
 
-        	HelpModalWindow help;
         	InputController inputController;
         	OutputController outputController;
         	ModalWindowManager windowManager;
         	UIButtonManager buttonManager;
 
         	private void OnEnable() {
-        		help = GameObject.Find("Help").GetComponent<HelpModalWindow>();
         		inputController = GameObject.Find("IOController").GetComponent<InputController>();
         		outputController = GameObject.Find("IOController").GetComponent<OutputController>();
         		windowManager = GameObject.Find("VoxWorld").GetComponent<ModalWindowManager>();
@@ -77,14 +75,6 @@ namespace VoxSimPlatform {
         			if (!Helper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				new Rect[] {outputController.outputRect})) {
-        				return;
-        			}
-        		}
-
-        		if (help != null) {
-        			if (!Helper.PointOutsideMaskedAreas(
-        				    new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
-        				    new Rect[] {help.windowRect}) && (help.render)) {
         				return;
         			}
         		}

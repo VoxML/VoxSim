@@ -6,14 +6,15 @@
 #  use this if you have Hub installed and need to make sure to build VoxSim with a particular version of Unity
 # You must have Unity OSX build support installed
 # Clean quits Unity if already open
-# Quits Unity when complete
-[ $# -lt 2 ] || [ $1 != "-b" ] && { echo "Usage: $0 -b <config file>.xml [-a path/to/unity]"; exit 1; }
-while getopts b:a: option
+# Quits Unity when complete unless "-n 1" is passed
+[ $# -lt 2 ] || [ $1 != "-b" ] && { echo "Usage: $0 -b <config file>.xml [-a path/to/unity] [-n 1]"; exit 1; }
+while getopts b:a:n: option
 do
 case "${option}"
 in
 b) CONFIG=${OPTARG};;
 a) UNITYPATH=${OPTARG};;
+n) NOQUIT=${OPTARG};;
 esac
 done
 if [ ! -f "$CONFIG" ]; then
@@ -26,12 +27,20 @@ else
         elif [[ "$UNITYPATH" == *"/Unity.app" ]]; then
             UNITYPATH+="/Contents/MacOS/Unity"
         fi
-        "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+        if [ $NOQUIT -eq 1 ]; then
+	        "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG
+        else
+            "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+        fi
     elif [[ "$OSTYPE" == "msys" ]]; then
         taskkill //F //IM Unity.exe //T
         if [ -z "$UNITYPATH" ]; then
             UNITYPATH="C:/Program Files/Unity/Editor/Unity.exe"
         fi
-        "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+        if [ $NOQUIT -eq 1 ]; then
+            "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG
+        else
+            "$UNITYPATH" -projectpath $(pwd) -executeMethod StandaloneBuild.AutoBuilder.BuildMac VoxSim $CONFIG -quit
+        fi
     fi
 fi

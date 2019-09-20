@@ -19,12 +19,10 @@ namespace VoxSimPlatform {
         	// Use this for initialization
         	void Start() {
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-        		Macros macros = GameObject.Find("BehaviorController").GetComponent<Macros>();
 
         		InitializeVoxemes();
 
         		objSelector.InitDisabledObjects();
-        		macros.PopulateMacros();
         	}
 
         	public void InitializeVoxemes() {

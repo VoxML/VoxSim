@@ -213,10 +213,20 @@ namespace VoxSimPlatform {
             	void Start() {
             		LoadPrefs();
 #if UNITY_EDITOR
-            		string scenesDirPath = Application.dataPath + "/Scenes/";
-            		string[] fileEntries = Directory.GetFiles(Application.dataPath + "/Scenes/", "*.unity");
+            		string assetsPath = Application.dataPath + "/";
+                    string[] fileEntries = new string[]{ };
+                    if (Directory.Exists(assetsPath + "/VoxSimPlatform/Scenes")) {
+                        fileEntries = Directory.GetFiles(assetsPath + "/VoxSimPlatform/Scenes", "*.unity",
+                            SearchOption.AllDirectories);
+                    }
+
+                    if (Directory.Exists(assetsPath + "/Scenes")) {
+                        fileEntries = fileEntries.Concat(Directory.GetFiles(assetsPath + "/Scenes", "*.unity",
+                            SearchOption.AllDirectories)).ToArray();
+                    }
+
             		foreach (string s in fileEntries) {
-            			string sceneName = s.Remove(0, scenesDirPath.Length).Replace(".unity", "");
+            			string sceneName = s.Split('/','\\')[s.Split('/','\\').Length - 1].Replace(".unity", "");
             			if (!sceneName.Equals(SceneManager.GetActiveScene().name)) {
             				Debug.Log(string.Format("Launcher.Start: Adding scene {0} to available scenes", sceneName));
             				availableScenes.Add(sceneName);
@@ -227,9 +237,10 @@ namespace VoxSimPlatform {
             		TextAsset scenesList = (TextAsset)Resources.Load("ScenesList", typeof(TextAsset));
             		string[] scenes = scenesList.text.Split ('\r','\n');
             		foreach (string s in scenes) {
-            			if ((s.Length > 0) && (!s.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name))) {
-                            Debug.Log(string.Format("Launcher.Start: Adding scene {0} to available scenes", s));
-            				availableScenes.Add(s);
+                        string sceneName = s.Split('/','\\')[s.Split('/','\\').Length - 1].Replace(".unity", "");
+            			if ((s.Length > 0) && (!sceneName.Equals(UnityEngine.SceneManagement.SceneManager.GetActiveScene ().name))) {
+                            Debug.Log(string.Format("Launcher.Start: Adding scene {0} to available scenes", sceneName));
+            				availableScenes.Add(sceneName);
             			}
             		}
 #endif

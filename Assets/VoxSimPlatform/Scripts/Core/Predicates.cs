@@ -34,7 +34,6 @@ namespace VoxSimPlatform {
         	EventManager eventManager;
         	ObjectSelector objSelector;
         	RelationTracker relationTracker;
-        	Macros macros;
 
         	public event EventHandler PrepareLog;
 
@@ -56,7 +55,6 @@ namespace VoxSimPlatform {
         		eventManager = gameObject.GetComponent<EventManager>();
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
-        		macros = GameObject.Find("BehaviorController").GetComponent<Macros>();
         	}
 
 #region OldPredicates
@@ -1235,8 +1233,10 @@ namespace VoxSimPlatform {
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
         							relOrientation = manners[selected];
+#if UNDERSPECIFICATION_TRIAL
         							OnPrepareLog(this, new ParamsEventArgs("RelOrientation", relOrientation));
-        						}
+#endif
+                               }
         					}
 
         					return;
@@ -2163,8 +2163,9 @@ namespace VoxSimPlatform {
         					                         Helper.VectorToParsable(targetPosition) + ")";
         				}
         				else {
-        					// record parameter values
-        					OnPrepareLog(this,
+#if UNDERSPECIFICATION_TRIAL
+                            // record parameter values
+                            OnPrepareLog(this,
         						new ParamsEventArgs("TranslocSpeed",
         							(args[0] as GameObject).GetComponent<Voxeme>().moveSpeed.ToString()));
 
@@ -2182,6 +2183,7 @@ namespace VoxSimPlatform {
         						    Helper.GetTopPredicate(eventManager.lastParse)))) {
         						OnParamsCalculated(null, null);
         					}
+#endif
 
         					//}
         				}
@@ -2375,6 +2377,7 @@ namespace VoxSimPlatform {
         					Debug.Log(eventManager.events[0]);
         				}
         				else {
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values
         					OnPrepareLog(this,
         						new ParamsEventArgs("TranslocSpeed",
@@ -2383,6 +2386,7 @@ namespace VoxSimPlatform {
         						new ParamsEventArgs("TranslocDir",
         							Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
         					OnParamsCalculated(null, null);
+#endif
         				}
         			}
         		}
@@ -2908,6 +2912,7 @@ namespace VoxSimPlatform {
         					Debug.Log(eventManager.events[0]);
         				}
         				else {
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values
         					OnPrepareLog(this,
         						new ParamsEventArgs("TranslocSpeed",
@@ -2916,6 +2921,7 @@ namespace VoxSimPlatform {
         						new ParamsEventArgs("TranslocDir",
         							Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
         					OnParamsCalculated(null, null);
+#endif
         				}
         			}
         		}
@@ -3471,6 +3477,7 @@ namespace VoxSimPlatform {
         					Debug.Log(eventManager.events[0]);
         				}
         				else {
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values
         					OnPrepareLog(this,
         						new ParamsEventArgs("TranslocSpeed",
@@ -3479,6 +3486,7 @@ namespace VoxSimPlatform {
         						new ParamsEventArgs("TranslocDir",
         							Helper.VectorToParsable(targetPosition - (args[0] as GameObject).transform.position)));
         					OnParamsCalculated(null, null);
+#endif
         				}
         			}
         		}
@@ -3754,19 +3762,21 @@ namespace VoxSimPlatform {
         							Helper.VectorToParsable((args[0] as GameObject).transform.position + offset)), 1);
         					eventManager.RemoveEvent(eventManager.events.Count - 1);
 
-        					// update subobject rigidbody rotations
-        					// TODO: UpdateSubObjectRigidbodyRotations()
-        //					Rigidbody[] rigidbodies = obj.gameObject.GetComponentsInChildren<Rigidbody> ();
-        //					foreach (Rigidbody rigidbody in rigidbodies) {
-        //						if (voxComponent.staticStateRotations.ContainsKey (rigidbody.name)) {
-        //							Debug.Log(rigidbody.name);
-        //							Debug.Log(rigidbody.rotation.eulerAngles);
-        //							voxComponent.staticStateRotations [rigidbody.name] = rigidbody.rotation.eulerAngles;
-        //						}
-        //					}
+                            // update subobject rigidbody rotations
+                            // TODO: UpdateSubObjectRigidbodyRotations()
+                            //					Rigidbody[] rigidbodies = obj.gameObject.GetComponentsInChildren<Rigidbody> ();
+                            //					foreach (Rigidbody rigidbody in rigidbodies) {
+                            //						if (voxComponent.staticStateRotations.ContainsKey (rigidbody.name)) {
+                            //							Debug.Log(rigidbody.name);
+                            //							Debug.Log(rigidbody.rotation.eulerAngles);
+                            //							voxComponent.staticStateRotations [rigidbody.name] = rigidbody.rotation.eulerAngles;
+                            //						}
+                            //					}
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values
         					OnPrepareLog(this, new ParamsEventArgs("TranslocDir", Helper.VectorToParsable(offset)));
         					OnParamsCalculated(null, null);
+#endif
         					return;
         				}
         				else {
@@ -4026,8 +4036,9 @@ namespace VoxSimPlatform {
         						Helper.VectorToParsable(worldAxis),
         						Helper.VectorToParsable((args[0] as GameObject).transform.rotation * targetDir),
         						Helper.VectorToParsable((args[0] as GameObject).transform.rotation * worldRotAxis));
-        					//flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
+                            //flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
 
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values
         					Dictionary<string, string> paramValues = UnderspecifiedPredicateParameters.InitPredicateParametersCollection();
         					Debug.Log(Helper.VectorToParsable(objAxis));
@@ -4049,6 +4060,7 @@ namespace VoxSimPlatform {
 
         					OnPrepareLog(this, new ParamsEventArgs("RotAxis", rotAxis.Key));
         					OnParamsCalculated(null, null);
+#endif
         					return;
         				}
         			}
@@ -4297,7 +4309,7 @@ namespace VoxSimPlatform {
         					}
 
         					Debug.Log(eventManager.events[0]);
-
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values
         					OnPrepareLog(this,
         						new ParamsEventArgs("RotSpeed",
@@ -4321,6 +4333,7 @@ namespace VoxSimPlatform {
         						    Helper.GetTopPredicate(eventManager.lastParse)))) {
         						OnParamsCalculated(null, null);
         					}
+#endif
 
         					//}
         				}
@@ -4468,6 +4481,7 @@ namespace VoxSimPlatform {
         							Helper.VectorToParsable(worldRotAxis)), 1 + i);
         				}
 
+#if UNDERSPECIFICATION_TRIAL
         				// record parameter values
         				OnPrepareLog(this,
         					new ParamsEventArgs("RotSpeed",
@@ -4478,6 +4492,7 @@ namespace VoxSimPlatform {
         				OnPrepareLog(this, new ParamsEventArgs("RotDir", (sign > 0) ? "+" : "-"));
         				OnParamsCalculated(null, null);
         				//Debug.Break ();
+#endif
         			}
         		}
 
@@ -4588,12 +4603,14 @@ namespace VoxSimPlatform {
         						eventManager.InsertEvent(string.Format("put({0},on({1}))", objs[i + 1].name, objs[i].name),
         							1 + i);
         					}
-        					//eventManager.RemoveEvent (i);
+                            //eventManager.RemoveEvent (i);
 
-        					// record parameter values
+#if UNDERSPECIFICATION_TRIAL
+                            // record parameter values
         					string[] placementOrder = objs.Select(o => o.name).ToArray();
         					OnPrepareLog(this, new ParamsEventArgs("PlacementOrder", string.Join(",", placementOrder)));
         					OnParamsCalculated(null, null);
+#endif
         				}
         			}
         		}
@@ -4925,13 +4942,15 @@ namespace VoxSimPlatform {
         					eventManager.InsertEvent(string.Format("put({0},{1})", (args[0] as GameObject).name,
         						Helper.VectorToParsable(targetPosition)), 2);
         					eventManager.RemoveEvent(eventManager.events.Count - 1);
-        					if (args[args.Length - 1] is bool) {
+#if UNDERSPECIFICATION_TRIAL
+                            if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
         							// record parameter values
         							OnPrepareLog(this, new ParamsEventArgs("RotAngle", leanAngle.ToString()));
         							OnParamsCalculated(null, null);
         						}
         					}
+#endif
 
         					return;
         				}
@@ -5572,10 +5591,12 @@ namespace VoxSimPlatform {
         							RandomHelper.RandomFloat(0.0f, 12.5f, (int) RandomHelper.RangeFlags.MaxInclusive);
         					}
 
-        					// record parameter values
-        					OnPrepareLog(this, new ParamsEventArgs("MotionManner", mannerString));
+#if UNDERSPECIFICATION_TRIAL
+                            // record parameter values
+                            OnPrepareLog(this, new ParamsEventArgs("MotionManner", mannerString));
         					OnPrepareLog(this, new ParamsEventArgs("MotionSpeed", motionSpeed.ToString()));
         					OnParamsCalculated(null, null);
+#endif
         				}
         			}
         		}
@@ -5793,6 +5814,7 @@ namespace VoxSimPlatform {
         						rotAngle = Quaternion.Angle(movingComponent.transform.rotation, targetRotation);
         					}
 
+#if UNDERSPECIFICATION_TRIAL
         					// record parameter values						
         					OnPrepareLog(this, new ParamsEventArgs("MotionManner", mannerString));
         					OnPrepareLog(this, new ParamsEventArgs("MotionSpeed", motionSpeed.ToString()));
@@ -5806,6 +5828,7 @@ namespace VoxSimPlatform {
         					}
 
         					OnParamsCalculated(null, null);
+#endif
         				}
         			}
         		}
@@ -5845,9 +5868,6 @@ namespace VoxSimPlatform {
         //				}
         			}
         		}
-
-        		macros.ClearMacros();
-        		macros.PopulateMacros();
         	}
 
         	// IN: Objects
@@ -5862,9 +5882,6 @@ namespace VoxSimPlatform {
         				}
         			}
         		}
-
-        		macros.ClearMacros();
-        		macros.PopulateMacros();
         	}
 
         	/* AGENT-DEPENDENT BEHAVIORS */
@@ -6029,7 +6046,7 @@ namespace VoxSimPlatform {
                                                 rigging.ActivatePhysics(true);
                                             }
 
-                                            graspController.grasper = (int) Gestures.HandPose.Neutral;
+                                            //graspController.grasper = (int) Gestures.HandPose.Neutral;
                                             //agent.GetComponent<GraspScript>().isGrasping = false;
                                             //agent.GetComponent<IKControl> ().leftHandObj.position = graspController.leftDefaultPosition;
                                             //agent.GetComponent<IKControl> ().rightHandObj.position = graspController.rightDefaultPosition;

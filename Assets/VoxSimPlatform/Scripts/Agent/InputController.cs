@@ -50,7 +50,6 @@ namespace VoxSimPlatform {
 
         	String[] commands;
         	EventManager eventManager;
-        	Macros macros;
 
         	CommunicationsBridge commBridge;
 
@@ -88,7 +87,6 @@ namespace VoxSimPlatform {
         	void Start() {
         		GameObject bc = GameObject.Find("BehaviorController");
         		eventManager = bc.GetComponent<EventManager>();
-        		macros = bc.GetComponent<Macros>();
 
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		//exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
@@ -302,16 +300,6 @@ namespace VoxSimPlatform {
 
         			if (functionalCommand.Count(x => x == '(') == functionalCommand.Count(x => x == ')')) {
         				//eventManager.ClearEvents ();
-        				if (macros != null) {
-        					foreach (KeyValuePair<String, String> kv in macros.commandMacros) {
-        						// if input is a macro
-        						if (functionalCommand == kv.Key) {
-        							// sub in value
-        							functionalCommand = kv.Value;
-        							break;
-        						}
-        					}
-        				}
 
         				Debug.Log("Raw input parsed as: " + functionalCommand);
         				InputEventArgs parseArgs = new InputEventArgs(functionalCommand);
