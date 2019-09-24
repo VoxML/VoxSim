@@ -23,7 +23,7 @@ namespace VoxSimPlatform {
         	}
 
         	void Update() {
-        		if (!Helper.VectorIsNaN(targetRotation)) {
+        		if (!GlobalHelper.VectorIsNaN(targetRotation)) {
         			// has valid target
         			if (transform.rotation != Quaternion.Euler(targetRotation)) {
         				float offset = RotateToward(targetRotation);

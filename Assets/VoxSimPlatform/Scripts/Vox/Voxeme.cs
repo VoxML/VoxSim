@@ -141,7 +141,7 @@ namespace VoxSimPlatform {
         		LoadVoxML();
 
         		// get movement blocking
-        		minYBound = Helper.GetObjectWorldSize(gameObject).min.y;
+        		minYBound = GlobalHelper.GetObjectWorldSize(gameObject).min.y;
         		//Debug.Log (minYBound);
 
         		// get rigging components
@@ -176,15 +176,15 @@ namespace VoxSimPlatform {
         		}
 
         		Debug.Log(gameObject);
-        		Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(gameObject).min));
-        		Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(gameObject).max));
+        		Debug.Log(GlobalHelper.VectorToParsable(GlobalHelper.GetObjectWorldSize(gameObject).min));
+        		Debug.Log(GlobalHelper.VectorToParsable(GlobalHelper.GetObjectWorldSize(gameObject).max));
         	}
 
         	// Update is called once per frame
         	void Update() {
         		if (interTargetPositions.Count == 0) {
         			// no queued path
-        			if (!Helper.VectorIsNaN(targetPosition)) {
+        			if (!GlobalHelper.VectorIsNaN(targetPosition)) {
         				// has valid destination
         				if (!isGrasped) {
         					if (transform.position != targetPosition) {
@@ -240,7 +240,7 @@ namespace VoxSimPlatform {
                             //	}
                             //}
 
-                            Debug.Log(string.Format("Removing {0} from {1}.interTargetPositions", Helper.VectorToParsable(interimTarget), gameObject.name));
+                            Debug.Log(string.Format("Removing {0} from {1}.interTargetPositions", GlobalHelper.VectorToParsable(interimTarget), gameObject.name));
         					interTargetPositions.RemoveFirst();
         				}
 
@@ -262,7 +262,7 @@ namespace VoxSimPlatform {
 
         		if (interTargetRotations.Count == 0) {
         			// no queued sequence
-        			if (!Helper.VectorIsNaN(targetRotation)) {
+        			if (!GlobalHelper.VectorIsNaN(targetRotation)) {
         				// has valid target
         				if (!isGrasped) {
         					if (transform.rotation != Quaternion.Euler(targetRotation)) {
@@ -339,8 +339,8 @@ namespace VoxSimPlatform {
         		if (supportingSurface != null) {
         			//Debug.Log (supportingSurface.name);
         			// add check for SupportingSurface component
-        			Bounds surfaceBounds = Helper.GetObjectWorldSize(supportingSurface);
-        			Bounds objectBounds = Helper.GetObjectWorldSize(gameObject);
+        			Bounds surfaceBounds = GlobalHelper.GetObjectWorldSize(supportingSurface);
+        			Bounds objectBounds = GlobalHelper.GetObjectWorldSize(gameObject);
         //			Renderer[] renderers = supportingSurface.GetComponentsInChildren<Renderer> ();
         //			Bounds surfaceBounds = new Bounds ();
         //			foreach (Renderer renderer in renderers) {
@@ -362,7 +362,7 @@ namespace VoxSimPlatform {
         //				}
         //			}
 
-        			if (Helper.IsTopmostVoxemeInHierarchy(gameObject)) {
+        			if (GlobalHelper.IsTopmostVoxemeInHierarchy(gameObject)) {
         				if (objectBounds.min.y < minYBound) {
         					transform.position = new Vector3(transform.position.x,
         						transform.position.y + (minYBound - objectBounds.min.y),
@@ -399,16 +399,16 @@ namespace VoxSimPlatform {
         	}
 
         	void AdjustToSupportingSurface() {
-        		Vector3 rayStartX = new Vector3(Helper.GetObjectWorldSize(gameObject).min.x - Constants.EPSILON,
-        			Helper.GetObjectWorldSize(gameObject).min.y + Constants.EPSILON,
-        			Helper.GetObjectWorldSize(gameObject).center.z);
-        		Vector3 contactPointX = Helper.RayIntersectionPoint(rayStartX, Vector3.right);
+        		Vector3 rayStartX = new Vector3(GlobalHelper.GetObjectWorldSize(gameObject).min.x - Constants.EPSILON,
+        			GlobalHelper.GetObjectWorldSize(gameObject).min.y + Constants.EPSILON,
+        			GlobalHelper.GetObjectWorldSize(gameObject).center.z);
+        		Vector3 contactPointX = GlobalHelper.RayIntersectionPoint(rayStartX, Vector3.right);
         		//contactPointX = new Vector3 (contactPointX.x, transform.position.y, contactPointX.z);
 
-        		Vector3 rayStartZ = new Vector3(Helper.GetObjectWorldSize(gameObject).center.x,
-        			Helper.GetObjectWorldSize(gameObject).min.y + Constants.EPSILON,
-        			Helper.GetObjectWorldSize(gameObject).min.z - Constants.EPSILON);
-        		Vector3 contactPointZ = Helper.RayIntersectionPoint(rayStartZ, Vector3.forward);
+        		Vector3 rayStartZ = new Vector3(GlobalHelper.GetObjectWorldSize(gameObject).center.x,
+        			GlobalHelper.GetObjectWorldSize(gameObject).min.y + Constants.EPSILON,
+        			GlobalHelper.GetObjectWorldSize(gameObject).min.z - Constants.EPSILON);
+        		Vector3 contactPointZ = GlobalHelper.RayIntersectionPoint(rayStartZ, Vector3.forward);
         		//contactPointZ = new Vector3 (contactPointZ.x, transform.position.y, contactPointZ.z);
 
         		Vector3 contactPoint = (contactPointZ.y < contactPointX.y)
@@ -432,19 +432,19 @@ namespace VoxSimPlatform {
         			if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
         				if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
         				    (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
-        					if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-        						Helper.GetObjectWorldSize(gameObject), true)) {
+        					if (!GlobalHelper.FitsIn(GlobalHelper.GetObjectWorldSize(hit.collider.gameObject),
+        						GlobalHelper.GetObjectWorldSize(gameObject), true)) {
         						supportingSurface = hit.collider.gameObject;
 
         						//if (!grasped) {
-        						bool themeIsConcave = (Helper.GetMostImmediateParentVoxeme(gameObject)
+        						bool themeIsConcave = (GlobalHelper.GetMostImmediateParentVoxeme(gameObject)
         							.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
         						bool themeIsUpright =
         							(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) > 0.5f);
         						bool themeIsUpsideDown =
         							(Vector3.Dot(gameObject.transform.root.transform.up, Vector3.up) < -0.5f);
 
-                                bool supportIsConcave = (Helper.GetMostImmediateParentVoxeme(supportingSurface)
+                                bool supportIsConcave = (GlobalHelper.GetMostImmediateParentVoxeme(supportingSurface)
         							.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"));
         						bool supportIsUpright =
         							(Vector3.Dot(supportingSurface.transform.root.transform.up, Vector3.up) > 0.5f);
@@ -454,10 +454,10 @@ namespace VoxSimPlatform {
         						// if theme is concave, the concavity isn't enabled, and the object is on top of an object that fits inside of it
         						// e.g. cup on top of ball
         						if ((themeIsConcave) &&
-        						    (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(gameObject))) &&
-        						    (Helper.FitsIn(Helper.GetObjectWorldSize(supportingSurface.transform.root.gameObject),
-        							    Helper.GetObjectWorldSize(gameObject)))) {
-        							minYBound = Helper.GetObjectWorldSize(supportingSurface).min.y;
+        						    (Concavity.IsEnabled(GlobalHelper.GetMostImmediateParentVoxeme(gameObject))) &&
+        						    (GlobalHelper.FitsIn(GlobalHelper.GetObjectWorldSize(supportingSurface.transform.root.gameObject),
+        							    GlobalHelper.GetObjectWorldSize(gameObject)))) {
+        							minYBound = GlobalHelper.GetObjectWorldSize(supportingSurface).min.y;
         							//flip the plate.  flip the cup.  put the plate under the cup
         							//flip the cup.  put the ball under the cup
         						}
@@ -465,7 +465,7 @@ namespace VoxSimPlatform {
         							// otherwise
         							if (supportIsConcave) {
         								// if the object under this object is concave
-        								if (Concavity.IsEnabled(Helper.GetMostImmediateParentVoxeme(supportingSurface))) {
+        								if (Concavity.IsEnabled(GlobalHelper.GetMostImmediateParentVoxeme(supportingSurface))) {
         									// if the object under this object has its concavity enabled
         									minYBound = PhysicsHelper.GetConcavityMinimum(supportingSurface.transform.root
         										.gameObject);
@@ -477,14 +477,14 @@ namespace VoxSimPlatform {
         								else {
         									// if the object under this object is not upright
         									//Debug.Break ();
-        									minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
+        									minYBound = GlobalHelper.GetObjectWorldSize(supportingSurface).max.y;
         									//								Debug.Log (minYBound);
         									//Debug.Log (minYBound);
         								}
         							}
         							else {
         								// if the object under this object is not concave
-        								minYBound = Helper.GetObjectWorldSize(supportingSurface).max.y;
+        								minYBound = GlobalHelper.GetObjectWorldSize(supportingSurface).max.y;
         								//							Debug.Log (minYBound);
         								//Debug.Break ();
         							}
@@ -505,7 +505,7 @@ namespace VoxSimPlatform {
         	public void Reset() {
         		if (gameObject.transform.parent != null) {
         			GameObject parent = gameObject.transform.parent.gameObject;
-        			Voxeme parentVox = Helper.GetMostImmediateParentVoxeme(parent).GetComponent<Voxeme>();
+        			Voxeme parentVox = GlobalHelper.GetMostImmediateParentVoxeme(parent).GetComponent<Voxeme>();
 
         			// if this voxeme is not (intentionally) a subcomponent of another voxeme object
         			if (!(parentVox.opVox.Type.Components.Select(i => i.Item2).ToList()).Contains(gameObject)) {
@@ -527,13 +527,13 @@ namespace VoxSimPlatform {
 
         	public Vector3 MoveToward(Vector3 target) {
         		Debug.Log (string.Format("{0}: at {1}, moving toward {2}",gameObject.name,
-                    Helper.VectorToParsable(transform.position),Helper.VectorToParsable(target)));
+                    GlobalHelper.VectorToParsable(transform.position),GlobalHelper.VectorToParsable(target)));
         		if (!isGrasped) {
         			Vector3 offset = transform.position - target;
         			Vector3 normalizedOffset = Vector3.Normalize(offset);
 
                     Debug.Log (string.Format("{0}: {1}, {2}",gameObject.name,
-                        Helper.VectorToParsable(offset),Helper.VectorToParsable(normalizedOffset)));
+                        GlobalHelper.VectorToParsable(offset),GlobalHelper.VectorToParsable(normalizedOffset)));
 
         			if (rigging.usePhysicsRig) {
         				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
@@ -567,7 +567,7 @@ namespace VoxSimPlatform {
                     }
 
                     Debug.Log (string.Format("{0}: {1}, {2}",gameObject.name,
-                        Helper.VectorToParsable(transform.position), Helper.VectorToParsable(target)));
+                        GlobalHelper.VectorToParsable(transform.position), GlobalHelper.VectorToParsable(target)));
 
         			return offset;
         		}
@@ -623,7 +623,7 @@ namespace VoxSimPlatform {
         						child.transform.localRotation = parentToChildRotationOffset[child.gameObject];
         						child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
         						child.targetRotation = child.transform.rotation.eulerAngles;
-        						child.transform.localPosition = Helper.RotatePointAroundPivot(
+        						child.transform.localPosition = GlobalHelper.RotatePointAroundPivot(
         							parentToChildPositionOffset[child.gameObject],
         							Vector3.zero, gameObject.transform.eulerAngles);
         						child.transform.position = gameObject.transform.position + child.transform.localPosition;
@@ -666,7 +666,7 @@ namespace VoxSimPlatform {
             //      newVal -- new or current value of gameObject's targetPosition
         	void OnTargetPositionChanged(Vector3 oldVal, Vector3 newVal) {
         		Debug.Log(string.Format("==================== Target position changed ==================== {0}: {1}->{2}",
-        			gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
+        			gameObject.name, GlobalHelper.VectorToParsable(oldVal), GlobalHelper.VectorToParsable(newVal)));
         	}
 
             /// <summary>
@@ -676,7 +676,7 @@ namespace VoxSimPlatform {
             //      newVal -- new or current value of gameObject's targetRotation
             void OnTargetRotationChanged(Vector3 oldVal, Vector3 newVal) {
                 Debug.Log(string.Format("==================== Target rotation changed ==================== {0}: {1}->{2}",
-                    gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
+                    gameObject.name, GlobalHelper.VectorToParsable(oldVal), GlobalHelper.VectorToParsable(newVal)));
             }
 
             /// <summary>
@@ -686,7 +686,7 @@ namespace VoxSimPlatform {
             //      newVal -- new or current value of gameObject's targetScale
             void OnTargetScaleChanged(Vector3 oldVal, Vector3 newVal) {
                 Debug.Log(string.Format("==================== Target scale changed ==================== {0}: {1}->{2}",
-                    gameObject.name, Helper.VectorToParsable(oldVal), Helper.VectorToParsable(newVal)));
+                    gameObject.name, GlobalHelper.VectorToParsable(oldVal), GlobalHelper.VectorToParsable(newVal)));
             }
 
         	void OnCollisionEnter(Collision other) {
@@ -747,7 +747,7 @@ namespace VoxSimPlatform {
         				int index = -1;
         				obj = gameObject.transform.Find(gameObject.name + "*/" + s[0]);
         				if (s.Length > 1) {
-        					index = Helper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
+        					index = GlobalHelper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
         				}
 
         				if (obj != null) {
@@ -765,7 +765,7 @@ namespace VoxSimPlatform {
         							//Debug.Log (child.name);
         							int index = -1;
         							if (s.Length > 1) {
-        								index = Helper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
+        								index = GlobalHelper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
         							}
 
         							opVox.Type.Components.Add(
@@ -779,7 +779,7 @@ namespace VoxSimPlatform {
         		// set component as semantic head
         		string[] str = voxml.Type.Head.Split('[');
         		if (str.Length > 1) {
-        			int i = Helper.StringToInt(str[1].Remove(str[1].IndexOf(']')));
+        			int i = GlobalHelper.StringToInt(str[1].Remove(str[1].IndexOf(']')));
         			if (opVox.Type.Components.FindIndex(c => c.Item3 == i) != -1) {
         				opVox.Type.Head = opVox.Type.Components.First(c => c.Item3 == i);
         			}
@@ -798,7 +798,7 @@ namespace VoxSimPlatform {
         		string[] concavity = voxml.Type.Concavity.Split('[');
         		// if reentrancy index given
         		if (concavity.Length > 1) {
-        			int index = Helper.StringToInt(concavity[1].Remove(concavity[1].IndexOf(']')));
+        			int index = GlobalHelper.StringToInt(concavity[1].Remove(concavity[1].IndexOf(']')));
         			if (opVox.Type.Components.FindIndex(c => c.Item3 == index) != -1) {
         				GameObject obj = opVox.Type.Components.Find(c => c.Item3 == index).Item2;
         				opVox.Type.Concavity = new Triple<string, GameObject, int>(concavity[0], obj, index);
@@ -830,7 +830,7 @@ namespace VoxSimPlatform {
         		// set habitat info
         		foreach (VoxHabitatIntr ih in voxml.Habitat.Intrinsic) {
         			string[] s = ih.Name.Split('[');
-        			int index = Helper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
+        			int index = GlobalHelper.StringToInt(s[1].Remove(s[1].IndexOf(']')));
         			//Debug.Log(index);
         			//Debug.Log (s[0] + " = {" + ih.Value + "}");
 
@@ -881,7 +881,7 @@ namespace VoxSimPlatform {
         				? conditions[1]
         				: ""; // split into habitat and non-habitat condition (if any)
         			int index = (cHabitat.Split('[').Length > 1)
-        				? Helper.StringToInt(cHabitat.Split('[')[1].Remove(cHabitat.Split('[')[1].IndexOf(']')))
+        				? GlobalHelper.StringToInt(cHabitat.Split('[')[1].Remove(cHabitat.Split('[')[1].IndexOf(']')))
         				: 0;
 
         			//Debug.Log ("Habitat index: " + index.ToString ());

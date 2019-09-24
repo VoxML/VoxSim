@@ -10,7 +10,7 @@ namespace VoxSimPlatform {
     			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
     			GameObject grasper;
 
-    			Bounds bounds = Helper.GetObjectWorldSize((obj as GameObject));
+    			Bounds bounds = GlobalHelper.GetObjectWorldSize((obj as GameObject));
 
     			// which hand is closer?
     			float leftToGoalDist =

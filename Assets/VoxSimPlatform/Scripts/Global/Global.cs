@@ -265,12 +265,12 @@ namespace VoxSimPlatform {
             public bool BoundsEqual(ObjBounds other) {
                 bool boundsEqual = true;
 
-                if (!Helper.CloseEnough(this.Center, other.Center)) {
+                if (!GlobalHelper.CloseEnough(this.Center, other.Center)) {
                     boundsEqual = false;
                 }
 
                 for (int i = 0; i < this.Points.Count; i++) {
-                    if (!Helper.CloseEnough(this.Points[i], other.Points[i])) {
+                    if (!GlobalHelper.CloseEnough(this.Points[i], other.Points[i])) {
                         boundsEqual = false;
                     }
                 }

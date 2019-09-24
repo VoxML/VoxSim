@@ -87,7 +87,7 @@ namespace VoxSimPlatform {
         				// on concave object
         				// get surface with concavity
         				// which side is concavity on? - assume +Y for now
-        				bounds = Helper.GetObjectWorldSize(obj);
+        				bounds = GlobalHelper.GetObjectWorldSize(obj);
 
         				/*float concavityMinY = bounds.min.y;
         				foreach (Renderer renderer in obj.GetComponentsInChildren<Renderer>()) {
@@ -112,7 +112,7 @@ namespace VoxSimPlatform {
         				Debug.Log (Helper.VectorToParsable(bounds.min));
         				Debug.Log (Helper.VectorToParsable(bounds.max));*/
 
-        				bounds = Helper.GetObjectWorldSize(obj);
+        				bounds = GlobalHelper.GetObjectWorldSize(obj);
 
         				outValue = new Vector3(obj.transform.position.x,
         					bounds.max.y,
@@ -131,7 +131,7 @@ namespace VoxSimPlatform {
         			}*/
 
         			//Debug.Log(obj);
-        			Debug.Log("on: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("on: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// on a location
@@ -184,7 +184,7 @@ namespace VoxSimPlatform {
         				outValue = new Vector3(float.NaN, float.NaN, float.NaN);
         			}
 
-        			Debug.Log("in: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("in: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// on a location
@@ -204,7 +204,7 @@ namespace VoxSimPlatform {
         			Bounds bounds = new Bounds();
 
         			outValue = obj.transform.position;
-        			Debug.Log("against: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("against: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// against a location
@@ -230,11 +230,11 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj);
+        			bounds = GlobalHelper.GetObjectWorldSize(obj);
 
         			outValue = new Vector3(obj.transform.position.x, bounds.min.y, obj.transform.position.z);
 
-        			Debug.Log("under: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("under: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// behind a location
@@ -305,8 +305,8 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
+        			bounds = GlobalHelper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
         			GameObject camera = GameObject.Find("Main Camera");
         			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
@@ -314,9 +314,9 @@ namespace VoxSimPlatform {
         				Mathf.Abs(bounds.size.z));
         			rayStart = Quaternion.Euler(0.0f, povDir, 0.0f) * rayStart;
         			rayStart += bounds.center;
-        			outValue = Helper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
+        			outValue = GlobalHelper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
 
-        			Debug.Log("behind: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("behind: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// behind a location
@@ -336,8 +336,8 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
+        			bounds = GlobalHelper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
         			GameObject camera = GameObject.Find("Main Camera");
         			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
@@ -345,9 +345,9 @@ namespace VoxSimPlatform {
         				Mathf.Abs(bounds.size.z));
         			rayStart = Quaternion.Euler(0.0f, povDir + 180.0f, 0.0f) * rayStart;
         			rayStart += bounds.center;
-        			outValue = Helper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
+        			outValue = GlobalHelper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
 
-        			Debug.Log("in_front: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("in_front: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// in front of a location
@@ -367,8 +367,8 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
+        			bounds = GlobalHelper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
         			GameObject camera = GameObject.Find("Main Camera");
         			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
@@ -376,9 +376,9 @@ namespace VoxSimPlatform {
         				Mathf.Abs(bounds.size.z));
         			rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         			rayStart += bounds.center;
-        			outValue = Helper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
+        			outValue = GlobalHelper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
 
-        			Debug.Log("left: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("left: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// left of a location
@@ -398,8 +398,8 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
+        			bounds = GlobalHelper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
         			GameObject camera = GameObject.Find("Main Camera");
         			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
@@ -407,9 +407,9 @@ namespace VoxSimPlatform {
         				Mathf.Abs(bounds.size.z));
         			rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
         			rayStart += bounds.center;
-        			outValue = Helper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
+        			outValue = GlobalHelper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
 
-        			Debug.Log("right: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("right: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// right of a location
@@ -429,8 +429,8 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
+        			bounds = GlobalHelper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
         			GameObject camera = GameObject.Find("Main Camera");
         			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
@@ -438,9 +438,9 @@ namespace VoxSimPlatform {
         				Mathf.Abs(bounds.size.z));
         			rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         			rayStart += bounds.center;
-        			outValue = Helper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
+        			outValue = GlobalHelper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
 
-        			Debug.Log("left-dc: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("left-dc: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// left of a location
@@ -460,8 +460,8 @@ namespace VoxSimPlatform {
 
         			Bounds bounds = new Bounds();
 
-        			bounds = Helper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
+        			bounds = GlobalHelper.GetObjectWorldSize(obj, obj.GetComponentsInChildren<Voxeme>().Where(
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList());
 
         			GameObject camera = GameObject.Find("Main Camera");
         			float povDir = cameraRelativeDirections ? camera.transform.eulerAngles.y : 0.0f;
@@ -469,9 +469,9 @@ namespace VoxSimPlatform {
         				Mathf.Abs(bounds.size.z));
         			rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
         			rayStart += bounds.center;
-        			outValue = Helper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
+        			outValue = GlobalHelper.RayIntersectionPoint(rayStart, bounds.center - rayStart);
 
-        			Debug.Log("right-dc: " + Helper.VectorToParsable(outValue));
+        			Debug.Log("right-dc: " + GlobalHelper.VectorToParsable(outValue));
         		}
         		else if (args[0] is Vector3) {
         			// right of a location
@@ -520,9 +520,9 @@ namespace VoxSimPlatform {
         				Region region = new Region();
         				Vector3 closestSurfaceBoundary = Vector3.zero;
         				do {
-        					region = Helper.FindClearRegion(voxComponent.supportingSurface.transform.root.gameObject, obj);
+        					region = GlobalHelper.FindClearRegion(voxComponent.supportingSurface.transform.root.gameObject, obj);
         					closestSurfaceBoundary =
-        						Helper.ClosestExteriorPoint(voxComponent.supportingSurface.transform.root.gameObject,
+        						GlobalHelper.ClosestExteriorPoint(voxComponent.supportingSurface.transform.root.gameObject,
         							region.center);
         //				Debug.Log (Vector3.Distance (obj.transform.position, region.center));
         //				Debug.Log (Vector3.Distance(closestSurfaceBoundary,region.center));
@@ -552,7 +552,7 @@ namespace VoxSimPlatform {
         		if (args[0] is GameObject) {
         			GameObject obj = ((GameObject) args[0]);
         			Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
-        			Bounds bounds = Helper.GetObjectWorldSize(obj);
+        			Bounds bounds = GlobalHelper.GetObjectWorldSize(obj);
 
         			Debug.Log("center: " + bounds.max.y);
 
@@ -572,7 +572,7 @@ namespace VoxSimPlatform {
         		if (args[0] is GameObject) {
         			GameObject obj = ((GameObject) args[0]);
         			Renderer[] renderers = obj.GetComponentsInChildren<Renderer>();
-        			Bounds bounds = Helper.GetObjectWorldSize(obj);
+        			Bounds bounds = GlobalHelper.GetObjectWorldSize(obj);
 
         			List<Vector3> edges = new List<Vector3>() {
         				new Vector3(bounds.max.x, bounds.center.y, bounds.center.z),
@@ -916,12 +916,12 @@ namespace VoxSimPlatform {
         			obj = objs[0];
 
         			foreach (GameObject o in objs) {
-        				if ((Helper.GetObjectWorldSize(o).size.x *
-        				     Helper.GetObjectWorldSize(o).size.y *
-        				     Helper.GetObjectWorldSize(o).size.z) >
-        				    (Helper.GetObjectWorldSize(obj).size.x *
-        				     Helper.GetObjectWorldSize(obj).size.y *
-        				     Helper.GetObjectWorldSize(obj).size.z)) {
+        				if ((GlobalHelper.GetObjectWorldSize(o).size.x *
+        				     GlobalHelper.GetObjectWorldSize(o).size.y *
+        				     GlobalHelper.GetObjectWorldSize(o).size.z) >
+        				    (GlobalHelper.GetObjectWorldSize(obj).size.x *
+        				     GlobalHelper.GetObjectWorldSize(obj).size.y *
+        				     GlobalHelper.GetObjectWorldSize(obj).size.z)) {
         					obj = o;
         				}
         			}
@@ -941,12 +941,12 @@ namespace VoxSimPlatform {
         			obj = objs[0];
 
         			foreach (GameObject o in objs) {
-        				if ((Helper.GetObjectWorldSize(o).size.x *
-        				     Helper.GetObjectWorldSize(o).size.y *
-        				     Helper.GetObjectWorldSize(o).size.z) <
-        				    (Helper.GetObjectWorldSize(obj).size.x *
-        				     Helper.GetObjectWorldSize(obj).size.y *
-        				     Helper.GetObjectWorldSize(obj).size.z)) {
+        				if ((GlobalHelper.GetObjectWorldSize(o).size.x *
+        				     GlobalHelper.GetObjectWorldSize(o).size.y *
+        				     GlobalHelper.GetObjectWorldSize(o).size.z) <
+        				    (GlobalHelper.GetObjectWorldSize(obj).size.x *
+        				     GlobalHelper.GetObjectWorldSize(obj).size.y *
+        				     GlobalHelper.GetObjectWorldSize(obj).size.z)) {
         					obj = o;
         				}
         			}
@@ -1147,7 +1147,7 @@ namespace VoxSimPlatform {
         					eventManager.InsertEvent(
         						eventManager.evalOrig[
         							string.Format("put({0},{1})", (args[0] as GameObject).name,
-        								Helper.VectorToParsable((Vector3) args[1]))], 1);
+        								GlobalHelper.VectorToParsable((Vector3) args[1]))], 1);
         					eventManager.RemoveEvent(2);
         					return;
         				}
@@ -1163,34 +1163,34 @@ namespace VoxSimPlatform {
         					GameObject supportingSurface = (args[0] as GameObject).GetComponent<Voxeme>().supportingSurface;
         					if (supportingSurface != null) {
         						//Debug.Log (rdfTriples [0].Item3);
-        						Bounds destBounds = Helper.GetObjectWorldSize(GameObject.Find(rdfTriples[0].Item3));
+        						Bounds destBounds = GlobalHelper.GetObjectWorldSize(GameObject.Find(rdfTriples[0].Item3));
         						destBounds.SetMinMax(destBounds.min + new Vector3(Constants.EPSILON, 0.0f, Constants.EPSILON),
         							destBounds.max - new Vector3(Constants.EPSILON, Constants.EPSILON, Constants.EPSILON));
         						//Debug.Log (Helper.VectorToParsable (bounds.min));
         						//Debug.Log (Helper.VectorToParsable ((Vector3)args [1]));
-        						Bounds themeBounds = Helper.GetObjectWorldSize((args[0] as GameObject));
+        						Bounds themeBounds = GlobalHelper.GetObjectWorldSize((args[0] as GameObject));
         						Vector3 min = (Vector3) args[1] - new Vector3(0.0f, themeBounds.extents.y, 0.0f);
         						Vector3 max = (Vector3) args[1] + new Vector3(0.0f, themeBounds.extents.y, 0.0f);
         						if ((min.y <= destBounds.min.y + Constants.EPSILON) &&
         						    (max.y > destBounds.min.y + Constants.EPSILON)) {
         							if (Mathf.Abs(
-        								    Helper.GetObjectWorldSize(GameObject.Find(rdfTriples[0].Item3)).min
+        								    GlobalHelper.GetObjectWorldSize(GameObject.Find(rdfTriples[0].Item3)).min
         									    .y - // if no space between dest obj and dest obj's supporting surface
-        								    Helper.GetObjectWorldSize(supportingSurface).max.y) < Constants.EPSILON) {
+        								    GlobalHelper.GetObjectWorldSize(supportingSurface).max.y) < Constants.EPSILON) {
         								Vector3 liftPos = GameObject.Find(rdfTriples[0].Item3).transform.position;
         								liftPos += new Vector3(0.0f,
-        									Helper.GetObjectWorldSize(args[0] as GameObject).size.y * 4, 0.0f);
+        									GlobalHelper.GetObjectWorldSize(args[0] as GameObject).size.y * 4, 0.0f);
 
         								eventManager.InsertEvent(string.Format("lift({0},{1})",
         									GameObject.Find(rdfTriples[0].Item3).name,
-        									Helper.VectorToParsable(liftPos)), 0);
+        									GlobalHelper.VectorToParsable(liftPos)), 0);
 
         								Vector3 adjustedPosition = ((Vector3) args[1]);
         								Debug.Log(adjustedPosition.y - (themeBounds.center.y - themeBounds.min.y));
-        								Debug.Log(Helper.GetObjectWorldSize(supportingSurface).max.y);
+        								Debug.Log(GlobalHelper.GetObjectWorldSize(supportingSurface).max.y);
         								if (adjustedPosition.y - (themeBounds.center.y - themeBounds.min.y) -
         								    ((args[0] as GameObject).transform.position.y - themeBounds.center.y) <
-        								    Helper.GetObjectWorldSize(supportingSurface).max.y) {
+        								    GlobalHelper.GetObjectWorldSize(supportingSurface).max.y) {
         									// if bottom of theme obj at this position is under the supporting surface's max
         									adjustedPosition = new Vector3(adjustedPosition.x,
         										adjustedPosition.y + (themeBounds.center.y - themeBounds.min.y) +
@@ -1200,7 +1200,7 @@ namespace VoxSimPlatform {
 
         								eventManager.InsertEvent(
         									string.Format("put({0},{1})", (args[0] as GameObject).name,
-        										Helper.VectorToParsable(adjustedPosition)), 1);
+        										GlobalHelper.VectorToParsable(adjustedPosition)), 1);
         								eventManager.RemoveEvent(eventManager.events.Count - 1);
         								eventManager.InsertEvent(
         									string.Format("put({0},on({1}))", rdfTriples[0].Item3,
@@ -1264,7 +1264,7 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		if (prep == "_on") {
         			// fix for multiple RDF triples
@@ -1286,20 +1286,20 @@ namespace VoxSimPlatform {
         					}*/
 
         					List<GameObject> themeChildren = theme.GetComponentsInChildren<Renderer>().Where(
-        							o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != theme)).Select(v => v.gameObject)
+        							o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != theme)).Select(v => v.gameObject)
         						.ToList();
 
         					List<GameObject> destChildren = dest.GetComponentsInChildren<Renderer>().Where(
-        							o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != dest)).Select(v => v.gameObject)
+        							o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != dest)).Select(v => v.gameObject)
         						.ToList();
 
-        					Debug.Log(Helper.VectorToParsable(Helper.GetObjectWorldSize(theme).size));
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme, themeChildren); // bounds of theme obj
+        					Debug.Log(GlobalHelper.VectorToParsable(GlobalHelper.GetObjectWorldSize(theme).size));
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme, themeChildren); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
-        					Debug.Log(Helper.VectorToParsable(themeBounds.size));
+        					Debug.Log(GlobalHelper.VectorToParsable(themeBounds.size));
 
         					//Debug.Log (Helper.VectorToParsable(bounds.center));
         					//Debug.Log (Helper.VectorToParsable(bounds.min));
@@ -1320,14 +1320,14 @@ namespace VoxSimPlatform {
         								Bounds concavityBounds;
         								if (dest.GetComponent<Voxeme>().opVox.Type.Concavity.Item2 != null) {
         									concavityBounds =
-        										Helper.GetObjectWorldSize(
+        										GlobalHelper.GetObjectWorldSize(
         											dest.GetComponent<Voxeme>().opVox.Type.Concavity.Item2);
         								}
         								else {
         									concavityBounds = destBounds;
         								}
 
-        								if (!Helper.FitsIn(themeBounds, concavityBounds)) {
+        								if (!GlobalHelper.FitsIn(themeBounds, concavityBounds)) {
         									loc = new Vector3(dest.transform.position.x,
         										concavityBounds.max.y,
         										dest.transform.position.z);
@@ -1345,7 +1345,7 @@ namespace VoxSimPlatform {
         							    (Concavity.IsEnabled(theme, loc, out disablingObject))) {
         								if ((Mathf.Abs(Vector3.Dot(theme.transform.up, Vector3.up) + 1.0f) <=
         								     Constants.EPSILON) &&
-        								    (Helper.FitsIn(destBounds, themeBounds))) {
+        								    (GlobalHelper.FitsIn(destBounds, themeBounds))) {
         									// TODO: Run this through habitat verification
         									// check if concavity is active
         									Debug.Log(string.Format("{0} upside down", theme.name));
@@ -1356,19 +1356,19 @@ namespace VoxSimPlatform {
         												loc.y + (themeBounds.center.y - themeBounds.min.y) - yAdjust -
         												(destBounds.max.y - destBounds.min.y),
         												loc.z);
-        											Debug.Log(Helper.VectorToParsable(targetPosition));
+        											Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
         											//Debug.Break ();
         											//flip(cup1);put(ball,under(cup1))
         										}
         										else {
         											//Debug.Break ();
-        											Debug.Log(Helper.VectorToParsable(targetPosition));
+        											Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
         											targetPosition = new Vector3(loc.x,
         												loc.y +
         												(themeBounds.center.y - PhysicsHelper.GetConcavityMinimum(theme)) -
         												yAdjust,
         												loc.z);
-        											Debug.Log(Helper.VectorToParsable(targetPosition));
+        											Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
         										}
         									}
         								}
@@ -1378,7 +1378,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1412,8 +1412,8 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple in plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
-        					Bounds destBounds = Helper.GetObjectWorldSize(dest); // bounds of dest obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds destBounds = GlobalHelper.GetObjectWorldSize(dest); // bounds of dest obj
 
         					//Debug.Log (Helper.VectorToParsable(bounds.center));
         					//Debug.Log (Helper.VectorToParsable(bounds.min));
@@ -1428,10 +1428,10 @@ namespace VoxSimPlatform {
         						    .Contains("Concave")) && // TODO: Run this through habitat verification
         					    (Concavity.IsEnabled(dest)) && (Vector3.Dot(dest.transform.up, Vector3.up) > 0.5f)) {
         						// check if concavity is active
-        						if (!Helper.FitsIn(themeBounds, destBounds)) {
+        						if (!GlobalHelper.FitsIn(themeBounds, destBounds)) {
         							// if the glove don't fit, you must acquit! (rotate)
         							// rotate to align longest major axis with container concavity axis
-        							Vector3 majorAxis = Helper.GetObjectMajorAxis(theme);
+        							Vector3 majorAxis = GlobalHelper.GetObjectMajorAxis(theme);
         							Quaternion adjust =
         								Quaternion.FromToRotation(theme.transform.rotation * majorAxis, Vector3.up);
         							//Debug.Log (Helper.VectorToParsable (themeBounds.size));
@@ -1443,7 +1443,7 @@ namespace VoxSimPlatform {
         							//		theme.GetComponent<Voxeme> ().targetRotation = Quaternion.LookRotation(majorAxis).eulerAngles;
         							//	}
         							//}
-        							if (Helper.FitsIn(testBounds, destBounds)) {
+        							if (GlobalHelper.FitsIn(testBounds, destBounds)) {
         								// check fit again
         								targetRotation = Quaternion.FromToRotation(majorAxis, Vector3.up).eulerAngles;
         							}
@@ -1462,7 +1462,7 @@ namespace VoxSimPlatform {
         						targetRotation = new Vector3(float.NaN, float.NaN, float.NaN);
         					}
 
-        					if (!Helper.VectorIsNaN(targetRotation)) {
+        					if (!GlobalHelper.VectorIsNaN(targetRotation)) {
         						if (args[args.Length - 1] is bool) {
         							if ((bool) args[args.Length - 1] == false) {
         								targetPosition = new Vector3(loc.x,
@@ -1486,7 +1486,7 @@ namespace VoxSimPlatform {
         						targetPosition = new Vector3(float.NaN, float.NaN, float.NaN);
         					}
 
-        					Debug.Log(Helper.VectorToParsable(targetPosition));
+        					Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         					if (voxComponent != null) {
         						if (!voxComponent.enabled) {
@@ -1532,10 +1532,10 @@ namespace VoxSimPlatform {
         					GameObject supportingSurface = dest.GetComponent<Voxeme>().supportingSurface;
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					//Debug.Log (Helper.VectorToParsable(bounds.center));
@@ -1558,7 +1558,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1592,10 +1592,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -1607,14 +1607,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.z));
         					rayStart = Quaternion.Euler(0.0f, povDir + 180.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("Z-adjust = " + zAdjust);
-        					Debug.Log("put_behind: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_behind: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "behind"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
         					//if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
         					//	loc = new Vector3 (loc.x,voxComponent.minYBound + themeBounds.extents.y,loc.z);
         					//}
@@ -1635,7 +1635,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1669,10 +1669,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -1684,14 +1684,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.z));
         					rayStart = Quaternion.Euler(0.0f, povDir, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("Z-adjust = " + zAdjust);
-        					Debug.Log("put_in_front: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_in_front: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "in front"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -1706,7 +1706,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1740,10 +1740,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -1755,14 +1755,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("put_left: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_left: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -1777,7 +1777,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1811,10 +1811,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -1827,14 +1827,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("put_leftdc: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_leftdc: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -1849,7 +1849,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1883,10 +1883,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -1900,14 +1900,14 @@ namespace VoxSimPlatform {
         					rayStart += themeBounds.center;
         					//Debug.Log(Helper.VectorToParsable(rayStart));
         					//Debug.Log(theme.transform.position.x + themeBounds.size.x);
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("put_right: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_right: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -1921,7 +1921,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -1955,10 +1955,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -1971,14 +1971,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("put_rightdc: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_rightdc: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -1992,7 +1992,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2026,7 +2026,7 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "near"
 
@@ -2046,7 +2046,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2073,18 +2073,18 @@ namespace VoxSimPlatform {
         			if (args[0] is GameObject) {
         				if (args[1] is Vector3) {
         					GameObject theme = args[0] as GameObject; // get theme obj ("apple" in "put apple on plate")
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
 
         					Vector3 loc = ((Vector3) args[1]); // coord
 
         					targetPosition = loc;
         					//targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y), loc.z);
 
-        					Debug.Log(Helper.VectorToParsable(targetPosition));
+        					Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
         					if (voxComponent != null) {
-        						Debug.Log(Helper.VectorToParsable(voxComponent.targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(voxComponent.targetPosition));
         						if (!voxComponent.enabled) {
         							voxComponent.gameObject.transform.parent = null;
         							voxComponent.enabled = true;
@@ -2106,8 +2106,8 @@ namespace VoxSimPlatform {
         							if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
         								if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
         								    (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
-        									if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-        										Helper.GetObjectWorldSize(gameObject), true)) {
+        									if (!GlobalHelper.FitsIn(GlobalHelper.GetObjectWorldSize(hit.collider.gameObject),
+        										GlobalHelper.GetObjectWorldSize(gameObject), true)) {
         										supportingSurface = hit.collider.gameObject;
         										break;
         									}
@@ -2118,15 +2118,15 @@ namespace VoxSimPlatform {
         						if (supportingSurface != null) {
         							Debug.Log(targetPosition.y);
         							Debug.Log((themeBounds.center.y - themeBounds.min.y));
-        							Debug.Log(Helper.GetObjectWorldSize(supportingSurface).max.y);
+        							Debug.Log(GlobalHelper.GetObjectWorldSize(supportingSurface).max.y);
         							Debug.Log(supportingSurface.name);
         							if (targetPosition.y - (themeBounds.center.y - themeBounds.min.y) <
-        							    Helper.GetObjectWorldSize(supportingSurface).max.y) {
+        							    GlobalHelper.GetObjectWorldSize(supportingSurface).max.y) {
         								targetPosition = new Vector3(targetPosition.x,
-        									Helper.GetObjectWorldSize(supportingSurface).max.y +
+        									GlobalHelper.GetObjectWorldSize(supportingSurface).max.y +
         									(themeBounds.center.y - themeBounds.min.y),
         									targetPosition.z);
-        								Debug.Log(Helper.VectorToParsable(targetPosition));
+        								Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
         							}
         						}
 
@@ -2138,7 +2138,7 @@ namespace VoxSimPlatform {
         							                               voxComponent.gameObject.transform.position);
         						}
 
-        						Debug.Log(Helper.VectorToParsable(voxComponent.targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(voxComponent.targetPosition));
         					}
         				}
         			}
@@ -2146,7 +2146,7 @@ namespace VoxSimPlatform {
 
         		// update evalOrig dict
         		string adjustedEval =
-        			"put(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) + ")";
+        			"put(" + (args[0] as GameObject).name + "," + GlobalHelper.VectorToParsable(targetPosition) + ")";
 
         		if (!eventManager.evalOrig.ContainsKey(adjustedEval)) {
         			eventManager.evalOrig.Add(adjustedEval, eventManager.evalOrig[originalEval]);
@@ -2160,7 +2160,7 @@ namespace VoxSimPlatform {
         				if ((bool) args[args.Length - 1] == false) {
         					//eventManager.eventsStatus.Add ("put("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetPosition)+")", false);
         					eventManager.events[0] = "put(" + (args[0] as GameObject).name + "," +
-        					                         Helper.VectorToParsable(targetPosition) + ")";
+        					                         GlobalHelper.VectorToParsable(targetPosition) + ")";
         				}
         				else {
 #if UNDERSPECIFICATION_TRIAL
@@ -2192,9 +2192,9 @@ namespace VoxSimPlatform {
 
                 if (args[args.Length - 1] is bool) {
                     if ((bool)args[args.Length - 1] == true) {
-                        Debug.Log("========== Before plan ========= " + Helper.VectorToParsable(targetPosition));
+                        Debug.Log("========== Before plan ========= " + GlobalHelper.VectorToParsable(targetPosition));
                         // plan path to destination
-                        if (!Helper.VectorIsNaN(targetPosition)) {
+                        if (!GlobalHelper.VectorIsNaN(targetPosition)) {
                             List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
                                 (args[0] as GameObject),
                                 GameObject.Find(rdfTriples[0].Item3) != null
@@ -2226,7 +2226,7 @@ namespace VoxSimPlatform {
 
         		Vector3 targetPosition;
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		if (rdfTriples[0].Item2.Contains("_to_top")) {
         			// fix for multiple RDF triples
@@ -2290,7 +2290,7 @@ namespace VoxSimPlatform {
         						eventManager.InsertEvent(
         							eventManager.evalOrig[
         								string.Format("lift({0},{1})", (args[0] as GameObject).name,
-        									Helper.VectorToParsable((Vector3) args[1]))], 1);
+        									GlobalHelper.VectorToParsable((Vector3) args[1]))], 1);
         					}
         					else {
         						eventManager.InsertEvent(
@@ -2340,7 +2340,7 @@ namespace VoxSimPlatform {
 
         		if (args[0] is GameObject) {
         			GameObject obj = (args[0] as GameObject);
-        			Bounds bounds = Helper.GetObjectWorldSize(obj);
+        			Bounds bounds = GlobalHelper.GetObjectWorldSize(obj);
         			Voxeme voxComponent = obj.GetComponent<Voxeme>();
         			if (voxComponent != null) {
         				if (!voxComponent.enabled) {
@@ -2373,7 +2373,7 @@ namespace VoxSimPlatform {
         			if (args[0] is GameObject) {
         				if ((bool) args[args.Length - 1] == false) {
         					eventManager.events[0] = "lift(" + (args[0] as GameObject).name + "," +
-        					                         Helper.VectorToParsable(targetPosition) + ")";
+        					                         GlobalHelper.VectorToParsable(targetPosition) + ")";
         					Debug.Log(eventManager.events[0]);
         				}
         				else {
@@ -2421,7 +2421,7 @@ namespace VoxSimPlatform {
         						eventManager.InsertEvent(
         							eventManager.evalOrig[
         								string.Format("slide({0},{1})", (args[0] as GameObject).name,
-        									Helper.VectorToParsable((Vector3) args[1]))], 2);
+        									GlobalHelper.VectorToParsable((Vector3) args[1]))], 2);
         					}
         					else {
         						eventManager.InsertEvent(
@@ -2459,7 +2459,7 @@ namespace VoxSimPlatform {
         		float translocDist = 0.0f;
         		Vector3 relOffset = Vector3.zero;
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("slide", "") : "";
 
@@ -2473,10 +2473,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -2488,14 +2488,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.z));
         					rayStart = Quaternion.Euler(0.0f, povDir + 180.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("Z-adjust = " + zAdjust);
-        					Debug.Log("put_behind: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_behind: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "behind"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -2510,7 +2510,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2544,10 +2544,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -2559,14 +2559,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.z));
         					rayStart = Quaternion.Euler(0.0f, povDir, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("Z-adjust = " + zAdjust);
-        					Debug.Log("put_in_front: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_in_front: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "in front"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -2581,7 +2581,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2615,10 +2615,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -2630,14 +2630,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("put_left: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_left: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -2652,7 +2652,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2686,10 +2686,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -2701,15 +2701,15 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("put_right: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("put_right: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
         					if (loc.y - themeBounds.extents.y < voxComponent.minYBound) {
-        						loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y,
+        						loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y,
         							loc.z);
         					}
 
@@ -2725,7 +2725,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2759,7 +2759,7 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "near"
 
@@ -2779,7 +2779,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -2834,14 +2834,14 @@ namespace VoxSimPlatform {
         				else {
         					if (args[1] is Vector3) {
         						GameObject theme = args[0] as GameObject; // get theme obj ("apple" in "put apple on plate")
-        						Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        						Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
 
         						Vector3 loc = ((Vector3) args[1]); // coord
 
         						targetPosition = loc;
         						//targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y), loc.z);
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						Voxeme voxComponent = theme.GetComponent<Voxeme>();
         						if (voxComponent != null) {
@@ -2866,8 +2866,8 @@ namespace VoxSimPlatform {
         								if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
         									if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
         									    (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
-        										if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-        											Helper.GetObjectWorldSize(gameObject), true)) {
+        										if (!GlobalHelper.FitsIn(GlobalHelper.GetObjectWorldSize(hit.collider.gameObject),
+        											GlobalHelper.GetObjectWorldSize(gameObject), true)) {
         											supportingSurface = hit.collider.gameObject;
         											break;
         										}
@@ -2878,15 +2878,15 @@ namespace VoxSimPlatform {
         							if (supportingSurface != null) {
         								Debug.Log(targetPosition.y);
         								Debug.Log((themeBounds.center.y - themeBounds.min.y));
-        								Debug.Log(Helper.GetObjectWorldSize(supportingSurface).max.y);
+        								Debug.Log(GlobalHelper.GetObjectWorldSize(supportingSurface).max.y);
         								Debug.Log(supportingSurface.name);
         								if (targetPosition.y - (themeBounds.center.y - themeBounds.min.y) <
-        								    Helper.GetObjectWorldSize(supportingSurface).max.y) {
+        								    GlobalHelper.GetObjectWorldSize(supportingSurface).max.y) {
         									targetPosition = new Vector3(targetPosition.x,
-        										Helper.GetObjectWorldSize(supportingSurface).max.y +
+        										GlobalHelper.GetObjectWorldSize(supportingSurface).max.y +
         										(themeBounds.center.y - themeBounds.min.y),
         										targetPosition.z);
-        									Debug.Log(Helper.VectorToParsable(targetPosition));
+        									Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
         								}
         							}
 
@@ -2908,7 +2908,7 @@ namespace VoxSimPlatform {
         			if (args[0] is GameObject) {
         				if ((bool) args[args.Length - 1] == false) {
         					eventManager.events[0] = "slide(" + (args[0] as GameObject).name + "," +
-        					                         Helper.VectorToParsable(targetPosition) + ")";
+        					                         GlobalHelper.VectorToParsable(targetPosition) + ")";
         					Debug.Log(eventManager.events[0]);
         				}
         				else {
@@ -2929,10 +2929,10 @@ namespace VoxSimPlatform {
                 if (args[args.Length - 1] is bool) {
                     if ((bool)args[args.Length - 1] == true) {
                         // plan path to destination
-                        if (!Helper.VectorIsNaN(targetPosition)) {
+                        if (!GlobalHelper.VectorIsNaN(targetPosition)) {
                             Bounds surfaceBounds =
-                                Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
-                            Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
+                                GlobalHelper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
+                            Bounds objBounds = GlobalHelper.GetObjectWorldSize(args[0] as GameObject);
                             Bounds embeddingSpaceBounds = new Bounds();
                             embeddingSpaceBounds.SetMinMax(
                                 new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y,
@@ -2971,7 +2971,7 @@ namespace VoxSimPlatform {
         						eventManager.InsertEvent(
         							eventManager.evalOrig[
         								string.Format("slidep({0},{1})", (args[0] as GameObject).name,
-        									Helper.VectorToParsable((Vector3) args[1]))], 2);
+        									GlobalHelper.VectorToParsable((Vector3) args[1]))], 2);
         					}
         					else {
         						eventManager.InsertEvent(
@@ -3011,7 +3011,7 @@ namespace VoxSimPlatform {
         		float translocDist = 0.0f;
         		Vector3 relOffset = Vector3.zero;
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("slidep", "") : "";
 
@@ -3025,10 +3025,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -3040,14 +3040,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.z));
         					rayStart = Quaternion.Euler(0.0f, povDir + 180.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("Z-adjust = " + zAdjust);
-        					Debug.Log("slidep_behind: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("slidep_behind: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "behind"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -3062,7 +3062,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -3096,10 +3096,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -3111,14 +3111,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.z));
         					rayStart = Quaternion.Euler(0.0f, povDir, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("Z-adjust = " + zAdjust);
-        					Debug.Log("slidep_in_front: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("slidep_in_front: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "in front"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -3133,7 +3133,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -3167,10 +3167,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -3182,14 +3182,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 90.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("slidep_left: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("slidep_left: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -3204,7 +3204,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -3238,10 +3238,10 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
         					Bounds
         						destBounds =
-        							Helper.GetObjectWorldSize(
+        							GlobalHelper.GetObjectWorldSize(
         								dest); // bounds of dest obj => alter to get interior enumerated by VoxML structure
 
         					GameObject mainCamera = GameObject.Find("Main Camera");
@@ -3253,14 +3253,14 @@ namespace VoxSimPlatform {
         						Mathf.Abs(themeBounds.size.x));
         					rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         					rayStart += themeBounds.center;
-        					Vector3 contactPoint = Helper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
+        					Vector3 contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, themeBounds.center - rayStart);
 
         					Debug.Log("X-adjust = " + xAdjust);
-        					Debug.Log("slidep_right: " + Helper.VectorToParsable(contactPoint));
+        					Debug.Log("slidep_right: " + GlobalHelper.VectorToParsable(contactPoint));
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "left"
 
-        					loc = new Vector3(loc.x, Helper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
+        					loc = new Vector3(loc.x, GlobalHelper.GetMinYBoundAtTarget(theme, loc) + themeBounds.extents.y, loc.z);
 
         					if (args[args.Length - 1] is bool) {
         						if ((bool) args[args.Length - 1] == false) {
@@ -3274,7 +3274,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -3308,7 +3308,7 @@ namespace VoxSimPlatform {
         							.Item3); // get destination obj ("plate" in "put apple on plate")
         					Voxeme voxComponent = theme.GetComponent<Voxeme>();
 
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme); // bounds of theme obj
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme); // bounds of theme obj
 
         					Vector3 loc = ((Vector3) args[1]); // coord of "near"
 
@@ -3328,7 +3328,7 @@ namespace VoxSimPlatform {
         							targetPosition = loc;
         						}
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						if (voxComponent != null) {
         							if (!voxComponent.enabled) {
@@ -3385,18 +3385,18 @@ namespace VoxSimPlatform {
         						GameObject theme = args[0] as GameObject; // get theme obj ("apple" in "put apple on plate")
 
         						List<GameObject> themeChildren = theme.GetComponentsInChildren<Renderer>().Where(
-        								o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != theme))
+        								o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != theme))
         							.Select(v => v.gameObject)
         							.ToList();
 
-        						Bounds themeBounds = Helper.GetObjectWorldSize(theme, themeChildren); // bounds of theme obj
+        						Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme, themeChildren); // bounds of theme obj
 
         						Vector3 loc = ((Vector3) args[1]); // coord
 
         						targetPosition = loc;
         						//targetPosition = new Vector3(loc.x, loc.y + (themeBounds.center.y - themeBounds.min.y), loc.z);
 
-        						Debug.Log(Helper.VectorToParsable(targetPosition));
+        						Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         						Voxeme voxComponent = theme.GetComponent<Voxeme>();
         						if (voxComponent != null) {
@@ -3421,8 +3421,8 @@ namespace VoxSimPlatform {
         								if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
         									if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
         									    (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
-        										if (!Helper.FitsIn(Helper.GetObjectWorldSize(hit.collider.gameObject),
-        											Helper.GetObjectWorldSize(gameObject), true)) {
+        										if (!GlobalHelper.FitsIn(GlobalHelper.GetObjectWorldSize(hit.collider.gameObject),
+        											GlobalHelper.GetObjectWorldSize(gameObject), true)) {
         											supportingSurface = hit.collider.gameObject;
         											break;
         										}
@@ -3433,15 +3433,15 @@ namespace VoxSimPlatform {
         							if (supportingSurface != null) {
         								Debug.Log(targetPosition.y);
         								Debug.Log((themeBounds.center.y - themeBounds.min.y));
-        								Debug.Log(Helper.GetObjectWorldSize(supportingSurface).max.y);
+        								Debug.Log(GlobalHelper.GetObjectWorldSize(supportingSurface).max.y);
         								Debug.Log(supportingSurface.name);
         								if (targetPosition.y - (themeBounds.center.y - themeBounds.min.y) <
-        								    Helper.GetObjectWorldSize(supportingSurface).max.y) {
+        								    GlobalHelper.GetObjectWorldSize(supportingSurface).max.y) {
         									targetPosition = new Vector3(targetPosition.x,
-        										Helper.GetObjectWorldSize(supportingSurface).max.y +
+        										GlobalHelper.GetObjectWorldSize(supportingSurface).max.y +
         										(themeBounds.center.y - themeBounds.min.y),
         										targetPosition.z);
-        									Debug.Log(Helper.VectorToParsable(targetPosition));
+        									Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
         								}
         							}
 
@@ -3459,7 +3459,7 @@ namespace VoxSimPlatform {
         		}
 
         		// update evalOrig dict
-        		string adjustedEval = "slidep(" + (args[0] as GameObject).name + "," + Helper.VectorToParsable(targetPosition) +
+        		string adjustedEval = "slidep(" + (args[0] as GameObject).name + "," + GlobalHelper.VectorToParsable(targetPosition) +
         		                      ")";
 
         		if (!eventManager.evalOrig.ContainsKey(adjustedEval)) {
@@ -3473,7 +3473,7 @@ namespace VoxSimPlatform {
         			if (args[0] is GameObject) {
         				if ((bool) args[args.Length - 1] == false) {
         					eventManager.events[0] = "slidep(" + (args[0] as GameObject).name + "," +
-        					                         Helper.VectorToParsable(targetPosition) + ")";
+        					                         GlobalHelper.VectorToParsable(targetPosition) + ")";
         					Debug.Log(eventManager.events[0]);
         				}
         				else {
@@ -3494,10 +3494,10 @@ namespace VoxSimPlatform {
                 if (args[args.Length - 1] is bool) {
                     if ((bool)args[args.Length - 1] == true) {
                         // plan path to destination
-                        if (!Helper.VectorIsNaN(targetPosition)) {
+                        if (!GlobalHelper.VectorIsNaN(targetPosition)) {
                             Bounds surfaceBounds =
-                                Helper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
-                            Bounds objBounds = Helper.GetObjectWorldSize(args[0] as GameObject);
+                                GlobalHelper.GetObjectWorldSize((args[0] as GameObject).GetComponent<Voxeme>().supportingSurface);
+                            Bounds objBounds = GlobalHelper.GetObjectWorldSize(args[0] as GameObject);
                             Bounds embeddingSpaceBounds = new Bounds();
                             embeddingSpaceBounds.SetMinMax(
                                 new Vector3(surfaceBounds.min.x + (objBounds.size.x / 2), surfaceBounds.max.y,
@@ -3536,7 +3536,7 @@ namespace VoxSimPlatform {
         						eventManager.InsertEvent(
         							eventManager.evalOrig[
         								string.Format("roll({0},{1})", (args[0] as GameObject).name,
-        									Helper.VectorToParsable((Vector3) args[1]))], 1);
+        									GlobalHelper.VectorToParsable((Vector3) args[1]))], 1);
         					}
         					else {
         						eventManager.InsertEvent(
@@ -3552,7 +3552,7 @@ namespace VoxSimPlatform {
         						eventManager.InsertEvent(
         							eventManager.evalOrig[
         								string.Format("roll({0},{1})", (args[0] as GameObject).name,
-        									Helper.VectorToParsable((Vector3) args[1]))], 1);
+        									GlobalHelper.VectorToParsable((Vector3) args[1]))], 1);
         					}
         					else {
         						eventManager.InsertEvent(
@@ -3657,11 +3657,11 @@ namespace VoxSimPlatform {
         			}
         		}*/
 
-        		Debug.Log(Helper.VectorToParsable((args[0] as GameObject).transform.position));
+        		Debug.Log(GlobalHelper.VectorToParsable((args[0] as GameObject).transform.position));
 
         		// calc object properties
         		float diameter =
-        			Helper.GetObjectWorldSize((args[0] as GameObject)).size.y; // bounds sphere diameter = world size.y
+        			GlobalHelper.GetObjectWorldSize((args[0] as GameObject)).size.y; // bounds sphere diameter = world size.y
         		float circumference = Mathf.PI * diameter; // circumference = pi*diameter
         		float revs = 0;
 
@@ -3749,17 +3749,17 @@ namespace VoxSimPlatform {
         				//Debug.Log (Quaternion.FromToRotation (objRotAxis, worldRotAxis).eulerAngles);
 
         				if (!SatisfactionTest.IsSatisfied(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
-        					Helper.VectorToParsable(objRotAxis), Helper.VectorToParsable(worldRotAxis)))) {
+        					GlobalHelper.VectorToParsable(objRotAxis), GlobalHelper.VectorToParsable(worldRotAxis)))) {
         					Debug.Log(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable(obj.transform.rotation * objRotAxis),
-        						Helper.VectorToParsable(worldRotAxis)));
+        						GlobalHelper.VectorToParsable(obj.transform.rotation * objRotAxis),
+        						GlobalHelper.VectorToParsable(worldRotAxis)));
         					eventManager.InsertEvent(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable(objRotAxis), Helper.VectorToParsable(worldRotAxis)), 0);
+        						GlobalHelper.VectorToParsable(objRotAxis), GlobalHelper.VectorToParsable(worldRotAxis)), 0);
         					Debug.Log(string.Format("roll({0},{1})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable((args[0] as GameObject).transform.position + offset)));
+        						GlobalHelper.VectorToParsable((args[0] as GameObject).transform.position + offset)));
         					eventManager.InsertEvent(
         						string.Format("roll({0},{1})", (args[0] as GameObject).name,
-        							Helper.VectorToParsable((args[0] as GameObject).transform.position + offset)), 1);
+        							GlobalHelper.VectorToParsable((args[0] as GameObject).transform.position + offset)), 1);
         					eventManager.RemoveEvent(eventManager.events.Count - 1);
 
                             // update subobject rigidbody rotations
@@ -3805,7 +3805,7 @@ namespace VoxSimPlatform {
         		Vector3 targetPosition = Vector3.zero;
         		Quaternion targetRotation = Quaternion.identity;
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("roll", "") : "";
 
@@ -3871,7 +3871,7 @@ namespace VoxSimPlatform {
         				float vel = offset.magnitude / time;
         				//Debug.Log(vel);
         				// w = v/d
-        				float angularVelocity = vel / Helper.GetObjectWorldSize(obj).size.y;
+        				float angularVelocity = vel / GlobalHelper.GetObjectWorldSize(obj).size.y;
         				//Debug.Log(angularVelocity);
 
         				voxComponent.targetPosition = targetPosition;
@@ -3885,7 +3885,7 @@ namespace VoxSimPlatform {
         			if (args[0] is GameObject) {
         				if ((bool) args[args.Length - 1] == false) {
         					eventManager.events[0] = "roll(" + (args[0] as GameObject).name + "," +
-        					                         Helper.VectorToParsable(targetPosition) + ")";
+        					                         GlobalHelper.VectorToParsable(targetPosition) + ")";
         					//Debug.Log (eventManager.events [0]);
         				}
         			}
@@ -3916,7 +3916,7 @@ namespace VoxSimPlatform {
         		Vector3 objRotAxis = Vector3.zero;
         		Vector3 worldRotAxis = Vector3.zero;
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		if (args[0] is GameObject) {
         			GameObject obj = args[0] as GameObject;
@@ -3924,9 +3924,9 @@ namespace VoxSimPlatform {
         			Voxeme voxComponent = obj.GetComponent<Voxeme>();
 
         			if (args[1] is Vector3) {
-        				Debug.Log(Helper.GetObjectWorldSize(obj).max.y);
+        				Debug.Log(GlobalHelper.GetObjectWorldSize(obj).max.y);
         				Debug.Log(((Vector3) args[1]).y);
-        				if (Mathf.Abs(((Vector3) args[1]).y - Helper.GetObjectWorldSize(obj).max.y) < Constants.EPSILON) {
+        				if (Mathf.Abs(((Vector3) args[1]).y - GlobalHelper.GetObjectWorldSize(obj).max.y) < Constants.EPSILON) {
         					// flip at center
 
         					// take any axis of rotational symmetry and reverse it
@@ -4033,9 +4033,9 @@ namespace VoxSimPlatform {
         					//eventManager.eventsStatus.Add ("flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")", false);
         					//eventManager.events[0] = "flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
         					eventManager.events[0] = string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable(worldAxis),
-        						Helper.VectorToParsable((args[0] as GameObject).transform.rotation * targetDir),
-        						Helper.VectorToParsable((args[0] as GameObject).transform.rotation * worldRotAxis));
+        						GlobalHelper.VectorToParsable(worldAxis),
+        						GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * targetDir),
+        						GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * worldRotAxis));
                             //flip("+(args [0] as GameObject).name+","+Helper.VectorToParsable(targetRotation)+")";
 
 #if UNDERSPECIFICATION_TRIAL
@@ -4089,20 +4089,20 @@ namespace VoxSimPlatform {
         					if (args.Length > 4) {
         						eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1},{2},{3})",
         							(args[0] as GameObject).name,
-        							Helper.VectorToParsable((Vector3) args[1]), Helper.VectorToParsable((Vector3) args[2]),
-        							Helper.VectorToParsable((Vector3) args[3]))], 1);
+        							GlobalHelper.VectorToParsable((Vector3) args[1]), GlobalHelper.VectorToParsable((Vector3) args[2]),
+        							GlobalHelper.VectorToParsable((Vector3) args[3]))], 1);
         					}
         					else if (args.Length > 3) {
         						eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1},{2})",
         								(args[0] as GameObject).name,
-        								Helper.VectorToParsable((Vector3) args[1]),
-        								Helper.VectorToParsable((Vector3) args[2]))],
+        								GlobalHelper.VectorToParsable((Vector3) args[1]),
+        								GlobalHelper.VectorToParsable((Vector3) args[2]))],
         							1);
         					}
         					else if (args.Length > 2) {
         						eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1})",
         							(args[0] as GameObject).name,
-        							Helper.VectorToParsable((Vector3) args[1]))], 1);
+        							GlobalHelper.VectorToParsable((Vector3) args[1]))], 1);
         					}
         					else {
         						eventManager.InsertEvent(
@@ -4184,7 +4184,7 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("turn", "") : "";
 
@@ -4275,7 +4275,7 @@ namespace VoxSimPlatform {
         				}
 
         				voxComponent.targetRotation = targetRotation;
-        				Debug.Log(Helper.VectorToParsable(voxComponent.targetRotation));
+        				Debug.Log(GlobalHelper.VectorToParsable(voxComponent.targetRotation));
         			}
         		}
 
@@ -4287,23 +4287,23 @@ namespace VoxSimPlatform {
         						if (args[3] is Vector3) {
         							eventManager.events[0] =
         								"turn(" + (args[0] as GameObject).name + "," +
-        								Helper.VectorToParsable((Vector3) args[1]) +
-        								"," + Helper.VectorToParsable((Vector3) args[2]) + "," +
-        								Helper.VectorToParsable((Vector3) args[3]) + ")";
+        								GlobalHelper.VectorToParsable((Vector3) args[1]) +
+        								"," + GlobalHelper.VectorToParsable((Vector3) args[2]) + "," +
+        								GlobalHelper.VectorToParsable((Vector3) args[3]) + ")";
         						}
         						else {
         							eventManager.events[0] =
         								"turn(" + (args[0] as GameObject).name + "," +
-        								Helper.VectorToParsable((Vector3) args[1]) +
-        								"," + Helper.VectorToParsable((Vector3) args[2]) + ")";
+        								GlobalHelper.VectorToParsable((Vector3) args[1]) +
+        								"," + GlobalHelper.VectorToParsable((Vector3) args[2]) + ")";
         						}
         					}
         					else {
         						eventManager.events[0] = "turn(" + (args[0] as GameObject).name + "," +
-        						                         Helper.VectorToParsable(
+        						                         GlobalHelper.VectorToParsable(
         							                         (args[0] as GameObject).transform.rotation * Constants.yAxis) +
         						                         "," +
-        						                         Helper.VectorToParsable(
+        						                         GlobalHelper.VectorToParsable(
         							                         (args[0] as GameObject).transform.rotation *
         							                         Quaternion.Euler(targetRotation) * Constants.yAxis) + ")";
         					}
@@ -4477,8 +4477,8 @@ namespace VoxSimPlatform {
         			if ((bool) args[args.Length - 1] == false) {
         				for (int i = 0; i < orientations.Count; i++) {
         					eventManager.InsertEvent(string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
-        							Helper.VectorToParsable(trackAxis), Helper.VectorToParsable(orientations[i]),
-        							Helper.VectorToParsable(worldRotAxis)), 1 + i);
+        							GlobalHelper.VectorToParsable(trackAxis), GlobalHelper.VectorToParsable(orientations[i]),
+        							GlobalHelper.VectorToParsable(worldRotAxis)), 1 + i);
         				}
 
 #if UNDERSPECIFICATION_TRIAL
@@ -4639,8 +4639,8 @@ namespace VoxSimPlatform {
         				GameObject theme = (args[0] as GameObject);
         				GameObject dest = GameObject.Find(rdfTriples[0].Item3);
         				Voxeme voxComponent = theme.GetComponent<Voxeme>();
-        				Vector3 objMajorAxis = Helper.GetObjectMajorAxis(theme);
-        				Vector3 objMinorAxis = Helper.GetObjectMinorAxis(theme);
+        				Vector3 objMajorAxis = GlobalHelper.GetObjectMajorAxis(theme);
+        				Vector3 objMinorAxis = GlobalHelper.GetObjectMinorAxis(theme);
         				Debug.Log(objMajorAxis);
         				Debug.Log(objMinorAxis);
         				Debug.Log((theme.transform.position.x - dest.transform.position.x));
@@ -4662,29 +4662,29 @@ namespace VoxSimPlatform {
         				Vector3 themeContactPoint = theme.transform.position; // computed coordinate of relation over dest
         				Vector3 destContactPoint = (Vector3) args[1]; // computed coordinate of relation over dest
         				//Bounds themeBounds = Helper.GetObjectWorldSize (theme);
-        				Bounds themeBounds = Helper.GetObjectSize(theme);
-        				Bounds destBounds = Helper.GetObjectWorldSize(dest);
+        				Bounds themeBounds = GlobalHelper.GetObjectSize(theme);
+        				Bounds destBounds = GlobalHelper.GetObjectWorldSize(dest);
 
         				float majorAxisLength = 0.0f;
         				if (objMajorAxis == Constants.xAxis) {
-        					majorAxisLength = Helper.GetObjectSize(theme).size.x;
+        					majorAxisLength = GlobalHelper.GetObjectSize(theme).size.x;
         				}
         				else if (objMajorAxis == Constants.yAxis) {
-        					majorAxisLength = Helper.GetObjectSize(theme).size.y;
+        					majorAxisLength = GlobalHelper.GetObjectSize(theme).size.y;
         				}
         				else if (objMajorAxis == Constants.zAxis) {
-        					majorAxisLength = Helper.GetObjectSize(theme).size.z;
+        					majorAxisLength = GlobalHelper.GetObjectSize(theme).size.z;
         				}
 
         				float minorAxisLength = 0.0f;
         				if (objMinorAxis == Constants.xAxis) {
-        					minorAxisLength = Helper.GetObjectSize(theme).size.x;
+        					minorAxisLength = GlobalHelper.GetObjectSize(theme).size.x;
         				}
         				else if (objMinorAxis == Constants.yAxis) {
-        					minorAxisLength = Helper.GetObjectSize(theme).size.y;
+        					minorAxisLength = GlobalHelper.GetObjectSize(theme).size.y;
         				}
         				else if (objMinorAxis == Constants.zAxis) {
-        					minorAxisLength = Helper.GetObjectSize(theme).size.z;
+        					minorAxisLength = GlobalHelper.GetObjectSize(theme).size.z;
         				}
 
         				//Debug.Log (minorAxisLength);
@@ -4791,7 +4791,7 @@ namespace VoxSimPlatform {
 
         					//Vector3 transformedThemeContactPoint = Helper.RotatePointAroundPivot (Helper.RotatePointAroundPivot (themeContactPoint, 
         					//	themeBounds.center, rot1.eulerAngles), themeBounds.center, rot2.eulerAngles);
-        					Vector3 transformedThemeContactPoint = Helper.RotatePointAroundPivot(themeContactPoint,
+        					Vector3 transformedThemeContactPoint = GlobalHelper.RotatePointAroundPivot(themeContactPoint,
         						themeBounds.center, (rot2 * rot1).eulerAngles);
         					transformedThemeContactPoint = new Vector3(transformedThemeContactPoint.x + horizontalOffset,
         						                               transformedThemeContactPoint.y, transformedThemeContactPoint.z) +
@@ -4906,7 +4906,7 @@ namespace VoxSimPlatform {
 
         					//Vector3 transformedThemeContactPoint = Helper.RotatePointAroundPivot (Helper.RotatePointAroundPivot (themeContactPoint, 
         					//	themeBounds.center, rot1.eulerAngles), themeBounds.center, rot2.eulerAngles);
-        					Vector3 transformedThemeContactPoint = Helper.RotatePointAroundPivot(themeContactPoint,
+        					Vector3 transformedThemeContactPoint = GlobalHelper.RotatePointAroundPivot(themeContactPoint,
         						themeBounds.center, (rot2 * rot1).eulerAngles);
         					transformedThemeContactPoint = new Vector3(transformedThemeContactPoint.x - horizontalOffset,
         						                               transformedThemeContactPoint.y, transformedThemeContactPoint.z) +
@@ -4928,19 +4928,19 @@ namespace VoxSimPlatform {
         				// E1: turn the theme object to that shortest axis is 90 degrees from desired $tilt angle away from the dest surface
         				// E2: turn the theme object to that longest axis is $tilt angle away from the dest surface
         				if (!SatisfactionTest.IsSatisfied(string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
-        					Helper.VectorToParsable(objMajorAxis),
-        					Helper.VectorToParsable(Quaternion.Euler(majorTilt) * Constants.yAxis),
-        					Helper.VectorToParsable((args[0] as GameObject).transform.rotation * objMinorAxis)))) {
+        					GlobalHelper.VectorToParsable(objMajorAxis),
+        					GlobalHelper.VectorToParsable(Quaternion.Euler(majorTilt) * Constants.yAxis),
+        					GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * objMinorAxis)))) {
         					eventManager.InsertEvent(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable(objMinorAxis),
-        						Helper.VectorToParsable(Quaternion.Euler(minorTilt) * Constants.yAxis)), 0);
+        						GlobalHelper.VectorToParsable(objMinorAxis),
+        						GlobalHelper.VectorToParsable(Quaternion.Euler(minorTilt) * Constants.yAxis)), 0);
         					eventManager.InsertEvent(string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable(objMajorAxis),
-        						Helper.VectorToParsable(Quaternion.Euler(majorTilt) * Constants.yAxis),
-        						Helper.VectorToParsable(Quaternion.Euler(minorTilt) * Constants.yAxis)), 1);
+        						GlobalHelper.VectorToParsable(objMajorAxis),
+        						GlobalHelper.VectorToParsable(Quaternion.Euler(majorTilt) * Constants.yAxis),
+        						GlobalHelper.VectorToParsable(Quaternion.Euler(minorTilt) * Constants.yAxis)), 1);
         					//eventManager.InsertEvent (string.Format ("lean({0},against({1}))", (args [0] as GameObject).name, dest.name), 2);
         					eventManager.InsertEvent(string.Format("put({0},{1})", (args[0] as GameObject).name,
-        						Helper.VectorToParsable(targetPosition)), 2);
+        						GlobalHelper.VectorToParsable(targetPosition)), 2);
         					eventManager.RemoveEvent(eventManager.events.Count - 1);
 #if UNDERSPECIFICATION_TRIAL
                             if (args[args.Length - 1] is bool) {
@@ -4957,7 +4957,7 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		Helper.PrintRDFTriples(rdfTriples);
+        		GlobalHelper.PrintRDFTriples(rdfTriples);
 
         		targetPosition = Vector3.zero;
 
@@ -4970,8 +4970,8 @@ namespace VoxSimPlatform {
         					GameObject dest = GameObject.Find(rdfTriples[0].Item3);
         					Vector3 targetPoint = (Vector3) args[1];
         					Debug.Log(targetPoint);
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme);
-        					Bounds destBounds = Helper.GetObjectWorldSize(dest);
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme);
+        					Bounds destBounds = GlobalHelper.GetObjectWorldSize(dest);
 
         					if (theme.transform.position.x < dest.transform.position.x) {
         						// place to left
@@ -4994,7 +4994,7 @@ namespace VoxSimPlatform {
         							rayStart = new Vector3(themeBounds.max.x - themeBounds.center.x - Constants.EPSILON,
         								Mathf.Abs(themeBounds.size.y), 0.0f);
         							rayStart += theme.transform.position;
-        							contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.down);
+        							contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.down);
 
         							loc = new Vector3(loc.x - destBounds.extents.x, contactPoint.y,
         								loc.z); // projected to left side of dest and top of theme
@@ -5007,14 +5007,14 @@ namespace VoxSimPlatform {
         						Debug.Log(themeBounds.max.y);
         						rayStart = new Vector3(rayStart.x, loc.y, rayStart.z);
         						contactPoint =
-        							Helper.RayIntersectionPoint(rayStart,
+        							GlobalHelper.RayIntersectionPoint(rayStart,
         								Vector3
         									.left); //** this ray is angled downward when it should be angled straight along the x-axis
         						Debug.Log(contactPoint.x);
         						Debug.Log(contactPoint.y);
 
         						Debug.Log("X-adjust = " + xAdjust);
-        						Debug.Log("lean_on: " + Helper.VectorToParsable(contactPoint));
+        						Debug.Log("lean_on: " + GlobalHelper.VectorToParsable(contactPoint));
 
         						if (args[args.Length - 1] is bool) {
         							if ((bool) args[args.Length - 1] == false) {
@@ -5030,7 +5030,7 @@ namespace VoxSimPlatform {
         								targetPosition = loc;
         							}
 
-        							Debug.Log(Helper.VectorToParsable(targetPosition));
+        							Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         							Voxeme voxComponent = theme.GetComponent<Voxeme>();
         							if (voxComponent != null) {
@@ -5064,7 +5064,7 @@ namespace VoxSimPlatform {
         							rayStart = new Vector3(themeBounds.min.x - themeBounds.center.x + Constants.EPSILON,
         								Mathf.Abs(themeBounds.size.y), 0.0f);
         							rayStart += theme.transform.position;
-        							contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.down);
+        							contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.down);
 
         							loc = new Vector3(loc.x + destBounds.extents.x, themeBounds.max.y,
         								loc.z); // projected to right side of dest and top of theme
@@ -5074,10 +5074,10 @@ namespace VoxSimPlatform {
         						rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         						rayStart += theme.transform.position;
         						rayStart = new Vector3(rayStart.x, loc.y, rayStart.z);
-        						contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.right);
+        						contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.right);
 
         						Debug.Log("X-adjust = " + xAdjust);
-        						Debug.Log("lean_against: " + Helper.VectorToParsable(contactPoint));
+        						Debug.Log("lean_against: " + GlobalHelper.VectorToParsable(contactPoint));
 
         						if (args[args.Length - 1] is bool) {
         							if ((bool) args[args.Length - 1] == false) {
@@ -5093,7 +5093,7 @@ namespace VoxSimPlatform {
         								targetPosition = loc;
         							}
 
-        							Debug.Log(Helper.VectorToParsable(targetPosition));
+        							Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         							Voxeme voxComponent = theme.GetComponent<Voxeme>();
         							if (voxComponent != null) {
@@ -5116,8 +5116,8 @@ namespace VoxSimPlatform {
         					GameObject dest = GameObject.Find(rdfTriples[0].Item3);
         					Vector3 targetPoint = (Vector3) args[1];
         					Debug.Log(targetPoint);
-        					Bounds themeBounds = Helper.GetObjectWorldSize(theme);
-        					Bounds destBounds = Helper.GetObjectWorldSize(dest);
+        					Bounds themeBounds = GlobalHelper.GetObjectWorldSize(theme);
+        					Bounds destBounds = GlobalHelper.GetObjectWorldSize(dest);
 
         					if (theme.transform.position.x < dest.transform.position.x) {
         						// place to left
@@ -5140,7 +5140,7 @@ namespace VoxSimPlatform {
         							rayStart = new Vector3(themeBounds.max.x - themeBounds.center.x - Constants.EPSILON,
         								Mathf.Abs(themeBounds.size.y), 0.0f);
         							rayStart += theme.transform.position;
-        							contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.down);
+        							contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.down);
 
         							loc = new Vector3(loc.x - destBounds.extents.x, contactPoint.y,
         								loc.z); // projected to left side of dest and top of theme
@@ -5153,13 +5153,13 @@ namespace VoxSimPlatform {
         						//Debug.Break ();
         						Debug.Log(themeBounds.max.y);
         						rayStart = new Vector3(rayStart.x, loc.y, rayStart.z);
-        						contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.left);
-        						Debug.Log(Helper.VectorToParsable(rayStart));
+        						contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.left);
+        						Debug.Log(GlobalHelper.VectorToParsable(rayStart));
         						Debug.Log(contactPoint.x);
         						Debug.Log(contactPoint.y);
 
         						Debug.Log("X-adjust = " + xAdjust);
-        						Debug.Log("lean_against: " + Helper.VectorToParsable(contactPoint));
+        						Debug.Log("lean_against: " + GlobalHelper.VectorToParsable(contactPoint));
 
         						if (args[args.Length - 1] is bool) {
         							if ((bool) args[args.Length - 1] == false) {
@@ -5175,7 +5175,7 @@ namespace VoxSimPlatform {
         								targetPosition = loc;
         							}
 
-        							Debug.Log(Helper.VectorToParsable(targetPosition));
+        							Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         							Voxeme voxComponent = theme.GetComponent<Voxeme>();
         							if (voxComponent != null) {
@@ -5209,7 +5209,7 @@ namespace VoxSimPlatform {
         							rayStart = new Vector3(themeBounds.min.x - themeBounds.center.x + Constants.EPSILON,
         								Mathf.Abs(themeBounds.size.y), 0.0f);
         							rayStart += theme.transform.position;
-        							contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.down);
+        							contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.down);
 
         							loc = new Vector3(loc.x + destBounds.extents.x, themeBounds.max.y,
         								loc.z); // projected to right side of dest and top of theme
@@ -5219,10 +5219,10 @@ namespace VoxSimPlatform {
         						rayStart = Quaternion.Euler(0.0f, povDir + 270.0f, 0.0f) * rayStart;
         						rayStart += theme.transform.position;
         						rayStart = new Vector3(rayStart.x, loc.y, rayStart.z);
-        						contactPoint = Helper.RayIntersectionPoint(rayStart, Vector3.right);
+        						contactPoint = GlobalHelper.RayIntersectionPoint(rayStart, Vector3.right);
 
         						Debug.Log("X-adjust = " + xAdjust);
-        						Debug.Log("lean_against: " + Helper.VectorToParsable(contactPoint));
+        						Debug.Log("lean_against: " + GlobalHelper.VectorToParsable(contactPoint));
 
         						if (args[args.Length - 1] is bool) {
         							if ((bool) args[args.Length - 1] == false) {
@@ -5238,7 +5238,7 @@ namespace VoxSimPlatform {
         								targetPosition = loc;
         							}
 
-        							Debug.Log(Helper.VectorToParsable(targetPosition));
+        							Debug.Log(GlobalHelper.VectorToParsable(targetPosition));
 
         							Voxeme voxComponent = theme.GetComponent<Voxeme>();
         							if (voxComponent != null) {
@@ -5355,7 +5355,7 @@ namespace VoxSimPlatform {
         					}
         				}
 
-        				Bounds bounds = Helper.GetObjectWorldSize(objs);
+        				Bounds bounds = GlobalHelper.GetObjectWorldSize(objs);
         				boundsCenter = container.transform.position = bounds.center;
         				boundsSize = bounds.size;
 
@@ -5444,17 +5444,17 @@ namespace VoxSimPlatform {
         							if ((component.Item2 != interior) && (component.Item2 != theme.gameObject)) {
         								if (component.Item2.GetComponent<Voxeme>() != null) {
         									Debug.Log(component.Item2.name);
-        									Debug.Log(Helper.GetObjectWorldSize(component.Item2).size);
-        									Debug.Log(Helper.GetObjectSize(component.Item2).size);
-        									Debug.Log(Helper.GetObjectWorldSize(interior).size);
+        									Debug.Log(GlobalHelper.GetObjectWorldSize(component.Item2).size);
+        									Debug.Log(GlobalHelper.GetObjectSize(component.Item2).size);
+        									Debug.Log(GlobalHelper.GetObjectWorldSize(interior).size);
         									Debug.Log(component.Item2.transform.localPosition);
 
         									// align comp minor axis to theme interior axis by rotating around comp major axis
-        									Vector3 compMajorAxis = Helper.GetObjectMajorAxis(component.Item2);
-        									Vector3 compMinorAxis = Helper.GetObjectMinorAxis(component.Item2);
+        									Vector3 compMajorAxis = GlobalHelper.GetObjectMajorAxis(component.Item2);
+        									Vector3 compMinorAxis = GlobalHelper.GetObjectMinorAxis(component.Item2);
         									Vector3 interiorAxis = Constants.zAxis;
-        									Bounds compBounds = Helper.GetObjectSize(component.Item2);
-        									Bounds destBounds = Helper.GetObjectSize(interior);
+        									Bounds compBounds = GlobalHelper.GetObjectSize(component.Item2);
+        									Bounds destBounds = GlobalHelper.GetObjectSize(interior);
 
         									Debug.Log(component.Item2.transform.rotation * compMinorAxis);
         									Debug.Log(interiorAxis);
@@ -5476,11 +5476,11 @@ namespace VoxSimPlatform {
         										destAdjust =
         											Quaternion
         												.identity; //Quaternion.AngleAxis (angle, component.Item2.transform.rotation * compMajorAxis);
-        									Debug.Log(Helper.VectorToParsable(compAdjust.eulerAngles));
+        									Debug.Log(GlobalHelper.VectorToParsable(compAdjust.eulerAngles));
 
-        									Debug.Log(Helper.VectorToParsable(compBounds.size));
-        									Debug.Log(Helper.VectorToParsable(compAdjust * compBounds.size));
-        									Debug.Log(Helper.VectorToParsable(destBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(compBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(compAdjust * compBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(destBounds.size));
 
         									Vector3 compAdjustedSize = compAdjust * compBounds.size;
         									compAdjustedSize = new Vector3(Mathf.Abs(compAdjustedSize.x),
@@ -5492,12 +5492,12 @@ namespace VoxSimPlatform {
 
         									// create new test bounds with vector*quat
         									compBounds = new Bounds(compBounds.center, compAdjustedSize);
-        									Debug.Log(Helper.VectorToParsable(compBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(compBounds.size));
 
         									destBounds = new Bounds(destBounds.center, destAdjustedSize);
-        									Debug.Log(Helper.VectorToParsable(destBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(destBounds.size));
 
-        									if (Helper.Covers(compBounds, destBounds, interiorAxis)) {
+        									if (GlobalHelper.Covers(compBounds, destBounds, interiorAxis)) {
         										// check fit again
         										cover = component.Item2;
         										//Debug.Log (component.Item2.name);
@@ -5525,16 +5525,16 @@ namespace VoxSimPlatform {
         									foreach (Voxeme voxeme in objSelector.allVoxemes) {
         										//if (voxeme.gameObject.activeInHierarchy) {
         										if ((voxeme.gameObject != theme) &&
-        										    (!Helper.IsSupportedBy(voxComponent.gameObject, voxeme.gameObject)) &&
+        										    (!GlobalHelper.IsSupportedBy(voxComponent.gameObject, voxeme.gameObject)) &&
         										    (voxeme.gameObject.transform.parent == null)) {
-        											if ((Helper.GetObjectWorldSize(voxeme.gameObject).size.x >=
-        											     Helper.GetObjectWorldSize(interior).size.x) &&
-        											    (Helper.GetObjectWorldSize(voxeme.gameObject).size.z >=
-        											     Helper.GetObjectWorldSize(interior).size.z)) {
+        											if ((GlobalHelper.GetObjectWorldSize(voxeme.gameObject).size.x >=
+        											     GlobalHelper.GetObjectWorldSize(interior).size.x) &&
+        											    (GlobalHelper.GetObjectWorldSize(voxeme.gameObject).size.z >=
+        											     GlobalHelper.GetObjectWorldSize(interior).size.z)) {
         												lids.Add(voxeme.gameObject);
-        												lids = lids.OrderBy(o => (Helper.GetObjectWorldSize(o).size.x +
-        												                          Helper.GetObjectWorldSize(o).size.z) +
-        												                         Helper.GetObjectWorldSize(o).size.y).ToList();
+        												lids = lids.OrderBy(o => (GlobalHelper.GetObjectWorldSize(o).size.x +
+        												                          GlobalHelper.GetObjectWorldSize(o).size.z) +
+        												                         GlobalHelper.GetObjectWorldSize(o).size.y).ToList();
         											}
         										}
 
@@ -5582,9 +5582,9 @@ namespace VoxSimPlatform {
         					}
         					else {
         						eventManager.InsertEvent(string.Format("turn({0},{1},{2},{3})", cover.name,
-        							Helper.VectorToParsable(Constants.xAxis),
-        							Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.xAxis),
-        							Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis)), 1);
+        							GlobalHelper.VectorToParsable(Constants.xAxis),
+        							GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.xAxis),
+        							GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis)), 1);
         						mannerString = string.Format("turn({0})", cover.name);
         						movingComponent = cover;
         						motionSpeed = movingComponent.GetComponent<Voxeme>().turnSpeed =
@@ -5646,17 +5646,17 @@ namespace VoxSimPlatform {
         							if ((component.Item2 != interior) && (component.Item2 != theme.gameObject)) {
         								if (component.Item2.GetComponent<Voxeme>() != null) {
         									Debug.Log(component.Item2.name);
-        									Debug.Log(Helper.GetObjectWorldSize(component.Item2).size);
-        									Debug.Log(Helper.GetObjectSize(component.Item2).size);
-        									Debug.Log(Helper.GetObjectWorldSize(interior).size);
+        									Debug.Log(GlobalHelper.GetObjectWorldSize(component.Item2).size);
+        									Debug.Log(GlobalHelper.GetObjectSize(component.Item2).size);
+        									Debug.Log(GlobalHelper.GetObjectWorldSize(interior).size);
         									Debug.Log(component.Item2.transform.localPosition);
 
         									// align comp minor axis to theme interior axis by rotating around comp major axis
-        									Vector3 compMajorAxis = Helper.GetObjectMajorAxis(component.Item2);
-        									Vector3 compMinorAxis = Helper.GetObjectMinorAxis(component.Item2);
+        									Vector3 compMajorAxis = GlobalHelper.GetObjectMajorAxis(component.Item2);
+        									Vector3 compMinorAxis = GlobalHelper.GetObjectMinorAxis(component.Item2);
         									Vector3 interiorAxis = Constants.zAxis;
-        									Bounds compBounds = Helper.GetObjectSize(component.Item2);
-        									Bounds destBounds = Helper.GetObjectSize(interior);
+        									Bounds compBounds = GlobalHelper.GetObjectSize(component.Item2);
+        									Bounds destBounds = GlobalHelper.GetObjectSize(interior);
 
         									Debug.Log(component.Item2.transform.rotation * compMinorAxis);
         									Debug.Log(interiorAxis);
@@ -5678,11 +5678,11 @@ namespace VoxSimPlatform {
         										destAdjust =
         											Quaternion
         												.identity; //Quaternion.AngleAxis (angle, component.Item2.transform.rotation * compMajorAxis);
-        									Debug.Log(Helper.VectorToParsable(compAdjust.eulerAngles));
+        									Debug.Log(GlobalHelper.VectorToParsable(compAdjust.eulerAngles));
 
-        									Debug.Log(Helper.VectorToParsable(compBounds.size));
-        									Debug.Log(Helper.VectorToParsable(compAdjust * compBounds.size));
-        									Debug.Log(Helper.VectorToParsable(destBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(compBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(compAdjust * compBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(destBounds.size));
 
         									Vector3 compAdjustedSize = compAdjust * compBounds.size;
         									compAdjustedSize = new Vector3(Mathf.Abs(compAdjustedSize.x),
@@ -5694,12 +5694,12 @@ namespace VoxSimPlatform {
 
         									// create new test bounds with vector*quat
         									compBounds = new Bounds(compBounds.center, compAdjustedSize);
-        									Debug.Log(Helper.VectorToParsable(compBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(compBounds.size));
 
         									destBounds = new Bounds(destBounds.center, destAdjustedSize);
-        									Debug.Log(Helper.VectorToParsable(destBounds.size));
+        									Debug.Log(GlobalHelper.VectorToParsable(destBounds.size));
 
-        									if (Helper.Covers(compBounds, destBounds, interiorAxis)) {
+        									if (GlobalHelper.Covers(compBounds, destBounds, interiorAxis)) {
         										// check fit again
         										cover = component.Item2;
         										targetRotation =
@@ -5730,12 +5730,12 @@ namespace VoxSimPlatform {
         									Debug.Log(lid.name);
         									if (lid != voxComponent.supportingSurface.transform.root.gameObject) {
         										Region region =
-        											Helper.FindClearRegion(
+        											GlobalHelper.FindClearRegion(
         												voxComponent.supportingSurface.transform.root.gameObject, lid);
-        										Debug.Log(Helper.VectorToParsable(region.min));
-        										Debug.Log(Helper.VectorToParsable(region.max));
-        										Debug.Log(Helper.VectorToParsable(region.center));
-        										Bounds lidBounds = Helper.GetObjectWorldSize(lid);
+        										Debug.Log(GlobalHelper.VectorToParsable(region.min));
+        										Debug.Log(GlobalHelper.VectorToParsable(region.max));
+        										Debug.Log(GlobalHelper.VectorToParsable(region.center));
+        										Bounds lidBounds = GlobalHelper.GetObjectWorldSize(lid);
         										removeLocation = new Vector3(region.center.x,
         											region.center.y + (lidBounds.center.y - lidBounds.min.y) +
         											(lid.transform.position.y - lidBounds.center.y),
@@ -5783,7 +5783,7 @@ namespace VoxSimPlatform {
         					if (!hasInteriorComponent) {
         						if (lid != null) {
         							eventManager.InsertEvent(
-        								string.Format("put({0},{1})", lid.name, Helper.VectorToParsable(removeLocation)), 1);
+        								string.Format("put({0},{1})", lid.name, GlobalHelper.VectorToParsable(removeLocation)), 1);
         							mannerString = string.Format("move({0})", lid.name);
         							movingComponent = lid;
         							motionSpeed = movingComponent.GetComponent<Voxeme>().moveSpeed =
@@ -5804,9 +5804,9 @@ namespace VoxSimPlatform {
         					}
         					else {
         						eventManager.InsertEvent(string.Format("turn({0},{1},{2},{3})", cover.name,
-        							Helper.VectorToParsable(Constants.xAxis),
-        							Helper.VectorToParsable(targetRotation * Constants.xAxis),
-        							Helper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis)), 1);
+        							GlobalHelper.VectorToParsable(Constants.xAxis),
+        							GlobalHelper.VectorToParsable(targetRotation * Constants.xAxis),
+        							GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * Constants.yAxis)), 1);
         						mannerString = string.Format("turn({0})", cover.name);
         						movingComponent = cover;
         						motionSpeed = movingComponent.GetComponent<Voxeme>().turnSpeed =
@@ -6083,7 +6083,7 @@ namespace VoxSimPlatform {
                             foreach (object arg in args) {
                                 if (arg is GameObject) {
                                     // find bounds corner closest to grasper
-                                    Bounds bounds = Helper.GetObjectWorldSize((arg as GameObject));
+                                    Bounds bounds = GlobalHelper.GetObjectWorldSize((arg as GameObject));
 
                                     // which hand is closer?
                                     Vector3 leftClosestPoint = bounds.ClosestPoint(leftGrasper.transform.position);
@@ -6284,7 +6284,7 @@ namespace VoxSimPlatform {
         								    interactionSystem.IsInInteraction(FullBodyBipedEffector.LeftHand)) {
         									Debug.Log(string.Format("Ending {0} interaction with {1}", leftGrasper.name,
         										(arg as GameObject).name));
-        									Debug.Log(Helper.VectorToParsable((arg as GameObject).GetComponent<Voxeme>()
+        									Debug.Log(GlobalHelper.VectorToParsable((arg as GameObject).GetComponent<Voxeme>()
         										.targetPosition));
         									//InteractionHelper.SetLeftHandTarget (agent, null);
 
@@ -6346,7 +6346,7 @@ namespace VoxSimPlatform {
                         for (int i = 0; i < args.Length; i++) {
                             Debug.Log(string.Format("{0}: args@{1}: {2} typeof({3})",
                                 MethodBase.GetCurrentMethod().Name, i,
-                                    (args[i] is Vector3) ? Helper.VectorToParsable((Vector3)args[i]) : args[i], args[i].GetType()));
+                                    (args[i] is Vector3) ? GlobalHelper.VectorToParsable((Vector3)args[i]) : args[i], args[i].GetType()));
                         }
 
                         if (args[0] is GameObject) {
@@ -6392,11 +6392,11 @@ namespace VoxSimPlatform {
 
                                                 if ((path is IList) && (path.GetType().IsGenericType) &&
                                                     (path.GetType().IsAssignableFrom(typeof(List<Vector3>)))) {
-                                                    Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                                                    GlobalHelper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
                                                     Debug.Log("Successfully computed path");
                                                     eventManager.macroVars.Add(string.Format("'{0}.{1}'",
                                                         ((MethodInfo)args[2]).ReflectedType.FullName, ((MethodInfo)args[2]).Name), path);
-                                                    Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                                                    GlobalHelper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
                                                 }
                                                 else {
                                                     Debug.Log(string.Format("{0} called from {2} did not return a path (got typeof{1}).  " +
@@ -6445,7 +6445,7 @@ namespace VoxSimPlatform {
                                         voxComponent.targetPosition = voxComponent.interTargetPositions.Last();
 
                                         Debug.Log(string.Format("Path is: [{0}]",
-                                            string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
+                                            string.Join(", ",((List<Vector3>)path).Select(n => GlobalHelper.VectorToParsable(n)))));
 
                                         //Vector3 nextInterimTarget = ((List<Vector3>)path).ElementAt(0);
                                         //Debug.Log(string.Format("Executing primitive {0}, nextInterimTarget is {1}",
@@ -6766,7 +6766,7 @@ namespace VoxSimPlatform {
                                                                 //  will be the first non-agent arg
                                                                 if (methodToCall != null) {
                                                                     List<object> objs = new List<object>{
-                                                                        string.Format("{0}{1}",match.Value,Helper.GetTopPredicate(value)) };
+                                                                        string.Format("{0}{1}",match.Value,GlobalHelper.GetTopPredicate(value)) };
 
                                                                     if (args[argIndex] is Vector3) {
                                                                         objs.Add((Vector3)args[argIndex]);
@@ -6775,13 +6775,13 @@ namespace VoxSimPlatform {
                                                                     if (args[0] is GameObject) {
                                                                         // TODO: calculate the offset using ObjBounds type for non-axis aligned motions
                                                                         //  e.g., "lean"
-                                                                        objs.Add(Helper.GetObjectWorldSize(args[0] as GameObject).extents.y);
+                                                                        objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject).extents.y);
                                                                     }
 
                                                                     Debug.Log(string.Format("ComposeProgram: calling OFFSET(\"{0}\",{1},{2})",
-                                                                        string.Format("{0}{1}",match.Value,Helper.GetTopPredicate(value)),
-                                                                        Helper.VectorToParsable((Vector3)args[argIndex]),
-                                                                        Helper.GetObjectWorldSize(args[0] as GameObject).extents.y));
+                                                                        string.Format("{0}{1}",match.Value,GlobalHelper.GetTopPredicate(value)),
+                                                                        GlobalHelper.VectorToParsable((Vector3)args[argIndex]),
+                                                                        GlobalHelper.GetObjectWorldSize(args[0] as GameObject).extents.y));
 
                                                                     object offset = methodToCall.Invoke(this, new object[]{ objs.ToArray() });
 
@@ -6812,7 +6812,7 @@ namespace VoxSimPlatform {
                     }
         		}
 
-                Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                GlobalHelper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
 
                 if (args[args.Length - 1] is bool) {
                     if ((bool)args[args.Length - 1]) {
@@ -6886,12 +6886,12 @@ namespace VoxSimPlatform {
                     }
                 }
                     
-                Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                GlobalHelper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
 
                 if (args.Length == voxml.Type.Args.Count) { // all arguments specified
                     // calc IsSatisfied result
                     // extract ObjBounds from GameObjects
-                    args = args.ToList().Select(a => (a is GameObject) ? Helper.GetObjectOrientedSize((GameObject)a) : a).ToArray();
+                    args = args.ToList().Select(a => (a is GameObject) ? GlobalHelper.GetObjectOrientedSize((GameObject)a) : a).ToArray();
                     // convert Vector3 to ObjBounds
                     // assume the provided coordinates are the center of the bounds object
                     // take the extents from the other object in the relation
@@ -6904,10 +6904,10 @@ namespace VoxSimPlatform {
                         new ObjBounds((Vector3)a)) : a).ToArray();
                     Debug.Log(string.Format("ComposeRelation: \"{0}\" test bounds:\n{1}: {2} {3}\n{4}: {5} {6}",
                         voxml.Lex.Pred,
-                        voxml.Type.Args[0].Value.Split(':')[0], Helper.VectorToParsable((args[0] as ObjBounds).Center),
-                            string.Join(", ", (args[0] as ObjBounds).Points.Select(p => Helper.VectorToParsable(p))),
-                        voxml.Type.Args[1].Value.Split(':')[0], Helper.VectorToParsable((args[1] as ObjBounds).Center),
-                            string.Join(", ", (args[1] as ObjBounds).Points.Select(p => Helper.VectorToParsable(p)))));
+                        voxml.Type.Args[0].Value.Split(':')[0], GlobalHelper.VectorToParsable((args[0] as ObjBounds).Center),
+                            string.Join(", ", (args[0] as ObjBounds).Points.Select(p => GlobalHelper.VectorToParsable(p))),
+                        voxml.Type.Args[1].Value.Split(':')[0], GlobalHelper.VectorToParsable((args[1] as ObjBounds).Center),
+                            string.Join(", ", (args[1] as ObjBounds).Points.Select(p => GlobalHelper.VectorToParsable(p)))));
                     retVal = SatisfactionTest.IsSatisfied(voxml, args.ToList());
                 }
                 else {                                      // otherwise calc location/region
@@ -6944,7 +6944,7 @@ namespace VoxSimPlatform {
                                     Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
                                         methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
                                     retVal = method.Invoke(null, args.ToList().Select(a => (a is GameObject) ? 
-                                        Helper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
+                                        GlobalHelper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
                                 }
                                 else {  // no method found
                                     // throw this to ComposeQSR
@@ -6953,7 +6953,7 @@ namespace VoxSimPlatform {
                                     Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
                                         methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
                                     retVal = method.Invoke(null, args.ToList().Select(a => (a is GameObject) ? 
-                                        Helper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
+                                        GlobalHelper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
                                 }
 
                                 Debug.Log(string.Format("Result of method {0}.{1}({2}) is {3}",

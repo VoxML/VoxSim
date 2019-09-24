@@ -89,8 +89,8 @@ namespace VoxSimPlatform {
         			}
 
         			List<GameObject> excludeChildren = obj.GetComponentsInChildren<Renderer>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
-        			int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj, excludeChildren), obj,
+        				o => (GlobalHelper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
+        			int visibility = GetVisibleVertices(GlobalHelper.GetObjectWorldSize(obj, excludeChildren), obj,
         				sensor.transform.position);
         			//Debug.Log(obj + "=============================================================== " + visibility);
         			return visibility > 0;

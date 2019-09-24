@@ -133,7 +133,7 @@ namespace VoxSimPlatform {
                         if (obj is Vector3) {
                             isType = true;
                         }
-                        else if ((obj is string) && (Helper.vec.IsMatch(obj as string))) {
+                        else if ((obj is string) && (GlobalHelper.vec.IsMatch(obj as string))) {
                             isType = true;
                         }
                         break;
@@ -144,7 +144,7 @@ namespace VoxSimPlatform {
                                 isType = true;
                             }
                             else if (obj.GetType().IsAssignableFrom(typeof(List<string>))) {
-                                if (((List<string>)obj).All(o => Helper.vec.IsMatch(o))) {
+                                if (((List<string>)obj).All(o => GlobalHelper.vec.IsMatch(o))) {
                                     isType = true;
                                 }
                             }
@@ -179,7 +179,7 @@ namespace VoxSimPlatform {
                         if (obj is Vector3) {
                             isType = true;
                         }
-                        else if ((obj is string) && (Helper.vec.IsMatch(obj as string))) {
+                        else if ((obj is string) && (GlobalHelper.vec.IsMatch(obj as string))) {
                             isType = true;
                         }
                         break;
@@ -190,7 +190,7 @@ namespace VoxSimPlatform {
                                 isType = true;
                             }
                             else if (obj.GetType().IsAssignableFrom(typeof(List<string>))) {
-                                if (((List<string>)obj).All(o => Helper.vec.IsMatch(o))) {
+                                if (((List<string>)obj).All(o => GlobalHelper.vec.IsMatch(o))) {
                                     isType = true;
                                 }
                             }

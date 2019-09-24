@@ -19,7 +19,7 @@ namespace VoxSimPlatform {
         /// <summary>
         /// Helper class
         /// </summary>
-        public static class Helper {
+        public static class GlobalHelper {
             public static Regex vec = new Regex(@"<.*>");               // vector form regex
             public static Regex listVec = new Regex(@"\[<.*>\]");       // list of vectors form regex
             public static Regex commaVec = new Regex(@",<.*>");         // comma + vector form regex

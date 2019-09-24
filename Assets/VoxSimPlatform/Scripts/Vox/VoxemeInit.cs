@@ -126,9 +126,9 @@ namespace VoxSimPlatform {
         									if (rigidbody != null) {
         										// assume mass is a volume of uniform density
         										// assumption: all objects have the same density
-        										float x = Helper.GetObjectWorldSize(subObj).size.x;
-        										float y = Helper.GetObjectWorldSize(subObj).size.y;
-        										float z = Helper.GetObjectWorldSize(subObj).size.z;
+        										float x = GlobalHelper.GetObjectWorldSize(subObj).size.x;
+        										float y = GlobalHelper.GetObjectWorldSize(subObj).size.y;
+        										float z = GlobalHelper.GetObjectWorldSize(subObj).size.z;
         										rigidbody.mass = x * y * z * (container.GetComponent<Voxeme>().density);
 
         										// bunch of crap assumptions to calculate drag:
@@ -176,8 +176,8 @@ namespace VoxSimPlatform {
 
         					// add to master voxeme list
         					objSelector.allVoxemes.Add(container.GetComponent<Voxeme>());
-        					Debug.Log(Helper.VectorToParsable(container.transform.position -
-        					                                  Helper.GetObjectWorldSize(container).center));
+        					Debug.Log(GlobalHelper.VectorToParsable(container.transform.position -
+        					                                  GlobalHelper.GetObjectWorldSize(container).center));
         				}
         			}
         		}
@@ -186,7 +186,7 @@ namespace VoxSimPlatform {
         		foreach (GameObject go in allObjects) {
         			if (go.activeInHierarchy) {
         				// remove BoxCollider and Rigidbody on non-top level objects
-        				if ((Helper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
+        				if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
         				    (go.transform.root.tag != "Agent")) {
         					BoxCollider boxCollider = go.GetComponent<BoxCollider>();
         					if (boxCollider != null) {
@@ -211,8 +211,8 @@ namespace VoxSimPlatform {
         							Rigidbody connectedBody = sub2.GetComponent<Rigidbody>();
 
         							if (connectedBody != null) {
-        								if ((Helper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent == null) &&
-        								    (Helper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform
+        								if ((GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent == null) &&
+        								    (GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform
         									     .parent == null)) {
         									FixedJoint fixedJoint = sub1.AddComponent<FixedJoint>();
         									fixedJoint.connectedBody = connectedBody;

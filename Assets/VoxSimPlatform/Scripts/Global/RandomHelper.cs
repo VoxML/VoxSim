@@ -60,7 +60,7 @@ namespace VoxSimPlatform {
                 List<Voxeme> allVoxemes = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>().allVoxemes.ToList();
 
                 Voxeme voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
-                while (Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) {
+                while (GlobalHelper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) {
                     voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
                 }
 
@@ -71,7 +71,7 @@ namespace VoxSimPlatform {
                 List<Voxeme> allVoxemes = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>().allVoxemes.ToList();
 
                 Voxeme voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
-                while ((Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||
+                while ((GlobalHelper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||
                        (exclude.Contains(voxeme.gameObject))) {
                     voxeme = allVoxemes[RandomInt(0, allVoxemes.Count, (int) RangeFlags.MinInclusive)];
                 }
@@ -83,7 +83,7 @@ namespace VoxSimPlatform {
                 Voxeme voxeme = fromList[RandomInt(0, fromList.Count, (int) RangeFlags.MinInclusive)]
                     .GetComponent<Voxeme>();
 
-                while ((Helper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||
+                while ((GlobalHelper.GetMostImmediateParentVoxeme(voxeme.gameObject).gameObject.transform.parent != null) ||
                        (exclude.Contains(voxeme.gameObject))) {
                     voxeme = fromList[RandomInt(0, fromList.Count, (int) RangeFlags.MinInclusive)].GetComponent<Voxeme>();
                 }

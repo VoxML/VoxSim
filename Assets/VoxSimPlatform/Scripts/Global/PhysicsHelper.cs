@@ -146,7 +146,7 @@ namespace VoxSimPlatform {
                                         child.targetRotation = child.transform.rotation.eulerAngles;
                                     }
 
-                                    child.transform.localPosition = Helper.RotatePointAroundPivot(
+                                    child.transform.localPosition = GlobalHelper.RotatePointAroundPivot(
                                         voxComponent.parentToChildPositionOffset[child.gameObject],
                                         Vector3.zero, voxComponent.gameObject.transform.eulerAngles);
                                     //child.transform.localPosition = Helper.RotatePointAroundPivot (child.transform.localEulerAngles,
@@ -247,17 +247,17 @@ namespace VoxSimPlatform {
             }
 
             public static float GetConcavityMinimum(GameObject obj) {
-                Bounds bounds = Helper.GetObjectSize(obj);
+                Bounds bounds = GlobalHelper.GetObjectSize(obj);
 
                 Vector3 concavityMin = bounds.min;
                 foreach (Renderer renderer in obj.GetComponentsInChildren<Renderer>()) {
     //              Debug.Log (renderer.gameObject.name + " " + Helper.GetObjectWorldSize (renderer.gameObject).min.y);
-                    if (Helper.GetObjectSize(renderer.gameObject).min.y > concavityMin.y) {
-                        concavityMin = Helper.GetObjectSize(renderer.gameObject).min;
+                    if (GlobalHelper.GetObjectSize(renderer.gameObject).min.y > concavityMin.y) {
+                        concavityMin = GlobalHelper.GetObjectSize(renderer.gameObject).min;
                     }
                 }
 
-                concavityMin = Helper.RotatePointAroundPivot(concavityMin, bounds.center, obj.transform.eulerAngles) +
+                concavityMin = GlobalHelper.RotatePointAroundPivot(concavityMin, bounds.center, obj.transform.eulerAngles) +
                                obj.transform.position;
 
     //          Debug.Log (obj.transform.eulerAngles);

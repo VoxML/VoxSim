@@ -31,8 +31,8 @@ namespace VoxSimPlatform {
         		List<GameObject> objList = new List<GameObject>();
 
         		foreach (Voxeme voxeme in objectSelector.allVoxemes) {
-        			if (!objectSelector.disabledObjects.Contains(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject))) {
-        				objList.Add(Helper.GetMostImmediateParentVoxeme(voxeme.gameObject));
+        			if (!objectSelector.disabledObjects.Contains(GlobalHelper.GetMostImmediateParentVoxeme(voxeme.gameObject))) {
+        				objList.Add(GlobalHelper.GetMostImmediateParentVoxeme(voxeme.gameObject));
         			}
         		}
 

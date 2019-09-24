@@ -46,7 +46,7 @@ namespace VoxSimPlatform {
         	// Update is called once per frame
         	void Update() {
         		if (Input.GetMouseButtonDown(0)) {
-        			if (Helper.PointOutsideMaskedAreas(
+        			if (GlobalHelper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				windowManager.windowManager.Values.Select(v => v.windowRect).ToArray())) {
         				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -76,7 +76,7 @@ namespace VoxSimPlatform {
         			}
         		}
         		else if (Input.GetMouseButtonDown(1)) {
-        			if (Helper.PointOutsideMaskedAreas(
+        			if (GlobalHelper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				windowManager.windowManager.Values.Select(v => v.windowRect).ToArray())) {
         				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -184,7 +184,7 @@ namespace VoxSimPlatform {
 
         	public void InitDisabledObjects() {
         		for (int i = 0; i < disabledObjects.Count; i++) {
-        			disabledObjects[i] = Helper.GetMostImmediateParentVoxeme(disabledObjects[i]);
+        			disabledObjects[i] = GlobalHelper.GetMostImmediateParentVoxeme(disabledObjects[i]);
         			disabledObjects[i].SetActive(false);
         		}
         	}
