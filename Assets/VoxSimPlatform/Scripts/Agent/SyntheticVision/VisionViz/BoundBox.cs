@@ -5,8 +5,6 @@ using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
 
-using VoxSimPlatform.Global;
-
 namespace VoxSimPlatform {
     namespace Agent {
         namespace SyntheticVision {
@@ -142,7 +140,7 @@ namespace VoxSimPlatform {
             		}
 
             		void setPoints() {
-            			bound = Helper.GetObjectWorldSize(Helper.GetMostImmediateParentVoxeme(gameObject));
+            			bound = Global.Helper.GetObjectWorldSize(Global.Helper.GetMostImmediateParentVoxeme(gameObject));
             			boundOffset = bound.center - transform.position;
 
             			// this makes bounds scaled down to blockX*'s local scale - and Diana shouldn't make blocks smaller or bigger at runtime
@@ -151,29 +149,29 @@ namespace VoxSimPlatform {
 
 
             			bottomBackLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, -1, -1));
-            			bottomBackLeft = Helper.RotatePointAroundPivot(bottomBackLeft, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			bottomBackLeft = Global.Helper.RotatePointAroundPivot(bottomBackLeft, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			bottomFrontLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, -1, 1));
-            			bottomFrontLeft = Helper.RotatePointAroundPivot(bottomFrontLeft, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			bottomFrontLeft = Global.Helper.RotatePointAroundPivot(bottomFrontLeft, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			topBackLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, 1, -1));
-            			topBackLeft = Helper.RotatePointAroundPivot(topBackLeft, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			topBackLeft = Global.Helper.RotatePointAroundPivot(topBackLeft, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			topFrontLeft = boundOffset + Vector3.Scale(bound.extents, new Vector3(-1, 1, 1));
-            			topFrontLeft = Helper.RotatePointAroundPivot(topFrontLeft, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			topFrontLeft = Global.Helper.RotatePointAroundPivot(topFrontLeft, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			bottomBackRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, -1, -1));
-            			bottomBackRight = Helper.RotatePointAroundPivot(bottomBackRight, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			bottomBackRight = Global.Helper.RotatePointAroundPivot(bottomBackRight, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			bottomFrontRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, -1, 1));
-            			bottomFrontRight = Helper.RotatePointAroundPivot(bottomFrontRight, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			bottomFrontRight = Global.Helper.RotatePointAroundPivot(bottomFrontRight, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			topBackRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, 1, -1));
-            			topBackRight = Helper.RotatePointAroundPivot(topBackRight, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			topBackRight = Global.Helper.RotatePointAroundPivot(topBackRight, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
             			topFrontRight = boundOffset + Vector3.Scale(bound.extents, new Vector3(1, 1, 1));
-            			topFrontRight = Helper.RotatePointAroundPivot(topFrontRight, Vector3.zero,
-            				Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
+            			topFrontRight = Global.Helper.RotatePointAroundPivot(topFrontRight, Vector3.zero,
+            				Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.eulerAngles);
 
             			corners = new[] {
             				topFrontRight, topFrontLeft, topBackLeft, topBackRight, bottomFrontRight, bottomFrontLeft,
@@ -182,7 +180,7 @@ namespace VoxSimPlatform {
             		}
 
             		void setLines() {
-            			Quaternion rot = Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
+            			Quaternion rot = Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
             			Vector3 pos = transform.position;
 
             			List<Vector3[]> _lines = new List<Vector3[]>();

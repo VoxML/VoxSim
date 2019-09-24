@@ -74,10 +74,10 @@ namespace VoxSimPlatform {
         //            if (Mathf.Abs (x.Center.y - y.Center.y) * 2 < ((x.Max(MajorAxis.Y).y-x.Center.y)*2 + (y.Max(MajorAxis.Y).y-y.Center.y)*2) &&
         //                (Mathf.Abs (x.Center.z - y.Center.z) * 2 < ((x.Max(MajorAxis.Z).z-x.Center.z)*2 + (y.Max(MajorAxis.Z).z-y.Center.z)*2))) {
                     if (x.Center.x <= y.Max(MajorAxis.X).x) {
-        //                Debug.Log (Helper.VectorToParsable(x.Center));
-        //                Debug.Log (Helper.VectorToParsable(y.Center));
+        //                Debug.Log (Global.Helper.VectorToParsable(x.Center));
+        //                Debug.Log (Global.Helper.VectorToParsable(y.Center));
                         foreach (Vector3 point in x.Points.Where(p => p.x >= x.Center.x).ToList()) {
-        //                        Debug.Log (Helper.VectorToParsable (point));
+        //                        Debug.Log (Global.Helper.VectorToParsable (point));
                             RaycastHit hitInfo;
                             Vector3 origin = new Vector3(point.x - Constants.EPSILON,
                                 (Mathf.Abs(point.y - x.Min(MajorAxis.Y).y) <= Constants.EPSILON) ? point.y + Constants.EPSILON :
@@ -87,7 +87,7 @@ namespace VoxSimPlatform {
                                 (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON :
                                 point.z);
                             bool hit = Physics.Raycast(origin, Vector3.right, out hitInfo);
-                            if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                            if ((hit) && (y.Contains(Global.Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
                                     .position)) &&
                                 (hitInfo.distance <= Constants.EPSILON * 3)) {
                                 Debug.Log(string.Format("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
@@ -106,7 +106,7 @@ namespace VoxSimPlatform {
                                 (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON) ? point.z - Constants.EPSILON :
                                 point.z);
                             bool hit = Physics.Raycast(origin, -Vector3.right, out hitInfo);
-                            if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                            if ((hit) && (y.Contains(Global.Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
                                     .position)) &&
                                 (hitInfo.distance <= Constants.EPSILON * 3)) {
                                 Debug.Log(string.Format("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
@@ -120,8 +120,8 @@ namespace VoxSimPlatform {
         //                (Mathf.Abs (x.Center.z - y.Center.z) * 2 < ((x.Max (MajorAxis.Z).z - x.Center.z) * 2 + (y.Max (MajorAxis.Z).z - y.Center.z) * 2))) {
                     //if (x.Center.x <= y.Center.x) {
                     if (x.Center.y <= y.Min(MajorAxis.Y).y) {
-                        Debug.Log(Helper.VectorToParsable(x.Center));
-                        Debug.Log(Helper.VectorToParsable(y.Center));
+                        Debug.Log(Global.Helper.VectorToParsable(x.Center));
+                        Debug.Log(Global.Helper.VectorToParsable(y.Center));
                         foreach (Vector3 point in x.Points.Where(p => p.y >= x.Center.y).ToList()) {
                             RaycastHit hitInfo;
                             Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
@@ -135,13 +135,13 @@ namespace VoxSimPlatform {
                                         ? point.z - Constants.EPSILON
                                         : point.z);
                             bool hit = Physics.Raycast(origin, Vector3.up, out hitInfo);
-        //                            if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
+        //                            if (y.Contains (Global.Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
         //                                Debug.Log (hitInfo.collider.gameObject);
         //                                Debug.Log (hitInfo.distance);
-        //                                Debug.Log (Helper.VectorToParsable(hitInfo.collider.gameObject.transform.position));
-        //                                Debug.Log (Helper.VectorToParsable (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position));
+        //                                Debug.Log (Global.Helper.VectorToParsable(hitInfo.collider.gameObject.transform.position));
+        //                                Debug.Log (Global.Helper.VectorToParsable (Global.Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position));
         //                            }
-                            if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                            if ((hit) && (y.Contains(Global.Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
                                     .position)) &&
                                 (hitInfo.distance <= Constants.EPSILON * 3)) {
                                 Debug.Log(string.Format("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
@@ -150,10 +150,10 @@ namespace VoxSimPlatform {
                         }
                     }
                     else if (x.Center.y >= y.Max(MajorAxis.Y).y) {
-                        Debug.Log(Helper.VectorToParsable(x.Center));
-                        Debug.Log(Helper.VectorToParsable(y.Center));
+                        Debug.Log(Global.Helper.VectorToParsable(x.Center));
+                        Debug.Log(Global.Helper.VectorToParsable(y.Center));
                         foreach (Vector3 point in x.Points.Where(p => p.y <= x.Center.y).ToList()) {
-                            Debug.Log(Helper.VectorToParsable(point));
+                            Debug.Log(Global.Helper.VectorToParsable(point));
                             RaycastHit hitInfo;
                             Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
                                     ? point.x + Constants.EPSILON
@@ -170,13 +170,13 @@ namespace VoxSimPlatform {
                                 Debug.Log(hitInfo.collider.gameObject);
                             }
 
-                            //if (y.Contains (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
+                            //if (y.Contains (Global.Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position)) {
                             //    Debug.Log (hitInfo.collider.gameObject);
                             //    Debug.Log (hitInfo.distance);
-                            //    Debug.Log (Helper.VectorToParsable(hitInfo.collider.gameObject.transform.position));
-                            //    Debug.Log (Helper.VectorToParsable (Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position));
+                            //    Debug.Log (Global.Helper.VectorToParsable(hitInfo.collider.gameObject.transform.position));
+                            //    Debug.Log (Global.Helper.VectorToParsable (Global.Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject).transform.position));
                             //}
-                            if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                            if ((hit) && (y.Contains(Global.Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
                                     .position)) &&
                                 (hitInfo.distance <= Constants.EPSILON * 3)) {
                                 Debug.Log(string.Format("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
@@ -201,7 +201,7 @@ namespace VoxSimPlatform {
                                 (Mathf.Abs(point.y - x.Max(MajorAxis.Y).y) <= Constants.EPSILON) ? point.y - Constants.EPSILON :
                                 point.y, point.z - Constants.EPSILON);
                             bool hit = Physics.Raycast(origin, Vector3.forward, out hitInfo);
-                            if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                            if ((hit) && (y.Contains(Global.Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
                                     .position)) &&
                                 (hitInfo.distance <= Constants.EPSILON * 3)) {
                                 Debug.Log(string.Format("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
@@ -221,7 +221,7 @@ namespace VoxSimPlatform {
                                 (Mathf.Abs(point.y - x.Max(MajorAxis.Y).y) <= Constants.EPSILON) ? point.y - Constants.EPSILON :
                                 point.y, point.z + Constants.EPSILON);
                             bool hit = Physics.Raycast(origin, -Vector3.forward, out hitInfo);
-                            if ((hit) && (y.Contains(Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                            if ((hit) && (y.Contains(Global.Helper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
                                     .position)) &&
                                 (hitInfo.distance <= Constants.EPSILON * 3)) {
                                 Debug.Log(string.Format("{0}:{1}", hitInfo.collider.gameObject, hitInfo.distance));
@@ -261,7 +261,7 @@ namespace VoxSimPlatform {
                     candidates.Add(new Vector3(y.Center.x,y.Center.y,y.Max(MajorAxis.Z).z));    // frontmost Z point, aligned on X and Y
 
                     Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}]", candidates.Count,
-                        string.Join(", ", candidates.Select(c => Helper.VectorToParsable(c)))));
+                        string.Join(", ", candidates.Select(c => Global.Helper.VectorToParsable(c)))));
 
                     // 2) prune candidates that don't satisfy all constraints
                     //  including global standing constraints like "this candidate location is blocked by another object"
@@ -273,14 +273,14 @@ namespace VoxSimPlatform {
 
                     foreach (Vector3 candidate in candidates) {
                         foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                            if (!y.BoundsEqual(Helper.GetObjectOrientedSize(voxeme.gameObject, true))) {
-                                Bounds testBounds = new Bounds(Helper.GetObjectWorldSize(voxeme.gameObject).center,
-                                    new Vector3(Helper.GetObjectWorldSize(voxeme.gameObject, true).size.x + 2 * Constants.EPSILON,
-                                        Helper.GetObjectWorldSize(voxeme.gameObject, true).size.y + 2 * Constants.EPSILON,
-                                        Helper.GetObjectWorldSize(voxeme.gameObject, true).size.z + 2 * Constants.EPSILON));
+                            if (!y.BoundsEqual(Global.Helper.GetObjectOrientedSize(voxeme.gameObject, true))) {
+                                Bounds testBounds = new Bounds(Global.Helper.GetObjectWorldSize(voxeme.gameObject).center,
+                                    new Vector3(Global.Helper.GetObjectWorldSize(voxeme.gameObject, true).size.x + 2 * Constants.EPSILON,
+                                        Global.Helper.GetObjectWorldSize(voxeme.gameObject, true).size.y + 2 * Constants.EPSILON,
+                                        Global.Helper.GetObjectWorldSize(voxeme.gameObject, true).size.z + 2 * Constants.EPSILON));
                                 if (testBounds.Contains(candidate)) {
                                     Debug.Log(string.Format("Adding {0} to prune list (intersects bounds({1}))",
-                                        Helper.VectorToParsable(candidate), voxeme.name));
+                                        Global.Helper.VectorToParsable(candidate), voxeme.name));
                                     pruneCandidates.Add(candidate);
                                 }
                             }
@@ -290,8 +290,8 @@ namespace VoxSimPlatform {
 
                         for (int i = 0; i < constraints.Length; i++) {
                             if (constraints[i] is string) {
-                                string constraintForm = ((string)constraints[i]).Replace("x", Helper.VectorToParsable(candidate)).
-                                        Replace("y", Helper.VectorToParsable(y.Center));
+                                string constraintForm = ((string)constraints[i]).Replace("x", Global.Helper.VectorToParsable(candidate)).
+                                        Replace("y", Global.Helper.VectorToParsable(y.Center));
                                 //Debug.Log(constraintForm);
 
                                 //string[] operators = new string[] { "<", "<=", "=", "!=", ">=", ">", "^", "|" };
@@ -300,11 +300,11 @@ namespace VoxSimPlatform {
                                 string[] constraintValues = operators.Split(constraintForm).Select(c => c.Trim()).ToArray();
 
                                 foreach (string value in constraintValues) {
-                                    if (Helper.pred.IsMatch(value)) {
-                                        List<object> objs = em.ExtractObjects(Helper.GetTopPredicate(value),
-                                                (string)Helper.ParsePredicate(value)[Helper.GetTopPredicate(value)]);
+                                    if (Global.Helper.pred.IsMatch(value)) {
+                                        List<object> objs = em.ExtractObjects(Global.Helper.GetTopPredicate(value),
+                                                (string)Global.Helper.ParsePredicate(value)[Global.Helper.GetTopPredicate(value)]);
 
-                                        MethodInfo methodToCall = preds.GetType().GetMethod(Helper.GetTopPredicate(value));
+                                        MethodInfo methodToCall = preds.GetType().GetMethod(Global.Helper.GetTopPredicate(value));
                                         
                                         if (methodToCall != null) {
                                             object result = methodToCall.Invoke(preds, new object[]{ objs.ToArray() });
@@ -328,7 +328,7 @@ namespace VoxSimPlatform {
 
                             if ((!result) && (!pruneCandidates.Contains(candidate))) {
                                 Debug.Log(string.Format("Adding {0} to prune list (violates {1})",
-                                    Helper.VectorToParsable(candidate), eval));
+                                    Global.Helper.VectorToParsable(candidate), eval));
                                 pruneCandidates.Add(candidate);
                             }
                         }
@@ -337,7 +337,7 @@ namespace VoxSimPlatform {
                     candidates = candidates.Except(pruneCandidates).ToList(); 
 
                     Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}]", candidates.Count,
-                        string.Join(", ", candidates.Select(c => Helper.VectorToParsable(c)))));
+                        string.Join(", ", candidates.Select(c => Global.Helper.VectorToParsable(c)))));
 
                     // 3) random/model-derived assignment from remaining choices (if > 1)
                     //  if there's only one, this will return that one

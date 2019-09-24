@@ -24,7 +24,7 @@ namespace VoxSimPlatform {
         	//}
 
         	static bool TestClear(GameObject obj, Vector3 curPoint) {
-        		Bounds objBounds = Helper.GetObjectWorldSize(obj);
+        		Bounds objBounds = Global.Helper.GetObjectWorldSize(obj);
         		Bounds testBounds = new Bounds(curPoint + objBounds.center - obj.transform.position, objBounds.size);
         		// get all objects
         		GameObject[] allObjects = GameObject.FindObjectsOfType<GameObject>();
@@ -32,7 +32,7 @@ namespace VoxSimPlatform {
         		bool spaceClear = true;
         		foreach (GameObject o in allObjects) {
         			if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
-        				if (testBounds.Intersects(Helper.GetObjectWorldSize(o))) {
+        				if (testBounds.Intersects(Global.Helper.GetObjectWorldSize(o))) {
         					spaceClear = false;
         					break;
         				}
@@ -202,7 +202,7 @@ namespace VoxSimPlatform {
                 // init empty path
                 List<Vector3> path = new List<Vector3>();
 
-                Debug.Log("========== In plan ========= " + Helper.VectorToParsable(goalPos));
+                Debug.Log("========== In plan ========= " + Global.Helper.VectorToParsable(goalPos));
                 // the compare method in ComparisonHeuristic class is called in 
                 // Dominates method in VoxSimPlatform.Global.MinHeap class.
                 // Dominates is called in bubble up and bubble down operation of the heap, 
@@ -213,9 +213,9 @@ namespace VoxSimPlatform {
         		// Closed set can be used because euclidean distance is monotonic
         		var closedSet = new HashSet<Vector3>();
 
-        		var objectBound = Helper.GetObjectWorldSize(obj);
+        		var objectBound = Global.Helper.GetObjectWorldSize(obj);
 
-        		Vector3 size = Helper.GetObjectWorldSize(obj).size;
+        		Vector3 size = Global.Helper.GetObjectWorldSize(obj).size;
 
         		Vector3 increment = prefs.defaultIncrement;
 
@@ -261,13 +261,13 @@ namespace VoxSimPlatform {
         			// if that object is concave (e.g. cup)
         			// if goalPos is within the bounds of target (e.g. in cup)
         			if (testTarget.voxml.Type.Concavity.Contains("Concave") &&
-        			    Helper.GetObjectWorldSize(testTarget.gameObject).Contains(goalPos)) {
+        			    Global.Helper.GetObjectWorldSize(testTarget.gameObject).Contains(goalPos)) {
         				// This endPos is special, and requires a special handling to avoid path not found
-        				var specialPos = new Vector3(goalPos.x, Helper.GetObjectWorldSize(testTarget.gameObject).max.y + size.y,
+        				var specialPos = new Vector3(goalPos.x, Global.Helper.GetObjectWorldSize(testTarget.gameObject).max.y + size.y,
         					goalPos.z);
         				endPos = specialPos;
         				specialNodes.Add(specialPos);
-        				Debug.Log(" ======== special ====== " + Helper.VectorToParsable(specialPos));
+        				Debug.Log(" ======== special ====== " + Global.Helper.VectorToParsable(specialPos));
         			}
         			else {
         				endPos = LookForClosest(goalPos, obj, increment);
@@ -281,10 +281,10 @@ namespace VoxSimPlatform {
         		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
         		hScore[startPos] = GetHScoreErgonomic(eventManager.GetActiveAgent(), startPos, goalPos, prefs.rigAttractionWeight);
 
-        		Debug.Log(" ========= obj.transform.position ======== " + Helper.VectorToParsable(obj.transform.position));
-        		Debug.Log(" ======== start ====== " + Helper.VectorToParsable(startPos));
-        		Debug.Log(" ======== goal ====== " + Helper.VectorToParsable(goalPos));
-        		Debug.Log(" ======== end ====== " + Helper.VectorToParsable(endPos));
+        		Debug.Log(" ========= obj.transform.position ======== " + Global.Helper.VectorToParsable(obj.transform.position));
+        		Debug.Log(" ======== start ====== " + Global.Helper.VectorToParsable(startPos));
+        		Debug.Log(" ======== goal ====== " + Global.Helper.VectorToParsable(goalPos));
+        		Debug.Log(" ======== end ====== " + Global.Helper.VectorToParsable(endPos));
 
         		// starting with startNode, for each neighborhood node of last node, assess A* heuristic
         		// using best node found until endNode reached
@@ -297,15 +297,15 @@ namespace VoxSimPlatform {
         		Vector3 bestLastPos = new Vector3();
 
         		if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude) {
-        			Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(startPos),
+        			Debug.Log(string.Format("{0}-{1}={2}", Global.Helper.VectorToParsable(goalPos), Global.Helper.VectorToParsable(startPos),
         				(goalPos - startPos).magnitude));
-        			Debug.Log(string.Format("{0}-{1}={2}", Helper.VectorToParsable(goalPos), Helper.VectorToParsable(endPos),
+        			Debug.Log(string.Format("{0}-{1}={2}", Global.Helper.VectorToParsable(goalPos), Global.Helper.VectorToParsable(endPos),
         				(goalPos - endPos).magnitude));
         			while (openSet.Count > 0 && counter < prefs.counterMax) {
         				// O(1)
         				curPos = openSet.TakeMin();
 
-        				Debug.Log(counter + " ======== curNode ====== (" + Helper.VectorToParsable(curPos) + ") " +
+        				Debug.Log(counter + " ======== curNode ====== (" + Global.Helper.VectorToParsable(curPos) + ") " +
         				          gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
 
         				float currentDistance = (curPos - endPos).magnitude;
@@ -321,7 +321,7 @@ namespace VoxSimPlatform {
         					// extend path to goal node (goal position)
         					cameFrom[goalPos] = curPos;
         					path = ReconstructPath(startPos, goalPos, cameFrom);
-                            Debug.Log(string.Format("====== path ====== {0}", string.Join(",", path.Select(n => Helper.VectorToParsable(n)).ToArray())));
+                            Debug.Log(string.Format("====== path ====== {0}", string.Join(",", path.Select(n => Global.Helper.VectorToParsable(n)).ToArray())));
 
                             return path;
         				}
@@ -346,12 +346,12 @@ namespace VoxSimPlatform {
         						// Add it
         						// Heap is automatically rearranged
         						if (!openSet.Has(neighbor)) {
-        							Debug.Log("=== Add candidate === (" + Helper.VectorToParsable(neighbor) + ")");
+        							Debug.Log("=== Add candidate === (" + Global.Helper.VectorToParsable(neighbor) + ")");
         							openSet.Add(neighbor);
         						}
         						else {
         							// If neighbor is already there, update the heap
-        							Debug.Log("=== Update candidate === (" + Helper.VectorToParsable(neighbor) + ")");
+        							Debug.Log("=== Update candidate === (" + Global.Helper.VectorToParsable(neighbor) + ")");
         							openSet.Update(neighbor);
         						}
         					}
@@ -367,7 +367,7 @@ namespace VoxSimPlatform {
         		}
 
         		path = ReconstructPath(startPos, bestLastPos, cameFrom);
-        		Debug.Log(string.Format("====== path ====== {0}",string.Join(",",path.Select(n => Helper.VectorToParsable(n)).ToArray())));
+        		Debug.Log(string.Format("====== path ====== {0}",string.Join(",",path.Select(n => Global.Helper.VectorToParsable(n)).ToArray())));
 
                 return path;
         	}

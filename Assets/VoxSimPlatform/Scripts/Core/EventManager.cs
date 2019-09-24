@@ -277,7 +277,7 @@ namespace VoxSimPlatform {
                         else {
                             if (OutputHelper.GetCurrentOutputString(Role.Affector) != "I'm sorry, I can't do that.") {
                                 //OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-                                string pred = Helper.GetTopPredicate(completedEvent);
+                                string pred = Global.Helper.GetTopPredicate(completedEvent);
                                 MethodInfo method = preds.GetType().GetMethod(pred.ToUpper());
                                 if ((method != null) && (method.ReturnType == typeof(void))) {
                                     EventManagerArgs eventArgs = null;
@@ -313,7 +313,7 @@ namespace VoxSimPlatform {
                         else {
                             if (OutputHelper.GetCurrentOutputString(Role.Affector) != "I'm sorry, I can't do that.") {
                                 //OutputHelper.PrintOutput (Role.Affector, "OK, I did it.");
-                                string pred = Helper.GetTopPredicate(completedEvent);
+                                string pred = Global.Helper.GetTopPredicate(completedEvent);
                                 MethodInfo method = preds.GetType().GetMethod(pred.ToUpper());
                                 if ((method != null) && (method.ReturnType == typeof(void))) {
                                     EventManagerArgs eventArgs = null;
@@ -420,8 +420,8 @@ namespace VoxSimPlatform {
                     return;
                 }
 
-                Hashtable predArgs = Helper.ParsePredicate(events[0]);
-                String pred = Helper.GetTopPredicate(events[0]);
+                Hashtable predArgs = Global.Helper.ParsePredicate(events[0]);
+                String pred = Global.Helper.GetTopPredicate(events[0]);
 
                 if (SatisfactionTest.ComputeSatisfactionConditions(events[0])) {
                     ExecuteCommand(events[0]);
@@ -485,13 +485,13 @@ namespace VoxSimPlatform {
 
                 events[events.IndexOf(command)] = evaluated;
 
-                Triple<String, String, String> triple = Helper.MakeRDFTriples(evalResolved[evaluated]);
+                Triple<String, String, String> triple = Global.Helper.MakeRDFTriples(evalResolved[evaluated]);
                 Debug.Log(string.Format("Event string {0} with skolems resolved -> {1}",evalOrig[evaluated],evalResolved[evaluated]));
                 Debug.Log(triple.Item1 + " " + triple.Item2 + " " + triple.Item3);
 
                 if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
                     preds.rdfTriples.Add(triple);
-                    Helper.PrintRDFTriples(preds.rdfTriples);
+                    Global.Helper.PrintRDFTriples(preds.rdfTriples);
                 }
                 else {
                     Debug.Log("Failed to make valid RDF triple");
@@ -515,13 +515,13 @@ namespace VoxSimPlatform {
 
                 while (argsStrings.Count > 0) {
                     object arg = argsStrings.Dequeue();
-                    if (Helper.vec.IsMatch((String) arg)) {
-                        if (Helper.listVec.IsMatch((String) arg)) {
+                    if (Global.Helper.vec.IsMatch((String) arg)) {
+                        if (Global.Helper.listVec.IsMatch((String) arg)) {
                             // if arg is list of vectors form
                             List<Vector3> vecList = new List<Vector3>();
 
                             foreach (string vecString in ((String) arg).Replace("[","").Replace("]","").Split(':')) {
-                                vecList.Add(Helper.ParsableToVector(vecString));
+                                vecList.Add(Global.Helper.ParsableToVector(vecString));
                             }
                             Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,vecList));
                             objs.Add(vecList);
@@ -529,10 +529,10 @@ namespace VoxSimPlatform {
                         else {
                             // if arg is vector form
                             Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,(String) arg));
-                            objs.Add(Helper.ParsableToVector((String) arg));
+                            objs.Add(Global.Helper.ParsableToVector((String) arg));
                         }
                     }
-                    else if (Helper.emptyList.IsMatch((String) arg)) {
+                    else if (Global.Helper.emptyList.IsMatch((String) arg)) {
                         Debug.Log(string.Format("ExtractObjects (predicate = \"{0}\"): extracted {1}",pred,new List<object>()));
                         objs.Add(new List<object>());
                     }
@@ -614,9 +614,9 @@ namespace VoxSimPlatform {
                                         objs.Add(go);
                                     }
                                     else {
-                                        List<object> args = ExtractObjects(Helper.GetTopPredicate(arg as String),
-                                            (String) Helper.ParsePredicate(arg as String)[
-                                                Helper.GetTopPredicate(arg as String)]);
+                                        List<object> args = ExtractObjects(Global.Helper.GetTopPredicate(arg as String),
+                                            (String) Global.Helper.ParsePredicate(arg as String)[
+                                                Global.Helper.GetTopPredicate(arg as String)]);
 
                                         foreach (object o in args) {
                                             if (o is GameObject) {
@@ -651,8 +651,8 @@ namespace VoxSimPlatform {
 
             public void ExecuteCommand(String evaluatedCommand) {
                 Debug.Log("Executing command: " + evaluatedCommand);
-                Hashtable predArgs = Helper.ParsePredicate(evaluatedCommand);
-                String pred = Helper.GetTopPredicate(evaluatedCommand);
+                Hashtable predArgs = Global.Helper.ParsePredicate(evaluatedCommand);
+                String pred = Global.Helper.GetTopPredicate(evaluatedCommand);
 
                 // Match referent stack to whoever is being talked to
                 if (GetActiveAgent() != null) {
@@ -722,7 +722,7 @@ namespace VoxSimPlatform {
                                               evaluatedCommand);
                                     Debug.Log("ExecuteCommand: invoke " + methodToCall.Name);
                                     Debug.Log(string.Format("{0} : {1}", evaluatedCommand,
-                                        Helper.VectorToParsable((objs[0] as GameObject).GetComponent<Voxeme>()
+                                        Global.Helper.VectorToParsable((objs[0] as GameObject).GetComponent<Voxeme>()
                                             .targetPosition)));
                                     object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
                                     OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
@@ -838,13 +838,13 @@ namespace VoxSimPlatform {
                 String predString = null;
                 List<String> argsStrings = null;
 
-                if (Helper.pred.IsMatch(command)) {   // if command matches predicate form
+                if (Global.Helper.pred.IsMatch(command)) {   // if command matches predicate form
                                             //Debug.Log ("ParseCommand: " + command);
                                             // make RDF triples only after resolving attributives to atomics (but before evaluating relations and functions)
-                                            /*Triple<String,String,String> triple = Helper.MakeRDFTriples(command);
+                                            /*Triple<String,String,String> triple = Global.Helper.MakeRDFTriples(command);
                                             if (triple.Item1 != "" && triple.Item2 != "" && triple.Item3 != "") {
                                                 preds.rdfTriples.Add(triple);
-                                                Helper.PrintRDFTriples(preds.rdfTriples);
+                                                Global.Helper.PrintRDFTriples(preds.rdfTriples);
                                             }
                                             else {
                                                 Debug.Log ("Failed to make RDF triple");
@@ -852,7 +852,7 @@ namespace VoxSimPlatform {
 
                     // get the main predicate and its argument
                     Debug.Log(string.Format("Parsing predicate: {0}", command));
-                    predArgs = Helper.ParsePredicate(command);
+                    predArgs = Global.Helper.ParsePredicate(command);
 
                     // foreach key-value pair
                     foreach (DictionaryEntry entry in predArgs) {
@@ -865,10 +865,10 @@ namespace VoxSimPlatform {
                         // 1. check the VoxML entity type dictionary to see what entity type this predicate signifies
                         // 2. split appropriately
 
-                        if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(Helper.GetTopPredicate((String)entry.Value))) {
+                        if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(Global.Helper.GetTopPredicate((String)entry.Value))) {
                             // look in VoxML entity type dictionary
-                            string predType = voxmlLibrary.VoxMLEntityTypeDict[Helper.GetTopPredicate((String)entry.Value)];
-                            Debug.Log(string.Format("Voxmeme \"{0}\" is of type {1}", Helper.GetTopPredicate((String)entry.Value),
+                            string predType = voxmlLibrary.VoxMLEntityTypeDict[Global.Helper.GetTopPredicate((String)entry.Value)];
+                            Debug.Log(string.Format("Voxmeme \"{0}\" is of type {1}", Global.Helper.GetTopPredicate((String)entry.Value),
                                 predType));
                             // if predicate is a relation
                             if (predType == "relations") {
@@ -882,7 +882,7 @@ namespace VoxSimPlatform {
                         }
                         else {
                             // look for primitive predicate of this name
-                            MethodInfo primitivePred = preds.GetType().GetMethod(Helper.GetTopPredicate((String)entry.Value).ToUpper());
+                            MethodInfo primitivePred = preds.GetType().GetMethod(Global.Helper.GetTopPredicate((String)entry.Value).ToUpper());
                             if (primitivePred != null) {
                                 argsStrings = new List<String>(Regex.Split(((String) entry.Value),                  // primitive predicates are all non-relational
                                     @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*),|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicate
@@ -890,7 +890,7 @@ namespace VoxSimPlatform {
                             else {
                                 Debug.LogWarning(string.Format("VoxMLEntityTypeDict doesn't contain entry for \"{0}.\" " +
                                     "No primitive predicate \"{1}\" found.  Expect errors!",
-                                    Helper.GetTopPredicate((String)entry.Value),Helper.GetTopPredicate((String)entry.Value).ToUpper()));
+                                    Global.Helper.GetTopPredicate((String)entry.Value),Global.Helper.GetTopPredicate((String)entry.Value).ToUpper()));
                                 argsStrings = ((String)entry.Value).Split(',').ToList();
                             }
                         }
@@ -917,14 +917,14 @@ namespace VoxSimPlatform {
 
                         for (int i = 0; i < argsStrings.Count; i++) {
                             Debug.Log(string.Format("argsStrings@{0}: {1}", i, argsStrings.ElementAt(i)));
-                            if (Helper.pred.IsMatch(argsStrings[i])) {
+                            if (Global.Helper.pred.IsMatch(argsStrings[i])) {
                                 string symbol = argsStrings[i];
 
                                 // if return type of top predicate of symbol is not void
                                 //  add it as a skolem constant
-                                //if (File.Exists(Data.voxmlDataPath + string.Format("/attributes/{0}.xml", Helper.GetTopPredicate(symbol))) ||
-                                //    File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", Helper.GetTopPredicate(symbol))) ||
-                                //    File.Exists(Data.voxmlDataPath + string.Format("/functions/{0}.xml", Helper.GetTopPredicate(symbol)))) {
+                                //if (File.Exists(Data.voxmlDataPath + string.Format("/attributes/{0}.xml", Global.Helper.GetTopPredicate(symbol))) ||
+                                //    File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", Global.Helper.GetTopPredicate(symbol))) ||
+                                //    File.Exists(Data.voxmlDataPath + string.Format("/functions/{0}.xml", Global.Helper.GetTopPredicate(symbol)))) {
                                     String v = argVarPrefix + argVarIndex;
                                     skolems[v] = symbol;
                                     Debug.Log(string.Format("Adding skolem constant {0}: {1}", v, skolems[v]));
@@ -974,7 +974,7 @@ namespace VoxSimPlatform {
                     Debug.Log("FinishSkolemization: " + skolems[kv.Key]);
                 }
 
-                Helper.PrintKeysAndValues("skolems", skolems);
+                Global.Helper.PrintKeysAndValues("skolems", skolems);
             }
 
             public String Skolemize(String inString) {
@@ -1004,7 +1004,7 @@ namespace VoxSimPlatform {
             }
 
             public String ApplyGlobals(String inString) {
-                Helper.PrintKeysAndValues("Applying macroVars", macroVars);
+                Global.Helper.PrintKeysAndValues("Applying macroVars", macroVars);
                 String outString = inString;
                 String temp = inString;
 
@@ -1017,7 +1017,7 @@ namespace VoxSimPlatform {
                         MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
                         for (int i = 0; i < matches.Count; i++) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key,
-                                Helper.VectorToParsable((Vector3) kv.Value));
+                                Global.Helper.VectorToParsable((Vector3) kv.Value));
                         }
                         // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
@@ -1025,18 +1025,18 @@ namespace VoxSimPlatform {
                             .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
                             .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
                         foreach (string key in changeValues.Keys) {
-                            skolems[key] = changeValues[key].Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+                            skolems[key] = changeValues[key].Replace((String) kv.Key, Global.Helper.VectorToParsable((Vector3) kv.Value));
                         }
                     }
                     else if (kv.Value is List<Vector3>) {
                         Debug.Log(kv.Value + " is List<Vector3>");
                         String list = string.Format("[{0}]",String.Join(":",
-                            ((List<Vector3>) kv.Value).Select(v => Helper.VectorToParsable(v)).ToArray()));
+                            ((List<Vector3>) kv.Value).Select(v => Global.Helper.VectorToParsable(v)).ToArray()));
                         MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
                         for (int i = 0; i < matches.Count; i++) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, list);
                         }
-                        list = string.Format("[{0}]",String.Join(",", ((List<Vector3>) kv.Value).Select(v => Helper.VectorToParsable(v)).ToArray()));
+                        list = string.Format("[{0}]",String.Join(",", ((List<Vector3>) kv.Value).Select(v => Global.Helper.VectorToParsable(v)).ToArray()));
                         // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
                             .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
@@ -1096,7 +1096,7 @@ namespace VoxSimPlatform {
                              temp.Count(f => f == ')');
                 //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
-                Helper.PrintKeysAndValues("skolems", skolems);
+                Global.Helper.PrintKeysAndValues("skolems", skolems);
 
                 //Debug.Log(outString);
                 return outString;
@@ -1112,7 +1112,7 @@ namespace VoxSimPlatform {
 
                 foreach (DictionaryEntry kv in skolems) {
                     if (kv.Value is Vector3) {
-                        outString = outString.Replace((String) kv.Key, Helper.VectorToParsable((Vector3) kv.Value));
+                        outString = outString.Replace((String) kv.Key, Global.Helper.VectorToParsable((Vector3) kv.Value));
                         //Debug.Log (outString);
                     }
                     else if (kv.Value is String) {
@@ -1179,18 +1179,18 @@ namespace VoxSimPlatform {
                         if (argsMatch.Groups[0].Value.Length == 0) {
                             // matched an empty string = no match
                             Debug.Log(kv.Value);
-                            predArgs = Helper.ParsePredicate((String) kv.Value);
-                            String pred = Helper.GetTopPredicate((String) kv.Value);
+                            predArgs = Global.Helper.ParsePredicate((String) kv.Value);
+                            String pred = Global.Helper.GetTopPredicate((String) kv.Value);
                             if (((String) kv.Value).Count(f => f == '(') + // make sure actually a predicate
                                 ((String) kv.Value).Count(f => f == ')') >= 2) {
                                 argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
                                 while (argsStrings.Count > 0) {
                                     object arg = argsStrings.Dequeue();
 
-                                    if (Helper.vec.IsMatch((String) arg)) {
+                                    if (Global.Helper.vec.IsMatch((String) arg)) {
                                         // if arg is vector form
-                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",Helper.ParsableToVector((String) arg)));
-                                        objs.Add(Helper.ParsableToVector((String) arg));
+                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",Global.Helper.ParsableToVector((String) arg)));
+                                        objs.Add(Global.Helper.ParsableToVector((String) arg));
                                     }
                                     else if (arg is String) {
                                         // if arg is String
@@ -1482,7 +1482,7 @@ namespace VoxSimPlatform {
                         ((String) skolems[replaceSkolems.Item1]).Replace(replaceSkolems.Item2, replaceSkolems.Item3);
                 }
 
-                //Helper.PrintKeysAndValues(skolems);
+                //Global.Helper.PrintKeysAndValues(skolems);
 
         //        for (int i = 0; i < temp.Count; i++) {
         //            Debug.Log (temp [i]);
@@ -1513,7 +1513,7 @@ namespace VoxSimPlatform {
                                 }
                                 else if (replaceWith is Vector3) {
                                     replaced = ((String) skolems[kv.Key]).Replace((String) argsMatch.Groups[0].Value,
-                                        Helper.VectorToParsable((Vector3) replaceWith));
+                                        Global.Helper.VectorToParsable((Vector3) replaceWith));
                                 }
                                 else if (replaceWith is bool) {
                                     replaced = ((String) skolems[kv.Key]).Replace(argsMatch.Groups[0].Value,
@@ -1531,13 +1531,13 @@ namespace VoxSimPlatform {
                     }
                 }
 
-                Helper.PrintKeysAndValues("skolems", skolems);
+                Global.Helper.PrintKeysAndValues("skolems", skolems);
 
                 int newEvaluations = 0;
                 foreach (DictionaryEntry kv in skolems) {
                     Debug.Log(kv.Key + " : " + kv.Value);
                     if (kv.Value is String) {
-                        argsMatch = Helper.pred.Match((String) kv.Value);
+                        argsMatch = Global.Helper.pred.Match((String) kv.Value);
 
                         if (argsMatch.Groups[0].Value.Length > 0) {
                             string pred = argsMatch.Groups[0].Value.Split('(')[0];
@@ -1596,7 +1596,7 @@ namespace VoxSimPlatform {
                     EvaluateSkolemConstants(pass);
                 }
 
-                //Helper.PrintKeysAndValues(skolems);
+                //Global.Helper.PrintKeysAndValues(skolems);
 
                 return true;
             }

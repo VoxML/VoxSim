@@ -406,8 +406,8 @@ namespace VoxSimPlatform {
                     Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
                         temp.max.y * mesh.gameObject.transform.lossyScale.y,
                         temp.max.z * mesh.gameObject.transform.lossyScale.z);
-                    //Debug.Log (Helper.VectorToParsable(min));
-                    //Debug.Log (Helper.VectorToParsable(max));
+                    //Debug.Log (Global.Helper.VectorToParsable(min));
+                    //Debug.Log (Global.Helper.VectorToParsable(max));
                     //Debug.Log(mesh.gameObject.transform.root.GetChild(0).localScale);
                     //Debug.Log(mesh.gameObject.name);
                     //Debug.Log(mesh.gameObject.transform.localEulerAngles);
@@ -428,12 +428,12 @@ namespace VoxSimPlatform {
                 Debug.Log (obj.transform.eulerAngles);
                 Quaternion invRot = Quaternion.Inverse (obj.transform.rotation);
                 Debug.Log (invRot.eulerAngles);
-                Debug.Log (Helper.VectorToParsable(bounds.min));
-                Debug.Log (Helper.VectorToParsable(bounds.max));
+                Debug.Log (Global.Helper.VectorToParsable(bounds.min));
+                Debug.Log (Global.Helper.VectorToParsable(bounds.max));
                 Vector3 bmin = RotatePointAroundPivot (bounds.min, obj.transform.position, invRot.eulerAngles);
                 Vector3 bmax = RotatePointAroundPivot (bounds.max, obj.transform.position, invRot.eulerAngles);
-                Debug.Log (Helper.VectorToParsable(bmin));
-                Debug.Log (Helper.VectorToParsable(bmax));
+                Debug.Log (Global.Helper.VectorToParsable(bmin));
+                Debug.Log (Global.Helper.VectorToParsable(bmax));
 
                 combinedBounds.Encapsulate(bmin);
                 combinedBounds.Encapsulate(bmax);*/
@@ -574,15 +574,15 @@ namespace VoxSimPlatform {
             //        }
             //    }
 
-            //    //Debug.Log(string.Format("center({0}):{1}", obj,Helper.VectorToParsable(combinedBounds.center)));
-            //    //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-            //    //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+            //    //Debug.Log(string.Format("center({0}):{1}", obj,Global.Helper.VectorToParsable(combinedBounds.center)));
+            //    //Debug.Log(string.Format("min({0}):{1}", obj, Global.Helper.VectorToParsable(combinedBounds.min)));
+            //    //Debug.Log(string.Format("max({0}):{1}", obj, Global.Helper.VectorToParsable(combinedBounds.max)));
             //    combinedBounds.SetMinMax(
             //        combinedBounds.center + GetObjectWorldSize(obj).center - combinedBounds.extents,
             //        combinedBounds.center + GetObjectWorldSize(obj).center + combinedBounds.extents);
-            //    //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
-            //    //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-            //    //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
+            //    //Debug.Log(string.Format("center({0}):{1}", obj, Global.Helper.VectorToParsable(combinedBounds.center)));
+            //    //Debug.Log(string.Format("min({0}):{1}", obj, Global.Helper.VectorToParsable(combinedBounds.min)));
+            //    //Debug.Log(string.Format("max({0}):{1}", obj, Global.Helper.VectorToParsable(combinedBounds.max)));
 
             //    Debug.Log(VectorToParsable(combinedBounds.size));
 
@@ -605,11 +605,11 @@ namespace VoxSimPlatform {
 
             //    Bounds bounds = new Bounds(pts[0], Vector3.zero);
             //    ObjBounds objBounds = new ObjBounds(combinedBounds.center);
-            //    //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(objBounds.Center)));
+            //    //Debug.Log(string.Format("center({0}):{1}", obj, Global.Helper.VectorToParsable(objBounds.Center)));
             //    List<Vector3> points = new List<Vector3>();
             //    foreach (Vector3 pt in pts) {
-            //        //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(pt)));
-            //        //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
+            //        //Debug.Log(string.Format("{0}:{1}", obj, Global.Helper.VectorToParsable(pt)));
+            //        //Debug.Log(string.Format("{0}:{1}", obj, Global.Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
             //        //points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
             //        points.Add(pt);
             //        bounds.Encapsulate(pt);
@@ -1168,12 +1168,12 @@ namespace VoxSimPlatform {
                     objBounds.min.y + Constants.EPSILON, objBounds.min.z - Constants.EPSILON);
                 Vector3 contactPointZ = RayIntersectionPoint(rayStartZ, Vector3.forward);
 
-                //Debug.Log(Helper.VectorToParsable(rayStartX));
-                //Debug.Log(Helper.VectorToParsable(rayStartZ));
-                //Debug.Log(Helper.VectorToParsable(contactPointX));
-                //Debug.Log(Helper.VectorToParsable(contactPointZ));
-                //Debug.Log(Helper.VectorToParsable(contactPointX - objBounds.center));
-                //Debug.Log(Helper.VectorToParsable(contactPointZ - objBounds.center));
+                //Debug.Log(Global.Helper.VectorToParsable(rayStartX));
+                //Debug.Log(Global.Helper.VectorToParsable(rayStartZ));
+                //Debug.Log(Global.Helper.VectorToParsable(contactPointX));
+                //Debug.Log(Global.Helper.VectorToParsable(contactPointZ));
+                //Debug.Log(Global.Helper.VectorToParsable(contactPointX - objBounds.center));
+                //Debug.Log(Global.Helper.VectorToParsable(contactPointZ - objBounds.center));
                 //Vector3 contactPoint = (contactPointZ.y < contactPointX.y) ?
                 //new Vector3((contactPointZ.x-objBounds.center.x) + (targetPoint.x-objBounds.center.x),
                 //    targetPoint.y, (contactPointZ.z-objBounds.center.z + (targetPoint.z-objBounds.center.z))) :

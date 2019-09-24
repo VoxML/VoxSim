@@ -56,7 +56,7 @@ namespace VoxSimPlatform {
         				catchupTimer.Interval = 1;
         			}
 
-        			Hashtable predArgs = Helper.ParsePredicate(testSatisfied.EventString);
+        			Hashtable predArgs = Global.Helper.ParsePredicate(testSatisfied.EventString);
         			String predString = "";
         			String[] argsStrings = null;
 
@@ -111,8 +111,8 @@ namespace VoxSimPlatform {
                 //  OR
                 // if there is more than one event in the event queue and the next one up is not a "while" predicate
                 if (((eventManager.eventHistory.Count > 0) &&
-                    (Helper.GetTopPredicate(eventManager.eventHistory.Last()) != "while")) || 
-                    ((eventManager.events.Count > 1) && (Helper.GetTopPredicate(eventManager.events[1]) != "while"))) {
+                    (Global.Helper.GetTopPredicate(eventManager.eventHistory.Last()) != "while")) || 
+                    ((eventManager.events.Count > 1) && (Global.Helper.GetTopPredicate(eventManager.events[1]) != "while"))) {
             		resolveDiscrepancies = true;
                     catchupTimer.Enabled = true;
                 }

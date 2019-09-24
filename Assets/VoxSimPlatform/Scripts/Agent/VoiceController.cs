@@ -65,7 +65,7 @@ namespace VoxSimPlatform {
     			_outputstring = text;
     			if (v != null && text != null && text.Length > 0) {
     				_speaker.Silence();
-    				_speaker.Speak(new Wrapper(text, v));
+                    _speaker.Speak(new Wrapper(text, v, 1, 1, 1, true));
     			}
     		}
 

@@ -49,7 +49,7 @@ namespace VoxSimPlatform {
 
         				foreach (GameObject go in objects) {
         					sb = sb.AppendFormat(string.Format("{0} {1}\n", go.name,
-        						Helper.VectorToParsable(go.transform.eulerAngles)));
+        						Global.Helper.VectorToParsable(go.transform.eulerAngles)));
         				}
 
                         commander.Write(sb.ToString());

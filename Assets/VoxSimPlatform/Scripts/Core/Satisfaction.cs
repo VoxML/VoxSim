@@ -161,7 +161,7 @@ namespace VoxSimPlatform {
 
             public static bool IsSatisfied(String test) {
                 bool satisfied = false;
-                Hashtable predArgs = Helper.ParsePredicate(test);
+                Hashtable predArgs = Global.Helper.ParsePredicate(test);
                 String predString = "";
                 String[] argsStrings = null;
 
@@ -192,14 +192,14 @@ namespace VoxSimPlatform {
                             ? voxComponent.graspTracker.transform.position
                             : theme.transform.position;
 
-                        //Debug.Log(string.Format("{0} : {1}", Helper.VectorToParsable(testLocation),argsStrings[1]));
-                        if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                        //Debug.Log(string.Format("{0} : {1}", Global.Helper.VectorToParsable(testLocation),argsStrings[1]));
+                        if (Global.Helper.CloseEnough(testLocation, Global.Helper.ParsableToVector(argsStrings[1]))) {
                             if (voxComponent.isGrasped) {
-                                theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
+                                theme.transform.position = Global.Helper.ParsableToVector(argsStrings[1]);
                                 theme.transform.rotation = Quaternion.identity;
                             }
 
-                            Debug.Log(Helper.VectorToParsable(theme.transform.position));
+                            Debug.Log(Global.Helper.VectorToParsable(theme.transform.position));
                             satisfied = true;
                         }
                     }
@@ -244,7 +244,7 @@ namespace VoxSimPlatform {
                     // satisfy put
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
-                        //Debug.Log(Helper.VectorToParsable(theme.transform.position) + " " + (String)argsStrings[1]);
+                        //Debug.Log(Global.Helper.VectorToParsable(theme.transform.position) + " " + (String)argsStrings[1]);
                         //Debug.Log(obj.transform.position);
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         //Debug.Log (voxComponent);
@@ -252,11 +252,11 @@ namespace VoxSimPlatform {
                             ? voxComponent.graspTracker.transform.position
                             : theme.transform.position;
 
-                        if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                        if (Global.Helper.CloseEnough(testLocation, Global.Helper.ParsableToVector(argsStrings[1]))) {
                             if (voxComponent.isGrasped) {
                                 //preds.UNGRASP (new object[]{ theme, true });
                                 //em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-                                theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
+                                theme.transform.position = Global.Helper.ParsableToVector(argsStrings[1]);
                                 theme.transform.rotation = Quaternion.identity;
                             }
 
@@ -271,19 +271,19 @@ namespace VoxSimPlatform {
                     // satisfy slide
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
-                        //Debug.Log(Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
+                        //Debug.Log(Global.Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
                         //Debug.Log(obj.transform.position);
-                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
+                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Global.Helper.ParsableToVector((String)argsStrings[1]))));
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         Vector3 testLocation = voxComponent.isGrasped
                             ? voxComponent.graspTracker.transform.position
                             : theme.transform.position;
 
-                        if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                        if (Global.Helper.CloseEnough(testLocation, Global.Helper.ParsableToVector(argsStrings[1]))) {
                             if (voxComponent.isGrasped) {
                                 //preds.UNGRASP (new object[]{ theme, true });
                                 //em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-                                theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
+                                theme.transform.position = Global.Helper.ParsableToVector(argsStrings[1]);
                                 theme.transform.rotation = Quaternion.identity;
                             }
 
@@ -297,20 +297,20 @@ namespace VoxSimPlatform {
                     // satisfy roll
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
-                        //Debug.Log(Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
+                        //Debug.Log(Global.Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
                         //Debug.Log(obj.transform.position);
-                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
+                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Global.Helper.ParsableToVector((String)argsStrings[1]))));
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         Vector3 testLocation = voxComponent.isGrasped
                             ? voxComponent.graspTracker.transform.position
                             : theme.transform.position;
 
                         if (argsStrings.Length > 1) {
-                            if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                            if (Global.Helper.CloseEnough(testLocation, Global.Helper.ParsableToVector(argsStrings[1]))) {
                                 if (voxComponent.isGrasped) {
                                     //preds.UNGRASP (new object[]{ theme, true });
                                     //em.ExecuteCommand(string.Format("put({0},{1})",theme.name,(String)argsStrings [1]));
-                                    theme.transform.position = Helper.ParsableToVector(argsStrings[1]);
+                                    theme.transform.position = Global.Helper.ParsableToVector(argsStrings[1]);
                                     theme.transform.rotation = Quaternion.identity;
                                 }
 
@@ -325,23 +325,23 @@ namespace VoxSimPlatform {
                     // satisfy turn
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
-                        //Debug.Log(Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
+                        //Debug.Log(Global.Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
                         //Debug.Log(obj.transform.position);
-                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
+                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Global.Helper.ParsableToVector((String)argsStrings[1]))));
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         Vector3 testRotation = voxComponent.isGrasped
                             ? voxComponent.graspTracker.transform.eulerAngles
                             : theme.transform.eulerAngles;
 
                         //Debug.DrawRay(theme.transform.position, theme.transform.up * 5, Color.blue, 0.01f);
-                        //Debug.Log(Vector3.Angle (theme.transform.rotation * Helper.ParsableToVector ((String)argsStrings [1]), Helper.ParsableToVector ((String)argsStrings [2])));
-                        //Debug.Log(Helper.VectorToParsable(theme.transform.rotation * Helper.ParsableToVector ((String)argsStrings [1])));
-                        //Debug.Log(Helper.ParsableToVector ((String)argsStrings [2]));
+                        //Debug.Log(Vector3.Angle (theme.transform.rotation * Global.Helper.ParsableToVector ((String)argsStrings [1]), Global.Helper.ParsableToVector ((String)argsStrings [2])));
+                        //Debug.Log(Global.Helper.VectorToParsable(theme.transform.rotation * Global.Helper.ParsableToVector ((String)argsStrings [1])));
+                        //Debug.Log(Global.Helper.ParsableToVector ((String)argsStrings [2]));
                         if (Mathf.Deg2Rad *
-                            Vector3.Angle(theme.transform.rotation * Helper.ParsableToVector(argsStrings[1]),
-                                Helper.ParsableToVector(argsStrings[2])) < Constants.EPSILON) {
+                            Vector3.Angle(theme.transform.rotation * Global.Helper.ParsableToVector(argsStrings[1]),
+                                Global.Helper.ParsableToVector(argsStrings[2])) < Constants.EPSILON) {
                             if (voxComponent.isGrasped) {
-                                //theme.transform.rotation = Quaternion.Euler(Helper.ParsableToVector ((String)argsStrings [1]));
+                                //theme.transform.rotation = Quaternion.Euler(Global.Helper.ParsableToVector ((String)argsStrings [1]));
                                 //theme.transform.rotation = Quaternion.identity;
                             }
 
@@ -361,13 +361,13 @@ namespace VoxSimPlatform {
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         Vector3 testRotation = voxComponent.isGrasped ? voxComponent.graspTracker.transform.eulerAngles : theme.transform.eulerAngles;
 
-                        Debug.Log (Vector3.Angle (theme.transform.rotation * Helper.ParsableToVector ((String)argsStrings [1]), Helper.ParsableToVector ((String)argsStrings [2])));
-                        //Debug.Log (Helper.VectorToParsable(theme.transform.rotation * Helper.ParsableToVector ((String)argsStrings [1])));
+                        Debug.Log (Vector3.Angle (theme.transform.rotation * Global.Helper.ParsableToVector ((String)argsStrings [1]), Global.Helper.ParsableToVector ((String)argsStrings [2])));
+                        //Debug.Log (Global.Helper.VectorToParsable(theme.transform.rotation * Global.Helper.ParsableToVector ((String)argsStrings [1])));
                         //Debug.Log ((String)argsStrings [2]);
                         //Debug.Break ();
-                        if (Mathf.Deg2Rad * Vector3.Angle (theme.transform.rotation * Helper.ParsableToVector ((String)argsStrings [1]), Helper.ParsableToVector ((String)argsStrings [2])) < Constants.EPSILON) {
+                        if (Mathf.Deg2Rad * Vector3.Angle (theme.transform.rotation * Global.Helper.ParsableToVector ((String)argsStrings [1]), Global.Helper.ParsableToVector ((String)argsStrings [2])) < Constants.EPSILON) {
                             if (voxComponent.isGrasped) {
-                                //theme.transform.rotation = Quaternion.Euler(Helper.ParsableToVector ((String)argsStrings [1]));
+                                //theme.transform.rotation = Quaternion.Euler(Global.Helper.ParsableToVector ((String)argsStrings [1]));
                                 //theme.transform.rotation = Quaternion.identity;
                             }
                             satisfied = true;
@@ -379,10 +379,10 @@ namespace VoxSimPlatform {
     //            else if (predString == "flip") {    // satisfy flip
     //                GameObject theme = GameObject.Find (argsStrings [0] as String);
     //                if (theme != null) {
-    //                    //Debug.Log(Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
+    //                    //Debug.Log(Global.Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
     //                    //Debug.Log(obj.transform.position);
-    //                    //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
-    //                    if (Helper.CloseEnough(theme.transform.rotation, Quaternion.Euler (Helper.ParsableToVector ((String)argsStrings [1])))) {
+    //                    //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Global.Helper.ParsableToVector((String)argsStrings[1]))));
+    //                    if (Global.Helper.CloseEnough(theme.transform.rotation, Quaternion.Euler (Global.Helper.ParsableToVector ((String)argsStrings [1])))) {
     //                        satisfied = true;
     //                        ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());    // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
     //                        theme.GetComponent<Rigging> ().ActivatePhysics (true);
@@ -393,9 +393,9 @@ namespace VoxSimPlatform {
                     // satisfy lift
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
-                        //Debug.Log(Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
+                        //Debug.Log(Global.Helper.ConvertVectorToParsable(obj.transform.position) + " " + (String)argsStrings[1]);
                         //Debug.Log(obj.transform.position);
-                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Helper.ParsableToVector((String)argsStrings[1]))));
+                        //Debug.Log (Quaternion.Angle(obj.transform.rotation,Quaternion.Euler(Global.Helper.ParsableToVector((String)argsStrings[1]))));
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
                         Vector3 testLocation = voxComponent.isGrasped
                             ? voxComponent.graspTracker.transform.position
@@ -403,10 +403,10 @@ namespace VoxSimPlatform {
                         //Vector3 testLocation = theme.transform.position;
 
                         if (voxComponent.isGrasped) {
-                            if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]) +
+                            if (Global.Helper.CloseEnough(testLocation, Global.Helper.ParsableToVector(argsStrings[1]) +
                                                                  voxComponent.grasperCoord.root.gameObject
                                                                      .GetComponent<GraspScript>().graspTrackerOffset)) {
-                                theme.transform.position = Helper.ParsableToVector(argsStrings[1]); //+
+                                theme.transform.position = Global.Helper.ParsableToVector(argsStrings[1]); //+
                                 //voxComponent.grasperCoord.root.gameObject.GetComponent<GraspScript> ().graspTrackerOffset;
                                 theme.transform.rotation = Quaternion.identity;
                             }
@@ -415,7 +415,7 @@ namespace VoxSimPlatform {
                             ReasonFromAffordances(em, null, predString,
                                 voxComponent); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
                         }
-                        else if (Helper.CloseEnough(testLocation, Helper.ParsableToVector(argsStrings[1]))) {
+                        else if (Global.Helper.CloseEnough(testLocation, Global.Helper.ParsableToVector(argsStrings[1]))) {
                             satisfied = true;
     //                        ReasonFromAffordances (predString, voxComponent);    // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
                             //theme.GetComponent<Rigging> ().ActivatePhysics (true);
@@ -565,8 +565,8 @@ namespace VoxSimPlatform {
             }
 
             public static bool ComputeSatisfactionConditions(String command) {
-                Hashtable predArgs = Helper.ParsePredicate(command);
-                String pred = Helper.GetTopPredicate(command);
+                Hashtable predArgs = Global.Helper.ParsePredicate(command);
+                String pred = Global.Helper.GetTopPredicate(command);
                 ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
                 EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
                 bool validPredExists = false;
@@ -591,24 +591,24 @@ namespace VoxSimPlatform {
                         while (argsStrings.Count > 0) {
                             object arg = argsStrings.Dequeue();
 
-                            if (Helper.vec.IsMatch((String) arg)) {
-                                if (Helper.listVec.IsMatch((String) arg)) {
+                            if (Global.Helper.vec.IsMatch((String) arg)) {
+                                if (Global.Helper.listVec.IsMatch((String) arg)) {
                                     // if arg is list of vectors form
                                     List<Vector3> vecList = new List<Vector3>();
 
                                     foreach (string vecString in ((String) arg).Replace("[","").Replace("]","").Split(':')) {
-                                        vecList.Add(Helper.ParsableToVector(vecString));
+                                        vecList.Add(Global.Helper.ParsableToVector(vecString));
                                     }
                                     Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",vecList));
                                     objs.Add(vecList);
                                 }
                                 else {
                                     // if arg is vector form
-                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",Helper.ParsableToVector((String) arg)));
-                                    objs.Add(Helper.ParsableToVector((String) arg));
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",Global.Helper.ParsableToVector((String) arg)));
+                                    objs.Add(Global.Helper.ParsableToVector((String) arg));
                                 }
                             }
-                            else if (Helper.emptyList.IsMatch((String) arg)) {
+                            else if (Global.Helper.emptyList.IsMatch((String) arg)) {
                                 objs.Add(new List<object>());
                             }
                             else if (arg is String) {
@@ -877,10 +877,10 @@ namespace VoxSimPlatform {
 
                 // get bounds of theme object of program
                 List<GameObject> excludeChildren = obj.gameObject.GetComponentsInChildren<Renderer>().Where(
-                        o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj.gameObject))
+                        o => (Global.Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj.gameObject))
                     .Select(v => v.gameObject)
                     .ToList();
-                Bounds objBounds = Helper.GetObjectWorldSize(obj.gameObject, excludeChildren);
+                Bounds objBounds = Global.Helper.GetObjectWorldSize(obj.gameObject, excludeChildren);
 
                 // get list of all voxeme entities that are not components of other voxemes
     //            Voxeme[] allVoxemes = objSelector.allVoxemes.Where(a => // where there does not exist another voxeme that has this voxeme as a component
@@ -911,7 +911,7 @@ namespace VoxSimPlatform {
                 // reactivate physics by default
                 //PhysicsHelper.ResolvePhysicsDiscepancies(obj.gameObject);
                 bool reactivatePhysics = true;
-                //if (Helper.IsTopmostVoxemeInHierarchy(obj.gameObject)){
+                //if (Global.Helper.IsTopmostVoxemeInHierarchy(obj.gameObject)){
                 //    obj.minYBound = objBounds.min.y;    //TODO: did removing this really fix the bug where
                 //}                                        // a turned object would go through the supporting surface?
                 // did that cause any other bugs?
@@ -951,7 +951,7 @@ namespace VoxSimPlatform {
                             if (test.gameObject != obj.gameObject) {
                                 // foreach voxeme
                                 // get bounds of object being tested against
-                                Bounds testBounds = Helper.GetObjectWorldSize(test.gameObject);
+                                Bounds testBounds = Global.Helper.GetObjectWorldSize(test.gameObject);
                                 if (!test.gameObject.name.Contains("*")) {
                                     // hacky fix to filter out unparented objects w/ disabled voxeme components
 
@@ -1008,7 +1008,7 @@ namespace VoxSimPlatform {
                                                         MatchCollection matches = reentrancyForm.Matches(ev);
                                                         foreach (Match m in matches) {
                                                             foreach (Group g in m.Groups) {
-                                                                int componentIndex = Helper.StringToInt(
+                                                                int componentIndex = Global.Helper.StringToInt(
                                                                     g.Value.Replace(g.Value,
                                                                         g.Value.Trim(new char[] {'[', ']'})));
                                                                 //Debug.Log (componentIndex);
@@ -1047,21 +1047,21 @@ namespace VoxSimPlatform {
 
                                                                         // things are getting a little ad hoc here
                                                                         if (relation == "on") {
-                                                                            Debug.Log(Helper
+                                                                            Debug.Log(Global.Helper
                                                                                 .GetMostImmediateParentVoxeme(
                                                                                     test.gameObject).GetComponent<Voxeme>()
                                                                                 .voxml.Type.Concavity.Contains("Concave"));
-                                                                            Debug.Log(Helper.VectorToParsable(
+                                                                            Debug.Log(Global.Helper.VectorToParsable(
                                                                                 objBounds.size));
-                                                                            Debug.Log(Helper.VectorToParsable(testBounds
+                                                                            Debug.Log(Global.Helper.VectorToParsable(testBounds
                                                                                 .size));
-                                                                            Debug.Log(Helper.FitsIn(objBounds, testBounds));
-                                                                            if (!((Helper
+                                                                            Debug.Log(Global.Helper.FitsIn(objBounds, testBounds));
+                                                                            if (!((Global.Helper
                                                                                       .GetMostImmediateParentVoxeme(
                                                                                           test.gameObject)
                                                                                       .GetComponent<Voxeme>().voxml.Type
                                                                                       .Concavity.Contains("Concave")) &&
-                                                                                  (Helper.FitsIn(objBounds, testBounds)))) {
+                                                                                  (Global.Helper.FitsIn(objBounds, testBounds)))) {
                                                                                 //if (obj.enabled) {
                                                                                 //    obj.gameObject.GetComponent<Rigging> ().ActivatePhysics (true);
                                                                                 //}
@@ -1078,7 +1078,7 @@ namespace VoxSimPlatform {
                                                                             obj.minYBound = objBounds.min.y;
                                                                         }
     //                                                                        else if (relation == "under") {
-    //                                                                            GameObject voxObj = Helper.GetMostImmediateParentVoxeme (test.gameObject);
+    //                                                                            GameObject voxObj = Global.Helper.GetMostImmediateParentVoxeme (test.gameObject);
     //                                                                            if ((voxObj.GetComponent<Voxeme> ().voxml.Type.Concavity == "Concave") &&    // this is a concave object
     //                                                                                (Concavity.IsEnabled (voxObj)) && (Mathf.Abs (Vector3.Dot (voxObj.transform.up, Vector3.up) + 1.0f) <= Constants.EPSILON)) { // TODO: Run this through habitat verification
     //                                                                                reactivatePhysics = false;
@@ -1093,7 +1093,7 @@ namespace VoxSimPlatform {
                                                                             // any component reentrancy ultimately inherits from the parent voxeme itself
                                                                             result = reentrancyForm.Replace(result,
                                                                                 obj.gameObject.name);
-                                                                            result = Helper.GetTopPredicate(result);
+                                                                            result = Global.Helper.GetTopPredicate(result);
 
                                                                             // TODO: maybe switch object order here below => passivize relation?
                                                                             if (groundComponentFirst.Match(ev).Length > 0) {
@@ -1173,7 +1173,7 @@ namespace VoxSimPlatform {
                             // condition/event/result list for this habitat index
                             string ev = affStr.Affordances[objHabitat][i].Item2.Item1;
                             Debug.Log (string.Format("{0}: Testing {1}",obj.name, ev));
-                            if (Helper.GetTopPredicate(ev) == predString) {
+                            if (Global.Helper.GetTopPredicate(ev) == predString) {
                                 bool relationIndependent = true;
                                 foreach (string rel in supportedRelations) {
                                     Regex r = new Regex(rel);
@@ -1206,7 +1206,7 @@ namespace VoxSimPlatform {
                                         catch (Exception ex) {
                                             if (ex is NullReferenceException) {
                                                 if (program == null) {
-                                                    Debug.LogWarning(string.Format("Check if VoxML encoding exists for \"{0}!\"",Helper.GetTopPredicate(ev)));
+                                                    Debug.LogWarning(string.Format("Check if VoxML encoding exists for \"{0}!\"",Global.Helper.GetTopPredicate(ev)));
                                                 }
                                             }
                                         }
@@ -1220,9 +1220,9 @@ namespace VoxSimPlatform {
                                         Debug.Log(string.Format("Satisfied event: {0}; Result: {1}",
                                             affStr.Affordances[objHabitat][i].Item2.Item1, result));
 
-                                        string resultPred = Helper.GetTopPredicate(result);
+                                        string resultPred = Global.Helper.GetTopPredicate(result);
 
-                                        Hashtable predArgs = Helper.ParsePredicate(result);
+                                        Hashtable predArgs = Global.Helper.ParsePredicate(result);
                                         var objs = eventManager.ExtractObjects(resultPred, (String)predArgs[resultPred]);
                                         List<GameObject> relationObjs = new List<GameObject>();
                                         foreach (object o in objs) {
@@ -1346,14 +1346,14 @@ namespace VoxSimPlatform {
             public static bool TestRelation(GameObject obj1, string relation, GameObject obj2) {
                 bool r = false;
 
-                Bounds bounds1 = Helper.GetObjectWorldSize(obj1);
-                Bounds bounds2 = Helper.GetObjectWorldSize(obj2);
+                Bounds bounds1 = Global.Helper.GetObjectWorldSize(obj1);
+                Bounds bounds2 = Global.Helper.GetObjectWorldSize(obj2);
 
                 Regex align = new Regex(@"align\(.+,.+\)");
                 List<string> habitats = new List<string>();
-                foreach (int i in Helper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
+                foreach (int i in Global.Helper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
                     .IntrinsicHabitats.Keys) {
-                    habitats.AddRange(Helper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
+                    habitats.AddRange(Global.Helper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
                         .IntrinsicHabitats[i].Where((h => align.IsMatch(h))));
                 }
 
@@ -1373,14 +1373,14 @@ namespace VoxSimPlatform {
     //                    Debug.Log (obj1);
     //                    Debug.Log (obj2);
     //                    Debug.Log (Concavity.IsEnabled(obj1));
-    //                    Debug.Log (Helper.GetMostImmediateParentVoxeme (obj1.gameObject));
+    //                    Debug.Log (Global.Helper.GetMostImmediateParentVoxeme (obj1.gameObject));
                         List<GameObject> excludeChildren = obj1.GetComponentsInChildren<Renderer>().Where(
-                                o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj1)).Select(v => v.gameObject)
+                                o => (Global.Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj1)).Select(v => v.gameObject)
                             .ToList();
-                        Bounds adjustedBounds1 = Helper.GetObjectWorldSize(obj1, excludeChildren);
-                        if ((Helper.GetMostImmediateParentVoxeme(obj2.gameObject).GetComponent<Voxeme>().voxml.Type
+                        Bounds adjustedBounds1 = Global.Helper.GetObjectWorldSize(obj1, excludeChildren);
+                        if ((Global.Helper.GetMostImmediateParentVoxeme(obj2.gameObject).GetComponent<Voxeme>().voxml.Type
                                 .Concavity.Contains("Concave")) &&
-                            (Concavity.IsEnabled(obj2)) && (Helper.FitsIn(adjustedBounds1, bounds2))) {
+                            (Concavity.IsEnabled(obj2)) && (Global.Helper.FitsIn(adjustedBounds1, bounds2))) {
                             // if ground object is concave and figure object would fit inside
                             switch (axis) {
                                 case "X":
@@ -1414,9 +1414,9 @@ namespace VoxSimPlatform {
 
                             r &= RCC8.PO(bounds1, bounds2);
                         }
-                        else if ((Helper.GetMostImmediateParentVoxeme(obj1.gameObject).GetComponent<Voxeme>().voxml.Type
+                        else if ((Global.Helper.GetMostImmediateParentVoxeme(obj1.gameObject).GetComponent<Voxeme>().voxml.Type
                                      .Concavity.Contains("Concave")) &&
-                                 (!Concavity.IsEnabled(obj1)) && (Helper.FitsIn(bounds2, bounds1))) {
+                                 (!Concavity.IsEnabled(obj1)) && (Global.Helper.FitsIn(bounds2, bounds1))) {
                             switch (axis) {
                                 case "X":
                                     r = (Vector3.Distance(
@@ -1460,10 +1460,10 @@ namespace VoxSimPlatform {
                                     break;
 
                                 case "Y":
-                                    ObjBounds objBounds1 = Helper.GetObjectOrientedSize(obj1, true);
-                                    ObjBounds objBounds2 = Helper.GetObjectOrientedSize(obj2, true);
-                                    //Debug.Log(Helper.VectorToParsable(objBounds1.Center));
-                                    //Debug.Log(Helper.VectorToParsable(objBounds2.Center));
+                                    ObjBounds objBounds1 = Global.Helper.GetObjectOrientedSize(obj1, true);
+                                    ObjBounds objBounds2 = Global.Helper.GetObjectOrientedSize(obj2, true);
+                                    //Debug.Log(Global.Helper.VectorToParsable(objBounds1.Center));
+                                    //Debug.Log(Global.Helper.VectorToParsable(objBounds2.Center));
                                     //Debug.Log (string.Format("XZ_off({0},{1}) = {2}",obj1,obj2,Vector3.Distance (
                                     //new Vector3 (objBounds1.Center.x, objBounds2.Center.y, objBounds1.Center.z),
                                     //objBounds2.Center)));
@@ -1479,8 +1479,8 @@ namespace VoxSimPlatform {
                                             objBounds1.Center.z),
                                         new Vector3(objBounds2.Max(MajorAxis.X).x - objBounds2.Min(MajorAxis.X).x, 0.0f,
                                             objBounds2.Max(MajorAxis.Z).z - objBounds2.Min(MajorAxis.Z).z));
-                                    //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.center), Helper.VectorToParsable(b2.center)));
-                                    //Debug.Log(string.Format("{0} {1}", Helper.VectorToParsable(b1.size), Helper.VectorToParsable(b2.size)));
+                                    //Debug.Log(string.Format("{0} {1}", Global.Helper.VectorToParsable(b1.center), Global.Helper.VectorToParsable(b2.center)));
+                                    //Debug.Log(string.Format("{0} {1}", Global.Helper.VectorToParsable(b1.size), Global.Helper.VectorToParsable(b2.size)));
                                     r = (b1.Intersects(b2) &&
                                          ((objBounds2.Max(MajorAxis.Y).y - objBounds1.Min(MajorAxis.Y).y) <=
                                           Constants.EPSILON));
@@ -1503,16 +1503,16 @@ namespace VoxSimPlatform {
                                     break;
                             }
 
-                            r &= RCC8.EC(Helper.GetObjectOrientedSize(obj1, true),
-                                Helper.GetObjectOrientedSize(obj2, true));
+                            r &= RCC8.EC(Global.Helper.GetObjectOrientedSize(obj1, true),
+                                Global.Helper.GetObjectOrientedSize(obj2, true));
                         }
                     }
                 }
                 else if (relation == "in") {
-                    if ((Helper.GetMostImmediateParentVoxeme(obj2.gameObject).GetComponent<Voxeme>().voxml.Type.Concavity
+                    if ((Global.Helper.GetMostImmediateParentVoxeme(obj2.gameObject).GetComponent<Voxeme>().voxml.Type.Concavity
                             .Contains("Concave")) &&
                         (Concavity.IsEnabled(obj2))) {
-                        if (Helper.FitsIn(bounds1, bounds2)) {
+                        if (Global.Helper.FitsIn(bounds1, bounds2)) {
                             Debug.Log(obj1);
                             Debug.Log(obj2);
                             Debug.Log(bounds1);
@@ -1521,7 +1521,7 @@ namespace VoxSimPlatform {
                         }
                     }
                     else {
-                        if (Helper.FitsIn(bounds1, bounds2)) {
+                        if (Global.Helper.FitsIn(bounds1, bounds2)) {
                             //Debug.Break ();
                             Debug.Log(obj1);
                             Debug.Log(obj2);
@@ -1672,8 +1672,8 @@ namespace VoxSimPlatform {
     //                r &= (obj1.gameObject.transform.position.x > obj2.gameObject.transform.position.x);
                 }
                 else if (relation == "touching") {
-                    r = RCC8.EC(Helper.GetObjectOrientedSize(obj1, true), Helper.GetObjectOrientedSize(obj2, true));
-    //                r = RCC8.EC(Helper.GetObjectOrientedSize(obj1), Helper.GetObjectOrientedSize(obj2));
+                    r = RCC8.EC(Global.Helper.GetObjectOrientedSize(obj1, true), Global.Helper.GetObjectOrientedSize(obj2, true));
+    //                r = RCC8.EC(Global.Helper.GetObjectOrientedSize(obj1), Global.Helper.GetObjectOrientedSize(obj2));
                 }
                 else {
                 }
@@ -1684,7 +1684,7 @@ namespace VoxSimPlatform {
 
             public static void ReevaluateRelationships(String program, GameObject obj) {
                 // get object bounds
-                Bounds objBounds = Helper.GetObjectWorldSize(obj);
+                Bounds objBounds = Global.Helper.GetObjectWorldSize(obj);
 
                 // get all objects
                 GameObject[] allObjects = Object.FindObjectsOfType<GameObject>();
@@ -1711,14 +1711,14 @@ namespace VoxSimPlatform {
                                 if (voxeme != null) {
                                     if (!voxeme.gameObject.name.Contains("*")) {
                                         // hacky fix to filter out unparented objects w/ disabled voxeme components
-                                        testBounds = Helper.GetObjectWorldSize(test);
+                                        testBounds = Global.Helper.GetObjectWorldSize(test);
                                         // bunch of underspecified RCC relations
                                         if (voxeme.voxml.Afford_Str.Affordances.Any(p => p.Formula.Contains("support"))) {
                                             // **check for support configuration here
                                             if ((voxeme.voxml.Type.Concavity.Contains("Concave")) &&
-                                                (Helper.FitsIn(objBounds, testBounds))) {
+                                                (Global.Helper.FitsIn(objBounds, testBounds))) {
                                                 // if test object is concave and placed object would fit inside
-                                                if (RCC8.PO(objBounds, Helper.GetObjectWorldSize(test))) {
+                                                if (RCC8.PO(objBounds, Global.Helper.GetObjectWorldSize(test))) {
                                                     // interpenetration = support
                                                     RiggingHelper.RigTo(obj, test); // setup parent-child rig
                                                     relationTracker.AddNewRelation(new List<GameObject> {test, obj},
@@ -1727,14 +1727,14 @@ namespace VoxSimPlatform {
                                                 }
                                             }
                                             else {
-                                                if (RCC8.EC(objBounds, Helper.GetObjectWorldSize(test))) {
+                                                if (RCC8.EC(objBounds, Global.Helper.GetObjectWorldSize(test))) {
                                                     // otherwise EC = support
                                                     if (voxeme.enabled) {
                                                         obj.GetComponent<Rigging>().ActivatePhysics(true);
                                                     }
 
                                                     obj.GetComponent<Voxeme>().minYBound =
-                                                        Helper.GetObjectWorldSize(test).max.y;
+                                                        Global.Helper.GetObjectWorldSize(test).max.y;
                                                     RiggingHelper.RigTo(obj, test); // setup parent-child rig
                                                     relationTracker.AddNewRelation(new List<GameObject> {test, obj},
                                                         "support");
@@ -1744,13 +1744,13 @@ namespace VoxSimPlatform {
                                         }
 
                                         if (voxeme.voxml.Afford_Str.Affordances.Any(p => p.Formula.Contains("contain"))) {
-                                            if (Helper.FitsIn(objBounds, Helper.GetObjectWorldSize(test))) {
-                                                if (RCC8.PO(objBounds, Helper.GetObjectWorldSize(test))) {
+                                            if (Global.Helper.FitsIn(objBounds, Global.Helper.GetObjectWorldSize(test))) {
+                                                if (RCC8.PO(objBounds, Global.Helper.GetObjectWorldSize(test))) {
                                                     // interpenetration = containment
                                                     obj.GetComponent<Voxeme>().minYBound =
                                                         PhysicsHelper
                                                             .GetConcavityMinimum(
-                                                                obj); //Helper.GetObjectWorldSize (obj).min.y;
+                                                                obj); //Global.Helper.GetObjectWorldSize (obj).min.y;
                                                     RiggingHelper.RigTo(obj, test); // setup parent-child rig
                                                     relationTracker.AddNewRelation(new List<GameObject> {test, obj},
                                                         "contain");

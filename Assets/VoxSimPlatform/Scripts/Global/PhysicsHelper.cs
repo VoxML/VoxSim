@@ -6,7 +6,7 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace Global {
         /// <summary>
-        /// Physics helper.
+        /// Physics Global.Helper.
         /// </summary>
         public static class PhysicsHelper {
             public static void ResolveAllPhysicsDiscrepancies(bool macroEventSatisfied) {
@@ -86,7 +86,7 @@ namespace VoxSimPlatform {
 
                             //Debug.Log (obj.transform.rotation.eulerAngles);
                             //foreach (Rigidbody rigidbody in rigidbodies) {
-                            //Debug.Log (Helper.VectorToParsable (rigidbody.transform.localPosition));
+                            //Debug.Log (Global.Helper.VectorToParsable (rigidbody.transform.localPosition));
                             //}
 
     //                      obj.transform.rotation = obj.transform.rotation *
@@ -146,10 +146,10 @@ namespace VoxSimPlatform {
                                         child.targetRotation = child.transform.rotation.eulerAngles;
                                     }
 
-                                    child.transform.localPosition = Helper.RotatePointAroundPivot(
+                                    child.transform.localPosition = Global.Helper.RotatePointAroundPivot(
                                         voxComponent.parentToChildPositionOffset[child.gameObject],
                                         Vector3.zero, voxComponent.gameObject.transform.eulerAngles);
-                                    //child.transform.localPosition = Helper.RotatePointAroundPivot (child.transform.localEulerAngles,
+                                    //child.transform.localPosition = Global.Helper.RotatePointAroundPivot (child.transform.localEulerAngles,
                                     //  Vector3.zero, voxComponent.gameObject.transform.eulerAngles);
                                     child.transform.position =
                                         voxComponent.gameObject.transform.position + child.transform.localPosition;
@@ -164,7 +164,7 @@ namespace VoxSimPlatform {
             public static void ResolvePhysicsPositionDiscrepancies(GameObject obj, bool macroEventSatisfied) {
                 Voxeme voxComponent = obj.GetComponent<Voxeme>();
                 //Debug.Break ();
-                //Debug.Log(string.Format("Before resolution: {0} position = {1}", obj.name, Helper.VectorToParsable(obj.transform.position)));
+                //Debug.Log(string.Format("Before resolution: {0} position = {1}", obj.name, Global.Helper.VectorToParsable(obj.transform.position)));
                 // find the displacement between the main body and this rigidbody
                 float displacement = float.MaxValue;
                 Rigidbody[] rigidbodies = obj.GetComponentsInChildren<Rigidbody>();
@@ -175,8 +175,8 @@ namespace VoxSimPlatform {
                         if (rigidbody.transform.localPosition.magnitude -
                             voxComponent.displacement[rigidbody.gameObject].magnitude < displacement) {
                             //                  Debug.Log (rigidbody.name);
-                            //                  Debug.Log (Helper.VectorToParsable (obj.transform.position));
-                            //                  Debug.Log (Helper.VectorToParsable (rigidbody.transform.position));
+                            //                  Debug.Log (Global.Helper.VectorToParsable (obj.transform.position));
+                            //                  Debug.Log (Global.Helper.VectorToParsable (rigidbody.transform.position));
                             displacement = rigidbody.transform.localPosition.magnitude -
                                            voxComponent.displacement[rigidbody.gameObject].magnitude;
                         }
@@ -196,10 +196,10 @@ namespace VoxSimPlatform {
                         if (rigidbodies.Length > 0) {
                             //                      Debug.Log (rigidbodies [0].name);
                             //                      Debug.Log (rigidbodies [0].transform.position);
-                            //                      Debug.Log (Helper.VectorToParsable(voxComponent.displacement [rigidbodies[0].gameObject]));
-                            //Debug.Log(string.Format("{0} position = {1}", rigidbodies[0].name, Helper.VectorToParsable(rigidbodies[0].transform.position)));
-                            //Debug.Log(string.Format("{0} position displacement = {1}", rigidbodies[0].name, Helper.VectorToParsable(voxComponent.displacement[rigidbodies[0].gameObject])));
-                            //Debug.Log(string.Format("{0} rotation * position displacement = {1}", rigidbodies[0].name, Helper.VectorToParsable((obj.transform.rotation *
+                            //                      Debug.Log (Global.Helper.VectorToParsable(voxComponent.displacement [rigidbodies[0].gameObject]));
+                            //Debug.Log(string.Format("{0} position = {1}", rigidbodies[0].name, Global.Helper.VectorToParsable(rigidbodies[0].transform.position)));
+                            //Debug.Log(string.Format("{0} position displacement = {1}", rigidbodies[0].name, Global.Helper.VectorToParsable(voxComponent.displacement[rigidbodies[0].gameObject])));
+                            //Debug.Log(string.Format("{0} rotation * position displacement = {1}", rigidbodies[0].name, Global.Helper.VectorToParsable((obj.transform.rotation *
                                                       //voxComponent.displacement[rigidbodies[0].gameObject]))));
                             obj.transform.position = rigidbodies[0].transform.position -
                                                      (obj.transform.rotation *
@@ -209,16 +209,16 @@ namespace VoxSimPlatform {
                             //obj.transform.position = rigidbodies [0].transform.localPosition - voxComponent.displacement [rigidbodies[0].gameObject] +
                             //  obj.transform.position;
                             voxComponent.targetPosition = obj.transform.position;
-                            //                      Debug.Log (Helper.VectorToParsable (rigidbodies [0].transform.position));
-                            //                      Debug.Log (Helper.VectorToParsable (rigidbodies [0].transform.localPosition));
-                            //                      Debug.Log (Helper.VectorToParsable (obj.transform.position));
+                            //                      Debug.Log (Global.Helper.VectorToParsable (rigidbodies [0].transform.position));
+                            //                      Debug.Log (Global.Helper.VectorToParsable (rigidbodies [0].transform.localPosition));
+                            //                      Debug.Log (Global.Helper.VectorToParsable (obj.transform.position));
 
-                            //Debug.Log (Helper.VectorToParsable (rigidbodies [0].transform.position));
-                            //Debug.Log (Helper.VectorToParsable (voxComponent.displacement [rigidbodies[0].name]));
+                            //Debug.Log (Global.Helper.VectorToParsable (rigidbodies [0].transform.position));
+                            //Debug.Log (Global.Helper.VectorToParsable (voxComponent.displacement [rigidbodies[0].name]));
 
                             foreach (Rigidbody rigidbody in rigidbodies) {
                                 if (voxComponent.displacement.ContainsKey(rigidbody.gameObject)) {
-                                    //Debug.Log (string.Format("{0} position displacement = {1}",rigidbody.name,Helper.VectorToParsable(voxComponent.displacement[rigidbody.gameObject])));
+                                    //Debug.Log (string.Format("{0} position displacement = {1}",rigidbody.name,Global.Helper.VectorToParsable(voxComponent.displacement[rigidbody.gameObject])));
                                     rigidbody.transform.localPosition = voxComponent.displacement[rigidbody.gameObject];
                                 }
                             }
@@ -243,21 +243,21 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
-                //Debug.Log(string.Format("After resolution: {0} position = {1}", obj.name, Helper.VectorToParsable(obj.transform.position)));
+                //Debug.Log(string.Format("After resolution: {0} position = {1}", obj.name, Global.Helper.VectorToParsable(obj.transform.position)));
             }
 
             public static float GetConcavityMinimum(GameObject obj) {
-                Bounds bounds = Helper.GetObjectSize(obj);
+                Bounds bounds = Global.Helper.GetObjectSize(obj);
 
                 Vector3 concavityMin = bounds.min;
                 foreach (Renderer renderer in obj.GetComponentsInChildren<Renderer>()) {
-    //              Debug.Log (renderer.gameObject.name + " " + Helper.GetObjectWorldSize (renderer.gameObject).min.y);
-                    if (Helper.GetObjectSize(renderer.gameObject).min.y > concavityMin.y) {
-                        concavityMin = Helper.GetObjectSize(renderer.gameObject).min;
+    //              Debug.Log (renderer.gameObject.name + " " + Global.Helper.GetObjectWorldSize (renderer.gameObject).min.y);
+                    if (Global.Helper.GetObjectSize(renderer.gameObject).min.y > concavityMin.y) {
+                        concavityMin = Global.Helper.GetObjectSize(renderer.gameObject).min;
                     }
                 }
 
-                concavityMin = Helper.RotatePointAroundPivot(concavityMin, bounds.center, obj.transform.eulerAngles) +
+                concavityMin = Global.Helper.RotatePointAroundPivot(concavityMin, bounds.center, obj.transform.eulerAngles) +
                                obj.transform.position;
 
     //          Debug.Log (obj.transform.eulerAngles);
@@ -265,13 +265,13 @@ namespace VoxSimPlatform {
                 return concavityMin.y;
 
                 /*
-                Bounds bounds = Helper.GetObjectWorldSize (obj);
+                Bounds bounds = Global.Helper.GetObjectWorldSize (obj);
 
                 float concavityMinY = bounds.min.y;
                 foreach (Renderer renderer in obj.GetComponentsInChildren<Renderer>()) {
-                    //Debug.Log (renderer.gameObject.name + " " + Helper.GetObjectWorldSize (renderer.gameObject).min.y);
-                    if (Helper.GetObjectWorldSize (renderer.gameObject).min.y > concavityMinY) {
-                        concavityMinY = Helper.GetObjectWorldSize (renderer.gameObject).min.y;
+                    //Debug.Log (renderer.gameObject.name + " " + Global.Helper.GetObjectWorldSize (renderer.gameObject).min.y);
+                    if (Global.Helper.GetObjectWorldSize (renderer.gameObject).min.y > concavityMinY) {
+                        concavityMinY = Global.Helper.GetObjectWorldSize (renderer.gameObject).min.y;
                     }
                 }
 

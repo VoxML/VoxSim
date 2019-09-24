@@ -64,7 +64,7 @@ namespace VoxSimPlatform {
 
         	private void FixedUpdate() {
         		if (inputController != null) {
-        			if (!Helper.PointOutsideMaskedAreas(
+        			if (!Global.Helper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				new Rect[] {inputController.inputRect})) {
         				return;
@@ -72,7 +72,7 @@ namespace VoxSimPlatform {
         		}
 
         		if (outputController != null) {
-        			if (!Helper.PointOutsideMaskedAreas(
+        			if (!Global.Helper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				new Rect[] {outputController.outputRect})) {
         				return;
@@ -83,7 +83,7 @@ namespace VoxSimPlatform {
         		for (int i = 0; i < windowManager.windowManager.Count; i++) {
         			if (windowManager.windowManager.ContainsKey(i)) {
         				if (windowManager.windowManager[i] != null) {
-        					if (!Helper.PointOutsideMaskedAreas(
+        					if (!Global.Helper.PointOutsideMaskedAreas(
         						    new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         						    new Rect[] {windowManager.windowManager[i].windowRect}) &&
         					    (windowManager.windowManager[i].Render)) {
@@ -97,7 +97,7 @@ namespace VoxSimPlatform {
         		for (int i = 0; i < buttonManager.buttonManager.Count; i++) {
         			if (buttonManager.buttonManager.ContainsKey(i)) {
         				if (buttonManager.buttonManager[i] != null) {
-        					if (!Helper.PointOutsideMaskedAreas(
+        					if (!Global.Helper.PointOutsideMaskedAreas(
         						new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         						new Rect[] {buttonManager.buttonManager[i].buttonRect})) {
         						masked = true;

@@ -23,7 +23,7 @@ namespace VoxSimPlatform {
         	}
 
         	void Update() {
-        		if (!Helper.VectorIsNaN(targetRotation)) {
+        		if (!Global.Helper.VectorIsNaN(targetRotation)) {
         			// has valid target
         			if (transform.rotation != Quaternion.Euler(targetRotation)) {
         				float offset = RotateToward(targetRotation);
@@ -102,13 +102,13 @@ namespace VoxSimPlatform {
         					child.transform.localRotation = parentToChildRotationOffset [child.gameObject];
         					child.transform.rotation = gameObject.transform.rotation * child.transform.localRotation;
         					child.targetRotation = child.transform.rotation.eulerAngles;
-        					child.transform.localPosition = Helper.RotatePointAroundPivot (parentToChildPositionOffset [child.gameObject],
+        					child.transform.localPosition = Global.Helper.RotatePointAroundPivot (parentToChildPositionOffset [child.gameObject],
         						Vector3.zero, gameObject.transform.eulerAngles);
         					child.transform.position = gameObject.transform.position + child.transform.localPosition;
         					child.targetPosition = child.transform.position;
         					//Debug.Log (child.name);
         					//Debug.Break ();
-        					//Debug.Log (Helper.VectorToParsable(child.transform.localPosition));
+        					//Debug.Log (Global.Helper.VectorToParsable(child.transform.localPosition));
         				}
         			}
         		}*/

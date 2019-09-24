@@ -46,7 +46,7 @@ namespace VoxSimPlatform {
         	// Update is called once per frame
         	void Update() {
         		if (Input.GetMouseButtonDown(0)) {
-        			if (Helper.PointOutsideMaskedAreas(
+        			if (Global.Helper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				windowManager.windowManager.Values.Select(v => v.windowRect).ToArray())) {
         				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -54,12 +54,12 @@ namespace VoxSimPlatform {
         				// Casts the ray and get the first game object hit
         				Physics.Raycast(ray, out hit);
         				if (hit.collider == null) {
-        					//if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+        					//if (!Global.Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
         					//inspector.InspectorObject = null;
         					selectedObjects.Clear();
         					//}
 
-        //					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+        //					if (!Global.Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
         //						inspector.DrawInspector = false;
         //					}
         				}
@@ -70,13 +70,13 @@ namespace VoxSimPlatform {
         					//Debug.Log (selectedObjects.Count);
         				}
 
-        //				if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+        //				if (!Global.Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
         //					inspector.DrawInspector = false;
         //				}
         			}
         		}
         		else if (Input.GetMouseButtonDown(1)) {
-        			if (Helper.PointOutsideMaskedAreas(
+        			if (Global.Helper.PointOutsideMaskedAreas(
         				new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y),
         				windowManager.windowManager.Values.Select(v => v.windowRect).ToArray())) {
         				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -84,7 +84,7 @@ namespace VoxSimPlatform {
         				// Casts the ray and get the first game object hit
         				Physics.Raycast(ray, out hit);
         //				if (hit.collider == null) {
-        //					if (!Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
+        //					if (!Global.Helper.PointInRect (new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y), inspector.InspectorRect)) {
         //						inspector.DrawInspector = false;
         //					}
         //				}
@@ -92,7 +92,7 @@ namespace VoxSimPlatform {
         //					inspector.DrawInspector = true;
         //					inspector.ScrollPosition = new Vector2 (0, 0);
         //					inspector.InspectorChoice = -1;
-        //					inspector.InspectorObject = Helper.GetMostImmediateParentVoxeme (hit.transform.gameObject);
+        //					inspector.InspectorObject = Global.Helper.GetMostImmediateParentVoxeme (hit.transform.gameObject);
         //					//inspector.InspectorObject = hit.transform.root.gameObject;
         //					inspector.InspectorPosition = new Vector2 (Input.mousePosition.x, Screen.height - Input.mousePosition.y);
         //				}
@@ -184,7 +184,7 @@ namespace VoxSimPlatform {
 
         	public void InitDisabledObjects() {
         		for (int i = 0; i < disabledObjects.Count; i++) {
-        			disabledObjects[i] = Helper.GetMostImmediateParentVoxeme(disabledObjects[i]);
+        			disabledObjects[i] = Global.Helper.GetMostImmediateParentVoxeme(disabledObjects[i]);
         			disabledObjects[i].SetActive(false);
         		}
         	}

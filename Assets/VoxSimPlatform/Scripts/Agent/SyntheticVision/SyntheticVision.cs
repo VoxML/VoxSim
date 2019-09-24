@@ -89,8 +89,8 @@ namespace VoxSimPlatform {
         			}
 
         			List<GameObject> excludeChildren = obj.GetComponentsInChildren<Renderer>().Where(
-        				o => (Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
-        			int visibility = GetVisibleVertices(Helper.GetObjectWorldSize(obj, excludeChildren), obj,
+        				o => (Global.Helper.GetMostImmediateParentVoxeme(o.gameObject) != obj)).Select(v => v.gameObject).ToList();
+        			int visibility = GetVisibleVertices(Global.Helper.GetObjectWorldSize(obj, excludeChildren), obj,
         				sensor.transform.position);
         			//Debug.Log(obj + "=============================================================== " + visibility);
         			return visibility > 0;
@@ -127,8 +127,8 @@ namespace VoxSimPlatform {
 
         			int numVisibleVertices = 0;
         			foreach (Vector3 vertex in vertices) {
-        //            Quaternion rot = Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
-        //				Vector3 rotatedVertex = Helper.GetMostImmediateParentVoxeme(rotatedObj).transform.rotation * vertex + rotatedObj.transform.position;
+        //            Quaternion rot = Global.Helper.GetMostImmediateParentVoxeme(gameObject).transform.rotation;
+        //				Vector3 rotatedVertex = Global.Helper.GetMostImmediateParentVoxeme(rotatedObj).transform.rotation * vertex + rotatedObj.transform.position;
         				Vector3 rotatedVertex = vertex;
         				RaycastHit hitInfo;
         				bool hit = Physics.Raycast(
@@ -141,15 +141,15 @@ namespace VoxSimPlatform {
         //						bounds.size.y+Constants.EPSILON,
         //						bounds.size.z+Constants.EPSILON)).Contains(hitInfo.point))) {
         				if (visible) {
-        					//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Helper.VectorToParsable (vertex), hitInfo.collider.name));
+        					//Debug.Log (string.Format ("SyntheticVision.Update:{0}:{1}:{2}", obj.name, Global.Helper.VectorToParsable (vertex), hitInfo.collider.name));
         					numVisibleVertices += Convert.ToInt32(visible);
         //					}
         				}
         				else {
         					//Debug.Log(string.Format("Ray from {0} collides with {1} at {2}",
-        					//Helper.VectorToParsable(rotatedVertex),
-        					//Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
-        					//Helper.VectorToParsable(hitInfo.point)));
+        					//Global.Helper.VectorToParsable(rotatedVertex),
+        					//Global.Helper.GetMostImmediateParentVoxeme (hitInfo.collider.gameObject),
+        					//Global.Helper.VectorToParsable(hitInfo.point)));
         				}
         			}
 

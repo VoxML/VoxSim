@@ -86,7 +86,7 @@ namespace VoxSimPlatform {
         					       gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"))) ||
         					    (gameObject.GetComponent<Voxeme>().isGrasped)) {
         						//if (!(collider.transform.IsChildOf(gameObject.transform) && gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave") &&
-        						//	!RCC8.ProperPart(Helper.GetObjectWorldSize(collider.gameObject),Helper.GetObjectWorldSize(gameObject))) {
+        						//	!RCC8.ProperPart(Global.Helper.GetObjectWorldSize(collider.gameObject),Global.Helper.GetObjectWorldSize(gameObject))) {
         						//if (!((collider.transform.IsChildOf(gameObject.transform) &&
         						//	gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave" &&
         						//	relationTracker.relations[new List<GameObject>(new GameObject[]{gameObject,collider.gameObject})] == "contain"))) {
@@ -109,7 +109,7 @@ namespace VoxSimPlatform {
         					       gameObject.GetComponent<Voxeme>().voxml.Type.Concavity.Contains("Concave"))) ||
         					    (gameObject.GetComponent<Voxeme>().isGrasped)) {
         						//if (!(rigidbody.transform.IsChildOf(gameObject.transform) && gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave") &&
-        						//	!RCC8.ProperPart(Helper.GetObjectWorldSize(rigidbody.gameObject),Helper.GetObjectWorldSize(gameObject))) {
+        						//	!RCC8.ProperPart(Global.Helper.GetObjectWorldSize(rigidbody.gameObject),Global.Helper.GetObjectWorldSize(gameObject))) {
         						//if (!((rigidbody.transform.IsChildOf(gameObject.transform) &&
         						//	gameObject.GetComponent<Voxeme>().voxml.Type.Concavity == "Concave" &&
         						//	relationTracker.relations[new List<GameObject>(new GameObject[]{gameObject,rigidbody.gameObject})] == "contain"))) {

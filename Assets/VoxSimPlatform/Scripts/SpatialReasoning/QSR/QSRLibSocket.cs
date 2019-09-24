@@ -42,7 +42,7 @@ namespace VoxSimPlatform {
 
                         _client.GetStream().Write(writeBuffer, 0, writeBuffer.Length);
                         Debug.Log(string.Format("Written to this NetworkStream: {0} ({1})", writeBuffer.Length,
-                            Helper.PrintByteArray(writeBuffer)));
+                            Global.Helper.PrintByteArray(writeBuffer)));
                     }
                     else {
                         Debug.Log("Sorry.  You cannot write to this NetworkStream.");

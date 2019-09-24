@@ -147,8 +147,6 @@ namespace VoxSimPlatform {
             	EULAModalWindow eulaWindow;
 
             	UIButtonManager buttonManager;
-            	ExportPrefsUIButton exportPrefsButton;
-            	ImportPrefsUIButton importPrefsButton;
 
             	List<UIButton> uiButtons = new List<UIButton>();
 
@@ -247,14 +245,6 @@ namespace VoxSimPlatform {
                     GetMyIP();
 
             		listItems = availableScenes.ToArray();
-
-#if !UNITY_IOS
-                    exportPrefsButton = gameObject.GetComponent<ExportPrefsUIButton>();
-                    importPrefsButton = gameObject.GetComponent<ImportPrefsUIButton>();
-
-                    uiButtons.Add(exportPrefsButton);
-                    uiButtons.Add(importPrefsButton);
-#endif
             	}
 
             	// Update is called once per frame
