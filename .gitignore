@@ -142,6 +142,9 @@ Assets/VoxSimPlatform/SimpleFileBrowser*
 Assets/VoxSimPlatform/Editor\ Default\ Resources/crosstales*
 Assets/VoxSimPlatform/Plugins/ConsoleE*
 
+# ignore _TerrainAutoUpgrade
+Assets/_TerrainAutoUpgrade*
+
 # ignore UntrackedScenes folder
 Assets/UntrackedScenes*
 
