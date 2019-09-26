@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 using Object = UnityEngine.Object;
@@ -184,7 +184,7 @@ namespace VoxSimPlatform {
 
         		// set joint links between all subobjects (Cartesian product)
         		foreach (GameObject go in allObjects) {
-        			if (go.activeInHierarchy) {
+        			if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null)) {
         				// remove BoxCollider and Rigidbody on non-top level objects
         				if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
         				    (go.transform.root.tag != "Agent")) {
