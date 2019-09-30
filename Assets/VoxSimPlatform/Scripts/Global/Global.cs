@@ -159,7 +159,7 @@ namespace VoxSimPlatform {
     	}
 
     	/// <summary>
-    	/// Object oriented bounds class
+    	/// Geometry-oriented bounds class
     	/// </summary>
     	public class ObjBounds {
     		Vector3 _center;
@@ -249,14 +249,22 @@ namespace VoxSimPlatform {
 
     		public bool Contains(Vector3 point) {
     			bool contains = true;
-
-    			Vector3 closestPoint = Points.OrderBy(p => (p - point).magnitude).ToList()[0];
-
-    			List<Vector3> colinearPoints = Points.Where(p => p != closestPoint)
-    				.OrderBy(p => (p - closestPoint).magnitude).Take(3).ToList();
-
-    			foreach (Vector3 pt in colinearPoints) {
-    				contains &= (Vector3.Dot((point - closestPoint).normalized, (pt - closestPoint).normalized) >= 0.0f);
+    			
+    			if ((point.x >= Min(MajorAxis.X).x) && (point.x <= Max(MajorAxis.X).x) &&
+	    			(point.y >= Min(MajorAxis.Y).y) && (point.y <= Max(MajorAxis.Y).y) && 
+	    			(point.z >= Min(MajorAxis.Z).z) && (point.z <= Max(MajorAxis.Z).z)) {
+	    			Vector3 closestCorner = Points.Take(8)	// take first 8 because latter 8 contain points on center of faces
+		    			.OrderBy(p => (p - point).magnitude).ToList()[0];
+	
+	    			List<Vector3> closestColinearCorners = Points.Take(8).Where(p => p != closestCorner)
+	    				.OrderBy(p => (p - closestCorner).magnitude).Take(3).ToList();
+	
+	    			foreach (Vector3 corner in closestColinearCorners) {
+	    				contains &= (Vector3.Dot((point - closestCorner).normalized, (corner - closestCorner).normalized) >= 0.0f);
+	    			}
+    			}
+    			else {
+    				contains = false;
     			}
 
     			return contains;

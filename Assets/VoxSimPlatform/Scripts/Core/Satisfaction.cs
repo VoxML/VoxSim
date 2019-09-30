@@ -849,8 +849,8 @@ namespace VoxSimPlatform {
 
             public static void ReasonFromAffordances(EventManager eventManager, VoxML program, String predString, Voxeme obj) {
                 Regex reentrancyForm = new Regex(@"\[[0-9]+\]");
-                Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\], .*x.*)"); // check the order of the arguments
-                Regex groundComponentSecond = new Regex(@".*(x, .*\[[0-9]+\].*)");
+	            Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\], ?.*x.*)"); // check the order of the arguments
+	            Regex groundComponentSecond = new Regex(@".*(x, ?.*\[[0-9]+\].*)");
                 List<string> supportedRelations = new List<string>(
                     new[] {
                         // list of supported relations
@@ -944,7 +944,9 @@ namespace VoxSimPlatform {
                 bool relationSatisfied = false;
 
                 // relation-based reasoning from affordances
-                foreach (int objHabitat in affStr.Affordances.Keys) {
+	            foreach (int objHabitat in affStr.Affordances.Keys) {
+		            Debug.Log(string.Format("{0}: testing habitat {1}",
+		            	obj.gameObject.name, objHabitat));
                     if (TestHabitat(obj.gameObject, objHabitat)) {
     //                    Debug.Log (objHabitat);
                         foreach (Voxeme test in allVoxemes) {
@@ -959,7 +961,7 @@ namespace VoxSimPlatform {
                                     foreach (string rel in genericRelations) {
                                         string relation = rel.Split('\\')[0]; // not using relation as regex here
 
-                                        //Debug.Log (string.Format ("Is {0} {1} {2}?", obj.gameObject.name, relation, test.gameObject.name));
+                                        Debug.Log (string.Format ("Is {0} {1} {2}?", obj.gameObject.name, relation, test.gameObject.name));
                                         if (TestRelation(obj.gameObject, relation, test.gameObject)) {
                                             relationTracker.AddNewRelation(
                                                 new List<GameObject> {obj.gameObject, test.gameObject}, relation);

@@ -399,7 +399,7 @@ namespace VoxSimPlatform {
                         ((Voxeme)target).showOpVox = !((Voxeme)target).showOpVox;
                     }
 
-                    if (((Voxeme)target).showOpVox) {
+	                if ((((Voxeme)target).showOpVox) && (((Voxeme)target).opVox != null)) {
                         GUILayout.BeginVertical();
                         GUILayout.BeginHorizontal();
                         GUILayout.Label("PRED", GUILayout.Width(120));
@@ -884,8 +884,10 @@ namespace VoxSimPlatform {
         			Voxeme parentVox = GlobalHelper.GetMostImmediateParentVoxeme(parent).GetComponent<Voxeme>();
 
         			// if this voxeme is not (intentionally) a subcomponent of another voxeme object
-        			if (!(parentVox.opVox.Type.Components.Select(i => i.Item2).ToList()).Contains(gameObject)) {
-        				RiggingHelper.UnRig(gameObject, gameObject.transform.parent.gameObject);
+        			if ((parentVox != null) && (parentVox.opVox != null)) {
+	        			if (!(parentVox.opVox.Type.Components.Select(i => i.Item2).ToList()).Contains(gameObject)) {
+	        				RiggingHelper.UnRig(gameObject, gameObject.transform.parent.gameObject);
+	        			}
         			}
         		}
 
