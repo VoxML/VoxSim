@@ -849,8 +849,8 @@ namespace VoxSimPlatform {
 
             public static void ReasonFromAffordances(EventManager eventManager, VoxML program, String predString, Voxeme obj) {
                 Regex reentrancyForm = new Regex(@"\[[0-9]+\]");
-	            Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\], ?.*x.*)"); // check the order of the arguments
-	            Regex groundComponentSecond = new Regex(@".*(x, ?.*\[[0-9]+\].*)");
+	            Regex groundComponentFirst = new Regex(@".*(\[[0-9]+\],\w?.*x.*)"); // check the order of the arguments
+	            Regex groundComponentSecond = new Regex(@".*(x,\w?.*\[[0-9]+\].*)");
                 List<string> supportedRelations = new List<string>(
                     new[] {
                         // list of supported relations
@@ -1126,26 +1126,34 @@ namespace VoxSimPlatform {
 
                                                                             if (result == "support") {
                                                                                 if (groundComponentFirst.Match(ev).Length >
-                                                                                    0) {
-                                                                                    RiggingHelper.RigTo(test.gameObject,
-                                                                                        obj.gameObject);
+	                                                                                0) {
+	                                                                                if (obj.tag != "Ground") {
+	                                                                                    RiggingHelper.RigTo(test.gameObject,
+		                                                                                    obj.gameObject);
+	                                                                                }
                                                                                 }
                                                                                 else if (groundComponentSecond.Match(ev)
-                                                                                             .Length > 0) {
-                                                                                    RiggingHelper.RigTo(obj.gameObject,
-                                                                                        test.gameObject);
+	                                                                                .Length > 0) {
+	                                                                                if (test.tag != "Ground") {
+	                                                                                    RiggingHelper.RigTo(obj.gameObject,
+		                                                                                    test.gameObject);
+	                                                                                }
                                                                                 }
                                                                             }
                                                                             else if (result == "contain") {
                                                                                 if (groundComponentFirst.Match(ev).Length >
-                                                                                    0) {
-                                                                                    RiggingHelper.RigTo(test.gameObject,
-                                                                                        obj.gameObject);
+	                                                                                0) {
+	                                                                                if (obj.tag != "Ground") {
+	                                                                                    RiggingHelper.RigTo(test.gameObject,
+		                                                                                    obj.gameObject);
+	                                                                                }
                                                                                 }
                                                                                 else if (groundComponentSecond.Match(ev)
-                                                                                             .Length > 0) {
-                                                                                    RiggingHelper.RigTo(obj.gameObject,
-                                                                                        test.gameObject);
+	                                                                                .Length > 0) {
+	                                                                                if (test.tag != "Ground") {
+	                                                                                    RiggingHelper.RigTo(obj.gameObject,
+		                                                                                    test.gameObject);
+	                                                                                }
                                                                                 }
                                                                             }
                                                                         }
@@ -1296,18 +1304,34 @@ namespace VoxSimPlatform {
                                 string methodName = formula.Split('(')[0].Trim();
                                 string[] methodArgs = new string[] {string.Empty};
 
-                                if (formula.Split('(').Length > 1) {
-                                    methodArgs = formula.Split('(')[1].Trim(')').Split(',');
+                                //Debug.Log(formula);
+                                //Debug.Log(formula.Split(new char[] {'(' },2)[1]);
+                                //Debug.Log(formula.Split(new char[] {'(' },2)[1].Trim(')'));
+
+                                if (formula.Split(new char[] {'(' },2).Length > 1) {
+	                                methodArgs = formula.Split(new char[] {'('},2)[1].Trim(')').Split(',');
                                 }
 
                                 List<object> args = new List<object>();
                                 args.Add(obj);
                                 foreach (string arg in methodArgs) {
-                                    args.Add(arg);
+                                    Debug.Log(arg);
+                                    string argToAdd = arg;
+                                    // for each component in opVox
+                                    //  if an index in this arg matches that component's index
+                                    //  sub the index with the component name
+                                    foreach (Triple<string, GameObject, int> component in opVox.Type.Components) {
+                                        if (argToAdd.Contains(string.Format("[{0}]",component.Item3))) {
+                                            argToAdd = argToAdd.Replace(string.Format("[{0}]", component.Item3), component.Item2.name);
+                                        }
+                                    }
+                                    args.Add(argToAdd);
                                 }
 
                                 methodToCall = habitatSolver.GetType().GetMethod(methodName);
                                 if (methodToCall != null) {
+                                    Debug.Log(string.Format("TestHabitat: Invoke {0} with {1}",
+                                           methodToCall.Name, args));
                                     object result = methodToCall.Invoke(habitatSolver, new object[] {args.ToArray()});
                                     r &= (bool) result;
                                 }
@@ -1341,7 +1365,7 @@ namespace VoxSimPlatform {
                     }
                 }
 
-                Debug.Log(string.Format("{0}: H[{1}]:{2}", obj.name, habitatIndex, r));
+                Debug.Log(string.Format("{0}.H[{1}]: {2}", obj.name, habitatIndex, r));
                 return r;
             }
 
@@ -1352,25 +1376,26 @@ namespace VoxSimPlatform {
                 Bounds bounds2 = GlobalHelper.GetObjectWorldSize(obj2);
 
                 Regex align = new Regex(@"align\(.+,.+\)");
-                List<string> habitats = new List<string>();
+                List<string> habitatAxes = new List<string>();
                 foreach (int i in GlobalHelper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
                     .IntrinsicHabitats.Keys) {
-                    habitats.AddRange(GlobalHelper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
+                    habitatAxes.AddRange(GlobalHelper.GetMostImmediateParentVoxeme(obj2).GetComponent<Voxeme>().opVox.Habitat
                         .IntrinsicHabitats[i].Where((h => align.IsMatch(h))));
                 }
 
-                for (int i = 0; i < habitats.Count; i++) {
-                    habitats[i] = align.Match(habitats[i]).Value.Replace("align(", "").Replace(")", "").Split(',')[0];
+                for (int i = 0; i < habitatAxes.Count; i++) {
+                    habitatAxes[i] = GlobalHelper.GetTopPredicate(
+                        align.Match(habitatAxes[i]).Value.Replace("align(", "").Replace(")", "").Split(',')[0]).Trim('_');
                 }
 
                 // (default to Y-alignment if no encoding exists)
-                if (habitats.Count == 0) {
-                    habitats.Add("Y");
+                if (habitatAxes.Count == 0) {
+                    habitatAxes.Add("Y");
                 }
 
                 if (relation == "on") {
                     // TODO: needs to be fixed: PO, TPP(i), NTPP(i) for contacting regions along axis; relation satisfied only within EPSILON radius of ground obj position
-                    foreach (string axis in habitats) {
+                    foreach (string axis in habitatAxes) {
                         //Debug.Break ();
     //                    Debug.Log (obj1);
     //                    Debug.Log (obj2);
@@ -1452,7 +1477,8 @@ namespace VoxSimPlatform {
                             r &= RCC8.PO(bounds1, bounds2);
                         }
                         else {
-                            switch (axis) {
+	                        Debug.Log(axis);
+	                        switch (axis) {
                                 case "X":
                                     r = (Vector3.Distance(
                                              new Vector3(obj2.gameObject.transform.position.x,

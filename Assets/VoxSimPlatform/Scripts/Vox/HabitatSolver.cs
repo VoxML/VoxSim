@@ -1,13 +1,21 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
+using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 
 namespace VoxSimPlatform {
     namespace Vox {
         public class HabitatSolver : MonoBehaviour {
+            EventManager em;
+            Predicates preds;
+
         	// Use this for initialization
         	void Start() {
+                em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
         	}
 
         	// IN: GameObject args[0]: the object in question
@@ -23,10 +31,33 @@ namespace VoxSimPlatform {
         		}
 
         		if (args[1] is string) {
-        			axis1str = (args[1] as string);
-        			if (Constants.Axes.ContainsKey(axis1str)) {
-        				axis1 = obj.transform.rotation * Constants.Axes[axis1str];
-        			}
+                    // if args[1] is in predicate form, we have to evaluate that predicate
+                    //  the predicate should operate over a component index
+                    if (GlobalHelper.pred.IsMatch(args[1] as string)) {
+                        Debug.Log(args[1] as string);
+                        if (GlobalHelper.pred.IsMatch(args[1] as string)) {
+                            List<object> objs = em.ExtractObjects(GlobalHelper.GetTopPredicate(args[1] as string),
+                                    (string)GlobalHelper.ParsePredicate(args[1] as string)[GlobalHelper.GetTopPredicate(args[1] as string)]);
+
+                            MethodInfo methodToCall = preds.GetType().GetMethod(GlobalHelper.GetTopPredicate(args[1] as string));
+                            
+                            if (methodToCall != null) {
+                                object result = methodToCall.Invoke(preds, new object[]{ objs.ToArray() });
+
+                                if (result is Vector3) {
+                                    Debug.Log(result);
+                                    axis1 = Quaternion.Inverse(obj.transform.rotation) * (Vector3)result;
+                                    Debug.Log(axis1);
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        axis1str = (args[1] as string);
+                        if (Constants.Axes.ContainsKey(axis1str)) {
+                            axis1 = obj.transform.rotation * Constants.Axes[axis1str];
+                        }
+                    }
         		}
 
         		if (args[2] is string) {
@@ -67,9 +98,10 @@ namespace VoxSimPlatform {
         		}
 
         		Debug.Log(obj.transform.up);
+                Debug.Log(obj.transform.rotation * obj.transform.up);
 
         		Debug.Log(string.Format("{0}.top({1})", obj.name, axis));
-        		bool r = Mathf.Abs(Vector3.Dot(obj.transform.up, axis) - 1) < Constants.EPSILON;
+        		bool r = Mathf.Abs(Vector3.Dot(Quaternion.Inverse(obj.transform.rotation) * obj.transform.up, axis) - 1) < Constants.EPSILON;
         		Debug.Log(r);
         		return r;
         	}

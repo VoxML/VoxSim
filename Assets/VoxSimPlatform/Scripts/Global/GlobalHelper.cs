@@ -503,10 +503,23 @@ namespace VoxSimPlatform {
                 //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
                 //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
 
-	            combinedBounds.SetMinMax(
-		            combinedBounds.min + (obj.transform.position-combinedBounds.center),
-		            combinedBounds.max + (obj.transform.position-combinedBounds.center));
+	            Debug.Log(VectorToParsable(combinedBounds.min));
+	            Debug.Log(VectorToParsable(combinedBounds.max));
+	            Debug.Log(VectorToParsable(obj.transform.position));
+	            Debug.Log(VectorToParsable(combinedBounds.center));
+	            Debug.Log(VectorToParsable(obj.transform.position-combinedBounds.center));
+
+	            //combinedBounds.SetMinMax(
+	            //    combinedBounds.min + (obj.transform.position-combinedBounds.center),
+	            //    combinedBounds.max + (obj.transform.position-combinedBounds.center));
 		            
+	            //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
+	            //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
+
+	            Debug.Log(VectorToParsable(combinedBounds.min));
+	            Debug.Log(VectorToParsable(combinedBounds.max));
+	            Debug.Log(VectorToParsable(combinedBounds.center));
+	            
                 List<Vector3> pts = new List<Vector3>(new Vector3[] {
                     new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
                     new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),

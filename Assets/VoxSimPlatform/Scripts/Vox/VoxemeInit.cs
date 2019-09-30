@@ -174,6 +174,8 @@ namespace VoxSimPlatform {
         						container.GetComponent<Rigging>().ActivatePhysics(false);
         					}
 
+                            container.tag = go.tag;
+
         					// add to master voxeme list
         					objSelector.allVoxemes.Add(container.GetComponent<Voxeme>());
         					Debug.Log(GlobalHelper.VectorToParsable(container.transform.position -

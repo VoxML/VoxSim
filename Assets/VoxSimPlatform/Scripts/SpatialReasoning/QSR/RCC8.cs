@@ -165,15 +165,23 @@ namespace VoxSimPlatform {
 	                            : point.z);
                             bool hit = Physics.Raycast(origin, -Vector3.up, out hitInfo);
                             
-	                        if ((hit) && (y.Contains(GlobalHelper.GetObjectWorldSize(
-		                        GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject)).center)) &&
-		                        (hitInfo.distance <= Constants.EPSILON * 3)) {
-		                        Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
-			                        GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
-		                        	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
-		                        	hitInfo.distance));
-                                ec = true;
-                            }
+	                        if (hit) {
+	                        	if ((y.Contains(GlobalHelper.GetObjectWorldSize(
+		                        	GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject)).center)) &&
+		                        	(hitInfo.distance <= Constants.EPSILON * 3)) {
+			                        Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
+			                        	GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
+			                        	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
+			                        	hitInfo.distance));
+		                        	ec = true;
+		                    	}
+	                        	else {
+		                        	Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
+			                        	GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
+			                        	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
+			                        	hitInfo.distance));
+	                        	}
+	                        }
                         }
                     }
                     //}
