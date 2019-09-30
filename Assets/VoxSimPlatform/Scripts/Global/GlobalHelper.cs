@@ -456,29 +456,45 @@ namespace VoxSimPlatform {
                              (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
                                  c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
                     foreach (MeshFilter mesh in children) {
-                        Debug.Log(mesh.gameObject);
+	                    Debug.Log(string.Format("Excluding {0} from bounds of {1}", mesh.gameObject.name, obj.name));
                         exclude.Add(mesh.gameObject);
                     }
                 }
 
-                Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
+	            Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
 
                 foreach (MeshFilter mesh in meshes) {
                     if (!exclude.Contains(mesh.gameObject)) {
-                        Debug.Log(string.Format("{0}: Adding {1} to combined bounds", obj, mesh.gameObject));
-                        // create a temp bounds of size of mesh, centered on origin
-                        Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
-                        // scale it by object size
-                        Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
-                            temp.min.y * mesh.gameObject.transform.lossyScale.y,
-                            temp.min.z * mesh.gameObject.transform.lossyScale.z);
-                        min = RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
-                        Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
-                            temp.max.y * mesh.gameObject.transform.lossyScale.y,
-                            temp.max.z * mesh.gameObject.transform.lossyScale.z);
-                        max = RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
-                        // set min and max
-                        temp.SetMinMax(min, max);
+	                    // create a temp bounds of size of mesh, centered on origin
+	                    //Bounds temp = new Bounds(
+	                    //    new Vector3(mesh.mesh.bounds.center.x * mesh.gameObject.transform.lossyScale.x,
+	                    //    mesh.mesh.bounds.center.y * mesh.gameObject.transform.lossyScale.y,
+	                    //    mesh.mesh.bounds.center.z * mesh.gameObject.transform.lossyScale.z),
+	                    //    new Vector3(mesh.mesh.bounds.size.x * mesh.gameObject.transform.lossyScale.x,
+	                    //    mesh.mesh.bounds.size.y * mesh.gameObject.transform.lossyScale.y,
+	                    //    mesh.mesh.bounds.size.z * mesh.gameObject.transform.lossyScale.z));
+                    	Bounds temp = GetObjectWorldSize(mesh.gameObject);
+	                    // scale it by object size and rotate it around pivot (currently origin) by rot
+	                    //Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
+	                    //    temp.min.y * mesh.gameObject.transform.lossyScale.y,
+	                    //    temp.min.z * mesh.gameObject.transform.lossyScale.z);
+	                    //min = RotatePointAroundPivot(temp.min, temp.center, mesh.gameObject.transform.eulerAngles);
+	                    //Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
+	                    //    temp.max.y * mesh.gameObject.transform.lossyScale.y,
+	                    //    temp.max.z * mesh.gameObject.transform.lossyScale.z);
+	                    //max = RotatePointAroundPivot(temp.max, temp.center, mesh.gameObject.transform.eulerAngles);
+	                    //// offset it (recenter at center of original mesh bounds)
+	                    //min += RotatePointAroundPivot(new Vector3(mesh.mesh.bounds.center.x * mesh.gameObject.transform.lossyScale.x,
+		                //    mesh.mesh.bounds.center.y * mesh.gameObject.transform.lossyScale.y,
+		                //    mesh.mesh.bounds.center.z * mesh.gameObject.transform.lossyScale.z), temp.center, mesh.gameObject.transform.eulerAngles);
+	                    //max += RotatePointAroundPivot(new Vector3(mesh.mesh.bounds.center.x * mesh.gameObject.transform.lossyScale.x,
+		                //    mesh.mesh.bounds.center.y * mesh.gameObject.transform.lossyScale.y,
+		                //    mesh.mesh.bounds.center.z * mesh.gameObject.transform.lossyScale.z), temp.center, mesh.gameObject.transform.eulerAngles);
+	                    // set min and max
+	                    //temp.SetMinMax(min, max);
+	                    Debug.Log(string.Format("{0}: Adding {1}@{2} of size {3} to combined bounds", obj, mesh.gameObject,
+	                    	VectorToParsable(temp.center), VectorToParsable(temp.size)));
+
                         // combined bounds = current combined bounds stretched to encapsulate this temp
                         combinedBounds.Encapsulate(temp);
                     }
@@ -487,10 +503,23 @@ namespace VoxSimPlatform {
                 //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
                 //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
 
-                combinedBounds.SetMinMax(
-                    combinedBounds.center + GetObjectWorldSize(obj).center - combinedBounds.extents,
-                    combinedBounds.center + GetObjectWorldSize(obj).center + combinedBounds.extents);
+	            Debug.Log(VectorToParsable(combinedBounds.min));
+	            Debug.Log(VectorToParsable(combinedBounds.max));
+	            Debug.Log(VectorToParsable(obj.transform.position));
+	            Debug.Log(VectorToParsable(combinedBounds.center));
+	            Debug.Log(VectorToParsable(obj.transform.position-combinedBounds.center));
 
+	            //combinedBounds.SetMinMax(
+	            //    combinedBounds.min + (obj.transform.position-combinedBounds.center),
+	            //    combinedBounds.max + (obj.transform.position-combinedBounds.center));
+		            
+	            //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
+	            //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
+
+	            Debug.Log(VectorToParsable(combinedBounds.min));
+	            Debug.Log(VectorToParsable(combinedBounds.max));
+	            Debug.Log(VectorToParsable(combinedBounds.center));
+	            
                 List<Vector3> pts = new List<Vector3>(new Vector3[] {
                     new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
                     new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
@@ -513,12 +542,14 @@ namespace VoxSimPlatform {
                 List<Vector3> points = new List<Vector3>();
                 foreach (Vector3 pt in pts) {
                     points.Add(pt);
-                    bounds.Encapsulate(pt);
                 }
 
-                Debug.Log(VectorToParsable(bounds.size));
-
-                objBounds.Points = new List<Vector3>(points);
+	            objBounds.Points = new List<Vector3>(points);
+                
+	            Debug.Log(string.Format("Center of {0}{1} = {2}; Size of {0}{1} = {3}; Points = [{4}]",
+		            obj.name, excludeChildren ? " excluding children" : string.Empty,
+		            VectorToParsable(combinedBounds.center), VectorToParsable(combinedBounds.size),
+	            	string.Join(",",points.Select(p => VectorToParsable(p)))));
 
                 return objBounds;
 
@@ -643,7 +674,9 @@ namespace VoxSimPlatform {
                     }
                 }
 
-                Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+	            // Warning: this gets weird if the pivot point for the object is not inside the bounds of the mesh
+	            //	but that is a sign of a badly made geometry
+	            Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
 
                 foreach (Renderer renderer in renderers) {
                     if (!exclude.Contains(renderer.transform.gameObject)) {

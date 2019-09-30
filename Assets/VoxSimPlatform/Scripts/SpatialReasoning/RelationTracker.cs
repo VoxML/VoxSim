@@ -15,6 +15,7 @@ namespace VoxSimPlatform {
     namespace SpatialReasoning {
         public class RelationTracker : MonoBehaviour {
         	ObjectSelector objectSelector;
+        	VoxMLLibrary voxmlLibrary;
 
         	public Hashtable relations = new Hashtable();
         	public List<String> relStrings = new List<String>();
@@ -24,6 +25,7 @@ namespace VoxSimPlatform {
         	// Use this for initialization
         	void Start() {
         		objectSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
+        		voxmlLibrary = GameObject.Find("VoxWorld").GetComponent<VoxMLLibrary>();
         	}
 
         	// Update is called once per frame
@@ -51,16 +53,10 @@ namespace VoxSimPlatform {
         	}
 
         	public void AddNewRelation(List<GameObject> objs, string relation, bool recurse = true) {
-        		VoxML voxml = null;
-                // TODO: check all relations in Data + primitives (i.e., is HOLD a primitive?)
-        		try {
-        			using (StreamReader sr = new StreamReader(
-        				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("relations/{0}.xml", relation)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), relation);
-                    }
-        		}
-        		catch (Exception e) {
-        			Debug.Log(e.Message);
+	        	VoxML voxml = null;
+        		if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(relation)) &&
+        		(voxmlLibrary.VoxMLEntityTypeDict[relation] == "relations")) {
+        			voxml = voxmlLibrary.VoxMLObjectDict[relation];
         		}
 
         		foreach (List<GameObject> key in relations.Keys) {
@@ -109,15 +105,9 @@ namespace VoxSimPlatform {
 
         	public void RemoveRelation(List<GameObject> objs, string relation, bool recurse = true) {
         		VoxML voxml = null;
-        		try {
-        			using (StreamReader sr = new StreamReader(
-        				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("relations/{0}.xml", relation)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), relation);
-        			}
-        		}
-        		catch (Exception e) {
-        			// TODO: fix
-        			//Debug.Log (e.Message);
+        		if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(relation)) &&
+        			(voxmlLibrary.VoxMLEntityTypeDict[relation] == "relations")) {
+        			voxml = voxmlLibrary.VoxMLObjectDict[relation];
         		}
 
         		foreach (List<GameObject> key in relations.Keys) {

@@ -6599,6 +6599,48 @@ namespace VoxSimPlatform {
         	}
 
             // IN: Object (single element array)
+            // OUT: Vector3 (orientation of X axis of object)
+            public Vector3 _X(object[] args) {
+                Vector3 xAxis = MajorAxes.AxisVector.posXAxis;
+
+                if (args.Length > 0) {
+                    if (args[0] is GameObject) {
+                        xAxis = (args[0] as GameObject).transform.rotation * xAxis;
+                    }
+                }
+
+                return xAxis;
+            }
+
+            // IN: Object (single element array)
+            // OUT: Vector3 (orientation of Y axis of object)
+            public Vector3 _Y(object[] args) {
+                Vector3 yAxis = MajorAxes.AxisVector.posYAxis;
+
+                if (args.Length > 0) {
+                    if (args[0] is GameObject) {
+                        yAxis = (args[0] as GameObject).transform.rotation * yAxis;
+                    }
+                }
+
+                return yAxis;
+            }
+
+            // IN: Object (single element array)
+            // OUT: Vector3 (orientation of Z axis of object)
+            public Vector3 _Z(object[] args) {
+                Vector3 zAxis = MajorAxes.AxisVector.posZAxis;
+
+                if (args.Length > 0) {
+                    if (args[0] is GameObject) {
+                        zAxis = (args[0] as GameObject).transform.rotation * zAxis;
+                    }
+                }
+
+                return zAxis;
+            }
+
+            // IN: Object (single element array)
             // OUT: float (x value of object coordinate)
             public float X(object[] args) {
                 float x = 0.0f;

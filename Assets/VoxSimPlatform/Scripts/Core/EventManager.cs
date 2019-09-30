@@ -249,7 +249,7 @@ namespace VoxSimPlatform {
                 
                 //eventWaitTimer = new Timer (eventWaitTime);
                 //eventWaitTimer.Enabled = false;
-                //eventWaitTimer.Elapsed += ExecuteNextEvent;
+	            //eventWaitTimer.Elapsed += ExecuteNextEvent;
             }
                 
             string completedEvent = "";
@@ -868,7 +868,7 @@ namespace VoxSimPlatform {
                         if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(GlobalHelper.GetTopPredicate((String)entry.Value))) {
                             // look in VoxML entity type dictionary
                             string predType = voxmlLibrary.VoxMLEntityTypeDict[GlobalHelper.GetTopPredicate((String)entry.Value)];
-                            Debug.Log(string.Format("Voxmeme \"{0}\" is of type {1}", GlobalHelper.GetTopPredicate((String)entry.Value),
+                            Debug.Log(string.Format("Voxeme \"{0}\" is of type {1}", GlobalHelper.GetTopPredicate((String)entry.Value),
                                 predType));
                             // if predicate is a relation
                             if (predType == "relations") {

@@ -1,19 +1,23 @@
 fileFormatVersion: 2
-guid: 1f16052dfd5f6f54e94e97ecedd4c86b
-timeCreated: 1447161301
-licenseType: Store
+guid: 35ff0d8eb991a4ec79141b4c2238bc0d
 TrueTypeFontImporter:
-  serializedVersion: 2
+  externalObjects: {}
+  serializedVersion: 4
   fontSize: 16
   forceTextureCase: -2
-  characterSpacing: 1
-  characterPadding: 0
+  characterSpacing: 0
+  characterPadding: 1
   includeFontData: 1
-  use2xBehaviour: 0
-  fontNames: []
-  fallbackFontReferences: []
+  fontName: Unipix
+  fontNames:
+  - Unipix
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 1f16052dfd5f6f54e94e97ecedd4c86b, type: 3}
   customCharacters: 
   fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
   userData: 
   assetBundleName: 
   assetBundleVariant: 

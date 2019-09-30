@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 using Object = UnityEngine.Object;
@@ -174,6 +174,8 @@ namespace VoxSimPlatform {
         						container.GetComponent<Rigging>().ActivatePhysics(false);
         					}
 
+                            container.tag = go.tag;
+
         					// add to master voxeme list
         					objSelector.allVoxemes.Add(container.GetComponent<Voxeme>());
         					Debug.Log(GlobalHelper.VectorToParsable(container.transform.position -
@@ -184,7 +186,8 @@ namespace VoxSimPlatform {
 
         		// set joint links between all subobjects (Cartesian product)
         		foreach (GameObject go in allObjects) {
-        			if (go.activeInHierarchy) {
+        			if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null) &&
+                        (go.GetComponent<Voxeme>().isActiveAndEnabled)) {
         				// remove BoxCollider and Rigidbody on non-top level objects
         				if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
         				    (go.transform.root.tag != "Agent")) {
