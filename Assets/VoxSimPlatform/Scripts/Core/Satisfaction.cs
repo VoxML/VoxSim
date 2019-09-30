@@ -1561,26 +1561,44 @@ namespace VoxSimPlatform {
                 }
                 else if (relation == "under") {
                     //Debug.Log (obj1.name);
-                    //Debug.Log (new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z));
+	                //Debug.Log (GlobalHelper.VectorToParsable(new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z)));
                     //Debug.Log (obj2.name);
-                    //Debug.Log (obj2.transform.position);
-                    float dist = Vector3.Distance(
-                        new Vector3(obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y,
-                            obj1.gameObject.transform.position.z),
-                        obj2.gameObject.transform.position);
-                    //Debug.Log (Vector3.Distance (
-                    //    new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
-                    //    obj2.gameObject.transform.position));
-                    r = (Vector3.Distance(
-                             new Vector3(obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y,
-                                 obj1.gameObject.transform.position.z),
-                             obj2.gameObject.transform.position) <= Constants.EPSILON);
-                    r &= (obj1.gameObject.transform.position.y < obj2.gameObject.transform.position.y);
+	                //Debug.Log (GlobalHelper.VectorToParsable(obj2.transform.position);
+                    //float dist = Vector3.Distance(
+                    //    new Vector3(obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y,
+                    //        obj1.gameObject.transform.position.z),
+                    //    obj2.gameObject.transform.position);
+                    ////Debug.Log (Vector3.Distance (
+                    ////    new Vector3 (obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y, obj1.gameObject.transform.position.z),
+                    ////    obj2.gameObject.transform.position));
+                    //r = (Vector3.Distance(
+                    //     new Vector3(obj1.gameObject.transform.position.x, obj2.gameObject.transform.position.y,
+                    //         obj1.gameObject.transform.position.z),
+                    //     obj2.gameObject.transform.position) <= Constants.EPSILON);
+	                //r &= (obj1.gameObject.transform.position.y < obj2.gameObject.transform.position.y);
+                    
+	                r = QSR.Below(bounds1, bounds2) &&
+		            	(RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X) ||
+		                	RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
+			                RectAlgebra.During(bounds1, bounds2, MajorAxis.X) ||
+			                RectAlgebra.During(bounds1, bounds2, MajorAxis.X, true) ||
+			                RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X) ||
+			                RectAlgebra.Starts(bounds1, bounds2, MajorAxis.X, true) ||
+			                RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X) ||
+			                RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.X, true)) &&
+		                (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z) ||
+			                RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.Z, true) ||
+			                RectAlgebra.During(bounds1, bounds2, MajorAxis.Z) ||
+			                RectAlgebra.During(bounds1, bounds2, MajorAxis.Z, true) ||
+			                RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z) ||
+			                RectAlgebra.Starts(bounds1, bounds2, MajorAxis.Z, true) ||
+			                RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z) ||
+			                RectAlgebra.Finishes(bounds1, bounds2, MajorAxis.Z, true));
                 }
                 // add generic relations--left, right, etc.
                 // TODO: must transform to camera perspective if relative persp is on
                 else if (relation == "behind") {
-                    r = QSR.Behind(bounds1, bounds2) &&
+	                r = QSR.Behind(bounds1, bounds2) &&
                         (RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X) ||
                          RectAlgebra.Overlaps(bounds1, bounds2, MajorAxis.X, true) ||
                          RectAlgebra.During(bounds1, bounds2, MajorAxis.X) ||
