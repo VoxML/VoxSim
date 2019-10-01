@@ -103,12 +103,14 @@ namespace VoxSimPlatform {
             bool eventWaitCompleted = false;
 
             string skolemized, evaluated;
-            public Predicates preds;
             String nextQueuedEvent = "";
             int argVarIndex = 0;
             Hashtable skolems = new Hashtable();
             string argVarPrefix = @"_ARG";
-            String nextIncompleteEvent;
+	        String nextIncompleteEvent;
+            
+	        object invocationTarget;
+	        public Predicates preds;
 
             MethodInfo _methodToCall;
             public MethodInfo methodToCall {
@@ -644,13 +646,30 @@ namespace VoxSimPlatform {
                     }
                 }
 
-                objs.Add(true);
-                methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+	            objs.Add(true);
+
+	            invocationTarget = preds;
+	            if (preds.primitivesOverride != null) {
+		            methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
+
+		            // couldn't find an override primitive predicate
+		            //  default to the existing primitive
+		            if (methodToCall == null) {
+			            methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+		            }
+		            else {
+			            invocationTarget = preds.primitivesOverride;
+		            }
+	            }
+	            else {
+		            methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+	            }
+	            
                 return objs;
             }
 
             public void ExecuteCommand(String evaluatedCommand) {
-                Debug.Log("Executing command: " + evaluatedCommand);
+                Debug.Log(string.Format("Executing command: {0} ", evaluatedCommand));
                 Hashtable predArgs = GlobalHelper.ParsePredicate(evaluatedCommand);
                 String pred = GlobalHelper.GetTopPredicate(evaluatedCommand);
 
@@ -718,19 +737,18 @@ namespace VoxSimPlatform {
                                 // found a method
                                 if (methodToCall.ReturnType == typeof(void)) {
                                     // is it a program?
-                                    Debug.Log("========================== ExecuteCommand ============================ " +
-                                              evaluatedCommand);
-                                    Debug.Log("ExecuteCommand: invoke " + methodToCall.Name);
-                                    Debug.Log(string.Format("{0} : {1}", evaluatedCommand,
-                                        GlobalHelper.VectorToParsable((objs[0] as GameObject).GetComponent<Voxeme>()
-                                            .targetPosition)));
-                                    object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                    Debug.Log(string.Format("ExecuteCommand ({0}): invoke {1} with {2}",
+                                        evaluatedCommand, methodToCall.Name, objs));
+	                                object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                     OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
                                 }
                                 else {
                                     // not a program
-                                    object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
-                                    Debug.Log(string.Format("{0}:{1}", obj, obj.GetType()));
+                                    Debug.Log(string.Format("ExecuteCommand ({0}): invoke {1} with {2}",
+                                        evaluatedCommand, methodToCall.Name, objs));
+	                                object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
+                                    Debug.Log(string.Format("ExecuteCommand ({0}): {1} returned {2} (typeof {3})",
+                                        evaluatedCommand, methodToCall.Name, obj, obj.GetType()));
                                     if (obj.ToString() == string.Empty) {
                                         OnNonexistentEntityError(this,
                                             new EventReferentArgs(
@@ -768,7 +786,7 @@ namespace VoxSimPlatform {
                                     Debug.Log("========================== ExecuteCommand ============================ " +
                                               evaluatedCommand);
                                     Debug.Log("ExecuteCommand: invoke " + methodToCall.Name);
-                                    object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                    object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                     OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
                                 }
                             }
@@ -1388,12 +1406,14 @@ namespace VoxSimPlatform {
                                     if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
                                         (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs"))) {
                                         voxml = voxmlLibrary.VoxMLObjectDict[pred];
-                                        methodToCall = preds.GetType().GetMethod("ComposeProgram");
+	                                    methodToCall = preds.GetType().GetMethod("ComposeProgram");
+	                                    invocationTarget = preds;
                                     }
                                     else if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
                                         (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))) {
                                         voxml = voxmlLibrary.VoxMLObjectDict[pred];
-                                        methodToCall = preds.GetType().GetMethod("ComposeRelation");
+	                                    methodToCall = preds.GetType().GetMethod("ComposeRelation");
+	                                    invocationTarget = preds;
                                     }
                                 }
 
@@ -1407,10 +1427,10 @@ namespace VoxSimPlatform {
                                             pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
                                         object obj = null;
                                         if (voxml == null) {
-                                            obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                            obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                         }
                                         else {
-                                            obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                                            obj = methodToCall.Invoke(invocationTarget, new object[] {voxml, objs.ToArray()});
                                         } 
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): {1} returns {2} (typeof({3}))",
                                             pass, methodToCall.Name, obj, obj.GetType()));
@@ -1457,10 +1477,10 @@ namespace VoxSimPlatform {
                                             pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
                                         object obj = null;
                                         if (voxml == null) {
-                                            obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                                            obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                         }
                                         else {
-                                            obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                                            obj = methodToCall.Invoke(invocationTarget, new object[] {voxml, objs.ToArray()});
                                         } 
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): {1} returns {2} (typeof({3}))",
                                             pass, methodToCall.Name, obj, obj.GetType()));

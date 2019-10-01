@@ -66,9 +66,7 @@ namespace VoxSimPlatform {
         							newAttrSet.attributes.Add(s);
         						}
         					}
-
-        					Debug.Log(newAttrSet.attributes.Count);
-
+                                
         					// copy interaction object
         					InteractionObject interactionObject = go.GetComponent<InteractionObject>();
         					if (interactionObject != null) {
@@ -174,6 +172,9 @@ namespace VoxSimPlatform {
         						container.GetComponent<Rigging>().ActivatePhysics(false);
         					}
 
+                            foreach(Transform transform in go.transform) {
+                                transform.gameObject.tag = go.tag;
+                            }
                             container.tag = go.tag;
 
         					// add to master voxeme list

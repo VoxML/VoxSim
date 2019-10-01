@@ -94,12 +94,14 @@ namespace VoxSimPlatform {
     //                              Quaternion.Inverse (Quaternion.Euler (voxComponent.rotationalDisplacement [rigidbodies [0].gameObject])));
                             //(rigidbodies [0].transform.localRotation *
     //                          obj.transform.rotation * Quaternion.Inverse (Quaternion.Euler (voxComponent.rotationalDisplacement [rigidbodies [0].gameObject])));
-                            obj.transform.rotation = rigidbodies[0].transform.rotation *
-                                                     Quaternion.Inverse(Quaternion.Euler(
-                                                         voxComponent.rotationalDisplacement[rigidbodies[0].gameObject]));
-                            voxComponent.targetRotation = obj.transform.rotation.eulerAngles;
-                            //Debug.Log (obj.transform.rotation.eulerAngles);
-
+                            
+	                        if (voxComponent.rotationalDisplacement.ContainsKey(rigidbodies[0].gameObject)) {
+		                        obj.transform.rotation = rigidbodies[0].transform.rotation *
+	                                                     Quaternion.Inverse(Quaternion.Euler(
+	                                                         voxComponent.rotationalDisplacement[rigidbodies[0].gameObject]));
+	                            voxComponent.targetRotation = obj.transform.rotation.eulerAngles;
+	                        }
+	                        
                             foreach (Rigidbody rigidbody in rigidbodies) {
                                 if (voxComponent.rotationalDisplacement.ContainsKey(rigidbody.gameObject)) {
                                     //Debug.Log (rigidbody.name);

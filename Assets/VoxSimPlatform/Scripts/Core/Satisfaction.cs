@@ -446,15 +446,22 @@ namespace VoxSimPlatform {
                     // satisfy grasp
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-
-                    if ((agent.GetComponent<InteractionSystem>().IsPaused(FullBodyBipedEffector.LeftHand)) ||
-                        (agent.GetComponent<InteractionSystem>().IsPaused(FullBodyBipedEffector.RightHand))) {
-                        foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
-                            handRot.enabled = false;
+	                InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
+	                
+	                if (interactionSystem != null) {
+	                    if ((interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
+	                        (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
+	                        foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+	                            handRot.enabled = false;
+	                        }
+	
+	                        satisfied = true;
                         }
-
-                        satisfied = true;
-                    }
+	                }
+	                else {
+	                	// handle non-default interaction systems here
+	                	satisfied = true;
+	                }
 
     //                if (theme != null) {
     //                    if (agent != null) {
@@ -480,16 +487,23 @@ namespace VoxSimPlatform {
                     // satisfy ungrasp
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+	                InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
 
-                    if ((!agent.GetComponent<InteractionSystem>().IsPaused(FullBodyBipedEffector.LeftHand)) ||
-                        (!agent.GetComponent<InteractionSystem>().IsPaused(FullBodyBipedEffector.RightHand))) {
-                        foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
-                            handRot.enabled = true;
+	                if (interactionSystem != null) {
+	                    if ((!interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
+	                        (!interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
+	                        foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+	                            handRot.enabled = true;
+	                        }
+	
+	                        satisfied = true;
+	    //                    ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());    // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
                         }
-
-                        satisfied = true;
-    //                    ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());    // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
-                    }
+	                } 
+	                else {
+		                // handle non-default interaction systems here
+		                satisfied = true;
+	                }
 
     //                GameObject theme = GameObject.Find (argsStrings [0] as String);
     //                GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
@@ -575,10 +589,27 @@ namespace VoxSimPlatform {
                     Queue<String> argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
                     List<object> objs = new List<object>();
                     Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-                    MethodInfo methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+	                object invocationTarget = preds;
+
+                    MethodInfo methodToCall = null;
                     VoxML voxml = null;
 
-                    methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                    if (preds.primitivesOverride != null) {
+	                    methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
+
+                        // couldn't find an override primitive predicate
+                        //  default to the existing primitive
+                        if (methodToCall == null) {
+                            methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                        }
+                        else {
+                        	invocationTarget = preds.primitivesOverride;
+                        }
+                    }
+                    else {
+                        methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                    }
+
                     if (methodToCall == null) {
                         if ((em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
                             (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
@@ -673,8 +704,8 @@ namespace VoxSimPlatform {
                                                     }
                                                 }
                                                 else {
-                                                    if (go.GetComponent<Voxeme>() != null) {
-                                                        if ((em.referents.stack.Count == 0) ||
+	                                                if (go.GetComponent<Voxeme>() != null) {
+		                                                if ((em.referents.stack.Count == 0) ||
                                                             (!em.referents.stack.Peek().Equals(go.name))) {
                                                             em.referents.stack.Push(go.name);
                                                         }
@@ -768,22 +799,22 @@ namespace VoxSimPlatform {
                             object obj = null;
  
                             if (voxml == null) {
-                                obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+	                            obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                             }
                             else {
-                                obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
+                                obj = methodToCall.Invoke(invocationTarget, new object[] {voxml, objs.ToArray()});
                             } 
                         }
                         else if (methodToCall.ReturnType == typeof(bool)) {
                             // is it a conditional?
                             Debug.Log("ComputeSatisfactionConditions: invoke " + methodToCall.Name);
-                            object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                            object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                         }
                         else {
                             // not a program or conditional
                             Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program or conditional! Returns {1}",
                                 methodToCall.Name, methodToCall.ReturnType));
-                            object obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
+                            object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                             if (obj is String) {
                                 Debug.Log(obj as String);
                                 if (GameObject.Find(obj as String) == null) {

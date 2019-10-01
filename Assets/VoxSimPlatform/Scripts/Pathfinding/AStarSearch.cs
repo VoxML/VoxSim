@@ -33,6 +33,8 @@ namespace VoxSimPlatform {
         		foreach (GameObject o in allObjects) {
         			if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
         				if (testBounds.Intersects(GlobalHelper.GetObjectWorldSize(o))) {
+        					Debug.Log(string.Format("Node position {0} intersects {1}",
+        						GlobalHelper.VectorToParsable(curPoint),o.name));
         					spaceClear = false;
         					break;
         				}
@@ -55,8 +57,10 @@ namespace VoxSimPlatform {
         			if (i * i == step * step || j * j == step * step || k * k == step * step) {
         				Vector3 newNode = new Vector3(curPos.x + i * increment.x, curPos.y + j * increment.y,
         					curPos.z + k * increment.z);
-        				if (TestClear(obj, newNode))
-        					neighbors.Add(newNode);
+        				if (TestClear(obj, newNode)) {
+        					Debug.Log(GlobalHelper.VectorToParsable(newNode));
+		        			neighbors.Add(newNode);
+	        			}
         			}
         		}
 
@@ -187,7 +191,7 @@ namespace VoxSimPlatform {
         		}
         	}
 
-        	// A plan path that run faster and more smooth
+        	// path planner
         	public static List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
         		params object[] constraints) {
 
@@ -297,9 +301,9 @@ namespace VoxSimPlatform {
         		Vector3 bestLastPos = new Vector3();
 
         		if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude) {
-        			Debug.Log(string.Format("{0}-{1}={2}", GlobalHelper.VectorToParsable(goalPos), GlobalHelper.VectorToParsable(startPos),
+        			Debug.Log(string.Format("{0} - {1} = {2}", GlobalHelper.VectorToParsable(goalPos), GlobalHelper.VectorToParsable(startPos),
         				(goalPos - startPos).magnitude));
-        			Debug.Log(string.Format("{0}-{1}={2}", GlobalHelper.VectorToParsable(goalPos), GlobalHelper.VectorToParsable(endPos),
+        			Debug.Log(string.Format("{0} - {1} = {2}", GlobalHelper.VectorToParsable(goalPos), GlobalHelper.VectorToParsable(endPos),
         				(goalPos - endPos).magnitude));
         			while (openSet.Count > 0 && counter < prefs.counterMax) {
         				// O(1)

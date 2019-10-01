@@ -28,6 +28,8 @@ namespace VoxSimPlatform {
         public class Predicates : MonoBehaviour {
         	public List<Triple<String, String, String>> rdfTriples = new List<Triple<String, String, String>>();
         	public bool cameraRelativeDirections = true;
+        	
+        	public MonoBehaviour primitivesOverride;
 
         	public Timer waitTimer = new Timer();
 
