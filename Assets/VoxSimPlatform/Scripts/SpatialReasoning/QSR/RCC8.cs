@@ -123,66 +123,120 @@ namespace VoxSimPlatform {
 	                //Debug.Log(GlobalHelper.VectorToParsable(y.Min(MajorAxis.Y)));
 	                //Debug.Log(GlobalHelper.VectorToParsable(y.Max(MajorAxis.Y)));
 	                if (x.Center.y <= y.Min(MajorAxis.Y).y) {
-		                //Debug.Log(GlobalHelper.VectorToParsable(x.Center));
-		                //Debug.Log(GlobalHelper.VectorToParsable(y.Center));
-                        foreach (Vector3 point in x.Points.Where(p => p.y >= x.Center.y).ToList()) {
-                            RaycastHit hitInfo;
-                            Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
-                                    ? point.x + Constants.EPSILON
-                                    : (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
-                                        ? point.x - Constants.EPSILON
-                                        : point.x,
-                                point.y - Constants.EPSILON, (Mathf.Abs(point.z - x.Min(MajorAxis.Z).z) <= Constants.EPSILON)
-                                    ? point.x + Constants.EPSILON
-                                    : (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
-                                        ? point.z - Constants.EPSILON
-                                        : point.z);
-                            bool hit = Physics.Raycast(origin, Vector3.up, out hitInfo);
+                        //foreach (Vector3 point in x.Points.Where(p => p.y >= x.Center.y).ToList()) {
+                        //    RaycastHit hitInfo;
+                        //    Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
+                        //            ? point.x + Constants.EPSILON
+                        //            : (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
+                        //                ? point.x - Constants.EPSILON
+                        //                : point.x,
+                        //        point.y - Constants.EPSILON, (Mathf.Abs(point.z - x.Min(MajorAxis.Z).z) <= Constants.EPSILON)
+                        //            ? point.x + Constants.EPSILON
+                        //            : (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
+                        //                ? point.z - Constants.EPSILON
+                        //                : point.z);
+                        //    bool hit = Physics.Raycast(origin, Vector3.up, out hitInfo);
 
-                            if ((hit) && (y.Contains(GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
-                                    .position)) &&
-                                (hitInfo.distance <= Constants.EPSILON * 3)) {
-	                            Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
-		                            GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(Vector3.up),
-		                            hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
-		                            hitInfo.distance));
-	                            ec = true;
-                            }
-                        }
+                        //    if ((hit) && (y.Contains(GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).transform
+                        //            .position)) &&
+                        //        (hitInfo.distance <= Constants.EPSILON * 3)) {
+	                    //        Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
+		                //            GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(Vector3.up),
+		                //            hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
+		                //            hitInfo.distance));
+	                    //        ec = true;
+                        //    }
+		                //}
+		                RaycastHit[] hitInfo;
+		                Vector3 center = new Vector3(x.Center.x, x.Center.y - Constants.EPSILON, x.Center.z);
+		                Vector3 halfSize = new Vector3((x.Max(MajorAxis.X).x-x.Min(MajorAxis.X).x)/2.0f,
+		                	(x.Max(MajorAxis.Y).y-x.Min(MajorAxis.Y).y)/2.0f,
+		                	(x.Max(MajorAxis.Z).z-x.Min(MajorAxis.Z).z)/2.0f);
+		                hitInfo = Physics.BoxCastAll(center, halfSize, Vector3.up);
+                            
+		                if (hitInfo.Length > 0) {
+		                	foreach (RaycastHit hit in hitInfo) {
+				                if ((y.Contains(GlobalHelper.GetObjectWorldSize(
+					                GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject)).center)) &&
+				                (hit.distance <= Constants.EPSILON * 3)) {
+					                Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
+						                GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+						                GlobalHelper.VectorToParsable(Vector3.up),
+						                hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
+						                hit.distance));
+					                ec = true;
+				                }
+				                else {
+					                Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
+						                GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+						                GlobalHelper.VectorToParsable(Vector3.up),
+						                hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
+						                hit.distance));
+				                }
+		                	}
+		                }
                     }
                     else if (x.Center.y >= y.Max(MajorAxis.Y).y) {
-                        foreach (Vector3 point in x.Points.Where(p => p.y <= x.Center.y).ToList()) {
-                            RaycastHit hitInfo;
-                            Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
-                                    ? point.x + Constants.EPSILON
-                                    : (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
-                                        ? point.x - Constants.EPSILON
-                                        : point.x,
-                                point.y + Constants.EPSILON, (Mathf.Abs(point.z - x.Min(MajorAxis.Z).z) <= Constants.EPSILON)
-                                    ? point.x + Constants.EPSILON
-                                    : (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
-                                        ? point.z - Constants.EPSILON
-	                            : point.z);
-                            bool hit = Physics.Raycast(origin, -Vector3.up, out hitInfo);
+                        //foreach (Vector3 point in x.Points.Where(p => p.y <= x.Center.y).ToList()) {
+                        //    RaycastHit hitInfo;
+                        //    Vector3 origin = new Vector3((Mathf.Abs(point.x - x.Min(MajorAxis.X).x) <= Constants.EPSILON)
+                        //            ? point.x + Constants.EPSILON
+                        //            : (Mathf.Abs(point.x - x.Max(MajorAxis.X).x) <= Constants.EPSILON)
+                        //                ? point.x - Constants.EPSILON
+                        //                : point.x,
+                        //        point.y + Constants.EPSILON, (Mathf.Abs(point.z - x.Min(MajorAxis.Z).z) <= Constants.EPSILON)
+                        //            ? point.x + Constants.EPSILON
+                        //            : (Mathf.Abs(point.z - x.Max(MajorAxis.Z).z) <= Constants.EPSILON)
+                        //                ? point.z - Constants.EPSILON
+	                    //        : point.z);
+                        //    bool hit = Physics.Raycast(origin, -Vector3.up, out hitInfo);
                             
-	                        if (hit) {
-	                        	if ((y.Contains(GlobalHelper.GetObjectWorldSize(
-		                        	GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject)).center)) &&
-		                        	(hitInfo.distance <= Constants.EPSILON * 3)) {
-			                        Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
-			                        	GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
-			                        	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
-			                        	hitInfo.distance));
-		                        	ec = true;
-		                    	}
-	                        	else {
-		                        	Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
-			                        	GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
-			                        	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
-			                        	hitInfo.distance));
-	                        	}
-	                        }
-                        }
+	                    //    if (hit) {
+	                    //    	if ((y.Contains(GlobalHelper.GetObjectWorldSize(
+		                //        	GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject)).center)) &&
+		                //        	(hitInfo.distance <= Constants.EPSILON * 3)) {
+			            //            Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
+			            //            	GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
+			            //            	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
+			            //            	hitInfo.distance));
+		                //        	ec = true;
+		                //    	}
+	                    //    	else {
+		                //        	Debug.Log(string.Format("Cast ray from {0} in direction {1}, hit {2} (component of {3}) in distance {4}",
+			            //            	GlobalHelper.VectorToParsable(origin), GlobalHelper.VectorToParsable(-Vector3.up),
+			            //            	hitInfo.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hitInfo.collider.gameObject).name,
+			            //            	hitInfo.distance));
+	                    //    	}
+	                    //    }
+	                    //}
+	                    RaycastHit[] hitInfo;
+	                    Vector3 center = new Vector3(x.Center.x, x.Center.y + Constants.EPSILON, x.Center.z);
+	                    Vector3 halfSize = new Vector3((x.Max(MajorAxis.X).x-x.Min(MajorAxis.X).x)/2.0f,
+		                    (x.Max(MajorAxis.Y).y-x.Min(MajorAxis.Y).y)/2.0f,
+		                    (x.Max(MajorAxis.Z).z-x.Min(MajorAxis.Z).z)/2.0f);
+	                    hitInfo = Physics.BoxCastAll(center, halfSize, -Vector3.up);
+                            
+	                    if (hitInfo.Length > 0) {
+		                    foreach (RaycastHit hit in hitInfo) {
+			                    if ((y.Contains(GlobalHelper.GetObjectWorldSize(
+				                    GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject)).center)) &&
+			                    (hit.distance <= Constants.EPSILON * 3)) {
+				                    Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
+					                    GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+					                    GlobalHelper.VectorToParsable(-Vector3.up),
+					                    hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
+					                    hit.distance));
+				                    ec = true;
+			                    }
+			                    else {
+				                    Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
+					                    GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+					                    GlobalHelper.VectorToParsable(-Vector3.up),
+					                    hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
+					                    hit.distance));
+			                    }
+		                    }
+	                    }
                     }
                     //}
         //            }

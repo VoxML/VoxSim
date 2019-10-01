@@ -1718,7 +1718,10 @@ namespace VoxSimPlatform {
     //                r &= (obj1.gameObject.transform.position.x > obj2.gameObject.transform.position.x);
                 }
                 else if (relation == "touching") {
-                    r = RCC8.EC(GlobalHelper.GetObjectOrientedSize(obj1, true), GlobalHelper.GetObjectOrientedSize(obj2, true));
+                	ObjBounds objBounds1 = GlobalHelper.GetObjectOrientedSize(obj1, true);
+                	ObjBounds objBounds2 = GlobalHelper.GetObjectOrientedSize(obj2, true);
+                	
+                    r = RCC8.EC(objBounds1, objBounds2);
     //                r = RCC8.EC(Helper.GetObjectOrientedSize(obj1), Helper.GetObjectOrientedSize(obj2));
                 }
                 else {
