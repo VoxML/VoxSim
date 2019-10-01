@@ -157,7 +157,7 @@ namespace VoxSimPlatform {
 		                if (hitInfo.Length > 0) {
 		                	foreach (RaycastHit hit in hitInfo) {
 				                if ((y.Contains(GlobalHelper.GetObjectWorldSize(
-					                GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject)).center)) &&
+					                GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject),true).center)) &&
 				                (hit.distance <= Constants.EPSILON * 3)) {
 					                Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
 						                GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
@@ -219,7 +219,7 @@ namespace VoxSimPlatform {
 	                    if (hitInfo.Length > 0) {
 		                    foreach (RaycastHit hit in hitInfo) {
 			                    if ((y.Contains(GlobalHelper.GetObjectWorldSize(
-				                    GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject)).center)) &&
+				                    GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject),true).center)) &&
 			                    (hit.distance <= Constants.EPSILON * 3)) {
 				                    Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
 					                    GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
