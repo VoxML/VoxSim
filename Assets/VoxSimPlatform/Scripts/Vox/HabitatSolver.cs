@@ -25,6 +25,8 @@ namespace VoxSimPlatform {
         		GameObject obj = null;
         		string axis1str = string.Empty, axis2str = string.Empty;
         		Vector3 axis1 = Vector3.zero, axis2 = Vector3.zero;
+                if (args.Length < 3)
+                    return false;
 
         		if (args[0] is GameObject) {
         			obj = (args[0] as GameObject);
