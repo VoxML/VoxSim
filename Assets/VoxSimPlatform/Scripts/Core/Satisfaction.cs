@@ -171,20 +171,67 @@ namespace VoxSimPlatform {
 
                 bool isMacroEvent = false;
 
-    //            if (em.isInitiatePhase) {
-    //                return false;
-    //            }
-
                 foreach (DictionaryEntry entry in predArgs) {
                     predString = (String) entry.Key;
                     argsStrings = ((String) entry.Value).Split(',');
                 }
-
-                //Debug.Log (test);
-
+                    
                 // PRIMITIVE MOTIONS
-                if (predString == "move") {
-                    // satisfy move_1
+                if (predString == "grasp") {
+                    // satisfy grasp
+                    GameObject theme = GameObject.Find(argsStrings[0] as String);
+                    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                    InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
+                    
+                    if (interactionSystem != null) {
+                        if ((interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
+                            (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
+                            foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+                                handRot.enabled = false;
+                            }
+    
+                            satisfied = true;
+                        }
+                    }
+                    else {
+                        satisfied = true;
+
+                        // handle non-default interaction systems here
+                        if (preds.primitivesOverride != null) {
+                            MethodInfo methodToCall = preds.primitivesOverride.GetType().GetMethod("IsSatisfied"); 
+                            if (methodToCall != null) {
+                                satisfied = (bool)methodToCall.Invoke(preds.primitivesOverride, new object[]{ test });
+                            } 
+                        }
+                    }
+                }
+                else if (predString == "ungrasp") {
+                    // satisfy ungrasp
+                    GameObject theme = GameObject.Find(argsStrings[0] as String);
+                    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                    InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
+
+                    if (interactionSystem != null) {
+                        if ((!interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
+                            (!interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
+                            foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+                                handRot.enabled = true;
+                            }
+    
+                            satisfied = true;
+                        }
+                    } 
+                    else {
+                        // handle non-default interaction systems here
+                        if (preds.primitivesOverride != null) {
+                        }
+                        else {
+                            satisfied = true;
+                        }
+                    }
+                }
+                else if (predString == "move") {
+                    // satisfy move
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
                         Voxeme voxComponent = theme.GetComponent<Voxeme>();
@@ -192,7 +239,6 @@ namespace VoxSimPlatform {
                             ? voxComponent.graspTracker.transform.position
                             : theme.transform.position;
 
-                        //Debug.Log(string.Format("{0} : {1}", Helper.VectorToParsable(testLocation),argsStrings[1]));
                         if (GlobalHelper.CloseEnough(testLocation, GlobalHelper.ParsableToVector(argsStrings[1]))) {
                             if (voxComponent.isGrasped) {
                                 theme.transform.position = GlobalHelper.ParsableToVector(argsStrings[1]);
@@ -204,6 +250,7 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
+
                 // PRIMITIVE FUNCTIONAL OPERATORS
                 // conditionals
                 else if (predString == "if") {
@@ -442,35 +489,6 @@ namespace VoxSimPlatform {
                     //}
                     //Debug.Log (string.Format ("Reach {0}", satisfied));
                 }
-                else if (predString == "grasp") {
-                    // satisfy grasp
-                    GameObject theme = GameObject.Find(argsStrings[0] as String);
-                    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-	                InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
-	                
-	                if (interactionSystem != null) {
-	                    if ((interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
-	                        (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
-	                        foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
-	                            handRot.enabled = false;
-	                        }
-	
-	                        satisfied = true;
-                        }
-	                }
-	                else {
-	                	// handle non-default interaction systems here
-	                	satisfied = true;
-	                }
-
-    //                if (theme != null) {
-    //                    if (agent != null) {
-    //                        if (theme.transform.IsChildOf (agent.transform)) {
-    //                            satisfied = true;
-    //                        }
-    //                    }
-    //                }
-                }
                 else if (predString == "hold") {
                     // satisfy hold
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
@@ -482,43 +500,6 @@ namespace VoxSimPlatform {
                             }
                         }
                     }
-                }
-                else if (predString == "ungrasp") {
-                    // satisfy ungrasp
-                    GameObject theme = GameObject.Find(argsStrings[0] as String);
-                    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-	                InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
-
-	                if (interactionSystem != null) {
-	                    if ((!interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
-	                        (!interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
-	                        foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
-	                            handRot.enabled = true;
-	                        }
-	
-	                        satisfied = true;
-	    //                    ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());    // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
-                        }
-	                } 
-	                else {
-		                // handle non-default interaction systems here
-		                satisfied = true;
-	                }
-
-    //                GameObject theme = GameObject.Find (argsStrings [0] as String);
-    //                GameObject agent = GameObject.FindGameObjectWithTag ("Agent");
-    //                GraspScript graspController = agent.GetComponent<GraspScript> ();
-    //                if (theme != null) {
-    //                    if (agent != null) {
-    //                        if (!theme.transform.IsChildOf (agent.transform)) {
-    //                            if (!theme.GetComponent<Voxeme>().isGrasped) {
-    //                                //Debug.Break ();
-    //                                satisfied = true;
-    //                                ReasonFromAffordances (predString, theme.GetComponent<Voxeme>());    // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
-    //                            }
-    //                        }
-    //                    }
-    //                }
                 }
     #pragma mark MacroEvents
                 else if (predString == "lean") {
@@ -589,7 +570,7 @@ namespace VoxSimPlatform {
                     Queue<String> argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
                     List<object> objs = new List<object>();
                     Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-	                object invocationTarget = preds;
+                    object invocationTarget = preds;
 
                     MethodInfo methodToCall = null;
                     VoxML voxml = null;
@@ -603,7 +584,7 @@ namespace VoxSimPlatform {
                             methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                         }
                         else {
-                        	invocationTarget = preds.primitivesOverride;
+                            invocationTarget = preds.primitivesOverride;
                         }
                     }
                     else {
@@ -755,18 +736,13 @@ namespace VoxSimPlatform {
                                                         return false; // abort
                                                     }
 
-                                                    //}
                                                     foreach (GameObject match in matches) {
                                                         Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",match));
                                                         objs.Add(match);
                                                     }
                                                 }
-
-                                                //}
                                             }
                                         }
-
-                                        //                            objs.Add (GameObject.Find (arg as String));
                                     }
                                 }
                             }
@@ -799,7 +775,7 @@ namespace VoxSimPlatform {
                             object obj = null;
  
                             if (voxml == null) {
-	                            obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
+                                obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                             }
                             else {
                                 obj = methodToCall.Invoke(invocationTarget, new object[] {voxml, objs.ToArray()});
