@@ -222,11 +222,14 @@ namespace VoxSimPlatform {
                         }
                     } 
                     else {
+                        satisfied = true;
+
                         // handle non-default interaction systems here
                         if (preds.primitivesOverride != null) {
-                        }
-                        else {
-                            satisfied = true;
+                            MethodInfo methodToCall = preds.primitivesOverride.GetType().GetMethod("IsSatisfied"); 
+                            if (methodToCall != null) {
+                                satisfied = (bool)methodToCall.Invoke(preds.primitivesOverride, new object[]{ test });
+                            }
                         }
                     }
                 }
