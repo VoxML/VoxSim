@@ -177,7 +177,8 @@ namespace VoxSimPlatform {
         			voxeme.enabled = true;
         		}
 
-        		child.transform.parent = null;
+        		//child.transform.parent = null;
+                child.transform.parent = voxeme.defaultParent;
 
         		Transform childCollisionClone = parent.transform.Find(string.Format("{0}_collision_clone", child.name));
         		if (childCollisionClone != null) {

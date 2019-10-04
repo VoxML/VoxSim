@@ -37,7 +37,6 @@ namespace VoxSimPlatform {
         	public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
             public LinkedList<Vector3> interTargetPositions = new LinkedList<Vector3>();
-        	//public Queue<Vector3> interTargetPositions = new Queue<Vector3>();
 
             private Vector3 _targetPosition;
         	public Vector3 targetPosition {
@@ -51,7 +50,6 @@ namespace VoxSimPlatform {
         	}
 
             public LinkedList<Vector3> interTargetRotations = new LinkedList<Vector3>();
-        	//public Queue<Vector3> interTargetRotations = new Queue<Vector3>();
 
             private Vector3 _targetRotation;
         	public Vector3 targetRotation {
@@ -91,16 +89,19 @@ namespace VoxSimPlatform {
         	//			}
         	//	}
 
-        	public GameObject supportingSurface = null;
-        //	public GameObject supportingSurface {
-        //		get { return _supportingSurface; }
-        //		set {
-        //				if (value != _supportingSurface) {
-        //					Debug.Break ();
-        //				}
-        //				_supportingSurface = value;
-        //			}
-        //	}
+            private GameObject _supportingSurface;
+            public GameObject supportingSurface {
+                get { return _supportingSurface; }
+                set {
+                    if (_supportingSurface != value) {
+                        Debug.Log(string.Format("==================== Supporting surface changed ==================== {0}: {1}->{2}",
+                            gameObject.name,
+                            (_supportingSurface == null) ? "NULL" : _supportingSurface.name,
+                            (value == null) ? "NULL" : value.name));
+                    }
+                    _supportingSurface = value;
+                }
+            }
 
         	public bool isGrasped = false;
         	public Transform graspTracker = null;
@@ -113,6 +114,8 @@ namespace VoxSimPlatform {
         	public Vector3 startPosition;
         	public Vector3 startRotation;
         	public Vector3 startScale;
+
+            public Transform defaultParent;
 
         	public event EventHandler VoxMLLoaded;
 
@@ -394,6 +397,12 @@ namespace VoxSimPlatform {
                         Convert.ToSingle(GUILayout.TextField(((Voxeme)target).startScale.z.ToString(), GUILayout.MaxWidth(60))));
                     GUILayout.EndHorizontal();
 
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Default Parent", GUILayout.Width(120));
+                    GUILayout.TextField(((Voxeme)target).defaultParent == null ? "Null" : 
+                        ((Voxeme)target).defaultParent.ToString(), GUILayout.MaxWidth(120));
+                    GUILayout.EndHorizontal();
+
                     GUILayout.Label("Operational Vox", bold);
                     if (GUILayout.Button(((Voxeme)target).showOpVox ? "Hide" : "Show", GUILayout.MaxWidth(60))) {
                         ((Voxeme)target).showOpVox = !((Voxeme)target).showOpVox;
@@ -501,24 +510,12 @@ namespace VoxSimPlatform {
 
         	// Use this for initialization
         	void Start() {
-        		// load in VoxML knowledge
-        //		TextAsset markup = Resources.Load (gameObject.name) as TextAsset;
-        //		if (markup != null) {
-        //			voxml = VoxML.LoadFromText (markup.text);
-        //		}
-
-        //		WWW www = new WWW ("file:///" + Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + 
-        //			string.Format("Data/voxml/objects/{0}.xml",gameObject.name));
-        //
-        //		yield return www;
-
-        //		voxml = VoxML.LoadFromText (www.text);
-
         		LoadVoxML();
+
+                supportingSurface = null;
 
         		// get movement blocking
         		minYBound = GlobalHelper.GetObjectWorldSize(gameObject).min.y;
-        		//Debug.Log (minYBound);
 
         		// get rigging components
         		rigging = gameObject.GetComponent<Rigging>();
@@ -533,9 +530,6 @@ namespace VoxSimPlatform {
         		targetPosition = transform.position;
         		targetRotation = transform.eulerAngles;
         		targetScale = transform.localScale;
-
-        //		moveSpeed = defaultMoveSpeed;
-        //		turnSpeed = defaultTurnSpeed;
 
         		parentToChildPositionOffset = new Dictionary<GameObject, Vector3>();
         		parentToChildRotationOffset = new Dictionary<GameObject, Quaternion>();
@@ -1085,7 +1079,6 @@ namespace VoxSimPlatform {
         			voxml.Entity.Type = VoxEntity.EntityType.Object;
         		}
 
-
         		// populate operational voxeme structure
         		PopulateOperationalVoxeme();
         	}
@@ -1129,9 +1122,6 @@ namespace VoxSimPlatform {
         				}
 
         				if (obj != null) {
-        					//Debug.Log (s[0]);
-        					//Debug.Log (obj);
-        					//Debug.Log (index);
         					opVox.Type.Components.Add(new Triple<string, GameObject, int>(s[0], obj.gameObject, index));
         				}
         			}
@@ -1140,7 +1130,6 @@ namespace VoxSimPlatform {
         				if (subVox != null) {
         					foreach (Transform child in subVox) {
         						if (child.name == s[0]) {
-        							//Debug.Log (child.name);
         							int index = -1;
         							if (s.Length > 1) {
         								index = GlobalHelper.StringToInt(s[1].Remove(s[1].IndexOf(']')));

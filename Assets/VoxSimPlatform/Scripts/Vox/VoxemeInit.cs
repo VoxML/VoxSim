@@ -44,6 +44,8 @@ namespace VoxSimPlatform {
         					// object has Voxeme component and no Rigging
         					GameObject container = new GameObject(go.name, typeof(Voxeme), typeof(Rigging));
 
+                            container.GetComponent<Voxeme>().defaultParent = go.transform.parent;
+
         					if (go.transform.root != go.transform) {
         						// not a top-level object
         						container.transform.parent = go.transform.parent;
@@ -171,7 +173,7 @@ namespace VoxSimPlatform {
         					if (!usePhysicsRigging) {
         						container.GetComponent<Rigging>().ActivatePhysics(false);
         					}
-
+                                
                             foreach(Transform transform in go.transform) {
                                 transform.gameObject.tag = go.tag;
                             }

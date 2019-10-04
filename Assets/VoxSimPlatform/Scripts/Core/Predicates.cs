@@ -6399,6 +6399,7 @@ namespace VoxSimPlatform {
                                                     eventManager.macroVars.Add(string.Format("'{0}.{1}'",
                                                         ((MethodInfo)args[2]).ReflectedType.FullName, ((MethodInfo)args[2]).Name), path);
                                                     GlobalHelper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
+                                                    AStarSearch.OnComputedPath(null, new ComputedPathEventArgs((List<Vector3>)path));
                                                 }
                                                 else {
                                                     Debug.Log(string.Format("{0} called from {2} did not return a path (got typeof{1}).  " +

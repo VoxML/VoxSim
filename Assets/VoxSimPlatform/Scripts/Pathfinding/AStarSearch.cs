@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 using Arc = VoxSimPlatform.Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
@@ -12,7 +12,24 @@ using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Pathfinding {
+        public class ComputedPathEventArgs : EventArgs {
+            public List<Vector3> path;
+
+            public ComputedPathEventArgs(List<Vector3> _path) {
+                path = new List<Vector3>(_path);
+            }
+        }
+
         public static class AStarSearch {
+
+            public static event EventHandler ComputedPath;
+
+            public static void OnComputedPath(object sender, EventArgs e) {
+                if (ComputedPath != null) {
+                    ComputedPath(sender, e);
+                }
+            }
+
             // not referenced anywhere
         	//void AddDebugCube(Vector3 coord) {
         	//	GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
