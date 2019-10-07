@@ -6989,7 +6989,7 @@ namespace VoxSimPlatform {
                                     Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
                                         methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
                                     retVal = method.Invoke(null, args.ToList().Select(a => (a is GameObject) ? 
-                                        GlobalHelper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
+	                                    GlobalHelper.GetObjectOrientedSize((GameObject)a, true) : a).Concat(new object[]{ constraints }).ToArray());
                                 }
                                 else {  // no method found
                                     // throw this to ComposeQSR
@@ -6998,7 +6998,7 @@ namespace VoxSimPlatform {
                                     Debug.Log(string.Format("Predicate \"{0}\": found method {1}.{2}({3})", voxml.Lex.Pred,
                                         methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType))));
                                     retVal = method.Invoke(null, args.ToList().Select(a => (a is GameObject) ? 
-                                        GlobalHelper.GetObjectOrientedSize((GameObject)a) : a).Concat(new object[]{ constraints }).ToArray());
+	                                    GlobalHelper.GetObjectOrientedSize((GameObject)a, true) : a).Concat(new object[]{ constraints }).ToArray());
                                 }
 
                                 Debug.Log(string.Format("Result of method {0}.{1}({2}) is {3}",

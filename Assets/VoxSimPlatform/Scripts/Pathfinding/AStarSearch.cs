@@ -75,7 +75,8 @@ namespace VoxSimPlatform {
         				Vector3 newNode = new Vector3(curPos.x + i * increment.x, curPos.y + j * increment.y,
         					curPos.z + k * increment.z);
         				if (TestClear(obj, newNode)) {
-        					Debug.Log(GlobalHelper.VectorToParsable(newNode));
+        					Debug.Log(string.Format("Node position {0} is a neighbor of {1}",
+	        					GlobalHelper.VectorToParsable(newNode), GlobalHelper.VectorToParsable(curPos)));
 		        			neighbors.Add(newNode);
 	        			}
         			}
@@ -93,10 +94,35 @@ namespace VoxSimPlatform {
         		RaycastHit hitInfo;
         		Vector3 dir = (second - first);
         		float dist = dir.magnitude;
-        		bool blocked = Physics.Raycast(first, dir.normalized, out hitInfo, dist);
-        		blocked |= Physics.Raycast(first - objBounds.extents, dir.normalized, out hitInfo, dist);
-        		blocked |= Physics.Raycast(first + objBounds.extents, dir.normalized, out hitInfo, dist);
+        		Collider blocker = null;
+                bool blocked = false;
+                bool hit = Physics.Raycast(first, dir.normalized, out hitInfo, dist);
+        		blocker = hitInfo.collider;
 
+                if (blocker != null) {
+                    blocked = hit && !hitInfo.collider.bounds.Contains(objBounds.center);
+                }
+
+	        	hit = Physics.Raycast(first - objBounds.extents, dir.normalized, out hitInfo, dist);
+	        	blocker = hitInfo.collider == null ? blocker : hitInfo.collider;
+
+                if (blocker != null) {
+                    blocked |= hit && !hitInfo.collider.bounds.Contains(objBounds.center);
+                }
+	        	
+	        	hit = Physics.Raycast(first + objBounds.extents, dir.normalized, out hitInfo, dist);
+        		blocker = hitInfo.collider == null ? blocker : hitInfo.collider;
+
+                if (blocker != null) {
+                    blocked |= hit && !hitInfo.collider.bounds.Contains(objBounds.center);
+                }
+
+	        	if (blocked && blocker != null) {
+	        		Debug.Log(string.Format("Path from {0} to {1} blocked by {2}",
+		        		GlobalHelper.VectorToParsable(first),GlobalHelper.VectorToParsable(second),
+	        			blocker.gameObject));
+	        	}
+	        	
         		return blocked;
             }
 
@@ -318,17 +344,16 @@ namespace VoxSimPlatform {
         		Vector3 bestLastPos = new Vector3();
 
         		if ((goalPos - startPos).magnitude > (goalPos - endPos).magnitude) {
-        			Debug.Log(string.Format("{0} - {1} = {2}", GlobalHelper.VectorToParsable(goalPos), GlobalHelper.VectorToParsable(startPos),
-        				(goalPos - startPos).magnitude));
-        			Debug.Log(string.Format("{0} - {1} = {2}", GlobalHelper.VectorToParsable(goalPos), GlobalHelper.VectorToParsable(endPos),
-        				(goalPos - endPos).magnitude));
+	        		// if the dist from startPos to goalPos > dist from goalPos to endPos (aka closest non-start node to endPos)
+        			
         			while (openSet.Count > 0 && counter < prefs.counterMax) {
         				// O(1)
         				curPos = openSet.TakeMin();
 
-        				Debug.Log(counter + " ======== curNode ====== (" + GlobalHelper.VectorToParsable(curPos) + ") " +
-        				          gScore[curPos] + " " + hScore[curPos] + " " + (gScore[curPos] + hScore[curPos]));
+        				Debug.Log(string.Format("{0} ======== curNode ====== pos {1}; gScore {2}; hScore {3}; gScore + hScore {4}",
+	        				counter, GlobalHelper.VectorToParsable(curPos), gScore[curPos],  hScore[curPos], gScore[curPos] + hScore[curPos]));
 
+	        			// calc distance from current position to end
         				float currentDistance = (curPos - endPos).magnitude;
         				if (currentDistance < bestMagnitude) {
         					bestMagnitude = currentDistance;
@@ -350,6 +375,8 @@ namespace VoxSimPlatform {
         				closedSet.Add(curPos);
 
         				var neighbors = GetNeighborNodes(obj, curPos, increment, step, specialNodes);
+	        			Debug.Log(string.Format("Node {0} has {1} neighbors",GlobalHelper.VectorToParsable(curPos),
+	        				neighbors.Count));
 
         				foreach (var neighbor in neighbors) {
         					if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor)) {
