@@ -160,7 +160,7 @@ namespace VoxSimPlatform {
 					                GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject),true).center)) &&
 				                (hit.distance <= Constants.EPSILON * 3)) {
 					                Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
-						                GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+						                GlobalHelper.VectorToParsable(halfSize * 2), GlobalHelper.VectorToParsable(center),
 						                GlobalHelper.VectorToParsable(Vector3.up),
 						                hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
 						                hit.distance));
@@ -168,7 +168,7 @@ namespace VoxSimPlatform {
 				                }
 				                else {
 					                Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
-						                GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+						                GlobalHelper.VectorToParsable(halfSize * 2), GlobalHelper.VectorToParsable(center),
 						                GlobalHelper.VectorToParsable(Vector3.up),
 						                hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
 						                hit.distance));
@@ -222,7 +222,7 @@ namespace VoxSimPlatform {
 				                    GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject),true).center)) &&
 			                    (hit.distance <= Constants.EPSILON * 3)) {
 				                    Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
-					                    GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+					                    GlobalHelper.VectorToParsable(halfSize * 2), GlobalHelper.VectorToParsable(center),
 					                    GlobalHelper.VectorToParsable(-Vector3.up),
 					                    hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
 					                    hit.distance));
@@ -230,7 +230,7 @@ namespace VoxSimPlatform {
 			                    }
 			                    else {
 				                    Debug.Log(string.Format("Cast box of size {0} from {1} in direction {2}, hit {3} (component of {4}) in distance {5}",
-					                    GlobalHelper.VectorToParsable(Vector3.Scale(halfSize, new Vector3(2,2,2))), GlobalHelper.VectorToParsable(center),
+					                    GlobalHelper.VectorToParsable(halfSize * 2), GlobalHelper.VectorToParsable(center),
 					                    GlobalHelper.VectorToParsable(-Vector3.up),
 					                    hit.collider.gameObject.name, GlobalHelper.GetMostImmediateParentVoxeme(hit.collider.gameObject).name,
 					                    hit.distance));
