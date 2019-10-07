@@ -48,7 +48,7 @@ namespace VoxSimPlatform {
 
         		bool spaceClear = true;
         		foreach (GameObject o in allObjects) {
-        			if ((o.tag != "UnPhysic") && (o.tag != "Ground")) {
+        			if ((o.tag != "UnPhysic") && (o.tag != "Ground") && (o.tag != "Agent")) {
         				if (testBounds.Intersects(GlobalHelper.GetObjectWorldSize(o))) {
         					Debug.Log(string.Format("Node position {0} intersects {1}",
         						GlobalHelper.VectorToParsable(curPoint),o.name));

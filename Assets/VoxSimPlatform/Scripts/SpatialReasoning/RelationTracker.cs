@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -31,6 +30,7 @@ namespace VoxSimPlatform {
         	// Update is called once per frame
         	void Update() {
         		if (!initialCalcComplete) {
+                    PhysicsHelper.ResolveAllPhysicsDiscrepancies(false);
         			SurveyRelations();
 
         			initialCalcComplete = true;
