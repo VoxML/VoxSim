@@ -65,6 +65,19 @@ namespace VoxSimPlatform {
 
                 Debug.Log(name + ": { " + string.Join(", ", output.ToArray()) + " }");
             }
+            
+	        public static void PrintKeysAndValues(string name, Dictionary<object,object> dict) {
+		        if (dict.Count == 0) {
+			        return;
+		        }
+
+		        List<string> output = new List<string>();
+		        foreach (KeyValuePair<object,object> entry in dict) {
+			        output.Add(entry.Key.ToString() + " : " + entry.Value.ToString());
+		        }
+
+		        Debug.Log(name + ": { " + string.Join(", ", output.ToArray()) + " }");
+	        }
 
             public static String VectorToParsable(Vector3 vector) {
                 return ("<" + vector.x + "; " +

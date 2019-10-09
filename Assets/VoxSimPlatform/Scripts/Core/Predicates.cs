@@ -6780,6 +6780,7 @@ namespace VoxSimPlatform {
                                 if (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Location).ToList().Count > 0) {
                                     // retrieve positional relation predicate
                                     string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace(string.Format("{0}_",voxml.Lex.Pred), "") : "";
+	                                Debug.Log(prep);
 
                                     // find VoxML for this relation
                                     VoxML relVoxml = null;

@@ -388,6 +388,12 @@ namespace VoxSimPlatform {
             public void ClearGlobalVars(object sender, EventArgs e) {
                 Debug.Log("Clearing macroVars");
                 macroVars.Clear();
+
+                Debug.Log("Clearing evalOrig");
+                evalOrig.Clear();
+
+                Debug.Log("Clearing evalResolved");
+                evalResolved.Clear();
             }
 
             public void WaitComplete(object sender, EventArgs e) {
@@ -453,7 +459,7 @@ namespace VoxSimPlatform {
                 }
 
                 string objectResolved = ApplySkolems(skolemized);
-        //        Debug.Log (objectResolved);
+	            Debug.Log(string.Format("Command {0} with objects resolved: {1}", skolemized, objectResolved));
 
                 if (objectResolved != command) {
                     OnObjectsResolved(this, new EventManagerArgs(objectResolved));
@@ -478,12 +484,16 @@ namespace VoxSimPlatform {
                     evalOrig[evaluated] = command;
                 }
 
-                if (!evalResolved.ContainsKey(evaluated)) {
+	            GlobalHelper.PrintKeysAndValues("evalOrig", evalOrig.ToDictionary(e => e.Key as object, e => e.Value as object));
+
+	            if (!evalResolved.ContainsKey(evaluated)) {
                     evalResolved.Add(evaluated, objectResolved);
                 }
                 else {
                     evalResolved[evaluated] = objectResolved;
                 }
+                
+	            GlobalHelper.PrintKeysAndValues("evalResolved", evalResolved.ToDictionary(e => e.Key as object, e => e.Value as object));
 
                 events[events.IndexOf(command)] = evaluated;
 
@@ -513,6 +523,46 @@ namespace VoxSimPlatform {
                 // Match referent stack to whoever is being talked to
                 if (GetActiveAgent() != null) {
                     referents = GetActiveAgent().GetComponent<ReferentStore>();
+                }
+
+                MethodInfo predMethod; 
+                Type predReturnType = null;
+
+                if (preds.primitivesOverride != null) {
+                    predMethod = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
+
+                    // couldn't find an override primitive predicate
+                    //  default to the existing primitive
+                    if (predMethod == null) {
+                        predMethod = preds.GetType().GetMethod(pred.ToUpper());
+                    }
+                    else {
+                        invocationTarget = preds.primitivesOverride;
+                    }
+                }
+                else {
+                    predMethod = preds.GetType().GetMethod(pred.ToUpper());
+                }
+
+                if (predMethod == null) {
+                    if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) {
+                        if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+                            predMethod = preds.GetType().GetMethod("ComposeProgram");
+                        }
+                        else if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "attributes") {
+                            predMethod = preds.GetType().GetMethod("ComposeAttribute");
+                        }
+                        else if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") {
+                            predMethod = preds.GetType().GetMethod("ComposeRelation");
+                        }
+                        else if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "function") {
+                            predMethod = preds.GetType().GetMethod("ComposeFunction");
+                        }
+                    }
+                }
+
+                if (predMethod != null) {
+                    predReturnType = predMethod.ReturnType;
                 }
 
                 while (argsStrings.Count > 0) {
@@ -591,12 +641,14 @@ namespace VoxSimPlatform {
                                                 }
                                             }
 
-                                            if (go == null) {
-                                                //OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
-                                                OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
-                                                return objs;
-                                                //throw new ArgumentNullException("Couldn't resolve the object");
-                                                // abort
+                                            if (predMethod.ReturnType != typeof(bool)) {
+                                                if (go == null) {
+                                                    //OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
+                                                    OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
+                                                    return objs;
+                                                    //throw new ArgumentNullException("Couldn't resolve the object");
+                                                    // abort
+                                                }
                                             }
                                         }
                                         else {
@@ -969,17 +1021,16 @@ namespace VoxSimPlatform {
                 foreach (DictionaryEntry kv in skolems) {
                     foreach (DictionaryEntry kkv in skolems) {
                         if (kkv.Key != kv.Key) {
-                            //Debug.Log ("FinishSkolemization: "+kv.Key+ " " +kkv.Key);
                             if (!temp.Contains(kkv.Key)) {
                                 if (((String) kkv.Value).Contains((String) kv.Value) &&
                                     ((((String) kkv.Value).Count(f => f == '(') + ((String) kkv.Value).Count(f => f == ')')) -
                                      (((String) kv.Value).Count(f => f == '(') + ((String) kv.Value).Count(f => f == ')')) ==
                                      2)) {
-                                    Debug.Log("FinishSkolemization: " + kv.Value + " found in " + kkv.Value);
-                                    Debug.Log("FinishSkolemization: " + kkv.Key + " : " +
-                                              ((String) kkv.Value).Replace((String) kv.Value, (String) kv.Key));
+                                    Debug.Log(string.Format("FinishSkolemization: {0} found in {1}", kv.Value, kkv.Value));
+                                    Debug.Log(string.Format("FinishSkolemization: {0} -> {1}", kkv.Key,
+                                              ((String) kkv.Value).Replace((String) kv.Value, (String) kv.Key)));
                                     temp[kkv.Key] = ((String) kkv.Value).Replace((String) kv.Value, (String) kv.Key);
-                                    Debug.Log("FinishSkolemization: " + temp[kkv.Key]);
+                                    Debug.Log(string.Format("FinishSkolemization: temp[{0}] = {1}", kkv.Key, temp[kkv.Key]));
                                 }
                             }
                         }
@@ -987,9 +1038,8 @@ namespace VoxSimPlatform {
                 }
 
                 foreach (DictionaryEntry kv in temp) {
-                    Debug.Log("FinishSkolemization: " + temp[kv.Key]);
+                    Debug.Log(string.Format("FinishSkolemization: skolems[{0}]: {1} -> {2}", kv.Key, skolems[kv.Key], temp[kv.Key]));
                     skolems[kv.Key] = temp[kv.Key];
-                    Debug.Log("FinishSkolemization: " + skolems[kv.Key]);
                 }
 
                 GlobalHelper.PrintKeysAndValues("skolems", skolems);
@@ -997,26 +1047,23 @@ namespace VoxSimPlatform {
 
             public String Skolemize(String inString) {
                 String outString = inString;
-                String temp = inString;
 
-                int parenCount = temp.Count(f => f == '(') +
-                                 temp.Count(f => f == ')');
+                int parenCount = outString.Count(f => f == '(') +
+	                outString.Count(f => f == ')');
+                                 
                 Debug.Log("Skolemize: parenCount = " + parenCount);
 
-                //return outString;
+	            Dictionary<string,string> sortedSkolems = skolems.Cast<DictionaryEntry>()
+		            .ToDictionary(e => (String)e.Key, e => (String)e.Value);
+	            sortedSkolems = sortedSkolems.OrderBy(e => ((String)e.Value).Contains(argVarPrefix))
+		            .ToDictionary(e => (String)e.Key, e => (String)e.Value);
 
-                //do {
-                    foreach (DictionaryEntry kv in skolems) {
-                        outString = outString.Replace((String) kv.Value, (String) kv.Key);
-                        //Debug.Log (outString);
-                    }
+	            GlobalHelper.PrintKeysAndValues("sortedSkolems", sortedSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
 
-                    //temp = outString;
-                    //parenCount = temp.Count(f => f == '(') +
-                    //             temp.Count(f => f == ')');
-                    //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
-                    //move(mug,from(edge(table)),to(edge(table)))
-                //} while (parenCount > 2);
+	            foreach (KeyValuePair<string,string> kv in sortedSkolems) {
+                    outString = outString.Replace((String) kv.Value, (String) kv.Key);
+                    Debug.Log (outString);
+	            }
 
                 return outString;
             }
@@ -1028,7 +1075,6 @@ namespace VoxSimPlatform {
 
                 int parenCount = temp.Count(f => f == '(') +
                                  temp.Count(f => f == ')');
-                //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
                 foreach (DictionaryEntry kv in macroVars) {
                     if (kv.Value is Vector3) {
@@ -1112,11 +1158,9 @@ namespace VoxSimPlatform {
                 temp = outString;
                 parenCount = temp.Count(f => f == '(') +
                              temp.Count(f => f == ')');
-                //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
                 GlobalHelper.PrintKeysAndValues("skolems", skolems);
 
-                //Debug.Log(outString);
                 return outString;
             }
 
@@ -1126,12 +1170,11 @@ namespace VoxSimPlatform {
 
                 int parenCount = temp.Count(f => f == '(') +
                                  temp.Count(f => f == ')');
-                //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
+	            GlobalHelper.PrintKeysAndValues("Applying skolems", skolems);
                 foreach (DictionaryEntry kv in skolems) {
                     if (kv.Value is Vector3) {
                         outString = outString.Replace((String) kv.Key, GlobalHelper.VectorToParsable((Vector3) kv.Value));
-                        //Debug.Log (outString);
                     }
                     else if (kv.Value is String) {
                         outString = outString.Replace((String) kv.Key, (String) kv.Value);
@@ -1167,7 +1210,6 @@ namespace VoxSimPlatform {
                 temp = outString;
                 parenCount = temp.Count(f => f == '(') +
                              temp.Count(f => f == ')');
-                //Debug.Log ("Skolemize: parenCount = " + parenCount.ToString ());
 
                 return outString;
             }
@@ -1182,9 +1224,9 @@ namespace VoxSimPlatform {
                 bool doSkolemReplacement = false;
                 Triple<String, String, String> replaceSkolems = null;
                 bool validPredExists;
-                VoxML voxml = null;
 
                 methodToCall = null;
+                VoxML voxml = null;
 
                 foreach (DictionaryEntry kv in skolems) {
                     voxml = null;
@@ -1202,71 +1244,75 @@ namespace VoxSimPlatform {
                             if (((String) kv.Value).Count(f => f == '(') + // make sure actually a predicate
                                 ((String) kv.Value).Count(f => f == ')') >= 2) {
                                 argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
-                                while (argsStrings.Count > 0) {
-                                    object arg = argsStrings.Dequeue();
 
-                                    if (GlobalHelper.vec.IsMatch((String) arg)) {
-                                        // if arg is vector form
-                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",GlobalHelper.ParsableToVector((String) arg)));
-                                        objs.Add(GlobalHelper.ParsableToVector((String) arg));
+                                if (preds.primitivesOverride != null) {
+                                    methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
+
+                                    // couldn't find an override primitive predicate
+                                    //  default to the existing primitive
+                                    if (methodToCall == null) {
+                                        methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                                     }
-                                    else if (arg is String) {
-                                        // if arg is String
-                                        if ((arg as String).Count(f => f == '(') + // not a predicate
-                                            (arg as String).Count(f => f == ')') == 0) {
-                                            //if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {    // if predicate not going to return string (as in "AS")
-                                            List<GameObject> matches = new List<GameObject>();
+                                    else {
+                                        invocationTarget = preds.primitivesOverride;
+                                    }
+                                }
+                                else {
+                                    methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                }
 
-                                            if (GameObject.Find(arg as String) != null) {
-                                                matches.Add(GameObject.Find(arg as String));
-                                            }
-                                            else {
-                                                foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                                                    if (voxeme.voxml.Lex.Pred.Equals(arg)) {
-                                                        matches.Add(voxeme.gameObject);
-                                                    }
-                                                }
-                                            }
+                                if (methodToCall == null) {
+	                                if (voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) {
+	                                	if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+                                        	voxml = voxmlLibrary.VoxMLObjectDict[pred];
+                                        	methodToCall = preds.GetType().GetMethod("ComposeProgram");
+	                                	}
+	                                	else if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "attributes") {
+		                                	voxml = voxmlLibrary.VoxMLObjectDict[pred];
+		                                	methodToCall = preds.GetType().GetMethod("ComposeAttribute");
+	                                	}
+	                                	else if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") {
+		                                	voxml = voxmlLibrary.VoxMLObjectDict[pred];
+		                                	methodToCall = preds.GetType().GetMethod("ComposeRelation");
+	                                	}
+	                                }
+                                }
 
-                                            Debug.Log(string.Format("{0} matches: [{1}]", matches.Count, string.Join(",",matches.Select(go => go.name).ToList())));
+	                            if (methodToCall.ReturnType != typeof(bool)) {
+                                    while (argsStrings.Count > 0) {
+                                        object arg = argsStrings.Dequeue();
 
-                                            if (matches.Count == 0) {
-                                                Debug.Log(arg as String);
-                                                Debug.Log(preds.GetType().GetMethod(pred.ToUpper()).ReturnType);
+                                        if (GlobalHelper.vec.IsMatch((String) arg)) {
+                                            // if arg is vector form
+                                            Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",GlobalHelper.ParsableToVector((String) arg)));
+                                            objs.Add(GlobalHelper.ParsableToVector((String) arg));
+                                        }
+                                        else if (arg is String) {
+                                            // if arg is String
+                                            if ((arg as String).Count(f => f == '(') + // not a predicate
+                                                (arg as String).Count(f => f == ')') == 0) {
                                                 //if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {    // if predicate not going to return string (as in "AS")
-                                                GameObject go = GameObject.Find(arg as String);
-                                                Debug.Log(go);
-                                                if (go == null) {
-                                                    for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
-                                                        if (objSelector.disabledObjects[i].name == (arg as String)) {
-                                                            go = objSelector.disabledObjects[i];
-                                                            break;
+                                                List<GameObject> matches = new List<GameObject>();
+
+                                                if (GameObject.Find(arg as String) != null) {
+                                                    matches.Add(GameObject.Find(arg as String));
+                                                }
+                                                else {
+                                                    foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                                        if (voxeme.voxml.Lex.Pred.Equals(arg)) {
+                                                            matches.Add(voxeme.gameObject);
                                                         }
                                                     }
-
-                                                    Debug.Log(go);
-                                                    if (go == null) {
-                                                        //OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-                                                        OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
-                                                        return false; // abort
-                                                    }
                                                 }
 
-                                                Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
-                                                objs.Add(go);
-                                                //}
-                                            }
-                                            else if (matches.Count == 1) {
-                                                // check if the predicate over this argument exists in our primitive list
-                                                //  or exists in VoxML
-                                                validPredExists = (((preds.GetType().GetMethod(pred.ToUpper()) != null) &&
-                                                    (preds.GetType().GetMethod(pred.ToUpper()).ReturnType != typeof(String))) ||
-                                                    ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
-                                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
-                                                    //(File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
-                                                if (validPredExists) {
-                                                    Debug.Log(string.Format("Predicate found: {0}", pred));
-                                                    GameObject go = matches[0];
+                                                Debug.Log(string.Format("{0} matches: [{1}]", matches.Count, string.Join(",",matches.Select(go => go.name).ToList())));
+
+                                                if (matches.Count == 0) {
+                                                    Debug.Log(arg as String);
+                                                    Debug.Log(preds.GetType().GetMethod(pred.ToUpper()).ReturnType);
+                                                    //if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {    // if predicate not going to return string (as in "AS")
+                                                    GameObject go = GameObject.Find(arg as String);
+                                                    Debug.Log(go);
                                                     if (go == null) {
                                                         for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
                                                             if (objSelector.disabledObjects[i].name == (arg as String)) {
@@ -1275,117 +1321,149 @@ namespace VoxSimPlatform {
                                                             }
                                                         }
 
+                                                        Debug.Log(go);
                                                         if (go == null) {
                                                             //OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
-                                                            OnNonexistentEntityError(this,
-                                                                new EventReferentArgs(
-                                                                    new Pair<string, List<GameObject>>(pred, matches)));
+                                                            OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
                                                             return false; // abort
                                                         }
                                                     }
 
                                                     Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
                                                     objs.Add(go);
-                                                    doSkolemReplacement = true;
-                                                    replaceSkolems = new Triple<String, String, String>(kv.Key as String,
-                                                        arg as String, go.name);
-                                                    //skolems[kv] = go.name;
+                                                    //}
+                                                }
+                                                else if (matches.Count == 1) {
+                                                    // check if the predicate over this argument exists in our primitive list
+                                                    //  or exists in VoxML
+                                                    validPredExists = (((preds.GetType().GetMethod(pred.ToUpper()) != null) &&
+                                                        (preds.GetType().GetMethod(pred.ToUpper()).ReturnType != typeof(String))) ||
+                                                        ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                                        (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
+                                                        //(File.Exists(Data.voxmlDataPath + string.Format("/relations/{0}.xml", pred))));
+                                                    if (validPredExists) {
+                                                        Debug.Log(string.Format("Predicate found: {0}", pred));
+                                                        GameObject go = matches[0];
+                                                        if (go == null) {
+                                                            for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
+                                                                if (objSelector.disabledObjects[i].name == (arg as String)) {
+                                                                    go = objSelector.disabledObjects[i];
+                                                                    break;
+                                                                }
+                                                            }
+
+                                                            if (go == null) {
+                                                                //OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
+                                                                OnNonexistentEntityError(this,
+                                                                    new EventReferentArgs(
+                                                                        new Pair<string, List<GameObject>>(pred, matches)));
+                                                                return false; // abort
+                                                            }
+                                                        }
+
+                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
+                                                        objs.Add(go);
+                                                        doSkolemReplacement = true;
+                                                        replaceSkolems = new Triple<String, String, String>(kv.Key as String,
+                                                            arg as String, go.name);
+                                                        //skolems[kv] = go.name;
+                                                    }
+                                                    else {
+                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",matches[0]));
+                                                        objs.Add(matches[0]);
+                                                    }
                                                 }
                                                 else {
-                                                    Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",matches[0]));
-                                                    objs.Add(matches[0]);
-                                                }
-                                            }
-                                            else {
-                                                // if predicate arity of enclosing predicate as encoded in VoxML != matches.Count
-                                                VoxML predVoxeme = new VoxML();
-                                                String path = string.Empty;
-                                                Debug.Log(pred);
-                                                if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
-                                                    ((voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
-                                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") ||
-                                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "functions"))) {
-                                                    predVoxeme = voxmlLibrary.VoxMLObjectDict[pred];
+                                                    // if predicate arity of enclosing predicate as encoded in VoxML != matches.Count
+                                                    VoxML predVoxeme = new VoxML();
+                                                    String path = string.Empty;
+                                                    Debug.Log(pred);
+                                                    if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                                                        ((voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
+                                                        (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") ||
+                                                        (voxmlLibrary.VoxMLEntityTypeDict[pred] == "functions"))) {
+                                                        predVoxeme = voxmlLibrary.VoxMLObjectDict[pred];
 
-                                                    Debug.Log(predVoxeme);
-                                                    if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "functions") {
-                                                        Debug.Log(predVoxeme.Type.Mapping);
-                                                        int arity;
-                                                        bool isInt = Int32.TryParse(predVoxeme.Type.Mapping.Split(':')[1],
-                                                            out arity);
+                                                        Debug.Log(predVoxeme);
+                                                        if (voxmlLibrary.VoxMLEntityTypeDict[pred] == "functions") {
+                                                            Debug.Log(predVoxeme.Type.Mapping);
+                                                            int arity;
+                                                            bool isInt = Int32.TryParse(predVoxeme.Type.Mapping.Split(':')[1],
+                                                                out arity);
 
-                                                        if (isInt) {
+                                                            if (isInt) {
+                                                                Debug.Log(string.Format("{0} : {1} : {2}", pred.ToUpper(), arity,
+                                                                    matches.Count));
+
+                                                                if (arity != matches.Count) {
+                                                                    OnDisambiguationError(this,
+                                                                        new EventDisambiguationArgs(events[0], (String) kv.Value,
+                                                                            "{0}",
+                                                                            matches.Select(o => o.GetComponent<Voxeme>())
+                                                                                .ToArray()));
+                                                                    return false; // abort
+                                                                }
+                                                            }
+                                                        }
+                                                        else {
+                                                            int arity = predVoxeme.Type.Args.Count - 1;
                                                             Debug.Log(string.Format("{0} : {1} : {2}", pred.ToUpper(), arity,
                                                                 matches.Count));
 
                                                             if (arity != matches.Count) {
-                                                                OnDisambiguationError(this,
-                                                                    new EventDisambiguationArgs(events[0], (String) kv.Value,
-                                                                        "{0}",
-                                                                        matches.Select(o => o.GetComponent<Voxeme>())
-                                                                            .ToArray()));
+                                                                //Debug.Log(string.Format("Which {0}?", (arg as String)));
+                                                                //OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
+                                                                OnDisambiguationError(this, new EventDisambiguationArgs(events[0],
+                                                                    (String) kv.Value,
+                                                                    ((String) kv.Value).Replace(arg as String, "{0}"),
+                                                                    matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
                                                                 return false; // abort
                                                             }
                                                         }
                                                     }
                                                     else {
-                                                        int arity = predVoxeme.Type.Args.Count - 1;
-                                                        Debug.Log(string.Format("{0} : {1} : {2}", pred.ToUpper(), arity,
-                                                            matches.Count));
-
-                                                        if (arity != matches.Count) {
-                                                            //Debug.Log(string.Format("Which {0}?", (arg as String)));
-                                                            //OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
-                                                            OnDisambiguationError(this, new EventDisambiguationArgs(events[0],
-                                                                (String) kv.Value,
-                                                                ((String) kv.Value).Replace(arg as String, "{0}"),
-                                                                matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
-                                                            return false; // abort
+                                                        foreach (GameObject match in matches) {
+                                                            //Debug.Log(match);
+                                                            Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",match));
+                                                            objs.Add(match);
                                                         }
                                                     }
                                                 }
-                                                else {
-                                                    foreach (GameObject match in matches) {
-                                                        //Debug.Log(match);
-                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",match));
-                                                        objs.Add(match);
-                                                    }
-                                                }
                                             }
-                                        }
 
-                                        if (objs.Count == 0) {
-                                            Regex q = new Regex("[\'\"].*[\'\"]");
-                                            int i;
-                                            if (int.TryParse(arg as String, out i)) {
-                                                Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",arg as String));
-                                                objs.Add(arg as String);
-                                            }
-                                            else if (q.IsMatch(arg as String)) {
-                                                String[] tryMethodPath = (arg as String).Replace("\'",string.Empty)
-                                                    .Replace("\"",string.Empty).Split('.');
-
-                                                // Get the Type for the class
-                                                Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
-                                                if (routineCallingType != null) {
-                                                    MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
-                                                    if (routineMethod != null) {
-                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",routineMethod));
-                                                        objs.Add(routineMethod);
-                                                    }
-                                                    else {
-                                                        Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
-                                                    }
-                                                } 
-                                                else {
+                                            if (objs.Count == 0) {
+                                                Regex q = new Regex("[\'\"].*[\'\"]");
+                                                int i;
+                                                if (int.TryParse(arg as String, out i)) {
                                                     Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",arg as String));
                                                     objs.Add(arg as String);
                                                 }
-                                            }
-                                            else {
-                                                GameObject go = GameObject.Find(arg as String);
-                                                Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
-                                                objs.Add(go);
+                                                else if (q.IsMatch(arg as String)) {
+                                                    String[] tryMethodPath = (arg as String).Replace("\'",string.Empty)
+                                                        .Replace("\"",string.Empty).Split('.');
+
+                                                    // Get the Type for the class
+                                                    Type routineCallingType = Type.GetType(String.Join(".", tryMethodPath.ToList().GetRange(0, tryMethodPath.Length - 1)));
+                                                    if (routineCallingType != null) {
+                                                        MethodInfo routineMethod = routineCallingType.GetMethod(tryMethodPath.Last());
+                                                        if (routineMethod != null) {
+                                                            Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",routineMethod));
+                                                            objs.Add(routineMethod);
+                                                        }
+                                                        else {
+                                                            Debug.Log(string.Format("No method {0} found in class {1}!",tryMethodPath.Last(),routineCallingType.Name));
+                                                        }
+                                                    } 
+                                                    else {
+                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",arg as String));
+                                                        objs.Add(arg as String);
+                                                    }
+                                                }
+                                                else {
+                                                    GameObject go = GameObject.Find(arg as String);
+                                                    Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",go));
+                                                    objs.Add(go);
+                                                }
                                             }
                                         }
                                     }
@@ -1422,7 +1500,9 @@ namespace VoxSimPlatform {
                                     //    (methodToCall.ReturnType == typeof(List<String>))) {
                                     // non-void return type
                                     // (attribute, relation, function)
-                                    if (methodToCall.ReturnType != typeof(void)) {
+                                    if (((methodToCall.ReturnType == typeof(String)) ||
+                                        (methodToCall.ReturnType == typeof(List<String>)) ||
+	                                    (methodToCall.Name == "ComposeAttribute"))) {
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
                                             pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
                                         object obj = null;
@@ -1450,7 +1530,8 @@ namespace VoxSimPlatform {
 
                                         temp[kv.Key] = obj;
                                     }
-                                    else {  // void return type: program
+                                    else if (((methodToCall.ReturnType == typeof(void)) ||
+	                                    ((methodToCall.Name == "ComposeProgram")))) {  // void return type: program
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke IsSatisfied{1} with {2}{3}",
                                             pass, (voxml == null) ? string.Format("({0})",methodToCall.Name) : string.Empty,
                                                 (voxml == null) ? string.Empty : string.Format("\"{0}\" ",voxml.Lex.Pred), objs));
@@ -1471,8 +1552,9 @@ namespace VoxSimPlatform {
                                     }
                                 }
                                 else if (pass == EvaluationPass.RelationsAndFunctions) {
-                                    if ((methodToCall.ReturnType == typeof(Vector3)) ||
-                                        (methodToCall.ReturnType == typeof(object))) {
+                                     if (((methodToCall.ReturnType == typeof(Vector3)) ||
+                                        (methodToCall.Name == "ComposeRelation") || 
+	                                     (methodToCall.Name == "ComposeFunction"))) {
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): invoke {1} with {2}{3}",
                                             pass, methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
                                         object obj = null;
