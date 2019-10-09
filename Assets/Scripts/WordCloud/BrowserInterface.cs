@@ -65,6 +65,14 @@ public class BrowserInterface : MonoBehaviour
 
         //Webpack is a module bundler.It takes disparate dependencies, creates modules for them and bundles the entire network up into manageable output files.This is especially useful for Single Page Applications(SPAs), which is the defacto standard for Web Applications today.
 
+        // TODO tomorrow: Figure out what parameters belong passed into Clustergrammer.
+        // Right now breaks on config.networkdata because something needs initialized.
+        // Rejection: TypeError: Cannot read property 'network_data' of undefined
+            //at make_config(https://game.local/clustergrammer-master/clustergrammer.js:203:31)
+            //at Clustergrammer(https://game.local/clustergrammer-master/clustergrammer.js:91:17)
+            //at eval(eval at < anonymous > (: 1:35), < anonymous >:1:1)
+            //at<anonymous>:1:35
+        // 
 
         return "test";
     }
