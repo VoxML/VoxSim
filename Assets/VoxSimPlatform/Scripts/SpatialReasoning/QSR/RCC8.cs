@@ -326,20 +326,6 @@ namespace VoxSimPlatform {
                     List<Vector3> pruneCandidates = new List<Vector3>();
 
                     foreach (Vector3 candidate in candidates) {
-                        foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                            if (!y.BoundsEqual(GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true))) {
-                                Bounds testBounds = new Bounds(GlobalHelper.GetObjectWorldSize(voxeme.gameObject).center,
-                                    new Vector3(GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.x + 2 * Constants.EPSILON,
-                                        GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.y + 2 * Constants.EPSILON,
-                                        GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.z + 2 * Constants.EPSILON));
-                                if (testBounds.Contains(candidate)) {
-                                    Debug.Log(string.Format("Adding {0} to prune list (intersects bounds({1}))",
-                                        GlobalHelper.VectorToParsable(candidate), voxeme.name));
-                                    pruneCandidates.Add(candidate);
-                                }
-                            }
-                        }
-
                         List<string> evaluatedConstraints = new List<string>(constraints.Length);
 
                         for (int i = 0; i < constraints.Length; i++) {
@@ -388,15 +374,138 @@ namespace VoxSimPlatform {
                         }
                     }
 
-                    candidates = candidates.Except(pruneCandidates).ToList(); 
+                    candidates = candidates.Except(pruneCandidates).ToList();
 
                     Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}]", candidates.Count,
                         string.Join(", ", candidates.Select(c => GlobalHelper.VectorToParsable(c)))));
 
+                    pruneCandidates.Clear();
+
+                    // if only one candidate is left
+                    //  then this candidate risks being eliminated if it intersects the bounds of another object
+                    // add some alternative candidate points that satisfy the same constraints as the remaining candidate
+                    List<Vector3> altCandidates = new List<Vector3>();
+                    if (candidates.Count == 1) {
+                        if (candidates[0].x < y.Center.x) {         // candidate obeys X(x) < X(y)
+                            for (int i = 0; i < 4; i++) {
+                                // add a new candidate somewhere else on the surface of y with the same x-coord
+                                altCandidates.Add(new Vector3(candidates[0].x,
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y, y.Max(MajorAxis.Y).y,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z, y.Max(MajorAxis.Z).z,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+                            }
+                        }
+                        else if (candidates[0].x > y.Center.x) {    // candidate obeys X(x) > X(y)
+                            for (int i = 0; i < 4; i++) {
+                                // add a new candidate somewhere else on the surface of y with the same x-coord
+                                altCandidates.Add(new Vector3(candidates[0].x,
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y, y.Max(MajorAxis.Y).y,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z, y.Max(MajorAxis.Z).z,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+                            }
+                        }
+
+                        if (candidates[0].y < y.Center.y) {         // candidate obeys Y(x) < Y(y)
+                            for (int i = 0; i < 4; i++) {
+                                // add a new candidate somewhere else on the surface of y with the same y-coord
+                                altCandidates.Add(new Vector3(
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.X).x, y.Max(MajorAxis.X).x,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    candidates[0].y,
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z, y.Max(MajorAxis.Z).z,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+                            }
+                        }
+                        else if (candidates[0].y > y.Center.y) {    // candidate obeys Y(x) > Y(y)
+                            for (int i = 0; i < 4; i++) {
+                                // add a new candidate somewhere else on the surface of y with the same y-coord
+                                altCandidates.Add(new Vector3(
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.X).x, y.Max(MajorAxis.X).x,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    candidates[0].y,
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z, y.Max(MajorAxis.Z).z,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+                            }
+                        }
+
+                        if (candidates[0].z < y.Center.z) {         // candidate obeys Z(x) < Z(y)
+                            for (int i = 0; i < 4; i++) {
+                                // add a new candidate somewhere else on the surface of y with the same z-coord
+                                altCandidates.Add(new Vector3(
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.X).x, y.Max(MajorAxis.X).x,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y, y.Max(MajorAxis.Y).y,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    candidates[0].z));
+                            }
+                        }
+                        else if (candidates[0].z > y.Center.z) {    // candidate obeys Z(x) > Z(y)
+                            for (int i = 0; i < 4; i++) {
+                                // add a new candidate somewhere else on the surface of y with the same z-coord
+                                altCandidates.Add(new Vector3(
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.X).x, y.Max(MajorAxis.X).x,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y, y.Max(MajorAxis.Y).y,
+                                        (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                                    candidates[0].z));
+                            }
+                        }
+
+                        candidates = candidates.Except(pruneCandidates).ToList();
+
+                        Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}], {2} alternates: [{3}]", candidates.Count,
+                            string.Join(", ", candidates.Select(c => GlobalHelper.VectorToParsable(c))),
+                            altCandidates.Count, string.Join(", ", altCandidates.Select(c => GlobalHelper.VectorToParsable(c)))));
+                    }
+
+                    foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                        foreach (Vector3 candidate in candidates) {
+                            if (!y.BoundsEqual(GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true))) {
+                                Bounds testBounds = new Bounds(GlobalHelper.GetObjectWorldSize(voxeme.gameObject).center,
+                                    new Vector3(GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.x + 2 * Constants.EPSILON,
+                                        GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.y + 2 * Constants.EPSILON,
+                                        GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.z + 2 * Constants.EPSILON));
+                                if (testBounds.Contains(candidate)) {
+                                    Debug.Log(string.Format("Adding {0} to prune list (intersects bounds({1}))",
+                                        GlobalHelper.VectorToParsable(candidate), voxeme.name));
+                                    pruneCandidates.Add(candidate);
+                                }
+                            }
+                        }
+
+                        foreach (Vector3 candidate in altCandidates) {
+                            if (!y.BoundsEqual(GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true))) {
+                                Bounds testBounds = new Bounds(GlobalHelper.GetObjectWorldSize(voxeme.gameObject).center,
+                                    new Vector3(GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.x + 2 * Constants.EPSILON,
+                                        GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.y + 2 * Constants.EPSILON,
+                                        GlobalHelper.GetObjectWorldSize(voxeme.gameObject, true).size.z + 2 * Constants.EPSILON));
+                                if (testBounds.Contains(candidate)) {
+                                    Debug.Log(string.Format("Adding {0} to prune list (intersects bounds({1}))",
+                                        GlobalHelper.VectorToParsable(candidate), voxeme.name));
+                                    pruneCandidates.Add(candidate);
+                                }
+                            }
+                        }
+                    }
+
+                    candidates = candidates.Except(pruneCandidates).ToList(); 
+                    altCandidates = altCandidates.Except(pruneCandidates).ToList(); 
+
+                    Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}], {2} alternates: [{3}]", candidates.Count,
+                        string.Join(", ", candidates.Select(c => GlobalHelper.VectorToParsable(c))),
+                        altCandidates.Count, string.Join(", ", altCandidates.Select(c => GlobalHelper.VectorToParsable(c)))));
+
                     // 3) random/model-derived assignment from remaining choices (if > 1)
                     //  if there's only one, this will return that one
 
-                    ec = candidates[RandomHelper.RandomInt(0, candidates.Count)];
+                    if (candidates.Count > 0) { // prefer default candidates list
+                        ec = candidates[RandomHelper.RandomInt(0, candidates.Count)];
+                    }
+                    else if (altCandidates.Count > 0) {
+                        ec = altCandidates[RandomHelper.RandomInt(0, altCandidates.Count)];
+                    }
 
                     return ec;
                 }
