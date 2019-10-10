@@ -1078,7 +1078,7 @@ namespace VoxSimPlatform {
 
                 foreach (DictionaryEntry kv in macroVars) {
                     if (kv.Value is Vector3) {
-                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
                         for (int i = 0; i < matches.Count; i++) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key,
                                 GlobalHelper.VectorToParsable((Vector3) kv.Value));
