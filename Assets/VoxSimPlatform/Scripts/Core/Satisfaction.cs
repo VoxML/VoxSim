@@ -317,7 +317,7 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
-                else if (predString == "slide") {
+                else if (predString == "slide_1") {
                     // satisfy slide
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {

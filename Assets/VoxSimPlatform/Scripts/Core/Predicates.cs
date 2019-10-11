@@ -2398,7 +2398,7 @@ namespace VoxSimPlatform {
 
         	// IN: Objects
         	// OUT: none
-        	public void SLIDE(object[] args) {
+        	public void SLIDE_1(object[] args) {
         		// look for agent
         		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
         		if (agent != null) {
