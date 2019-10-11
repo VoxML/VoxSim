@@ -1069,87 +1069,93 @@ namespace VoxSimPlatform {
             }
 
             public String ApplyGlobals(String inString) {
-                GlobalHelper.PrintKeysAndValues("Applying macroVars", macroVars);
+                GlobalHelper.PrintKeysAndValues(string.Format("Applying macroVars to {0}", inString), macroVars);
                 String outString = inString;
                 String temp = inString;
 
                 int parenCount = temp.Count(f => f == '(') +
-                                 temp.Count(f => f == ')');
+	                temp.Count(f => f == ')');
+                                 
+	            GlobalHelper.PrintKeysAndValues("skolems are", skolems);
 
                 foreach (DictionaryEntry kv in macroVars) {
                     if (kv.Value is Vector3) {
                         MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
-                        for (int i = 0; i < matches.Count; i++) {
+                        for (int i = matches.Count-1; i >= 0; i--) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key,
                                 GlobalHelper.VectorToParsable((Vector3) kv.Value));
                         }
                         // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
                             .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
-                            .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+                            .Where(kkv => kkv.GetType() == typeof(String) && 
+                                (Regex.IsMatch(((String)kkv.Value), @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')")))
                             .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
                         foreach (string key in changeValues.Keys) {
                             skolems[key] = changeValues[key].Replace((String) kv.Key, GlobalHelper.VectorToParsable((Vector3) kv.Value));
                         }
                     }
                     else if (kv.Value is List<Vector3>) {
-                        Debug.Log(kv.Value + " is List<Vector3>");
                         String list = string.Format("[{0}]",String.Join(":",
                             ((List<Vector3>) kv.Value).Select(v => GlobalHelper.VectorToParsable(v)).ToArray()));
-                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
-                        for (int i = 0; i < matches.Count; i++) {
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
+                        for (int i = matches.Count-1; i >= 0; i--) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, list);
                         }
                         list = string.Format("[{0}]",String.Join(",", ((List<Vector3>) kv.Value).Select(v => GlobalHelper.VectorToParsable(v)).ToArray()));
                         // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
                             .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
-                            .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+                            .Where(kkv => kkv.GetType() == typeof(String) && 
+                                (Regex.IsMatch(((String)kkv.Value), @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')")))
                             .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
                         foreach (string key in changeValues.Keys) {
                             skolems[key] = changeValues[key].Replace((String) kv.Key, list);
                         }
                     }
                     else if (kv.Value is GameObject) {
-                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
-                        for (int i = 0; i < matches.Count; i++) {
-                            outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, ((GameObject) kv.Value).name);
+	                    MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
+	                    for (int i = matches.Count-1; i >= 0; i--) {
+	                        outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, ((GameObject) kv.Value).name);
                         }
                         // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
                             .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
-                            .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+                            .Where(kkv => kkv.GetType() == typeof(String) && 
+                                (Regex.IsMatch(((String)kkv.Value), @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')")))
                             .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
-                        foreach (string key in changeValues.Keys) {
+	                    GlobalHelper.PrintKeysAndValues("changeValues", changeValues.ToDictionary(e => e.Key as object, e => e.Value as object));
+	                    foreach (string key in changeValues.Keys) {
                             skolems[key] = changeValues[key].Replace((String) kv.Key, ((GameObject) kv.Value).name);
-                        }
+	                    }
                     }
                     else if (kv.Value is List<GameObject>) {
                         String list = String.Join(":", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray());
-                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
-                        for (int i = 0; i < matches.Count; i++) {
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
+                        for (int i = matches.Count-1; i >= 0; i--) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, list);
                         }
                         list = string.Format("[{0}]",String.Join(",", ((List<GameObject>) kv.Value).Select(go => go.name).ToArray()));
                         // get the entries in "skolems" where the values contain the string equal to current key under question
                         Dictionary<string, string> changeValues = skolems.Cast<DictionaryEntry>()
                             .ToDictionary(kkv => kkv.Key, kkv => kkv.Value)
-                            .Where(kkv => kkv.GetType() == typeof(String) && ((String)kkv.Value).Contains((String) kv.Key))
+                            .Where(kkv => kkv.GetType() == typeof(String) && 
+                                (Regex.IsMatch(((String)kkv.Value), @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')")))
                             .ToDictionary(kkv => (String)kkv.Key, kkv => (String)kkv.Value);
                         foreach (string key in changeValues.Keys) {
                             skolems[key] = changeValues[key].Replace((String) kv.Key, list);
                         }
                     }
                     else if (kv.Value is String) {
-                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
-                        for (int i = 0; i < matches.Count; i++) {
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
+                        for (int i = matches.Count-1; i >= 0; i--) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, (String) kv.Value);
                         }
                     }
                     else if (kv.Value is List<String>) {
                         String list = string.Format("[{0}]",String.Join(",", ((List<String>) kv.Value).ToArray()));
-                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)" + (String)kv.Key + @"(?![^,]+\')");
-                        for (int i = 0; i < matches.Count; i++) {
+                        MatchCollection matches = Regex.Matches(outString, @"(?<!\'[^,]+)(?<=[,\(])" + (String)kv.Key + @"(?=[,\)])(?![^,]+\')");
+                        for (int i = matches.Count-1; i >= 0; i--) {
                             outString = outString.ReplaceFirstStartingAt(matches[i].Index, (String) kv.Key, list);
                         }
                     }
@@ -1159,8 +1165,9 @@ namespace VoxSimPlatform {
                 parenCount = temp.Count(f => f == '(') +
                              temp.Count(f => f == ')');
 
-                GlobalHelper.PrintKeysAndValues("skolems", skolems);
+	            GlobalHelper.PrintKeysAndValues("skolems are now", skolems);
 
+	            Debug.Log(string.Format("{0} is now {1}", inString, outString));
                 return outString;
             }
 
