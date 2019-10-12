@@ -47,8 +47,16 @@ namespace VoxSimPlatform {
                         glType = GLType.PhysObj;
                         break;
 
-                    case "physob[]":
+                    case "physobj[]":
                         glType = GLType.PhysObjList;
+                        break;
+
+                    case "surface":
+                        glType = GLType.Surface;
+                        break;
+
+                    case "surface[]":
+                        glType = GLType.SurfaceList;
                         break;
 
                     case "vector":
@@ -169,6 +177,30 @@ namespace VoxSimPlatform {
                             List<Voxeme> voxComponents = ((List<GameObject>)obj).Select(o => o.GetComponent<Voxeme>()).ToList();
                             if (voxComponents.Count > 0) {
                                 if (voxComponents.Select(v => v.voxml.Lex.Type.Split('*')).ToList().All(t => t.Contains("physobj"))) {
+                                    isType = true;
+                                }
+                            }
+                        }
+                        break;
+
+                    case GLType.Surface:
+                        if (obj is GameObject) {
+                            Voxeme voxComponent = (obj as GameObject).GetComponent<Voxeme>();
+                            if (voxComponent != null) {
+                                string[] types = voxComponent.voxml.Lex.Type.Split('*');
+                                if (types.Where(t => GetGLType(t) == GLType.Surface).ToList().Count > 0) {
+                                    isType = true;
+                                }
+                            }
+                        }
+                        break;
+
+                    case GLType.SurfaceList:
+                        if ((obj is IList) && (obj.GetType().IsGenericType) &&
+                            (obj.GetType().IsAssignableFrom(typeof(List<GameObject>)))) {
+                            List<Voxeme> voxComponents = ((List<GameObject>)obj).Select(o => o.GetComponent<Voxeme>()).ToList();
+                            if (voxComponents.Count > 0) {
+                                if (voxComponents.Select(v => v.voxml.Lex.Type.Split('*')).ToList().All(t => t.Contains("surface"))) {
                                     isType = true;
                                 }
                             }

@@ -13,6 +13,8 @@
             LocationList,
             PhysObj,
             PhysObjList,
+            Surface,
+            SurfaceList,
             Vector,
             VectorList,
             Method,

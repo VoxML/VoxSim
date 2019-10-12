@@ -6776,8 +6776,9 @@ namespace VoxSimPlatform {
                         try {
                             if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[argIndex],GenLex.GenLex.GetGLType(t)))) {
                                 object argToAdd = args[argIndex];
-                                // if the arg is a location, it may need adjusting to avoid interpenetration
                                 if (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Location).ToList().Count > 0) {
+                                    // if the arg is a location, it may need adjusting to avoid interpenetration
+    
                                     // retrieve positional relation predicate
                                     string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace(string.Format("{0}_",voxml.Lex.Pred), "") : "";
 	                                Debug.Log(prep);
@@ -6845,6 +6846,26 @@ namespace VoxSimPlatform {
                                 }
 
                                 eventManager.macroVars.Add(curArgName, argToAdd);
+                            }
+                            else if ((curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Surface).ToList().Count > 0) ||
+                                (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.SurfaceList).ToList().Count > 0)) {
+                                // if the arg is a surface, look for the supporting surface of the theme object
+
+                                List<VoxTypeArg> themes = voxml.Type.Args.Where(a => a.Value.Split(':')[1].Split('*')
+                                    .Where(t => GenLex.GenLex.GetGLType(t) == GLType.PhysObj).ToList().Count > 0).ToList();
+                                foreach (VoxTypeArg theme in themes) {
+                                    Debug.Log("theme = " + theme.Value + "@" + 
+                                        voxml.Type.Args.IndexOf(theme) + " : " + eventManager.macroVars[theme.Value.Split(':')[0]]);
+                                    GameObject themeObj = null;
+
+                                    if (eventManager.macroVars[theme.Value.Split(':')[0]] is GameObject) {
+                                        themeObj = eventManager.macroVars[theme.Value.Split(':')[0]] as GameObject;
+                                        object argToAdd = GlobalHelper.GetMostImmediateParentVoxeme(
+                                            themeObj.GetComponent<Voxeme>().supportingSurface);
+
+                                        eventManager.macroVars.Add(curArgName, argToAdd);
+                                    }
+                                }
                             }
                         }
                         catch (Exception ex) {
