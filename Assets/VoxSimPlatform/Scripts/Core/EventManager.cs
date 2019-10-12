@@ -806,13 +806,15 @@ namespace VoxSimPlatform {
                                             new EventReferentArgs(
                                                 new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
                                     }
+                                    else {
+	                                    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
+		                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+			                                    referents.stack.Push(obj);
+		                                    }
 
-                                    //else {
-                                    //    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
-                                    //        referents.stack.Push(obj);
-                                    //    }
-                                    //    OnEntityReferenced(this, new EventReferentArgs(obj));
-                                    //}
+		                                    OnEntityReferenced(null, new EventReferentArgs(obj));
+	                                    }
+                                    }
                                 }
                             }
                             else {

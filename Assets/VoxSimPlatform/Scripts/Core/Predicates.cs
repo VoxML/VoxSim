@@ -1004,10 +1004,20 @@ namespace VoxSimPlatform {
 
         		if (args[0] is GameObject) {
         			// assume all inputs are of same type
-        			//int index = random.Next(args.Length);
         			for (int index = 0; index < args.Length; index++) {
         				if (args[index] is GameObject) {
         					objNames.Add((args[index] as GameObject).name);
+        				}
+        			}
+        		}
+        		else if (args[0] is String) {
+        			// assume all inputs are of same type
+        			for (int index = 0; index < args.Length; index++) {
+        				if (args[index] is String) {
+        					GameObject go = GameObject.Find(args[index] as String);
+        					if (go != null) {
+	        					objNames.Add(args[index] as String);        						
+        					}
         				}
         			}
         		}

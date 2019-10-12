@@ -595,11 +595,16 @@ namespace VoxSimPlatform {
                     }
 
                     if (methodToCall == null) {
-                        if ((em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
-                            (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
-                            voxml = em.voxmlLibrary.VoxMLObjectDict[pred];
-                            methodToCall = preds.GetType().GetMethod("ComposeProgram");
-                        }
+	                    if (em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) {
+	                    	if (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") {
+	                            voxml = em.voxmlLibrary.VoxMLObjectDict[pred];
+	                            methodToCall = preds.GetType().GetMethod("ComposeProgram");
+	                    	}
+		                    else if (em.voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations") {
+			                    voxml = em.voxmlLibrary.VoxMLObjectDict[pred];
+			                    methodToCall = preds.GetType().GetMethod("ComposeRelation");
+	                    	}
+	                    }
                     }
 
                     if (methodToCall.ReturnType == typeof(void)) {
@@ -765,6 +770,15 @@ namespace VoxSimPlatform {
                         // not a program or conditional
                         Debug.Log(string.Format("ComputeSatisfactionConditions: {0} is not a program or conditional! Returns {1}",
                             methodToCall.Name, methodToCall.ReturnType));
+
+                        while (argsStrings.Count > 0) {
+                            object arg = argsStrings.Dequeue();
+
+                            if (arg is String) {
+                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
+                                objs.Add(arg);
+                            }
+                        }
                     }
 
                     objs.Add(false);
@@ -795,23 +809,22 @@ namespace VoxSimPlatform {
                                 methodToCall.Name, methodToCall.ReturnType));
                             object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                             if (obj is String) {
-                                Debug.Log(obj as String);
-                                if (GameObject.Find(obj as String) == null) {
+	                            if (GameObject.Find(obj as String) == null) {
                                     em.OnNonexistentEntityError(null, new EventReferentArgs(
                                         new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
                                     Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
                                         em.events[0]));
                                     return false;
                                 }
-                                else {
-                                    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
-                                        if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
-                                            em.referents.stack.Push(obj);
-                                        }
+                                //else {
+                                //    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
+                                //        if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
+                                //            em.referents.stack.Push(obj);
+                                //        }
 
-                                        em.OnEntityReferenced(null, new EventReferentArgs(obj));
-                                    }
-                                }
+                                //        em.OnEntityReferenced(null, new EventReferentArgs(obj));
+                                //    }
+                                //}
                             }
                         }
                     }
