@@ -77,6 +77,10 @@ namespace VoxSimPlatform {
     			"{0}"
     		});
 
+            private List<string> _anaphorVars = new List<string>(new[] {
+                "{2}"
+            });
+
             /// <summary>
             /// A super simple mapping of plural to singular. Surprisingly, I'm not the one to name it this.
             /// To be deleted???
@@ -262,6 +266,12 @@ namespace VoxSimPlatform {
     					//form = MatchParens(form);
     					cur++;
     				}
+                    else if (_anaphorVars.Contains(tokens[cur])) {
+                        lastObj = tokens[cur];
+                        form += lastObj;
+                        //form = MatchParens(form);
+                        cur++;
+                    }
     				else if (tokens[cur].StartsWith("v@")) {
     					form += "," + tokens[cur].ToUpper();
     					cur++;
@@ -335,6 +345,19 @@ namespace VoxSimPlatform {
     					//Debug.Log(parsed);
     					cur++;
     				}
+                    else if (_anaphorVars.Contains(restOfSent[cur])) {
+                        lastObj = restOfSent[cur];
+                        parsed += lastObj;
+                        //Debug.Log(parsed);
+                        for (var i = 0; i < openParen; i++) {
+                            parsed += ")";
+                            //Debug.Log(parsed);
+                        }
+
+                        parsed += ")";
+                        //Debug.Log(parsed);
+                        cur++;
+                    }
     				else if (restOfSent[cur] == "and") {
     					parsed += ",";
     					cur++;
