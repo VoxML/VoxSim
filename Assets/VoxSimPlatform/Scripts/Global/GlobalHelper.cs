@@ -1175,6 +1175,32 @@ namespace VoxSimPlatform {
                 return voxObject;
             }
 
+             /// <summary>
+            /// Find an object transform nearest to a location within a given radius
+            /// </summary>
+            /// <param name="location">The location around which to search</param>
+            /// <param name="radius">The radius of the sphere which checks for nearby overlapping objects</param>
+            /// <returns>The transform of the closest object to <paramref name="location"/>"/> or <c>null</c> if it can't find any.</returns>
+            public static GameObject FindTargetByLocation(Vector3 location, float radius, int layerMask = -1) {
+                GameObject target = null;
+
+                // Find a block that we can grab
+                Collider[] colliders = Physics.OverlapSphere(location, radius, layerMask);
+
+                if (colliders != null && colliders.Length > 0) {
+                    float minDistance = float.MaxValue;
+                    foreach (Collider c in colliders) {
+                        float distance = Vector3.Distance(c.transform.position, location);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            target = GetMostImmediateParentVoxeme(c.gameObject);
+                        }
+                    }
+                }
+
+                return target;
+            }
+
             public static List<GameObject> ContainingObjects(Vector3 point) {
                 List<GameObject> objs = new List<GameObject>();
 
