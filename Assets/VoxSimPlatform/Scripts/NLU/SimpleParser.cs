@@ -135,7 +135,9 @@ namespace VoxSimPlatform {
     			"center of",
     			"edge of",
     			"under",
-    			"against"
+    			"against",
+                "here",
+                "there"
     		});
 
     		private List<string> _relationVars = new List<string>(new[] {
