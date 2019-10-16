@@ -779,8 +779,8 @@ namespace VoxSimPlatform {
                     }
                     else if (methodToCall.ReturnType == typeof(bool)) {
                         while (argsStrings.Count > 0) {
-	                        object arg = argsStrings.ElementAt(0);
-	                        argsStrings.RemoveFirst();
+                            object arg = argsStrings.ElementAt(0);
+                            argsStrings.RemoveFirst();
 
                             if (arg is String) {
                                 Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
@@ -794,9 +794,9 @@ namespace VoxSimPlatform {
                             methodToCall.Name, methodToCall.ReturnType));
 
                         while (argsStrings.Count > 0) {
-	                        object arg = argsStrings.ElementAt(0);
-	                        argsStrings.RemoveFirst();
-	                        
+                            object arg = argsStrings.ElementAt(0);
+                            argsStrings.RemoveFirst();
+
                             if (arg is String) {
                                 Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
                                 objs.Add(arg);
@@ -810,8 +810,8 @@ namespace VoxSimPlatform {
                         // found a method
                         if (methodToCall.ReturnType == typeof(void)) {
                             // is it a program?
-                            Debug.Log(string.Format("ComputeSatisfactionConditions: invoke {0} with {1}{2}",
-                                methodToCall.Name, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+                            Debug.Log(string.Format("ComputeSatisfactionConditions: invoke {0} on object {1} with {2}{3}",
+                                methodToCall.Name, invocationTarget, (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
                             object obj = null;
  
                             if (voxml == null) {

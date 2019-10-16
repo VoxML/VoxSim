@@ -1519,7 +1519,22 @@ namespace VoxSimPlatform {
                                     }
                                 }
 
-                                methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                if (preds.primitivesOverride != null) {
+                                    methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
+
+                                    // couldn't find an override primitive predicate
+                                    //  default to the existing primitive
+                                    if (methodToCall == null) {
+                                        methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                    }
+                                    else {
+                                        invocationTarget = preds.primitivesOverride;
+                                    }
+                                }
+                                else {
+                                    methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                }
+
                                 validPredExists = ((methodToCall != null) ||
                                     ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
                                     ((voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
