@@ -673,7 +673,7 @@ namespace VoxSimPlatform {
                                                         referents.stack.Push(go.name);
                                                     }
 
-                                                    if (executionPhase == EventExecutionPhase.Computation) {
+                                                    if (executionPhase == EventExecutionPhase.Execution) {
                                                         OnEntityReferenced(this, new EventReferentArgs(go.name));
                                                     }
                                                 }
@@ -696,7 +696,7 @@ namespace VoxSimPlatform {
                                                         referents.stack.Push(((GameObject) o).name);
                                                     }
 
-                                                    if (executionPhase == EventExecutionPhase.Computation) {
+                                                    if (executionPhase == EventExecutionPhase.Execution) {
                                                         OnEntityReferenced(this, new EventReferentArgs(((GameObject) o).name));
                                                     }
                                                 }
@@ -795,7 +795,7 @@ namespace VoxSimPlatform {
                                                 referents.stack.Push(((GameObject) obj).name);
                                             }
 
-                                            if (executionPhase == EventExecutionPhase.Computation) {
+                                            if (executionPhase == EventExecutionPhase.Execution) {
                                                 OnEntityReferenced(this, new EventReferentArgs(((GameObject) obj).name));
                                             }
                                         }
@@ -832,7 +832,7 @@ namespace VoxSimPlatform {
 			                                    referents.stack.Push(obj);
 		                                    }
 
-                                            if (executionPhase == EventExecutionPhase.Computation) {
+                                            if (executionPhase == EventExecutionPhase.Execution) {
 		                                        OnEntityReferenced(null, new EventReferentArgs(obj));
                                             }
 	                                    }

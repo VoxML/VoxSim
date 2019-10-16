@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -23,6 +22,10 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace Core {
         public static class SatisfactionTest {
+            public static event UnhandledArgument OnUnhandledArgument;
+
+            public delegate string UnhandledArgument(string predStr);
+
             public static bool IsSatisfied(String pred, List<object> args) {
                 bool satisfied = false;
 
@@ -570,13 +573,28 @@ namespace VoxSimPlatform {
                 bool validPredExists = false;
 
                 if (predArgs.Count > 0) {
-                    Queue<String> argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
+                    LinkedList<String> argsStrings = new LinkedList<String>(((String) predArgs[pred]).Split(new char[] {','}));
                     List<object> objs = new List<object>();
                     Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
                     object invocationTarget = preds;
 
                     MethodInfo methodToCall = null;
                     VoxML voxml = null;
+
+                    // see if the active implementation has a UnhandledArgument handler for variables
+                    List<string> unhandledArgs = argsStrings.Where(a => Regex.IsMatch(a, @"\{[0-9]+\}")).ToList();
+                    for (int i = 0; i < unhandledArgs.Count; i++) {
+                        if (OnUnhandledArgument != null) {
+                            string retVal = OnUnhandledArgument(command);
+
+                            Debug.Log(string.Format("Replacing {0} in argsStrings with {1}",
+                                unhandledArgs[i], retVal));
+                            foreach (string newOption in retVal.Split(',')) {
+                                argsStrings.AddBefore(argsStrings.Find(unhandledArgs[i]), newOption);
+                            }
+                            argsStrings.Remove(argsStrings.Find(unhandledArgs[i]));
+                        }
+                    }
 
                     if (preds.primitivesOverride != null) {
 	                    methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
@@ -609,7 +627,8 @@ namespace VoxSimPlatform {
 
                     if (methodToCall.ReturnType == typeof(void)) {
                         while (argsStrings.Count > 0) {
-                            object arg = argsStrings.Dequeue();
+                            object arg = argsStrings.ElementAt(0);
+                            argsStrings.RemoveFirst();
 
                             if (GlobalHelper.vec.IsMatch((String) arg)) {
                                 if (GlobalHelper.listVec.IsMatch((String) arg)) {
@@ -760,7 +779,8 @@ namespace VoxSimPlatform {
                     }
                     else if (methodToCall.ReturnType == typeof(bool)) {
                         while (argsStrings.Count > 0) {
-                            object arg = argsStrings.Dequeue();
+	                        object arg = argsStrings.ElementAt(0);
+	                        argsStrings.RemoveFirst();
 
                             if (arg is String) {
                                 Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
@@ -774,8 +794,9 @@ namespace VoxSimPlatform {
                             methodToCall.Name, methodToCall.ReturnType));
 
                         while (argsStrings.Count > 0) {
-                            object arg = argsStrings.Dequeue();
-
+	                        object arg = argsStrings.ElementAt(0);
+	                        argsStrings.RemoveFirst();
+	                        
                             if (arg is String) {
                                 Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
                                 objs.Add(arg);
