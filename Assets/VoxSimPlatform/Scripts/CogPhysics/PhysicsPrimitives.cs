@@ -49,6 +49,7 @@ namespace VoxSimPlatform {
         	void LateUpdate() {
         		//if (Input.GetKeyDown (KeyCode.R)) {
         		if (resolveDiscrepancies) {
+                    eventManager.executionPhase = EventExecutionPhase.Resolution;
         			Debug.Log ("Resolving discrepancies between physics bodies and voxemes");
         			PhysicsHelper.ResolveAllPhysicsDiscrepancies(testSatisfied.MacroEvent);
         			//Debug.Break ();

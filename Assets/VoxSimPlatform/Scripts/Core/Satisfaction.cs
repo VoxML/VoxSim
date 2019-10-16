@@ -698,8 +698,10 @@ namespace VoxSimPlatform {
                                                             (!em.referents.stack.Peek().Equals(go.name))) {
                                                             em.referents.stack.Push(go.name);
                                                         }
-
-                                                        em.OnEntityReferenced(null, new EventReferentArgs(go.name));
+                                                    
+                                                        if (em.executionPhase == EventExecutionPhase.Computation) {
+                                                            em.OnEntityReferenced(null, new EventReferentArgs(go.name));
+                                                        }
                                                     }
                                                 }
 
@@ -853,7 +855,9 @@ namespace VoxSimPlatform {
                                         em.referents.stack.Push(((GameObject) obj).name);
                                     }
 
-                                    em.OnEntityReferenced(null, new EventReferentArgs(((GameObject) obj).name));
+                                    if (em.executionPhase == EventExecutionPhase.Computation) {
+                                        em.OnEntityReferenced(null, new EventReferentArgs(((GameObject) obj).name));
+                                    }
                                 }
                             }
                         }

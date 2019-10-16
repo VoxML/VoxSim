@@ -19,6 +19,12 @@ using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Core {
+        public enum EventExecutionPhase {
+            Computation,
+            Execution,
+            Resolution
+        }
+
         public class EventManagerArgs : EventArgs {
             // TODO: transition this over to take a VoxML encoding as the argument
             public VoxML VoxML { get; set; }
@@ -78,6 +84,8 @@ namespace VoxSimPlatform {
             public List<string> inspectableEventsList = new List<string>();
             public ObservableCollection<String> eventHistory = new ObservableCollection<String>();
             public List<string> inspectableEventHistory = new List<string>();
+
+            public EventExecutionPhase executionPhase = EventExecutionPhase.Computation;
 
             // a dictionary containing
             //  Key: the evaluated form of an event string
@@ -211,6 +219,10 @@ namespace VoxSimPlatform {
                     ForceClear(this, e);
                 }
             }
+
+            public event UnhandledArgument OnUnhandledArgument;
+
+            public delegate string UnhandledArgument(string predStr);
 
             // Just getters/setters for the active agent
             public void SetActiveAgent(String name) {
@@ -423,6 +435,7 @@ namespace VoxSimPlatform {
 
                 //PhysicsHelper.ResolveAllPhysicsDiscrepancies (false);
                 Debug.Log("Next Command: " + events[0]);
+                executionPhase = EventExecutionPhase.Computation;
 
                 if (!EvaluateCommand(events[0])) {
                     return;
@@ -432,6 +445,7 @@ namespace VoxSimPlatform {
                 String pred = GlobalHelper.GetTopPredicate(events[0]);
 
                 if (SatisfactionTest.ComputeSatisfactionConditions(events[0])) {
+                    executionPhase = EventExecutionPhase.Execution;
                     ExecuteCommand(events[0]);
                 }
                 else {
@@ -659,7 +673,9 @@ namespace VoxSimPlatform {
                                                         referents.stack.Push(go.name);
                                                     }
 
-                                                    OnEntityReferenced(this, new EventReferentArgs(go.name));
+                                                    if (executionPhase == EventExecutionPhase.Computation) {
+                                                        OnEntityReferenced(this, new EventReferentArgs(go.name));
+                                                    }
                                                 }
                                             }
                                         }
@@ -680,7 +696,9 @@ namespace VoxSimPlatform {
                                                         referents.stack.Push(((GameObject) o).name);
                                                     }
 
-                                                    OnEntityReferenced(this, new EventReferentArgs(((GameObject) o).name));
+                                                    if (executionPhase == EventExecutionPhase.Computation) {
+                                                        OnEntityReferenced(this, new EventReferentArgs(((GameObject) o).name));
+                                                    }
                                                 }
                                             }
 
@@ -777,7 +795,9 @@ namespace VoxSimPlatform {
                                                 referents.stack.Push(((GameObject) obj).name);
                                             }
 
-                                            OnEntityReferenced(this, new EventReferentArgs(((GameObject) obj).name));
+                                            if (executionPhase == EventExecutionPhase.Computation) {
+                                                OnEntityReferenced(this, new EventReferentArgs(((GameObject) obj).name));
+                                            }
                                         }
                                     }
                                 }
@@ -812,7 +832,9 @@ namespace VoxSimPlatform {
 			                                    referents.stack.Push(obj);
 		                                    }
 
-		                                    OnEntityReferenced(null, new EventReferentArgs(obj));
+                                            if (executionPhase == EventExecutionPhase.Computation) {
+		                                        OnEntityReferenced(null, new EventReferentArgs(obj));
+                                            }
 	                                    }
                                     }
                                 }
@@ -1229,7 +1251,7 @@ namespace VoxSimPlatform {
                 Match argsMatch;
                 Hashtable predArgs;
                 List<object> objs = new List<object>();
-                Queue<String> argsStrings;
+                LinkedList<String> argsStrings;
                 bool doSkolemReplacement = false;
                 Triple<String, String, String> replaceSkolems = null;
                 bool validPredExists;
@@ -1252,7 +1274,22 @@ namespace VoxSimPlatform {
                             String pred = GlobalHelper.GetTopPredicate((String) kv.Value);
                             if (((String) kv.Value).Count(f => f == '(') + // make sure actually a predicate
                                 ((String) kv.Value).Count(f => f == ')') >= 2) {
-                                argsStrings = new Queue<String>(((String) predArgs[pred]).Split(new char[] {','}));
+                                argsStrings = new LinkedList<String>(((String) predArgs[pred]).Split(new char[] {','}));
+
+                                // see if the active implementation has a UnhandledArgument handler for variables
+                                List<string> unhandledArgs = argsStrings.Where(a => Regex.IsMatch(a, @"\{[0-9]+\}")).ToList();
+                                for (int i = 0; i < unhandledArgs.Count; i++) {
+                                    if (OnUnhandledArgument != null) {
+                                        string retVal = OnUnhandledArgument((String)kv.Value);
+
+                                        Debug.Log(string.Format("Replacing {0} in argsStrings with {1}",
+                                            unhandledArgs[i], retVal));
+                                        foreach (string newOption in retVal.Split(',')) {
+                                            argsStrings.AddBefore(argsStrings.Find(unhandledArgs[i]), newOption);
+                                        }
+                                        argsStrings.Remove(argsStrings.Find(unhandledArgs[i]));
+                                    }
+                                }
 
                                 if (preds.primitivesOverride != null) {
                                     methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
@@ -1289,7 +1326,8 @@ namespace VoxSimPlatform {
 
 	                            if (methodToCall.ReturnType != typeof(bool)) {
                                     while (argsStrings.Count > 0) {
-                                        object arg = argsStrings.Dequeue();
+                                        object arg = argsStrings.ElementAt(0);
+                                        argsStrings.RemoveFirst();
 
                                         if (GlobalHelper.vec.IsMatch((String) arg)) {
                                             // if arg is vector form
@@ -1313,7 +1351,7 @@ namespace VoxSimPlatform {
                                                         }
                                                     }
                                                 }
-
+                                                    
                                                 Debug.Log(string.Format("{0} matches: [{1}]", matches.Count, string.Join(",",matches.Select(go => go.name).ToList())));
 
                                                 if (matches.Count == 0) {
@@ -1323,6 +1361,7 @@ namespace VoxSimPlatform {
                                                     GameObject go = GameObject.Find(arg as String);
                                                     Debug.Log(go);
                                                     if (go == null) {
+                                                        // look in disabled objects
                                                         for (int i = 0; i < objSelector.disabledObjects.Count; i++) {
                                                             if (objSelector.disabledObjects[i].name == (arg as String)) {
                                                                 go = objSelector.disabledObjects[i];
@@ -1331,6 +1370,8 @@ namespace VoxSimPlatform {
                                                         }
 
                                                         Debug.Log(go);
+
+                                                        // couldn't find any kind of entity that matched
                                                         if (go == null) {
                                                             //OutputHelper.PrintOutput (Role.Affector, string.Format ("What is that?", (arg as String)));
                                                             OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
