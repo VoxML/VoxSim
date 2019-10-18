@@ -29,7 +29,17 @@ namespace VoxSimPlatform {
                 }
                 UnityWebRequest webRequest;
 
-                Debug.Log("Payload is: " + jsonPayload);
+                Debug.LogWarning("Payload is: " + jsonPayload);
+                //Debug.LogWarning(jsonPayload);
+                if (jsonPayload.StartsWith("web")) {
+                    // Hacky way to circumvent normal command structure.
+                    // Also, love how 'hack' gets syntax highlighted lol
+                    Debug.LogWarning("WEB tag called");
+                    GameObject browser = GameObject.Find("Browser (GUI)");
+                    BrowserInterface bi = browser.GetComponent<BrowserInterface>();
+                    bi.Arbitrary_Func(jsonPayload);
+                    jsonPayload = "";
+                }
 
                 if (jsonPayload != "0") {
                     var form = new WWWForm();

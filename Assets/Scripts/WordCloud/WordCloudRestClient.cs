@@ -32,6 +32,8 @@ namespace VoxSimPlatform {
             /// In this method, we actually invoke a request to the outside server
             /// </summary>
             public override IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+                
+
                 if (!url.StartsWith("http")) {
                     url = "http://" + url;
                 }

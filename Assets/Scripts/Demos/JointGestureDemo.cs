@@ -553,8 +553,12 @@ public class JointGestureDemo : SingleAgentInteraction {
 				// Casts the ray and get the first game object hit
 				Physics.Raycast(ray, out hit);
 
+                //hit.point; // Should be coordinates on the object
+                // hit.distance might also be useful. Some distortion
 				if (hit.collider != null) {
-					if (availableObjs.Contains(Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
+                    Debug.LogWarning("Click detected on " + hit.collider.gameObject + " at position " + hit.point[0] + ":" + hit.point[1] + ":" + hit.point[2] + " distance " + hit.distance);
+                    //Debug.DrawLine(ray.origin, hit.point);
+                    if (availableObjs.Contains(Helper.GetMostImmediateParentVoxeme(hit.collider.gameObject))) {
 						if (!epistemicModel.engaged) {
 							epistemicModel.engaged = true;
 						}

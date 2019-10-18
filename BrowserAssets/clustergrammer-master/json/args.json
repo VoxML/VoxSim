@@ -1,0 +1,4 @@
+{
+  'root': '#id_of_container',
+  'network_data': 'json/mult_viewOLD'
+}
