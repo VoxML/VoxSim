@@ -1261,6 +1261,7 @@ namespace VoxSimPlatform {
 
                 foreach (DictionaryEntry kv in skolems) {
                     voxml = null;
+                    invocationTarget = preds;
                     Debug.Log(kv.Key + " : " + kv.Value);
                     objs.Clear();
                     if (kv.Value is String) {
