@@ -823,21 +823,23 @@ namespace VoxSimPlatform {
 	                                object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                     Debug.Log(string.Format("ExecuteCommand ({0}): {1} returned {2} (typeof {3})",
                                         evaluatedCommand, methodToCall.Name, obj, obj.GetType()));
-                                    if (obj.ToString() == string.Empty) {
-                                        OnNonexistentEntityError(this,
-                                            new EventReferentArgs(
-                                                new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
-                                    }
-                                    else {
-	                                    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
-		                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
-			                                    referents.stack.Push(obj);
-		                                    }
+                                    if (obj is string) {
+                                        if (obj.ToString() == string.Empty) {
+                                            OnNonexistentEntityError(this,
+                                                new EventReferentArgs(
+                                                    new Pair<string, List<object>>(pred, objs.GetRange(0, objs.Count - 1))));
+                                        }
+                                        else {
+    	                                    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
+    		                                    if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+    			                                    referents.stack.Push(obj);
+    		                                    }
 
-                                            if (executionPhase == EventExecutionPhase.Execution) {
-		                                        OnEntityReferenced(null, new EventReferentArgs(obj));
-                                            }
-	                                    }
+                                                if (executionPhase == EventExecutionPhase.Execution) {
+    		                                        OnEntityReferenced(null, new EventReferentArgs(obj));
+                                                }
+    	                                    }
+                                        }
                                     }
                                 }
                             }
