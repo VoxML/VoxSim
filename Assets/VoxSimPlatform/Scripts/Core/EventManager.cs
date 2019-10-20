@@ -743,6 +743,8 @@ namespace VoxSimPlatform {
                 Hashtable predArgs = GlobalHelper.ParsePredicate(evaluatedCommand);
                 String pred = GlobalHelper.GetTopPredicate(evaluatedCommand);
 
+	            methodToCall = null;
+
                 // Match referent stack to whoever is being talked to
                 if (GetActiveAgent() != null) {
                     referents = GetActiveAgent().GetComponent<ReferentStore>();
@@ -809,15 +811,15 @@ namespace VoxSimPlatform {
                                 // found a method
                                 if (methodToCall.ReturnType == typeof(void)) {
                                     // is it a program?
-                                    Debug.Log(string.Format("ExecuteCommand ({0}): invoke {1} with {2}",
-                                        evaluatedCommand, methodToCall.Name, objs));
+	                                Debug.Log(string.Format("ExecuteCommand ({0}): invoke {1} on object {2} with {3}",
+		                                evaluatedCommand, methodToCall.Name, invocationTarget, objs));
 	                                object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                     OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
                                 }
                                 else {
                                     // not a program
-                                    Debug.Log(string.Format("ExecuteCommand ({0}): invoke {1} with {2}",
-                                        evaluatedCommand, methodToCall.Name, objs));
+	                                Debug.Log(string.Format("ExecuteCommand ({0}): invoke {1} on object {2} with {3}",
+		                                evaluatedCommand, methodToCall.Name, invocationTarget, objs));
 	                                object obj = methodToCall.Invoke(invocationTarget, new object[] {objs.ToArray()});
                                     Debug.Log(string.Format("ExecuteCommand ({0}): {1} returned {2} (typeof {3})",
                                         evaluatedCommand, methodToCall.Name, obj, obj.GetType()));

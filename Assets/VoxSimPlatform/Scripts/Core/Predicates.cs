@@ -6435,7 +6435,7 @@ namespace VoxSimPlatform {
                                         path = (List<Vector3>)args[2];
                                     }
                                     else {
-                                        Debug.Log(string.Format("{0}: args@2: {1} must be of type MethodInfo or type List<Vector3>! (is {2})",
+	                                    Debug.Log(string.Format("{0}: args@2: {1} must be of type MethodInfo or type List<Vector3> (is {2})!  No path will be generated.",
                                             MethodBase.GetCurrentMethod().Name, args[2], args[2].GetType()));
                                     }
                                 }
@@ -6443,8 +6443,12 @@ namespace VoxSimPlatform {
                                 Voxeme voxComponent = (args[0] as GameObject).GetComponent<Voxeme>();
                                 if (voxComponent != null) {
                                     if (path == null) {
-                                        // no path given, move directly
+	                                    // no path given, move directly
+	                                    Debug.Log(string.Format("No path from {0} to {1} given.  Moving {0} directly.",
+	                                    	GlobalHelper.VectorToParsable((args[0] as GameObject).transform.position),
+	                                    	GlobalHelper.VectorToParsable((Vector3)args[1])));
                                         voxComponent.targetPosition = (Vector3)args[1];
+                                        AStarSearch.OnComputedPath(null, new ComputedPathEventArgs(new List<Vector3>{ voxComponent.targetPosition }));
                                     }
                                     else {
                                         // iterate motion over the path supplied by method
@@ -6459,50 +6463,6 @@ namespace VoxSimPlatform {
 
                                         Debug.Log(string.Format("Path is: [{0}]",
                                             string.Join(", ",((List<Vector3>)path).Select(n => GlobalHelper.VectorToParsable(n)))));
-
-                                        //Vector3 nextInterimTarget = ((List<Vector3>)path).ElementAt(0);
-                                        //Debug.Log(string.Format("Executing primitive {0}, nextInterimTarget is {1}",
-                                        //    Helper.GetTopPredicate(eventManager.events[0]),
-                                        //    Helper.VectorToParsable(nextInterimTarget)));
-                                        //voxComponent.MoveToward(nextInterimTarget);
-                                        //Vector3 iteratedTarget = voxComponent.transform.position;
-                                        //voxComponent.targetPosition = iteratedTarget;
-
-                                        //if (Helper.CloseEnough(voxComponent.targetPosition,((List<Vector3>)path)[0])) {
-                                        //    Debug.Log(string.Format("Executing primitive {0}, {1} ~= {2}, removing {2} from path",
-                                        //        Helper.GetTopPredicate(eventManager.events[0]),
-                                        //        Helper.VectorToParsable(voxComponent.targetPosition),
-                                        //        Helper.VectorToParsable(((List<Vector3>)path)[0])));
-                                        //    bool pathStored = (eventManager.macroVars.Values.Cast<object>().ToList().Where(
-                                        //        v => (v is List<Vector3>) && ((List<Vector3>)v).SequenceEqual((List<Vector3>)path)).Count() == 1);
-                                        //    if (pathStored) {
-                                        //        string pathKey = eventManager.macroVars.Keys.OfType<String>().
-                                        //            FirstOrDefault(v => (eventManager.macroVars[v] is List<Vector3>) && 
-                                        //                ((List<Vector3>)eventManager.macroVars[v]).SequenceEqual((List<Vector3>)path));
-                                        //        ((List<Vector3>)path).RemoveAt(0);
-                                        //        eventManager.macroVars[pathKey] = path;
-                                        //        Helper.PrintKeysAndValues("eventManager.macroVars", eventManager.macroVars);
-                                        //    }
-                                        //    Debug.Log(string.Format("Path is now: [{0}]",
-                                        //        string.Join(", ",((List<Vector3>)path).Select(n => Helper.VectorToParsable(n)))));
-                                        //}
-
-                                        //Debug.Log(string.Format("Executing primitive {0}, iteratedTarget is {1}",
-                                        //    Helper.GetTopPredicate(eventManager.events[0]),
-                                        //    Helper.VectorToParsable(iteratedTarget)));
-
-                                        //if (((List<Vector3>)path).Count > 0) {
-                                        //    Debug.Log(string.Format("Executing primitive {0}, replacing first occurrence of {1} with {2}",
-                                        //        Helper.GetTopPredicate(eventManager.events[0]),
-                                        //        Helper.VectorToParsable(((List<Vector3>)path).Last()),
-                                        //        Helper.VectorToParsable(iteratedTarget)));
-                                        //    eventManager.events[0] = eventManager.events[0].ReplaceFirst(
-                                        //        Helper.VectorToParsable(((List<Vector3>)path).Last()),
-                                        //        Helper.VectorToParsable(iteratedTarget));
-                                        //}
-
-                                        //Debug.Log(string.Format("Executing primitive {0}, event string is now: {1}",
-                                            //Helper.GetTopPredicate(eventManager.events[0]), eventManager.events[0]));
                                     }
                                 }
                                 else {
@@ -7085,6 +7045,7 @@ namespace VoxSimPlatform {
 
                 bool result = false;
 
+                Debug.Log(args[0].GetType());
                 if (args[0] is String) {
                     // do stuff here
                     string expression = (args[0] as String).Replace("^", " AND ").Replace("|", " OR ");
