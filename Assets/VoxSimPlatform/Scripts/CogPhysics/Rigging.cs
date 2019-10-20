@@ -166,6 +166,10 @@ namespace VoxSimPlatform {
         				}
 
         				childCollisionClone.name = childCollisionClone.name.Replace("(Clone)", "_collision_clone");
+                        foreach(Transform transform in childCollisionClone.transform) {
+                            transform.gameObject.tag = "UnPhysic";
+                        }
+                        childCollisionClone.tag = "UnPhysic";
         			}
         		}
         	}

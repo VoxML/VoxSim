@@ -1189,7 +1189,7 @@ namespace VoxSimPlatform {
 
                 if (colliders != null && colliders.Length > 0) {
                     float minDistance = float.MaxValue;
-                    foreach (Collider c in colliders) {
+                    foreach (Collider c in colliders.Where(c => c.tag != "UnPhysic")) {
                         float distance = Vector3.Distance(c.transform.position, location);
                         if (distance < minDistance) {
                             minDistance = distance;
@@ -1215,7 +1215,7 @@ namespace VoxSimPlatform {
 
                 if (colliders != null && colliders.Length > 0) {
                     float minDistance = float.MaxValue;
-                    foreach (Collider c in colliders) {
+                    foreach (Collider c in colliders.Where(c => c.tag != "UnPhysic")) {
                         if (options.Contains(GetMostImmediateParentVoxeme(c.gameObject))) {
                             float distance = Vector3.Distance(c.transform.position, location);
                             if (distance < minDistance) {
