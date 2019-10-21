@@ -41,7 +41,7 @@ namespace VoxSimPlatform {
                     String args = split.ElementAt(1);   // portion after (
                     // remove the close paren from the end of args
                     //  this is the close paren corresponding to the open paren on which we split the string
-                    args = args.Remove(args.Length - 1);
+	                args = args.Remove(args.Length - 1);
                     predArgs.Add(pred, args);   // add to hashtable
                 }
 

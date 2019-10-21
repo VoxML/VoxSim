@@ -971,11 +971,11 @@ namespace VoxSimPlatform {
                             // if predicate is a relation
                             if (predType == "relations") {
                                 argsStrings = new List<String>(Regex.Split(((String) entry.Value),
-                                    @"(!|^\(|\((?=\()|(?<=(\n|\^)[^(]*\(?[^(]*),(?=[^)]*\)?[^)]*(\n|\^))|(?<=\)[^(]*)[,|^](?=[^)]*\())"));    // use for relational predicates
+	                                @"(!|^\(|\((?=\()|(?<=(\n|\^)[^(]*\(?[^(]*)[,+*/-](?=[^)]*\)?[^)]*(\n|\^))|(?<=\)[^(]*)[,|^](?=[^)]*\())"));    // use for relational predicates
                             }
                             else {
                                 argsStrings = new List<String>(Regex.Split(((String) entry.Value),
-                                    @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*),|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicates
+	                                @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*)[,+*/-]|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicates
                             }
                         }
                         else {
@@ -983,17 +983,17 @@ namespace VoxSimPlatform {
                             MethodInfo primitivePred = preds.GetType().GetMethod(GlobalHelper.GetTopPredicate((String)entry.Value).ToUpper());
                             if (primitivePred != null) {
                                 argsStrings = new List<String>(Regex.Split(((String) entry.Value),                  // primitive predicates are all non-relational
-                                    @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*),|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicate
+	                                @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*)[,+*/-]|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicate
                             }
                             else {
                                 Debug.LogWarning(string.Format("VoxMLEntityTypeDict doesn't contain entry for \"{0}.\" " +
                                     "No primitive predicate \"{1}\" found.  Expect errors!",
                                     GlobalHelper.GetTopPredicate((String)entry.Value),GlobalHelper.GetTopPredicate((String)entry.Value).ToUpper()));
-                                argsStrings = ((String)entry.Value).Split(',').ToList();
+	                            argsStrings = ((String)entry.Value).Split(',','+','-','*','/').ToList();
                             }
                         }
 
-                        for (int i = 0; i < argsStrings.Count; i++) {   // get rid of any dangling close parens
+	                    for (int i = 0; i < argsStrings.Count; i++) {   // get rid of any dangling close parens
                             int extraParens = argsStrings[i].Count(f => f == ')') -     //  that might be left over from an imperfect
                                 argsStrings[i].Count(f => f == '(');                    //  regex split
 
@@ -1206,10 +1206,31 @@ namespace VoxSimPlatform {
                 int parenCount = temp.Count(f => f == '(') +
                                  temp.Count(f => f == ')');
 
-	            GlobalHelper.PrintKeysAndValues("Applying skolems", skolems);
+	            GlobalHelper.PrintKeysAndValues(string.Format("Applying skolems to {0}",inString), skolems);
                 foreach (DictionaryEntry kv in skolems) {
-                    if (kv.Value is Vector3) {
-                        outString = outString.Replace((String) kv.Key, GlobalHelper.VectorToParsable((Vector3) kv.Value));
+	                if (kv.Value is Vector3) {
+		                outString = outString.Replace((String) kv.Key, GlobalHelper.VectorToParsable((Vector3) kv.Value));
+                                        
+                        if (outString.Contains("+")) {
+                            Debug.Log(outString);
+                            Regex eq = new Regex(@"<.+;\w?.+;\w?.+>\+<.+;\w?.+;\w?.+>");
+                            if (eq.Match(outString).Length > 0) {
+                                string toAddStr = eq.Match(outString).Groups[0].Value;
+                                List<Vector3> toAdd = new List<Vector3>();
+                                foreach (string vecStr in toAddStr.Split('+')) {
+                                    toAdd.Add(GlobalHelper.ParsableToVector(vecStr));
+                                    Debug.Log(toAdd.Last());
+                                }
+                                
+                                Vector3 sum = Vector3.zero;
+                                foreach (Vector3 vec in toAdd) {
+                                    sum += vec;
+                                }
+
+                                outString = outString.Replace(toAddStr,
+                                    GlobalHelper.VectorToParsable(sum));
+                            }
+                        }
                     }
                     else if (kv.Value is String) {
                         outString = outString.Replace((String) kv.Key, (String) kv.Value);
@@ -1222,7 +1243,6 @@ namespace VoxSimPlatform {
                         Dictionary<string, string> toReplace = new Dictionary<string, string>();
                         List<int> indicesOfArg = outString.FindAllIndicesOf((String)kv.Key);
                         foreach (int index in indicesOfArg) {
-                            //Debug.Log(string.Format("{0}:{1}:{2}", (String)kv.Key, index, outString[index-1]));
                             if ((index > 0) && 
                                 (outString[index-1] == '!')) {
                                 if (!toReplace.ContainsKey('!' + (String)kv.Key)) {
@@ -1279,8 +1299,11 @@ namespace VoxSimPlatform {
                             String pred = GlobalHelper.GetTopPredicate((String) kv.Value);
                             if (((String) kv.Value).Count(f => f == '(') + // make sure actually a predicate
                                 ((String) kv.Value).Count(f => f == ')') >= 2) {
-                                argsStrings = new LinkedList<String>(((String) predArgs[pred]).Split(new char[] {','}));
+	                            argsStrings = new LinkedList<String>(((String) predArgs[pred]).Split(new char[] {',','+','*','/'}));
 
+	                            foreach(string arg in argsStrings) {
+	                            	Debug.Log(arg as string);
+	                            }
                                 // see if the active implementation has a UnhandledArgument handler for variables
                                 List<string> unhandledArgs = argsStrings.Where(a => Regex.IsMatch(a, @"\{[0-9]+\}")).ToList();
                                 for (int i = 0; i < unhandledArgs.Count; i++) {
@@ -1361,7 +1384,7 @@ namespace VoxSimPlatform {
 
                                                 if (matches.Count == 0) {
                                                     Debug.Log(arg as String);
-                                                    Debug.Log(preds.GetType().GetMethod(pred.ToUpper()).ReturnType);
+	                                                //Debug.Log(preds.GetType().GetMethod(pred.ToUpper()).ReturnType);
                                                     //if (preds.GetType ().GetMethod (pred.ToUpper ()).ReturnType != typeof(String)) {    // if predicate not going to return string (as in "AS")
                                                     GameObject go = GameObject.Find(arg as String);
                                                     Debug.Log(go);
@@ -1677,7 +1700,7 @@ namespace VoxSimPlatform {
                             Debug.Log(replaceWith.GetType());
                             //String replaced = ((String)skolems [kv.Key]).Replace ((String)argsMatch.Groups [0].Value,
                             //    replaceWith.ToString ().Replace (',', ';').Replace ('(', '<').Replace (')', '>'));
-                            if (regex.Match((String) replaceWith).Length == 0) {
+	                        if (regex.Match(replaceWith.ToString()).Length == 0) {
                                 String replaced = argsMatch.Groups[0].Value;
                                 if (replaceWith is String) {
                                     replaced = ((String) skolems[kv.Key]).Replace(argsMatch.Groups[0].Value,
@@ -1685,7 +1708,30 @@ namespace VoxSimPlatform {
                                 }
                                 else if (replaceWith is Vector3) {
                                     replaced = ((String) skolems[kv.Key]).Replace((String) argsMatch.Groups[0].Value,
-                                        GlobalHelper.VectorToParsable((Vector3) replaceWith));
+	                                    GlobalHelper.VectorToParsable((Vector3) replaceWith));
+                                        
+	                                if (replaced.Contains("+")) {
+		                                Debug.Log(replaced);
+	                                	Regex eq = new Regex(@"<.+;\w?.+;\w?.+>\+<.+;\w?.+;\w?.+>");
+	                                	if (eq.Match(replaced).Length > 0) {
+	                                		string toAddStr = eq.Match(replaced).Groups[0].Value;
+	                                		List<Vector3> toAdd = new List<Vector3>();
+	                                		foreach (string vecStr in toAddStr.Split('+')) {
+	                                			toAdd.Add(GlobalHelper.ParsableToVector(vecStr));
+	                                			Debug.Log(toAdd.Last());
+	                                		}
+	                                		
+	                                		Vector3 sum = Vector3.zero;
+	                                		foreach (Vector3 vec in toAdd) {
+	                                			sum += vec;
+	                                		}
+
+                                            Debug.Log(replaced.Replace(toAddStr,
+                                                GlobalHelper.VectorToParsable(sum)));
+                                            replaced = replaced.Replace(toAddStr,
+                                                GlobalHelper.VectorToParsable(sum));
+	                                	}
+	                                }
                                 }
                                 else if (replaceWith is bool) {
                                     replaced = ((String) skolems[kv.Key]).Replace(argsMatch.Groups[0].Value,
