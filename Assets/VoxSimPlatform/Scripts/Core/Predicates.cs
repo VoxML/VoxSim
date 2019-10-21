@@ -6385,8 +6385,9 @@ namespace VoxSimPlatform {
                                                     ((MethodInfo)args[2]).Name, ((MethodInfo)args[2]).GetParameters().Length));
                                                 object[] additionalParams = new ArraySegment<object>(
                                                     args, 3 + numMethodParams, args.Length - (4 + numMethodParams)).ToArray();
-                                                Debug.Log(string.Format("{0} additional parameters supplied",
-                                                    additionalParams.Length));
+	                                            Debug.Log(string.Format("{0} additional parameters supplied: [{1}]",
+		                                            additionalParams.Length,
+		                                            string.Join(", ", additionalParams.Select(p => p.ToString()).ToArray())));
 
                                                 // new ArraySegment slices args starting at 3
                                                 //  - the first index after the specified method -
