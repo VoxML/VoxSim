@@ -442,7 +442,7 @@ namespace VoxSimPlatform {
     //                    }
     //                }
     //            }
-                else if (predString == "lift") {
+                else if (predString == "lift_1") {
                     // satisfy lift
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {

@@ -2277,7 +2277,7 @@ namespace VoxSimPlatform {
 
         	// IN: Objects
         	// OUT: none
-        	public void LIFT(object[] args) {
+        	public void LIFT_1(object[] args) {
         		// look for agent
         		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
         		if (agent != null) {
@@ -6385,9 +6385,8 @@ namespace VoxSimPlatform {
                                                     ((MethodInfo)args[2]).Name, ((MethodInfo)args[2]).GetParameters().Length));
                                                 object[] additionalParams = new ArraySegment<object>(
                                                     args, 3 + numMethodParams, args.Length - (4 + numMethodParams)).ToArray();
-	                                            Debug.Log(string.Format("{0} additional parameters supplied: [{1}]",
-		                                            additionalParams.Length,
-		                                            string.Join(", ", additionalParams.Select(p => p.ToString()).ToArray())));
+                                                Debug.Log(string.Format("{0} additional parameters supplied",
+                                                    additionalParams.Length));
 
                                                 // new ArraySegment slices args starting at 3
                                                 //  - the first index after the specified method -
@@ -6665,6 +6664,82 @@ namespace VoxSimPlatform {
                 return z;
             }
 
+            // IN: Objects (ints, floats, or Vector3s)
+            // OUT: object (int, float, or Vector3)
+            public object PLUS(object[] args) {
+                object r = null;
+
+                if (args.Length > 0) {
+                    if (args[0] is int) {
+                        int sum = 0;
+                        // assume all args are of the same type
+                        foreach (int arg in args.Cast<int>()) {
+                            sum += arg;
+                        }
+
+                        r = sum;
+                    }
+                    else if (args[0] is float) {
+                        float sum = 0f;
+                        // assume all args are of the same type
+                        foreach (float arg in args.Cast<float>()) {
+                            sum += arg;
+                        }
+
+                        r = sum;
+                    }
+                    else if (args[0] is Vector3) {
+                        Vector3 sum = Vector3.zero;
+                        // assume all args are of the same type
+                        foreach (Vector3 arg in args.Cast<Vector3>()) {
+                            sum += arg;
+                        }
+
+                        r = sum;
+                    }
+                }
+
+                return r;
+            }
+
+            // IN: Objects (ints, floats, or Vector3s)
+            // OUT: object (int, float, or Vector3)
+            public object MINUS(object[] args) {
+                object r = null;
+
+                if (args.Length > 0) {
+                    if (args[0] is int) {
+                        int diff = (int)args[0];
+                        // assume all args are of the same type
+                        foreach (int arg in args.Cast<int>().Skip(1)) {
+                            diff -= arg;
+                        }
+
+                        r = diff;
+                    }
+                    else if (args[0] is float) {
+                        float diff = (float)args[0];
+                        // assume all args are of the same type
+                        foreach (float arg in args.Cast<float>().Skip(1)) {
+                            diff -= arg;
+                        }
+
+                        r = diff;
+                    }
+                    else if (args[0] is Vector3) {
+                        Vector3 diff = (Vector3)args[0];
+                        // assume all args are of the same type
+                        foreach (Vector3 arg in args.Cast<Vector3>().Skip(1)) {
+                            diff -= arg;
+                        }
+
+                        r = diff;
+                    }
+                }
+
+                return r;
+            }
+
             // IN: Object (single element array)
             // OUT: float (z value of object coordinate)
             public Vector3 OFFSET(object[] args) {
@@ -6856,7 +6931,8 @@ namespace VoxSimPlatform {
                     if ((bool)args[args.Length - 1]) {
                 		int index = 1;
                 		foreach (VoxTypeSubevent subevent in voxml.Type.Body) {
-                			string[] commands = subevent.Value.Split(new char[] { ';', ':' });
+                            string[] commands = Regex.Split(subevent.Value, @"(?<!(<[^>]))[;:](?!([^<]+>))");
+                            //subevent.Value.Split(new char[] { ';', ':' });
                 			foreach (string command in commands) {
                 				string modifiedCommand = command;
                 				Regex q = new Regex("[\'\"].*[\'\"]");
