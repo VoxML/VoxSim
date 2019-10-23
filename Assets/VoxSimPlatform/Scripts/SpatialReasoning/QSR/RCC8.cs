@@ -5,10 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-using MajorAxes;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
+using MajorAxis = VoxSimPlatform.Global.Constants.MajorAxis;
 
 // RCC8 relations
 // grossly underspecified for now

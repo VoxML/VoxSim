@@ -907,19 +907,24 @@ namespace VoxSimPlatform {
                     Debug.Log (string.Format("{0}: {1}, {2}",gameObject.name,
                         GlobalHelper.VectorToParsable(offset),GlobalHelper.VectorToParsable(normalizedOffset)));
 
+                    float t = (Time.deltaTime * moveSpeed) / offset.magnitude;
+
         			if (rigging.usePhysicsRig) {
         				Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
         				foreach (Rigidbody rigidbody in rigidbodies) {
-        					rigidbody.MovePosition(new Vector3(
-        						transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
-        						transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
-        						transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed));
+        					//rigidbody.MovePosition(new Vector3(
+        					//	transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
+        					//	transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
+        					//	transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed));
+                            rigidbody.MovePosition(Vector3.Lerp(transform.position, target, t));
         				}
         			}
 
-        			transform.position = new Vector3(transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
-        				transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
-        				transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
+                    transform.position = Vector3.Lerp(transform.position, target, t);
+
+        			//transform.position = new Vector3(transform.position.x - normalizedOffset.x * Time.deltaTime * moveSpeed,
+        			//	transform.position.y - normalizedOffset.y * Time.deltaTime * moveSpeed,
+        			//	transform.position.z - normalizedOffset.z * Time.deltaTime * moveSpeed);
 
                     Debug.Log (string.Format("offset.sqrMagnitude({0}) = {1}",gameObject.name,
                         offset.sqrMagnitude));

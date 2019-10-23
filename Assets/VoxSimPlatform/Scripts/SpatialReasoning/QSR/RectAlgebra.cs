@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-using MajorAxes;
 using VoxSimPlatform.Global;
+using MajorAxis = VoxSimPlatform.Global.Constants.MajorAxis;
 
 // generic qualitative relations
 // grossly underspecified for now

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-using MajorAxes;
 using Object = UnityEngine.Object;
 using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
@@ -18,6 +17,7 @@ using VoxSimPlatform.Global;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.SpatialReasoning.QSR;
 using VoxSimPlatform.Vox;
+using MajorAxis = VoxSimPlatform.Global.Constants.MajorAxis;
 
 namespace VoxSimPlatform {
     namespace Core {
@@ -839,15 +839,15 @@ namespace VoxSimPlatform {
                                         em.events[0]));
                                     return false;
                                 }
-                                //else {
-                                //    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
-                                //        if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
-                                //            em.referents.stack.Push(obj);
-                                //        }
+                                else {
+                                    if (GameObject.Find(obj as String).GetComponent<Voxeme>() != null) {
+                                        if ((em.referents.stack.Count == 0) || (!em.referents.stack.Peek().Equals(obj))) {
+                                            em.referents.stack.Push(obj);
+                                        }
 
-                                //        em.OnEntityReferenced(null, new EventReferentArgs(obj));
-                                //    }
-                                //}
+                                        em.OnEntityReferenced(null, new EventReferentArgs(obj));
+                                    }
+                                }
                             }
                         }
                     }

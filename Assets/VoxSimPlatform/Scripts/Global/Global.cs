@@ -9,7 +9,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using MajorAxes;
 using Object = System.Object;
 using Random = UnityEngine.Random;
 using VoxSimPlatform.Vox;
@@ -30,6 +29,22 @@ namespace VoxSimPlatform {
     			{"Y", yAxis},
     			{"Z", zAxis}
     		};
+
+            public enum MajorAxis {
+                None,
+                X,
+                Y,
+                Z
+            };
+
+            public class AxisVector {
+                public static Vector3 posXAxis = new Vector3(1.0f, 0.0f, 0.0f);
+                public static Vector3 posYAxis = new Vector3(0.0f, 1.0f, 0.0f);
+                public static Vector3 posZAxis = new Vector3(0.0f, 0.0f, 1.0f);
+                public static Vector3 negXAxis = new Vector3(-1.0f, 0.0f, 0.0f);
+                public static Vector3 negYAxis = new Vector3(0.0f, -1.0f, 0.0f);
+                public static Vector3 negZAxis = new Vector3(0.0f, 0.0f, -1.0f);
+            }
     	}
 
     	public static class Data {
@@ -205,20 +220,20 @@ namespace VoxSimPlatform {
     			_points = new List<Vector3>(points);
     		}
 
-    		public Vector3 Min(MajorAxis axis = MajorAxis.None) {
+    		public Vector3 Min(Constants.MajorAxis axis = Constants.MajorAxis.None) {
     			List<Vector3> pts = new List<Vector3>();
-    			if (axis == MajorAxis.None) {
+    			if (axis == Constants.MajorAxis.None) {
     				// default to Y
     				pts = Points.OrderBy(v => v.y).ToList();
     			}
     			else {
-    				if (axis == MajorAxis.X) {
+    				if (axis == Constants.MajorAxis.X) {
     					pts = Points.OrderBy(v => v.x).ToList();
     				}
-    				else if (axis == MajorAxis.Y) {
+    				else if (axis == Constants.MajorAxis.Y) {
     					pts = Points.OrderBy(v => v.y).ToList();
     				}
-    				else if (axis == MajorAxis.Z) {
+    				else if (axis == Constants.MajorAxis.Z) {
     					pts = Points.OrderBy(v => v.z).ToList();
     				}
     			}
@@ -226,20 +241,20 @@ namespace VoxSimPlatform {
     			return pts[0];
     		}
 
-    		public Vector3 Max(MajorAxis axis = MajorAxis.None) {
+    		public Vector3 Max(Constants.MajorAxis axis = Constants.MajorAxis.None) {
     			List<Vector3> pts = new List<Vector3>();
-    			if (axis == MajorAxis.None) {
+    			if (axis == Constants.MajorAxis.None) {
     				// default to Y
     				pts = Points.OrderByDescending(v => v.y).ToList();
     			}
     			else {
-    				if (axis == MajorAxis.X) {
+    				if (axis == Constants.MajorAxis.X) {
     					pts = Points.OrderByDescending(v => v.x).ToList();
     				}
-    				else if (axis == MajorAxis.Y) {
+    				else if (axis == Constants.MajorAxis.Y) {
     					pts = Points.OrderByDescending(v => v.y).ToList();
     				}
-    				else if (axis == MajorAxis.Z) {
+    				else if (axis == Constants.MajorAxis.Z) {
     					pts = Points.OrderByDescending(v => v.z).ToList();
     				}
     			}
@@ -250,9 +265,9 @@ namespace VoxSimPlatform {
     		public bool Contains(Vector3 point) {
     			bool contains = true;
     			
-    			if ((point.x >= Min(MajorAxis.X).x) && (point.x <= Max(MajorAxis.X).x) &&
-	    			(point.y >= Min(MajorAxis.Y).y) && (point.y <= Max(MajorAxis.Y).y) && 
-	    			(point.z >= Min(MajorAxis.Z).z) && (point.z <= Max(MajorAxis.Z).z)) {
+    			if ((point.x >= Min(Constants.MajorAxis.X).x) && (point.x <= Max(Constants.MajorAxis.X).x) &&
+	    			(point.y >= Min(Constants.MajorAxis.Y).y) && (point.y <= Max(Constants.MajorAxis.Y).y) && 
+	    			(point.z >= Min(Constants.MajorAxis.Z).z) && (point.z <= Max(Constants.MajorAxis.Z).z)) {
 	    			Vector3 closestCorner = Points.Take(8)	// take first 8 because latter 8 contain points on center of faces
 		    			.OrderBy(p => (p - point).magnitude).ToList()[0];
 	

@@ -8,7 +8,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using MajorAxes;
 using Random = UnityEngine.Random;
 using VoxSimPlatform.CogPhysics;
 using VoxSimPlatform.Core;
@@ -1075,20 +1074,20 @@ namespace VoxSimPlatform {
                 return region;
             }
 
-            public static Region RegionOfIntersection(Region r1, Region r2, MajorAxis axis) {
+            public static Region RegionOfIntersection(Region r1, Region r2, Constants.MajorAxis axis) {
                 Region intersection = new Region();
 
-                if (axis == MajorAxis.X) {
+                if (axis == Constants.MajorAxis.X) {
         //              Debug.Log ("X");
                     intersection.min = new Vector3(r1.max.x, Mathf.Max(r1.min.y, r2.min.y), Mathf.Max(r1.min.z, r2.min.z));
                     intersection.max = new Vector3(r1.max.x, Mathf.Min(r1.max.y, r2.max.y), Mathf.Min(r1.max.z, r2.max.z));
                 }
-                else if (axis == MajorAxis.Y) {
+                else if (axis == Constants.MajorAxis.Y) {
         //              Debug.Log ("Y");
                     intersection.min = new Vector3(Mathf.Max(r1.min.x, r2.min.x), r1.max.y, Mathf.Max(r1.min.z, r2.min.z));
                     intersection.max = new Vector3(Mathf.Min(r1.max.x, r2.max.x), r1.max.y, Mathf.Min(r1.max.z, r2.max.z));
                 }
-                else if (axis == MajorAxis.Z) {
+                else if (axis == Constants.MajorAxis.Z) {
         //              Debug.Log ("Z");
                     intersection.min = new Vector3(Mathf.Max(r1.min.x, r2.min.x), Mathf.Max(r1.min.y, r2.min.y), r1.max.z);
                     intersection.max = new Vector3(Mathf.Min(r1.max.x, r2.max.x), Mathf.Min(r1.max.y, r2.max.y), r1.max.z);
@@ -1278,7 +1277,7 @@ namespace VoxSimPlatform {
                 RaycastHit[] hits;
 
                 //      hits = Physics.RaycastAll (transform.position, AxisVector.negYAxis);
-                hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
+	            hits = Physics.RaycastAll(contactPoint, Constants.AxisVector.negYAxis);
                 List<RaycastHit> hitList = new List<RaycastHit>(hits);
                 hits = hitList.OrderBy(h => h.distance).ToArray();
                 foreach (RaycastHit hit in hits) {
