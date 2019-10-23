@@ -25,6 +25,8 @@ var Clustergrammer =
 /******/ 		module.loaded = true;
 
 /******/ 		// Return the exports of the module
+				//console.log(module.exports);
+				//console.log(module);
 /******/ 		return module.exports;
 /******/ 	}
 
@@ -26228,7 +26230,7 @@ var Clustergrammer =
 	var deactivate_cropping = __webpack_require__(253);
 	var underscore = __webpack_require__(3);
 
-	module.exports = function brush_crop_matrix() {
+	module.exports = function brush_crop_matrix(xy = null) {
 
 	  // get rows/cols from brush-extent
 	  // works for differnt brushing directions (e.g. start end sites)
@@ -26245,19 +26247,43 @@ var Clustergrammer =
 	  // make brush group
 	  d3.select(params.root + ' .clust_container').append('g').classed('brush_group', true);
 
-	  cgm.params.is_cropping = true;
+	  if (xy == null){
+		  console.log("xy not set");
 
-	  var brush = d3.svg.brush().x(x).y(y).on("brushend", brushend);
+		  cgm.params.is_cropping = true;
 
-	  d3.select(params.root + ' .brush_group').call(brush);
+		  var brush = d3.svg.brush().x(x).y(y).on("brushend", brushend);
+
+		  d3.select(params.root + ' .brush_group').call(brush);
+	  }else{
+		  console.log("xy set: ");
+		  console.log(xy);
+
+		  //d3.selectAll(selector) //will be useful for later, more specific selecting
+		  cgm.params.is_cropping = true;
+		  var brush = d3.svg.brush().x(x).y(y).on("brushend", brushend);
+		  // Spoof the brush
+		  d3.select(params.root + ' .brush_group').call(brush);
+	  }
+
+	  // cgm.params.is_cropping = true;
+	  //
+	  // var brush = d3.svg.brush().x(x).y(y).on("brushend", brushend);
+	  //
+	  // d3.select(params.root + ' .brush_group').call(brush);
 
 	  function brushend() {
 
 	    // do not display dendro crop buttons when cropping with brushing
 	    d3.select(cgm.params.root + ' .col_dendro_icons_container').style('display', 'none');
 	    d3.select(cgm.params.root + ' .row_dendro_icons_container').style('display', 'none');
-
-	    var brushing_extent = brush.extent();
+		if(xy != null){
+			start = [xy[0] - 10, xy[1] - 10]
+			end = [xy[0] + 10, xy[1] + 10]
+			console.log(xy, start, end);
+			brush.extent([start,end]);
+		}
+		var brushing_extent = brush.extent();
 	    var brush_start = brushing_extent[0];
 	    var brush_end = brushing_extent[1];
 
@@ -26278,12 +26304,20 @@ var Clustergrammer =
 
 	      d3.select(params.root + ' .crop_button').style('color', '#337ab7').classed('fa-crop', false).classed('fa-undo', true);
 	    }
+	    console.log("halt");
 	  }
 
 	  function find_cropped_nodes(x_start, x_end, y_start, y_end, brush_start, brush_end) {
 
 	    // reverse if necessary (depending on how brushing was done)
-	    if (x_start > x_end) {
+		  console.log(x_start, x_end);
+		  console.log(y_start, y_end);
+		  console.log(brush_start);
+		  console.log(brush_end);
+		  // console.log(x_start, x_end, y_start, y_end, brush_start, brish_end);
+		  // console.log(x_start, x_end, y_start, y_end, brush_start, brish_end);
+
+		  if (x_start > x_end) {
 	      x_start = brush_end[0];
 	      x_end = brush_start[0];
 	    }

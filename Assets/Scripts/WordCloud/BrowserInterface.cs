@@ -10,6 +10,8 @@ namespace VoxSimPlatform {
         public class BrowserInterface : MonoBehaviour {
             float prior0;
             float prior1;
+            Vector2 topleft; // of the cgm window
+            Vector2 bottomright; // of the cgm window
             string saved_nodes = "jyf";
             Browser b;
             ZenFulcrum.EmbeddedBrowser.IPromise<ZenFulcrum.EmbeddedBrowser.JSONNode> ip = null; //`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
@@ -17,58 +19,64 @@ namespace VoxSimPlatform {
             // Start is called before the first frame update
             void Start() {
                 // immediately remember the browser forever.
-                b = Selection.activeGameObject.GetComponent<Browser>();
+                b = FindObjectOfType<Browser>(); // Only one browser allowed right now. Just a couple lines to specify further
             }
 
             // Update is called once per frame
             void Update() {
-                if (Input.GetMouseButtonDown(0)) {
+                if (Input.GetMouseButton(1)) { // Right click to avoid double input//Input.GetMouseButtonDown(0)
                     // Send a note to the browser to crop around the current mouse position.
-                    b.EvalJS("").Then(ret => Debug.LogWarning("" + ret));
+                    Debug.LogWarning(b);
+                    var x = Input.mousePosition;
+                    Debug.LogWarning(x.ToString());
+                    //x[0] = 30;
+                    //x[1] = 30;
+                    remap_to_window(x);
+                    string point = x.ToString().Replace("(", "[").Replace(")","]");
+                    Debug.LogWarning(point);
+
+                    //b.EvalJS("console.log(this)");
+                    // We just need a nice centerpoint. How to get?
+                    //b.EvalJS("this.cgm.brush_crop_matrix([[0,0],[10,10]])").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
+                    b.EvalJS("this.cgm.brush_crop_matrix("+ point + ")").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
+
+                    //b.EvalJS("this.cgm").Then(ret => Debug.LogWarning("CG: " + ret)).Done();
+
+                    //Debug.LogWarning(saved_nodes);
                 }
+                if (Input.GetKeyDown("p")) {
+                    // Set parameters. Like window height/width within
+                    // Get pixel of the top left
+                    // Don't even need bottom right I wager.
+                }
+            }
+
+            ///
+            private void remap_to_window(Vector3 x) {
+                /// remap input pixel to its relative position in the actual matrix.
+                /// Hard coded for me rn
+                /// (0,0) is the top left
+                // 263, 276 are the top left in Unity
+                // 689, 55 are bottom right.
+                // ^ Grab by right clicking on each corner and reading unity console.
+
+                // Width is 425.5
+                // Height is 215
+                // ^ Grab these by going to javascript console (on Browser (GUI))
+                //      and typing in > cgm.params.viz.clust.dim.width
+                //> cgm.params.viz.clust.dim.height
+                // Switcheroo
+                x[0] = ((x[0] - 263) / (689  -263)) * 425.5f;
+                x[1] = ((276 - x[1]) / (276 - 55)) * 215f;
+                
             }
 
             public string Arbitrary_Func(string payload = "") {
                 
-
-                //b.EvalJS("").Then(ret => Debug.LogWarning(ret)).Done();
+                //b.EvalJS("this.saved_selected_nodes").Then(ret => Debug.LogWarning("Returned Cells: " + ret)).Done();
                 //b.EvalJS("document.title").Then(ret => Debug.LogWarning("Document title: " + ret)).Done();
-
-                b.EvalJS("this.saved_selected_nodes").Then(ret => Debug.LogWarning("Returned Cells: " + ret)).Done();
-                b.EvalJS("document.title").Then(ret => Debug.LogWarning("Document title: " + ret)).Done();
                 b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
-                Debug.LogWarning("WE GOT THEM: " + saved_nodes);
-                //b.CallFunction("gibberishjask").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-
-                //b.CallFunction("get_selected_nodes").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("Clustergrammer.get_selected_nodes").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("Clustergrammer").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("export_matrix_string").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("Clustergrammer.export_matrix_string").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("Clustergrammer.export_matrix").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("export_matrix").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-                //b.CallFunction("close").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done(); // should kill it
-
-                //b.CallFunction("d3.selection").Then(ret => Debug.LogWarning("Saved Nodes: " + ret)).Done();
-
-
-                //Debug.LogWarning(saved_nodes);
-
-                //Debug.LogWarning(ip + "\n" + ip.GetType().ToString());
-                // ZenFulcrum.EmbeddedBrowser.Promise`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
-
-
-                //Webpack is a module bundler.It takes disparate dependencies, creates modules for them and bundles the entire network up into manageable output files.This is especially useful for Single Page Applications(SPAs), which is the defacto standard for Web Applications today.
-
-                // TODO tomorrow: Figure out what parameters belong passed into Clustergrammer.
-                // Right now breaks on config.networkdata because something needs initialized.
-                // Rejection: TypeError: Cannot read property 'network_data' of undefined
-                //at make_config(https://game.local/clustergrammer-master/clustergrammer.js:203:31)
-                //at Clustergrammer(https://game.local/clustergrammer-master/clustergrammer.js:91:17)
-                //at eval(eval at < anonymous > (: 1:35), < anonymous >:1:1)
-                //at<anonymous>:1:35
-                // They used a tool (webpack) to squish all functions into one file here: https://medium.com/ag-grid/webpack-tutorial-understanding-how-it-works-f73dfa164f01
-
+                Debug.LogWarning("WE GOT THEM: " + saved_nodes); // race condition. 
                 return "test";
             }
 
