@@ -26278,11 +26278,12 @@ var Clustergrammer =
 	    d3.select(cgm.params.root + ' .col_dendro_icons_container').style('display', 'none');
 	    d3.select(cgm.params.root + ' .row_dendro_icons_container').style('display', 'none');
 		if(xy != null){
-			start = [xy[0] - 10, xy[1] - 10]
-			end = [xy[0] + 10, xy[1] + 10]
+			start = [xy[0] - 25, xy[1] - 25]
+			end = [xy[0] + 25, xy[1] + 25]
 			console.log(xy, start, end);
 			brush.extent([start,end]);
 		}
+		console.log("extent: ", brush.extent());
 		var brushing_extent = brush.extent();
 	    var brush_start = brushing_extent[0];
 	    var brush_end = brushing_extent[1];
