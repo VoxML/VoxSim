@@ -26247,6 +26247,7 @@ var Clustergrammer =
 	  // make brush group
 	  d3.select(params.root + ' .clust_container').append('g').classed('brush_group', true);
 
+	  //CHANGED, though not a lot functionally different, just prints
 	  if (xy == null){
 		  console.log("xy not set");
 
@@ -26277,7 +26278,8 @@ var Clustergrammer =
 	    // do not display dendro crop buttons when cropping with brushing
 	    d3.select(cgm.params.root + ' .col_dendro_icons_container').style('display', 'none');
 	    d3.select(cgm.params.root + ' .row_dendro_icons_container').style('display', 'none');
-		if(xy != null){
+		//CHANGED
+	    if(xy != null){
 			start = [xy[0] - 25, xy[1] - 25]
 			end = [xy[0] + 25, xy[1] + 25]
 			console.log(xy, start, end);
