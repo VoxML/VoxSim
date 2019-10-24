@@ -888,6 +888,7 @@ namespace VoxSimPlatform {
             }
 
             public void ClearEvents() {
+                Debug.Log("Clearing events");
                 events.Clear();
                 evalOrig.Clear();
                 evalResolved.Clear();
@@ -1834,8 +1835,8 @@ namespace VoxSimPlatform {
             /// Triggered when the events list is modified or changes
             /// </summary>
             void OnEventsListChanged(object sender, NotifyCollectionChangedEventArgs e) {
-                //Debug.Log(string.Format("==================== Events list changed ==================== {0}",
-                //    (sender == null) ? "NULL" : string.Format("[{0}]",string.Join(",\n\t",((ObservableCollection<string>)sender).Cast<string>()))));
+                Debug.Log(string.Format("==================== Events list changed ==================== {0}",
+                    (sender == null) ? "NULL" : string.Format("[{0}]",string.Join(",\n\t",((ObservableCollection<string>)sender).Cast<string>()))));
                 inspectableEventsList = ((ObservableCollection<string>)sender).Cast<string>().ToList();
             }
 
