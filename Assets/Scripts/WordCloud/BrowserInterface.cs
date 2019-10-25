@@ -8,6 +8,7 @@ using System.Text;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.RegularExpressions;
 
 
 namespace VoxSimPlatform {
@@ -56,19 +57,14 @@ namespace VoxSimPlatform {
                     // Create a socket connection with the specified server and port.
 
                     // Send request to the server.
-                    if (receive){
-                        
-
-                    }
-                    else {
-                        int result = s.Send(bytesSent, bytesSent.Length, 0);
-                        Debug.LogWarning(request + "   " + s.Handle + "    " + s.IsBound + "  result: " + result + "  connected: " + s.RemoteEndPoint);
-                    }
+                    int result = s.Send(bytesSent, bytesSent.Length, 0);
+                    Debug.LogWarning(request + "   " + s.Handle + "    " + s.IsBound + "  result: " + result + "  connected: " + s.RemoteEndPoint);
 
 
                 }
                 else {
-                    string[] requests = { "(register :name DIANA" + "52"+")",
+                    // Initialize the connection
+                    string[] requests = { "(register :name DIANA" + "56"+")", // Particular number needs to change while facilitator is open
                     "(subscribe :content (request &key :content (record-gene-data . * )))",
                     "(subscribe :content (request &key :content (cluster-analysis . * )))",
                     "(tell :content (module-status ready))",
@@ -173,32 +169,51 @@ namespace VoxSimPlatform {
                         Debug.LogWarning("You probably clicked outside the box.");
                     }
                 }
-                else if (Input.GetKeyDown("s")) { // s for server, idunno
+                else if (Input.GetKeyDown("s")) { // s for server, initializes the socket connection
                     //string[] the_list = { };
                     s = GetSocket.Main(s);//, "(register :name DIANA14)");
                 }
-                //else if (Input.GetKeyDown("d")) { // s for server, idunno
-                //    //string[] the_list = { };
-                //    s = GetSocket.Main(s, "(subscribe :content (request &key :content (record-gene-data . * )))");
-                //}
-                //else if (Input.GetKeyDown("f")) { // s for server, idunno
-                //    //string[] the_list = { };
-                //    s = GetSocket.Main(s, "(subscribe :content (request &key :content (cluster-analysis . * )))");
-                //}
-                //else if (Input.GetKeyDown("h")) { // s for server, idunno
-                //    //string[] the_list = { };
-                //    s = GetSocket.Main(s, "(tell :content (module-status ready))");
-                //}
-                //else if (Input.GetKeyDown("g")) { // s for server, idunno
-                //    //string[] the_list = { };
-                //    s = GetSocket.Main(s, "(subscribe :content (tell &key :content (utterance . *)))");
-                //}
-                else if (Input.GetKeyDown("j")) { // s for server, idunno
+                else if (Input.GetKeyDown("d")) { // Downloads whatever, prints to debug.
                     //string[] the_list = { };
-                    s = GetSocket.Main(s, "", true);
+                    //s = GetSocket.Main(s, "", true);
                     byte[] bytesReceived = new byte[256];
                     int i = s.Receive(bytesReceived);
-                    Debug.LogWarning(Encoding.UTF8.GetString(bytesReceived));
+                    string from_trips = Encoding.UTF8.GetString(bytesReceived);
+                    Debug.LogWarning(from_trips);
+                }
+                else if (Input.GetKeyDown("p")) { // p for path
+                    // Request a path to a cluster from the server. (or rather, just grab whatever it hands you)
+                        // Then cluster, then give the server a success notification.
+                    //s = GetSocket.Main(s, "", true);
+                    byte[] bytesReceived = new byte[256];
+                    int i = s.Receive(bytesReceived);
+                    string from_trips = Encoding.UTF8.GetString(bytesReceived);
+                    Debug.LogWarning(from_trips);
+                    // Create a socket connection with the specified server and port.
+
+                    // Parse the string here.
+                    // (request :content (record-gene-data :filename "path on localhost"  :data " content of csv file")
+                    // string to_eval = Regex.Match(from_trips, "test.*test").Value;
+                    string to_eval = Regex.Match(from_trips, @""".*json").Value;
+                    to_eval = to_eval.Substring(1, to_eval.Length - 1); //UGH
+
+                    Debug.LogWarning("eval: " + to_eval);
+                    b.EvalJS("make_clust('" + to_eval + "');").Then(ret => saved_nodes = ret).Done();
+                    // Send request to the server.
+                    byte[] bytesSent = Encoding.ASCII.GetBytes("(reply :content (success :status done)");
+                    int result = s.Send(bytesSent, bytesSent.Length, 0);
+                }
+                else if (Input.GetKeyDown("g")) { // g for genes
+                    //s = GetSocket.Main(s, "", true);
+                    byte[] bytesSent = Encoding.ASCII.GetBytes("");
+                    // Create a socket connection with the specified server and port.
+
+                    // Send request to the server.
+                    int result = s.Send(bytesSent, bytesSent.Length, 0);
+                    byte[] bytesReceived = new byte[256];
+                    int i = s.Receive(bytesReceived);
+                    string from_trips = Encoding.UTF8.GetString(bytesReceived);
+                    Debug.LogWarning(from_trips);
                 }
             }
 
