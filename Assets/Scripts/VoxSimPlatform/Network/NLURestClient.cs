@@ -37,7 +37,7 @@ namespace VoxSimPlatform {
                     Debug.LogWarning("WEB tag called");
                     GameObject browser = GameObject.Find("Browser (GUI)");
                     BrowserInterface bi = browser.GetComponent<BrowserInterface>();
-                    bi.Arbitrary_Func(jsonPayload);
+                    bi.grab_selected(jsonPayload);
                     jsonPayload = "";
                 }
 
