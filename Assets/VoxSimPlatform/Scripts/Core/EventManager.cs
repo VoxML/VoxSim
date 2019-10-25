@@ -976,7 +976,8 @@ namespace VoxSimPlatform {
                             }
                             else {
                                 argsStrings = new List<String>(Regex.Split(((String) entry.Value),
-	                                @"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*)[,+*/-]|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicates
+	                                //@"(!|^\(|\((?=\()|(?<=(\n|^)[^(]*\(?[^(]*)[,+*/-]|(?<=\)[^(]*)[,|^](?=[^)]*\())"));   // use for non-relational predicates
+                                    @"(!|^[(<]|[(<](?=[(<])|(?<=(\n|^)[^(<]*\(?[^(<]*)[,+*/-]|(?<=[)>][^(<]*)[,|^](?=[^)>]*[(<]))"));   // use for non-relational predicates
                             }
                         }
                         else {
