@@ -64,7 +64,7 @@ namespace VoxSimPlatform {
                 }
                 else {
                     // Initialize the connection
-                    string[] requests = { "(register :name DIANA" + "56"+")", // Particular number needs to change while facilitator is open
+                    string[] requests = { "(register :name DIANA" + "67"+")", // Particular number needs to change while facilitator is open
                     "(subscribe :content (request &key :content (record-gene-data . * )))",
                     "(subscribe :content (request &key :content (cluster-analysis . * )))",
                     "(tell :content (module-status ready))",
@@ -163,7 +163,7 @@ namespace VoxSimPlatform {
                         // We just need a nice centerpoint. How to get?
                         //b.EvalJS("this.cgm.brush_crop_matrix([[0,0],[10,10]])").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
                         b.EvalJS("this.cgm.brush_crop_matrix(" + point + ")").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
-
+                        b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
                     }
                     else {
                         Debug.LogWarning("You probably clicked outside the box.");
@@ -172,8 +172,64 @@ namespace VoxSimPlatform {
                 else if (Input.GetKeyDown("s")) { // s for server, initializes the socket connection
                     //string[] the_list = { };
                     s = GetSocket.Main(s);//, "(register :name DIANA14)");
+                    external_call("s");
                 }
                 else if (Input.GetKeyDown("d")) { // Downloads whatever, prints to debug.
+                    external_call("d");
+
+                }
+                else if (Input.GetKeyDown("p")) { // p for path
+                    external_call("p");
+
+                }
+                else if (Input.GetKeyDown("g")) { // g for genes
+                    external_call("g");
+                }
+                else if (Input.GetKeyDown("n")) { // g for genes
+                    grab_selected("");
+                }else if (Input.GetKeyDown("i")) {
+                    b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
+                }
+            }
+
+
+            void external_call(string j) {
+                // Turn the update things into a function that takes a string for choices.
+                if (j == "1") { // Right click to avoid double input//Input.GetMouseButtonDown(0). Feel free to change to keypresses or whatever.
+                    // Send a note to the browser to crop around the current mouse position.
+                    Debug.LogWarning(b);
+                    Vector3 x;
+                    if (to_enter != new Vector3(0, 0, 0)) {
+                        x = to_enter; // Set to_enter elsewhere to make t
+                    }
+                    else {
+                        x = Input.mousePosition; // if point isn't set, steal it from the mouse
+                    }
+                    Debug.LogWarning("ORIGINAL: " + x.ToString());
+                    //x[0] = 30;
+                    //x[1] = 30;
+                    x = remap_to_window(x);
+                    if (x[0] > 0 && x[1] > 0) {
+                        string point = x.ToString().Replace("(", "[").Replace(")", "]");
+                        Debug.LogWarning("POINT" + point);
+
+                        //b.EvalJS("console.log(this)");
+                        // We just need a nice centerpoint. How to get?
+                        //b.EvalJS("this.cgm.brush_crop_matrix([[0,0],[10,10]])").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
+                        b.EvalJS("this.cgm.brush_crop_matrix(" + point + ")").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
+                        b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
+
+                    }
+                    else {
+                        Debug.LogWarning("You probably clicked outside the box.");
+                    }
+                    return;
+                }
+                if (s == null) { // s for server, initializes the socket connection
+                    // Calls when you press s too, right now.
+                    s = GetSocket.Main(s);
+                }
+                if (j == "d") { // Downloads whatever, prints to debug.
                     //string[] the_list = { };
                     //s = GetSocket.Main(s, "", true);
                     byte[] bytesReceived = new byte[256];
@@ -181,10 +237,10 @@ namespace VoxSimPlatform {
                     string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(from_trips);
                 }
-                else if (Input.GetKeyDown("p")) { // p for path
-                    // Request a path to a cluster from the server. (or rather, just grab whatever it hands you)
-                        // Then cluster, then give the server a success notification.
-                    //s = GetSocket.Main(s, "", true);
+                else if (j == "p") { // p for path
+                                                  // Request a path to a cluster from the server. (or rather, just grab whatever it hands you)
+                                                  // Then cluster, then give the server a success notification.
+                                                  //s = GetSocket.Main(s, "", true);
                     byte[] bytesReceived = new byte[256];
                     int i = s.Receive(bytesReceived);
                     string from_trips = Encoding.UTF8.GetString(bytesReceived);
@@ -203,19 +259,22 @@ namespace VoxSimPlatform {
                     byte[] bytesSent = Encoding.ASCII.GetBytes("(reply :content (success :status done)");
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
                 }
-                else if (Input.GetKeyDown("g")) { // g for genes
+                else if (j == "g") { // g for genes
                     //s = GetSocket.Main(s, "", true);
-                    byte[] bytesSent = Encoding.ASCII.GetBytes("");
+                    string to_send = "(tell: content(selected - genes :gene - list(" + saved_nodes + ")))";
+                    Debug.LogWarning(to_send);
+                    byte[] bytesSent = Encoding.ASCII.GetBytes(to_send);
                     // Create a socket connection with the specified server and port.
 
                     // Send request to the server.
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
                     byte[] bytesReceived = new byte[256];
-                    int i = s.Receive(bytesReceived);
-                    string from_trips = Encoding.UTF8.GetString(bytesReceived);
-                    Debug.LogWarning(from_trips);
+                    //int i = s.Receive(bytesReceived);
+                    //string from_trips = Encoding.UTF8.GetString(bytesReceived);
+                    Debug.LogWarning(result);
                 }
             }
+
 
             ///
             private Vector3 remap_to_window(Vector3 x) {
@@ -238,7 +297,7 @@ namespace VoxSimPlatform {
                 
             }
 
-            public string Arbitrary_Func(string payload = "") {
+            public string grab_selected(string payload = "") {
                 
                 //b.EvalJS("this.saved_selected_nodes").Then(ret => Debug.LogWarning("Returned Cells: " + ret)).Done();
                 //b.EvalJS("document.title").Then(ret => Debug.LogWarning("Document title: " + ret)).Done();
@@ -250,7 +309,7 @@ namespace VoxSimPlatform {
             [MenuItem("Jarvis/Arbitrary &#A")]
             static void Arb() {
                 BrowserInterface bi = Selection.activeGameObject.GetComponent<BrowserInterface>();
-                Debug.LogWarning("Result: " + bi.Arbitrary_Func());
+                Debug.LogWarning("Result: " + bi.grab_selected());
             }
 
             // Makes sure that we have this object selected yo
