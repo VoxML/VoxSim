@@ -6953,10 +6953,12 @@ namespace VoxSimPlatform {
                                     modifiedCommand = r.Replace(modifiedCommand,string.Empty);
                                 }
                                     
-                                // TODO: send to agent's event manager
-                				eventManager.InsertEvent(eventManager.ApplyGlobals(modifiedCommand), index);
-                				index++;
-                				//Debug.Log (eventManager.EvaluateCommand (command));
+                                if (eventManager.macroVars.Count >= voxml.Type.Args.Count) {
+                                    // if filled out all required variables
+                                    // TODO: send to agent's event manager
+                    				eventManager.InsertEvent(eventManager.ApplyGlobals(modifiedCommand), index);
+                    				index++;
+                                }
                 			}
                 		}
                     }
