@@ -118,8 +118,13 @@ namespace VoxSimPlatform {
                     catchupTimer.Enabled = true;
                 }
 
-                if (eventManager.events.Count > 0) {
-                    eventManager.stayExecution = true;
+	        	if (eventManager.events.Count > 0) {
+		        	if (eventManager.events[0] == "") {
+			        	eventManager.stayExecution = false;
+		        	}
+		        	else {
+			        	eventManager.stayExecution = true;
+		        	}
                 }
                 else {
                     eventManager.stayExecution = false;
@@ -135,7 +140,10 @@ namespace VoxSimPlatform {
         		catchupTimer.Enabled = false;
         		catchupTimer.Interval = PHYSICS_CATCHUP_TIME;
         		resolveDiscrepancies = false;
-                //eventManager.stayExecution = false;
+        		
+        		if (eventManager.events[0] == "" && eventManager.stayExecution) {
+        			eventManager.stayExecution = false;
+        		}
         	}
 
             /// <summary>
