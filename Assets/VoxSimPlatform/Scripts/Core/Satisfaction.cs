@@ -719,7 +719,7 @@ namespace VoxSimPlatform {
                                                         }
                                                     
                                                         if (em.executionPhase == EventExecutionPhase.Computation) {
-                                                            em.OnEntityReferenced(null, new EventReferentArgs(go.name));
+                                                            em.OnEntityReferenced(null, new EventReferentArgs(go.name, pred));
                                                         }
                                                     }
                                                 }
@@ -845,7 +845,7 @@ namespace VoxSimPlatform {
                                             em.referents.stack.Push(obj);
                                         }
 
-                                        em.OnEntityReferenced(null, new EventReferentArgs(obj));
+                                        em.OnEntityReferenced(null, new EventReferentArgs(obj, pred));
                                     }
                                 }
                             }
@@ -877,7 +877,7 @@ namespace VoxSimPlatform {
                                     }
 
                                     if (em.executionPhase == EventExecutionPhase.Computation) {
-                                        em.OnEntityReferenced(null, new EventReferentArgs(((GameObject) obj).name));
+                                        em.OnEntityReferenced(null, new EventReferentArgs(((GameObject) obj).name, pred));
                                     }
                                 }
                             }

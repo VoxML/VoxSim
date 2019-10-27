@@ -45,9 +45,11 @@ namespace VoxSimPlatform {
 
         public class EventReferentArgs : EventArgs {
             public object Referent { get; set; }
+            public object Predicate { get; set; }
 
-            public EventReferentArgs(object referent) {
+            public EventReferentArgs(object referent, string predicate = "") {
                 this.Referent = referent;
+                this.Predicate = predicate;
             }
         }
 
@@ -674,7 +676,7 @@ namespace VoxSimPlatform {
                                                     }
 
                                                     if (executionPhase == EventExecutionPhase.Execution) {
-                                                        OnEntityReferenced(this, new EventReferentArgs(go.name));
+                                                        OnEntityReferenced(this, new EventReferentArgs(go.name, pred));
                                                     }
                                                 }
                                             }
@@ -697,7 +699,8 @@ namespace VoxSimPlatform {
                                                     }
 
                                                     if (executionPhase == EventExecutionPhase.Execution) {
-                                                        OnEntityReferenced(this, new EventReferentArgs(((GameObject) o).name));
+                                                        OnEntityReferenced(this, new EventReferentArgs(((GameObject) o).name,
+                                                            GlobalHelper.GetTopPredicate(arg as String)));
                                                     }
                                                 }
                                             }
@@ -798,7 +801,7 @@ namespace VoxSimPlatform {
                                             }
 
                                             if (executionPhase == EventExecutionPhase.Execution) {
-                                                OnEntityReferenced(this, new EventReferentArgs(((GameObject) obj).name));
+                                                OnEntityReferenced(this, new EventReferentArgs(((GameObject) obj).name, pred));
                                             }
                                         }
                                     }
@@ -836,7 +839,7 @@ namespace VoxSimPlatform {
     		                                    }
 
                                                 if (executionPhase == EventExecutionPhase.Execution) {
-    		                                        OnEntityReferenced(null, new EventReferentArgs(obj));
+    		                                        OnEntityReferenced(null, new EventReferentArgs(obj, pred));
                                                 }
     	                                    }
                                         }
@@ -846,14 +849,10 @@ namespace VoxSimPlatform {
                             else {
                                 if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) && 
                                     (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
-                                //if (File.Exists(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                    //using (StreamReader sr =
-                                        //new StreamReader(Data.voxmlDataPath + string.Format("/programs/{0}.xml", pred))) {
-                                        VoxML voxml = voxmlLibrary.VoxMLObjectDict[pred];
-                                        Debug.Log(string.Format("Invoke ComposeProgram with {0}{1}",
-                                           (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
-                                        preds.ComposeProgram(voxml, objs.ToArray());
-                                    //}
+                                    VoxML voxml = voxmlLibrary.VoxMLObjectDict[pred];
+                                    Debug.Log(string.Format("Invoke ComposeProgram with {0}{1}",
+                                       (voxml == null) ? string.Empty : "\"" + voxml.Lex.Pred + "\", ", objs));
+                                    preds.ComposeProgram(voxml, objs.ToArray());
                                 }
                             }
                         }
