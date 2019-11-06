@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEditor;
 using ZenFulcrum.EmbeddedBrowser;
 
+using VoxSimPlatform;
+
 using System.Text;
 using System.IO;
 using System.Net;
@@ -64,7 +66,7 @@ namespace VoxSimPlatform {
                 }
                 else {
                     // Initialize the connection
-                    string[] requests = { "(register :name DIANA" + "67"+")", // Particular number needs to change while facilitator is open
+                    string[] requests = { "(register :name DIANA" + "81"+")", // Particular number needs to change while facilitator is open
                     "(subscribe :content (request &key :content (record-gene-data . * )))",
                     "(subscribe :content (request &key :content (cluster-analysis . * )))",
                     "(tell :content (module-status ready))",
@@ -120,6 +122,7 @@ namespace VoxSimPlatform {
             string saved_nodes = "";
             Browser b;
             Socket s;
+            VoxSimPlatform.Agent.AgentTextController atc;
             ZenFulcrum.EmbeddedBrowser.IPromise<ZenFulcrum.EmbeddedBrowser.JSONNode> ip = null; //`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
 
             //GetSocket gs = new GetSocket();
@@ -128,6 +131,8 @@ namespace VoxSimPlatform {
             void Start() {
                 // immediately remember the browser forever.
                 b = FindObjectOfType<Browser>(); // Only one browser allowed right now. Just a couple lines to specify further
+                GameObject diana = GameObject.Find("Diana");
+                atc = diana.GetComponent<Agent.AgentTextController>();
             }
 
             // Set the location you are otherwise clicking on. IDK how you want to do it
@@ -184,6 +189,12 @@ namespace VoxSimPlatform {
                 }
                 else if (Input.GetKeyDown("g")) { // g for genes
                     external_call("g");
+                }
+                else if (Input.GetKeyDown("2")) { // g for genes
+                    external_call("2");
+                }
+                else if (Input.GetKeyDown("3")) { // g for genes
+                    external_call("3");
                 }
                 else if (Input.GetKeyDown("n")) { // g for genes
                     grab_selected("");
@@ -261,7 +272,7 @@ namespace VoxSimPlatform {
                 }
                 else if (j == "g") { // g for genes
                     //s = GetSocket.Main(s, "", true);
-                    string to_send = "(tell: content(selected - genes :gene - list(" + saved_nodes + ")))";
+                    string to_send = "(tell: content (selected-genes :gene-list (" + saved_nodes + ")))";
                     Debug.LogWarning(to_send);
                     byte[] bytesSent = Encoding.ASCII.GetBytes(to_send);
                     // Create a socket connection with the specified server and port.
@@ -273,6 +284,30 @@ namespace VoxSimPlatform {
                     //string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(result);
                 }
+                else if (j == "2") { // pull a list of genes FROM FACILITATOR
+                    byte[] bytesReceived = new byte[2048];
+                    int i = s.Receive(bytesReceived);
+                    string from_trips = Encoding.UTF8.GetString(bytesReceived);
+                    Debug.LogWarning(from_trips);
+                    // Create a socket connection with the specified server and port.
+
+                    // Parse the string here.
+                    // (request :content (record-gene-data :filename "path on localhost"  :data " content of csv file")
+                    // string to_eval = Regex.Match(from_trips, "test.*test").Value;
+                    string to_eval = Regex.Match(from_trips, @""".*""").Value;
+                    to_eval = to_eval.Substring(1, to_eval.Length - 2); //UGH
+
+
+                    Debug.LogWarning("GENES FROM BOB: " + to_eval);
+                    //b.EvalJS("make_clust('" + to_eval + "');").Then(ret => saved_nodes = ret).Done();
+                    // Send request to the server
+                    atc.outputString = to_eval;
+                    atc.textField = true;
+                    byte[] bytesSent = Encoding.ASCII.GetBytes("(reply :content (success :status done)");
+                    int result = s.Send(bytesSent, bytesSent.Length, 0);
+                    
+
+                }
             }
 
 
@@ -281,18 +316,18 @@ namespace VoxSimPlatform {
                 /// remap input pixel to its relative position in the actual matrix.
                 /// Hard coded for me rn
                 /// (0,0) is the top left
-                // 263, 276 are the top left in Unity
-                // 689, 55 are bottom right.
+                // 271, 333 are the top left in Unity
+                // 673, 56 are bottom right.
                 // ^ Grab by right clicking on each corner and reading unity console.
 
-                // Width is 425.5
-                // Height is 215
+                // Width is 408
+                // Height is 278
                 // ^ Grab these by going to javascript console (on Browser (GUI))
                 //      and typing in > cgm.params.viz.clust.dim.width
                 //> cgm.params.viz.clust.dim.height
                 // Switcheroo
-                x[0] = ((x[0] - 263) / (700 - 263)) * 425.5f; // 700 since was empirically too far right.
-                x[1] = ((276 - x[1]) / (276 - 55)) * 215f;
+                x[0] = ((x[0] - 271) / (675 - 271)) * 408f; // 700 since was empirically too far right.
+                x[1] = ((333 - x[1]) / (333 - 56)) * 278f;
                 return x;
                 
             }

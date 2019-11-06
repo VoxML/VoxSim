@@ -2384,6 +2384,7 @@ var Clustergrammer =
 	  var row_names = utils.pluck(new_nodes.row_nodes, 'name');
 	  var col_names = utils.pluck(new_nodes.col_nodes, 'name');
 
+	  // new_nodes seems undefined here. not CHANGED, but where an error is cropping up
 	  var new_mat = math.matrix(math.zeros([new_nodes.row_nodes.length, new_nodes.col_nodes.length]));
 	  new_mat = new_mat.toArray();
 
@@ -20140,7 +20141,8 @@ var Clustergrammer =
 	module.exports = function two_translate_zoom(cgm, pan_dx, pan_dy, fin_zoom) {
 
 	  // console.log('pan_dy: ' + String(pan_dy))
-
+		//CHANGED
+		console.log("two_translate_zoom")
 	  var params = cgm.params;
 
 	  d3.selectAll(params.viz.root_tips).style('display', 'none');
@@ -26233,7 +26235,7 @@ var Clustergrammer =
 	module.exports = function brush_crop_matrix(xy = null) {
 
 	  // get rows/cols from brush-extent
-	  // works for differnt brushing directions (e.g. start end sites)
+	  // works for different brushing directions (e.g. start end sites)
 
 	  var cgm = this;
 	  var params = cgm.params;
@@ -26260,6 +26262,14 @@ var Clustergrammer =
 		  console.log("xy set: ");
 		  console.log(xy);
 
+		  //CHANGED to allow zoom back out to work. Adapted from make_icons
+		  if(cgm.params.crop_filter_nodes.row == false){
+			  cgm.params.crop_filter_nodes = {};
+			  cgm.params.crop_filter_nodes.row_nodes = cgm.params.network_data.row_nodes;
+			  cgm.params.crop_filter_nodes.col_nodes = cgm.params.network_data.col_nodes;
+		  }
+
+
 		  //d3.selectAll(selector) //will be useful for later, more specific selecting
 		  cgm.params.is_cropping = true;
 		  var brush = d3.svg.brush().x(x).y(y).on("brushend", brushend);
@@ -26285,7 +26295,9 @@ var Clustergrammer =
 			console.log(xy, start, end);
 			brush.extent([start,end]);
 		}
-		console.log("extent: ", brush.extent());
+	    console.log("x and y: ", brush.x(), brush.y());
+
+		  console.log("extent: ", brush.extent());
 		var brushing_extent = brush.extent();
 	    var brush_start = brushing_extent[0];
 	    var brush_end = brushing_extent[1];
@@ -26391,8 +26403,9 @@ var Clustergrammer =
 /***/ (function(module, exports) {
 
 	module.exports = function deactivate_cropping(cgm) {
-
+	  //console.log("params:", cgm.params.root + ' .brush_group');
 	  d3.select(cgm.params.root + ' .brush_group').transition().style('opacity', 0).remove();
+
 
 	  cgm.params.is_cropping = false;
 		};
@@ -28125,6 +28138,7 @@ var Clustergrammer =
 	      if (is_crop) {
 
 	        // keep list of names to return to state
+			  console.log("filter nodes set", this);
 	        cgm.params.crop_filter_nodes = {};
 	        cgm.params.crop_filter_nodes.row_nodes = cgm.params.network_data.row_nodes;
 	        cgm.params.crop_filter_nodes.col_nodes = cgm.params.network_data.col_nodes;

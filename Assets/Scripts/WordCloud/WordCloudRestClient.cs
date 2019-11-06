@@ -64,7 +64,7 @@ namespace VoxSimPlatform {
                 while (count < 20) { // 2 seconds max is good? Probably.
                     yield return new WaitForSeconds((float)0.1); // Totally sufficient
                     if (webRequest.isNetworkError || webRequest.isHttpError) {
-                        Debug.LogWarning("Some sort of network error: " + webRequest.error + " from " + url);
+//                        Debug.LogWarning("Some sort of network error: " + webRequest.error + " from " + url);
                     }
                     else {
                         // Show results as text            
@@ -91,8 +91,8 @@ namespace VoxSimPlatform {
                     count++;
                 }
                 if (count >= 20) {
-                    Debug.LogWarning("WordCloud Server took 2+ seconds ");
-                    Debug.LogWarning(webRequest.uploadHandler.data);
+//                    Debug.LogWarning("WordCloud Server took 2+ seconds ");
+//                    Debug.LogWarning(webRequest.uploadHandler.data);
                 }
             }
         }
