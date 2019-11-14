@@ -26232,11 +26232,12 @@ var Clustergrammer =
 	var deactivate_cropping = __webpack_require__(253);
 	var underscore = __webpack_require__(3);
 
-	module.exports = function brush_crop_matrix(xy = null) {
-
+	module.exports = function brush_crop_matrix(xy = null, x_size = 50, y_size = 50) {
+		size = [x_size, y_size];
+		console.log(size);
 	  // get rows/cols from brush-extent
 	  // works for different brushing directions (e.g. start end sites)
-
+		console.log("0");
 	  var cgm = this;
 	  var params = cgm.params;
 
@@ -26247,7 +26248,9 @@ var Clustergrammer =
 	  var y = d3.scale.linear().domain([0, clust_height]).range([0, clust_height]);
 
 	  // make brush group
+	  //d3.select(params.root + ' .clust_container').append('g').classed('brush_group', true);
 	  d3.select(params.root + ' .clust_container').append('g').classed('brush_group', true);
+
 
 	  //CHANGED, though not a lot functionally different, just prints
 	  if (xy == null){
@@ -26274,7 +26277,17 @@ var Clustergrammer =
 		  cgm.params.is_cropping = true;
 		  var brush = d3.svg.brush().x(x).y(y).on("brushend", brushend);
 		  // Spoof the brush
-		  d3.select(params.root + ' .brush_group').call(brush);
+		  //d3.select(".brush").call(brush.move, [[startX, endX], [startY, endY]]); // To programmatically move the brush
+
+		  x_range = [xy[0] - size[0] / 2, xy[0] + size[0] / 2];
+		  y_range = [xy[1] - size[1] / 2, xy[1] + size[1] / 2];
+
+		  console.log("Ranges: ", x_range, y_range);
+		  d3.select(params.root + ' .brush_group').call(brush, [x_range, y_range]);
+		  //d3.dispatch.call("brushend"); // To short past the actual, y'know, click.
+			// d3.call("brushend");
+		  console.log("2a");
+
 	  }
 
 	  // cgm.params.is_cropping = true;
@@ -26290,12 +26303,13 @@ var Clustergrammer =
 	    d3.select(cgm.params.root + ' .row_dendro_icons_container').style('display', 'none');
 		//CHANGED
 	    if(xy != null){
-			start = [xy[0] - 25, xy[1] - 25]
-			end = [xy[0] + 25, xy[1] + 25]
+	    	// Size corresponds to the size of the box.
+			start = [xy[0] - size[0] / 2, xy[1] - size[1] / 2]
+			end = [xy[0] + size[0] / 2, xy[1] + size[1] / 2]
 			console.log(xy, start, end);
 			brush.extent([start,end]);
 		}
-	    console.log("x and y: ", brush.x(), brush.y());
+	    //console.log("x and y: ", brush.x(), brush.y());
 
 		  console.log("extent: ", brush.extent());
 		var brushing_extent = brush.extent();
@@ -26325,10 +26339,10 @@ var Clustergrammer =
 	  function find_cropped_nodes(x_start, x_end, y_start, y_end, brush_start, brush_end) {
 
 	    // reverse if necessary (depending on how brushing was done)
-		  console.log(x_start, x_end);
-		  console.log(y_start, y_end);
-		  console.log(brush_start);
-		  console.log(brush_end);
+		//   console.log(x_start, x_end);
+		//   console.log(y_start, y_end);
+		//   console.log(brush_start);
+		//   console.log(brush_end);
 		  // console.log(x_start, x_end, y_start, y_end, brush_start, brish_end);
 		  // console.log(x_start, x_end, y_start, y_end, brush_start, brish_end);
 
@@ -26366,7 +26380,7 @@ var Clustergrammer =
 	    //     }
 
 	    //   });
-
+		console.log("2");
 	    underscore.each(params.matrix.matrix, function (row_data) {
 	      var y_trans = params.viz.y_scale(row_data.row_index);
 
@@ -26374,9 +26388,9 @@ var Clustergrammer =
 	        found_nodes.row.push(row_data.name);
 	      }
 	    });
-
+		console.log("3");
 	    d3.selectAll(params.root + ' .col_label_text').each(function (inst_col) {
-
+			console.log("4");
 	      // there is already bound data on the cols
 	      var inst_trans = d3.select(this).attr('transform');
 
@@ -26394,8 +26408,9 @@ var Clustergrammer =
 	    this.saved_selected_nodes = '"' + found_nodes.row.join('" "') + '"';
 	    return found_nodes;
 	  }
-
+		console.log("3a");
 	  d3.selectAll(params.root + ' .extent').style('opacity', 0.2).style('fill', 'black');
+	  console.log("4a");
 		};
 
 /***/ }),

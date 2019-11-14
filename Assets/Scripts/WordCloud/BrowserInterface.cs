@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using ZenFulcrum.EmbeddedBrowser;
 
+
 using VoxSimPlatform;
 
 using System.Text;
@@ -46,27 +47,22 @@ namespace VoxSimPlatform {
 
             // This method requests the home page content for the specified server.
             private static Socket SocketSendReceive(string server, int port, Socket s = null, string request = null, bool receive = false) {
-                //string request = "GET / HTTP/1.1\r\nHost: " + server +
-                //    "\r\nConnection: Close\r\n\r\n";
                 if (s == null) {
                     s = ConnectSocket(server, port);
-                    //s.ReceiveTimeout = 1;
-
                 }
 
                 if(request != null) {
                     byte[] bytesSent = Encoding.ASCII.GetBytes(request);
-                    // Create a socket connection with the specified server and port.
-
+                    // Create a socket connection with the specified server and port
                     // Send request to the server.
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
                     Debug.LogWarning(request + "   " + s.Handle + "    " + s.IsBound + "  result: " + result + "  connected: " + s.RemoteEndPoint);
 
-
                 }
                 else {
                     // Initialize the connection
-                    string[] requests = { "(register :name DIANA" + "81"+")", // Particular number needs to change while facilitator is open
+                    string id = Random.Range(0, 999999).ToString(); // This allows us to re-register on a new port without, like, doing it manually.
+                    string[] requests = { "(register :name DIANA" + id +")", // Particular number needs to change while facilitator is open
                     "(subscribe :content (request &key :content (record-gene-data . * )))",
                     "(subscribe :content (request &key :content (cluster-analysis . * )))",
                     "(tell :content (module-status ready))",
@@ -76,23 +72,14 @@ namespace VoxSimPlatform {
                         request = requestLoop;
                         byte[] bytesSent = Encoding.ASCII.GetBytes(request);
                         byte[] bytesReceived = new byte[256];
-                        //string page = "";
 
                         // Create a socket connection with the specified server and port.
 
                         // Send request to the server.
                         s.Send(bytesSent, bytesSent.Length, 0);
-                        //int i = s.Receive(bytesReceived);
-                        
-                        //Debug.LogWarning(bytesReceived);
                     }
                 }
-
-
-                //return page;
                 return s;
-                //string request = "(register :name DIANA)";
-
             }
 
             public static Socket Main(Socket s = null, string request = null, bool receive = false) {
@@ -125,6 +112,8 @@ namespace VoxSimPlatform {
             VoxSimPlatform.Agent.AgentTextController atc;
             ZenFulcrum.EmbeddedBrowser.IPromise<ZenFulcrum.EmbeddedBrowser.JSONNode> ip = null; //`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
 
+
+
             //GetSocket gs = new GetSocket();
 
             // Start is called before the first frame update
@@ -140,71 +129,82 @@ namespace VoxSimPlatform {
                 to_enter = to_set;
             }
 
-            string get_saved_nodes() {
+            string GetSavedNodes() {
                 return saved_nodes;
+            }
+
+            public void ZoomIn(Vector3 x, Vector2 size) {
+                // Send a note to the browser to crop around the current mouse position.
+                //Debug.LogWarning(b);
+                Debug.LogWarning("SIZE IS: " + size);
+                if (x[0] > 0 && x[1] > 0) {
+                    string point = x.ToString().Replace("(", "[").Replace(")", "]");
+                    //Debug.LogWarning("POINT" + point);
+
+                    //b.EvalJS("console.log(this)");
+                    // We just need a nice centerpoint. How to get?
+                    //b.EvalJS("this.cgm.brush_crop_matrix([[0,0],[10,10]])").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
+                    b.EvalJS("this.cgm.brush_crop_matrix(" + point + "," + size[0] + "," + size[1] + ")").Then(ret => {
+                        Debug.LogWarning("Brush cropper turned on" + ret);
+                        b.EvalJS("this.saved_selected_nodes").Then(ret1 => {
+                            saved_nodes = ret1;
+                            // Problem here: the call to brush_crop_matrix only changes the state of the
+                            // Javascript to begin listening for an input. It does not wait for the
+                            // input to be received or responded to. So the Then statement does not
+                            // prevent reading saved_nodes before it has been changed.
+                            Debug.LogWarning("saved" + saved_nodes);
+                            }).Done();
+                    }).Done(); //
+                    
+                }
+                else {
+                    Debug.LogWarning("You probably clicked outside the box.");
+                }
             }
 
             // Update is called once per frame
             void Update() {
                 if (Input.GetMouseButton(1)) { // Right click to avoid double input//Input.GetMouseButtonDown(0). Feel free to change to keypresses or whatever.
-                    // Send a note to the browser to crop around the current mouse position.
-                    Debug.LogWarning(b);
                     Vector3 x;
-                    if (to_enter != new Vector3(0,0,0)){
+                    if (to_enter != new Vector3(0, 0, 0)) {
                         x = to_enter; // Set to_enter elsewhere to make t
                     }
                     else {
                         x = Input.mousePosition; // if point isn't set, steal it from the mouse
                     }
-                    Debug.LogWarning("ORIGINAL: " + x.ToString());
-                    //x[0] = 30;
-                    //x[1] = 30;
-                    x = remap_to_window(x);
-                    if (x[0] > 0 && x[1] > 0){
-                        string point = x.ToString().Replace("(", "[").Replace(")", "]");
-                        Debug.LogWarning("POINT" + point);
-
-                        //b.EvalJS("console.log(this)");
-                        // We just need a nice centerpoint. How to get?
-                        //b.EvalJS("this.cgm.brush_crop_matrix([[0,0],[10,10]])").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
-                        b.EvalJS("this.cgm.brush_crop_matrix(" + point + ")").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
-                        b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
-                    }
-                    else {
-                        Debug.LogWarning("You probably clicked outside the box.");
-                    }
+                    x = RemapToWindow(x);
+                    ZoomIn(x, new Vector2(50,50));
                 }
                 else if (Input.GetKeyDown("s")) { // s for server, initializes the socket connection
-                    //string[] the_list = { };
-                    s = GetSocket.Main(s);//, "(register :name DIANA14)");
-                    external_call("s");
+                    s = GetSocket.Main(s);
+                    ExternalCall("s");
                 }
                 else if (Input.GetKeyDown("d")) { // Downloads whatever, prints to debug.
-                    external_call("d");
+                    ExternalCall("d");
 
                 }
                 else if (Input.GetKeyDown("p")) { // p for path
-                    external_call("p");
+                    ExternalCall("p");
 
                 }
                 else if (Input.GetKeyDown("g")) { // g for genes
-                    external_call("g");
+                    ExternalCall("g");
                 }
-                else if (Input.GetKeyDown("2")) { // g for genes
-                    external_call("2");
+                else if (Input.GetKeyDown("2")) {
+                    ExternalCall("2");
                 }
-                else if (Input.GetKeyDown("3")) { // g for genes
-                    external_call("3");
+                else if (Input.GetKeyDown("3")) {
+                    ExternalCall("3");
                 }
-                else if (Input.GetKeyDown("n")) { // g for genes
-                    grab_selected("");
+                else if (Input.GetKeyDown("n")) {
+                    GrabSelected("");
                 }else if (Input.GetKeyDown("i")) {
                     b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
                 }
             }
 
 
-            void external_call(string j) {
+            void ExternalCall(string j) {
                 // Turn the update things into a function that takes a string for choices.
                 if (j == "1") { // Right click to avoid double input//Input.GetMouseButtonDown(0). Feel free to change to keypresses or whatever.
                     // Send a note to the browser to crop around the current mouse position.
@@ -217,18 +217,18 @@ namespace VoxSimPlatform {
                         x = Input.mousePosition; // if point isn't set, steal it from the mouse
                     }
                     Debug.LogWarning("ORIGINAL: " + x.ToString());
-                    //x[0] = 30;
-                    //x[1] = 30;
-                    x = remap_to_window(x);
+                    x = RemapToWindow(x);
                     if (x[0] > 0 && x[1] > 0) {
                         string point = x.ToString().Replace("(", "[").Replace(")", "]");
                         Debug.LogWarning("POINT" + point);
-
-                        //b.EvalJS("console.log(this)");
                         // We just need a nice centerpoint. How to get?
-                        //b.EvalJS("this.cgm.brush_crop_matrix([[0,0],[10,10]])").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
-                        b.EvalJS("this.cgm.brush_crop_matrix(" + point + ")").Then(ret => Debug.LogWarning("Brush cropper turned on" + ret)).Done();
-                        b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
+                        b.EvalJS("this.cgm.brush_crop_matrix(" + point + ")").Then(ret => {
+                            Debug.LogWarning("Brush cropper turned on" + ret);
+                            b.EvalJS("this.saved_selected_nodes").Then(ret1 => {
+                                saved_nodes = ret1;
+                                Debug.LogWarning("Saved Nodes:" + saved_nodes);
+                                }).Done();
+                        }).Done();
 
                     }
                     else {
@@ -280,8 +280,6 @@ namespace VoxSimPlatform {
                     // Send request to the server.
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
                     byte[] bytesReceived = new byte[256];
-                    //int i = s.Receive(bytesReceived);
-                    //string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(result);
                 }
                 else if (j == "2") { // pull a list of genes FROM FACILITATOR
@@ -289,11 +287,8 @@ namespace VoxSimPlatform {
                     int i = s.Receive(bytesReceived);
                     string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(from_trips);
-                    // Create a socket connection with the specified server and port.
-
                     // Parse the string here.
                     // (request :content (record-gene-data :filename "path on localhost"  :data " content of csv file")
-                    // string to_eval = Regex.Match(from_trips, "test.*test").Value;
                     string to_eval = Regex.Match(from_trips, @""".*""").Value;
                     to_eval = to_eval.Substring(1, to_eval.Length - 2); //UGH
 
@@ -312,7 +307,7 @@ namespace VoxSimPlatform {
 
 
             ///
-            private Vector3 remap_to_window(Vector3 x) {
+            public Vector3 RemapToWindow(Vector3 x) {
                 /// remap input pixel to its relative position in the actual matrix.
                 /// Hard coded for me rn
                 /// (0,0) is the top left
@@ -332,26 +327,21 @@ namespace VoxSimPlatform {
                 
             }
 
-            public string grab_selected(string payload = "") {
-                
-                //b.EvalJS("this.saved_selected_nodes").Then(ret => Debug.LogWarning("Returned Cells: " + ret)).Done();
-                //b.EvalJS("document.title").Then(ret => Debug.LogWarning("Document title: " + ret)).Done();
-                b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
-                Debug.LogWarning("WE GOT THEM: " + saved_nodes); // race condition. 
-                return "test";
+            // Acquire the list of selected genes
+            public void GrabSelected(string payload = "") {
+                b.EvalJS("this.saved_selected_nodes").Then(ret => {
+                    saved_nodes = ret;
+                    Debug.LogWarning("WE GOT THEM2: " + saved_nodes);
+
+                }).Done();
             }
 
             [MenuItem("Jarvis/Arbitrary &#A")]
             static void Arb() {
                 BrowserInterface bi = Selection.activeGameObject.GetComponent<BrowserInterface>();
-                Debug.LogWarning("Result: " + bi.grab_selected());
+                bi.GrabSelected("");
+                var promise = new Promise<string>();
             }
-
-            // Makes sure that we have this object selected yo
-            //[MenuItem("VoxSim/New WordCloud &#w", true)]
-            //static bool ValidateNewWordCloud() {
-
-            //}
 
             // Makes sure that we have this object selected yo
             [MenuItem("Jarvis/Arbitrary &#A", true)]
