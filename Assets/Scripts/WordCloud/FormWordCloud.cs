@@ -71,11 +71,11 @@ namespace WordCloud {
 
             //Pull from somewhere more real in future.
             //phrases = ProcessCSV("Assets/Resources/combined1699OvlapedGenes.csv");
-            //phrases = ProcessWords(jsonString);
             float start_time;
             float end_time;
             start_time = Time.realtimeSinceStartup;
-            NewSphere(jsonString);
+            //NewSphere(just_words: "test");
+            //NewSphere(jsonString);
             //NewSphere(csv_filepath:"Assets/Resources/combined1699OvlapedGenes.csv");
             end_time = Time.realtimeSinceStartup;
             Debug.LogWarning("Sphere took " + (end_time - start_time) + " ... seconds?");
@@ -175,7 +175,7 @@ namespace WordCloud {
         }
 
         // Create new locations for sphere and populating those locations with voxphrases
-        void NewSphere(string new_json = "", string csv_filepath = "") {
+        public void NewSphere(string new_json = "", string csv_filepath = "", string just_words = "") {
             Dictionary<string, Phrase> old_children = precious_children;
             precious_children = new Dictionary<string, Phrase>();
 
@@ -185,11 +185,27 @@ namespace WordCloud {
             List<Vector3>.Enumerator point_locations;
 
             if (new_json != "") {
-                new_phrases = ProcessWords(new_json); // fills in precious children
+                new_phrases = ProcessJson(new_json); // fills in precious children
                 point_locations = MakePointList(new_phrases.Count);
             }
             else if(csv_filepath != "") {
                 new_phrases = ProcessCSV(csv_filepath); // fills in precious children
+                point_locations = MakePointList(new_phrases.Count);
+            }else if(just_words != "") {
+                // Note to self, maybe refactor out like the other two
+                new_phrases = new List<Phrase>();
+                string[] wordarray = just_words.Split(' ');
+                Debug.LogWarning(wordarray + "aaa" + just_words);
+                maxOccurrences = 1;
+                foreach (string word in wordarray){
+                    Phrase phrase = new Phrase();
+                    phrase.term = word.ToLower();
+                    phrase.occurrences = 1;
+                    if (phrase.occurrences > maxOccurrences) {
+                    }
+                    new_phrases.Add(phrase);
+                    totalOccurrences += phrase.occurrences;
+                }
                 point_locations = MakePointList(new_phrases.Count);
             }
             else {
@@ -274,7 +290,7 @@ namespace WordCloud {
         // Return an enumerable in case we make an arbitrary-size method in future.
         // (That may allow us to do some sort of spiral-backward thing)
         private List<Vector3>.Enumerator MakePointList(float points) {
-            Debug.LogWarning(phrases.Count);
+            //Debug.LogWarning(phrases.Count);
             // points is the number of phrases
             float increment = Mathf.PI * (3 - Mathf.Sqrt(5));
             float offset = 2 / points;
@@ -295,9 +311,12 @@ namespace WordCloud {
 
         }
 
-        private List<Phrase> ProcessWords(string jsonString) {
+        private List<Phrase> ProcessJson(string jsonString) {
             JObject jsonvale = JObject.Parse(jsonString);
             //Not exactly future-proof here. This is the structure of the current Json returned
+            if(jsonvale["aggregations"] == null) {
+                return new List<Phrase>();
+            }
             Debug.Log(jsonvale["aggregations"]["2"]["buckets"]);
             JArray second_layer = (JArray)jsonvale["aggregations"]["2"]["buckets"];
             List<Phrase> to_return = new List<Phrase>();

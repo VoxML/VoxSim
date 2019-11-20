@@ -14,92 +14,10 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 
 
+// This file is a bit too big and unwieldy. See about refactoring.
 namespace VoxSimPlatform {
     namespace Network {
-        public class GetSocket {
-            private static Socket ConnectSocket(string server, int port) {
-                Socket s = null;
-                IPHostEntry hostEntry = null;
-
-                // Get host related information.
-                hostEntry = Dns.GetHostEntry(server);
-
-                // Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
-                // an exception that occurs when the host IP Address is not compatible with the address family
-                // (typical in the IPv6 case).
-                foreach (IPAddress address in hostEntry.AddressList) {
-                    IPEndPoint ipe = new IPEndPoint(address, port);
-                    Socket tempSocket =
-                        new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-                    tempSocket.Connect(ipe);
-
-                    if (tempSocket.Connected) {
-                        s = tempSocket;
-                        break;
-                    }
-                    else {
-                        continue;
-                    }
-                }
-                return s;
-            }
-
-            // This method requests the home page content for the specified server.
-            private static Socket SocketSendReceive(string server, int port, Socket s = null, string request = null, bool receive = false) {
-                if (s == null) {
-                    s = ConnectSocket(server, port);
-                }
-
-                if(request != null) {
-                    byte[] bytesSent = Encoding.ASCII.GetBytes(request);
-                    // Create a socket connection with the specified server and port
-                    // Send request to the server.
-                    int result = s.Send(bytesSent, bytesSent.Length, 0);
-                    Debug.LogWarning(request + "   " + s.Handle + "    " + s.IsBound + "  result: " + result + "  connected: " + s.RemoteEndPoint);
-
-                }
-                else {
-                    // Initialize the connection
-                    string id = Random.Range(0, 999999).ToString(); // This allows us to re-register on a new port without, like, doing it manually.
-                    string[] requests = { "(register :name DIANA" + id +")", // Particular number needs to change while facilitator is open
-                    "(subscribe :content (request &key :content (record-gene-data . * )))",
-                    "(subscribe :content (request &key :content (cluster-analysis . * )))",
-                    "(tell :content (module-status ready))",
-                    "(subscribe :content (tell &key :content (utterance . *)))"};
-
-                    foreach (string requestLoop in requests) {
-                        request = requestLoop;
-                        byte[] bytesSent = Encoding.ASCII.GetBytes(request);
-                        byte[] bytesReceived = new byte[256];
-
-                        // Create a socket connection with the specified server and port.
-
-                        // Send request to the server.
-                        s.Send(bytesSent, bytesSent.Length, 0);
-                    }
-                }
-                return s;
-            }
-
-            public static Socket Main(Socket s = null, string request = null, bool receive = false) {
-                string host;
-                int port;
-
-                //if (args.Length == 0)
-                //    // If no server name is passed as argument to this program, 
-                //    // use the current host name as the default.
-                //    host = Dns.GetHostName();
-                //else
-                //    host = args[0];
-                //Debug.LogWarning(host + "    " + port);
-                host = "localhost";
-                port = 6200;
-                return SocketSendReceive(host, port, s, request, receive); // where s gets passed
-                //Debug.LogWarning(result);
-            }
-        }
-
+        
         public class BrowserInterface : MonoBehaviour {
             float prior0;
             float prior1;
@@ -107,6 +25,7 @@ namespace VoxSimPlatform {
             //Vector2 bottomright; // of the cgm window
             Vector3 to_enter = new Vector3(0,0,0); // Only a Vector3 because that's how mouse position is recorded. Only first 2 used
             string saved_nodes = "";
+            string to_display = "";
             Browser b;
             Socket s;
             VoxSimPlatform.Agent.AgentTextController atc;
@@ -124,8 +43,13 @@ namespace VoxSimPlatform {
                 atc = diana.GetComponent<Agent.AgentTextController>();
             }
 
+            public string GetDisplay() {
+                Debug.LogWarning(to_display);
+                return to_display;
+            }
+
             // Set the location you are otherwise clicking on. IDK how you want to do it
-            void setEntry(Vector3 to_set) {
+            void SetEntry(Vector3 to_set) {
                 to_enter = to_set;
             }
 
@@ -181,7 +105,6 @@ namespace VoxSimPlatform {
                 }
                 else if (Input.GetKeyDown("d")) { // Downloads whatever, prints to debug.
                     ExternalCall("d");
-
                 }
                 else if (Input.GetKeyDown("p")) { // p for path
                     ExternalCall("p");
@@ -243,7 +166,7 @@ namespace VoxSimPlatform {
                 if (j == "d") { // Downloads whatever, prints to debug.
                     //string[] the_list = { };
                     //s = GetSocket.Main(s, "", true);
-                    byte[] bytesReceived = new byte[256];
+                    byte[] bytesReceived = new byte[1024];
                     int i = s.Receive(bytesReceived);
                     string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(from_trips);
@@ -252,7 +175,7 @@ namespace VoxSimPlatform {
                                                   // Request a path to a cluster from the server. (or rather, just grab whatever it hands you)
                                                   // Then cluster, then give the server a success notification.
                                                   //s = GetSocket.Main(s, "", true);
-                    byte[] bytesReceived = new byte[256];
+                    byte[] bytesReceived = new byte[1024];
                     int i = s.Receive(bytesReceived);
                     string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(from_trips);
@@ -279,7 +202,7 @@ namespace VoxSimPlatform {
 
                     // Send request to the server.
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
-                    byte[] bytesReceived = new byte[256];
+                    byte[] bytesReceived = new byte[1024];
                     Debug.LogWarning(result);
                 }
                 else if (j == "2") { // pull a list of genes FROM FACILITATOR
@@ -289,6 +212,7 @@ namespace VoxSimPlatform {
                     Debug.LogWarning(from_trips);
                     // Parse the string here.
                     // (request :content (record-gene-data :filename "path on localhost"  :data " content of csv file")
+                    // Literally just finds the substring with a pair of quotes around it.
                     string to_eval = Regex.Match(from_trips, @""".*""").Value;
                     to_eval = to_eval.Substring(1, to_eval.Length - 2); //UGH
 
@@ -296,12 +220,13 @@ namespace VoxSimPlatform {
                     Debug.LogWarning("GENES FROM BOB: " + to_eval);
                     //b.EvalJS("make_clust('" + to_eval + "');").Then(ret => saved_nodes = ret).Done();
                     // Send request to the server
-                    atc.outputString = to_eval;
-                    atc.textField = true;
+
+                    to_display = to_eval;
+
+                    atc.outputString = to_display;
+                    //atc.textField = true; // Not displaying under current specs
                     byte[] bytesSent = Encoding.ASCII.GetBytes("(reply :content (success :status done)");
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
-                    
-
                 }
             }
 
