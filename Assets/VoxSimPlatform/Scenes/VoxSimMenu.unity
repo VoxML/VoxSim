@@ -551,6 +551,8 @@ MonoBehaviour:
   videoOutputDir: 
   editableVoxemes: 0
   eulaAccepted: 0
+  voxSimScenesPath: /Plugins/VoxSimPlatform/Scenes/
+  implScenesPath: /_Core/Scenes/
 --- !u!4 &1595736131
 Transform:
   m_ObjectHideFlags: 0

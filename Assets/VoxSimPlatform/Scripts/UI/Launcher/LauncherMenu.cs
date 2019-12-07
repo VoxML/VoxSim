@@ -143,6 +143,16 @@ namespace VoxSimPlatform {
             	[HideInInspector] 
                 public bool eulaAccepted;
 
+                // VoxSim built-in scenes path relative to the main
+                //  implementation Assets folder
+                //  (probably "/Plugins/VoxSimPlatform/Scenes/" assuming
+                //  usual submodule setup instructions are followed)
+                public string voxSimScenesPath = String.Empty;
+
+                // implementation-specific scenes path relative to the main
+                //  implementation Assets folder
+                public string implScenesPath = String.Empty;
+
             	ModalWindowManager windowManager;
             	EULAModalWindow eulaWindow;
 
@@ -213,15 +223,14 @@ namespace VoxSimPlatform {
             	void Start() {
             		LoadPrefs();
 #if UNITY_EDITOR
-            		string assetsPath = Application.dataPath + "/";
                     string[] fileEntries = new string[]{ };
-                    if (Directory.Exists(assetsPath + "/VoxSimPlatform/Scenes")) {
-                        fileEntries = Directory.GetFiles(assetsPath + "/VoxSimPlatform/Scenes", "*.unity",
+                    if (Directory.Exists(Application.dataPath + voxSimScenesPath)) {
+                        fileEntries = Directory.GetFiles(Application.dataPath + voxSimScenesPath, "*.unity",
                             SearchOption.AllDirectories);
                     }
 
-                    if (Directory.Exists(assetsPath + "/Scenes")) {
-                        fileEntries = fileEntries.Concat(Directory.GetFiles(assetsPath + "/Scenes", "*.unity",
+                    if (Directory.Exists(Application.dataPath + implScenesPath)) {
+                        fileEntries = fileEntries.Concat(Directory.GetFiles(Application.dataPath + implScenesPath, "*.unity",
                             SearchOption.AllDirectories)).ToArray();
                     }
 
