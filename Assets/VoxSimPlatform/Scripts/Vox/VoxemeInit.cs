@@ -198,18 +198,14 @@ namespace VoxSimPlatform {
         					foreach (Renderer r2 in renderers) {
         						GameObject sub2 = r2.gameObject;
         						if (sub1 != sub2) {
-                                    Debug.Log(string.Format("sub1 = {0}; sub2 = {1}", sub1, sub2));
                                     // can't connect body to itself
                                     // add connections between all bodies EXCEPT:
                                     //  if the connectedBody is on a GameObject that has a Voxeme component AND IS NOT the top-level voxeme
                                     Rigidbody connectedBody = sub2.GetComponent<Rigidbody>();
-                                    Debug.Log(string.Format("connectedBody = {0}", connectedBody));
 
                                     if (connectedBody != null) {
                                         Transform subObjectParentContainer = GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent;
                                         Transform connectedObjectParentContainer = GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform.parent;
-                                        Debug.Log(string.Format("GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent = {0}", GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent));
-                                        Debug.Log(string.Format("GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform.parent = {0}", GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform
                                                  .parent));
                                         if (((subObjectParentContainer == null) || (topLevelObjectContainers.Contains(subObjectParentContainer))) &&
         								    ((connectedObjectParentContainer == null) || (topLevelObjectContainers.Contains(connectedObjectParentContainer)))) {
