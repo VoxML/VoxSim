@@ -206,7 +206,6 @@ namespace VoxSimPlatform {
                                     if (connectedBody != null) {
                                         Transform subObjectParentContainer = GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent;
                                         Transform connectedObjectParentContainer = GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform.parent;
-                                                 .parent));
                                         if (((subObjectParentContainer == null) || (topLevelObjectContainers.Contains(subObjectParentContainer))) &&
         								    ((connectedObjectParentContainer == null) || (topLevelObjectContainers.Contains(connectedObjectParentContainer)))) {
         									FixedJoint fixedJoint = sub1.AddComponent<FixedJoint>();
