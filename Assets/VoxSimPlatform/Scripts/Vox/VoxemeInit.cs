@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Object = UnityEngine.Object;
 using RootMotion.FinalIK;
@@ -14,6 +16,7 @@ namespace VoxSimPlatform {
         	Predicates preds;
         	ObjectSelector objSelector;
 
+            public List<Transform> topLevelObjectContainers; 
         	public bool usePhysicsRigging;
 
         	// Use this for initialization
@@ -55,8 +58,7 @@ namespace VoxSimPlatform {
         					container.transform.rotation = go.transform.rotation;
         					go.transform.parent = container.transform;
         					go.name += "*";
-        					voxeme.enabled = false;
-        					//container.GetComponent<Entity> ().enabled = false;
+                            voxeme.enabled = false;
 
         					container.GetComponent<Voxeme>().density = voxeme.density;
 
@@ -92,14 +94,12 @@ namespace VoxSimPlatform {
 
         					FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();
         					foreach (FixHandRotation fixHandRotation in fixHandRotations) {
-        //						Debug.Log (fixHandRotation);
-        //						Debug.Log (fixHandRotation.rootJoint);
         						CopyComponent(fixHandRotation, container);
         						Destroy(fixHandRotation);
         					}
 
-        					// set up for physics
-        					// add box colliders and rigid bodies to all subobjects that have MeshFilters
+        					//// set up for physics
+        					//// add box colliders and rigid bodies to all subobjects that have MeshFilters
         					Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
         					foreach (Renderer renderer in renderers) {
         						GameObject subObj = renderer.gameObject;
@@ -108,14 +108,10 @@ namespace VoxSimPlatform {
         								if (subObj.GetComponent<BoxCollider>() == null) {
         									// may already have one -- goddamn overachieving scene artists
         									BoxCollider collider = subObj.AddComponent<BoxCollider>();
-        									//Physics.IgnoreCollision (collider, GameObject.Find ("MainCamera").GetComponent<Collider> ());
         								}
         							}
 
         							if ((go.tag != "UnPhysic") && (go.tag != "Ground")) {
-        								// Non-physics objects are either scene markers or, like the ground, cognitively immobile
-        								Debug.Log(subObj.name);
-
         								if (container.GetComponent<Voxeme>().density == 0) {
         									container.GetComponent<Voxeme>().density = 1;
         								}
@@ -140,16 +136,7 @@ namespace VoxSimPlatform {
         										rigidbody.drag =
         											1.225f * voxeme.moveSpeed * ((2 * x * y) + (2 * y * z) + (2 * x * z)) *
         											1.0f;
-        										//rigidbody.drag = 0f;
-        										//rigidbody.angularDrag = 0f;
-
-        										//rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-
-        										// get subobject initial rotations
-        										//Debug.Log(rigidbody.name);
-        										//Debug.Log(rigidbody.rotation.eulerAngles);
-        										//container.GetComponent<Voxeme> ().startEventRotations.Add(rigidbody.name,rigidbody.rotation.eulerAngles);
-        									}
+           									}
 
         									// log the orientational displacement of each rigidbody relative to the main body
         									// relativeDisplacement = rotation to get from main body rotation to rigidbody rotation
@@ -188,11 +175,11 @@ namespace VoxSimPlatform {
         		}
 
         		// set joint links between all subobjects (Cartesian product)
-        		foreach (GameObject go in allObjects) {
-        			if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null) &&
+        		foreach (GameObject go in objSelector.allVoxemes.Select(v => v.gameObject).ToList()) {
+                    if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null) &&
                         (go.GetComponent<Voxeme>().isActiveAndEnabled)) {
-        				// remove BoxCollider and Rigidbody on non-top level objects
-        				if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
+                        // remove BoxCollider and Rigidbody on non-top level objects
+                        if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
         				    (go.transform.root.tag != "Agent")) {
         					BoxCollider boxCollider = go.GetComponent<BoxCollider>();
         					if (boxCollider != null) {
@@ -211,15 +198,21 @@ namespace VoxSimPlatform {
         					foreach (Renderer r2 in renderers) {
         						GameObject sub2 = r2.gameObject;
         						if (sub1 != sub2) {
-        							// can't connect body to itself
-        							// add connections between all bodies EXCEPT:
-        							//  if the connectedBody is on a GameObject that has a Voxeme component AND IS NOT the top-level voxeme
-        							Rigidbody connectedBody = sub2.GetComponent<Rigidbody>();
+                                    Debug.Log(string.Format("sub1 = {0}; sub2 = {1}", sub1, sub2));
+                                    // can't connect body to itself
+                                    // add connections between all bodies EXCEPT:
+                                    //  if the connectedBody is on a GameObject that has a Voxeme component AND IS NOT the top-level voxeme
+                                    Rigidbody connectedBody = sub2.GetComponent<Rigidbody>();
+                                    Debug.Log(string.Format("connectedBody = {0}", connectedBody));
 
-        							if (connectedBody != null) {
-        								if ((GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent == null) &&
-        								    (GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform
-        									     .parent == null)) {
+                                    if (connectedBody != null) {
+                                        Transform subObjectParentContainer = GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent;
+                                        Transform connectedObjectParentContainer = GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform.parent;
+                                        Debug.Log(string.Format("GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent = {0}", GlobalHelper.GetMostImmediateParentVoxeme(sub1).gameObject.transform.parent));
+                                        Debug.Log(string.Format("GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform.parent = {0}", GlobalHelper.GetMostImmediateParentVoxeme(connectedBody.gameObject).gameObject.transform
+                                                 .parent));
+                                        if (((subObjectParentContainer == null) || (topLevelObjectContainers.Contains(subObjectParentContainer))) &&
+        								    ((connectedObjectParentContainer == null) || (topLevelObjectContainers.Contains(connectedObjectParentContainer)))) {
         									FixedJoint fixedJoint = sub1.AddComponent<FixedJoint>();
         									fixedJoint.connectedBody = connectedBody;
         								}
