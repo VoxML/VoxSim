@@ -442,6 +442,9 @@ namespace VoxSimPlatform {
                     }
                     if (GUILayout.Button("Save Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
                         XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
+                        if (!Directory.Exists("local_config")) {
+                            Directory.CreateDirectory("local_config");
+                        }
                         using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
                             VoxSimSocketConfig socketConfig = new VoxSimSocketConfig();
                             for (int i = 0; i < numUrls; i++) {
