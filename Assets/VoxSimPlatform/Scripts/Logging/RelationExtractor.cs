@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿
+using UnityEditor;
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,24 +14,42 @@ using VoxSimPlatform.SpatialReasoning;
 namespace VoxSimPlatform {
     namespace Logging {
         public class RelationExtractor : MonoBehaviour {
-        	RelationTracker relationTracker;
-        	EventManager em;
+#if UNITY_EDITOR
+            // Todo: How many of these fields are actually in active use?
+            [CustomEditor(typeof(RelationExtractor))]
+            public class DebugPreview : Editor
+            {
+                public override void OnInspectorGUI()
+                {
+                    var bold = new GUIStyle();
+                    bold.fontStyle = FontStyle.Bold;
+
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Write Relations")) {
+                        ((RelationExtractor)target).WriteRelations(this, null);
+                    }
+                    GUILayout.EndHorizontal();
+                }
+            }
+#endif
+            RelationTracker relationTracker;
+            EventManager em;
         	CommunicationsBridge commBridge;
 
         	// Use this for initialization
         	void Start() {
         		relationTracker = gameObject.GetComponent<RelationTracker>();
-        		em = gameObject.GetComponent<EventManager>();
+        		//em = gameObject.GetComponent<EventManager>();
         		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 
-        		em.QueueEmpty += QueueEmpty;
+        		//em.QueueEmpty += WriteRelations;
         	}
 
         	// Update is called once per frame
         	void Update() {
         	}
 
-        	void QueueEmpty(object sender, EventArgs e) {
+        	public void WriteRelations(object sender, EventArgs e) {
         		if (commBridge != null) {
                     CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
         			if (commander != null) {
@@ -52,6 +72,8 @@ namespace VoxSimPlatform {
         						GlobalHelper.VectorToParsable(go.transform.eulerAngles)));
         				}
 
+                        Debug.Log(string.Format("Writing data to {0}:{1}: {2}", commander.Address, commander.Port,
+                            sb.ToString()));
                         commander.Write(sb.ToString());
         			}
         		}

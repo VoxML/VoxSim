@@ -1,4 +1,6 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
+using System.Text;
 
 using VoxSimPlatform.Network;
 
@@ -20,15 +22,15 @@ public class CommanderSocket : SocketConnection {
 	}
 
 	public void Write(string content) {
-		// Check to see if this NetworkStream is writable.
-//			if (_client.GetStream().CanWrite) {
-//
-//				byte[] writeBuffer = Encoding.ASCII.GetBytes (content);
-//				_client.GetStream().Write (writeBuffer, 0, writeBuffer.Length);
-//				Debug.Log (string.Format("Written to this NetworkStream: {0}",writeBuffer.Length));  
-//			} 
-//			else {
-//				Debug.Log ("Sorry.  You cannot write to this NetworkStream.");  
-//			}
+		 //Check to see if this NetworkStream is writable.
+		if (_client.GetStream().CanWrite) {
+
+			byte[] writeBuffer = Encoding.ASCII.GetBytes (content);
+			_client.GetStream().Write (writeBuffer, 0, writeBuffer.Length);
+			Debug.Log (string.Format("Written to this NetworkStream: {0}",writeBuffer.Length));  
+		} 
+		else {
+			Debug.Log ("Sorry.  You cannot write to this NetworkStream.");  
+		}
 	}
 }
