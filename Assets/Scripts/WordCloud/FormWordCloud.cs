@@ -28,7 +28,6 @@ namespace WordCloud {
         // It would be a vector. N-dimensional.
         public List<float> distanceVector = new List<float>();
         public bool is_highlighted; // Stuff that is brought forward becomes highlighted.
-
     }
 
     public class FormWordCloud : MonoBehaviour {
@@ -41,13 +40,17 @@ namespace WordCloud {
         private List<Phrase> phrases = new List<Phrase>(); // ordered from biggest to smallest
         private Dictionary<string, Phrase> precious_children = new Dictionary<string, Phrase>(); // For fast lookup
                                                                                                  //private List<Phrase> randomisedPhrases = new List<Phrase>();
-        Transform camera1;
+        private Dictionary<string, Phrase> unprecious_children = new Dictionary<string, Phrase>(); // To be grabbed by CloudOfClouds
+        public Transform camera1; //Being public seems to help instantiating new ones from a prototype cloud ???
         List<GameObject> highlight_points = new List<GameObject>(); // When things become children to these, they become highlighted.
 
         private float totalOccurrences = 0.0f;
         private float maxOccurrences = 0;
         // Highlighted phrases, selected phrases, whathaveyou
         private List<Phrase> highlighted_phrases = new List<Phrase>(); // List because I imagine multiple in future.
+
+        public Color color = Color.white; // Default color for phrases (not hooked up to anything yet)
+
 
         // To get grabbed from somewhere else in future.
         // jsonString2 is identical, except values for spoon and fork are swapped.
@@ -71,11 +74,11 @@ namespace WordCloud {
 
             //Pull from somewhere more real in future.
             //phrases = ProcessCSV("Assets/Resources/combined1699OvlapedGenes.csv");
-            //phrases = ProcessWords(jsonString);
             float start_time;
             float end_time;
             start_time = Time.realtimeSinceStartup;
-            NewSphere(jsonString);
+            //NewSphere(just_words: "test");
+            //NewSphere(jsonString);
             //NewSphere(csv_filepath:"Assets/Resources/combined1699OvlapedGenes.csv");
             end_time = Time.realtimeSinceStartup;
             Debug.LogWarning("Sphere took " + (end_time - start_time) + " ... seconds?");
@@ -147,6 +150,10 @@ namespace WordCloud {
             }
         }
 
+        public Dictionary<string, Phrase> getOrphans() {
+            return unprecious_children;
+        }
+
         float vector_distance(List<float> v1, List<float> v2) {
             float to_return = 0;
             float total = 0;
@@ -175,7 +182,7 @@ namespace WordCloud {
         }
 
         // Create new locations for sphere and populating those locations with voxphrases
-        void NewSphere(string new_json = "", string csv_filepath = "") {
+        public void NewSphere(string new_json = "", string csv_filepath = "", string[] just_words = null) {
             Dictionary<string, Phrase> old_children = precious_children;
             precious_children = new Dictionary<string, Phrase>();
 
@@ -185,15 +192,35 @@ namespace WordCloud {
             List<Vector3>.Enumerator point_locations;
 
             if (new_json != "") {
-                new_phrases = ProcessWords(new_json); // fills in precious children
+                new_phrases = ProcessJson(new_json); // fills in precious children
                 point_locations = MakePointList(new_phrases.Count);
             }
             else if(csv_filepath != "") {
                 new_phrases = ProcessCSV(csv_filepath); // fills in precious children
                 point_locations = MakePointList(new_phrases.Count);
+            }else if(just_words != null) {
+                // Note to self, maybe refactor out like the other two
+                new_phrases = new List<Phrase>();
+                //string[] wordarray = just_words.Split(' ');
+
+                string[] wordarray = just_words;
+                //Debug.LogWarning(wordarray + "aaa" + just_words);
+                maxOccurrences = 1;
+                foreach (string word in wordarray){
+                    Phrase phrase = new Phrase();
+                    phrase.term = word.ToLower();
+                    phrase.occurrences = 1;
+                    if (phrase.occurrences > maxOccurrences) {
+                    }
+                    new_phrases.Add(phrase);
+                    totalOccurrences += phrase.occurrences;
+                }
+                Debug.LogWarning("new_phrases: " + new_phrases.Count);
+                point_locations = MakePointList(new_phrases.Count);
             }
             else {
                 // idk, default or zero-length garbage.
+                Debug.LogWarning("Trying to make a cloud with no words!");
                 new_phrases = new List<Phrase>();
                 point_locations = MakePointList(0);
             }
@@ -254,11 +281,17 @@ namespace WordCloud {
                     }
                     point_locations.MoveNext();
                 }
+                //else {
+                //    // If not, disown them, let shrink to nothingness
+                //    // We do that here by setting target size below the threshold for deletion (see FixedUpdate to_destroy for more)
+                //    new_precious_children.Add(old_children[child].term, old_children[child]);
+                //    new_precious_children[old_children[child].term].size = new Vector3(0,0,0); // Will shrink pretty quick.
+                //}
                 else {
-                    // If not, disown them, let shrink to nothingness
+                    // If not, disown them, pass up to the CloudOfClouds as orphans.
                     // We do that here by setting target size below the threshold for deletion (see FixedUpdate to_destroy for more)
-                    new_precious_children.Add(old_children[child].term, old_children[child]);
-                    new_precious_children[old_children[child].term].size = new Vector3(0,0,0); // Will shrink pretty quick.
+                    unprecious_children.Add(old_children[child].term, old_children[child]); // Passed up to CloudOfClouds
+                    //new_precious_children[old_children[child].term].size = new Vector3(0, 0, 0); // Will shrink pretty quick.
                 }
             }
             precious_children = new_precious_children;
@@ -274,7 +307,7 @@ namespace WordCloud {
         // Return an enumerable in case we make an arbitrary-size method in future.
         // (That may allow us to do some sort of spiral-backward thing)
         private List<Vector3>.Enumerator MakePointList(float points) {
-            Debug.LogWarning(phrases.Count);
+            //Debug.LogWarning(phrases.Count);
             // points is the number of phrases
             float increment = Mathf.PI * (3 - Mathf.Sqrt(5));
             float offset = 2 / points;
@@ -290,14 +323,18 @@ namespace WordCloud {
             }
 
             // Gotta add OUR position lol
+            Debug.LogWarning(camera1);
             point_locations.Sort((x, y) => Vector3.Distance(x + transform.position, camera1.position).CompareTo(Vector3.Distance(y + transform.position, camera1.position)));
             return point_locations.GetEnumerator();
 
         }
 
-        private List<Phrase> ProcessWords(string jsonString) {
+        private List<Phrase> ProcessJson(string jsonString) {
             JObject jsonvale = JObject.Parse(jsonString);
             //Not exactly future-proof here. This is the structure of the current Json returned
+            if(jsonvale["aggregations"] == null) {
+                return new List<Phrase>();
+            }
             Debug.Log(jsonvale["aggregations"]["2"]["buckets"]);
             JArray second_layer = (JArray)jsonvale["aggregations"]["2"]["buckets"];
             List<Phrase> to_return = new List<Phrase>();
@@ -400,6 +437,10 @@ namespace WordCloud {
             //to_return.Add(phrases);
             ReorderForHighlights(to_return);
             return to_return;
+        }
+
+        public Dictionary<string, Phrase> GetPreciousChildren() {
+            return precious_children;
         }
 
         [MenuItem("VoxSim/New WordCloud &#w")]
