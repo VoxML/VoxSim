@@ -7074,7 +7074,7 @@ namespace VoxSimPlatform {
 
                                 Debug.Log(string.Format("Result of method {0}.{1}({2}) is {3}",
                                     methodCallingType.Name, method.Name, string.Join(", ",method.GetParameters().Select(p => p.ParameterType)),
-                                    retVal));
+	                                retVal));	                         
                             }
                             catch (Exception ex) {
                                 if (ex is AmbiguousMatchException) {

@@ -506,6 +506,9 @@ namespace VoxSimPlatform {
                     else if (altCandidates.Count > 0) {
                         ec = altCandidates[RandomHelper.RandomInt(0, altCandidates.Count)];
                     }
+                    else {
+                    	ec = new Vector3(float.NaN,float.NaN,float.NaN);
+                    }
 
                     return ec;
                 }

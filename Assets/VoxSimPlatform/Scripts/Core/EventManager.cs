@@ -52,6 +52,16 @@ namespace VoxSimPlatform {
                 this.Predicate = predicate;
             }
         }
+        
+	    public class CalculatedPositionArgs : EventArgs {
+		    public string Formula { get; set; }
+		    public Vector3 Position { get; set; }
+
+		    public CalculatedPositionArgs(string formula, Vector3 position) {
+			    this.Formula = formula;
+			    this.Position = position;
+		    }
+	    }
 
         public class EventDisambiguationArgs : EventArgs {
             public string Event { get; set; }
@@ -173,6 +183,14 @@ namespace VoxSimPlatform {
                     NonexistentEntityError(this, e);
                 }
             }
+            
+	        public event EventHandler InvalidPositionError;
+
+	        public void OnInvalidPositionError(object sender, EventArgs e) {
+		        if (InvalidPositionError != null) {
+			        InvalidPositionError(this, e);
+		        }
+	        }
 
             public event EventHandler DisambiguationError;
 
@@ -1660,6 +1678,19 @@ namespace VoxSimPlatform {
                                         } 
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): {1} returns {2} (typeof({3}))",
                                             pass, methodToCall.Name, obj, obj.GetType()));
+
+                                        if (obj is Vector3) {
+                                            if (GlobalHelper.VectorIsNaN((Vector3)obj)) {
+                                                OnInvalidPositionError(this,
+                                                    null);
+                                                return false;
+                                            }
+
+                                            //if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+                                            //    referents.stack.Push(obj);
+                                            //}
+                                            //OnEntityReferenced(this, new EventReferentArgs(obj));
+                                        }
 
                                         temp[kv.Key] = obj;
                                     }
