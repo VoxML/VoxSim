@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -363,11 +364,17 @@ namespace VoxSimPlatform {
                         foreach (string eval in evaluatedConstraints) {
                             string expression = eval.Replace("^", " AND ").Replace("|", " OR ");
                             DataTable dt = new DataTable();
-                            bool result = (bool)dt.Compute(expression, null);
-                            Debug.Log(string.Format("Result of {0}: {1}", expression, result));
+                            bool result = true;
+                            try {
+                                result = (bool)dt.Compute(expression, null);
+                                Debug.Log(string.Format("RCC8.EC: Result of {0}: {1}", expression, result));
+                            }
+                            catch (Exception ex) {
+                                Debug.Log(string.Format("RCC8.EC: Encountered a {0} with input {1}", ex.GetType(), expression));
+                            }
 
                             if ((!result) && (!pruneCandidates.Contains(candidate))) {
-                                Debug.Log(string.Format("Adding {0} to prune list (violates {1})",
+                                Debug.Log(string.Format("RCC8.EC: Adding {0} to prune list (violates {1})",
                                     GlobalHelper.VectorToParsable(candidate), eval));
                                 pruneCandidates.Add(candidate);
                             }

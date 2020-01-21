@@ -6775,7 +6775,7 @@ namespace VoxSimPlatform {
                                         offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y,
                                             ((Vector3)args[1]).z - (float)args[2]);
                                         break;
-                                    
+
                                     case ">Z":
                                         offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y,
                                             ((Vector3)args[1]).z + (float)args[2]);
@@ -6808,7 +6808,7 @@ namespace VoxSimPlatform {
                     string curArgName = typedArg.Value.Split(':')[0];
                     string[] curArgTypes = typedArg.Value.Split(':')[1].Split('*');
 
-                    Debug.Log(string.Format("{0}.TYPE.ARGS = [A{1} = {2}:{3}]",
+                    Debug.Log(string.Format("ComposeProgram: {0}.TYPE.ARGS = [A{1} = {2}:{3}]",
                         voxml.Lex.Pred, i, curArgName, string.Join("*",curArgTypes)));
 
                     if ((curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Agent).ToList().Count > 0) ||
@@ -6827,7 +6827,9 @@ namespace VoxSimPlatform {
     
                                     // retrieve positional relation predicate
                                     string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace(string.Format("{0}_",voxml.Lex.Pred), "") : "";
-	                                Debug.Log(prep);
+
+                                    // retrieve destination object
+                                    string dest = rdfTriples.Count > 0 ? rdfTriples[0].Item3 : "";
 
                                     // find VoxML for this relation
                                     VoxML relVoxml = null;
@@ -6843,13 +6845,88 @@ namespace VoxSimPlatform {
                                                 // look in the constraints and for all constraints that contain an inequality operator
                                                 //  over an axis over y/prep's 2nd arg, adjust z value by the extents of y along that axis
                                                 //  in that direction
+
+                                                // inequality matching
                                                 Regex ineq = new Regex(@"[<>]=?");
-                                                MatchCollection ineqOperators = ineq.Matches(constraints[j] as string);
-                                                string[] constraintValues = ineq.Split(constraints[j] as string).Select(c => c.Trim()).ToArray();
-                                               
+                                                // disjunction matching
+                                                Regex dis = new Regex(@"[\^|]");
+
+
+                                                //Debug.Log(string.Format("ComposeProgram: ineqOperators = [{0}]",
+                                                //    string.Join(", ",ineqOperators.Cast<Match>().Select(m => m.Value))));
+
+                                                string[] disjunctConstraintValues = dis.Split(constraints[j] as string).Select(c => c.Trim()).ToArray();
+                                                Debug.Log(string.Format("ComposeProgram: disjunctConstraintValues = [{0}]",
+                                                    string.Join(", ", disjunctConstraintValues)));
+
+                                                List<string> evaluatedDisjunctConstraints = new List<string>(disjunctConstraintValues.Length);
+
+                                                int obeyedConstraintIndex = -1;
+
+                                                for (int k = 0; k < disjunctConstraintValues.Length; k++) {
+                                                    if (disjunctConstraintValues[k] is string) {
+
+                                                        string constraintForm = ((string)disjunctConstraintValues[k]).Replace("x", GlobalHelper.VectorToParsable((Vector3)args[argIndex])).
+                                                                Replace("y", dest);
+                                                        //Debug.Log(constraintForm);
+
+                                                        //string[] operators = new string[] { "<", "<=", "=", "!=", ">=", ">", "^", "|" };
+                                                        Regex operators = new Regex(@"(?<![()])\w?([<>!]=?|[\^|=])\w?(?![()])");
+
+                                                        string[] constraintValues = operators.Split(constraintForm).Select(c => c.Trim()).ToArray();
+
+                                                        foreach (string value in constraintValues) {
+                                                            if (GlobalHelper.pred.IsMatch(value)) {
+                                                                List<object> objs = eventManager.ExtractObjects(GlobalHelper.GetTopPredicate(value),
+                                                                        (string)GlobalHelper.ParsePredicate(value)[GlobalHelper.GetTopPredicate(value)]);
+
+                                                                MethodInfo methodToCall = this.GetType().GetMethod(GlobalHelper.GetTopPredicate(value));
+                                                                
+                                                                if (methodToCall != null) {
+                                                                    object result = methodToCall.Invoke(this, new object[]{ objs.ToArray() });
+                                                                    //Debug.Log(value);
+                                                                    //Debug.Log(result);
+
+                                                                    constraintForm = constraintForm.Replace(value, ((float)result).ToString());
+                                                                }
+                                                            }
+                                                        }
+
+                                                        evaluatedDisjunctConstraints.Add(constraintForm);
+                                                    }
+                                                }
+
+                                                Debug.Log(string.Format("ComposeProgram: evaluatedDisjunctConstraints = [{0}]",
+                                                    string.Join(", ", evaluatedDisjunctConstraints)));
+
+                                                for (int k = 0; k < evaluatedDisjunctConstraints.Count; k++) {
+                                                    DataTable dt = new DataTable();
+                                                    bool result = false;
+                                                    try {
+                                                        result = (bool)dt.Compute(evaluatedDisjunctConstraints[k], null);
+                                                        Debug.Log(string.Format("ComposeProgram: {0} evaluates to {1}", evaluatedDisjunctConstraints[k], result));
+                                                    }
+                                                    catch (Exception ex) {
+                                                        Debug.Log(string.Format("ComposeProgram: Encountered a {0} with input {1}", ex.GetType(), evaluatedDisjunctConstraints[k]));
+                                                    }
+
+                                                    if (result) {
+                                                        obeyedConstraintIndex = k;
+                                                    }
+                                                }
+
+                                                Debug.Log(string.Format("ComposeProgram: Candidate position {0} obeys constraint {1} ({2})",
+                                                    (Vector3)args[argIndex], evaluatedDisjunctConstraints[obeyedConstraintIndex], disjunctConstraintValues[obeyedConstraintIndex]));
+
+                                                MatchCollection ineqOperators = ineq.Matches(disjunctConstraintValues[obeyedConstraintIndex] as string);
+                                                string[] ineqConstraintValues = ineq.Split(disjunctConstraintValues[obeyedConstraintIndex] as string).Select(c => c.Trim()).ToArray();
+                                                Debug.Log(string.Format("ComposeProgram: ineqConstraintValues = [{0}]",
+                                                    string.Join(", ", ineqConstraintValues)));
+
                                                 if (ineqOperators.Count > 0) {  // inequality operators found in constraint formula
                                                     foreach (Match match in ineqOperators) {
-                                                        foreach (string value in constraintValues) {
+                                                        Debug.Log(string.Format("ComposeProgram: {0}@{1}", match.Value, match.Index));
+                                                        foreach (string value in ineqConstraintValues) {
                                                             // if index of this constraint value > index of the matched inquality operator
                                                             //  i.e., if the constraint value formula follows (is scoped by) the inequality
                                                             if ((constraints[j] as string).IndexOf(value) > match.Index) {
@@ -6858,8 +6935,11 @@ namespace VoxSimPlatform {
                                                                 // assumption: in any event encoding, the theme object (typed as physobj)
                                                                 //  will be the first non-agent arg
                                                                 if (methodToCall != null) {
-                                                                    List<object> objs = new List<object>{
-                                                                        string.Format("{0}{1}",match.Value,GlobalHelper.GetTopPredicate(value)) };
+
+                                                                    List<object> objs = new List<object>();
+
+                                                                    // generate the format string to pass to OFFSET (and add to objs)
+                                                                    objs.Add(string.Format("{0}{1}",match.Value,GlobalHelper.GetTopPredicate(value)));
 
                                                                     if (args[argIndex] is Vector3) {
                                                                         objs.Add((Vector3)args[argIndex]);
