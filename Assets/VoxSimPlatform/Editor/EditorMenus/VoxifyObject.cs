@@ -76,10 +76,10 @@ namespace EditorMenus {
             }
             
             // Interaction Object, rotate with me
-            if (obj.GetComponent<InteractionObject>() != null) {
+            if (obj.GetComponent<InteractionObject>() == null) {
                 obj.AddComponent<InteractionObject>();
             }
-            if(obj.GetComponent<RotateWithMe>() != null) {
+            if(obj.GetComponent<RotateWithMe>() == null) {
                 RotateWithMe rotWithMe = obj.AddComponent<RotateWithMe>();
                 rotWithMe.source = agent;
                 rotWithMe.rotateAround = RotateWithMe.Axis.Y;
