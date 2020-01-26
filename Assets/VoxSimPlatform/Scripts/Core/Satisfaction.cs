@@ -182,56 +182,57 @@ namespace VoxSimPlatform {
                 // PRIMITIVE MOTIONS
                 if (predString == "grasp") {
                     // satisfy grasp
-                    GameObject theme = GameObject.Find(argsStrings[0] as String);
-                    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-                    InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
-                    
-                    if (interactionSystem != null) {
-                        if ((interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
-                            (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
-                            foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
-                                handRot.enabled = false;
-                            }
-    
-                            satisfied = true;
+                    satisfied = true;
+
+                    if (preds.primitivesOverride != null) {
+                        // handle overridden satisfaction here
+                        MethodInfo methodToCall = preds.primitivesOverride.GetType().GetMethod("IsSatisfied"); 
+                        if (methodToCall != null) {
+                            satisfied = (bool)methodToCall.Invoke(preds.primitivesOverride, new object[]{ test });
                         }
                     }
                     else {
-                        satisfied = true;
 
-                        // handle non-default interaction systems here
-                        if (preds.primitivesOverride != null) {
-                            MethodInfo methodToCall = preds.primitivesOverride.GetType().GetMethod("IsSatisfied"); 
-                            if (methodToCall != null) {
-                                satisfied = (bool)methodToCall.Invoke(preds.primitivesOverride, new object[]{ test });
-                            } 
+                        GameObject theme = GameObject.Find(argsStrings[0] as String);
+                        GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                        InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
+                        
+                        if (interactionSystem != null) {
+                            if ((interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
+                                (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
+                                foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+                                    handRot.enabled = false;
+                                }
+        
+                                satisfied = true;
+                            }
                         }
                     }
                 }
                 else if (predString == "ungrasp") {
                     // satisfy ungrasp
-                    GameObject theme = GameObject.Find(argsStrings[0] as String);
-                    GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-                    InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
+                    satisfied = true;
 
-                    if (interactionSystem != null) {
-                        if ((!interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
-                            (!interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
-                            foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
-                                handRot.enabled = true;
-                            }
-    
-                            satisfied = true;
+                    if (preds.primitivesOverride != null) {
+                        // handle overridden satisfaction here
+                        MethodInfo methodToCall = preds.primitivesOverride.GetType().GetMethod("IsSatisfied"); 
+                        if (methodToCall != null) {
+                            satisfied = (bool)methodToCall.Invoke(preds.primitivesOverride, new object[]{ test });
                         }
-                    } 
-                    else {
-                        satisfied = true;
+                    }
+                    else { 
+                        GameObject theme = GameObject.Find(argsStrings[0] as String);
+                        GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+                        InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
 
-                        // handle non-default interaction systems here
-                        if (preds.primitivesOverride != null) {
-                            MethodInfo methodToCall = preds.primitivesOverride.GetType().GetMethod("IsSatisfied"); 
-                            if (methodToCall != null) {
-                                satisfied = (bool)methodToCall.Invoke(preds.primitivesOverride, new object[]{ test });
+                        if (interactionSystem != null) {
+                            if ((!interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand)) ||
+                                (!interactionSystem.IsPaused(FullBodyBipedEffector.RightHand))) {
+                                foreach (FixHandRotation handRot in theme.GetComponentsInChildren<FixHandRotation>()) {
+                                    handRot.enabled = true;
+                                }
+        
+                                satisfied = true;
                             }
                         }
                     }
