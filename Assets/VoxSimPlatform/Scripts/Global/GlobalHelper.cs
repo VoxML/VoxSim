@@ -778,17 +778,18 @@ namespace VoxSimPlatform {
 
                 List<Vector3> objBoundPoints = GetObjectOrientedSize(obj).Points;
                 for (int i = 0; i < objBoundPoints.Count; i++) {
-                    Debug.Log(VectorToParsable(objBoundPoints[i]));
+                    //Debug.Log(VectorToParsable(objBoundPoints[i]));
                     objBoundPoints[i] = (point - obj.transform.position) + objBoundPoints[i];
-                    Debug.Log(VectorToParsable(objBoundPoints[i]));
+                    //Debug.Log(VectorToParsable(objBoundPoints[i]));
                 }
 
                 ObjBounds projectedBounds = new ObjBounds(point, objBoundPoints);
                     
                 RaycastHit[] hits;
 
-                Vector3 origin = new Vector3(projectedBounds.Center.x,projectedBounds.Min(Constants.MajorAxis.Y).y,
+                Vector3 origin = new Vector3(projectedBounds.Center.x,projectedBounds.Min(Constants.MajorAxis.Y).y+Constants.EPSILON,
                     projectedBounds.Center.z);
+                Debug.LogFormat(string.Format("FindSurfaceBelow: origin = {0}", GlobalHelper.VectorToParsable(origin)));
                 hits = Physics.RaycastAll(origin, AxisVector.negYAxis);
                 List<RaycastHit> hitList = new List<RaycastHit>(hits);
                 hits = hitList.OrderBy(h => h.distance).ToArray();
