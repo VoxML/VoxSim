@@ -553,6 +553,10 @@ namespace VoxSimPlatform {
                     bool eq = true;
 
                     for (int i = 0; i < x.Points.Count; i++) {
+                        Debug.Log(string.Format("{0}.{1}: ({2}) ({3} - {4}).magnitude = {5}",
+                            MethodInfo.GetCurrentMethod().DeclaringType.Name, MethodInfo.GetCurrentMethod().Name,
+                            i, GlobalHelper.VectorToParsable(x.Points[i]), GlobalHelper.VectorToParsable(y.Points[i]),
+                            (x.Points[i] - y.Points[i]).magnitude));
                         if ((x.Points[i]-y.Points[i]).magnitude > Constants.EPSILON) {
                             eq = false;
                         }

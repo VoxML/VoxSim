@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 
+using MajorAxes;
 using Random = UnityEngine.Random;
 using VoxSimPlatform.CogPhysics;
 using VoxSimPlatform.Core;
@@ -410,45 +411,17 @@ namespace VoxSimPlatform {
 
                 foreach (MeshFilter mesh in meshes) {
                     Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
-                    //Debug.Log(mesh.gameObject.name);
-                    //Debug.Log(temp);
                     Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
                         temp.min.y * mesh.gameObject.transform.lossyScale.y,
                         temp.min.z * mesh.gameObject.transform.lossyScale.z);
                     Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
                         temp.max.y * mesh.gameObject.transform.lossyScale.y,
                         temp.max.z * mesh.gameObject.transform.lossyScale.z);
-                    //Debug.Log (Helper.VectorToParsable(min));
-                    //Debug.Log (Helper.VectorToParsable(max));
-                    //Debug.Log(mesh.gameObject.transform.root.GetChild(0).localScale);
-                    //Debug.Log(mesh.gameObject.name);
-                    //Debug.Log(mesh.gameObject.transform.localEulerAngles);
-                    //temp.center = obj.transform.position;
-                    //temp.SetMinMax (min,max);
                     temp.SetMinMax(RotatePointAroundPivot(min, Vector3.zero, mesh.gameObject.transform.localEulerAngles),
                         RotatePointAroundPivot(max, Vector3.zero, mesh.gameObject.transform.localEulerAngles));
-                    //Debug.Log (temp);
-                    //Debug.Log (combinedBounds);
-                    //Debug.Log (temp);
                     combinedBounds.Encapsulate(temp);
-                    //Debug.Log (combinedBounds);
                 }
 
-                /*combinedBounds = new Bounds (obj.transform.position, Vector3.zero);
-                Bounds bounds = GetObjectWorldSize (obj);
-
-                Debug.Log (obj.transform.eulerAngles);
-                Quaternion invRot = Quaternion.Inverse (obj.transform.rotation);
-                Debug.Log (invRot.eulerAngles);
-                Debug.Log (Helper.VectorToParsable(bounds.min));
-                Debug.Log (Helper.VectorToParsable(bounds.max));
-                Vector3 bmin = RotatePointAroundPivot (bounds.min, obj.transform.position, invRot.eulerAngles);
-                Vector3 bmax = RotatePointAroundPivot (bounds.max, obj.transform.position, invRot.eulerAngles);
-                Debug.Log (Helper.VectorToParsable(bmin));
-                Debug.Log (Helper.VectorToParsable(bmax));
-
-                combinedBounds.Encapsulate(bmin);
-                combinedBounds.Encapsulate(bmax);*/
                 return combinedBounds;
             }
 
@@ -477,33 +450,7 @@ namespace VoxSimPlatform {
 
                 foreach (MeshFilter mesh in meshes) {
                     if (!exclude.Contains(mesh.gameObject)) {
-	                    // create a temp bounds of size of mesh, centered on origin
-	                    //Bounds temp = new Bounds(
-	                    //    new Vector3(mesh.mesh.bounds.center.x * mesh.gameObject.transform.lossyScale.x,
-	                    //    mesh.mesh.bounds.center.y * mesh.gameObject.transform.lossyScale.y,
-	                    //    mesh.mesh.bounds.center.z * mesh.gameObject.transform.lossyScale.z),
-	                    //    new Vector3(mesh.mesh.bounds.size.x * mesh.gameObject.transform.lossyScale.x,
-	                    //    mesh.mesh.bounds.size.y * mesh.gameObject.transform.lossyScale.y,
-	                    //    mesh.mesh.bounds.size.z * mesh.gameObject.transform.lossyScale.z));
                     	Bounds temp = GetObjectWorldSize(mesh.gameObject);
-	                    // scale it by object size and rotate it around pivot (currently origin) by rot
-	                    //Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
-	                    //    temp.min.y * mesh.gameObject.transform.lossyScale.y,
-	                    //    temp.min.z * mesh.gameObject.transform.lossyScale.z);
-	                    //min = RotatePointAroundPivot(temp.min, temp.center, mesh.gameObject.transform.eulerAngles);
-	                    //Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
-	                    //    temp.max.y * mesh.gameObject.transform.lossyScale.y,
-	                    //    temp.max.z * mesh.gameObject.transform.lossyScale.z);
-	                    //max = RotatePointAroundPivot(temp.max, temp.center, mesh.gameObject.transform.eulerAngles);
-	                    //// offset it (recenter at center of original mesh bounds)
-	                    //min += RotatePointAroundPivot(new Vector3(mesh.mesh.bounds.center.x * mesh.gameObject.transform.lossyScale.x,
-		                //    mesh.mesh.bounds.center.y * mesh.gameObject.transform.lossyScale.y,
-		                //    mesh.mesh.bounds.center.z * mesh.gameObject.transform.lossyScale.z), temp.center, mesh.gameObject.transform.eulerAngles);
-	                    //max += RotatePointAroundPivot(new Vector3(mesh.mesh.bounds.center.x * mesh.gameObject.transform.lossyScale.x,
-		                //    mesh.mesh.bounds.center.y * mesh.gameObject.transform.lossyScale.y,
-		                //    mesh.mesh.bounds.center.z * mesh.gameObject.transform.lossyScale.z), temp.center, mesh.gameObject.transform.eulerAngles);
-	                    // set min and max
-	                    //temp.SetMinMax(min, max);
 	                    Debug.Log(string.Format("{0}: Adding {1}@{2} of size {3} to combined bounds", obj, mesh.gameObject,
 	                    	VectorToParsable(temp.center), VectorToParsable(temp.size)));
 
@@ -511,16 +458,6 @@ namespace VoxSimPlatform {
                         combinedBounds.Encapsulate(temp);
                     }
                 }
-
-                //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
-                //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
-
-	            //combinedBounds.SetMinMax(
-	            //    combinedBounds.min + (obj.transform.position-combinedBounds.center),
-	            //    combinedBounds.max + (obj.transform.position-combinedBounds.center));
-		            
-	            //combinedBounds.SetMinMax(combinedBounds.center + obj.transform.position - combinedBounds.extents,
-	            //    combinedBounds.center + obj.transform.position + combinedBounds.extents);
 
                 List<Vector3> pts = new List<Vector3>(new Vector3[] {
                     new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
@@ -565,95 +502,6 @@ namespace VoxSimPlatform {
 
                 //return objBounds;
             }
-
-            // returns current position-centered object bounds
-            //public static ObjBounds GetObjectOrientedSize(GameObject obj, bool excludeChildren) {
-            //    MeshFilter[] meshes = obj.GetComponentsInChildren<MeshFilter>();
-
-            //    // me: I hate computer scientists!  They never document their code properly!
-            //    // also me: I'm going to extract the information I need using this quadruply-embedded list comprehension
-            //    //          Debug.Log (obj1);
-            //    MeshFilter[] children = obj.GetComponentsInChildren<MeshFilter>().Where(
-            //        m => (GetMostImmediateParentVoxeme(m.gameObject) != obj) &&
-            //             (m.gameObject.GetComponent<Voxeme>() != null) &&
-            //             (!obj.GetComponent<Voxeme>().opVox.Type.Components.Select(
-            //                 c => c.Item2).ToList().Contains(m.gameObject))).ToArray();
-            //    List<GameObject> exclude = new List<GameObject>();
-            //    foreach (MeshFilter mesh in children) {
-            //        Debug.Log(mesh.gameObject);
-            //        exclude.Add(mesh.gameObject);
-            //    }
-
-            //    Bounds combinedBounds = new Bounds(Vector3.zero, Vector3.zero);
-
-            //    foreach (MeshFilter mesh in meshes) {
-            //        if (!exclude.Contains(mesh.gameObject)) {
-            //            Debug.Log(string.Format("{0}: Adding {1} to combined bounds", obj, mesh.gameObject));
-            //            // create a temp bounds of size of mesh, centered on origin
-            //            Bounds temp = new Bounds(Vector3.zero, mesh.mesh.bounds.size);
-            //            // scale it by object size
-            //            Vector3 min = new Vector3(temp.min.x * mesh.gameObject.transform.lossyScale.x,
-            //                temp.min.y * mesh.gameObject.transform.lossyScale.y,
-            //                temp.min.z * mesh.gameObject.transform.lossyScale.z);
-            //            min = RotatePointAroundPivot(min, temp.center, mesh.gameObject.transform.eulerAngles);
-            //            Vector3 max = new Vector3(temp.max.x * mesh.gameObject.transform.lossyScale.x,
-            //                temp.max.y * mesh.gameObject.transform.lossyScale.y,
-            //                temp.max.z * mesh.gameObject.transform.lossyScale.z);
-            //            max = RotatePointAroundPivot(max, temp.center, mesh.gameObject.transform.eulerAngles);
-            //            // set min and max
-            //            temp.SetMinMax(min, max);
-            //            // combined bounds = current combined bounds stretched to encapsulate this temp
-            //            combinedBounds.Encapsulate(temp);
-            //        }
-            //    }
-
-            //    //Debug.Log(string.Format("center({0}):{1}", obj,Helper.VectorToParsable(combinedBounds.center)));
-            //    //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-            //    //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
-            //    combinedBounds.SetMinMax(
-            //        combinedBounds.center + GetObjectWorldSize(obj).center - combinedBounds.extents,
-            //        combinedBounds.center + GetObjectWorldSize(obj).center + combinedBounds.extents);
-            //    //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.center)));
-            //    //Debug.Log(string.Format("min({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.min)));
-            //    //Debug.Log(string.Format("max({0}):{1}", obj, Helper.VectorToParsable(combinedBounds.max)));
-
-            //    Debug.Log(VectorToParsable(combinedBounds.size));
-
-            //    List<Vector3> pts = new List<Vector3>(new Vector3[] {
-            //        new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.min.z),
-            //        new Vector3(combinedBounds.min.x, combinedBounds.min.y, combinedBounds.max.z),
-            //        new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.min.z),
-            //        new Vector3(combinedBounds.min.x, combinedBounds.max.y, combinedBounds.max.z),
-            //        new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.min.z),
-            //        new Vector3(combinedBounds.max.x, combinedBounds.min.y, combinedBounds.max.z),
-            //        new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.min.z),
-            //        new Vector3(combinedBounds.max.x, combinedBounds.max.y, combinedBounds.max.z),
-            //        new Vector3(combinedBounds.min.x, combinedBounds.center.y, combinedBounds.center.z),
-            //        new Vector3(combinedBounds.max.x, combinedBounds.center.y, combinedBounds.center.z),
-            //        new Vector3(combinedBounds.center.x, combinedBounds.min.y, combinedBounds.center.z),
-            //        new Vector3(combinedBounds.center.x, combinedBounds.max.y, combinedBounds.center.z),
-            //        new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.min.z),
-            //        new Vector3(combinedBounds.center.x, combinedBounds.center.y, combinedBounds.max.z)
-            //    });
-
-            //    Bounds bounds = new Bounds(pts[0], Vector3.zero);
-            //    ObjBounds objBounds = new ObjBounds(combinedBounds.center);
-            //    //Debug.Log(string.Format("center({0}):{1}", obj, Helper.VectorToParsable(objBounds.Center)));
-            //    List<Vector3> points = new List<Vector3>();
-            //    foreach (Vector3 pt in pts) {
-            //        //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(pt)));
-            //        //Debug.Log(string.Format("{0}:{1}", obj, Helper.VectorToParsable(RotatePointAroundPivot(pt, objBounds.Center, obj.transform.eulerAngles))));
-            //        //points.Add (RotatePointAroundPivot (pt, objBounds.Center, obj.transform.eulerAngles));
-            //        points.Add(pt);
-            //        bounds.Encapsulate(pt);
-            //    }
-
-            //    Debug.Log(VectorToParsable(bounds.size));
-
-            //    objBounds.Points = new List<Vector3>(points);
-
-            //    return objBounds;
-            //}
 
             // get the bounds of the object in the current world
             public static Bounds GetObjectWorldSize(GameObject obj, bool excludeChildren = false) {
@@ -743,16 +591,7 @@ namespace VoxSimPlatform {
                         Renderer[] renderers = (obj as GameObject).GetComponentsInChildren<Renderer>();
 
                         foreach (Renderer renderer in renderers) {
-                            //Bounds bounds = new Bounds(renderer.bounds.center,
-                            //                           renderer.bounds.size);
-                            //localBounds.center = renderer.gameObject.transform.position;
-                            //localBounds.size = new Vector3(localBounds.size.x * renderer.gameObject.transform.localScale.x,
-                            //                               localBounds.size.y * renderer.gameObject.transform.localScale.y,
-                            //                               localBounds.size.z * renderer.gameObject.transform.localScale.z);
                             combinedBounds.Encapsulate(renderer.bounds);
-
-                            //Debug.Log (combinedBounds.center);
-                            //Debug.Log (combinedBounds.size);
                         }
                     }
                 }
@@ -762,15 +601,12 @@ namespace VoxSimPlatform {
 
             public static Vector3 GetObjectMajorAxis(GameObject obj) {
                 Bounds bounds = GetObjectSize(obj);
-                Debug.Log(bounds);
+                Debug.Log(string.Format("GetObjectMajorAxis: bounds({0}) = {1}",obj.name, bounds));
 
                 List<float> dims = new List<float>(new float[] {bounds.size.x, bounds.size.y, bounds.size.z});
 
                 int longest = dims.IndexOf(dims.Max());
-                //Debug.Log (bounds.size.x);
-                //Debug.Log (bounds.size.y);
-                //Debug.Log (bounds.size.z);
-                Debug.Log(longest);
+                Debug.Log(string.Format("GetObjectMajorAxis: longest dim of {0} = {1}", obj.name, longest));
 
                 Vector3 axis = Vector3.zero;
                 if (longest == 0) {
@@ -851,12 +687,6 @@ namespace VoxSimPlatform {
                 return point;
             }
 
-        //      public static Vector3 GetAxisOfSeparation (GameObject obj1, GameObject obj2) {
-        //          Vector3 axis = Vector3.zero;
-        //
-        //
-        //      }
-
             // if obj1 fits inside obj2
             public static bool FitsIn(Bounds obj1, Bounds obj2, bool threeDimensional = false) {
                 bool fits = true;
@@ -903,6 +733,76 @@ namespace VoxSimPlatform {
                 }
 
                 return covers;
+            }
+
+            public static GameObject FindSurfaceBelow(GameObject obj) {
+                GameObject surfaceBelow = null;
+
+                Vector3 rayStartX = new Vector3(GetObjectWorldSize(obj).min.x - Constants.EPSILON,
+                    GetObjectWorldSize(obj).min.y + Constants.EPSILON,
+                    GetObjectWorldSize(obj).center.z);
+                Vector3 contactPointX = RayIntersectionPoint(rayStartX, Vector3.right);
+
+                Vector3 rayStartZ = new Vector3(GetObjectWorldSize(obj).center.x,
+                    GetObjectWorldSize(obj).min.y + Constants.EPSILON,
+                    GetObjectWorldSize(obj).min.z - Constants.EPSILON);
+                Vector3 contactPointZ = RayIntersectionPoint(rayStartZ, Vector3.forward);
+
+                Vector3 contactPoint = (contactPointZ.y < contactPointX.y)
+                    ? new Vector3(contactPointZ.x, obj.transform.position.y, contactPointZ.z)
+                    : new Vector3(contactPointX.x, obj.transform.position.y, contactPointX.z);
+                    
+                RaycastHit[] hits;
+
+                hits = Physics.RaycastAll(contactPoint, AxisVector.negYAxis);
+                List<RaycastHit> hitList = new List<RaycastHit>(hits);
+                hits = hitList.OrderBy(h => h.distance).ToArray();
+                foreach (RaycastHit hit in hits) {
+                    if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
+                        if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
+                            (!hit.collider.gameObject.transform.IsChildOf(obj.transform))) {
+                            if (!FitsIn(GetObjectWorldSize(hit.collider.gameObject),
+                                GetObjectWorldSize(obj), true)) {
+                                surfaceBelow = hit.collider.gameObject;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return surfaceBelow;
+            }
+
+            public static GameObject FindSurfaceBelow(Vector3 point, GameObject obj) {
+                GameObject surfaceBelow = null;
+
+                List<Vector3> objBoundPoints = GetObjectOrientedSize(obj).Points;
+                for (int i = 0; i < objBoundPoints.Count; i++) {
+                    Debug.Log(VectorToParsable(objBoundPoints[i]));
+                    objBoundPoints[i] = (point - obj.transform.position) + objBoundPoints[i];
+                    Debug.Log(VectorToParsable(objBoundPoints[i]));
+                }
+
+                ObjBounds projectedBounds = new ObjBounds(point, objBoundPoints);
+                    
+                RaycastHit[] hits;
+
+                Vector3 origin = new Vector3(projectedBounds.Center.x,projectedBounds.Min(Constants.MajorAxis.Y).y,
+                    projectedBounds.Center.z);
+                hits = Physics.RaycastAll(origin, AxisVector.negYAxis);
+                List<RaycastHit> hitList = new List<RaycastHit>(hits);
+                hits = hitList.OrderBy(h => h.distance).ToArray();
+                foreach (RaycastHit hit in hits) {
+                    if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
+                        if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
+                            (!hit.collider.gameObject.transform.IsChildOf(obj.transform))) {
+                            surfaceBelow = hit.collider.gameObject;
+                            break;
+                        }
+                    }
+                }
+
+                return surfaceBelow;
             }
 
             // obj2 is somewhere in obj1's supportingSurface hierarchy

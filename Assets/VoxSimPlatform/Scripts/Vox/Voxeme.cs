@@ -802,6 +802,7 @@ namespace VoxSimPlatform {
         			if (hit.collider.gameObject.GetComponent<BoxCollider>() != null) {
         				if ((!hit.collider.gameObject.GetComponent<BoxCollider>().isTrigger) &&
         				    (!hit.collider.gameObject.transform.IsChildOf(gameObject.transform))) {
+                            //TODO: under what circumstances does the following check matter?
         					if (!GlobalHelper.FitsIn(GlobalHelper.GetObjectWorldSize(hit.collider.gameObject),
         						GlobalHelper.GetObjectWorldSize(gameObject), true)) {
         						supportingSurface = hit.collider.gameObject;

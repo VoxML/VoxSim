@@ -168,8 +168,8 @@ namespace VoxSimPlatform {
 
         					// add to master voxeme list
         					objSelector.allVoxemes.Add(container.GetComponent<Voxeme>());
-        					Debug.Log(GlobalHelper.VectorToParsable(container.transform.position -
-        					                                  GlobalHelper.GetObjectWorldSize(container).center));
+        					//Debug.Log(GlobalHelper.VectorToParsable(container.transform.position -
+        					//                                  GlobalHelper.GetObjectWorldSize(container).center));
         				}
         			}
         		}

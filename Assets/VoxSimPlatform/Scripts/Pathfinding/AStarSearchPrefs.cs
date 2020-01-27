@@ -17,8 +17,6 @@ namespace VoxSimPlatform {
             void Start() {
                 Renderer r = embeddingSpace.GetComponent<Renderer>();
                 embeddingSpaceBounds = r.bounds;
-                Debug.Log(embeddingSpaceBounds.min);
-                Debug.Log(embeddingSpaceBounds.max);
             }
 
             // Update is called once per frame
