@@ -871,7 +871,7 @@ namespace VoxSimPlatform {
             }
 
             public static Region FindClearRegion(GameObject surface, Region region, GameObject testObj) {
-                Bounds testBounds = GetObjectWorldSize(testObj);
+                Bounds objBounds = GetObjectWorldSize(testObj);
 
                 ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
@@ -880,10 +880,11 @@ namespace VoxSimPlatform {
                     Random.Range(region.min.z, region.max.z));
                 bool clearRegionFound = false;
                 while (!clearRegionFound) {
-                    testBounds.center = testPoint;
+                    Bounds testBounds = new Bounds(testPoint, objBounds.size);
                     bool regionClear = true;
                     foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                        if (voxeme.gameObject != surface) {
+                        if ((voxeme.gameObject != surface) && (voxeme.gameObject != testObj) &&
+                            (voxeme.gameObject.activeInHierarchy)) {
                             if (testBounds.Intersects(GetObjectWorldSize(voxeme.gameObject))) {
                                 regionClear = false;
                                 break;
@@ -901,10 +902,9 @@ namespace VoxSimPlatform {
                         Random.Range(region.min.z, region.max.z));
                 }
 
-                region.min = testPoint - testBounds.extents;
-                region.max = testPoint + testBounds.extents;
+                Region clearRegion = new Region(testPoint - objBounds.extents, testPoint + objBounds.extents);
 
-                return region;
+                return clearRegion;
             }
 
             public static Region FindClearRegion(GameObject surface, Region[] regions, GameObject testObj) {
