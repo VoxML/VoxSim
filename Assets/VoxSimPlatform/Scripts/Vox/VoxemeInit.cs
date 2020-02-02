@@ -72,31 +72,31 @@ namespace VoxSimPlatform {
         					}
                                 
         					// copy interaction object
-        					InteractionObject interactionObject = go.GetComponent<InteractionObject>();
-        					if (interactionObject != null) {
-        						// Set the object inactive to avoid InteractionObject initializing before attributes are set
-        						Boolean containerState = container.activeInHierarchy;
-        						container.SetActive(false);
+        					//InteractionObject interactionObject = go.GetComponent<InteractionObject>();
+        					//if (interactionObject != null) {
+        					//	// Set the object inactive to avoid InteractionObject initializing before attributes are set
+        					//	Boolean containerState = container.activeInHierarchy;
+        					//	container.SetActive(false);
 
-        						CopyComponent(interactionObject, container);
+        					//	CopyComponent(interactionObject, container);
 
-        						container.SetActive(containerState);
-        					}
+        					//	container.SetActive(containerState);
+        					//}
 
-        					Destroy(interactionObject);
+        					//Destroy(interactionObject);
 
-        					// copy interaction target(s)
-        					InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
-        					foreach (InteractionTarget interactionTarget in interactionTargets) {
-        						interactionTarget.gameObject.transform.parent = container.transform;
-        						container.GetComponent<Voxeme>().interactionTargets.Add(interactionTarget);
-        					}
+        					//// copy interaction target(s)
+        					//InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
+        					//foreach (InteractionTarget interactionTarget in interactionTargets) {
+        					//	interactionTarget.gameObject.transform.parent = container.transform;
+        					//	container.GetComponent<Voxeme>().interactionTargets.Add(interactionTarget);
+        					//}
 
-        					FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();
-        					foreach (FixHandRotation fixHandRotation in fixHandRotations) {
-        						CopyComponent(fixHandRotation, container);
-        						Destroy(fixHandRotation);
-        					}
+        					//FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();
+        					//foreach (FixHandRotation fixHandRotation in fixHandRotations) {
+        					//	CopyComponent(fixHandRotation, container);
+        					//	Destroy(fixHandRotation);
+        					//}
 
         					//// set up for physics
         					//// add box colliders and rigid bodies to all subobjects that have MeshFilters
