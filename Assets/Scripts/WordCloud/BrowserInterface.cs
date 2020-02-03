@@ -24,7 +24,7 @@ namespace VoxSimPlatform {
             //Vector2 topleft; // of the cgm window
             //Vector2 bottomright; // of the cgm window
             Vector3 to_enter = new Vector3(0,0,0); // Only a Vector3 because that's how mouse position is recorded. Only first 2 used
-            string saved_nodes = "";
+            public string saved_nodes = "";
             string to_display = "";
             Browser b;
             Socket s;
@@ -195,8 +195,8 @@ namespace VoxSimPlatform {
                     int result = s.Send(bytesSent, bytesSent.Length, 0);
                 }
                 else if (j == "g") { // g for genes
-                    //s = GetSocket.Main(s, "", true);
-                    // (REQUEST :CONTENT (TAG :TEXT "Create the gene set." :IMITATE-KEYBOARD-MANAGER T))
+                                     //s = GetSocket.Main(s, "", true);
+                                     // (REQUEST :CONTENT (TAG :TEXT "Create the gene set." :IMITATE-KEYBOARD-MANAGER T))
 
                     // Dec 5 2019:
                     //(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members $list) (:gene-set-name $name))))
@@ -227,10 +227,14 @@ namespace VoxSimPlatform {
                     //                               (:GENE - SET - NAME
                     //                                . "selection0"))))
 
-                    string to_send = "(tell :content (selected-genes :gene-list (" + saved_nodes + ")))";
+
+                    //(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members $list) (:gene-set-name $name))))
+                    string to_send = "(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members " + saved_nodes + ") (:gene-set-name . \"selection0\"))))";
+
+                    //string to_send = "(tell :content (selected-genes :gene-list (" + saved_nodes + ")))";
                     Debug.LogWarning(to_send);
                     byte[] bytesSent = Encoding.ASCII.GetBytes(to_send);
-                    // Create a socket connection with the specified server and port.
+                    // Create a socket connection with the specified server and port.s
 
                     // Send request to the server.
                     Debug.LogWarning(bytesSent + "  " + bytesSent.Length);

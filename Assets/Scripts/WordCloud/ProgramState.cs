@@ -68,7 +68,7 @@ namespace WordCloud {
                 Browser b = GetComponentInChildren<Browser>();
                 RectTransform rt = b.gameObject.GetComponent<RectTransform>();
 
-                GameObject cursor = transform.Find("CursorBox").gameObject;
+                GameObject cursor = transform.Find("UI Holder").Find("CursorBox").gameObject;
                 //if (Input.GetKeyDown("w")) {
                 //    // Don't see a reason not to have it here.
                 //    //canvas.renderMode = RenderMode.ScreenSpaceCamera;
@@ -88,10 +88,12 @@ namespace WordCloud {
 
 
                 //}
-                if (Input.GetKeyDown("q")) { 
+                if (Input.GetKeyDown("q")) {
                     // Create a subset to be rendered as a second (or third, etc) cloud.
-                    BrowserInterface bi = FindObjectOfType<BrowserInterface>();
+                    canvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
+                    BrowserInterface bi = FindObjectOfType<BrowserInterface>();
+                    cc.gameObject.SetActive(true);
                     if(wordstring == "") {
                         wordstring = bi.GetDisplay();
                         var all_words = wordstring.Split(' ');
@@ -118,7 +120,7 @@ namespace WordCloud {
 
                     goal = tiny;
                     goal_loc = tiny_loc;
-                    cursor.SetActive(false);
+                    cursor.transform.parent.gameObject.SetActive(false);
                     cc.MakeNewClouds();
 
                 }
@@ -134,8 +136,8 @@ namespace WordCloud {
                 }
                 if ((rt.localScale - goal).magnitude > 0.01) {
                     if (goal == big) {
-                        cursor.SetActive(true);
-                        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                        cursor.transform.parent.gameObject.SetActive(true);
+                        canvas.renderMode = RenderMode.ScreenSpaceCamera;
                     }
                     rt.localScale = Vector3.Lerp(rt.localScale, goal, speed * Time.deltaTime);
                     rt.position = Vector3.Lerp(rt.position, goal_loc, speed * Time.deltaTime);
@@ -143,6 +145,9 @@ namespace WordCloud {
                 }
                 else { // snap in place.
                     rt.localScale = goal;
+                    if(goal == big) {
+                        cc.gameObject.SetActive(false); // No clouds while the clustergram is filling the screen.
+                    }
                 }
             }
         }

@@ -12,7 +12,7 @@ namespace VoxSimPlatform {
             int s = 10; // Scaling factor
             void Start() {
                 rt = GetComponent<RectTransform>();
-                bi = transform.parent.GetComponentInChildren<BrowserInterface>(); // attached to Browser
+                bi = transform.parent.parent.GetComponentInChildren<BrowserInterface>(); // attached to Browser
                 Debug.LogWarning(bi);
             }
 
@@ -52,6 +52,13 @@ namespace VoxSimPlatform {
                 }
             }
 
+            public void Grow() {
+                rt.sizeDelta += new Vector2(s, s);
+            }
+            public void Shrink() {
+                rt.sizeDelta -= new Vector2(s, s);
+            }
+
             // Use this function to assign location to the green square
             void Move(Vector3 where) {
                 // Set new location
@@ -60,13 +67,17 @@ namespace VoxSimPlatform {
                 rt.position = where;
             }
 
-            void SendSizeAndLocation() {
+            public void SendSizeAndLocation() {
+                // Render mode needs to change to Overlay to make the location mapping work
+                // It needs to normally be in Camera mode for Fingers Drag/Drop to work
+                transform.parent.parent.gameObject.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
                 if(bi == null) {
-                    bi = transform.parent.GetComponentInChildren<BrowserInterface>();
+                    bi = transform.parent.parent.GetComponentInChildren<BrowserInterface>();
                 }
                 Debug.LogWarning(rt.position + " " + bi + " " + rt.sizeDelta[0]);
                 Vector3 to_enter = bi.RemapToWindow(rt.position);
                 bi.ZoomIn(to_enter, rt.sizeDelta);
+                transform.parent.parent.gameObject.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
             }
         }
     }

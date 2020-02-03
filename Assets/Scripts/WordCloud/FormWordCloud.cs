@@ -6,6 +6,8 @@ using System.Linq;
 using UnityEditor;
 using System.IO;
 using VoxSimPlatform.Core;
+using DigitalRubyShared;
+
 
 // Based on code from Andrew Sage (although mostly unrecognizable by now): https://medium.com/@SymboticaAndrew/a-vr-word-cloud-in-unity-f7cb8cf17b6b
 
@@ -51,6 +53,9 @@ namespace WordCloud {
 
         public Color color = Color.white; // Default color for phrases (not hooked up to anything yet)
 
+        //public FingersPanOrbitComponentScript fpocs;
+        public bool rotating_flag = false;
+        public bool rotating = false; // disable or enable voxeme scripts based on if wordcloud as a whole is moving/rotating
 
         // To get grabbed from somewhere else in future.
         // jsonString2 is identical, except values for spoon and fork are swapped.
@@ -90,6 +95,8 @@ namespace WordCloud {
             Vector3 Point;
             float zDistance;
             List<Phrase> to_destroy = new List<Phrase>(); // To avoid errors deleting in the for loop
+            //GetComponent<FingersRotateCameraComponentScript>().GestureView = gameObject; // eh, every frame shouldn't be too bad for this
+
 
             // Tell each of the objects to look at the camera
             foreach (Phrase child in precious_children.Values) {
@@ -113,6 +120,9 @@ namespace WordCloud {
                     child.obj.transform.SetParent(transform);
                 }
                 Voxeme vx = child.obj.transform.GetComponent<Voxeme>(); // Kinda awkward to do this here.
+                //Voxeme vx = child.asterisk.transform.GetComponent<Voxeme>(); // Kinda awkward to do this here.
+
+
                 //vx.is_phrase = true; //Every frame, like taking a sledghammer to a banana
                 vx.moveSpeed = 0.5f;//
                 // Look at the camera
@@ -127,7 +137,19 @@ namespace WordCloud {
                 }
                 // If you're not where you're supposed to be, let the voxphrase physics know that.
                 // Make it so it does not override movement.
-                if (!child.is_happy && vx.targetPosition != child.ideal_position) {
+
+
+                if (rotating_flag) {
+                    if (rotating) {
+                        vx.enabled = false;
+                    }
+                }
+                
+
+
+
+
+                else if (!child.is_happy && vx.targetPosition != child.ideal_position) {
                     // Increment to new location. Only do if position is not set manually by user.
                     vx.targetPosition = child.ideal_position;
                     child.is_happy = true; // Kinda papering over the problem right now. Should probably specify when things should override preexisting locations.
@@ -136,8 +158,11 @@ namespace WordCloud {
                 if (child.asterisk.transform.localScale.magnitude < 0.005) { // Explode the heckin tiny ones that shrunk the heck away
                     to_destroy.Add(child);
                 }
-
             }
+            if (rotating_flag && !rotating) {
+                Invoke("notRotating", 2); //2 seconds before they are voxemes again
+            }
+            rotating_flag = false;
 
             ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
             foreach (Phrase child in to_destroy) {
@@ -148,7 +173,29 @@ namespace WordCloud {
                 objSelector.allVoxemes.Remove(child.obj.transform.GetComponent<Voxeme>());
                 DestroyImmediate(transform.Find(child.term).gameObject);
             }
+            if (Input.GetKey("]")) {
+                // make haptic when you transition to that form of movement
+                transform.Rotate(0, Time.deltaTime * 20, 0);
+            }
+            else if (Input.GetKey("[")) {
+                transform.Rotate(0, -Time.deltaTime * 20, 0);
+            }
         }
+
+
+        private void notRotating() {
+            if (!rotating) { // Only fire if not rotating
+                Debug.LogWarning("Invoked notRotating");
+                foreach (Phrase child in precious_children.Values) {
+                    Voxeme vx = child.obj.GetComponent<Voxeme>();
+                    child.ideal_position = child.obj.transform.position;
+                    vx.enabled = true;
+                    vx.targetPosition = child.ideal_position;
+                }
+            }
+        }
+
+
 
         public Dictionary<string, Phrase> getOrphans() {
             return unprecious_children;

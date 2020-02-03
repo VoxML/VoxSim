@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Vox;
+using System.Linq;
 
 
 
@@ -52,27 +53,10 @@ namespace WordCloud {
                 else clouds.Add(child);
             }
             prime.name = "CloudPrime";
-            //if (clouds.Count == 0) {
-            //    GameObject new_child = Instantiate(prime.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
-            //    //GameObject asterisk = new_child.transform.Find("phrase*").gameObject;
-            //    new_child.transform.SetParent(transform);
-            //    new_child.transform.position = transform.position;
-            //    new_child.name = "0";
-            //}
         }
 
         // Update is called once per frame
         void Update() {
-            //if (clouds.Count == 0) {
-            //    GameObject new_child = Instantiate(prime.gameObject, new Vector3(0, 0, 0), Quaternion.identity);
-            //    //GameObject asterisk = new_child.transform.Find("phrase*").gameObject;
-            //    new_child.transform.SetParent(transform);
-            //    new_child.transform.position = transform.position;
-            //    new_child.name = "0";
-            //    clouds.Add(new_child.GetComponent<FormWordCloud>());
-            //}
-
-
 
             // Probably not much in here. Maybe prevent clouds from overlapping each other? That'd be about it.
             if (Input.GetKeyDown(KeyCode.M)) {
@@ -83,61 +67,10 @@ namespace WordCloud {
             }
 
             foreach (Phrase child in unloved_orphans.Values) {
-                //if (child.obj.name.EndsWith("*")) {
-                //    //child.obj.transform.parent.SetParent(transform);
-                //    child.asterisk = child.obj;
-                //    child.obj = child.obj.transform.parent.gameObject; // point exclusively to the top-level.
-                //}
-                //if (child.asterisk == null) {
-                //    // Set that yo
-                //    child.asterisk = child.obj.transform.Find(child.term + "*").gameObject;
-                //}
-                //if (child.obj.transform.parent != transform) {
-                //    // Someone has stolen my child :o
-
-                //    // Quick check if its parent is in our list of highlight spots
-                //    if (child.obj.transform.parent != null && highlight_points.Contains(child.obj.transform.parent.gameObject)) {
-                //        child.is_highlighted = true;
-                //        Debug.LogWarning("Got " + child.term + " highlighted.");
-                //    }
-                //    child.obj.transform.SetParent(transform);
-                //}
-                //Voxeme vx = child.obj.transform.GetComponent<Voxeme>(); // Kinda awkward to do this here.
-                ////vx.is_phrase = true; //Every frame, like taking a sledghammer to a banana
-                //vx.moveSpeed = 0.5f;//
-                //// Look at the camera
-                //Quaternion toRotation1;
-                //toRotation1 = Quaternion.LookRotation(child.asterisk.transform.position - camera1.position);
-                //float speed = 0.7f;
-                //if (Quaternion.Angle(toRotation1, child.asterisk.transform.rotation) > 5) {
-                //    child.asterisk.transform.rotation = Quaternion.Lerp(child.asterisk.transform.rotation, toRotation1, speed * Time.deltaTime);
-                //}
-                //if ((child.asterisk.transform.localScale - child.size).magnitude > 0.001) {
-                //    child.asterisk.transform.localScale = Vector3.Lerp(child.asterisk.transform.localScale, child.size, speed * Time.deltaTime);
-                //}
-                //// If you're not where you're supposed to be, let the voxphrase physics know that.
-                //// Make it so it does not override movement.
-                //if (!child.is_happy && vx.targetPosition != child.ideal_position) {
-                //    // Increment to new location. Only do if position is not set manually by user.
-                //    vx.targetPosition = child.ideal_position;
-                //    child.is_happy = true; // Kinda papering over the problem right now. Should probably specify when things should override preexisting locations.
-                //}
-
-                //if (child.asterisk.transform.localScale.magnitude < 0.005) { // Explode the heckin tiny ones that shrunk the heck away
-                //    to_destroy.Add(child);
-                //}
 
             }
 
             ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-            //foreach (Phrase child in to_destroy) {
-            //    // DELETE DELETE DELETE
-            //    // Add steps to this until no errors remain
-            //    unloved_orphans.Remove(child.term);
-            //    // A list of 'all voxemes' needs to know if one goes bye bye I guess
-            //    objSelector.allVoxemes.Remove(child.obj.transform.GetComponent<Voxeme>());
-            //    DestroyImmediate(transform.Find(child.term).gameObject);
-            //}
 
 
         }
@@ -151,6 +84,15 @@ namespace WordCloud {
             // Get a list of... strings I guess.
 
             // +1 for default cloud, for everything that is not selected. Gets last point from locations
+            if (word_lists.Count + 1 > 7) {
+                Debug.LogWarning("More than five clouds is unreasonable, jettisoning some. First in, first out");
+                // Maybe do that at some point.
+                var old = word_lists;
+                word_lists = new List<string[]>();
+                foreach(int i in Enumerable.Range(-7, 6)) {
+                    word_lists.Add(old[i]);
+                }
+            }
             List<Vector3>.Enumerator point_locations = MakePointList(word_lists.Count + 1);
             point_locations.MoveNext();
 
@@ -172,6 +114,7 @@ namespace WordCloud {
                 }
                 catch { // if we don't have that many clouds yet, make a new one.
                     GameObject new_child = Instantiate(prime.gameObject, pos, Quaternion.identity);
+                    new_child.transform.rotation = prime.transform.rotation; // Get the right angle for good haptic rotations
                     //GameObject asterisk = new_child.transform.Find("phrase*").gameObject;
                     new_child.transform.SetParent(transform);
                     //new_child.transform.position = transform.position;
@@ -228,38 +171,36 @@ namespace WordCloud {
                         }
                     }
                     words = word_list.ToArray();
+                    c.transform.position = new Vector3(0, 0, 0) + transform.position;
+
                     c.NewSphere(just_words: words);
                     unloved_orphans = c.GetPreciousChildren();
                 }
-
-                //Debug.LogWarning("Words in " + i + ":" + words.Length);
-                // Grab list of new orphans
             }
-
-            // Euthanize all orphans without parents. It's the humane thing to do.
-            //foreach (Phrase child in unloved_orphans.Values) {
-            //    child.size = new Vector3(0, 0, 0); // Will shrink pretty quick.
-            //}
         }
 
         // Generate the locations for words around the sphere
         // Return an enumerable in case we make an arbitrary-size method in future.
         // (That may allow us to do some sort of spiral-backward thing)
+
+        // We want this one to be populating a spiral, NOT a sphere, in order to maintain distance from camera.
         private List<Vector3>.Enumerator MakePointList(float points) {
             //Debug.LogWarning(phrases.Count);
             // points is the number of phrases
+            var p = camera1.position;
+
             float increment = Mathf.PI * (3 - Mathf.Sqrt(5));
             float offset = 2 / points;
 
             List<Vector3> point_locations = new List<Vector3>();
-            for (float i = 0; i < points; i++) {
-                float y = i * offset - 1 + (offset / 2);
-                float radius = Mathf.Sqrt(1 - y * y);
-                //float radius_scaled = radius * (totalOccurances / phrases[(int)i].occurrences);
-                float angle = i * increment;
-                Vector3 pos = new Vector3((Mathf.Cos(angle) * radius * size), y * size, Mathf.Sin(angle) * radius * size);
-                point_locations.Add(pos);
-            }
+
+            point_locations.Add(new Vector3(-size, 0, 0));
+            point_locations.Add(new Vector3(-size, size, 0));
+            point_locations.Add(new Vector3(-size, -size, 0));
+
+            point_locations.Add(new Vector3(size, 0, 0));
+            point_locations.Add(new Vector3(size, size, 0));
+            point_locations.Add(new Vector3(size, -size, 0));
 
             // Gotta add OUR position lol
             point_locations.Sort((x, y) => Vector3.Distance(x + transform.position, camera1.position).CompareTo(Vector3.Distance(y + transform.position, camera1.position)));
