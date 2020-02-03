@@ -626,6 +626,11 @@ namespace VoxSimPlatform {
 	                    }
                     }
 
+                    Debug.Log(string.Format("methodToCall = {0}", methodToCall.Name));
+                    foreach (string argString in argsStrings) {
+                        Debug.Log(argString);
+                    }
+
                     if (methodToCall.ReturnType == typeof(void)) {
                         while (argsStrings.Count > 0) {
                             object arg = argsStrings.ElementAt(0);
@@ -677,7 +682,7 @@ namespace VoxSimPlatform {
                                             }
                                         } 
                                         else {
-                                            Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg as String));
+                                            Debug.Log(string.Format("ComputeSatisfactionConditions: adding \"{0}\" to objs",arg as String));
                                             objs.Add(arg as String);
                                         }
                                     }
@@ -730,7 +735,7 @@ namespace VoxSimPlatform {
                                             }
                                             else if (matches.Count == 1) {
                                                 go = matches[0];
-                                                for (int j = 0; j < objSelector.disabledObjects.Count; i++) {
+                                                for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
                                                     if (objSelector.disabledObjects[j].name == (arg as String)) {
                                                         go = objSelector.disabledObjects[j];
                                                         break;
@@ -784,7 +789,7 @@ namespace VoxSimPlatform {
                             argsStrings.RemoveFirst();
 
                             if (arg is String) {
-                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
+                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding \"{0}\" to objs",arg));
                                 objs.Add(arg);
                             }
                         }
@@ -798,9 +803,89 @@ namespace VoxSimPlatform {
                             object arg = argsStrings.ElementAt(0);
                             argsStrings.RemoveFirst();
 
-                            if (arg is String) {
-                                Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs",arg));
-                                objs.Add(arg);
+                            GameObject go = null;
+                            if ((arg as String).Count(f => f == '(') +
+                                (arg as String).Count(f => f == ')') == 0) {
+                                List<GameObject> matches = new List<GameObject>();
+                                foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                    if (voxeme.voxml.Lex.Pred.Equals(arg)) {
+                                        matches.Add(voxeme.gameObject);
+                                    }
+                                }
+                                
+                                if (matches.Count == 0) {
+                                    go = GameObject.Find(arg as String);
+                                    if (go == null) {
+                                        for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
+                                            if (objSelector.disabledObjects[j].name == (arg as String)) {
+                                                go = objSelector.disabledObjects[j];
+                                                break;
+                                            }
+                                        }
+
+                                        if (go == null) {
+                                            em.OnNonexistentEntityError(null,
+                                                new EventReferentArgs((arg as String)));
+                                            Debug.Log(string.Format("ComputeSatisfactionConditions: no object named {0}",
+                                                (arg as String)));
+                                        }
+                                    }
+                                    else {
+                                        if (go.GetComponent<Voxeme>() != null) {
+                                            if ((em.referents.stack.Count == 0) ||
+                                                (!em.referents.stack.Peek().Equals(go.name))) {
+                                                em.referents.stack.Push(go.name);
+                                            }
+
+                                            if (em.executionPhase == EventExecutionPhase.Computation) {
+                                                em.OnEntityReferenced(null, new EventReferentArgs(go.name, pred));
+                                            }
+                                        }
+                                    }
+
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs", go));
+                                    objs.Add(go);
+                                }
+                                else if (matches.Count == 1) {
+                                    go = matches[0];
+                                    for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
+                                        if (objSelector.disabledObjects[j].name == (arg as String)) {
+                                            go = objSelector.disabledObjects[j];
+                                            break;
+                                        }
+                                    }
+
+                                    if (go == null) {
+                                        em.OnNonexistentEntityError(null, new EventReferentArgs((arg as String)));
+                                        Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                            em.events[0]));
+                                        return false; // abort
+                                    }
+
+                                    Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs", go));
+                                    objs.Add(go);
+                                }
+                                else {
+                                    if (methodToCall != null) {
+                                        // found a method
+                                        Debug.Log(pred);
+                                        if ((!em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) ||
+                                            (em.voxmlLibrary.VoxMLEntityTypeDict[pred] != "attributes")) {
+                                            Debug.Log(string.Format("Which {0}?", (arg as String)));
+                                            em.OnDisambiguationError(null, new EventDisambiguationArgs(command,
+                                                string.Empty, string.Empty,
+                                                matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
+                                            Debug.LogError(string.Format("ComputeSatisfactionConditions: Aborting {0}",
+                                                em.events[0]));
+                                            return false; // abort
+                                        }
+
+                                        foreach (GameObject match in matches) {
+                                            Debug.Log(string.Format("ComputeSatisfactionConditions: adding {0} to objs", match));
+                                            objs.Add(match);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

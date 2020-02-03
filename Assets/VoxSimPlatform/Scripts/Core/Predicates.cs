@@ -1000,13 +1000,13 @@ namespace VoxSimPlatform {
         	// OUT: String
         	public String THE(object[] args) {
         		List<String> objNames = new List<String>();
-        		//System.Random random = new System.Random ();
+                //System.Random random = new System.Random ();
 
-        		if (args[0] is GameObject) {
+                if (args[0] is GameObject) {
         			// assume all inputs are of same type
         			for (int index = 0; index < args.Length; index++) {
         				if (args[index] is GameObject) {
-        					objNames.Add((args[index] as GameObject).name);
+                            objNames.Add((args[index] as GameObject).name);
         				}
         			}
         		}
@@ -1014,7 +1014,7 @@ namespace VoxSimPlatform {
         			// assume all inputs are of same type
         			for (int index = 0; index < args.Length; index++) {
         				if (args[index] is String) {
-        					GameObject go = GameObject.Find(args[index] as String);
+                            GameObject go = GameObject.Find(args[index] as String);
         					if (go != null) {
 	        					objNames.Add(args[index] as String);        						
         					}
@@ -1022,7 +1022,7 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		return string.Join(",", objNames.ToArray());
+                return string.Join(",", objNames.ToArray());
         	}
 
         	// IN: Objects

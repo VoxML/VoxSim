@@ -668,10 +668,18 @@ namespace VoxSimPlatform {
                                         GameObject go = GameObject.Find(arg as String);
                                         //Debug.Log(go);
                                         if (go == null) {
-                                            for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
-                                                if (objSelector.disabledObjects[j].name == (arg as String)) {
-                                                    go = objSelector.disabledObjects[j];
-                                                    break;
+                                            foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                                if (voxeme.voxml.Lex.Pred.Equals(arg as String)) {
+                                                    go = voxeme.gameObject;
+                                                }
+                                            }
+
+                                            if (go == null) { 
+                                                for (int j = 0; j < objSelector.disabledObjects.Count; j++) {
+                                                    if (objSelector.disabledObjects[j].name == (arg as String)) {
+                                                        go = objSelector.disabledObjects[j];
+                                                        break;
+                                                    }
                                                 }
                                             }
 
@@ -798,7 +806,7 @@ namespace VoxSimPlatform {
                                     object arg = argsStrings.Dequeue();
 
                                     if (arg is String) {
-                                        Debug.Log(string.Format("ExecuteCommand: adding {0} to objs",(String) arg));
+                                        Debug.Log(string.Format("ExecuteCommand: adding \"{0}\" to objs",(String) arg));
                                         objs.Add(arg);
                                     }
                                 }
@@ -1552,7 +1560,7 @@ namespace VoxSimPlatform {
                                                         }
                                                     } 
                                                     else {
-                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding {0} to objs",arg as String));
+                                                        Debug.Log(string.Format("EvaluateSkolemConstants: adding \"{0}\" to objs",arg as String));
                                                         objs.Add(arg as String);
                                                     }
                                                 }
