@@ -40,10 +40,6 @@ namespace VoxSimPlatform {
                             (Mathf.Abs(x.max.x - y.min.x) < Constants.EPSILON * 2)) {
                             ec = true;
                         }
-                        else {
-                            Debug.Log(Mathf.Abs(x.min.x - y.max.x));
-                            Debug.Log(Mathf.Abs(x.max.x - y.min.x));
-                        }
                     }
 
                     // if x and z dimensions overlap

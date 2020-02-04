@@ -1379,7 +1379,11 @@ namespace VoxSimPlatform {
 	                                }
                                 }
 
-	                            if (methodToCall.ReturnType != typeof(bool)) {
+                                if (methodToCall == null) {
+                                    Debug.Log(string.Format("EvaluateSkolemConstants: found no method \"{0}\"!", pred));
+                                }
+
+                                if (methodToCall.ReturnType != typeof(bool)) {
                                     while (argsStrings.Count > 0) {
                                         object arg = argsStrings.ElementAt(0);
                                         argsStrings.RemoveFirst();
