@@ -6962,22 +6962,20 @@ namespace VoxSimPlatform {
                                                                     if (dest != null) {
                                                                         // (dest.min.y-dest.extents.y) + (args[0].extents.y-args[0].min.y)
                                                                         // args[0].extents.y-dest.extents.y
+
                                                                         objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y-
                                                                             GlobalHelper.GetObjectWorldSize(GameObject.Find(dest), true).extents.y);
                                                                     }
 
 
                                                                     Debug.Log(string.Format("ComposeProgram: calling OFFSET(\"{0}\",{1},{2},{3})",
-                                                                        string.Format("{0}{1}",match.Value,GlobalHelper.GetTopPredicate(value)),
-                                                                        GlobalHelper.VectorToParsable((Vector3)args[argIndex]),
-                                                                        GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y,
-                                                                        GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y -
-                                                                            GlobalHelper.GetObjectWorldSize(GameObject.Find(dest), true).extents.y));
+                                                                        (string)objs[0], GlobalHelper.VectorToParsable((Vector3)objs[1]),
+                                                                        (float)objs[2], (float)objs[3]));
 
                                                                     object offset = methodToCall.Invoke(this, new object[]{ objs.ToArray() });
 
                                                                     if (offset is Vector3) {
-                                                                        Debug.Log(string.Format("ComposeProgram: OFFSET retured {0}", GlobalHelper.VectorToParsable((Vector3)offset)));
+                                                                        Debug.Log(string.Format("ComposeProgram: OFFSET returned {0}", GlobalHelper.VectorToParsable((Vector3)offset)));
                                                                         argToAdd = (Vector3)offset;
                                                                     }
                                                                 }
