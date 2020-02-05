@@ -6746,19 +6746,19 @@ namespace VoxSimPlatform {
                 Vector3 offset = Vector3.zero;
 
                 if (args.Length > 0) {
-                    if (args[0] is string) {
-                        if (args[1] is Vector3) {
+                    if (args[0] is string) {    // the axis to offset along and direction in which to offset
+                        if (args[1] is Vector3) {   // the vector to adjust
                             offset = (Vector3)args[1];
-                            if (args[2] is float) {
+                            if ((args[2] is float) && (args[3] is float)) {
                                 switch(args[0] as string) {
                                     case "<X":
                                         offset = new Vector3(((Vector3)args[1]).x - (float)args[2],
-                                            ((Vector3)args[1]).y, ((Vector3)args[1]).z);
+                                            ((Vector3)args[1]).y + (float)args[3], ((Vector3)args[1]).z);
                                         break;
                                     
                                     case ">X":
                                         offset = new Vector3(((Vector3)args[1]).x + (float)args[2],
-                                            ((Vector3)args[1]).y, ((Vector3)args[1]).z);
+                                            ((Vector3)args[1]).y + (float)args[3], ((Vector3)args[1]).z);
                                         break;
 
                                     case "<Y":
@@ -6772,12 +6772,12 @@ namespace VoxSimPlatform {
                                         break;
 
                                     case "<Z":
-                                        offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y,
+                                        offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y + (float)args[3],
                                             ((Vector3)args[1]).z - (float)args[2]);
                                         break;
 
                                     case ">Z":
-                                        offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y,
+                                        offset = new Vector3(((Vector3)args[1]).x, ((Vector3)args[1]).y + (float)args[3],
                                             ((Vector3)args[1]).z + (float)args[2]);
                                         break;
 
@@ -6948,17 +6948,36 @@ namespace VoxSimPlatform {
                                                                     if (args[0] is GameObject) {
                                                                         // TODO: calculate the offset using ObjBounds type for non-axis aligned motions
                                                                         //  e.g., "lean"
-                                                                        objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject).extents.y);
+                                                                        if (GlobalHelper.GetTopPredicate(value) == "X") {
+                                                                            objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.x);
+                                                                        }
+                                                                        else if(GlobalHelper.GetTopPredicate(value) == "Y") {
+                                                                            objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y);
+                                                                        }
+                                                                        else if (GlobalHelper.GetTopPredicate(value) == "Z") {
+                                                                            objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.z);
+                                                                        }
                                                                     }
 
-                                                                    Debug.Log(string.Format("ComposeProgram: calling OFFSET(\"{0}\",{1},{2})",
+                                                                    if (dest != null) {
+                                                                        // (dest.min.y-dest.extents.y) + (args[0].extents.y-args[0].min.y)
+                                                                        // args[0].extents.y-dest.extents.y
+                                                                        objs.Add(GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y-
+                                                                            GlobalHelper.GetObjectWorldSize(GameObject.Find(dest), true).extents.y);
+                                                                    }
+
+
+                                                                    Debug.Log(string.Format("ComposeProgram: calling OFFSET(\"{0}\",{1},{2},{3})",
                                                                         string.Format("{0}{1}",match.Value,GlobalHelper.GetTopPredicate(value)),
                                                                         GlobalHelper.VectorToParsable((Vector3)args[argIndex]),
-                                                                        GlobalHelper.GetObjectWorldSize(args[0] as GameObject).extents.y));
+                                                                        GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y,
+                                                                        GlobalHelper.GetObjectWorldSize(args[0] as GameObject, true).extents.y -
+                                                                            GlobalHelper.GetObjectWorldSize(GameObject.Find(dest), true).extents.y));
 
                                                                     object offset = methodToCall.Invoke(this, new object[]{ objs.ToArray() });
 
                                                                     if (offset is Vector3) {
+                                                                        Debug.Log(string.Format("ComposeProgram: OFFSET retured {0}", GlobalHelper.VectorToParsable((Vector3)offset)));
                                                                         argToAdd = (Vector3)offset;
                                                                     }
                                                                 }
