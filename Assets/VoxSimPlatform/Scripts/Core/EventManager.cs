@@ -683,13 +683,15 @@ namespace VoxSimPlatform {
                                                 }
                                             }
 
-                                            if (predMethod.ReturnType != typeof(bool)) {
-                                                if (go == null) {
-                                                    //OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
-                                                    OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
-                                                    return objs;
-                                                    //throw new ArgumentNullException("Couldn't resolve the object");
-                                                    // abort
+                                            if (predMethod != null) {
+                                                if (predMethod.ReturnType != typeof(bool)) {
+                                                    if (go == null) {
+                                                        //OutputHelper.PrintOutput(Role.Affector, string.Format("What is {0}?", (arg as String)));
+                                                        OnNonexistentEntityError(this, new EventReferentArgs(arg as String));
+                                                        return objs;
+                                                        //throw new ArgumentNullException("Couldn't resolve the object");
+                                                        // abort
+                                                    }
                                                 }
                                             }
                                         }

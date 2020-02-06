@@ -209,17 +209,37 @@ namespace VoxSimPlatform {
     					form += ",in_front(";
     					cur += 3;
     				}
-    				else if (cur + 1 < end &&
+                    else if (cur + 1 == end &&
+                             tokens[cur] == "forward") {
+                        form += ",{1}(front)";
+                        cur += 1;
+                    }
+                    else if (cur + 1 < end &&
     				         tokens[cur] == "left" && tokens[cur + 1] == "of") {
     					form += ",left(";
     					cur += 2;
     				}
-    				else if (cur + 1 < end &&
+                    else if (cur + 1 == end &&
+                             tokens[cur] == "left") {
+                        form += ",{1}(left)";
+                        cur += 1;
+                    }
+                    else if (cur + 1 < end &&
     				         tokens[cur] == "right" && tokens[cur + 1] == "of") {
     					form += ",right(";
     					cur += 2;
     				}
-    				else if (cur + 1 < end &&
+                    else if (cur + 1 == end &&
+                             tokens[cur] == "right") {
+                        form += ",{1}(right)";
+                        cur += 1;
+                    }
+                    else if (cur + 1 == end &&
+                             tokens[cur] == "back") {
+                        form += ",{1}(back)";
+                        cur += 1;
+                    }
+                    else if (cur + 1 < end &&
     				         tokens[cur] == "center" && tokens[cur + 1] == "of") {
     					form += ",center(";
     					cur += 2;
