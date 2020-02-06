@@ -446,7 +446,17 @@ namespace VoxSimPlatform {
                     }
                 }
 
-	            Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                //MeshRenderer childMeshRenderer = obj.GetComponentInChildren<MeshRenderer>();
+                //if (childMeshRenderer == null) {
+                //    combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                //    Debug.Log(string.Format("GetObjectOrientedSize: {0}.transform.position = {1}", obj.name, VectorToParsable(obj.transform.position)));
+                //}
+                //else {
+                //    combinedBounds = new Bounds(childMeshRenderer.bounds.center, Vector3.zero);
+                //    Debug.Log(string.Format("GetObjectOrientedSize: {0}.GetComponent<MeshRenderer>().bounds.center = {1}", obj.name,
+                //        VectorToParsable(childMeshRenderer.bounds.center)));
+                //}
 
                 foreach (MeshFilter mesh in meshes) {
                     if (!exclude.Contains(mesh.gameObject)) {
@@ -524,9 +534,22 @@ namespace VoxSimPlatform {
                     }
                 }
 
-	            // Warning: this gets weird if the pivot point for the object is not inside the bounds of the mesh
-	            //	but that is a sign of a badly made geometry
-	            Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                // Warning: this gets weird if the pivot point for the object is not inside the bounds of the mesh
+                //	but that is a sign of a badly made geometry
+                Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                //MeshRenderer childMeshRenderer = obj.GetComponentInChildren<MeshRenderer>();
+                //if (childMeshRenderer == null) {
+                //    combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                //    Debug.Log(string.Format("GetObjectWorldSize: {0}.transform.position = {1}", obj.name, VectorToParsable(obj.transform.position)));
+                //}
+                //else {
+                //    combinedBounds = new Bounds(childMeshRenderer.bounds.center, Vector3.zero);
+                //    Debug.Log(string.Format("GetObjectWorldSize: {0}.GetComponent<MeshRenderer>().bounds.center = {1}", obj.name,
+                //        VectorToParsable(childMeshRenderer.bounds.center)));
+                //}
+                //Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
+                //Bounds combinedBounds = new Bounds(obj.GetComponent<Renderer>().bounds.center, Vector3.zero);
+
 
                 foreach (Renderer renderer in renderers) {
                     if (!exclude.Contains(renderer.transform.gameObject)) {
