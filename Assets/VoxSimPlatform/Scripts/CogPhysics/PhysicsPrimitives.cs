@@ -140,11 +140,19 @@ namespace VoxSimPlatform {
         		catchupTimer.Enabled = false;
         		catchupTimer.Interval = PHYSICS_CATCHUP_TIME;
         		resolveDiscrepancies = false;
-        		
+
         		if (eventManager.events[0] == "" && eventManager.stayExecution) {
         			eventManager.stayExecution = false;
         		}
-        	}
+                else {
+                    string pred = GlobalHelper.GetTopPredicate(eventManager.events[0]);
+                    if (eventManager.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) && 
+                        eventManager.voxmlLibrary.VoxMLEntityTypeDict[pred] != "programs" && eventManager.stayExecution) {
+                        eventManager.stayExecution = false;
+
+                    }
+                }
+            }
 
             /// <summary>
             /// Triggered when the resolveDiscrepancies flag changes
