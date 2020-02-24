@@ -24,7 +24,7 @@ namespace VoxSimPlatform {
         //	protected InputController inputController;
 
         	protected bool logTimestamps;
-        	StreamWriter logFile;
+        	protected StreamWriter logFile;
 
         	public Dictionary<string, Vector3> defaultState = new Dictionary<string, Vector3>();
 
