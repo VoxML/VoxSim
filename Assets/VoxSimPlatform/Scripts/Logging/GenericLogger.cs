@@ -55,7 +55,7 @@ namespace VoxSimPlatform {
         	}
 
         	// Update is called once per frame
-        	public void Update() {
+        	public virtual void Update() {
         		logTimer += Time.deltaTime;
         	}
 
@@ -102,7 +102,7 @@ namespace VoxSimPlatform {
         		return string.Format("\"{0}\"", utterance);
         	}
 
-        	protected void Log(string content) {
+        	protected virtual void Log(string content) {
         		if (PlayerPrefs.GetInt("Make Logs") == 1) {
         			logFile.WriteLine(string.Format("{0}\t{1}", content, logTimestamps ? logTimer.ToString() : string.Empty));
         		}
