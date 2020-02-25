@@ -24,8 +24,8 @@ namespace VoxSimPlatform {
         //	protected InputController inputController;
 
         	protected bool logTimestamps;
-        	StreamWriter logFile;
-
+        	protected StreamWriter logFile;
+            public static bool logFileCreated = false;
         	public Dictionary<string, Vector3> defaultState = new Dictionary<string, Vector3>();
 
         	public event EventHandler LogEvent;
@@ -55,7 +55,7 @@ namespace VoxSimPlatform {
         	}
 
         	// Update is called once per frame
-        	public void Update() {
+        	public virtual void Update() {
         		logTimer += Time.deltaTime;
         	}
 
@@ -79,7 +79,7 @@ namespace VoxSimPlatform {
 
         		string dateTime = DateTime.Now.ToString("yyyy-MM-dd-HHmmss");
         		logFile = new StreamWriter(string.Format("Logs/{0}/{1}-{2}.txt", name, name, dateTime));
-
+                logFileCreated = true;
         //		logFile.WriteLine (string.Format ("Structure: {0}", name));
         //		string modalityString = string.Empty;
         //		modalityString += ((int)(modality & OutputModality.Modality.Gestural) == (int)OutputModality.Modality.Gestural) ? "Gestural" : string.Empty;
@@ -87,7 +87,7 @@ namespace VoxSimPlatform {
         //		modalityString += ((int)(modality & OutputModality.Modality.Linguistic) == (int)OutputModality.Modality.Linguistic) ? "Linguistic" : string.Empty;
         //		modalityString = String.Join(", ", modalityString.Split ());
         //		logFile.WriteLine (string.Format ("Modality: {0}", modalityString));
-        	}
+            }
 
         	protected string MakeLogString(params string[] strings) {
         		string outStr = string.Empty;
@@ -102,7 +102,7 @@ namespace VoxSimPlatform {
         		return string.Format("\"{0}\"", utterance);
         	}
 
-        	protected void Log(string content) {
+        	protected virtual void Log(string content) {
         		if (PlayerPrefs.GetInt("Make Logs") == 1) {
         			logFile.WriteLine(string.Format("{0}\t{1}", content, logTimestamps ? logTimer.ToString() : string.Empty));
         		}
