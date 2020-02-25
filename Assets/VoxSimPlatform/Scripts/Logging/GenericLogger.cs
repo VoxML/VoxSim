@@ -25,7 +25,11 @@ namespace VoxSimPlatform {
 
         	protected bool logTimestamps;
         	protected StreamWriter logFile;
+
             public static bool logFileCreated = false;
+
+
+
         	public Dictionary<string, Vector3> defaultState = new Dictionary<string, Vector3>();
 
         	public event EventHandler LogEvent;
