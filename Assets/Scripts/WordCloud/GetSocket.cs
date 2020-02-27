@@ -64,7 +64,9 @@ namespace VoxSimPlatform {
                     "(subscribe :content (request &key :content (record-gene-data . * )))",
                     "(subscribe :content (request &key :content (cluster-analysis . * )))",
                     "(tell :content (module-status ready))",
-                    "(subscribe :content (tell &key :content (utterance . *)))"
+                    //"(subscribe :content (tell &key :content (utterance . *)))",
+                    "(subscribe :content (tell &key :content (spoken . *)))"// New one as of 2/27/2020
+                    //(tell :content (spoken :who sys :what "Sorry, I didn't catch that. Can you rephrase please?"))
                 };
 
                     foreach (string requestLoop in requests) {

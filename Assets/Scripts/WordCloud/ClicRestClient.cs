@@ -4,51 +4,69 @@ using System.Collections;
 using System.Text;
 using UnityEngine;
 using VoxSimPlatform.Interaction;
+using System.Collections.Generic;
 
 namespace VoxSimPlatform {
     namespace Network {
-        public class NLURestClient : RestClient {
+        public class ClicRestClient : RestClient {
             String route = ""; // to be set on the first contact to the server
             String payload = ""; //Json payload
             public String last_read = "";
+            BrowserInterface bi;
 
             /// <summary>
             /// Name to match, that's about it.
             /// </summary>
-            public NLURestClient() {
-                clientType = typeof(NLUIOClient);
+            public ClicRestClient() {
+                clientType = typeof(ClicIOClient);
             }
 
 
             /// <summary>
             /// In this method, we actually invoke a request to the outside server
             /// </summary>
-            public override IEnumerator AsyncRequest(string jsonPayload, string method, string url, string success, string error) {
+            public override IEnumerator AsyncRequest(string to_say_and_payload, string method, string url, string success, string error) {
                 if (!url.StartsWith("http")) {
                     url = "http://" + url;
                 }
                 UnityWebRequest webRequest;
 
-                Debug.LogWarning("Payload is: " + jsonPayload);
-                //Debug.LogWarning(jsonPayload);
-                if (jsonPayload.StartsWith("web")) {
-                    // Hacky way to circumvent normal command structure.
-                    // Also, love how 'hack' gets syntax highlighted lol
-                    Debug.LogWarning("WEB tag called");
-                    GameObject browser = GameObject.Find("Browser (GUI)");
-                    BrowserInterface bi = browser.GetComponent<BrowserInterface>();
-                    bi.GrabSelected(jsonPayload);
+
+                string jsonPayload;
+                string to_say;
+                // Split the sentence from the payload
+
+                if(!to_say_and_payload.Contains("~")){
+                    Debug.LogWarning("No '~' character in to_say_and_payload");
+                    to_say = to_say_and_payload;
                     jsonPayload = "";
                 }
-
-                if (jsonPayload != "0") {
-                    var form = new WWWForm();
-                    form.AddField("sentence", jsonPayload); // IMPORTANT: Assumes there is a form with THIS PARICULAR NAME OF FIELD
-                    webRequest = UnityWebRequest.Post(url, form);
-                }
                 else {
+                    var x = to_say_and_payload.Split('~'); // Tilde ~ seems like an okay split character
+                    to_say = x[0];
+                    jsonPayload = x[1];
+                }
+
+
+                Debug.LogWarning("To_say is: " + to_say);
+                Debug.LogWarning("Payload is: " + jsonPayload);
+
+
+                var form = new WWWForm();
+
+                // Look at ADDBINARYDATA later
+
+                foreach(var s in form.headers) {
+                    Debug.LogWarning("header " + s);
+
+                }
+                var data = "{\"geneSetMembers\":[\"UST\"],\"geneSetName\":\"selection0\"}";
+
+
+                // Convert our data string to a bunch of bytes. 
+                {
                     // Only really handles the initialization step, to see if the server is, in fact, real
-                    webRequest = new UnityWebRequest(url + route, method); // route is specific page as directed by server
+                    webRequest = new UnityWebRequest(url + route + to_say, method); // route is specific page as directed by server
                     var payloadBytes = string.IsNullOrEmpty(jsonPayload)
                         ? Encoding.UTF8.GetBytes("{}")
                         : Encoding.UTF8.GetBytes(jsonPayload);
@@ -72,13 +90,14 @@ namespace VoxSimPlatform {
                             last_read = webRequest.downloadHandler.text;
                             //BroadcastMessage("LookForNewParse"); // Tell something, in JointGestureDemo for instance, to grab the result
                             if (webRequest.downloadHandler.text != "connected") {
-                                SingleAgentInteraction sai = GameObject.FindObjectOfType<SingleAgentInteraction>();
-                                sai.SendMessage("LookForNewParse");
+                                //SingleAgentInteraction sai = GameObject.FindObjectOfType<SingleAgentInteraction>();
+                                //sai.SendMessage("LookForNewParse");
+                                bi.SendMessage("BobSaidSomething");
                             }
                             else {
                                 // Blatantly janky
-                                NLUIOClient parent = GameObject.FindObjectOfType<NLUIOClient>();
-                                parent.nlurestclient = this; // Ew, disgusting
+                                ClicIOClient parent = GameObject.FindObjectOfType<ClicIOClient>();
+                                parent.clicrestclient = this; // Ew, disgusting
                             }
 
                             Debug.Log("Server took " + count * 0.1 + " seconds");

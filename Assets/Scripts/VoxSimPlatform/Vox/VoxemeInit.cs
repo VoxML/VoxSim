@@ -26,13 +26,13 @@ namespace VoxSimPlatform {
                 start_time = Time.realtimeSinceStartup;
                 InitializeVoxemes();
                 end_time = Time.realtimeSinceStartup;
-                Debug.LogWarning("Initializing took " + (end_time - start_time) + " ... seconds?");
+//                Debug.LogWarning("Initializing took " + (end_time - start_time) + " ... seconds?");
 
                 start_time = Time.realtimeSinceStartup;
                 objSelector.InitDisabledObjects();
         		macros.PopulateMacros();
                 end_time = Time.realtimeSinceStartup;
-                Debug.LogWarning("Second step took " + (end_time - start_time) + " ... seconds?");
+ //               Debug.LogWarning("Second step took " + (end_time - start_time) + " ... seconds?");
 
             }
 

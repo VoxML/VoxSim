@@ -14,6 +14,7 @@ using VoxSimPlatform.Network;
 using VoxSimPlatform.UI.ModalWindow;
 using VoxSimPlatform.UI.UIButtons;
 using VoxSimPlatform.VideoCapture;
+using System.Net.NetworkInformation;
 
 namespace VoxSimPlatform {
     namespace UI {

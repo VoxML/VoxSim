@@ -18,7 +18,7 @@ using System.Text.RegularExpressions;
 namespace VoxSimPlatform {
     namespace Network {
         
-        public class BrowserInterface : MonoBehaviour {
+        public class BrowserInterface : CommunicationsBridge {
             float prior0;
             float prior1;
             //Vector2 topleft; // of the cgm window
@@ -30,10 +30,13 @@ namespace VoxSimPlatform {
             Socket s;
             VoxSimPlatform.Agent.AgentTextController atc;
             ZenFulcrum.EmbeddedBrowser.IPromise<ZenFulcrum.EmbeddedBrowser.JSONNode> ip = null; //`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
-
+            ClicIOClient io;
 
 
             //GetSocket gs = new GetSocket();
+            public Socket GetSock() {
+                return s;
+            }
 
             // Start is called before the first frame update
             void Start() {
@@ -107,13 +110,13 @@ namespace VoxSimPlatform {
                 else if (Input.GetKeyDown("d")) { // Downloads whatever, prints to debug.
                     ExternalCall("d");
                 }
-                else if (Input.GetKeyDown("p")) { // p for path
-                    ExternalCall("p");
+                //else if (Input.GetKeyDown("p")) { // p for path
+                //    ExternalCall("p");
 
-                }
-                else if (Input.GetKeyDown("g")) { // g for genes
-                    ExternalCall("g");
-                }
+                //}
+                //else if (Input.GetKeyDown("g")) { // g for genes
+                //    ExternalCall("g");
+                //}
                 else if (Input.GetKeyDown("2")) {
                     ExternalCall("2");
                 }
@@ -122,8 +125,19 @@ namespace VoxSimPlatform {
                 }
                 else if (Input.GetKeyDown("n")) {
                     GrabSelected("");
-                }else if (Input.GetKeyDown("i")) {
+                }
+                else if (Input.GetKeyDown("i")) {
                     b.EvalJS("this.saved_selected_nodes").Then(ret => saved_nodes = ret).Done();
+                }
+                else if (Input.GetKeyDown("5")) {
+                    PostRequest("Hello");
+                }
+                else if (Input.GetKeyDown("6")) {
+                    //geneSetMembers: (41) ["UST", "SAMD5", "PLAGL1", "SLC35D3", "SAMD3", "TMEM200A", "TRDN"]
+                    //geneSetName: "selection0"
+                    var to_say = "Create+the+gene+set.";
+                    var payload = "{\"geneSetMembers\":[\"UST\", \"SAMD5\", \"PLAGL1\", \"SLC35D3\", \"SAMD3\", \"TMEM200A\", \"TRDN\"], \"geneSetName\": \"selection52\"}";
+                    PostRequest(to_say + "~" + payload);
                 }
             }
 
@@ -172,78 +186,78 @@ namespace VoxSimPlatform {
                     string from_trips = Encoding.UTF8.GetString(bytesReceived);
                     Debug.LogWarning(from_trips);
                 }
-                else if (j == "p") { // p for path
-                                                  // Request a path to a cluster from the server. (or rather, just grab whatever it hands you)
-                                                  // Then cluster, then give the server a success notification.
-                                                  //s = GetSocket.Main(s, "", true);
-                    byte[] bytesReceived = new byte[1024];
-                    int i = s.Receive(bytesReceived);
-                    string from_trips = Encoding.UTF8.GetString(bytesReceived);
-                    Debug.LogWarning(from_trips);
-                    // Create a socket connection with the specified server and port.
+                //else if (j == "p") { // p for path
+                //                                  // Request a path to a cluster from the server. (or rather, just grab whatever it hands you)
+                //                                  // Then cluster, then give the server a success notification.
+                //                                  //s = GetSocket.Main(s, "", true);
+                //    byte[] bytesReceived = new byte[1024];
+                //    int i = s.Receive(bytesReceived);
+                //    string from_trips = Encoding.UTF8.GetString(bytesReceived);
+                //    Debug.LogWarning(from_trips);
+                //    // Create a socket connection with the specified server and port.
 
-                    // Parse the string here.
-                    // (request :content (record-gene-data :filename "path on localhost"  :data " content of csv file")
-                    // string to_eval = Regex.Match(from_trips, "test.*test").Value;
-                    string to_eval = Regex.Match(from_trips, @""".*json").Value;
-                    to_eval = to_eval.Substring(1, to_eval.Length - 1); //UGH
+                //    // Parse the string here.
+                //    // (request :content (record-gene-data :filename "path on localhost"  :data " content of csv file")
+                //    // string to_eval = Regex.Match(from_trips, "test.*test").Value;
+                //    string to_eval = Regex.Match(from_trips, @""".*json").Value;
+                //    to_eval = to_eval.Substring(1, to_eval.Length - 1); //UGH
 
-                    Debug.LogWarning("eval: " + to_eval);
-                    b.EvalJS("make_clust('" + to_eval + "');").Then(ret => saved_nodes = ret).Done();
-                    // Send request to the server.
-                    byte[] bytesSent = Encoding.ASCII.GetBytes("(reply :content (success :status done)");
-                    int result = s.Send(bytesSent, bytesSent.Length, 0);
-                }
-                else if (j == "g") { // g for genes
-                                     //s = GetSocket.Main(s, "", true);
-                                     // (REQUEST :CONTENT (TAG :TEXT "Create the gene set." :IMITATE-KEYBOARD-MANAGER T))
+                //    Debug.LogWarning("eval: " + to_eval);
+                //    b.EvalJS("make_clust('" + to_eval + "');").Then(ret => saved_nodes = ret).Done();
+                //    // Send request to the server.
+                //    byte[] bytesSent = Encoding.ASCII.GetBytes("(reply :content (success :status done)");
+                //    int result = s.Send(bytesSent, bytesSent.Length, 0);
+                //}
+                //else if (j == "g") { // g for genes
+                //                     //s = GetSocket.Main(s, "", true);
+                //                     // (REQUEST :CONTENT (TAG :TEXT "Create the gene set." :IMITATE-KEYBOARD-MANAGER T))
 
-                    // Dec 5 2019:
-                    //(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members $list) (:gene-set-name $name))))
+                //    // Dec 5 2019:
+                //    //(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members $list) (:gene-set-name $name))))
 
-                    // Expanded below. Name should maybe be some kind of incrementing counter.
-                    //(tell: receiver BA: content(create - gene - set :request - body((: GENE - SET - MEMBERS "APEX2"
-                    //                                "APOD" "APP" "ASPA"
-                    //                                "MYDGF" "C1D" "CBR3"
-                    //                                "CDH19" "CLEC2B" "COL5A2"
-                    //                                "COL9A3" "CUBN" "DHRS3"
-                    //                                "ECHDC1" "ENPP2" "FAM3C"
-                    //                                "TENT5A" "FN1" "FXYD3"
-                    //                                "GALNT5" "IFNGR2" "ITGB5"
-                    //                                "ITM2B" "KHDRBS3" "LAMA4"
-                    //                                "LAMB1" "LAMC1" "LOXL3"
-                    //                                "LSAMP" "MAGED1" "MAGED2"
-                    //                                "MAGEH1" "MANSC1" "MAS1"
-                    //                                "MIA" "MRPS6" "PDLIM4"
-                    //                                "PDZRN3" "PLAT" "PLEKHA4"
-                    //                                "PON2" "PRKAR1A" "HTRA1"
-                    //                                "S100A13" "S100B" "SAT1"
-                    //                                "SCRG1" "SERPINA3"
-                    //                                "SERPINE2" "SLC26A2"
-                    //                                "SMPDL3A" "SNRPB2"
-                    //                                "SPAG16" "SPARC" "STXBP6"
-                    //                                "DYNLT3" "TIAM2" "TIMP1"
-                    //                                "ANO1" "TUSC3" "ZNF521")
-                    //                               (:GENE - SET - NAME
-                    //                                . "selection0"))))
+                //    // Expanded below. Name should maybe be some kind of incrementing counter.
+                //    //(tell: receiver BA: content(create - gene - set :request - body((: GENE - SET - MEMBERS "APEX2"
+                //    //                                "APOD" "APP" "ASPA"
+                //    //                                "MYDGF" "C1D" "CBR3"
+                //    //                                "CDH19" "CLEC2B" "COL5A2"
+                //    //                                "COL9A3" "CUBN" "DHRS3"
+                //    //                                "ECHDC1" "ENPP2" "FAM3C"
+                //    //                                "TENT5A" "FN1" "FXYD3"
+                //    //                                "GALNT5" "IFNGR2" "ITGB5"
+                //    //                                "ITM2B" "KHDRBS3" "LAMA4"
+                //    //                                "LAMB1" "LAMC1" "LOXL3"
+                //    //                                "LSAMP" "MAGED1" "MAGED2"
+                //    //                                "MAGEH1" "MANSC1" "MAS1"
+                //    //                                "MIA" "MRPS6" "PDLIM4"
+                //    //                                "PDZRN3" "PLAT" "PLEKHA4"
+                //    //                                "PON2" "PRKAR1A" "HTRA1"
+                //    //                                "S100A13" "S100B" "SAT1"
+                //    //                                "SCRG1" "SERPINA3"
+                //    //                                "SERPINE2" "SLC26A2"
+                //    //                                "SMPDL3A" "SNRPB2"
+                //    //                                "SPAG16" "SPARC" "STXBP6"
+                //    //                                "DYNLT3" "TIAM2" "TIMP1"
+                //    //                                "ANO1" "TUSC3" "ZNF521")
+                //    //                               (:GENE - SET - NAME
+                //    //                                . "selection0"))))
 
 
-                    //(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members $list) (:gene-set-name $name))))
-                    string to_send = "(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members " + saved_nodes + ") (:gene-set-name . \"selection0\"))))";
+                //    //(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members $list) (:gene-set-name $name))))
+                //    string to_send = "(tell :receiver BA :content (create-gene-set :request-body ((:gene-set-members " + saved_nodes + ") (:gene-set-name . \"selection0\"))))";
 
-                    //string to_send = "(tell :content (selected-genes :gene-list (" + saved_nodes + ")))";
-                    Debug.LogWarning(to_send);
-                    byte[] bytesSent = Encoding.ASCII.GetBytes(to_send);
-                    // Create a socket connection with the specified server and port.s
+                //    //string to_send = "(tell :content (selected-genes :gene-list (" + saved_nodes + ")))";
+                //    Debug.LogWarning(to_send);
+                //    byte[] bytesSent = Encoding.ASCII.GetBytes(to_send);
+                //    // Create a socket connection with the specified server and port.s
 
-                    // Send request to the server.
-                    Debug.LogWarning(bytesSent + "  " + bytesSent.Length);
+                //    // Send request to the server.
+                //    Debug.LogWarning(bytesSent + "  " + bytesSent.Length);
 
-                    int result = s.Send(bytesSent, bytesSent.Length, 0);
-                    byte[] bytesReceived = new byte[1024];
-                    Debug.LogWarning(result);
-                    Debug.LogWarning(" " + s.IsBound);
-                }
+                //    int result = s.Send(bytesSent, bytesSent.Length, 0);
+                //    byte[] bytesReceived = new byte[1024];
+                //    Debug.LogWarning(result);
+                //    Debug.LogWarning(" " + s.IsBound);
+                //}
                 else if (j == "2") { // pull a list of genes FROM FACILITATOR
                     byte[] bytesReceived = new byte[2048];
                     int i = s.Receive(bytesReceived);
@@ -293,6 +307,20 @@ namespace VoxSimPlatform {
                 
             }
 
+            public string PostRequest(string rawSent) {
+                string route = "clic/say?text="; // idk rn
+                //to_return = ExecuteCommand(rawSent);
+                if (io == null) {
+                    io = GameObject.Find("interface").GetComponent<ClicIOClient>();
+                }
+                io.Post(route, rawSent);
+                return "WAIT";
+            }
+
+            public void BobSaidSomething() {
+                Debug.LogWarning("Bob said something back to the REST client.");
+            }
+
             // Acquire the list of selected genes
             public void GrabSelected(string payload = "") {
                 b.EvalJS("this.saved_selected_nodes").Then(ret => {
@@ -301,6 +329,7 @@ namespace VoxSimPlatform {
 
                 }).Done();
             }
+#if UNITY_EDITOR
 
             [MenuItem("Jarvis/Arbitrary &#A")]
             static void Arb() {
@@ -316,6 +345,7 @@ namespace VoxSimPlatform {
                (Selection.activeGameObject.GetComponent<BrowserInterface>() != null) &&
                (Selection.activeGameObject.GetComponent<Browser>() != null);
             }
+#endif
         }
     }
 }

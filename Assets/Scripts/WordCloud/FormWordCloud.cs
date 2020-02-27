@@ -490,6 +490,8 @@ namespace WordCloud {
             return precious_children;
         }
 
+#if UNITY_EDITOR
+
         [MenuItem("VoxSim/New WordCloud &#w")]
         static void NewWordCloud() {
             FormWordCloud wc = Selection.activeGameObject.GetComponent<FormWordCloud>();
@@ -519,5 +521,6 @@ namespace WordCloud {
             return (Selection.activeGameObject != null) &&
                    (Selection.activeGameObject.GetComponent<FormWordCloud>() != null);
         }
+#endif
     }
 }
