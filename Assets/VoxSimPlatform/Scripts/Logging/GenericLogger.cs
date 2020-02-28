@@ -24,7 +24,9 @@ namespace VoxSimPlatform {
         //	protected InputController inputController;
 
         	protected bool logTimestamps;
-        	protected StreamWriter logFile;
+            protected bool logFileCreated;
+
+            protected StreamWriter logFile;
 
         	public Dictionary<string, Vector3> defaultState = new Dictionary<string, Vector3>();
 
@@ -37,7 +39,7 @@ namespace VoxSimPlatform {
         	}
 
         	// Use this for initialization
-        	public void Start() {
+        	public virtual void Start() {
         		logTimestamps = (PlayerPrefs.GetInt("Timestamps") == 1);
         		//
         //		// log default state
@@ -119,7 +121,7 @@ namespace VoxSimPlatform {
         		}
         	}
 
-        	void LogEventReceived(object sender, EventArgs e) {
+        	protected void LogEventReceived(object sender, EventArgs e) {
         		Log(((LoggerArgs) e).LogString);
         	}
         }
