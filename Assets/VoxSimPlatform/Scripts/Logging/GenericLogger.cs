@@ -23,11 +23,11 @@ namespace VoxSimPlatform {
         //
         //	protected InputController inputController;
 
-        	protected bool logTimestamps;
-        	protected static StreamWriter logFile;
 
-            public static bool logFileCreated = false;
+        	protected static bool logTimestamps;
+            protected static bool logFileCreated;
 
+            protected static StreamWriter logFile;
 
 
         	public Dictionary<string, Vector3> defaultState = new Dictionary<string, Vector3>();
@@ -82,7 +82,19 @@ namespace VoxSimPlatform {
         		}
 
         		string dateTime = DateTime.Now.ToString("yyyy-MM-dd-HHmmss");
-        		logFile = new StreamWriter(string.Format("Logs/{0}/{1}-{2}.txt", name, name, dateTime));
+
+                if (!File.Exists(string.Format(@"Logs/{0}/{1}-{2}.txt", PlayerPrefs.GetString("Logs Prefix"), PlayerPrefs.GetString("Logs Prefix"), PlayerPrefs.GetString("LogFileName"))))
+                {
+                    logFile = new StreamWriter(string.Format("Logs/{0}/{1}-{2}.txt", name, name, dateTime),append:false);
+                    PlayerPrefs.SetString("LogFileName", dateTime);
+
+                }
+                else
+                {
+                    logFile = new StreamWriter(string.Format("Logs/{0}/{1}-{2}.txt", name, name, PlayerPrefs.GetString("LogFileName")), append: true);
+                }
+                
+
                 logFileCreated = true;
         //		logFile.WriteLine (string.Format ("Structure: {0}", name));
         //		string modalityString = string.Empty;
