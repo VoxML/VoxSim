@@ -289,11 +289,12 @@ namespace VoxSimPlatform {
             }
 
             public static string PrintByteArray(byte[] bytes) {
-                var sb = new StringBuilder("new byte[] { ");
+                var sb = new StringBuilder("new byte[] {");
                 foreach (var b in bytes) {
                     sb.Append(b + ", ");
                 }
 
+                sb.Length -= 2;
                 sb.Append("}");
 
                 return sb.ToString();

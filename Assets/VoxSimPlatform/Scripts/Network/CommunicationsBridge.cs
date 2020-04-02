@@ -185,12 +185,8 @@ namespace VoxSimPlatform {
                             string[] socketAddress = segments[2].Split(':'); //// Assumes in form of IP address, not url
                             if (!string.IsNullOrEmpty(socketAddress[0])) {
                                 Type socketType = null;
+                                // append Assembly-CSharp.dll assembly to search in
                                 socketType = Type.GetType(segments[1]+",Assembly-CSharp.dll");
-                                //if(socketType == null) {
-                                    //socketType = typeof(NLURestClient);
-                                //    socketType = Type.GetType("VoxSimPlatform.Network." + segments[1]); //ugh, GetType doesn't find it by default
-                                //}
-                                //socketType = Type.GetType("String");
                                 if (socketType != null) {
                                     if (socketType.IsSubclassOf(typeof(SocketConnection))) {
                                         SocketConnection newSocket = null;
