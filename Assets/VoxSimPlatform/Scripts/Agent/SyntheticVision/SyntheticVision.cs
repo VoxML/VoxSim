@@ -54,7 +54,7 @@ namespace VoxSimPlatform {
         			}
 
                     // interaction prefs windows (e.g., InteractionPrefsModalWindow should action ShowFoV
-                    //  instead of the other way around
+                    //  instead of the other way around)
         			if (!ShowFoV) {
         				VisionCanvas.SetActive(false);
         			}
