@@ -240,6 +240,14 @@ namespace VoxSimPlatform {
                 }
             }
 
+            public event EventHandler ResolveDiscrepanciesComplete;
+
+            public void OnResolveDiscrepanciesComplete(object sender, EventArgs e) {
+                if (ResolveDiscrepanciesComplete != null) {
+                    ResolveDiscrepanciesComplete(this, e);
+                }
+            }
+
             public event UnhandledArgument OnUnhandledArgument;
 
             public delegate string UnhandledArgument(string predStr);

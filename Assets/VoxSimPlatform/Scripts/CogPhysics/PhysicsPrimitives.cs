@@ -12,7 +12,8 @@ using VoxSimPlatform.Vox;
 namespace VoxSimPlatform {
     namespace CogPhysics {
         public class PhysicsPrimitives : MonoBehaviour {
-        	bool _resolveDiscrepancies;
+
+            bool _resolveDiscrepancies;
             public bool resolveDiscrepancies {
                 get { return _resolveDiscrepancies; }
                 set {
@@ -100,6 +101,8 @@ namespace VoxSimPlatform {
         					GameObject.Find(argsStrings[0] as String)
         						.GetComponent<Voxeme>()); // we need to talk (do physics reactivation in here?) // replace ReevaluateRelationships
         			}
+
+                    eventManager.OnResolveDiscrepanciesComplete(null, null);
         		}
 
         		//}
@@ -149,7 +152,6 @@ namespace VoxSimPlatform {
                     if (eventManager.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) && 
                         eventManager.voxmlLibrary.VoxMLEntityTypeDict[pred] != "programs" && eventManager.stayExecution) {
                         eventManager.stayExecution = false;
-
                     }
                 }
             }
