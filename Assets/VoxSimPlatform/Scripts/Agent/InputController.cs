@@ -47,6 +47,7 @@ namespace VoxSimPlatform {
         	public bool textField = true;
         	public bool silenceAcknowledgment = false;
         	public bool allowToggleAgent = true;
+            public bool directToEventManager = true;
 
         	String[] commands;
         	EventManager eventManager;
@@ -260,8 +261,6 @@ namespace VoxSimPlatform {
         			InputEventArgs inputArgs = new InputEventArgs(inputString);
         			OnInputReceived(this, inputArgs);
 
-        			Debug.Log("User entered: " + inputString);
-
                     if (inputString.StartsWith("qsr:")) {
                         SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
                             (SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
@@ -269,64 +268,68 @@ namespace VoxSimPlatform {
                         return;
                     }
 
-        			Dictionary<string, string> vectors = new Dictionary<string, string>();
+                    if (directToEventManager) {
+                        Debug.Log("User entered: " + inputString);
 
-        			foreach (Match match in v.Matches(inputString)) {
-        				vectors.Add(string.Format("V@{0}", match.Index), match.Value);
-        				Debug.Log(string.Format("{0}:{1}", string.Format("V@{0}", match.Index), match.Value));
-        				inputString = v.Replace(inputString, string.Format("V@{0}", match.Index), 1);
-        			}
+            			Dictionary<string, string> vectors = new Dictionary<string, string>();
 
-        			Debug.Log("Formatted as: " + inputString);
+            			foreach (Match match in v.Matches(inputString)) {
+            				vectors.Add(string.Format("V@{0}", match.Index), match.Value);
+            				Debug.Log(string.Format("{0}:{1}", string.Format("V@{0}", match.Index), match.Value));
+            				inputString = v.Replace(inputString, string.Format("V@{0}", match.Index), 1);
+            			}
 
-        			if (!r.IsMatch(inputString)) {
-        				// is not already functional form
-        				// parse into functional form
-        				String[] inputs = inputString.Split(new char[] {'.', ',', '!'});
-        				List<String> commands = new List<String>();
-        				foreach (String s in inputs) {
-        					if (s != String.Empty) {
-        						commands.Add(commBridge.NLParse(s.Trim().ToLower()));
-        					}
-        				}
+            			Debug.Log("Formatted as: " + inputString);
 
-        				functionalCommand = String.Join(";", commands.ToArray());
-        			}
-        			else {
-        				functionalCommand = inputString;
-        			}
+            			if (!r.IsMatch(inputString)) {
+            				// is not already functional form
+            				// parse into functional form
+            				String[] inputs = inputString.Split(new char[] {'.', ',', '!'});
+            				List<String> commands = new List<String>();
+            				foreach (String s in inputs) {
+            					if (s != String.Empty) {
+            						commands.Add(commBridge.NLParse(s.Trim().ToLower()));
+            					}
+            				}
 
-        			Debug.Log(functionalCommand);
+            				functionalCommand = String.Join(";", commands.ToArray());
+            			}
+            			else {
+            				functionalCommand = inputString;
+            			}
 
-        			if (functionalCommand.Count(x => x == '(') == functionalCommand.Count(x => x == ')')) {
-        				//eventManager.ClearEvents ();
+            			Debug.Log(functionalCommand);
 
-        				Debug.Log("Raw input parsed as: " + functionalCommand);
-        				InputEventArgs parseArgs = new InputEventArgs(functionalCommand);
-        				OnParseComplete(this, parseArgs);
+            			if (functionalCommand.Count(x => x == '(') == functionalCommand.Count(x => x == ')')) {
+            				//eventManager.ClearEvents ();
 
-        				if (!silenceAcknowledgment) {
-        					OutputHelper.PrintOutput(Role.Affector, "OK.");
-        					OutputHelper.PrintOutput(Role.Planner, "");
-        				}
-                            
-        				commands = functionalCommand.Split(new char[] { ';', ':' });
-        				foreach (String commandString in commands) {
-        					string command = commandString;
-        					foreach (string vector in vectors.Keys) {
-        						command = command.Replace(vector, vectors[vector]);
-        					}
+            				Debug.Log("Raw input parsed as: " + functionalCommand);
+            				InputEventArgs parseArgs = new InputEventArgs(functionalCommand);
+            				OnParseComplete(this, parseArgs);
 
-        					// add to queue
-        					eventManager.QueueEvent(command);
-        				}
+            				if (!silenceAcknowledgment) {
+            					OutputHelper.PrintOutput(Role.Affector, "OK.");
+            					OutputHelper.PrintOutput(Role.Planner, "");
+            				}
+                                
+            				commands = functionalCommand.Split(new char[] { ';', ':' });
+            				foreach (String commandString in commands) {
+            					string command = commandString;
+            					foreach (string vector in vectors.Keys) {
+            						command = command.Replace(vector, vectors[vector]);
+            					}
 
-        				if (eventManager.immediateExecution) {
-        					eventManager.ExecuteNextCommand();
-        				}
-        			}
-        		}
-        	}
+            					// add to queue
+            					eventManager.QueueEvent(command);
+            				}
+
+            				if (eventManager.immediateExecution) {
+            					eventManager.ExecuteNextCommand();
+            				}
+            			}
+            		}
+                }
+            }
         }
     }
 }
