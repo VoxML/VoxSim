@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using ZenFulcrum.EmbeddedBrowser;
+//using ZenFulcrum.EmbeddedBrowser;
 
 using System.Text;
 using System.IO;

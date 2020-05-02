@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using ZenFulcrum.EmbeddedBrowser;
+//using ZenFulcrum.EmbeddedBrowser;
 
 
 using VoxSimPlatform;
@@ -30,7 +30,7 @@ namespace VoxSimPlatform {
             //Browser b;
             Socket s;
             VoxSimPlatform.Agent.AgentTextController atc;
-            IPromise<JSONNode> ip = null; //`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
+            //IPromise<JSONNode> ip = null; //`1[ZenFulcrum.EmbeddedBrowser.JSONNode]
             ClicIOClient io;
 
 
@@ -330,23 +330,23 @@ namespace VoxSimPlatform {
 
                 //}).Done();
             }
-#if UNITY_EDITOR
+//#if UNITY_EDITOR
 
-            [MenuItem("Jarvis/Arbitrary &#A")]
-            static void Arb() {
-                BrowserInterface bi = Selection.activeGameObject.GetComponent<BrowserInterface>();
-                bi.GrabSelected("");
-                var promise = new Promise<string>();
-            }
+//            [MenuItem("Jarvis/Arbitrary &#A")]
+//            static void Arb() {
+//                BrowserInterface bi = Selection.activeGameObject.GetComponent<BrowserInterface>();
+//                bi.GrabSelected("");
+//                var promise = new Promise<string>();
+//            }
 
-            // Makes sure that we have this object selected yo
-            [MenuItem("Jarvis/Arbitrary &#A", true)]
-            static bool ValidateArb() {
-                return (Selection.activeGameObject != null) &&
-               (Selection.activeGameObject.GetComponent<BrowserInterface>() != null) &&
-               (Selection.activeGameObject.GetComponent<Browser>() != null);
-            }
-#endif
+//            // Makes sure that we have this object selected yo
+//            [MenuItem("Jarvis/Arbitrary &#A", true)]
+//            static bool ValidateArb() {
+//                return (Selection.activeGameObject != null) &&
+//               (Selection.activeGameObject.GetComponent<BrowserInterface>() != null) &&
+//               (Selection.activeGameObject.GetComponent<Browser>() != null);
+//            }
+//#endif
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ZenFulcrum.EmbeddedBrowser;
+//using ZenFulcrum.EmbeddedBrowser;
 using WordCloud;
 
 using VoxSimPlatform.Network;
@@ -44,8 +44,8 @@ namespace WordCloud {
                 //}
 
 
-                Browser b = GetComponentInChildren<Browser>();
-                RectTransform rt = b.gameObject.GetComponent<RectTransform>();
+                ClusterGram cg = GetComponentInChildren<ClusterGram>();
+                RectTransform rt = cg.gameObject.GetComponent<RectTransform>();
                 big_loc = rt.position; // What a nice way to avoid measuring it.
 
                 goal = big;
@@ -65,8 +65,8 @@ namespace WordCloud {
 
             void Update() {
                 // switch modes on left mouse click
-                Browser b = GetComponentInChildren<Browser>();
-                RectTransform rt = b.gameObject.GetComponent<RectTransform>();
+                ClusterGram cg = GetComponentInChildren<ClusterGram>();
+                RectTransform rt = cg.gameObject.GetComponent<RectTransform>();
 
                 GameObject cursor = transform.Find("UI Holder").Find("CursorBox").gameObject;
                 //if (Input.GetKeyDown("w")) {
