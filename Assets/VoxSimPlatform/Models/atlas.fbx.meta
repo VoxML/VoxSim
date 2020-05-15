@@ -8,7 +8,12 @@ ModelImporter:
     2300000: //RootNode
     3300000: //RootNode
     4300000: atlas map
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: atlas
+    second: {fileID: 2100000, guid: 5605b9d739f7ea94cac24066945387dd, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -15,7 +15,12 @@ ModelImporter:
     3300002: nail sharp point
     4300000: nail
     4300002: nail sharp point
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: nail
+    second: {fileID: 2100000, guid: bf8b0033a19ee4d29a57d58293040c8f, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

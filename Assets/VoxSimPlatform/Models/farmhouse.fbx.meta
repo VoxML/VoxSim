@@ -78,7 +78,42 @@ ModelImporter:
     4300024: side windows
     4300026: front windows
     4300028: backdoor
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: 4fd7da78e70ee03479bd1df9281a17da, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.007
+    second: {fileID: 2100000, guid: 20be71c98a91f458baa27f044ec821b5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: farmhosue_windowpanes
+    second: {fileID: 2100000, guid: 66bb106a029d7794b88179425544b4cc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: farmhouse_door_texture
+    second: {fileID: 2100000, guid: 4fd7da78e70ee03479bd1df9281a17da, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: farmhouse_fence
+    second: {fileID: 2100000, guid: 4fd7da78e70ee03479bd1df9281a17da, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: farmhouse_material
+    second: {fileID: 2100000, guid: c9d3221204675404a967d4d0900312bc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: farmhousewindows
+    second: {fileID: 2100000, guid: 4fd7da78e70ee03479bd1df9281a17da, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

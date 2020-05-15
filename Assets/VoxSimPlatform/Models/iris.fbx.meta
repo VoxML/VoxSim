@@ -30,7 +30,17 @@ ModelImporter:
     4300004: iris (stem leaves)
     4300006: Iris (Standards)
     4300008: Iris (Falls)
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iris
+    second: {fileID: 2100000, guid: d46ed14e6e6b2ee4e8564fe10220a84d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iris_stem
+    second: {fileID: 2100000, guid: e108de4db91cf49ab86c6ab9d26d3bb6, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

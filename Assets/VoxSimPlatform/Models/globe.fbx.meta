@@ -15,7 +15,17 @@ ModelImporter:
     3300002: Sphere
     4300000: Cone
     4300002: Sphere
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: globe_gold
+    second: {fileID: 2100000, guid: 24f1b586c6c864a4c853f040049ff8b4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: globe_map
+    second: {fileID: 2100000, guid: 607a4da4f8b033b4f9ee8d71b9a37059, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

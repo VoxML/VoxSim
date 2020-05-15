@@ -27,7 +27,47 @@ ModelImporter:
     4300002: Steps
     4300004: Beige body
     4300006: Brick body
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_beige
+    second: {fileID: 2100000, guid: e621b8aaac3bb674890bc293bda9026c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_brick
+    second: {fileID: 2100000, guid: 6ad76207765c1104cbdc532e7d705a13, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_clock
+    second: {fileID: 2100000, guid: 7509b1e4bcd690f49ac7a6420f7a0e70, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_door
+    second: {fileID: 2100000, guid: 7813b49db8c814847b53bad218ef38c1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_roof
+    second: {fileID: 2100000, guid: 06b59e6395f9eeb498633c4442734e76, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_steps
+    second: {fileID: 2100000, guid: 78b094755f5db4fcd9acc59aaf612944, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_white
+    second: {fileID: 2100000, guid: cd72b3e930bca584d89e8dd11904f597, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: school_window
+    second: {fileID: 2100000, guid: e892cc0ca48491d45b612f42e681bb84, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

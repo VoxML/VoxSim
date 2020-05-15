@@ -23,7 +23,37 @@ ModelImporter:
     4300002: 3rd valve slide ring
     4300004: 1st Valve Saddle
     4300006: Valves
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 481959426ed234c7db19767c0586059b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: 54015a42ad59540f29dab652d75eea77, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: 66b619a623876426bb57c9452c6e105f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.004
+    second: {fileID: 2100000, guid: ae525eff742574ef0af56cccb54cc3af, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: trumpet+white_texture
+    second: {fileID: 2100000, guid: 32c5626baef5333458a8fee91d1e05f2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: trumpet_texture
+    second: {fileID: 2100000, guid: 5c9fcc37d5c75dd45aa95ea0dbd79cdb, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

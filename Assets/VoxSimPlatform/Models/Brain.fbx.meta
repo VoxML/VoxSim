@@ -15,7 +15,17 @@ ModelImporter:
     3300002: Sphere
     4300000: Sphere
     4300002: Cube
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: brain_brown
+    second: {fileID: 2100000, guid: d9ce7306799f7e644b5da6a9d6c7688c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: brain_pink
+    second: {fileID: 2100000, guid: 20906e8b4c96e7c47950f6ae9338856b, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

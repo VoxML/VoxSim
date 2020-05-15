@@ -15,7 +15,17 @@ ModelImporter:
     4300002: Fence
     7400000: Default Take
     9500000: //RootNode
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_001
+    second: {fileID: 2100000, guid: fda3c5169fa7b4f1682db158e240d6a9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_001__34-wood-texture_jpg
+    second: {fileID: 2100000, guid: b44855e7dcf614aec94e542d7f439255, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

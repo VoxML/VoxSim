@@ -15,7 +15,17 @@ ModelImporter:
     3300002: Plane.001
     4300000: Plane.001
     4300002: Plane
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ticket_back
+    second: {fileID: 2100000, guid: ad280605871535a4d80580ce75df82e0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ticket_front
+    second: {fileID: 2100000, guid: 2cf3216a9247e49468257d4c70e430a0, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

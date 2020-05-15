@@ -20,7 +20,12 @@ ModelImporter:
     4300000: lip
     4300002: outside
     4300004: inside
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: flask_glass
+    second: {fileID: 2100000, guid: 5fca8ba6bd9e4574a9a1037fc12b259d, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

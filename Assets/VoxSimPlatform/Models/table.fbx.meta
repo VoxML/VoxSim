@@ -17,7 +17,12 @@ ModelImporter:
     3300002: Table Top
     4300000: Table Top
     4300002: Table Legs
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: table_wood
+    second: {fileID: 2100000, guid: 3ceb872a8dccb49eb8837997aff54ed2, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

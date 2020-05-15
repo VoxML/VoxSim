@@ -13,7 +13,12 @@ ModelImporter:
     3300002: bolt_head
     4300000: bolt
     4300002: bolt_head
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bolt
+    second: {fileID: 2100000, guid: 336bf2b922dee431ead5125917bcf550, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

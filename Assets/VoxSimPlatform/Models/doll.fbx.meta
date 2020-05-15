@@ -28,7 +28,32 @@ ModelImporter:
     4300004: shoes
     4300006: Dress
     4300008: Hair
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.011
+    second: {fileID: 2100000, guid: 894584c28b2c54f6f85477f607a96fdd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: doll_clothes_texture
+    second: {fileID: 2100000, guid: 30ac905b04a2d4c808bdc3953dcb8d77, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: doll_eyes_texture
+    second: {fileID: 2100000, guid: 8edd731e2e5bdda49ba55508a1170aa4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: doll_hair_texture
+    second: {fileID: 2100000, guid: b02675c2ee775534c82dc390e48dcfc0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: doll_texture
+    second: {fileID: 2100000, guid: 9efb06c4b55e20046aadbf18992e2347, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

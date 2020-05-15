@@ -50,7 +50,27 @@ ModelImporter:
     4300012: Cube
     4300014: stand
     4300016: screen
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 481959426ed234c7db19767c0586059b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: 54015a42ad59540f29dab652d75eea77, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 8fa6c94f9d5556743b43501afb55105a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.006
+    second: {fileID: 2100000, guid: 9b15a58c80ef84d7fbcdf0dc68170f17, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

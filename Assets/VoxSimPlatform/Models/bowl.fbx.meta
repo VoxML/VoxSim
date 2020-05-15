@@ -15,7 +15,22 @@ ModelImporter:
     4300002: Bowl__interior_
     7400000: Default Take
     9500000: //RootNode
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 481959426ed234c7db19767c0586059b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_003__bowltexture_jpg
+    second: {fileID: 2100000, guid: fb5b98a3deba5d040bc8ac954d3334f9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material__bowltexture_jpg
+    second: {fileID: 2100000, guid: fb5b98a3deba5d040bc8ac954d3334f9, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

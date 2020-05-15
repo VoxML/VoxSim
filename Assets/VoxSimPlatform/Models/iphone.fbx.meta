@@ -33,7 +33,12 @@ ModelImporter:
     4300006: volumeup_button
     4300008: silent_button
     4300010: power_button
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iphone_texture
+    second: {fileID: 2100000, guid: e8e2348088365403799b1aa19c3f9e50, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

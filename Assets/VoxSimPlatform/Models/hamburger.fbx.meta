@@ -55,7 +55,32 @@ ModelImporter:
     4300014: meat
     4300016: tomato
     4300018: tomato_003
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamburger_bun
+    second: {fileID: 2100000, guid: 21cb4dd145457408abe8f6d69033e7d2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamburger_cheese
+    second: {fileID: 2100000, guid: c98e2dfabce9444698da8f58d24e7ca0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamburger_lettuce
+    second: {fileID: 2100000, guid: aaffca55c9dbd4d62ab151b8d2193a7e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamburger_meat
+    second: {fileID: 2100000, guid: d5f8f7037032c494cab80cd7e6ed4b2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: hamburger_tomato
+    second: {fileID: 2100000, guid: dca37c8765b6f4959babe36621b2b7a6, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

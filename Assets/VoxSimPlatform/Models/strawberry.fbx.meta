@@ -19,7 +19,17 @@ ModelImporter:
     3300002: Strawberry_stem
     4300000: Strawberry
     4300002: Strawberry_stem
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: e108de4db91cf49ab86c6ab9d26d3bb6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.005
+    second: {fileID: 2100000, guid: 02a4b0377b526d2498374b3ceabbab01, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

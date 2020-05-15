@@ -204,7 +204,52 @@ ModelImporter:
     13700006: Iris
     13700008: pants(exterior).001
     13700010: Shirt
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 481959426ed234c7db19767c0586059b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: 66b619a623876426bb57c9452c6e105f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: female_human_eyelashes
+    second: {fileID: 2100000, guid: ddb4bc8a8e2544c1bafb8788f35ca392, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: female_human_skin
+    second: {fileID: 2100000, guid: b1ac90c6b7603412c9e0f7f661c4e44f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: female_lips
+    second: {fileID: 2100000, guid: a982787eea6ed48f2b72573c8c01b4bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iris.001
+    second: {fileID: 2100000, guid: ce0d54764283c434f9fc81b3aea149f2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iris.002
+    second: {fileID: 2100000, guid: ce0d54764283c434f9fc81b3aea149f2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pants_button
+    second: {fileID: 2100000, guid: daaa5a57a6f6d4c4289a0421365054cf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pants_texture
+    second: {fileID: 2100000, guid: 3f96e386024994bd1b5f248c01c890a8, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -40,7 +40,12 @@ ModelImporter:
     4300008: drawer.001
     4300010: drawer
     4300012: handle.001
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: desk
+    second: {fileID: 2100000, guid: 9d4347c0add294e379f0dc7d39c97c04, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

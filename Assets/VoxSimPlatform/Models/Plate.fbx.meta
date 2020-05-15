@@ -18,7 +18,12 @@ ModelImporter:
     4300000: Plate
     4300002: top
     4300004: base
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: 135e132d7066b45459eab840939bc308, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

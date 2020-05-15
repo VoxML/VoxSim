@@ -233,7 +233,62 @@ ModelImporter:
     13700016: Unity_Hand_Left_Mesh
     13700018: Unity_Hand_Right_Mesh
     2186277476908879412: ImportLogs
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Elou
+    second: {fileID: 2100000, guid: 36eca982293d941b3900496ed74f72e4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Eye_1
+    second: {fileID: 2100000, guid: 873dd3d64b0a945aeaadb4d27acac1a0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Eye_2
+    second: {fileID: 2100000, guid: 4b2d656c99ab9471b85193bfaa164288, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Eye_3
+    second: {fileID: 2100000, guid: 349cda38122334c13ac2cf64acb84fe1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Eye_4
+    second: {fileID: 2100000, guid: af705d5f6c4fd40c4afe3f7d8efd063a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 'Material #1405'
+    second: {fileID: 2100000, guid: e581174245e5d4507a26017586c99770, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 'Material #1408'
+    second: {fileID: 2100000, guid: f2b55b2d48f3243fd986a995988c7500, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 'Material #1411'
+    second: {fileID: 2100000, guid: 75d0ded7423744ba5b0a3712ebcaac8b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: 'Material #402'
+    second: {fileID: 2100000, guid: 97ab8237af1684d6a95d5a12c5882678, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: body
+    second: {fileID: 2100000, guid: 53394e5a3daad46caadafe094c1b5ff2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: face
+    second: {fileID: 2100000, guid: 6756faf47da1745458c42226ad56dcc6, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -8,7 +8,12 @@ ModelImporter:
     2300000: //RootNode
     3300000: //RootNode
     4300000: Cube
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Steel
+    second: {fileID: 2100000, guid: 0350300320ff84a4f93f2fc9d5d8b006, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

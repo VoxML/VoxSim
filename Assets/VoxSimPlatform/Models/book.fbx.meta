@@ -28,7 +28,17 @@ ModelImporter:
     4300004: front_cover
     4300006: back_cover
     4300008: pages
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: book_cover
+    second: {fileID: 2100000, guid: d74677de2eda68441a861f58a9959b1e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: book_pages
+    second: {fileID: 2100000, guid: b5ee6d5f5a2fa734bb1d8ba47692a932, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

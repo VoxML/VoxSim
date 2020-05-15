@@ -21,6 +21,26 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: No Name
     second: {fileID: 2100000, guid: d0e7be25c57f34f9f86cb3e3307594ec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: dvd_black
+    second: {fileID: 2100000, guid: 9089b7fde3546456aa31cbb60b41952a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: dvd_darkgrey
+    second: {fileID: 2100000, guid: e624f334ce117495ab0f5b96d4b0840c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: dvd_lightgrey
+    second: {fileID: 2100000, guid: 3f706408f85cd4c018d72230a3e4c9df, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: dvd_mediumgrey
+    second: {fileID: 2100000, guid: 6ee67c4f10a424944b8bb69beb713eb1, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

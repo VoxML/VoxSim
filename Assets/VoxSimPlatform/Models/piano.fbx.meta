@@ -490,7 +490,27 @@ ModelImporter:
     4300188: Black_key017
     4300190: Black_key019
     4300192: White_key043
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: piano
+    second: {fileID: 2100000, guid: 67aaf6ecd8ee54a08af43662ecf4d413, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: piano_gold
+    second: {fileID: 2100000, guid: 42848be2861ce4a6886ae097d2aae789, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wire_006135006
+    second: {fileID: 2100000, guid: 4c6940d59b890437f8ff66bbe185f96e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wire_108008136
+    second: {fileID: 2100000, guid: b884c161d75b4449e8b9e8cdaa1a8bee, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

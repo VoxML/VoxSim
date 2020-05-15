@@ -20,7 +20,12 @@ ModelImporter:
     4300000: Cube
     7400000: Default Take
     9500000: //RootNode
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_001__RockSmooth0044_2_thumbhuge_jpg
+    second: {fileID: 2100000, guid: b7d0045a3ede6ae49bebf78f83a84ef5, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

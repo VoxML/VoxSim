@@ -8,7 +8,22 @@ ModelImporter:
     2300000: //RootNode
     3300000: //RootNode
     4300000: Cube
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: painting_canvas
+    second: {fileID: 2100000, guid: 43080520822965c4bbad9b10b6d9871f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: painting_texture
+    second: {fileID: 2100000, guid: 24173738de9aa7043a1d4445898d68aa, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: painting_wood
+    second: {fileID: 2100000, guid: 8c4c94bc6ed848e459bccb9acef31c97, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

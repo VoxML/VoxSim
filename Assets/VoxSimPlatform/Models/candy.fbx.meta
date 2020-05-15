@@ -21,7 +21,17 @@ ModelImporter:
     3300002: Tootsie
     4300000: Tootsie
     4300002: Stick
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: candy_stick_texture
+    second: {fileID: 2100000, guid: b1bd49daf78d5664a842159ca8859fac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: candy_texture
+    second: {fileID: 2100000, guid: 9653ab80cf6cb3a47975563478d4439b, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

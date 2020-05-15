@@ -32,7 +32,27 @@ ModelImporter:
     4300004: bed_mattress
     4300006: bed_frame
     4300008: bed_blanket
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bed_blanket
+    second: {fileID: 2100000, guid: ec584b454d8c2a94682e3b2360ef3339, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bed_frame
+    second: {fileID: 2100000, guid: 6ab7a4b854f4dc140aacdced6549eeef, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bed_mattress
+    second: {fileID: 2100000, guid: 63d71548f0659f7479a21da871cf2052, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bed_pillow
+    second: {fileID: 2100000, guid: 40f11f416e3f38f48816f4e82e6d2c61, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

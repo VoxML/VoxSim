@@ -65,7 +65,17 @@ ModelImporter:
     4300018: Cube.001
     4300020: Cube
     4300022: Sphere
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cookie_chocolate
+    second: {fileID: 2100000, guid: e1dddd208418148ff9a9a9e0bb15f9d8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cookie_dough
+    second: {fileID: 2100000, guid: 27df3bd2ba3f14574ba2c7a3726e1327, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

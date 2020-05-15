@@ -15,7 +15,17 @@ ModelImporter:
     4300002: Grapes
     7400000: Default Take
     9500000: //RootNode
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: f1604eba9b5884d15bb45eeeae7983ab, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grape_texture
+    second: {fileID: 2100000, guid: 686f4f1e176dce542afffffdd175e114, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
