@@ -30,7 +30,22 @@ ModelImporter:
     4300004: Cube.001
     4300006: Sphere.001
     4300008: Cube
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: 54015a42ad59540f29dab652d75eea77, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: turkey_brown
+    second: {fileID: 2100000, guid: 1426963b27255a34186a1b4b0199253a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: turkey_white
+    second: {fileID: 2100000, guid: 7a04d0f59723c6648a2027804dd67b48, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

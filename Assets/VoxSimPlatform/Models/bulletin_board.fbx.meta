@@ -17,7 +17,17 @@ ModelImporter:
     3300002: bulletin_board_surface
     4300000: bulletin_board_surface
     4300002: bulletin_board_frame
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bulletin_board_frame
+    second: {fileID: 2100000, guid: a138f226bf35e0e438a7205e97c79acf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bulletin_board_surface
+    second: {fileID: 2100000, guid: 9a146406f1e717a4e9b39c23e60d9eac, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

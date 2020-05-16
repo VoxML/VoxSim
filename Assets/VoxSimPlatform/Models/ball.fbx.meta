@@ -18,7 +18,12 @@ ModelImporter:
     2300000: ball
     3300000: ball
     4300000: ball
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ball_texture
+    second: {fileID: 2100000, guid: 39681453ccf5b49c1878289850c980ca, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

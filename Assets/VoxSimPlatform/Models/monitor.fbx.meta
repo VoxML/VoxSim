@@ -18,7 +18,17 @@ ModelImporter:
     4300000: monitor
     4300002: monitor_screen
     4300004: monitor_stand
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: monitor_screen
+    second: {fileID: 2100000, guid: 49380853e38cc7d4d9043d36dc202590, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: monitor_screen_texture
+    second: {fileID: 2100000, guid: 9fead7d7fd55ad94080813ec629b6a55, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

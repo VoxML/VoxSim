@@ -23,7 +23,27 @@ ModelImporter:
     4300002: cocktail_umbrella_stick
     4300004: cocktail_umbrella
     4300006: cocktail_liquid
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cocktail_glass_texture
+    second: {fileID: 2100000, guid: 7098a797e5a82af4d86b956321823131, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cocktail_liquid
+    second: {fileID: 2100000, guid: f6cd38f2b3c51dc498e950f72c4f423a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cocktail_stick_texture
+    second: {fileID: 2100000, guid: b469ee8f92a476343a62a644711c3741, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cocktail_umbrella_texture
+    second: {fileID: 2100000, guid: 9eb1788cffe387c4ebc74df81321105a, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

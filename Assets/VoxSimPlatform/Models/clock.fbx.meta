@@ -390,7 +390,27 @@ ModelImporter:
     4300148: Text.001
     4300150: Text
     4300152: Cylinder
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: clock_black
+    second: {fileID: 2100000, guid: 2ded7c1191ce849f7bfcd387bc6e846b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: clock_blacktwo
+    second: {fileID: 2100000, guid: ce651ae2f27aa40f6b042285c7ee0ebd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: clock_face
+    second: {fileID: 2100000, guid: 7c3828591d07c4fbb9f56e08ede6a2b0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: clock_white
+    second: {fileID: 2100000, guid: 6cefd8c0ccedd4cfea023f3c56a49450, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

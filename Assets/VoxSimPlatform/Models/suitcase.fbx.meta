@@ -43,7 +43,32 @@ ModelImporter:
     4300010: Zipper
     4300012: Suitcase (interior)
     4300014: Suitcase front (exterior)
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: suitcase_fabric_texture
+    second: {fileID: 2100000, guid: 8abf1f64b2feedb448bf31c0d29336de, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: suitcase_handle_stick_texture
+    second: {fileID: 2100000, guid: a81f956e535834afabb732e876d9849f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: suitcase_handle_texture
+    second: {fileID: 2100000, guid: a81f956e535834afabb732e876d9849f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: suitcase_wheel_texture
+    second: {fileID: 2100000, guid: 3ef2e1202b00e47b784f1d694683bcd4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: suitcase_zipper_texture
+    second: {fileID: 2100000, guid: 3ef2e1202b00e47b784f1d694683bcd4, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

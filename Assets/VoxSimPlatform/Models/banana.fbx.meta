@@ -28,7 +28,17 @@ ModelImporter:
     4300000: Banana
     4300002: Banana butt
     4300004: Banana stem
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: b33b69873b37a7843bb4a1c2c7a23650, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 5662c41adfc680e458e7ecf0fb155e2f, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

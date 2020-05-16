@@ -13,7 +13,17 @@ ModelImporter:
     3300002: egg_interior
     4300000: egg
     4300002: egg_interior
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: egg
+    second: {fileID: 2100000, guid: 1255802dafb0d6b46bc2d5ba43f87263, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: egg_interior
+    second: {fileID: 2100000, guid: a021a2adccc3a404cb7dd49193020508, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

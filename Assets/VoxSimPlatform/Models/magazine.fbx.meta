@@ -8,7 +8,17 @@ ModelImporter:
     2300000: //RootNode
     3300000: //RootNode
     4300000: Cube.004
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: magazine_back
+    second: {fileID: 2100000, guid: c65c1723e88f1134ebd2e425f295c4e9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: magazine_front
+    second: {fileID: 2100000, guid: 9458271e3bdb5774c8d9fc1438cc903a, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

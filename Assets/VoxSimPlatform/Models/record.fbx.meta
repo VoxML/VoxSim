@@ -10,7 +10,12 @@ ModelImporter:
     4300000: Vinyl_Record
     7400000: Default Take
     9500000: //RootNode
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material_001__vinylrecord_jpeg
+    second: {fileID: 2100000, guid: f1ea9335e24de2c4783e6598fccedc42, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -21,7 +21,17 @@ ModelImporter:
     3300002: Inside Bottle
     4300000: Bottle Outside
     4300002: Inside Bottle
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bottle+texture_interior
+    second: {fileID: 2100000, guid: 51b726b1bfe727d448b99e9492bf330c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bottle_texture_exterior
+    second: {fileID: 2100000, guid: 09893ee7565d5174d8901c6203069e9d, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

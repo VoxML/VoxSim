@@ -12,7 +12,12 @@ ModelImporter:
     2300000: gear
     3300000: gear
     4300000: gear
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: gear_metal
+    second: {fileID: 2100000, guid: 935b8a14584f43a4dae665eafc3f4e75, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

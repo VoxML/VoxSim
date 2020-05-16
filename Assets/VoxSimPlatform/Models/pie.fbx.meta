@@ -720,7 +720,22 @@ ModelImporter:
     4300280: cherry
     4300282: Sphere.001
     4300284: Sphere
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Glass
+    second: {fileID: 2100000, guid: 2f73510cb8f364d62beebd1030f721ef, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Inner
+    second: {fileID: 2100000, guid: f6387a14ac11443ed96aa3fc21e6116b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cherry red
+    second: {fileID: 2100000, guid: 5ba4f3cb186ac48cab0119c007b366ac, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

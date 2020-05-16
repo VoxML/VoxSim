@@ -28,7 +28,27 @@ ModelImporter:
     4300000: temple
     4300002: roof
     4300004: door
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: building
+    second: {fileID: 2100000, guid: 564449d563a424cc09f3c0a2bcdb2677, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: gable
+    second: {fileID: 2100000, guid: de250a02529974b9bab56feea58d4b2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: roofing
+    second: {fileID: 2100000, guid: b046e5d61bdad43509ad436d9f4f3b8a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wood
+    second: {fileID: 2100000, guid: 4feebe4f56bbc4d05a361782787e4c57, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

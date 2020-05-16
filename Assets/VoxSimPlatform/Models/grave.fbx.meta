@@ -17,7 +17,17 @@ ModelImporter:
     3300002: grave_tombstone
     4300000: grave_tombstone
     4300002: grave_memorial
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grave_memorial
+    second: {fileID: 2100000, guid: 9dc1af9dc26cc28478ffde813a8dbbc6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grave_tombstone
+    second: {fileID: 2100000, guid: 3d4316deafc0c2349a41333d2bb4a484, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

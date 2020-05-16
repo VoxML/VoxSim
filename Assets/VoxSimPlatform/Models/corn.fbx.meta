@@ -15,7 +15,17 @@ ModelImporter:
     3300002: corncob
     4300000: corncob
     4300002: 'corn '
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: corn
+    second: {fileID: 2100000, guid: a80aedf3dfd1c488197f3fba81921e65, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: corn_middle
+    second: {fileID: 2100000, guid: 7ce51121f85094a6aa3dcc8eb96229dd, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

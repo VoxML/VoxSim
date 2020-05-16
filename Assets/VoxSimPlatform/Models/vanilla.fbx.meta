@@ -23,7 +23,17 @@ ModelImporter:
     4300002: Vanilla Extract Label
     4300004: 'Vanilla Extract Cap '
     4300006: Vanilla Extract Bottle (interior)
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: vanilla_bottle
+    second: {fileID: 2100000, guid: 833be906ba53c0b4c86d7a76e3c4b8a3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: vanilla_label
+    second: {fileID: 2100000, guid: e6a1d58216e726848831dbbc77b3ecb6, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

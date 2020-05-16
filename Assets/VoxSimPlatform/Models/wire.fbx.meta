@@ -17,7 +17,17 @@ ModelImporter:
     3300002: wire_spool
     4300000: wire_container
     4300002: wire_spool
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wire_copper
+    second: {fileID: 2100000, guid: 01d66336fc9dce24f9cb356cc297a8b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wire_plastic
+    second: {fileID: 2100000, guid: 1c92587662d6d5a4d8c0f828d0fcc4e1, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

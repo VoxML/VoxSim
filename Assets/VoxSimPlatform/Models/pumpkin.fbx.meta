@@ -13,7 +13,12 @@ ModelImporter:
     3300002: pumpkin_stem
     4300000: pumpkin
     4300002: pumpkin_stem
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pumpkin_texture
+    second: {fileID: 2100000, guid: 59a6d3cfb02cd4aceafdf719a1947b90, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

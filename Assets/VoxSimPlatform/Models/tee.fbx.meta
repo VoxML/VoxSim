@@ -15,7 +15,12 @@ ModelImporter:
     3300002: point
     4300000: holder
     4300002: point
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: golftee
+    second: {fileID: 2100000, guid: 662c4e39121ec4faa965a3586e0b0b2a, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -23,7 +23,37 @@ ModelImporter:
     4300002: Tea Liquid
     4300004: Dish
     4300006: teacup handle
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: ff60322665c7841519f6c8da95478515, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: ff60322665c7841519f6c8da95478515, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.005
+    second: {fileID: 2100000, guid: 03cedafc8bb8248ad8e2674e364bc7ce, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.006
+    second: {fileID: 2100000, guid: b7e202a36660a4fd1ba913ecb24b8e83, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: teacup
+    second: {fileID: 2100000, guid: ff60322665c7841519f6c8da95478515, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: teacup_plate
+    second: {fileID: 2100000, guid: ff60322665c7841519f6c8da95478515, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -15,7 +15,12 @@ ModelImporter:
     3300002: Mug
     4300000: Mug
     4300002: Handle
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mug_blue
+    second: {fileID: 2100000, guid: 06ab9a0a4734c43d99c19db83f3d96e3, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

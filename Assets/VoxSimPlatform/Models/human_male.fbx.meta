@@ -178,7 +178,47 @@ ModelImporter:
     4300008: human.002
     9500000: //RootNode
     13700000: human
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.001
+    second: {fileID: 2100000, guid: 54015a42ad59540f29dab652d75eea77, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 8fa6c94f9d5556743b43501afb55105a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: 66b619a623876426bb57c9452c6e105f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cornea
+    second: {fileID: 2100000, guid: 2cc50eb9ecdc642298bcab6dc52b0fc0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: female_human_eyelashes
+    second: {fileID: 2100000, guid: ddb4bc8a8e2544c1bafb8788f35ca392, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: human_male_lips
+    second: {fileID: 2100000, guid: c59a91488f292486b9cbec2abc484737, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: human_male_skin
+    second: {fileID: 2100000, guid: 99d83d2c608704acda8b6461741eb945, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: iris
+    second: {fileID: 2100000, guid: ce0d54764283c434f9fc81b3aea149f2, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

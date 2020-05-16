@@ -48,7 +48,37 @@ ModelImporter:
     4300012: computer_Keyboard
     4300014: computer_monitor_screen
     4300016: computer_monitor_stand
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Computer_mouse
+    second: {fileID: 2100000, guid: 0abf78d14fbb4594fbe6b6cc9942b137, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: computer_mouse_scroll
+    second: {fileID: 2100000, guid: 2e2a5d48c85433f48be2d3a2c80266f8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: keyboard_indents
+    second: {fileID: 2100000, guid: 438af79cdbd78754aa160188f9996ce5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: keyboard_keys
+    second: {fileID: 2100000, guid: 13c08bf838e32b14f9be117df4e58745, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: monitor_screen_texture
+    second: {fileID: 2100000, guid: 9fead7d7fd55ad94080813ec629b6a55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: monitor_texture
+    second: {fileID: 2100000, guid: 91a592bd93cad044c987543fc046dd62, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

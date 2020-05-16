@@ -17,7 +17,12 @@ ModelImporter:
     3300002: Mug (Interior)
     4300000: Mug (Interior)
     4300002: Mug
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cup_ceramic
+    second: {fileID: 2100000, guid: 83ae978cd4ab7994498f31ec2c3e794a, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

@@ -48,7 +48,27 @@ ModelImporter:
     4300012: Swing Hanger (1)
     4300014: chain.(1)
     4300016: Swing Seat (1)
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.003
+    second: {fileID: 2100000, guid: a81f956e535834afabb732e876d9849f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: swing_metal
+    second: {fileID: 2100000, guid: a81f956e535834afabb732e876d9849f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: swing_seat
+    second: {fileID: 2100000, guid: 2e35a46b9a23f4dad93086cb904f6618, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: swing_wood
+    second: {fileID: 2100000, guid: e109715a7ad322b4f9a0d2e8fa3c1b6e, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

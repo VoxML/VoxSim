@@ -141,6 +141,7 @@ Assets/VoxSimPlatform/GracesGames*
 Assets/VoxSimPlatform/SimpleFileBrowser* 
 Assets/VoxSimPlatform/Editor\ Default\ Resources/crosstales*
 Assets/VoxSimPlatform/Plugins/ConsoleE*
+Assets/VoxSimPlatform/JsonDotNet
 
 # ignore _TerrainAutoUpgrade
 Assets/_TerrainAutoUpgrade*
@@ -159,9 +160,6 @@ EpiSim/UserModels*
 
 # ignore local configurations folder
 local_config
-
-# ignore NuGet packages (e.g. Nunit)
-packages*
 
 # ctag files
 **/.tags

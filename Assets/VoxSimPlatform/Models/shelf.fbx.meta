@@ -15,7 +15,17 @@ ModelImporter:
     3300002: shelf holders
     4300000: 'Shelf '
     4300002: shelf holders
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material
+    second: {fileID: 2100000, guid: 481959426ed234c7db19767c0586059b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 8fa6c94f9d5556743b43501afb55105a, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

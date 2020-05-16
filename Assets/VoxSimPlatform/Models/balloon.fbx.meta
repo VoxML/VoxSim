@@ -15,7 +15,17 @@ ModelImporter:
     3300002: balloon_string
     4300000: balloon_string
     4300002: balloon
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: balloon
+    second: {fileID: 2100000, guid: 5f09cdb63a0ea044893e37d5f1d218fe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: balloon_string
+    second: {fileID: 2100000, guid: ad2ded459cff7e2409e2d2be40e761b6, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

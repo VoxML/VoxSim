@@ -49,7 +49,32 @@ ModelImporter:
     4300010: camera_large_button
     4300012: camera_shutter
     4300014: camera_lens
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: camera_button
+    second: {fileID: 2100000, guid: 8685dea9ed1d64fc7ba7a670a575182d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: camera_dial
+    second: {fileID: 2100000, guid: b74efe2a43d4549d4836e10d170286dd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: camera_frame
+    second: {fileID: 2100000, guid: 8b0e4836c35594fdd835337d90bbd188, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: camera_lcd
+    second: {fileID: 2100000, guid: beb698a3ed3004823aa8e3ffa42dea5d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: camera_lens
+    second: {fileID: 2100000, guid: 736a081c8ddba4d7498f48ace6dc1577, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

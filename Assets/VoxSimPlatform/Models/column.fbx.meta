@@ -18,7 +18,17 @@ ModelImporter:
     4300000: Shaft
     4300002: Capital
     4300004: Base
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.002
+    second: {fileID: 2100000, guid: 8fa6c94f9d5556743b43501afb55105a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: column texture
+    second: {fileID: 2100000, guid: 880ace2cb808a7d4db7860f9559aa9c2, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
