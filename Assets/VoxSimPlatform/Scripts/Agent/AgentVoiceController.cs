@@ -97,7 +97,7 @@ namespace VoxSimPlatform {
                     }
                     else if (SystemInfo.operatingSystemFamily ==
                              OperatingSystemFamily.MacOSX) {
-                        vName = MacMaleVoice.ToString().Replace('_', '-');
+                        vName = MacFemaleVoice.ToString().Replace('_', '-');
                     }
                 }
                 else if (Gender == Gender.Male) {
@@ -108,7 +108,7 @@ namespace VoxSimPlatform {
                     }
                     else if (SystemInfo.operatingSystemFamily ==
                              OperatingSystemFamily.MacOSX) {
-                        vName = MacFemaleVoice.ToString().Replace('_', '-');
+                        vName = MacMaleVoice.ToString().Replace('_', '-');
                     }
                 }
 
