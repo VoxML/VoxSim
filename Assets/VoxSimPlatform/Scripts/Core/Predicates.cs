@@ -20,6 +20,15 @@ using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Core {
+        [AttributeUsage(AttributeTargets.Method)]
+        public class DeferredEvaluation : Attribute {
+            private bool defer;
+
+            public DeferredEvaluation() {
+                this.defer = true;
+            }
+        }
+
         /// <summary>
         /// Semantics of each predicate should be explicated within the method itself
         /// Could have an issue when it comes to functions for predicates of multiple valencies?
@@ -1027,13 +1036,15 @@ namespace VoxSimPlatform {
 
         	// IN: Objects
         	// OUT: String
+            [DeferredEvaluation]
         	public String A(object[] args) {
         		String objName = "";
         		Random random = new Random();
 
         		if (args[0] is GameObject) {
         			// assume all inputs are of same type
-        			int index = random.Next(args.Length - 1);
+        			int index = RandomHelper.RandomInt(0,args.Length - 1,
+                        (int)(RandomHelper.RangeFlags.MinInclusive | RandomHelper.RangeFlags.MaxInclusive));
         			Debug.Log(index);
         			objName = (args[index] as GameObject).name;
         		}
@@ -1041,9 +1052,10 @@ namespace VoxSimPlatform {
         		return objName;
         	}
 
-        	// IN: Objects
-        	// OUT: String TODO: List<String>
-        	public String TWO(object[] args) {
+            // IN: Objects
+            // OUT: String TODO: List<String>
+            [DeferredEvaluation]
+            public String TWO(object[] args) {
         		//Debug.Log (args.Length);
         		List<String> objNames = new List<String>();
         		Random random = new Random();
@@ -1052,8 +1064,9 @@ namespace VoxSimPlatform {
         			// assume all inputs are of same type
         			if (args.Length >= 2) {
         				while (objNames.Count < 2) {
-        					int index = random.Next(args.Length);
-        					if (args[index].GetType() == args[0].GetType()) {
+        					int index = RandomHelper.RandomInt(0, args.Length,
+                                (int)(RandomHelper.RangeFlags.MinInclusive | RandomHelper.RangeFlags.MaxInclusive));
+                            if (args[index].GetType() == args[0].GetType()) {
         						if (!objNames.Contains((args[index] as GameObject).name)) {
         							// make sure all entries are distinct
         							objNames.Add((args[index] as GameObject).name);
