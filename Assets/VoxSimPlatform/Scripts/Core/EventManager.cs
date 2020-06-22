@@ -126,6 +126,7 @@ namespace VoxSimPlatform {
             String nextQueuedEvent = "";
             int argVarIndex = 0;
             Hashtable skolems = new Hashtable();
+            Dictionary<string,string> sortedSkolems = new Dictionary<string, string>();
             string argVarPrefix = @"_ARG";
 	        String nextIncompleteEvent;
             
@@ -251,6 +252,10 @@ namespace VoxSimPlatform {
             public event UnhandledArgument OnUnhandledArgument;
 
             public delegate string UnhandledArgument(string predStr);
+
+            public event ObjectMatchingConstraint OnObjectMatchingConstraint;
+
+            public delegate List<GameObject> ObjectMatchingConstraint(List<GameObject> matches, MethodInfo referringMethod);
 
             // Just getters/setters for the active agent
             public void SetActiveAgent(String name) {
@@ -1118,12 +1123,17 @@ namespace VoxSimPlatform {
                                  
                 Debug.Log("Skolemize: parenCount = " + parenCount);
 
-	            Dictionary<string,string> sortedSkolems = skolems.Cast<DictionaryEntry>()
+	            sortedSkolems = skolems.Cast<DictionaryEntry>()
 		            .ToDictionary(e => (String)e.Key, e => (String)e.Value);
-	            sortedSkolems = sortedSkolems.OrderBy(e => ((String)e.Value).Contains(argVarPrefix))
-		            .ToDictionary(e => (String)e.Key, e => (String)e.Value);
+                sortedSkolems = sortedSkolems.OrderBy(e => ((String)e.Value).Contains(argVarPrefix))
+                    .ThenBy(e => (preds.GetType()
+                        .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper()) == null ? 0 :
+                            preds.GetType()
+                                .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper())
+                                .GetCustomAttributes(typeof(DeferredEvaluation),false).ToList().Count))
+                    .ToDictionary(e => (String)e.Key, e => (String)e.Value);
 
-	            GlobalHelper.PrintKeysAndValues("sortedSkolems", sortedSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
+                GlobalHelper.PrintKeysAndValues("sortedSkolems", sortedSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
 
 	            foreach (KeyValuePair<string,string> kv in sortedSkolems) {
                     outString = outString.Replace((String) kv.Value, (String) kv.Key);
@@ -1243,10 +1253,10 @@ namespace VoxSimPlatform {
                 int parenCount = temp.Count(f => f == '(') +
                                  temp.Count(f => f == ')');
 
-	            GlobalHelper.PrintKeysAndValues(string.Format("Applying skolems to {0}",inString), skolems);
-                foreach (DictionaryEntry kv in skolems) {
-	                if (kv.Value is Vector3) {
-		                outString = outString.Replace((String) kv.Key, GlobalHelper.VectorToParsable((Vector3) kv.Value));
+                GlobalHelper.PrintKeysAndValues(string.Format("Applying skolems to {0}",inString), skolems);
+                foreach (KeyValuePair<string,string> kv in sortedSkolems) {
+	                if (skolems[kv.Key] is Vector3) {
+		                outString = outString.Replace((String) kv.Key, GlobalHelper.VectorToParsable((Vector3)skolems[kv.Key]));
                                         
                         if (outString.Contains("+")) {
                             Debug.Log(outString);
@@ -1269,26 +1279,26 @@ namespace VoxSimPlatform {
                             }
                         }
                     }
-                    else if (kv.Value is String) {
-                        outString = outString.Replace((String) kv.Key, (String) kv.Value);
+                    else if (skolems[kv.Key] is String) {
+                        outString = outString.Replace((String) kv.Key, (String)skolems[kv.Key]);
                     }
-                    else if (kv.Value is List<String>) {
-                        String list = String.Join(",", ((List<String>) kv.Value).ToArray());
+                    else if (skolems[kv.Key] is List<String>) {
+                        String list = String.Join(",", ((List<String>)skolems[kv.Key]).ToArray());
                         outString = outString.Replace((String) kv.Key, list);
                     }
-                    else if (kv.Value is bool) {
+                    else if (skolems[kv.Key] is bool) {
                         Dictionary<string, string> toReplace = new Dictionary<string, string>();
                         List<int> indicesOfArg = outString.FindAllIndicesOf((String)kv.Key);
                         foreach (int index in indicesOfArg) {
                             if ((index > 0) && 
                                 (outString[index-1] == '!')) {
                                 if (!toReplace.ContainsKey('!' + (String)kv.Key)) {
-                                    toReplace.Add('!' + (String)kv.Key, (!(bool)kv.Value).ToString());
+                                    toReplace.Add('!' + (String)kv.Key, (!(bool)skolems[kv.Key]).ToString());
                                 }
                             }
                             else {
                                 if (!toReplace.ContainsKey((String)kv.Key)) {
-                                    toReplace.Add((String)kv.Key, ((bool)kv.Value).ToString());
+                                    toReplace.Add((String)kv.Key, ((bool)skolems[kv.Key]).ToString());
                                 }
                             }
                         }
@@ -1320,22 +1330,22 @@ namespace VoxSimPlatform {
                 methodToCall = null;
                 VoxML voxml = null;
 
-                foreach (DictionaryEntry kv in skolems) {
+                foreach (KeyValuePair<string,string> kv in sortedSkolems) {
                     voxml = null;
                     invocationTarget = preds;
-                    Debug.Log(kv.Key + " : " + kv.Value);
+                    Debug.Log(kv.Key + " : " + skolems[kv.Key]);
                     objs.Clear();
-                    if (kv.Value is String) {
-                        Debug.Log(kv.Value);
-                        argsMatch = regex.Match((String) kv.Value);
+                    if (skolems[kv.Key] is String) {
+                        Debug.Log(skolems[kv.Key]);
+                        argsMatch = regex.Match((String)skolems[kv.Key]);
                         //Debug.Log(argsMatch);
                         if (argsMatch.Groups[0].Value.Length == 0) {
                             // matched an empty string = no match
-                            Debug.Log(kv.Value);
-                            predArgs = GlobalHelper.ParsePredicate((String) kv.Value);
-                            String pred = GlobalHelper.GetTopPredicate((String) kv.Value);
-                            if (((String) kv.Value).Count(f => f == '(') + // make sure actually a predicate
-                                ((String) kv.Value).Count(f => f == ')') >= 2) {
+                            Debug.Log(skolems[kv.Key]);
+                            predArgs = GlobalHelper.ParsePredicate((String)skolems[kv.Key]);
+                            String pred = GlobalHelper.GetTopPredicate((String)skolems[kv.Key]);
+                            if (((String)skolems[kv.Key]).Count(f => f == '(') + // make sure actually a predicate
+                                ((String)skolems[kv.Key]).Count(f => f == ')') >= 2) {
 	                            argsStrings = new LinkedList<String>(((String) predArgs[pred]).Split(new char[] {',','+','*','/'}));
 
 	                            foreach(string arg in argsStrings) {
@@ -1345,7 +1355,7 @@ namespace VoxSimPlatform {
                                 List<string> unhandledArgs = argsStrings.Where(a => Regex.IsMatch(a, @"\{[0-9]+\}")).ToList();
                                 for (int i = 0; i < unhandledArgs.Count; i++) {
                                     if (OnUnhandledArgument != null) {
-                                        string retVal = OnUnhandledArgument((String)kv.Value);
+                                        string retVal = OnUnhandledArgument((String)skolems[kv.Key]);
 
                                         Debug.Log(string.Format("Replacing {0} in argsStrings with {1}",
                                             unhandledArgs[i], retVal));
@@ -1418,6 +1428,10 @@ namespace VoxSimPlatform {
                                                         if (voxeme.voxml.Lex.Pred.Equals(arg)) {
                                                             matches.Add(voxeme.gameObject);
                                                         }
+                                                    }
+
+                                                    if (OnObjectMatchingConstraint != null) {
+                                                        matches = OnObjectMatchingConstraint(matches, methodToCall);
                                                     }
                                                 }
                                                     
@@ -1516,7 +1530,7 @@ namespace VoxSimPlatform {
 
                                                                 if (arity != matches.Count) {
                                                                     OnDisambiguationError(this,
-                                                                        new EventDisambiguationArgs(events[0], (String) kv.Value,
+                                                                        new EventDisambiguationArgs(events[0], (String)skolems[kv.Key],
                                                                             "{0}",
                                                                             matches.Select(o => o.GetComponent<Voxeme>())
                                                                                 .ToArray()));
@@ -1533,8 +1547,8 @@ namespace VoxSimPlatform {
                                                                 //Debug.Log(string.Format("Which {0}?", (arg as String)));
                                                                 //OutputHelper.PrintOutput(Role.Affector, string.Format("Which {0}?", (arg as String)));
                                                                 OnDisambiguationError(this, new EventDisambiguationArgs(events[0],
-                                                                    (String) kv.Value,
-                                                                    ((String) kv.Value).Replace(arg as String, "{0}"),
+                                                                    (String)skolems[kv.Key],
+                                                                    ((String)skolems[kv.Key]).Replace(arg as String, "{0}"),
                                                                     matches.Select(o => o.GetComponent<Voxeme>()).ToArray()));
                                                                 return false; // abort
                                                             }
@@ -1656,9 +1670,9 @@ namespace VoxSimPlatform {
                                                 return false;
                                             }
 
-                                            //if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
-                                            //    referents.stack.Push(obj);
-                                            //}
+                                            if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals(obj))) {
+                                                referents.stack.Push(obj);
+                                            }
                                             //OnEntityReferenced(this, new EventReferentArgs(obj));
                                         }
 
@@ -1720,7 +1734,7 @@ namespace VoxSimPlatform {
                             }
                         }
                         else {
-                            temp[kv.Key] = kv.Value;
+                            temp[kv.Key] = skolems[kv.Key];
                         }
                     }
                 }
@@ -1759,6 +1773,13 @@ namespace VoxSimPlatform {
                                 if (replaceWith is String) {
                                     replaced = ((String) skolems[kv.Key]).Replace(argsMatch.Groups[0].Value,
                                         (String) replaceWith);
+
+                                    if (GameObject.Find((String)replaceWith) != null) {
+                                        if ((referents.stack.Count == 0) || (!referents.stack.Peek().Equals((String)replaceWith))) {
+                                            Debug.Log(string.Format("Pushing {0} onto referent stack", (String)replaceWith));
+                                            referents.stack.Push((String)replaceWith);
+                                        }
+                                    }
                                 }
                                 else if (replaceWith is Vector3) {
                                     replaced = ((String) skolems[kv.Key]).Replace((String) argsMatch.Groups[0].Value,

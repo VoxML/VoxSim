@@ -26,6 +26,10 @@ namespace VoxSimPlatform {
 
             public delegate string UnhandledArgument(string predStr);
 
+            public static event ObjectMatchingConstraint OnObjectMatchingConstraint;
+
+            public delegate List<GameObject> ObjectMatchingConstraint(List<GameObject> matches, MethodInfo referringMethod);
+
             public static bool IsSatisfied(String pred, List<object> args) {
                 bool satisfied = false;
 
@@ -695,6 +699,10 @@ namespace VoxSimPlatform {
                                                 if (voxeme.voxml.Lex.Pred.Equals(arg)) {
                                                     matches.Add(voxeme.gameObject);
                                                 }
+                                            }
+
+                                            if (OnObjectMatchingConstraint != null) {
+                                                matches = OnObjectMatchingConstraint(matches, methodToCall);
                                             }
 
                                             //Debug.Log(string.Format("# voxeme predicate matches to string {0}: {1}",(arg as String),matches.Count));
