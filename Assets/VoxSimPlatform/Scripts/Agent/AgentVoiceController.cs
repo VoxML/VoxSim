@@ -6,16 +6,72 @@ using Crosstales.RTVoice.Model;
 
 namespace VoxSimPlatform {
     namespace Agent {
+        public  enum MacMaleVoice
+        {
+            Alex,
+            Daniel,
+            Diego,
+            Fred,
+            Jorge,
+            Juan,
+            Luca,
+            Maged,
+            Rishi,
+            Thomas,
+            Xander,
+            Yuri
+        };
+
+        public enum MacFemaleVoice
+        {
+            Alice,
+            Alva,
+            Amelie,
+            Anna,
+            Carmit,
+            Damayanti,
+            Ellen,
+            Fiona,
+            Ioana,
+            Joana,
+            Kanya,
+            Karen,
+            Kyoko,
+            Laura,
+            Lekha,
+            Luciana,
+            Mariska,
+            Mei_Jia,
+            Melina,
+            Milena,
+            Moira,
+            Monica,
+            Nora,
+            Paulina,
+            Samantha,
+            Sara,
+            Satu,
+            Sin_ji,
+            Tessa,
+            Ting_Ting,
+            Veena,
+            Victoria,
+            Yelda,
+            Yuna,
+            Zosia,
+            Zuzana
+        };
+
         public class AgentVoiceController : MonoBehaviour {
             /// <summary>
             /// For attaching to the agent insead of to an IOController
             /// </summary>
 
 
-            private static readonly String MAC_F = "Samantha";
-            private static readonly String MAC_M = "Fred";
-            private static readonly String WIN_F = "Microsoft Zira Desktop";
-            private static readonly String WIN_M = "Microsoft David Desktop";
+            public MacFemaleVoice MacFemaleVoice;
+            public MacMaleVoice MacMaleVoice;
+            private static readonly String WinFemaleVoice = "Microsoft Zira Desktop";
+            private static readonly String WinMaleVoice = "Microsoft David Desktop";
             private static readonly String LANG = "en-US";
             private static readonly String DUMMY = "not-important";
 
@@ -37,22 +93,22 @@ namespace VoxSimPlatform {
                     vGender = Crosstales.RTVoice.Model.Enum.Gender.FEMALE;
                     if (SystemInfo.operatingSystemFamily ==
                         OperatingSystemFamily.Windows) {
-                        vName = WIN_F;
+                        vName = WinFemaleVoice;
                     }
                     else if (SystemInfo.operatingSystemFamily ==
                              OperatingSystemFamily.MacOSX) {
-                        vName = MAC_F;
+                        vName = MacFemaleVoice.ToString().Replace('_', '-');
                     }
                 }
                 else if (Gender == Gender.Male) {
                     vGender = Crosstales.RTVoice.Model.Enum.Gender.MALE;
                     if (SystemInfo.operatingSystemFamily ==
                         OperatingSystemFamily.Windows) {
-                        vName = WIN_M;
+                        vName = WinMaleVoice;
                     }
                     else if (SystemInfo.operatingSystemFamily ==
                              OperatingSystemFamily.MacOSX) {
-                        vName = MAC_M;
+                        vName = MacMaleVoice.ToString().Replace('_', '-');
                     }
                 }
 
