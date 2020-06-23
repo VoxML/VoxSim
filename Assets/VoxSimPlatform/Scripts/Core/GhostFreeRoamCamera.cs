@@ -26,8 +26,8 @@ namespace VoxSimPlatform {
         	public bool cursorToggleAllowed = true;
         	public KeyCode cursorToggleButton = KeyCode.Escape;
 
-        	private Vector3 cameraPosOrigin;
-        	private Quaternion cameraRotOrigin;
+        	public Vector3 cameraPosOrigin;
+        	public Quaternion cameraRotOrigin;
 
         	public float panSpeed = 0.1f;
         	private Vector3 mouseOrigin; // Position of cursor when mouse dragging starts
