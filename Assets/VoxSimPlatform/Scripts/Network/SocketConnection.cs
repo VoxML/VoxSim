@@ -38,6 +38,7 @@ namespace VoxSimPlatform {
 
     		protected const int IntSize = sizeof(Int32);
     		protected TcpClient _client;
+            protected NetworkStream stream;
     		protected Thread _t;
     		protected Queue<string> _messages;
     		protected byte[] _ok = new byte[] {0x20};
@@ -82,8 +83,9 @@ namespace VoxSimPlatform {
     			}
 
     			_client.EndConnect(result);
-    			//_client.Connect(address, port);
-    			_t = new Thread(Loop);
+                stream = _client.GetStream();
+                //_client.Connect(address, port);
+                _t = new Thread(Loop);
     			_t.Start();
                 Debug.Log(string.Format("VoxSim ({0}) is connected to {1} on port {2} with outbound port {3}",
                     ((IPEndPoint)_client.Client.LocalEndPoint).Address, ((IPEndPoint)_client.Client.RemoteEndPoint).Address,
@@ -92,7 +94,6 @@ namespace VoxSimPlatform {
 
     		protected virtual void Loop() {
     			while (IsConnected()) {
-    				NetworkStream stream = _client.GetStream();
     				byte[] byteBuffer = new byte[IntSize];
     				try {
     					stream.Read(byteBuffer, 0, IntSize);
