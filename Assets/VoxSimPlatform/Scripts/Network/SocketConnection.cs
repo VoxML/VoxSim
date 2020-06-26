@@ -37,7 +37,9 @@ namespace VoxSimPlatform {
     		}
 
     		protected const int IntSize = sizeof(Int32);
+            protected const int MaxBufSize = 65536;
     		protected TcpClient _client;
+            protected NetworkStream stream;
     		protected Thread _t;
     		protected Queue<string> _messages;
     		protected byte[] _ok = new byte[] {0x20};
@@ -82,8 +84,9 @@ namespace VoxSimPlatform {
     			}
 
     			_client.EndConnect(result);
-    			//_client.Connect(address, port);
-    			_t = new Thread(Loop);
+                stream = _client.GetStream();
+                //_client.Connect(address, port);
+                _t = new Thread(Loop);
     			_t.Start();
                 Debug.Log(string.Format("VoxSim ({0}) is connected to {1} on port {2} with outbound port {3}",
                     ((IPEndPoint)_client.Client.LocalEndPoint).Address, ((IPEndPoint)_client.Client.RemoteEndPoint).Address,
@@ -92,27 +95,37 @@ namespace VoxSimPlatform {
 
     		protected virtual void Loop() {
     			while (IsConnected()) {
-    				NetworkStream stream = _client.GetStream();
     				byte[] byteBuffer = new byte[IntSize];
-    				try {
+                    try {
     					stream.Read(byteBuffer, 0, IntSize);
-    				}
-    				catch (Exception e) {
+                    }
+                    catch (Exception e) {
     					Debug.LogError(e.Message);
     				}
 
-    				//				if (!BitConverter.IsLittleEndian)
-    				//				{
-    				//					Array.Reverse(byteBuffer);
-    				//				}
-    				int len = BitConverter.ToInt32(byteBuffer, 0);
+                    //if (!BitConverter.IsLittleEndian)
+                    //{
+                    //    Array.Reverse(byteBuffer);
+                    //}
+                    int len = BitConverter.ToInt32(byteBuffer, 0);
+                    Debug.Log(string.Format("Loop: len = {0}", len));
+
+                    // sometimes the number you get for length is garbage and
+                    // way too large (e.g., connecting to a Redis server)
+                    // so reset it to MaxBufSize
+                    if (len > MaxBufSize)
+                    {
+                        len = MaxBufSize;
+                    }
 
     				byteBuffer = new byte[len];
     				int numBytesRead = stream.Read(byteBuffer, 0, len);
-    				//Debug.Log (numBytesRead);
+    				Debug.Log (string.Format("Loop: Read {0} bytes", numBytesRead));
+                    Debug.Log (string.Format("Loop: {0} messages left", HowManyLeft()));
 
     				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
     				_messages.Enqueue(message);
+                    Debug.Log(string.Format("Loop: Enqueued message: {0}", message));
     				//_messages.Enqueue (message);
     			}
 
