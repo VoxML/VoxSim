@@ -33,7 +33,8 @@ namespace VoxSimPlatform {
         	public int outputMaxWidth;
         	public int outputHeight;
         	public int outputMargin;
-        	public Rect outputRect = new Rect();
+            public Rect outputRect;
+            Rect rect;
 
         	public bool textField = true;
 
@@ -48,32 +49,32 @@ namespace VoxSimPlatform {
         		outputWidth = (Convert.ToInt32(Screen.width - outputMargin) > outputMaxWidth)
         			? outputMaxWidth
         			: Convert.ToInt32(Screen.width - outputMargin);
-        		outputHeight = Convert.ToInt32(20.0f * (float) fontSizeModifier);
+        		outputHeight = Convert.ToInt32(outputHeight * (float) fontSizeModifier);
 
         		if (alignment == Alignment.Left) {
         			if (placement == Placement.Top) {
-        				outputRect = new Rect(5, 5, outputWidth, outputHeight);
+                        rect = new Rect(outputRect.x, outputRect.y, outputWidth, outputHeight);
         			}
         			else if (placement == Placement.Bottom) {
-        				outputRect = new Rect(5, Screen.height - outputHeight - 5, outputWidth, outputHeight);
+                        rect = new Rect(outputRect.x, Screen.height - outputHeight - outputRect.y, outputWidth, outputHeight);
         			}
         		}
         		else if (alignment == Alignment.Center) {
         			if (placement == Placement.Top) {
-        				outputRect = new Rect((int) ((Screen.width / 2) - (outputWidth / 2)), 5, outputWidth, outputHeight);
+                        rect = new Rect((int) ((Screen.width / 2) - (outputWidth / 2)), outputRect.y, outputWidth, outputHeight);
         			}
         			else if (placement == Placement.Bottom) {
-        				outputRect = new Rect((int) ((Screen.width / 2) - (outputWidth / 2)),
-        					Screen.height - outputHeight - 5, outputWidth, outputHeight);
+                        rect = new Rect((int) ((Screen.width / 2) - (outputWidth / 2)),
+        					Screen.height - outputHeight - outputRect.y, outputWidth, outputHeight);
         			}
         		}
         		else if (alignment == Alignment.Right) {
         			if (placement == Placement.Top) {
-        				outputRect = new Rect(Screen.width - (5 + outputWidth), 5, outputWidth, outputHeight);
+                        rect = new Rect(Screen.width - (outputRect.x + outputWidth), outputRect.y, outputWidth, outputHeight);
         			}
         			else if (placement == Placement.Bottom) {
-        				outputRect = new Rect(Screen.width - (5 + outputWidth),
-        					Screen.height - outputHeight - 5, outputWidth, outputHeight);
+                        rect = new Rect(Screen.width - (outputRect.x + outputWidth),
+        					Screen.height - outputHeight - outputRect.y, outputWidth, outputHeight);
         			}
         		}
         	}
@@ -92,7 +93,7 @@ namespace VoxSimPlatform {
         		labelStyle.fontSize = fontSize;
         		textFieldStyle.fontSize = fontSize;
 
-        		GUILayout.BeginArea(outputRect);
+        		GUILayout.BeginArea(rect);
         		GUILayout.BeginHorizontal();
 
         		if (outputLabel != "") {
