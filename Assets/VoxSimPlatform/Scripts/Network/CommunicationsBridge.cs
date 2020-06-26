@@ -237,6 +237,7 @@ namespace VoxSimPlatform {
                 if ((retryConnections) && (tryAgainSockets.Keys.Count > 0)) {
                     foreach (string connectionUrl in tryAgainSockets.Keys) {
                         if (tryAgainSockets[connectionUrl] != null) {
+                            //Debug.Log(connectionUrl);
                             SocketConnection socket =
                                 _socketConnections.FirstOrDefault(s => s.GetType() == tryAgainSockets[connectionUrl]);
                             if (socket != null) {
