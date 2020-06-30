@@ -54,12 +54,9 @@ namespace VoxSimPlatform {
     #elif UNITY_STANDALONE_OSX
     		public static string voxmlDataPath =
      Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/VoxML/voxml");
-    #elif UNITY_STANDALONE_WIN
+    #else
     		public static string voxmlDataPath =
      Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("VoxML/voxml");
-    #elif UNITY_IOS
-    		public static string voxmlDataPath =
-     Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("/VoxML/voxml");
     #endif
 
     		public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs) {

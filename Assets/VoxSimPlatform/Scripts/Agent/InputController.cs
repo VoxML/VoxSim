@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using VoxSimPlatform.Core;
-using VoxSimPlatform.Network;
+//using VoxSimPlatform.Network;
 using VoxSimPlatform.UI;
 
 namespace VoxSimPlatform {
@@ -52,7 +52,7 @@ namespace VoxSimPlatform {
         	String[] commands;
         	EventManager eventManager;
 
-        	CommunicationsBridge commBridge;
+        	//CommunicationsBridge commBridge;
 
         	ObjectSelector objSelector;
         	//ExitToMenuUIButton exitToMenu;
@@ -92,7 +92,7 @@ namespace VoxSimPlatform {
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
         		//exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
 
-        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
+        		//commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
 
         		labelStyle = new GUIStyle("Label");
         		textFieldStyle = new GUIStyle("TextField");
@@ -261,12 +261,12 @@ namespace VoxSimPlatform {
         			InputEventArgs inputArgs = new InputEventArgs(inputString);
         			OnInputReceived(this, inputArgs);
 
-                    if (inputString.StartsWith("qsr:")) {
-                        SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
-                            (SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
-                        qsrLibSocket.SendQSRRequest(inputString);
-                        return;
-                    }
+                    //if (inputString.StartsWith("qsr:")) {
+                    //    SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
+                    //        (SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
+                    //    qsrLibSocket.SendQSRRequest(inputString);
+                    //    return;
+                    //}
 
                     if (directToEventManager) {
                         Debug.Log("User entered: " + inputString);
@@ -281,22 +281,22 @@ namespace VoxSimPlatform {
 
             			Debug.Log("Formatted as: " + inputString);
 
-            			if (!r.IsMatch(inputString)) {
-            				// is not already functional form
-            				// parse into functional form
-            				String[] inputs = inputString.Split(new char[] {'.', ',', '!'});
-            				List<String> commands = new List<String>();
-            				foreach (String s in inputs) {
-            					if (s != String.Empty) {
-            						commands.Add(commBridge.NLParse(s.Trim().ToLower()));
-            					}
-            				}
+            			//if (!r.IsMatch(inputString)) {
+            			//	// is not already functional form
+            			//	// parse into functional form
+            			//	String[] inputs = inputString.Split(new char[] {'.', ',', '!'});
+            			//	List<String> commands = new List<String>();
+            			//	foreach (String s in inputs) {
+            			//		if (s != String.Empty) {
+            			//			commands.Add(commBridge.NLParse(s.Trim().ToLower()));
+            			//		}
+            			//	}
 
-            				functionalCommand = String.Join(";", commands.ToArray());
-            			}
-            			else {
+            			//	functionalCommand = String.Join(";", commands.ToArray());
+            			//}
+            			//else {
             				functionalCommand = inputString;
-            			}
+            			//}
 
             			Debug.Log(functionalCommand);
 

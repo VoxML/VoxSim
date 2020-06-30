@@ -2,7 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-using VoxSimPlatform.Network;
+//using VoxSimPlatform.Network;
 
 namespace VoxSimPlatform {
     namespace Global {

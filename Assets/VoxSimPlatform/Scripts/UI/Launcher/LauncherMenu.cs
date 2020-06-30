@@ -5,12 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+//using System.Net;
+using UnityEngine.Networking;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 using VoxSimPlatform.Global;
-using VoxSimPlatform.Network;
+//using VoxSimPlatform.Network;
 using VoxSimPlatform.UI.ModalWindow;
 using VoxSimPlatform.UI.UIButtons;
 using VoxSimPlatform.VideoCapture;
@@ -24,13 +25,13 @@ namespace VoxSimPlatform {
                 public bool ActionOnlyLogs = false;
                 public bool FullStateInfo = false;
                 public bool LogTimestamps = false;
-                public VoxSimSocketConfig SocketConfig = null;
+                //public VoxSimSocketConfig SocketConfig = null;
                 public CapturePrefs CapturePrefs = null;
                 public bool MakeVoxemesEditable = false;
 
                 public VoxSimUserPrefs() {
                     CapturePrefs = new CapturePrefs();
-                    SocketConfig = new VoxSimSocketConfig();
+                    //SocketConfig = new VoxSimSocketConfig();
                 }
             }
 
@@ -403,72 +404,72 @@ namespace VoxSimPlatform {
             		GUILayout.EndVertical();
                     GUILayout.EndScrollView();
 
-                    GUILayout.BeginHorizontal();
-                    if (GUILayout.Button("Load Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
-                        // read in the socket config file and deserialize it to an instance of VoxSimSocketConfig
-                        XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
-                        try {
-                            using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Open)) {
-                                VoxSimSocketConfig config = serializer.Deserialize(stream) as VoxSimSocketConfig;
+                    //GUILayout.BeginHorizontal();
+                    //if (GUILayout.Button("Load Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
+                    //    // read in the socket config file and deserialize it to an instance of VoxSimSocketConfig
+                    //    XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
+                    //    try {
+                    //        using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Open)) {
+                    //            VoxSimSocketConfig config = serializer.Deserialize(stream) as VoxSimSocketConfig;
 
-                                urlLabels.Clear();
-                                urlTypes.Clear();
-                                urls.Clear();
-                                urlActiveStatuses.Clear();
-                                numUrls = 0;
+                    //            urlLabels.Clear();
+                    //            urlTypes.Clear();
+                    //            urls.Clear();
+                    //            urlActiveStatuses.Clear();
+                    //            numUrls = 0;
 
-                                foreach (VoxSimSocket socket in config.Sockets) {
-                                    urlLabels.Add(socket.Name);
-                                    urlTypes.Add(socket.Type);
-                                    urls.Add(socket.URL);
-                                    urlActiveStatuses.Add(socket.Enabled);
-                                    numUrls++;
-                                }
-                            }
-                        }
-                        catch (FileNotFoundException ex) {
-                            // if local_config/socket_config.xml has been removed or renamed
-                            //  create a new, empty one
-                            using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
-                                serializer.Serialize(stream, new VoxSimSocketConfig());
+                    //            foreach (VoxSimSocket socket in config.Sockets) {
+                    //                urlLabels.Add(socket.Name);
+                    //                urlTypes.Add(socket.Type);
+                    //                urls.Add(socket.URL);
+                    //                urlActiveStatuses.Add(socket.Enabled);
+                    //                numUrls++;
+                    //            }
+                    //        }
+                    //    }
+                    //    catch (FileNotFoundException ex) {
+                    //        // if local_config/socket_config.xml has been removed or renamed
+                    //        //  create a new, empty one
+                    //        using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
+                    //            serializer.Serialize(stream, new VoxSimSocketConfig());
 
-                                urlLabels.Clear();
-                                urlTypes.Clear();
-                                urls.Clear();
-                                urlActiveStatuses.Clear();
-                                numUrls = 0;
-                            }
-                        }
-                    }
-                    if (GUILayout.Button("Save Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
-                        XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
-                        if (!Directory.Exists("local_config")) {
-                            Directory.CreateDirectory("local_config");
-                        }
-                        using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
-                            VoxSimSocketConfig socketConfig = new VoxSimSocketConfig();
-                            for (int i = 0; i < numUrls; i++) {
-                                VoxSimSocket socket = new VoxSimSocket();
-                                socket.Name = urlLabels[i];
-                                socket.Type = urlTypes[i];
-                                socket.URL = urls[i];
-                                socket.Enabled = urlActiveStatuses[i];
-                                socketConfig.Sockets.Add(socket);
-                            }
+                    //            urlLabels.Clear();
+                    //            urlTypes.Clear();
+                    //            urls.Clear();
+                    //            urlActiveStatuses.Clear();
+                    //            numUrls = 0;
+                    //        }
+                    //    }
+                    //}
+                    //if (GUILayout.Button("Save Socket Config", GUILayout.Width(135 * fontSizeModifier))) {
+                    //    XmlSerializer serializer = new XmlSerializer(typeof(VoxSimSocketConfig));
+                    //    if (!Directory.Exists("local_config")) {
+                    //        Directory.CreateDirectory("local_config");
+                    //    }
+                    //    using (var stream = new FileStream("local_config/socket_config.xml", FileMode.Create)) {
+                    //        VoxSimSocketConfig socketConfig = new VoxSimSocketConfig();
+                    //        for (int i = 0; i < numUrls; i++) {
+                    //            VoxSimSocket socket = new VoxSimSocket();
+                    //            socket.Name = urlLabels[i];
+                    //            socket.Type = urlTypes[i];
+                    //            socket.URL = urls[i];
+                    //            socket.Enabled = urlActiveStatuses[i];
+                    //            socketConfig.Sockets.Add(socket);
+                    //        }
 
-                            List<string> urlStrings = new List<string>();
-                            string urlsString = string.Empty;
-                            for (int i = 0; i < numUrls; i++) {
-                                urlStrings.Add(string.Format("{0}|{1}={2},{3}", urlLabels[i], urlTypes[i], urls[i], urlActiveStatuses[i].ToString()));
-                            }
-                            urlsString = string.Join(";", urlStrings);
+                    //        List<string> urlStrings = new List<string>();
+                    //        string urlsString = string.Empty;
+                    //        for (int i = 0; i < numUrls; i++) {
+                    //            urlStrings.Add(string.Format("{0}|{1}={2},{3}", urlLabels[i], urlTypes[i], urls[i], urlActiveStatuses[i].ToString()));
+                    //        }
+                    //        urlsString = string.Join(";", urlStrings);
 
-                            PlayerPrefs.SetString("URLs", urlsString);
+                    //        PlayerPrefs.SetString("URLs", urlsString);
 
-                            serializer.Serialize(stream, socketConfig);
-                        }
-                    }
-                    GUILayout.EndHorizontal();
+                    //        serializer.Serialize(stream, socketConfig);
+                    //    }
+                    //}
+                    //GUILayout.EndHorizontal();
             		GUILayout.EndArea();
 
             #if !UNITY_IOS
@@ -720,8 +721,10 @@ namespace VoxSimPlatform {
             	}
 
                 void GetMyIP() {
-                // get IP address
-#if !UNITY_IOS
+                    // get IP address
+#if UNITY_WEBGL
+                    ip = "127.0.0.1"; // what a m
+#elif !UNITY_IOS
                     foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
                         if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
                             //Debug.Log(ipAddress.ToString());
@@ -884,14 +887,14 @@ namespace VoxSimPlatform {
                     userPrefs.FullStateInfo = fullState;
                     userPrefs.LogTimestamps = logTimestamps;
 
-                    for (int i = 0; i < numUrls; i++) {
-                        VoxSimSocket socket = new VoxSimSocket();
-                        socket.Name = urlLabels[i];
-                        socket.Type = urlTypes[i];
-                        socket.URL = urls[i];
-                        socket.Enabled = urlActiveStatuses[i];
-                        userPrefs.SocketConfig.Sockets.Add(socket);
-                    }
+                    //for (int i = 0; i < numUrls; i++) {
+                    //    VoxSimSocket socket = new VoxSimSocket();
+                    //    socket.Name = urlLabels[i];
+                    //    socket.Type = urlTypes[i];
+                    //    socket.URL = urls[i];
+                    //    socket.Enabled = urlActiveStatuses[i];
+                    //    userPrefs.SocketConfig.Sockets.Add(socket);
+                    //}
 
                     userPrefs.CapturePrefs.CaptureVideo = captureVideo;
                     userPrefs.CapturePrefs.CaptureParams = captureParams;

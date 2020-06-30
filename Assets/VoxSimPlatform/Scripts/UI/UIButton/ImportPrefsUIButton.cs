@@ -5,7 +5,7 @@ using System.IO;
 using System.Xml.Serialization;
 
 using GracesGames.SimpleFileBrowser.Scripts;
-using VoxSimPlatform.Network;
+//using VoxSimPlatform.Network;
 using VoxSimPlatform.UI.Launcher;
 using VoxSimPlatform.VideoCapture;
 
@@ -67,13 +67,13 @@ namespace VoxSimPlatform {
                     launcher.urlTypes.Clear();
                     launcher.urls.Clear();
                     launcher.urlActiveStatuses.Clear();
-                    foreach (VoxSimSocket socket in userPrefs.SocketConfig.Sockets) {
-                        launcher.urlLabels.Add(socket.Name);
-                        launcher.urlTypes.Add(socket.Type);
-                        launcher.urls.Add(socket.URL);
-                        launcher.urlActiveStatuses.Add(socket.Enabled);
-                        launcher.numUrls++;
-                    }
+                    //foreach (VoxSimSocket socket in userPrefs.SocketConfig.Sockets) {
+                    //    launcher.urlLabels.Add(socket.Name);
+                    //    launcher.urlTypes.Add(socket.Type);
+                    //    launcher.urls.Add(socket.URL);
+                    //    launcher.urlActiveStatuses.Add(socket.Enabled);
+                    //    launcher.numUrls++;
+                    //}
                         
                     launcher.captureVideo = userPrefs.CapturePrefs.CaptureVideo;
                     launcher.captureParams = userPrefs.CapturePrefs.CaptureParams;

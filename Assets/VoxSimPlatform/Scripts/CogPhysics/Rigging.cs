@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using VoxSimPlatform.Vox;
 using VoxSimPlatform.Animation;
-using VoxSimPlatform.SpatialReasoning;
+//using VoxSimPlatform.SpatialReasoning;
 
 namespace VoxSimPlatform {
     namespace CogPhysics {
@@ -15,14 +15,14 @@ namespace VoxSimPlatform {
         public class Rigging : MonoBehaviour {
         	//[HideInInspector]
         	public bool usePhysicsRig = true;
-        	RelationTracker relationTracker;
+        	//RelationTracker relationTracker;
         	List<Voxeme> ignorePhysics; // ignore physics between this game object and listed objects
 
         	[HideInInspector] public Rigidbody[] rigidbodies;
 
         	// Use this for initialization
         	void Start() {
-        		relationTracker = (RelationTracker) GameObject.Find("BehaviorController").GetComponent("RelationTracker");
+        		//relationTracker = (RelationTracker) GameObject.Find("BehaviorController").GetComponent("RelationTracker");
 
         		ignorePhysics = new List<Voxeme>();
         	}

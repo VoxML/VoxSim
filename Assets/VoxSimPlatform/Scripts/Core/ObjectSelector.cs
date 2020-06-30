@@ -19,9 +19,9 @@ namespace VoxSimPlatform {
         	//public List<GameObject> toDisable = new List<GameObject> ();
         	public List<GameObject> disabledObjects = new List<GameObject>();
 
-        	//VoxemeInspector inspector;
-        	RelationTracker relationTracker;
-        	ModalWindowManager windowManager;
+			//VoxemeInspector inspector;
+			RelationTracker relationTracker;
+			ModalWindowManager windowManager;
 
         	public int fontSize = 12;
 
