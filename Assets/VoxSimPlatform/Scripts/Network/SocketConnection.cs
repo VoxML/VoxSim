@@ -12,6 +12,9 @@ namespace VoxSimPlatform {
             public CommunicationsBridge owner;
             public Type IOClientType;
 
+            public bool useSizeHeader;
+            public bool verboseDebugOutput;
+
     		public event EventHandler EventSequenceReceived;
 
     		public void OnEventSequenceReceived(object sender, EventArgs e) {
@@ -95,38 +98,45 @@ namespace VoxSimPlatform {
 
     		protected virtual void Loop() {
     			while (IsConnected()) {
-    				byte[] byteBuffer = new byte[IntSize];
-                    try {
-    					stream.Read(byteBuffer, 0, IntSize);
+    				byte[] byteBuffer;
+
+                    if (useSizeHeader) {
+                        byteBuffer = new byte[IntSize];
+                        try {
+        					stream.Read(byteBuffer, 0, IntSize);
+                        }
+                        catch (Exception e) {
+        					Debug.LogError(e.Message);
+        				}
+
+                        //if (!BitConverter.IsLittleEndian)
+                        //{
+                        //    Array.Reverse(byteBuffer);
+                        //}
+                        int len = BitConverter.ToInt32(byteBuffer, 0);
+                        if (verboseDebugOutput) {
+                            Debug.Log(string.Format("Loop: len = {0}", len));
+                        }
+                        byteBuffer = new byte[len];
                     }
-                    catch (Exception e) {
-    					Debug.LogError(e.Message);
-    				}
+                    else {
+        				byteBuffer = new byte[MaxBufSize];
+                    }
 
-                    //if (!BitConverter.IsLittleEndian)
-                    //{
-                    //    Array.Reverse(byteBuffer);
-                    //}
-                    int len = BitConverter.ToInt32(byteBuffer, 0);
-                    //Debug.Log(string.Format("Loop: len = {0}", len));
 
-                    // sometimes the number you get for length is garbage and
-                    // way too large (e.g., connecting to a Redis server)
-                    // so reset it to MaxBufSize
-                    //if (len > MaxBufSize)
-                    //{
-                    //    len = MaxBufSize;
-                    //}
-
-    				byteBuffer = new byte[MaxBufSize];
     				int numBytesRead = stream.Read(byteBuffer, 0, byteBuffer.Length);
-    				Debug.Log (string.Format("SocketConnection.Loop: Read {0} bytes", numBytesRead));
-                    Debug.Log (string.Format("SocketConnection.Loop: {0} messages left", HowManyLeft()));
+
+                    if (verboseDebugOutput) {
+        				Debug.Log (string.Format("SocketConnection.Loop: Read {0} bytes", numBytesRead));
+                        Debug.Log (string.Format("SocketConnection.Loop: {0} messages left", HowManyLeft()));
+                    }
 
     				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
     				_messages.Enqueue(message);
-                    Debug.Log(string.Format("SocketConnection.Loop: Enqueued message: {0}", message));
-    				//_messages.Enqueue (message);
+
+                    if (verboseDebugOutput) {
+                        Debug.Log(string.Format("SocketConnection.Loop: Enqueued message: {0}", message));
+                    }
     			}
 
     			_client.Close();
