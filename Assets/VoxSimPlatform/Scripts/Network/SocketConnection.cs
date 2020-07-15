@@ -8,64 +8,73 @@ using UnityEngine;
 
 namespace VoxSimPlatform {
     namespace Network {
-    	public class SocketConnection {
+        public class SocketConnection {
             public CommunicationsBridge owner;
             public Type IOClientType;
 
-            public bool useSizeHeader;
-            public bool verboseDebugOutput;
+            public event EventHandler EventSequenceReceived;
 
-    		public event EventHandler EventSequenceReceived;
+            public void OnEventSequenceReceived(object sender, EventArgs e) {
+                if (EventSequenceReceived != null) {
+                    EventSequenceReceived(this, e);
+                }
+            }
 
-    		public void OnEventSequenceReceived(object sender, EventArgs e) {
-    			if (EventSequenceReceived != null) {
-    				EventSequenceReceived(this, e);
-    			}
-    		}
+            public event EventHandler ConnectionLost;
 
-    		public event EventHandler ConnectionLost;
+            public void OnConnectionLost(object sender, EventArgs e) {
+                if (ConnectionLost != null) {
+                    ConnectionLost(this, e);
+                }
+            }
 
-    		public void OnConnectionLost(object sender, EventArgs e) {
-    			if (ConnectionLost != null) {
-    				ConnectionLost(this, e);
-    			}
-    		}
+            public event EventHandler ConnectionMade;
 
-    		public event EventHandler ConnectionMade;
+            public void OnConnectionMade(object sender, EventArgs e) {
+                if (ConnectionMade != null) {
+                    ConnectionMade(this, e);
+                }
+            }
 
-    		public void OnConnectionMade(object sender, EventArgs e) {
-    			if (ConnectionMade != null) {
-    				ConnectionMade(this, e);
-    			}
-    		}
-
-    		protected const int IntSize = sizeof(Int32);
+            protected const int IntSize = sizeof(Int32);
             protected const int MaxBufSize = 65536;
-    		protected TcpClient _client;
+            protected TcpClient _client;
             protected NetworkStream stream;
-    		protected Thread _t;
-    		protected Queue<string> _messages;
-    		protected byte[] _ok = new byte[] {0x20};
+            protected Thread _t;
+            protected Queue<string> _messages;
+            protected byte[] _ok = new byte[] { 0x20 };
 
-    		string _label;
+            string _label;
             public string Label {
                 get { return _label; }
                 set { _label = value; }
             }
-                
+
             string _address;
-    		public string Address {
-    			get { return _address; }
-    			set { _address = value; }
-    		}
+            public string Address {
+                get { return _address; }
+                set { _address = value; }
+            }
 
-    		int _port;
-    		public int Port {
-    			get { return _port; }
-    			set { _port = value; }
-    		}
+            int _port;
+            public int Port {
+                get { return _port; }
+                set { _port = value; }
+            }
 
-    		public virtual bool IsConnected() {
+            bool _useSizeHeader;
+            public bool UseSizeHeader {
+                get { return _useSizeHeader; }
+                set { _useSizeHeader = value; }
+            }
+
+            bool _verboseDebugOutput;
+            public bool VerboseDebugOutput {
+                get { return _verboseDebugOutput; }
+                set { _verboseDebugOutput = value; }
+            }
+
+            public virtual bool IsConnected() {
     			return !((_client.Client.Poll(10, SelectMode.SelectRead) && (_client.Client.Available == 0)) ||
     			         !_client.Client.Connected);
     		}
@@ -100,7 +109,7 @@ namespace VoxSimPlatform {
     			while (IsConnected()) {
     				byte[] byteBuffer;
 
-                    if (useSizeHeader) {
+                    if (_useSizeHeader) {
                         byteBuffer = new byte[IntSize];
                         try {
         					stream.Read(byteBuffer, 0, IntSize);
@@ -114,7 +123,7 @@ namespace VoxSimPlatform {
                         //    Array.Reverse(byteBuffer);
                         //}
                         int len = BitConverter.ToInt32(byteBuffer, 0);
-                        if (verboseDebugOutput) {
+                        if (_verboseDebugOutput) {
                             Debug.Log(string.Format("Loop: len = {0}", len));
                         }
                         byteBuffer = new byte[len];
@@ -126,7 +135,7 @@ namespace VoxSimPlatform {
 
     				int numBytesRead = stream.Read(byteBuffer, 0, byteBuffer.Length);
 
-                    if (verboseDebugOutput) {
+                    if (_verboseDebugOutput) {
         				Debug.Log (string.Format("SocketConnection.Loop: Read {0} bytes", numBytesRead));
                         Debug.Log (string.Format("SocketConnection.Loop: {0} messages left", HowManyLeft()));
                     }
@@ -134,7 +143,7 @@ namespace VoxSimPlatform {
     				string message = Encoding.ASCII.GetString(byteBuffer, 0, numBytesRead);
     				_messages.Enqueue(message);
 
-                    if (verboseDebugOutput) {
+                    if (_verboseDebugOutput) {
                         Debug.Log(string.Format("SocketConnection.Loop: Enqueued message: {0}", message));
                     }
     			}
