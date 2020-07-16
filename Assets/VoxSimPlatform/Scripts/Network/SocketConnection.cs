@@ -124,7 +124,7 @@ namespace VoxSimPlatform {
                         //}
                         int len = BitConverter.ToInt32(byteBuffer, 0);
                         if (_verboseDebugOutput) {
-                            Debug.Log(string.Format("Loop: len = {0}", len));
+                            Debug.Log(string.Format("SocketConnection.Loop: len = {0}", len));
                         }
                         byteBuffer = new byte[len];
                     }
