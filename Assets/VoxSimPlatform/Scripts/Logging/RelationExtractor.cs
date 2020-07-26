@@ -2,6 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,7 @@ using System.Text;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Network;
+using VoxSimPlatform.Network.Commander;
 using VoxSimPlatform.SpatialReasoning;
 
 namespace VoxSimPlatform {
@@ -35,6 +37,7 @@ namespace VoxSimPlatform {
             RelationTracker relationTracker;
             EventManager em;
         	CommunicationsBridge commBridge;
+            CommanderSocket commander;
 
         	// Use this for initialization
         	void Start() {
@@ -51,7 +54,9 @@ namespace VoxSimPlatform {
 
         	public void WriteRelations(object sender, EventArgs e) {
         		if (commBridge != null) {
+                    Debug.Log(commBridge.FindSocketConnectionByLabel("Commander"));
                     CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
+                    Debug.Log(commander);
         			if (commander != null) {
         				StringBuilder sb = new StringBuilder();
         				foreach (string rel in relationTracker.relStrings) {
@@ -74,7 +79,8 @@ namespace VoxSimPlatform {
 
                         Debug.Log(string.Format("Writing data to {0}:{1}: {2}", commander.Address, commander.Port,
                             sb.ToString()));
-                        commander.Write(sb.ToString());
+                        byte[] bytes = Encoding.ASCII.GetBytes(sb.ToString()).ToArray<byte>();
+                        commander.Write(bytes);
         			}
         		}
         	}

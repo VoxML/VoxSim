@@ -2,35 +2,50 @@
 using System;
 using System.Text;
 
-using VoxSimPlatform.Network;
+using VoxSimPlatform.Global;
 
-public class CommanderEventArgs : EventArgs {
-	public string Content { get; set; }
+namespace VoxSimPlatform {
+    namespace Network {
+        namespace Commander {
+            public class CommanderEventArgs : EventArgs {
+                public string Content { get; set; }
 
-	public CommanderEventArgs(string content, bool macroEvent = false) {
-		this.Content = content;
-	}
-}
+                public CommanderEventArgs(string content, bool macroEvent = false) {
+                    this.Content = content;
+                }
+            }
 
-public class CommanderSocket : SocketConnection {
-	public event EventHandler ConnectionLost;
+            public class CommanderSocket : SocketConnection {
 
-	public void OnConnectionLost(object sender, EventArgs e) {
-		if (ConnectionLost != null) {
-			ConnectionLost(this, e);
-		}
-	}
+                public EventHandler UpdateReceived;
 
-	public void Write(string content) {
-		 //Check to see if this NetworkStream is writable.
-		if (_client.GetStream().CanWrite) {
+                public void OnUpdateReceived(object sender, EventArgs e) {
+                    if (UpdateReceived != null) {
+                        UpdateReceived(this, e);
+                    }
+                }
 
-			byte[] writeBuffer = Encoding.ASCII.GetBytes (content);
-			_client.GetStream().Write (writeBuffer, 0, writeBuffer.Length);
-			Debug.Log (string.Format("Written to this NetworkStream: {0}",writeBuffer.Length));  
-		} 
-		else {
-			Debug.Log ("Sorry.  You cannot write to this NetworkStream.");  
-		}
-	}
+                public CommanderSocket() {
+                    IOClientType = typeof(CommanderIOClient);
+                }
+
+                public void Write(byte[] content) {
+                    // Check to see if this NetworkStream is writable.
+                    if (_client.GetStream().CanWrite) {
+                        byte[] writeBuffer = content;
+                        if (!BitConverter.IsLittleEndian) {
+                            Array.Reverse(writeBuffer);
+                        }
+
+                        _client.GetStream().Write(writeBuffer, 0, writeBuffer.Length);
+                        Debug.Log(string.Format("Written to this NetworkStream: {0} ({1})", writeBuffer.Length,
+                            GlobalHelper.PrintByteArray(writeBuffer)));
+                    }
+                    else {
+                        Debug.Log("Sorry.  You cannot write to this NetworkStream.");
+                    }
+                }
+            }
+        }
+    }
 }

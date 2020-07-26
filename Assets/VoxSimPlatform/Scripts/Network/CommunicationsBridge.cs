@@ -10,6 +10,7 @@ using System.Xml.Serialization;
 
 using VoxSimPlatform.NLU;
 using VoxSimPlatform.Network;
+using VoxSimPlatform.Network.Commander;
 using VoxSimPlatform.Agent;
 
 namespace VoxSimPlatform {
@@ -150,11 +151,11 @@ namespace VoxSimPlatform {
                         // split the URL into IP and port
                         Debug.Log(segments[0] + " " + segments[1] + " " + segments[2]);
                         if (socketActiveStatuses[i] == true) {
-                            string[] socketAddress = segments[2].Split(':'); //// Assumes in form of IP address, not url
+	                        string[] socketAddress = segments[2].Split(':'); // Assumes in form of IP address, not url
                             if (!string.IsNullOrEmpty(socketAddress[0])) {
                                 Type socketType = null;
                                 // append Assembly-CSharp.dll assembly to search in
-                                socketType = Type.GetType(segments[1]+",Assembly-CSharp.dll");
+                                socketType = Type.GetType(segments[1]) != null ? Type.GetType(segments[1]) : Type.GetType(segments[1]+",Assembly-CSharp.dll");
                                 if (socketType != null) {
                                     if (socketType.IsSubclassOf(typeof(SocketConnection))) {
                                         SocketConnection newSocket = null;

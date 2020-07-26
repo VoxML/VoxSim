@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System;
+using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Network;
+using VoxSimPlatform.Network.Commander;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
@@ -40,7 +43,8 @@ namespace VoxSimPlatform {
                     CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
 
                     if (commander != null) {
-                        commander.Write("");
+                        byte[] bytes = Encoding.ASCII.GetBytes("").ToArray<byte>();
+                        commander.Write(bytes);
         			}
         		}
         	}
