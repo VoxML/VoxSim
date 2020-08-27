@@ -44,6 +44,7 @@ namespace VoxSimPlatform {
         				voxeme = go.GetComponent<Voxeme>();
         				Rigging rigging = go.GetComponent<Rigging>();
         				if ((voxeme != null) && (voxeme.enabled) && (rigging == null)) {
+                            Debug.Log(string.Format("Initalizing object {0} as voxeme",go.name));
         					// object has Voxeme component and no Rigging
         					GameObject container = new GameObject(go.name, typeof(Voxeme), typeof(Rigging));
 
