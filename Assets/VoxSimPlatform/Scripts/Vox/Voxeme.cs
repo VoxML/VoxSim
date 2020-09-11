@@ -510,6 +510,7 @@ namespace VoxSimPlatform {
 
         	// Use this for initialization
         	void Start() {
+                Debug.Log(string.Format("Starting voxeme {0}", gameObject.name));
         		LoadVoxML();
 
                 supportingSurface = null;
