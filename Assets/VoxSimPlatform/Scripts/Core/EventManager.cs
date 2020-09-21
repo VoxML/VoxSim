@@ -811,7 +811,20 @@ namespace VoxSimPlatform {
                         else {
                             // if methodToCall is still null at this point
                             //  we might have to look for a conditional predicate to evaluate
-                            methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                            if (preds.primitivesOverride != null) {
+                                methodToCall = preds.primitivesOverride.GetType().GetMethod(pred.ToUpper());
+
+                                // couldn't find an override primitive predicate
+                                //  default to the existing primitive
+                                if (methodToCall == null) {
+                                    methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                                }
+                            }
+                            else {
+                                methodToCall = preds.GetType().GetMethod(pred.ToUpper());
+                            }
+
+                            //methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                             if (methodToCall.ReturnType != typeof(bool)) {
                                 methodToCall = null;
                             }
