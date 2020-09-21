@@ -141,7 +141,7 @@ Assets/VoxSimPlatform/GracesGames*
 Assets/VoxSimPlatform/SimpleFileBrowser* 
 Assets/VoxSimPlatform/Editor\ Default\ Resources/crosstales*
 Assets/VoxSimPlatform/Plugins/ConsoleE*
-Assets/VoxSimPlatform/JsonDotNet
+Assets/VoxSimPlatform/JsonDotNet*
 
 # ignore _TerrainAutoUpgrade
 Assets/_TerrainAutoUpgrade*
