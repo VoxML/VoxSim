@@ -19,7 +19,7 @@ Run *cmd* and cd to the main directory of your VoxSim-based implementation (para
 @cd /d "%~dp0"\
 rmdir Assets\Plugins\VoxSimPlatform & del /Q Assets\Plugins\VoxSimPlatform & mklink /D Assets\Plugins\VoxSimPlatform ..\..\submodules\VoxSim\Assets\VoxSimPlatform
 
-$ git submodule update --remote --merge
+$ git submodule foreach git pull
 
 ## Dependencies
 
