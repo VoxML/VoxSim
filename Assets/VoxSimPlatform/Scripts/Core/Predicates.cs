@@ -7224,6 +7224,18 @@ namespace VoxSimPlatform {
                 return retVal;
             }
 
+            /// <summary>
+            /// Composes a function from primitives using a VoxML encoding file (.xml)
+            /// </summary>
+            // IN: VoxML event encoding, arguments
+            // OUT: none
+            public object ComposeFunction(VoxML voxml, object[] args)
+            {
+                object retVal = null;
+
+                return retVal;
+            }
+
             // IN: Condition (string)
             // OUT: bool
             public bool WHILE(object[] args) {
