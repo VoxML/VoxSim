@@ -11,9 +11,26 @@ $ git submodule add https://github.com/VoxML/VoxSim VoxSim
 
 $ cd ../Assets/Plugins
 
-$ ln -s ../../submodules/VoxSim/Assets/VoxSimPlatform VoxSimPlatform
+If on Mac or \*nix:\
+$ ln -s ../../submodules/VoxSim/Assets/VoxSimPlatform VoxSimPlatform\
+If on Windows:\
+Run *cmd* and cd to the main directory of your VoxSim-based implementation (parallel to Assets). Run the following commands:\
+@setlocal enableextensions\
+@cd /d "%~dp0"\
+rmdir Assets\Plugins\VoxSimPlatform & del /Q Assets\Plugins\VoxSimPlatform & mklink /D Assets\Plugins\VoxSimPlatform ..\..\submodules\VoxSim\Assets\VoxSimPlatform
 
 $ git submodule foreach git pull
+
+## Dependencies
+
+VoxSim depends on the following 3rd-party Unity libraries which are not included in the repository.  Find them on the Unity Asset Store.
+* RTVoice
+* FinalIK
+* FlashbackRecorder
+* ConsoleEnhanced Free
+* SimpleFileBrowser
+
+VoxSim also depends on Newtonsoft's JsonDotNet package, which is included as a .zip file.  Unzip the package from within *VoxSimPlatform/Packages* and place the result directly under *VoxSimPlatform*
 
 ## Keep your Unity project up to date with VoxSim
 
