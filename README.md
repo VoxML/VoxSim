@@ -13,6 +13,7 @@ $ cd ../Assets/Plugins
 
 If on Mac or \*nix:\
 $ ln -s ../../submodules/VoxSim/Assets/VoxSimPlatform VoxSimPlatform\
+
 If on Windows:\
 Run *cmd* and cd to the main directory of your VoxSim-based implementation (parallel to Assets). Run the following commands:\
 @setlocal enableextensions\
