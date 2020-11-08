@@ -18,7 +18,7 @@ If on Windows:\
 Run *cmd* and cd to the main directory of your VoxSim-based implementation (parallel to Assets). Run the following commands:\
 @setlocal enableextensions\
 @cd /d "%~dp0"\
-rmdir Assets\Plugins\VoxSimPlatform & del /Q Assets\Plugins\VoxSimPlatform & mklink /D Assets\Plugins\VoxSimPlatform ..\..\submodules\VoxSim\Assets\VoxSimPlatform
+rmdir Assets\Plugins\VoxSimPlatform & del /Q Assets\Plugins\VoxSimPlatform & mklink /D Assets\Plugins\VoxSimPlatform ..\\..\submodules\VoxSim\Assets\VoxSimPlatform
 
 $ git submodule foreach git pull
 
