@@ -30,6 +30,8 @@ namespace VoxSimPlatform {
 
             public delegate List<GameObject> ObjectMatchingConstraint(List<GameObject> matches, MethodInfo referringMethod);
 
+            // if a relational predicate is satisfied
+            // checks for presence of that relation in RelationTracker
             public static bool IsSatisfied(String pred, List<object> args) {
                 bool satisfied = false;
 
@@ -1016,6 +1018,7 @@ namespace VoxSimPlatform {
                     (RelationTracker) GameObject.Find("BehaviorController").GetComponent("RelationTracker");
 
                 ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
+                SpatialReasoningPrefs srPrefs = GameObject.Find("VoxWorld").GetComponent<SpatialReasoningPrefs>();
 
                 // get bounds of theme object of program
                 List<GameObject> excludeChildren = obj.gameObject.GetComponentsInChildren<Renderer>().Where(
@@ -1270,15 +1273,19 @@ namespace VoxSimPlatform {
                                                                                 if (groundComponentFirst.Match(ev).Length >
 	                                                                                0) {
 	                                                                                if (obj.tag != "Ground") {
-	                                                                                    RiggingHelper.RigTo(test.gameObject,
-		                                                                                    obj.gameObject);
+                                                                                        if (srPrefs.bindOnSupport){
+                                                                                            RiggingHelper.RigTo(test.gameObject,
+                                                                                                obj.gameObject);
+                                                                                        }
 	                                                                                }
                                                                                 }
                                                                                 else if (groundComponentSecond.Match(ev)
 	                                                                                .Length > 0) {
 	                                                                                if (test.tag != "Ground") {
-	                                                                                    RiggingHelper.RigTo(obj.gameObject,
-		                                                                                    test.gameObject);
+                                                                                        if (srPrefs.bindOnSupport) {
+                                                                                            RiggingHelper.RigTo(obj.gameObject,
+                                                                                                test.gameObject);
+                                                                                        }
 	                                                                                }
                                                                                 }
                                                                             }
@@ -1286,15 +1293,19 @@ namespace VoxSimPlatform {
                                                                                 if (groundComponentFirst.Match(ev).Length >
 	                                                                                0) {
 	                                                                                if (obj.tag != "Ground") {
-	                                                                                    RiggingHelper.RigTo(test.gameObject,
-		                                                                                    obj.gameObject);
+                                                                                        if (srPrefs.bindOnSupport) {
+                                                                                            RiggingHelper.RigTo(test.gameObject,
+                                                                                                obj.gameObject);
+                                                                                        }
 	                                                                                }
                                                                                 }
                                                                                 else if (groundComponentSecond.Match(ev)
 	                                                                                .Length > 0) {
 	                                                                                if (test.tag != "Ground") {
-	                                                                                    RiggingHelper.RigTo(obj.gameObject,
-		                                                                                    test.gameObject);
+                                                                                        if (srPrefs.bindOnSupport) {
+                                                                                            RiggingHelper.RigTo(obj.gameObject,
+                                                                                                test.gameObject);
+                                                                                        }
 	                                                                                }
                                                                                 }
                                                                             }
@@ -1874,6 +1885,8 @@ namespace VoxSimPlatform {
             }
 
             public static void ReevaluateRelationships(String program, GameObject obj) {
+                SpatialReasoningPrefs srPrefs = GameObject.Find("VoxWorld").GetComponent<SpatialReasoningPrefs>();
+
                 // get object bounds
                 Bounds objBounds = GlobalHelper.GetObjectWorldSize(obj);
 
@@ -1911,7 +1924,9 @@ namespace VoxSimPlatform {
                                                 // if test object is concave and placed object would fit inside
                                                 if (RCC8.PO(objBounds, GlobalHelper.GetObjectWorldSize(test))) {
                                                     // interpenetration = support
-                                                    RiggingHelper.RigTo(obj, test); // setup parent-child rig
+                                                    if (srPrefs.bindOnSupport) {
+                                                        RiggingHelper.RigTo(obj, test); // setup parent-child rig
+                                                    }
                                                     relationTracker.AddNewRelation(new List<GameObject> {test, obj},
                                                         "support");
                                                     Debug.Log(test.name + " supports " + obj.name);
@@ -1926,7 +1941,9 @@ namespace VoxSimPlatform {
 
                                                     obj.GetComponent<Voxeme>().minYBound =
                                                         GlobalHelper.GetObjectWorldSize(test).max.y;
-                                                    RiggingHelper.RigTo(obj, test); // setup parent-child rig
+                                                    if (srPrefs.bindOnSupport) {
+                                                        RiggingHelper.RigTo(obj, test); // setup parent-child rig
+                                                    }
                                                     relationTracker.AddNewRelation(new List<GameObject> {test, obj},
                                                         "support");
                                                     Debug.Log(test.name + " supports " + obj.name);

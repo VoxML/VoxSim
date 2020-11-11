@@ -277,7 +277,7 @@ namespace VoxSimPlatform {
 	    			foreach (Vector3 corner in closestColinearCorners) {
 	    				contains &= (Vector3.Dot((point - closestCorner).normalized, (corner - closestCorner).normalized) >= 0.0f);
 	    			}
-    			}
+                }
     			else {
     				contains = false;
     			}

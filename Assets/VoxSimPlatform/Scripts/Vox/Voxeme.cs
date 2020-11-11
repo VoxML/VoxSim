@@ -21,6 +21,8 @@ namespace VoxSimPlatform {
             private bool showOpVox = false;
         	public OperationalVox opVox;
 
+            public string predicate;
+
         	public float density;
 
         	// rotation information for each subobject's rigidbody
@@ -31,6 +33,8 @@ namespace VoxSimPlatform {
         	public Dictionary<GameObject, Vector3> rotationalDisplacement = new Dictionary<GameObject, Vector3>();
 
         	Rigging rigging;
+
+            VoxMLLibrary library;
 
         	public GameObject graspConvention = null;
 
@@ -132,6 +136,12 @@ namespace VoxSimPlatform {
                 public override void OnInspectorGUI() {
                     var bold = new GUIStyle();
                     bold.fontStyle = FontStyle.Bold;
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Predicate", GUILayout.Width(120));
+                    ((Voxeme)target).predicate = GUILayout.TextField(((Voxeme)target).predicate,
+                        GUILayout.MaxWidth(200));
+                    GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Density", GUILayout.Width(120));
@@ -511,7 +521,19 @@ namespace VoxSimPlatform {
         	// Use this for initialization
         	void Start() {
                 Debug.Log(string.Format("Starting voxeme {0}", gameObject.name));
-        		LoadVoxML();
+
+                if (GameObject.Find("VoxWorld") == null) {
+                    Debug.LogError("Could not find VoxWorld object!  Unable to load VoxML!");
+                    return;
+                }
+          
+                library = GameObject.Find("VoxWorld").GetComponent<VoxMLLibrary>();
+                if (library == null) {
+                    Debug.LogError("Could not find VoxMLLibrary on VoxWorld object!  Unable to load VoxML!");
+                    return;
+                }
+
+                LoadVoxML();
 
                 supportingSurface = null;
 
@@ -1076,9 +1098,13 @@ namespace VoxSimPlatform {
 
         	public void LoadVoxML() {
         		try {
+                    // load the VoxML from the file whose "predicate" field matches the predicate of this object
+                    string filename = library.VoxMLPredicateDict.Where(kvp => kvp.Value == predicate).FirstOrDefault().Key;
         			using (StreamReader sr = new StreamReader(
-        				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", gameObject.name)))) {
-        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), gameObject.name);
+        				string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", filename)))) {
+        				voxml = VoxML.LoadFromText(sr.ReadToEnd(), filename);
+                        Debug.Log(string.Format("Loaded VoxML for object {0} from {1}", gameObject.name,
+                            string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", filename))));
         			}
         		}
         		catch (FileNotFoundException ex) {
@@ -1308,7 +1334,7 @@ namespace VoxSimPlatform {
         		if (voxml.Entity.Type == VoxEntity.EntityType.Object) {
         			AttributeSet attrSet = gameObject.GetComponent<AttributeSet>();
         			if (attrSet != null) {
-        				attrSet.attributes.Clear();
+        				//attrSet.attributes.Clear();
         				for (int i = 0; i < voxml.Attributes.Attrs.Count; i++) {
         					attrSet.attributes.Add(voxml.Attributes.Attrs[i].Value);
         					Debug.Log(attrSet.attributes[i]);

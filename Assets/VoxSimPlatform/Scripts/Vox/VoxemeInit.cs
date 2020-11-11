@@ -55,19 +55,21 @@ namespace VoxSimPlatform {
         						container.transform.parent = go.transform.parent;
         					}
 
-        					container.transform.position = go.transform.position;
+                            container.transform.position = go.transform.position;
         					container.transform.rotation = go.transform.rotation;
         					go.transform.parent = container.transform;
         					go.name += "*";
                             voxeme.enabled = false;
 
-        					container.GetComponent<Voxeme>().density = voxeme.density;
+                            container.GetComponent<Voxeme>().predicate = voxeme.predicate;
+                            container.GetComponent<Voxeme>().density = voxeme.density;
 
         					// copy attribute set
         					AttributeSet newAttrSet = container.AddComponent<AttributeSet>();
         					AttributeSet attrSet = go.GetComponent<AttributeSet>();
         					if (attrSet != null) {
         						foreach (string s in attrSet.attributes) {
+                                    Debug.Log(string.Format("Adding attribute {0} to object {1}", s, container.name));
         							newAttrSet.attributes.Add(s);
         						}
         					}
