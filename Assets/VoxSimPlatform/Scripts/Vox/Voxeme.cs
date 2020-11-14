@@ -23,7 +23,7 @@ namespace VoxSimPlatform {
             public OperationalVox opVox;
 
             public string predicate;
-
+            
             public float density;
 
             // rotation information for each subobject's rigidbody
@@ -146,59 +146,59 @@ namespace VoxSimPlatform {
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Density", GUILayout.Width(120));
-                    ((Voxeme) target).density = Convert.ToSingle(GUILayout.TextField(((Voxeme) target).density.ToString(),
+                    ((Voxeme)target).density = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).density.ToString(),
                         GUILayout.MaxWidth(200)));
                     GUILayout.EndHorizontal();
 
                     GUILayout.Label("Displacement", bold);
-                    if (((Voxeme) target).displacement != null) {
-                        foreach (GameObject item in ((Voxeme) target).displacement.Keys) {
+                    if (((Voxeme)target).displacement != null) {
+                        foreach (GameObject item in ((Voxeme)target).displacement.Keys) {
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label(item.name,GUILayout.Width(120));
+                            GUILayout.Label(item.name, GUILayout.Width(120));
                             GUILayout.Label("X");
-                            GUILayout.TextField(((Voxeme) target).displacement[item].x.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).displacement[item].x.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Y");
-                            GUILayout.TextField(((Voxeme) target).displacement[item].y.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).displacement[item].y.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Z");
-                            GUILayout.TextField(((Voxeme) target).displacement[item].z.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).displacement[item].z.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.EndHorizontal();
                         }
                     }
 
                     GUILayout.Label("Rotational Displacement", bold);
-                    if (((Voxeme) target).rotationalDisplacement != null) {
-                        foreach (GameObject item in ((Voxeme) target).rotationalDisplacement.Keys) {
+                    if (((Voxeme)target).rotationalDisplacement != null) {
+                        foreach (GameObject item in ((Voxeme)target).rotationalDisplacement.Keys) {
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label(item.name,GUILayout.Width(120));
+                            GUILayout.Label(item.name, GUILayout.Width(120));
                             GUILayout.Label("X");
-                            GUILayout.TextField(((Voxeme) target).rotationalDisplacement[item].x.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).rotationalDisplacement[item].x.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Y");
-                            GUILayout.TextField(((Voxeme) target).rotationalDisplacement[item].y.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).rotationalDisplacement[item].y.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Z");
-                            GUILayout.TextField(((Voxeme) target).rotationalDisplacement[item].z.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).rotationalDisplacement[item].z.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.EndHorizontal();
                         }
                     }
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Grasp Convention", GUILayout.Width(120));
-                    GUILayout.TextField(((Voxeme) target).graspConvention == null ? "None" : 
-                        ((Voxeme) target).graspConvention.ToString(), GUILayout.MaxWidth(200));
+                    GUILayout.TextField(((Voxeme)target).graspConvention == null ? "None" :
+                        ((Voxeme)target).graspConvention.ToString(), GUILayout.MaxWidth(200));
                     GUILayout.EndHorizontal();
 
                     GUILayout.Label("Interaction Targets", bold);
-                    if (((Voxeme) target).interactionTargets != null) {
-                        foreach (InteractionTarget item in ((Voxeme) target).interactionTargets) {
+                    if (((Voxeme)target).interactionTargets != null) {
+                        foreach (InteractionTarget item in ((Voxeme)target).interactionTargets) {
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label(item.name,GUILayout.Width(120));
+                            GUILayout.Label(item.name, GUILayout.Width(120));
                             GUILayout.TextField(item.ToString(), GUILayout.MaxWidth(200));
                             GUILayout.EndHorizontal();
                         }
                     }
 
                     GUILayout.Label("Inter Target Positions", bold);
-                    if (((Voxeme) target).interTargetPositions != null) {
-                        foreach (Vector3 item in ((Voxeme) target).interTargetPositions) {
+                    if (((Voxeme)target).interTargetPositions != null) {
+                        foreach (Vector3 item in ((Voxeme)target).interTargetPositions) {
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("X");
                             GUILayout.TextField(item.x.ToString(), GUILayout.MaxWidth(60));
@@ -226,8 +226,8 @@ namespace VoxSimPlatform {
                     GUILayout.EndHorizontal();
 
                     GUILayout.Label("Inter Target Rotations", bold);
-                    if (((Voxeme) target).interTargetRotations != null) {
-                        foreach (Vector3 item in ((Voxeme) target).interTargetRotations) {
+                    if (((Voxeme)target).interTargetRotations != null) {
+                        foreach (Vector3 item in ((Voxeme)target).interTargetRotations) {
                             GUILayout.BeginHorizontal();
                             GUILayout.Label("X");
                             GUILayout.TextField(item.x.ToString(), GUILayout.MaxWidth(60));
@@ -271,60 +271,60 @@ namespace VoxSimPlatform {
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Move Speed", GUILayout.Width(120));
-                    ((Voxeme) target).moveSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme) target).moveSpeed.ToString(),
+                    ((Voxeme)target).moveSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).moveSpeed.ToString(),
                         GUILayout.MaxWidth(200)));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Turn Speed", GUILayout.Width(120));
-                    ((Voxeme) target).turnSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme) target).turnSpeed.ToString(),
+                    ((Voxeme)target).turnSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).turnSpeed.ToString(),
                         GUILayout.MaxWidth(200)));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Default Move Speed", GUILayout.Width(120));
-                    ((Voxeme) target).defaultMoveSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme) target).defaultMoveSpeed.ToString(),
+                    ((Voxeme)target).defaultMoveSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).defaultMoveSpeed.ToString(),
                         GUILayout.MaxWidth(200)));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Default Turn Speed", GUILayout.Width(120));
-                    ((Voxeme) target).defaultTurnSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme) target).defaultTurnSpeed.ToString(),
+                    ((Voxeme)target).defaultTurnSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).defaultTurnSpeed.ToString(),
                         GUILayout.MaxWidth(200)));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Min Y Bound", GUILayout.Width(120));
-                    ((Voxeme) target).minYBound = Convert.ToSingle(GUILayout.TextField(((Voxeme) target).minYBound.ToString(),
+                    ((Voxeme)target).minYBound = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).minYBound.ToString(),
                         GUILayout.MaxWidth(200)));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Supporting Surface", GUILayout.Width(120));
-                    GUILayout.TextField(((Voxeme) target).supportingSurface == null ? "None" : 
-                        ((Voxeme) target).supportingSurface.ToString(), GUILayout.MaxWidth(200));
+                    GUILayout.TextField(((Voxeme)target).supportingSurface == null ? "None" :
+                        ((Voxeme)target).supportingSurface.ToString(), GUILayout.MaxWidth(200));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Is Grasped", GUILayout.Width(120));
-                    ((Voxeme) target).isGrasped = GUILayout.Toggle(((Voxeme) target).isGrasped, string.Empty, GUILayout.MaxWidth(200));
+                    ((Voxeme)target).isGrasped = GUILayout.Toggle(((Voxeme)target).isGrasped, string.Empty, GUILayout.MaxWidth(200));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Grasp Tracker", GUILayout.Width(120));
-                    GUILayout.TextField(((Voxeme) target).graspTracker == null ? "None" : 
-                        ((Voxeme) target).graspTracker.ToString(), GUILayout.MaxWidth(200));
+                    GUILayout.TextField(((Voxeme)target).graspTracker == null ? "None" :
+                        ((Voxeme)target).graspTracker.ToString(), GUILayout.MaxWidth(200));
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Grasper Coord", GUILayout.Width(120));
-                    GUILayout.TextField(((Voxeme) target).grasperCoord == null ? "None" : 
-                        ((Voxeme) target).grasperCoord.ToString(), GUILayout.MaxWidth(200));
+                    GUILayout.TextField(((Voxeme)target).grasperCoord == null ? "None" :
+                        ((Voxeme)target).grasperCoord.ToString(), GUILayout.MaxWidth(200));
                     GUILayout.EndHorizontal();
 
                     GUILayout.Label("Children", bold);
-                    if (((Voxeme) target).children != null) {
-                        foreach (Voxeme item in ((Voxeme) target).children) {
+                    if (((Voxeme)target).children != null) {
+                        foreach (Voxeme item in ((Voxeme)target).children) {
                             GUILayout.BeginHorizontal();
                             GUILayout.TextField(item.ToString(), GUILayout.MaxWidth(200));
                             GUILayout.EndHorizontal();
@@ -332,33 +332,33 @@ namespace VoxSimPlatform {
                     }
 
                     GUILayout.Label("Parent To Child Position Offset", bold);
-                    if (((Voxeme) target).parentToChildPositionOffset != null) {
-                        foreach (GameObject item in ((Voxeme) target).parentToChildPositionOffset.Keys) {
+                    if (((Voxeme)target).parentToChildPositionOffset != null) {
+                        foreach (GameObject item in ((Voxeme)target).parentToChildPositionOffset.Keys) {
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label(item.name,GUILayout.Width(120));
+                            GUILayout.Label(item.name, GUILayout.Width(120));
                             GUILayout.Label("X");
-                            GUILayout.TextField(((Voxeme) target).parentToChildPositionOffset[item].x.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildPositionOffset[item].x.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Y");
-                            GUILayout.TextField(((Voxeme) target).parentToChildPositionOffset[item].y.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildPositionOffset[item].y.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Z");
-                            GUILayout.TextField(((Voxeme) target).parentToChildPositionOffset[item].z.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildPositionOffset[item].z.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.EndHorizontal();
                         }
                     }
 
                     GUILayout.Label("Parent To Child Rotation Offset", bold);
-                    if (((Voxeme) target).parentToChildRotationOffset != null) {
-                        foreach (GameObject item in ((Voxeme) target).parentToChildRotationOffset.Keys) {
+                    if (((Voxeme)target).parentToChildRotationOffset != null) {
+                        foreach (GameObject item in ((Voxeme)target).parentToChildRotationOffset.Keys) {
                             GUILayout.BeginHorizontal();
-                            GUILayout.Label(item.name,GUILayout.Width(120));
+                            GUILayout.Label(item.name, GUILayout.Width(120));
                             GUILayout.Label("X");
-                            GUILayout.TextField(((Voxeme) target).parentToChildRotationOffset[item].x.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildRotationOffset[item].x.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Y");
-                            GUILayout.TextField(((Voxeme) target).parentToChildRotationOffset[item].y.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildRotationOffset[item].y.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("Z");
-                            GUILayout.TextField(((Voxeme) target).parentToChildRotationOffset[item].z.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildRotationOffset[item].z.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.Label("W");
-                            GUILayout.TextField(((Voxeme) target).parentToChildRotationOffset[item].w.ToString(), GUILayout.MaxWidth(60));
+                            GUILayout.TextField(((Voxeme)target).parentToChildRotationOffset[item].w.ToString(), GUILayout.MaxWidth(60));
                             GUILayout.EndHorizontal();
                         }
                     }
@@ -410,7 +410,7 @@ namespace VoxSimPlatform {
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Default Parent", GUILayout.Width(120));
-                    GUILayout.TextField(((Voxeme)target).defaultParent == null ? "Null" : 
+                    GUILayout.TextField(((Voxeme)target).defaultParent == null ? "Null" :
                         ((Voxeme)target).defaultParent.ToString(), GUILayout.MaxWidth(120));
                     GUILayout.EndHorizontal();
 
@@ -1101,22 +1101,11 @@ namespace VoxSimPlatform {
                 try {
                     // load the VoxML from the file whose "predicate" field matches the predicate of this object
                     string filename = library.VoxMLPredicateDict.Where(kvp => kvp.Value == predicate).FirstOrDefault().Key;
-                    //using (StreamReader sr = new StreamReader(
-                    //    string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", filename)))) {
-                    //    voxml = VoxML.LoadFromText(sr.ReadToEnd(), filename);
-                    //             Debug.Log(string.Format("Loaded VoxML for object {0} from {1}", gameObject.name,
-                    //                 string.Format("{0}/{1}", Data.voxmlDataPath, string.Format("objects/{0}.xml", filename))));
-                    //}
 
-
-                    voxml = library.VoxMLObjectDict[filename];
-                    /*using (var ms = new MemoryStream()) {
-                        var formatter = new BinaryFormatter();
-                        formatter.Serialize(ms, library.VoxMLObjectDict[filename]);
-                        ms.Position = 0;
-
-                        voxml = (VoxML)formatter.Deserialize(ms);
-                    }*/
+                    if (library.VoxMLEntityTypeDict.ContainsKey(filename) && library.VoxMLEntityTypeDict[filename] == "objects")
+                    {
+                        voxml = library.VoxMLObjectDict[filename];
+                    }
                 }
                 catch (FileNotFoundException ex) {
                     voxml = new VoxML();

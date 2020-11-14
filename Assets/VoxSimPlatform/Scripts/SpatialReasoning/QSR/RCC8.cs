@@ -45,8 +45,8 @@ namespace VoxSimPlatform {
                     // if x and z dimensions overlap
                     if (Mathf.Abs(x.center.x - y.center.x) * 2 < (x.size.x + y.size.x) &&
                         (Mathf.Abs(x.center.z - y.center.z) * 2 < (x.size.z + y.size.z))) {
-                        Debug.Log(x.min.y);
-                        Debug.Log(y.max.y);
+                        //Debug.Log(x.min.y);
+                        //Debug.Log(y.max.y);
                         if ((Mathf.Abs(x.min.y - y.max.y) < Constants.EPSILON * 2) || // if touching on y
                             (Mathf.Abs(x.max.y - y.min.y) < Constants.EPSILON * 2)) {
                             ec = true;
