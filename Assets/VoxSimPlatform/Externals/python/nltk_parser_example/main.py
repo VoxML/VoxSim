@@ -77,7 +77,7 @@ if __name__ == "__main__":
         default='0.0.0.0',
         action='store',
         nargs='?',
-        help='Specify host name for EpiSim to listen to.'
+        help='Specify host name for parser to listen to.'
     )
     args = parser.parse_args()
     app.run(host=args.host, port=args.port, debug=True)
