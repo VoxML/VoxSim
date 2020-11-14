@@ -1469,6 +1469,9 @@ namespace VoxSimPlatform {
 		                                	methodToCall = preds.GetType().GetMethod("ComposeRelation");
 	                                	}
 	                                }
+                                    else {
+                                        Debug.LogWarningFormat("EvaluateSkolemConstants: found no VoxML for \"{0}\"!", pred);
+                                    }
                                 }
 
                                 if (methodToCall == null) {
