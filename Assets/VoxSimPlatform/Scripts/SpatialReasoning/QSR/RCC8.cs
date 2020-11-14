@@ -323,9 +323,6 @@ namespace VoxSimPlatform {
                             foreach (string val in constraintValues) {
                                 if (val.Contains("y")) {
                                     if (GlobalHelper.pred.IsMatch(val)) {
-                                        List<object> objs = em.ExtractObjects(GlobalHelper.GetTopPredicate(val),
-                                                (string)GlobalHelper.ParsePredicate(val)[GlobalHelper.GetTopPredicate(val)]);
-
                                         MethodInfo methodToCall = preds.GetType().GetMethod(GlobalHelper.GetTopPredicate(val));
 
                                         if (methodToCall != null) {
