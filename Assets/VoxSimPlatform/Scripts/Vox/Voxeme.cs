@@ -1101,9 +1101,9 @@ namespace VoxSimPlatform {
                 try {
                     // load the VoxML from the file whose "predicate" field matches the predicate of this object
                     string filename = library.VoxMLPredicateDict.Where(kvp => kvp.Value == predicate).FirstOrDefault().Key;
+                    Debug.LogFormat("Loading VoxML (filename {0})", filename);
 
-                    if (library.VoxMLEntityTypeDict.ContainsKey(filename) && library.VoxMLEntityTypeDict[filename] == "objects")
-                    {
+                    if (library.VoxMLEntityTypeDict.ContainsKey(filename) && library.VoxMLEntityTypeDict[filename] == "objects") {
                         voxml = library.VoxMLObjectDict[filename];
                     }
                 }
