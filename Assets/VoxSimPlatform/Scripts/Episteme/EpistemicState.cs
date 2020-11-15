@@ -7,7 +7,7 @@ using SimpleJSON;
 using VoxSimPlatform.Episteme;
 using VoxSimPlatform.Network;
 
-public class EpistemicState : RestClient {
+public class EpistemicState : RESTClient {
 	private Dictionary<ConceptType, Concepts> _episteme;
 	//private GameObject _restClient;
 	//private RestClient client;

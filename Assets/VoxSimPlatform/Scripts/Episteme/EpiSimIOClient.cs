@@ -16,7 +16,7 @@ public class EpiSimIOClient : MonoBehaviour {
     // Use this for initialization
     void Start() {
         commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
-        _epiSimSocket = (EpistemicState)commBridge.FindRestClientByLabel("EpiSim");
+        _epiSimSocket = (EpistemicState)commBridge.FindRESTClientByLabel("EpiSim");
     }
 
     // Update is called once per frame
@@ -26,7 +26,7 @@ public class EpiSimIOClient : MonoBehaviour {
             if (_epiSimSocket.isConnected) {
                 if (commBridge.tryAgainSockets.ContainsKey(epiSimUrl)) {
                     if (commBridge.tryAgainRest[epiSimUrl] == typeof(EpistemicState)) {
-                        _epiSimSocket = (EpistemicState)commBridge.FindRestClientByLabel("EpiSim");
+                        _epiSimSocket = (EpistemicState)commBridge.FindRESTClientByLabel("EpiSim");
                         //Debug.Log(_fusionSocket.IsConnected());
                     }
                 }

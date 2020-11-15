@@ -425,7 +425,7 @@ namespace VoxSimPlatform {
                 throw new System.NotImplementedException();
             }
 
-            public void InitParserService(RestClient restClient, Type expectedSyntax) {
+            public void InitParserService(RESTClient restClient, Type expectedSyntax) {
                 throw new System.NotImplementedException();
             }
 

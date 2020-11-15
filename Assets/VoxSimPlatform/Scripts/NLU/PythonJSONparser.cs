@@ -15,7 +15,7 @@ namespace VoxSimPlatform {
         public class PythonJSONParser : INLParser {
             //NLUServerHandler nlu_server = null;
             SocketConnection nluSocketConnection = null;
-            RestClient nluRestClient = null;
+            RESTClient nluRESTClient = null;
             string route = ""; // Don't expect to be setting it anytime soon
             Type syntaxType = null;
 
@@ -26,9 +26,9 @@ namespace VoxSimPlatform {
                 syntaxType = expectedSyntax;
             }
 
-            public void InitParserService(RestClient restClient = null, Type expectedSyntax = null) {
+            public void InitParserService(RESTClient restClient = null, Type expectedSyntax = null) {
                 // set the REST client instance
-                nluRestClient = restClient;
+                nluRESTClient = restClient;
                 // set the expected syntax type (custom defined class or null)
                 syntaxType = expectedSyntax;
             }
@@ -37,8 +37,8 @@ namespace VoxSimPlatform {
                 if (nluSocketConnection != null) {
                     // do stuff here
                 }
-                else if (nluRestClient != null) {
-                    RestDataContainer result = new RestDataContainer(nluRestClient.owner, nluRestClient.Post(route, rawSent));
+                else if (nluRESTClient != null) {
+                    RESTDataContainer result = new RESTDataContainer(nluRESTClient.owner, nluRESTClient.Post(route, rawSent));
                     Debug.Log("Parse result: " + result.result);
                 }
                 return "WAIT";
@@ -56,10 +56,10 @@ namespace VoxSimPlatform {
                     // Grab the result
                     // do stuff here
                 }
-                else if (nluRestClient != null) {
+                else if (nluRESTClient != null) {
                     // Grab the result
                     //to_print = nluRestClient.last_read;
-                    toPrint = nluRestClient.webRequest.downloadHandler.text;
+                    toPrint = nluRESTClient.webRequest.downloadHandler.text;
                 }
 
                 if (toPrint == "empty" || toPrint == null || toPrint == "") {

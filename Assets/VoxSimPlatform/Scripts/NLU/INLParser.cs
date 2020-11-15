@@ -14,7 +14,7 @@ namespace VoxSimPlatform {
 
             //void InitParserService(NLUServerHandler nlu_server = null);
             void InitParserService(SocketConnection socketConnection = null, Type expectedSyntax = null);
-            void InitParserService(RestClient restClient = null, Type expectedSyntax = null);
+            void InitParserService(RESTClient restClient = null, Type expectedSyntax = null);
         }
     }
 }
