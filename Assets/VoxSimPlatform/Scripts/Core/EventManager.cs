@@ -784,6 +784,7 @@ namespace VoxSimPlatform {
 
             public void ExecuteCommand(String evaluatedCommand) {
                 Debug.Log(string.Format("Executing command: {0} ", evaluatedCommand));
+                OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
                 Hashtable predArgs = GlobalHelper.ParsePredicate(evaluatedCommand);
                 String pred = GlobalHelper.GetTopPredicate(evaluatedCommand);
 
