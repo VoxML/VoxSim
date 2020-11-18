@@ -6138,6 +6138,7 @@ namespace VoxSimPlatform {
                                 ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
 
                                 foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                    if (voxeme.gameObject != args[0] as GameObject) { 
                                     ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
                                     foreach (Vector3 point in testBounds.Points) {
                                         if (projectedBounds.Contains(point)) {
@@ -6150,6 +6151,7 @@ namespace VoxSimPlatform {
                                                 new CalculatedPositionArgs(string.Format("move({0},{1})",
                                                     (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
                                             return;
+                                            }
                                         }
                                     }
                                 }
