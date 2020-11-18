@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Network;
-using VoxSimPlatform.Network.Commander;
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
@@ -40,7 +39,8 @@ namespace VoxSimPlatform {
         		}
 
         		if (commBridge != null) {
-                    CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
+                    Examples.SocketConnections.RelationExtractorSocket commander =
+                        (Examples.SocketConnections.RelationExtractorSocket)commBridge.FindSocketConnectionByLabel("Extractor");
 
                     if (commander != null) {
                         byte[] bytes = Encoding.ASCII.GetBytes("").ToArray<byte>();
