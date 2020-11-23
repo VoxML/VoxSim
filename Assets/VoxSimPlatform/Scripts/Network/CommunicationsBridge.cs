@@ -9,9 +9,6 @@ using System.Timers;
 using System.Xml.Serialization;
 
 using VoxSimPlatform.NLU;
-using VoxSimPlatform.Network;
-using VoxSimPlatform.Network.Commander;
-using VoxSimPlatform.Agent;
 
 namespace VoxSimPlatform {
     namespace Network {

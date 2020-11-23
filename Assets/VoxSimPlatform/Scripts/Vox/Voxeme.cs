@@ -140,14 +140,26 @@ namespace VoxSimPlatform {
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Predicate", GUILayout.Width(120));
-                    ((Voxeme)target).predicate = GUILayout.TextField(((Voxeme)target).predicate,
-                        GUILayout.MaxWidth(200));
+                    EditorGUI.BeginChangeCheck();
+                    string predicate = ((Voxeme)target).predicate;
+                    predicate = GUILayout.TextField(predicate, GUILayout.MaxWidth(200));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, "Inspector");
+                        ((Voxeme)target).predicate = predicate;
+                    }
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Density", GUILayout.Width(120));
-                    ((Voxeme)target).density = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).density.ToString(),
-                        GUILayout.MaxWidth(200)));
+                    EditorGUI.BeginChangeCheck();
+                    float density = ((Voxeme)target).density;
+                    density = Convert.ToSingle(GUILayout.TextField(density.ToString(), GUILayout.MaxWidth(200)));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, "Inspector");
+                        ((Voxeme)target).density = density;
+                    }
                     GUILayout.EndHorizontal();
 
                     GUILayout.Label("Displacement", bold);
@@ -271,26 +283,50 @@ namespace VoxSimPlatform {
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Move Speed", GUILayout.Width(120));
-                    ((Voxeme)target).moveSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).moveSpeed.ToString(),
-                        GUILayout.MaxWidth(200)));
+                    EditorGUI.BeginChangeCheck();
+                    float moveSpeed = ((Voxeme)target).moveSpeed;
+                    moveSpeed = Convert.ToSingle(GUILayout.TextField(moveSpeed.ToString(), GUILayout.MaxWidth(200)));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, "Inspector");
+                        ((Voxeme)target).moveSpeed = moveSpeed;
+                    }
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Turn Speed", GUILayout.Width(120));
-                    ((Voxeme)target).turnSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).turnSpeed.ToString(),
-                        GUILayout.MaxWidth(200)));
+                    EditorGUI.BeginChangeCheck();
+                    float turnSpeed = ((Voxeme)target).turnSpeed;
+                    turnSpeed = Convert.ToSingle(GUILayout.TextField(turnSpeed.ToString(), GUILayout.MaxWidth(200)));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, "Inspector");
+                        ((Voxeme)target).turnSpeed = turnSpeed;
+                    }
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Default Move Speed", GUILayout.Width(120));
-                    ((Voxeme)target).defaultMoveSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).defaultMoveSpeed.ToString(),
-                        GUILayout.MaxWidth(200)));
+                    EditorGUI.BeginChangeCheck();
+                    float defaultMoveSpeed = ((Voxeme)target).defaultMoveSpeed;
+                    defaultMoveSpeed = Convert.ToSingle(GUILayout.TextField(moveSpeed.ToString(), GUILayout.MaxWidth(200)));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, "Inspector");
+                        ((Voxeme)target).defaultMoveSpeed = defaultMoveSpeed;
+                    }
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Default Turn Speed", GUILayout.Width(120));
-                    ((Voxeme)target).defaultTurnSpeed = Convert.ToSingle(GUILayout.TextField(((Voxeme)target).defaultTurnSpeed.ToString(),
-                        GUILayout.MaxWidth(200)));
+                    EditorGUI.BeginChangeCheck();
+                    float defaultTurnSpeed = ((Voxeme)target).defaultTurnSpeed;
+                    defaultTurnSpeed = Convert.ToSingle(GUILayout.TextField(defaultTurnSpeed.ToString(), GUILayout.MaxWidth(200)));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        Undo.RecordObject(target, "Inspector");
+                        ((Voxeme)target).defaultTurnSpeed = defaultTurnSpeed;
+                    }
                     GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();

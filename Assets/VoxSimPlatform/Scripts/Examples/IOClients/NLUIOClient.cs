@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Linq;
 
 using VoxSimPlatform.Network;
-using VoxSimPlatform.NLU;
 
 namespace VoxSimPlatform {
     namespace Examples {

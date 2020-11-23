@@ -5,7 +5,6 @@ using System.Collections;
 using System.Reflection;
 using System.Text;
 
-using VoxSimPlatform.Examples;
 using VoxSimPlatform.Network;
 
 namespace VoxSimPlatform {
