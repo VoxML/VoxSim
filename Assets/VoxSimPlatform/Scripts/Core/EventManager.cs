@@ -1143,22 +1143,24 @@ namespace VoxSimPlatform {
                 // add the "deferred evaluation" predicates at the end of the dictionary
                 // add "deferred dependencies" at the end of the dictionary
 
-                // find the first order skolems (those skolems whose associated values do not contain another skolem constant)
-                Dictionary<string, string> firstOrderSkolems = skolems.Cast<DictionaryEntry>()
-                    .Where(e => !((String)e.Value).Contains(argVarPrefix)).ToDictionary(e => (String)e.Key, e => (String)e.Value);
-
-                // find the first order skolems (those skolems whose associated values DO contain another skolem constant)
-                Dictionary<string,string> higherOrderSkolems = skolems.Cast<DictionaryEntry>()
-                    .Where(e => ((String)e.Value).Contains(argVarPrefix)).ToDictionary(e => (String)e.Key, e => (String)e.Value);
-
                 // find skolems whose evaluation should be deferred (check the custom attributes of the predicate in the assoc'd value)
-                Dictionary<string,string> deferredEvaluationSkolems = skolems.Cast<DictionaryEntry>()
+                Dictionary<string, string> deferredEvaluationSkolems = skolems.Cast<DictionaryEntry>()
                     .Where(e => (preds.GetType()
                         .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper()) != null &&
                             preds.GetType()
                                 .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper())
                                 .GetCustomAttributes(typeof(DeferredEvaluation), false).ToList().Count > 0))
                     .ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+                // find the first order skolems (those skolems whose associated values do not contain another skolem constant)
+                Dictionary<string, string> firstOrderSkolems = skolems.Cast<DictionaryEntry>()
+                    .Where(e => !((String)e.Value).Contains(argVarPrefix)).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+                firstOrderSkolems = firstOrderSkolems.Except(deferredEvaluationSkolems).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+
+                // find the first order skolems (those skolems whose associated values DO contain another skolem constant)
+                Dictionary<string,string> higherOrderSkolems = skolems.Cast<DictionaryEntry>()
+                    .Where(e => ((String)e.Value).Contains(argVarPrefix)).ToDictionary(e => (String)e.Key, e => (String)e.Value);
 
                 // find any higher order skolems whose associated value contains a skolem constant whose evaluation itself needs to be deferred
                 Dictionary<string, string> skolemsContainingDeferredEvaluations = higherOrderSkolems
@@ -1183,30 +1185,6 @@ namespace VoxSimPlatform {
                     .ToDictionary(e => (String)e.Key, e => (String)e.Value);
 
                 GlobalHelper.PrintKeysAndValues("sortedSkolems", sortedSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
-
-                // copy skolems to sortedSkolems
-                //sortedSkolems = skolems.Cast<DictionaryEntry>()
-                //    .ToDictionary(e => (String)e.Key, e => (String)e.Value);
-
-                //// sort the list by whether or not the skolem constant's associated value contains another skolem constant
-                ////  e.g., { _ARG2 : on(_ARG3), _ARG4 : red(block), _ARG3 : a(_ARG4), _ARG0 : the(_ARG1), _ARG1 : green(block) }
-                ////      { _ARG4 : red(block), _ARG1 : green(block), _ARG2 : on(_ARG3), _ARG3 : a(_ARG4), _ARG0 : the(_ARG1) } ->
-                //sortedSkolems = sortedSkolems.OrderBy(e => ((String)e.Value).Contains(argVarPrefix))
-                //    // then sort by the following:
-                //    // if the top predicate of the associated value cannot be found, 0, otherwise the # of "DeferredEvaluation" attributes (0 or 1) of the predicate
-                //    //  e.g., { _ARG4 : red(block), _ARG1 : green(block), _ARG2 : on(_ARG3), _ARG3 : a(_ARG4), _ARG0 : the(_ARG1) } ->
-                //    //      { _ARG4 : red(block), _ARG1 : green(block), _ARG2 : on(_ARG3), _ARG0 : the(_ARG1), _ARG3 : a(_ARG4) }
-
-                //    //  e.g., { _ARG4 : red(block), _ARG1 : green(block), _ARG2 : on(_ARG3), _ARG3 : a(_ARG4), _ARG0 : a(_ARG1) } ->
-                //    //      { _ARG4 : red(block), _ARG1 : green(block), _ARG2 : on(_ARG3), _ARG0 : the(_ARG1), _ARG3 : a(_ARG4) }
-                //    .ThenBy(e => (preds.GetType()
-                //        .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper()) == null ? 0 :
-                //            preds.GetType()
-                //                .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper())
-                //                .GetCustomAttributes(typeof(DeferredEvaluation),false).ToList().Count))
-                //    .ToDictionary(e => (String)e.Key, e => (String)e.Value);
-                                
-                //GlobalHelper.PrintKeysAndValues("sortedSkolems", sortedSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
 
 	            foreach (KeyValuePair<string,string> kv in sortedSkolems) {
                     outString = outString.Replace((String) kv.Value, (String) kv.Key);
