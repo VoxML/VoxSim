@@ -343,7 +343,7 @@ namespace VoxSimPlatform {
                 if (client != null) {
                     client.owner = this;
                     try {
-                        client.PostError += client.ConnectionLost;
+                        client.GetError += client.ConnectionLost;
                         StartCoroutine(TryConnectRestClient(client, address, port));
                         //Debug.Log(result.GetType());
                         //Debug.Log(result.coroutine.GetType());

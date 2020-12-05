@@ -123,7 +123,7 @@ namespace VoxSimPlatform {
             public IEnumerator TryConnect(string _address, int _port) {
                 address = _address;
                 port = _port;
-                RestDataContainer result = new RestDataContainer(owner, Post("","0"));
+                RestDataContainer result = new RestDataContainer(owner, Get(""));
                 yield return result.result;
             }
 
@@ -139,12 +139,9 @@ namespace VoxSimPlatform {
             }
 
             public virtual IEnumerator Post(string route, string jsonPayload) {
-                Debug.Log(route);
-                Debug.Log(jsonPayload);
                 Debug.Log(string.Format("RestClient POST to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
                 RestDataContainer result = new RestDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + successStr, "POST_" + errorStr));
-                //Debug.Log(string.Format("RestClient.Post: {0}", result));
                 yield return result.result;
             }
 
