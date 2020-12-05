@@ -18,13 +18,13 @@ $ git submodule add https://github.com/VoxML/VoxSim VoxSim
 $ cd ../Assets/Plugins
 ```
 
-If on Mac or \*nix:\
+If on Mac or \*nix:
 ```
 $ ln -s ../../submodules/VoxSim/Assets/VoxSimPlatform VoxSimPlatform\
 ```
 
 If on Windows:\
-Run *cmd* and cd to the main directory of your VoxSim-based implementation (parallel to Assets). Run the following commands:\
+Run *cmd* and cd to the main directory of your VoxSim-based implementation (parallel to Assets). Run the following commands:
 ```
 @setlocal enableextensions\
 @cd /d "%~dp0"\
