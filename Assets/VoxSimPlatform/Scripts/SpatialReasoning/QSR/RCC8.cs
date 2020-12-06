@@ -45,8 +45,8 @@ namespace VoxSimPlatform {
                     // if x and z dimensions overlap
                     if (Mathf.Abs(x.center.x - y.center.x) * 2 < (x.size.x + y.size.x) &&
                         (Mathf.Abs(x.center.z - y.center.z) * 2 < (x.size.z + y.size.z))) {
-                        Debug.Log(x.min.y);
-                        Debug.Log(y.max.y);
+                        //Debug.Log(x.min.y);
+                        //Debug.Log(y.max.y);
                         if ((Mathf.Abs(x.min.y - y.max.y) < Constants.EPSILON * 2) || // if touching on y
                             (Mathf.Abs(x.max.y - y.min.y) < Constants.EPSILON * 2)) {
                             ec = true;
@@ -288,6 +288,8 @@ namespace VoxSimPlatform {
                 public static Vector3 EC(ObjBounds y, params object[] constraints) {
                     Vector3 ec = Vector3.zero;
 
+                    SpatialReasoningPrefs prefs = GameObject.Find("VoxWorld").GetComponent<SpatialReasoningPrefs>();
+
                     // EC is underspecified
                     // assumptions: 1) x will be aligned with y on all non-constrained axes
                     //  2) underspecification in relative orientation will be randomly selected
@@ -302,14 +304,108 @@ namespace VoxSimPlatform {
                     // // (that is, the first object in relation of type ObjBounds,
                     // // or create ObjBounds of 0 extents if no ObjBounds to copy exists)
 
+                    Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
+                    EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+
+                    List<string> constraintPreds = new List<string>();
+
+                    for (int i = 0; i < constraints.Length; i++) {
+                        if (constraints[i] is string) {
+                            //string constraintForm = ((string)constraints[i]).Replace("x", GlobalHelper.VectorToParsable(candidate)).
+                            //        Replace("y", GlobalHelper.VectorToParsable(y.Center));
+                            //Debug.Log(constraintForm);
+
+                            //string[] operators = new string[] { "<", "<=", "=", "!=", ">=", ">", "^", "|" };
+                            Regex operators = new Regex(@"(?<![()])\w?([<>!]=?|[\^|=])\w?(?![()])");
+
+                            string[] constraintValues = operators.Split(constraints[i] as string).Select(c => c.Trim()).ToArray();
+
+                            foreach (string val in constraintValues) {
+                                if (val.Contains("y")) {
+                                    if (GlobalHelper.pred.IsMatch(val)) {
+                                        MethodInfo methodToCall = preds.GetType().GetMethod(GlobalHelper.GetTopPredicate(val));
+
+                                        if (methodToCall != null) {
+                                            constraintPreds.Add(methodToCall.Name);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Debug.Log(string.Format("RCC8.EC: Constraint predicates = [{0}]", string.Join(",", constraintPreds)));
+
                     // 1) generate possible candidates
                     List<Vector3> candidates = new List<Vector3>();
-                    candidates.Add(new Vector3(y.Min(MajorAxis.X).x,y.Center.y,y.Center.z));    // leftmost X point, aligned on Y and Z
-                    candidates.Add(new Vector3(y.Max(MajorAxis.X).x,y.Center.y,y.Center.z));    // rightmost X point, aligned on Y and Z
-                    candidates.Add(new Vector3(y.Center.x,y.Min(MajorAxis.Y).y,y.Center.z));    // bottommost Y point, aligned on X and Z
-                    candidates.Add(new Vector3(y.Center.x,y.Max(MajorAxis.Y).y,y.Center.z));    // topmost Y point, aligned on X and Z
-                    candidates.Add(new Vector3(y.Center.x,y.Center.y,y.Min(MajorAxis.Z).z));    // rearmost Z point, aligned on X and Y
-                    candidates.Add(new Vector3(y.Center.x,y.Center.y,y.Max(MajorAxis.Z).z));    // frontmost Z point, aligned on X and Y
+
+                    if (prefs.alignmentPreference == AlignmentPreference.Centered) { 
+                        candidates.Add(new Vector3(y.Min(MajorAxis.X).x,y.Center.y,y.Center.z));    // leftmost X point, aligned on Y and Z
+                        candidates.Add(new Vector3(y.Max(MajorAxis.X).x,y.Center.y,y.Center.z));    // rightmost X point, aligned on Y and Z
+                        candidates.Add(new Vector3(y.Center.x,y.Min(MajorAxis.Y).y,y.Center.z));    // bottommost Y point, aligned on X and Z
+                        candidates.Add(new Vector3(y.Center.x,y.Max(MajorAxis.Y).y,y.Center.z));    // topmost Y point, aligned on X and Z
+                        candidates.Add(new Vector3(y.Center.x,y.Center.y,y.Min(MajorAxis.Z).z));    // rearmost Z point, aligned on X and Y
+                        candidates.Add(new Vector3(y.Center.x,y.Center.y,y.Max(MajorAxis.Z).z));    // frontmost Z point, aligned on X and Y
+                    }
+                    else if (prefs.alignmentPreference == AlignmentPreference.Quadrant) {
+                    }
+                    else if (prefs.alignmentPreference == AlignmentPreference.Stochastic) {
+                        // TODO: account for arbitrarily rotated objects
+
+                        // add a new candidate somewhere else on the surface of y with the same x-coord as y's far left side
+                        candidates.Add(new Vector3(y.Min(MajorAxis.X).x,
+                            constraintPreds.Contains("Y") ? y.Center.y :
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y + Constants.EPSILON, y.Max(MajorAxis.Y).y - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            constraintPreds.Contains("Z") ? y.Center.z : 
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z + Constants.EPSILON, y.Max(MajorAxis.Z).z - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+
+                        // add a new candidate somewhere else on the surface of y with the same x-coord as y's far right side
+                        candidates.Add(new Vector3(y.Max(MajorAxis.X).x,
+                            constraintPreds.Contains("Y") ? y.Center.y :
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y + Constants.EPSILON, y.Max(MajorAxis.Y).y - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            constraintPreds.Contains("Z") ? y.Center.z :
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z + Constants.EPSILON, y.Max(MajorAxis.Z).z - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+
+                        // add a new candidate somewhere else on the surface of y with the same y-coord as y's bottom
+                        candidates.Add(new Vector3(constraintPreds.Contains("X") ? y.Center.x : 
+                            RandomHelper.RandomFloat(y.Min(MajorAxis.X).x + Constants.EPSILON, y.Max(MajorAxis.X).x - Constants.EPSILON,
+                                (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            y.Min(MajorAxis.Y).y,
+                            constraintPreds.Contains("Z") ? y.Center.z : 
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z + Constants.EPSILON, y.Max(MajorAxis.Z).z - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+
+                        // add a new candidate somewhere else on the surface of y with the same y-coord as y's top
+                        candidates.Add(new Vector3(constraintPreds.Contains("X") ? y.Center.x : 
+                            RandomHelper.RandomFloat(y.Min(MajorAxis.X).x + Constants.EPSILON, y.Max(MajorAxis.X).x - Constants.EPSILON,
+                                (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            y.Max(MajorAxis.Y).y,
+                            constraintPreds.Contains("Z") ? y.Center.z : 
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Z).z + Constants.EPSILON, y.Max(MajorAxis.Z).z - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive))));
+
+                        // add a new candidate somewhere else on the surface of y with the same y-coord as y's rearmost face
+                        candidates.Add(new Vector3(constraintPreds.Contains("X") ? y.Center.x : 
+                            RandomHelper.RandomFloat(y.Min(MajorAxis.X).x + Constants.EPSILON, y.Max(MajorAxis.X).x - Constants.EPSILON,
+                                (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            constraintPreds.Contains("Y") ? y.Center.y : 
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y + Constants.EPSILON, y.Max(MajorAxis.Y).y - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            y.Min(MajorAxis.Z).z));
+
+                        // add a new candidate somewhere else on the surface of y with the same y-coord as y's rearmost face
+                        candidates.Add(new Vector3(constraintPreds.Contains("X") ? y.Center.x : 
+                            RandomHelper.RandomFloat(y.Min(MajorAxis.X).x + Constants.EPSILON, y.Max(MajorAxis.X).x - Constants.EPSILON,
+                                (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            constraintPreds.Contains("Y") ? y.Center.y : 
+                                RandomHelper.RandomFloat(y.Min(MajorAxis.Y).y + Constants.EPSILON, y.Max(MajorAxis.Y).y - Constants.EPSILON,
+                                    (int)(RandomHelper.RangeFlags.MinInclusive & RandomHelper.RangeFlags.MaxInclusive)),
+                            y.Max(MajorAxis.Z).z));
+                    }
 
                     Debug.Log(string.Format("RCC8.EC: {0} candidates: [{1}]", candidates.Count,
                         string.Join(", ", candidates.Select(c => GlobalHelper.VectorToParsable(c)))));
@@ -318,8 +414,6 @@ namespace VoxSimPlatform {
                     //  including global standing constraints like "this candidate location is blocked by another object"
 
                     ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-                    Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-                    EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
                     List<Vector3> pruneCandidates = new List<Vector3>();
 
                     foreach (Vector3 candidate in candidates) {
@@ -512,6 +606,8 @@ namespace VoxSimPlatform {
                     else {
                     	ec = new Vector3(float.NaN,float.NaN,float.NaN);
                     }
+
+                    Debug.Log(string.Format("RCC8.EC: result = {0}", GlobalHelper.VectorToParsable(ec)));
 
                     return ec;
                 }

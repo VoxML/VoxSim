@@ -1,21 +1,22 @@
 ﻿using UnityEngine;
 using System;
-using System.Text;
 
 using VoxSimPlatform.Global;
+using VoxSimPlatform.Network;
+
 
 namespace VoxSimPlatform {
-    namespace Network {
-        namespace Commander {
-            public class CommanderEventArgs : EventArgs {
+    namespace Examples {
+        namespace SocketConnections { 
+            public class RelationExtractorEventArgs : EventArgs {
                 public string Content { get; set; }
 
-                public CommanderEventArgs(string content, bool macroEvent = false) {
+                public RelationExtractorEventArgs(string content, bool macroEvent = false) {
                     this.Content = content;
                 }
             }
 
-            public class CommanderSocket : SocketConnection {
+            public class RelationExtractorSocket : SocketConnection {
 
                 public EventHandler UpdateReceived;
 
@@ -25,8 +26,8 @@ namespace VoxSimPlatform {
                     }
                 }
 
-                public CommanderSocket() {
-                    IOClientType = typeof(CommanderIOClient);
+                public RelationExtractorSocket() {
+                    IOClientType = typeof(IOClients.RelationExtractorIOClient);
                 }
 
                 public void Write(byte[] content) {

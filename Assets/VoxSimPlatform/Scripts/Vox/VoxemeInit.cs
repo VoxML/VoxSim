@@ -55,49 +55,51 @@ namespace VoxSimPlatform {
         						container.transform.parent = go.transform.parent;
         					}
 
-        					container.transform.position = go.transform.position;
+                            container.transform.position = go.transform.position;
         					container.transform.rotation = go.transform.rotation;
         					go.transform.parent = container.transform;
         					go.name += "*";
                             voxeme.enabled = false;
 
-        					container.GetComponent<Voxeme>().density = voxeme.density;
+                            container.GetComponent<Voxeme>().predicate = voxeme.predicate;
+                            container.GetComponent<Voxeme>().density = voxeme.density;
 
         					// copy attribute set
         					AttributeSet newAttrSet = container.AddComponent<AttributeSet>();
         					AttributeSet attrSet = go.GetComponent<AttributeSet>();
         					if (attrSet != null) {
         						foreach (string s in attrSet.attributes) {
+                                    Debug.Log(string.Format("Adding attribute {0} to object {1}", s, container.name));
         							newAttrSet.attributes.Add(s);
         						}
         					}
-                                
-        					// copy interaction object
-        					//InteractionObject interactionObject = go.GetComponent<InteractionObject>();
-        					//if (interactionObject != null) {
-        					//	// Set the object inactive to avoid InteractionObject initializing before attributes are set
-        					//	Boolean containerState = container.activeInHierarchy;
-        					//	container.SetActive(false);
 
-        					//	CopyComponent(interactionObject, container);
+                            // copy interaction object
+                            //InteractionObject interactionObject = go.GetComponent<InteractionObject>();
+                            //if (interactionObject != null) {
+                            //	// Set the object inactive to avoid InteractionObject initializing before attributes are set
+                            //	Boolean containerState = container.activeInHierarchy;
+                            //	container.SetActive(false);
 
-        					//	container.SetActive(containerState);
-        					//}
+                            //	CopyComponent(interactionObject, container);
 
-        					//Destroy(interactionObject);
+                            //	container.SetActive(containerState);
+                            //}
 
-        					//// copy interaction target(s)
-        					//InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
-        					//foreach (InteractionTarget interactionTarget in interactionTargets) {
-        					//	interactionTarget.gameObject.transform.parent = container.transform;
-        					//	container.GetComponent<Voxeme>().interactionTargets.Add(interactionTarget);
-        					//}
+                            //Destroy(interactionObject);
 
-        					//FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();
-        					//foreach (FixHandRotation fixHandRotation in fixHandRotations) {
-        					//	CopyComponent(fixHandRotation, container);
-        					//	Destroy(fixHandRotation);
-        					//}
+                            //// copy interaction target(s)
+                            //InteractionTarget[] interactionTargets = go.GetComponentsInChildren<InteractionTarget>();
+                            //foreach (InteractionTarget interactionTarget in interactionTargets) {
+                            //	interactionTarget.gameObject.transform.parent = container.transform;
+                            //	container.GetComponent<Voxeme>().interactionTargets.Add(interactionTarget);
+                            //}
+
+                            //FixHandRotation[] fixHandRotations = go.GetComponents<FixHandRotation>();
+                            //foreach (FixHandRotation fixHandRotation in fixHandRotations) {
+                            //	CopyComponent(fixHandRotation, container);
+                            //	Destroy(fixHandRotation);
+                            //}
 
         					//// set up for physics
         					//// add box colliders and rigid bodies to all subobjects that have MeshFilters
@@ -175,6 +177,7 @@ namespace VoxSimPlatform {
         			}
         		}
 
+
         		// set joint links between all subobjects (Cartesian product)
         		foreach (GameObject go in objSelector.allVoxemes.Select(v => v.gameObject).ToList()) {
                     if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null) &&
@@ -215,13 +218,13 @@ namespace VoxSimPlatform {
         							}
         						}
         					}
-        				}
-        			}
-        		}
-        	}
+                        }
+                    }
+                }
+            }
 
-        	// Update is called once per frame
-        	void Update() {
+            // Update is called once per frame
+            void Update() {
         	}
 
         	T CopyComponent<T>(T original, GameObject destination) where T : Component {

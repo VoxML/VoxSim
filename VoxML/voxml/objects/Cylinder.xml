@@ -7,28 +7,18 @@
   </Lex>
   <Type>
     <Head>cylindroid[1]</Head>
-    <Components>
-      <Component Value="surface[1]" />
-      <Component Value="interior[2]" />
-    </Components>
-    <Concavity>Concave[2]</Concavity>
+    <Components />
+    <Concavity>Flat[1]</Concavity>
     <RotatSym>Y</RotatSym>
     <ReflSym>XY,YZ</ReflSym>
   </Type>
   <Habitat>
-    <Intrinsic>
-        <Intr Name="UP[3]" Value="align(Y,E_y)" />
-        <Intr Name="TOP[3]" Value="top(+Y)" />
-    </Intrinsic>
-    <Extrinsic>
-        <Extr Name="UP[4]" Value="align(Y,E_y)" />
-        <Extr Name="TOP[4]" Value="top(-Y)" />
-    </Extrinsic>
+    <Intrinsic />
+    <Extrinsic />
   </Habitat>
   <Afford_Str>
     <Affordances>
         <Affordance Formula="H-&gt;[put(x, on([1]))]support([1], x)" />
-        <Affordance Formula="H-&gt;[put(x, in([2]))]contain([2], x)" />
         <Affordance Formula="H-&gt;[grasp(x, [1])]hold(x, [1])" />
         <Affordance Formula="H-&gt;[lift(x, [1])]hold(x, [1])" />
     </Affordances>
@@ -37,9 +27,5 @@
     <Scale>&lt;agent</Scale>
     <Movable>true</Movable>
   </Embodiment>
-  <Attributes>
-      <Attrs>
-          <Attr Value="blue" />
-      </Attrs>
-  </Attributes>
+  <Attributes />
 </VoxML>

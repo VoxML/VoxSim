@@ -627,296 +627,6 @@ namespace VoxSimPlatform {
         	/// Attributes
         	/// </summary>
 
-        	// IN: String
-        	// OUT: String
-        	public String BROWN(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("brown"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String BLUE(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("blue"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String BLACK(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("black"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String GREEN(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("green"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String YELLOW(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("yellow"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String RED(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("red"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String ORANGE(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("orange"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String PINK(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("pink"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String WHITE(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("white"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String GRAY(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("gray"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String PURPLE(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("purple"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
-        	public String SILVER(object[] args) {
-        		List<String> objNames = new List<String>();
-
-        		if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			List<GameObject> objs = new List<GameObject>();
-        			if (args[args.Length - 1] is bool) {
-        				// except last
-        				objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
-        			}
-        			else {
-        				objs = args.Cast<GameObject>().ToList();
-        			}
-
-        			List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains("silver"));
-
-        			for (int index = 0; index < attrObjs.Count; index++) {
-        				objNames.Add(attrObjs[0].name);
-        			}
-        		}
-
-        		return string.Join(",", objNames.ToArray());
-        	}
-
         	public String BIG(object[] args) {
         		String objName = "";
         		GameObject obj = null;
@@ -1051,6 +761,45 @@ namespace VoxSimPlatform {
 
         		return objName;
         	}
+
+            // IN: Objects
+            // OUT: String
+            [DeferredEvaluation]
+            public String AN(object[] args)
+            {
+                String objName = "";
+                Random random = new Random();
+
+                if (args[0] is GameObject)
+                {
+                    // assume all inputs are of same type
+                    int index = RandomHelper.RandomInt(0, args.Length - 1,
+                        (int)(RandomHelper.RangeFlags.MinInclusive | RandomHelper.RangeFlags.MaxInclusive));
+                    Debug.Log(index);
+                    objName = (args[index] as GameObject).name;
+                }
+
+                return objName;
+            }
+
+            // IN: Objects
+            // OUT: String
+            [DeferredEvaluation]
+            public String ANOTHER(object[] args) {
+                String objName = "";
+                Random random = new Random();
+
+                if (args[0] is GameObject)
+                {
+                    // assume all inputs are of same type
+                    int index = RandomHelper.RandomInt(0, args.Length - 1,
+                        (int)(RandomHelper.RangeFlags.MinInclusive | RandomHelper.RangeFlags.MaxInclusive));
+                    Debug.Log(index);
+                    objName = (args[index] as GameObject).name;
+                }
+
+                return objName;
+            }
 
             // IN: Objects
             // OUT: String TODO: List<String>
@@ -6361,7 +6110,7 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void MOVE(object[] args) {
-                // required types (see Data/voxml/programs/move_1.xml)
+                // required types (see Data/voxml/programs/move.xml)
                 // args[0]: GameObject
                 // args[1]: Vector3
                 // args[2]: List<Vector3> or MethodInfo (return List<Vector3>)
@@ -6376,6 +6125,37 @@ namespace VoxSimPlatform {
 
                         if (args[0] is GameObject) {
                             if (args[1] is Vector3) {
+                                // check that object arg[0]'s projected bounds will fit at location args[1]
+                                List<Vector3> objBoundPoints = GlobalHelper.GetObjectOrientedSize(args[0] as GameObject, true).Points;
+                                for (int i = 0; i < objBoundPoints.Count; i++) {
+                                    objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
+                                        objBoundPoints[i];
+                                    Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                    objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized*Constants.EPSILON);
+                                    Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                }
+
+                                ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
+
+                                foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                    if (voxeme.gameObject != args[0] as GameObject) { 
+                                    ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
+                                    foreach (Vector3 point in testBounds.Points) {
+                                        if (projectedBounds.Contains(point)) {
+                                            // not a valid location: abort
+                                            Debug.Log(string.Format("Projected bounds of {0} contains {1}!",
+                                                (args[0] as GameObject).name, GlobalHelper.VectorToParsable(point)));
+                                            Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
+                                                (args[0] as GameObject).name, voxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
+                                            eventManager.OnInvalidPositionError(this,
+                                                new CalculatedPositionArgs(string.Format("move({0},{1})",
+                                                    (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
+                                            return;
+                                            }
+                                        }
+                                    }
+                                }
+
                                 if (args[2] != null) {
                                     if (args[2] is MethodInfo) {
                                         Debug.Log("Type signature match.");
@@ -6833,8 +6613,11 @@ namespace VoxSimPlatform {
                     }
                     else {
                         try {
+                            Debug.Log(string.Join(",", curArgTypes));
+                            Debug.Log(args[argIndex]);
                             if (curArgTypes.Any(t => GenLex.GenLex.IsGLType(args[argIndex],GenLex.GenLex.GetGLType(t)))) {
                                 object argToAdd = args[argIndex];
+                                Debug.Log(argToAdd);
                                 if (curArgTypes.Where(a => GenLex.GenLex.GetGLType(a) == GLType.Location).ToList().Count > 0) {
                                     // if the arg is a location, it may need adjusting to avoid interpenetration
     
@@ -7074,6 +6857,43 @@ namespace VoxSimPlatform {
                     }
                 }
         	}
+
+            /// <summary>
+            /// Composes an attribute from primitives using a VoxML encoding file (.xml)
+            /// </summary>
+            // IN: VoxML attribute encoding, arguments
+            // OUT: none
+            public object ComposeAttribute(VoxML voxml, object[] args) {
+                object retVal = null;
+
+                Debug.Log(voxml.Type.Scale);
+                if (voxml.Type.Scale == "nominal") {
+                    List<String> objNames = new List<String>();
+
+                    Debug.Log(args[0].GetType());
+                    if (args[0] is GameObject) {
+                        // assume all inputs are of same type
+                        List<GameObject> objs = new List<GameObject>();
+                        if (args[args.Length - 1] is bool) {
+                            // except last
+                            objs = args.ToList().GetRange(0, args.Length - 1).Cast<GameObject>().ToList();
+                        }
+                        else {
+                            objs = args.Cast<GameObject>().ToList();
+                        }
+
+                        List<GameObject> attrObjs = objs.FindAll(o => o.GetComponent<AttributeSet>().attributes.Contains(voxml.Lex.Pred));
+
+                        for (int index = 0; index < attrObjs.Count; index++) {
+                            objNames.Add(attrObjs[index].name);
+                        }
+                    }
+
+                    retVal = string.Join(",", objNames.ToArray());
+                }
+
+                return retVal;
+            }
 
             /// <summary>
             /// Composes a relation from primitives using a VoxML encoding file (.xml)

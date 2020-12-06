@@ -10,7 +10,6 @@ using System.Text;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Network;
-using VoxSimPlatform.Network.Commander;
 using VoxSimPlatform.SpatialReasoning;
 
 namespace VoxSimPlatform {
@@ -37,7 +36,7 @@ namespace VoxSimPlatform {
             RelationTracker relationTracker;
             EventManager em;
         	CommunicationsBridge commBridge;
-            CommanderSocket commander;
+            Examples.SocketConnections.RelationExtractorSocket extractor;
 
         	// Use this for initialization
         	void Start() {
@@ -54,10 +53,10 @@ namespace VoxSimPlatform {
 
         	public void WriteRelations(object sender, EventArgs e) {
         		if (commBridge != null) {
-                    Debug.Log(commBridge.FindSocketConnectionByLabel("Commander"));
-                    CommanderSocket commander = (CommanderSocket)commBridge.FindSocketConnectionByLabel("Commander");
-                    Debug.Log(commander);
-        			if (commander != null) {
+                    Debug.Log(commBridge.FindSocketConnectionByLabel("Extractor"));
+                    extractor = (Examples.SocketConnections.RelationExtractorSocket)commBridge.FindSocketConnectionByLabel("Extractor");
+                    Debug.Log(extractor);
+        			if (extractor != null) {
         				StringBuilder sb = new StringBuilder();
         				foreach (string rel in relationTracker.relStrings) {
         					sb = sb.AppendFormat(string.Format("{0}\n", rel));
@@ -77,10 +76,10 @@ namespace VoxSimPlatform {
         						GlobalHelper.VectorToParsable(go.transform.eulerAngles)));
         				}
 
-                        Debug.Log(string.Format("Writing data to {0}:{1}: {2}", commander.Address, commander.Port,
+                        Debug.Log(string.Format("Writing data to {0}:{1}: {2}", extractor.Address, extractor.Port,
                             sb.ToString()));
                         byte[] bytes = Encoding.ASCII.GetBytes(sb.ToString()).ToArray<byte>();
-                        commander.Write(bytes);
+                        extractor.Write(bytes);
         			}
         		}
         	}

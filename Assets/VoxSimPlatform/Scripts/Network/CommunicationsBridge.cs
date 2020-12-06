@@ -9,9 +9,6 @@ using System.Timers;
 using System.Xml.Serialization;
 
 using VoxSimPlatform.NLU;
-using VoxSimPlatform.Network;
-using VoxSimPlatform.Network.Commander;
-using VoxSimPlatform.Agent;
 
 namespace VoxSimPlatform {
     namespace Network {
@@ -63,8 +60,8 @@ namespace VoxSimPlatform {
             }
             public Dictionary<string, Type> tryAgainSockets = new Dictionary<string, Type>();
 
-            List<RestClient> _restClients;
-            public List<RestClient> RestClients {
+            List<RESTClient> _restClients;
+            public List<RESTClient> RestClients {
                 get { return _restClients; }
             }
 
@@ -91,18 +88,10 @@ namespace VoxSimPlatform {
 
             void Start() {
                 _socketConnections = new List<SocketConnection>();
-                _restClients = new List<RestClient>();
+                _restClients = new List<RESTClient>();
                 connectionRetryTimer = new Timer(connectionRetryTimerTime);
                 connectionRetryTimer.Enabled = true;
                 connectionRetryTimer.Elapsed += RetryConnections;
-
-                //string port = PlayerPrefs.GetString("Listener Port");
-                //if (port != "") {
-                //    OpenPortInternal(port);
-                //}
-                //else {
-                //    Debug.Log("No listener port specified. Skipping interface startup.");
-                //}
 
                 if (PlayerPrefs.HasKey("URLs")) {
                     // TODO: Refactor generically
@@ -185,11 +174,11 @@ namespace VoxSimPlatform {
                                             }
                                         }
                                     }
-                                    else if (socketType.IsSubclassOf(typeof(RestClient))) {
-                                        RestClient newSocket = null;
+                                    else if (socketType.IsSubclassOf(typeof(RESTClient))) {
+                                        RESTClient newSocket = null;
                                         try {
                                             Debug.Log(string.Format("Creating new REST interface {0} of type {1}", segments[0], socketType));
-                                            newSocket = CreateRestClient(socketAddress[0], Convert.ToInt32(socketAddress[1]), socketType);
+                                            newSocket = CreateRESTClient(socketAddress[0], Convert.ToInt32(socketAddress[1]), socketType);
                                             newSocket.name = segments[0];
                                             _restClients.Add(newSocket);
 
@@ -221,18 +210,6 @@ namespace VoxSimPlatform {
             public void InitDefaultParser() {
                 _parser = new SimpleParser();
             }
-
-            //public void InitParser() {
-            //    NLUIOClient nluIO = gameObject.GetComponent<NLUIOClient>();
-            //    if (nluIO == null) {
-            //        _parser = new SimpleParser();
-                    //
-            //    }
-            //    else { // I think that using the IO handlers is what's expected here
-            //        _parser = new PythonJSONParser();
-            //        _parser.InitParserService(nluIO);
-            //    }
-            //}
 
             void Update() {
                 if ((retryConnections) && (tryAgainSockets.Keys.Count > 0)) {
@@ -336,15 +313,15 @@ namespace VoxSimPlatform {
                 }
             }
 
-            public RestClient CreateRestClient(string address, int port, Type socketType) {
+            public RESTClient CreateRESTClient(string address, int port, Type socketType) {
                 Debug.Log(string.Format("Trying connection to {0}:{1} as type {2}", address, port, socketType));
 
-                RestClient client = (RestClient)Activator.CreateInstance(socketType);
+                RESTClient client = (RESTClient)Activator.CreateInstance(socketType);
                 if (client != null) {
                     client.owner = this;
                     try {
                         client.GetError += client.ConnectionLost;
-                        StartCoroutine(TryConnectRestClient(client, address, port));
+                        StartCoroutine(TryConnectRESTClient(client, address, port));
                         //Debug.Log(result.GetType());
                         //Debug.Log(result.coroutine.GetType());
                         //Debug.Log(result.result.GetType());
@@ -361,9 +338,9 @@ namespace VoxSimPlatform {
                 return client;
             }
 
-            private IEnumerator TryConnectRestClient(RestClient client, string address, int port) {
+            private IEnumerator TryConnectRESTClient(RESTClient client, string address, int port) {
                 // Tries a connection, stores result in a RestDataContainer for future reference.
-                RestDataContainer result = new RestDataContainer(this, client.TryConnect(address, port));
+                RESTDataContainer result = new RESTDataContainer(this, client.TryConnect(address, port));
                 //Debug.Log(string.Format("Result: {0}",((UnityWebRequestAsyncOperation)result.result).webRequest.responseCode));
                 yield return result.result;
                 // here make the check whether it is connected or not
@@ -384,27 +361,8 @@ namespace VoxSimPlatform {
                 }
             }
 
-            //public void OpenPortInternal(string port) {
-            //    try {
-                    // pass true as first param to make the server visible only to 'localhost'
-                    // (for testing, for exmaple)
-                    //_cmdServer = new CmdServer(false, int.Parse(port), 1);
-            //        OnPortOpened(this, null);
-            //    }
-            //    catch (Exception e) {
-            //        Debug.Log("Failed to open port " + port);
-            //        Debug.Log(e.Message);
-            //        Debug.Log(e.InnerException);
-            //        Debug.Log(e.StackTrace);
-            //        Debug.Log(e.Data);
-            //    }
-            //}
-
             public string NLParse(string input) {
-        //        string[] args = new string[]{input};
-        //        string result = Marshal.PtrToStringAuto(PythonCall (Application.dataPath + "/Externals/python/", "change_to_forms", "parse_sent", args, args.Length));
                 var result = _parser.NLParse(input);
-                //Debug.LogWarning("Parsed as: " + result);
                 if(result == "WAIT"){
                     return "";
                 }
@@ -453,16 +411,16 @@ namespace VoxSimPlatform {
                 return socket;
             }
 
-            public RestClient FindRestClientByLabel(string label) {
-                RestClient socket = null;
+            public RESTClient FindRESTClientByLabel(string label) {
+                RESTClient socket = null;
 
                 socket = _restClients.FirstOrDefault(s => s.name == label);
 
                 return socket;
             }
 
-            public RestClient FindRestClientByLabel(string label, List<string> exclude) {
-                RestClient socket = null;
+            public RESTClient FindRESTClientByLabel(string label, List<string> exclude) {
+                RESTClient socket = null;
 
                 socket = _restClients.Except(_restClients.Where(s => exclude.Contains(s.name))).
                     FirstOrDefault(s => s.name == label);
@@ -470,16 +428,16 @@ namespace VoxSimPlatform {
                 return socket;
             }
 
-            public RestClient FindRestClientByType(Type type) {
-                RestClient socket = null;
+            public RESTClient FindRESTClientByType(Type type) {
+                RESTClient socket = null;
 
                 socket = _restClients.FirstOrDefault(s => s.clientType == type);
 
                 return socket;
             }
 
-            public RestClient FindRestClientByType(Type type, List<string> exclude) {
-                RestClient socket = null;
+            public RESTClient FindRESTClientByType(Type type, List<string> exclude) {
+                RESTClient socket = null;
 
                 socket = _restClients.Except(_restClients.Where(s => exclude.Contains(s.name))).
                     FirstOrDefault(s => s.clientType == type);
@@ -488,11 +446,6 @@ namespace VoxSimPlatform {
             }
 
             void OnDestroy() {
-                //if (_cmdServer != null) {
-                //    _cmdServer.Close();
-                //    _cmdServer = null;
-                //}
-
                 for (int i = 0; i < _socketConnections.Count; i++) {
                     if (_socketConnections[i] != null && _socketConnections[i].IsConnected()) {
                         _socketConnections[i].Close();
@@ -505,26 +458,6 @@ namespace VoxSimPlatform {
                         _restClients[i] = null;
                     }
                 }
-
-                //if (_fusionSocket != null && _fusionSocket.IsConnected()) {
-                //    _fusionSocket.Close();
-                //    _fusionSocket = null;
-                //}
-
-                //if (_commanderSocket != null && _commanderSocket.IsConnected()) {
-                //    _commanderSocket.Close();
-                //    _commanderSocket = null;
-                //}
-
-                //if (_ksimSocket != null && _ksimSocket.IsConnected()) {
-                //    _ksimSocket.Close();
-                //    _ksimSocket = null;
-                //}
-
-                //if (_adeSocket != null && _adeSocket.IsConnected()) {
-                //    _adeSocket.Close();
-                //    _adeSocket = null;
-                //}
             }
 
             void OnApplicationQuit() {

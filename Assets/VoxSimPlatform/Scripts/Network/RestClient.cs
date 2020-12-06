@@ -7,13 +7,13 @@ using System.Text;
 
 namespace VoxSimPlatform {
     namespace Network {
-        public class RestDataContainer {
+        public class RESTDataContainer {
             // Coroutine in which this is instantiated
             public Coroutine coroutine { get; private set; }
             // Current item from target
             public object result;
             private IEnumerator target;
-            public RestDataContainer(MonoBehaviour owner, IEnumerator target) {
+            public RESTDataContainer(MonoBehaviour owner, IEnumerator target) {
                 // e.g. client.TryConnect(address, port)
                 this.target = target;
                 this.coroutine = owner.StartCoroutine(Run());
@@ -27,15 +27,15 @@ namespace VoxSimPlatform {
             }
         }
 
-        public class RestEventArgs : EventArgs {
+        public class RESTEventArgs : EventArgs {
             public object Content { get; set; }
 
-            public RestEventArgs(object content) {
+            public RESTEventArgs(object content) {
                 this.Content = content;
             }
         }
 
-        public class RestClient {
+        public class RESTClient {
             public CommunicationsBridge owner;
             public Type clientType;
 
@@ -123,7 +123,7 @@ namespace VoxSimPlatform {
             public IEnumerator TryConnect(string _address, int _port) {
                 address = _address;
                 port = _port;
-                RestDataContainer result = new RestDataContainer(owner, Get(""));
+                RESTDataContainer result = new RESTDataContainer(owner, Get(""));
                 yield return result.result;
             }
 
@@ -133,28 +133,28 @@ namespace VoxSimPlatform {
 
             public virtual IEnumerator Get(string route) {
                 Debug.Log(string.Format("RestClient GET from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner, 
+                RESTDataContainer result = new RESTDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "GET", null, "GET_" + successStr, "GET_" + errorStr));
                 yield return result.result;
             }
 
             public virtual IEnumerator Post(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient POST to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner, 
+                RESTDataContainer result = new RESTDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "POST", jsonPayload, "POST_" + successStr, "POST_" + errorStr));
                 yield return result.result;
             }
 
             public virtual IEnumerator Put(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient PUT to {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner, 
+                RESTDataContainer result = new RESTDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "PUT", jsonPayload, "PUT_" + successStr, "PUT_" + errorStr));
                 yield return result.result;
             }
 
             public virtual IEnumerator Delete(string route, string jsonPayload) {
                 Debug.Log(string.Format("RestClient DELETE from {0}", string.Format("{0}:{1}/{2}", address, port, route)));
-                RestDataContainer result = new RestDataContainer(owner, 
+                RESTDataContainer result = new RESTDataContainer(owner, 
                     Request(string.Format("{0}:{1}/{2}", address, port, route), "DELETE", jsonPayload, "DELETE_" + successStr, "DELETE_" + errorStr));
                 yield return result.result;
             }
@@ -170,7 +170,7 @@ namespace VoxSimPlatform {
                 //url = url.Replace(":0/", ""); // filler port from before. Might as well handle it here
                 //Debug.LogWarning("URL for request: " + url);
                 Debug.Log(string.Format("RestClient Request {1} to {0}", url, method));
-                RestDataContainer result = new RestDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
+                RESTDataContainer result = new RESTDataContainer(owner, AsyncRequest(jsonPayload, method, url, success, error));
                 //Debug.Log(string.Format("RestClient.Request: {0}", result));
                 yield return result.result;
             }
@@ -209,11 +209,11 @@ namespace VoxSimPlatform {
             }
 
             public void GET_okay(object parameter) {
-                OnGetOkay(this, new RestEventArgs(parameter));
+                OnGetOkay(this, new RESTEventArgs(parameter));
             }
 
             public void GET_error(object parameter) {
-                OnGetError(this, new RestEventArgs(parameter));
+                OnGetError(this, new RESTEventArgs(parameter));
             }
 
             public void POST_okay(object parameter) {

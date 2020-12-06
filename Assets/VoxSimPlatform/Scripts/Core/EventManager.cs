@@ -784,6 +784,7 @@ namespace VoxSimPlatform {
 
             public void ExecuteCommand(String evaluatedCommand) {
                 Debug.Log(string.Format("Executing command: {0} ", evaluatedCommand));
+                OnExecuteEvent(this, new EventManagerArgs(evaluatedCommand));
                 Hashtable predArgs = GlobalHelper.ParsePredicate(evaluatedCommand);
                 String pred = GlobalHelper.GetTopPredicate(evaluatedCommand);
 
@@ -1136,14 +1137,51 @@ namespace VoxSimPlatform {
                                  
                 Debug.Log("Skolemize: parenCount = " + parenCount);
 
-	            sortedSkolems = skolems.Cast<DictionaryEntry>()
-		            .ToDictionary(e => (String)e.Key, e => (String)e.Value);
-                sortedSkolems = sortedSkolems.OrderBy(e => ((String)e.Value).Contains(argVarPrefix))
-                    .ThenBy(e => (preds.GetType()
-                        .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper()) == null ? 0 :
+                // sort the list by whether or not the skolem constant's associated value contains another skolem constant
+                // pull out all "deferred evaluation" predicates
+                // pull out any other predicates depending on the "deferred evaluation" predicates
+                // add the "deferred evaluation" predicates at the end of the dictionary
+                // add "deferred dependencies" at the end of the dictionary
+
+                // find skolems whose evaluation should be deferred (check the custom attributes of the predicate in the assoc'd value)
+                Dictionary<string, string> deferredEvaluationSkolems = skolems.Cast<DictionaryEntry>()
+                    .Where(e => (preds.GetType()
+                        .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper()) != null &&
                             preds.GetType()
                                 .GetMethod(GlobalHelper.GetTopPredicate((String)e.Value).ToUpper())
-                                .GetCustomAttributes(typeof(DeferredEvaluation),false).ToList().Count))
+                                .GetCustomAttributes(typeof(DeferredEvaluation), false).ToList().Count > 0))
+                    .ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+                // find the first order skolems (those skolems whose associated values do not contain another skolem constant)
+                Dictionary<string, string> firstOrderSkolems = skolems.Cast<DictionaryEntry>()
+                    .Where(e => !((String)e.Value).Contains(argVarPrefix)).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+                firstOrderSkolems = firstOrderSkolems.Except(deferredEvaluationSkolems).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+
+                // find the first order skolems (those skolems whose associated values DO contain another skolem constant)
+                Dictionary<string,string> higherOrderSkolems = skolems.Cast<DictionaryEntry>()
+                    .Where(e => ((String)e.Value).Contains(argVarPrefix)).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+                // find any higher order skolems whose associated value contains a skolem constant whose evaluation itself needs to be deferred
+                Dictionary<string, string> skolemsContainingDeferredEvaluations = higherOrderSkolems
+                    .Where(e => deferredEvaluationSkolems.Keys.Any(k => ((String)e.Value).Contains(k))).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+                // get higher order skolems whose evaluation should not be deferred
+                Dictionary<string, string> nonDeferredHigherOrderSkolems = higherOrderSkolems.Except(deferredEvaluationSkolems)
+                    .ToDictionary(e => (String)e.Key, e => (String)e.Value);
+                nonDeferredHigherOrderSkolems = nonDeferredHigherOrderSkolems.Except(skolemsContainingDeferredEvaluations).ToDictionary(e => (String)e.Key, e => (String)e.Value);
+
+                // print dicts for debugging
+                GlobalHelper.PrintKeysAndValues("firstOrderSkolems", firstOrderSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
+                GlobalHelper.PrintKeysAndValues("higherOrderSkolems", higherOrderSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
+                GlobalHelper.PrintKeysAndValues("deferredEvaluationSkolems", deferredEvaluationSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
+                GlobalHelper.PrintKeysAndValues("skolemsContainingDeferredEvaluations", skolemsContainingDeferredEvaluations.ToDictionary(e => e.Key as object, e => e.Value as object));
+                GlobalHelper.PrintKeysAndValues("nonDeferredHigherOrderSkolems", nonDeferredHigherOrderSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
+
+                // ordered skolems = first order skolems + deferred evaluations + skolems containing deferred evaluations
+                sortedSkolems = firstOrderSkolems.Concat(nonDeferredHigherOrderSkolems)
+                    .Concat(deferredEvaluationSkolems)
+                    .Concat(skolemsContainingDeferredEvaluations)
                     .ToDictionary(e => (String)e.Key, e => (String)e.Value);
 
                 GlobalHelper.PrintKeysAndValues("sortedSkolems", sortedSkolems.ToDictionary(e => e.Key as object, e => e.Value as object));
@@ -1410,6 +1448,9 @@ namespace VoxSimPlatform {
 		                                	methodToCall = preds.GetType().GetMethod("ComposeRelation");
 	                                	}
 	                                }
+                                    else {
+                                        Debug.LogWarningFormat("EvaluateSkolemConstants: found no VoxML for \"{0}\"!", pred);
+                                    }
                                 }
 
                                 if (methodToCall == null) {
@@ -1634,6 +1675,7 @@ namespace VoxSimPlatform {
                                 validPredExists = ((methodToCall != null) ||
                                     ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
                                     ((voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "attributes") ||
                                     (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations")))));
 
                                 if (!validPredExists) {
@@ -1647,6 +1689,12 @@ namespace VoxSimPlatform {
                                         voxml = voxmlLibrary.VoxMLObjectDict[pred];
 	                                    methodToCall = preds.GetType().GetMethod("ComposeProgram");
 	                                    invocationTarget = preds;
+                                    }
+                                    else if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                        (voxmlLibrary.VoxMLEntityTypeDict[pred] == "attributes"))) {
+                                        voxml = voxmlLibrary.VoxMLObjectDict[pred];
+                                        methodToCall = preds.GetType().GetMethod("ComposeAttribute");
+                                        invocationTarget = preds;
                                     }
                                     else if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
                                         (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))) {
@@ -1849,8 +1897,10 @@ namespace VoxSimPlatform {
                             string pred = argsMatch.Groups[0].Value.Split('(')[0];
                             methodToCall = preds.GetType().GetMethod(pred.ToUpper());
                             validPredExists = ((methodToCall != null) ||
-                                ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
-                                (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations"))));
+                                    ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred) &&
+                                    (//(voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs") ||
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "attributes") ||
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations")))));
 
                             if (!validPredExists) {
                                 this.GetActiveAgent().GetComponent<AgentOutputController>().PromptOutput("Sorry, what does " + "\"" + pred + "\" mean?");
@@ -1862,6 +1912,11 @@ namespace VoxSimPlatform {
                                     (voxmlLibrary.VoxMLEntityTypeDict[pred] == "programs")) {
                                     voxml = voxmlLibrary.VoxMLObjectDict[pred];
                                     methodToCall = preds.GetType().GetMethod("ComposeProgram");
+                                }
+                                if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
+                                    (voxmlLibrary.VoxMLEntityTypeDict[pred] == "attributes")) {
+                                    voxml = voxmlLibrary.VoxMLObjectDict[pred];
+                                    methodToCall = preds.GetType().GetMethod("ComposeAttribute");
                                 }
                                 else if ((voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) &&
                                     (voxmlLibrary.VoxMLEntityTypeDict[pred] == "relations")) {

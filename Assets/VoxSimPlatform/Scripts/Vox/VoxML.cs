@@ -8,10 +8,11 @@ using System.Xml.Linq;
 
 namespace VoxSimPlatform {
     namespace Vox {
-    	/// <summary>
-    	/// ENTITY
-    	/// </summary>
-    	public class VoxEntity {
+        /// <summary>
+        /// ENTITY
+        /// </summary>
+        [Serializable]
+        public class VoxEntity {
     		public enum EntityType {
     			None,
     			Object,
@@ -23,40 +24,49 @@ namespace VoxSimPlatform {
 
     		[XmlAttribute] 
             public EntityType Type { get; set; }
-    	}
+        }
 
-    	/// <summary>
-    	/// LEX
-    	/// </summary>
-    	public class VoxLex {
+        /// <summary>
+        /// LEX
+        /// </summary>
+        [Serializable]
+        public class VoxLex {
     		public string Pred = "";
     		public string Type = "";
-    	}
+        }
 
-    	/// <summary>
-    	/// TYPE
-    	/// </summary>
-    	public class VoxTypeComponent {
+        /// <summary>
+        /// TYPE
+        /// </summary>
+        [Serializable]
+        public class VoxTypeComponent {
     		[XmlAttribute] 
             public string Value { get; set; }
-    	}
+        }
 
-    	public class VoxTypeArg {
+        [Serializable]
+        public class VoxTypeArg {
     		[XmlAttribute] 
             public string Value { get; set; }
-    	}
+        }
 
-    	public class VoxTypeSubevent {
+        [Serializable]
+        public class VoxTypeSubevent {
     		[XmlAttribute] 
             public string Value { get; set; }
-    	}
+        }
 
-    	public class VoxTypeCorresp {
+        [Serializable]
+        public class VoxTypeCorresp {
     		[XmlAttribute] 
             public string Value { get; set; }
-    	}
+        }
 
-    	public class VoxType {
+        /// <summary>
+        /// TYPE
+        /// </summary>
+        [Serializable]
+        public class VoxType {
     		public string Head = "";
 
     		[XmlArray("Components")] 
@@ -88,70 +98,78 @@ namespace VoxSimPlatform {
     		[XmlArray("Corresps")] 
             [XmlArrayItem("Corresp")]
     		public List<VoxTypeCorresp> Corresps = new List<VoxTypeCorresp>();
-    	}
+        }
 
-    	/// <summary>
-    	/// HABITAT
-    	/// </summary>
-    	public class VoxHabitatIntr {
+        /// <summary>
+        /// HABITAT
+        /// </summary>
+        [Serializable]
+        public class VoxHabitatIntr {
     		[XmlAttribute] 
             public string Name { get; set; }
 
     		[XmlAttribute] 
             public string Value { get; set; }
-    	}
+        }
 
-    	public class VoxHabitatExtr {
+        [Serializable]
+        public class VoxHabitatExtr {
     		[XmlAttribute]
             public string Name { get; set; }
 
     		[XmlAttribute] 
             public string Value { get; set; }
-    	}
+        }
 
-    	public class VoxHabitat {
-    		[XmlArray("Intrinsic")]
+        [Serializable]
+        public class VoxHabitat {
+            [XmlArray("Intrinsic")]
             [XmlArrayItem("Intr")]
-    		public List<VoxHabitatIntr> Intrinsic = new List<VoxHabitatIntr>();
+            public List<VoxHabitatIntr> Intrinsic = new List<VoxHabitatIntr>();
 
-    		[XmlArray("Extrinsic")] 
+            [XmlArray("Extrinsic")]
             [XmlArrayItem("Extr")]
-    		public List<VoxHabitatExtr> Extrinsic = new List<VoxHabitatExtr>();
-    	}
+            public List<VoxHabitatExtr> Extrinsic = new List<VoxHabitatExtr>();
+        }
 
-    	/// <summary>
-    	/// AFFORD_STR
-    	/// </summary>
-    	public class VoxAffordAffordance {
+        /// <summary>
+        /// AFFORD_STR
+        /// </summary>
+        [Serializable]
+        public class VoxAffordAffordance {
     		[XmlAttribute]
             public string Formula { get; set; }
     	}
 
-    	public class VoxAfford_Str {
+        [Serializable]
+        public class VoxAfford_Str {
     		[XmlArray("Affordances")]
             [XmlArrayItem("Affordance")]
     		public List<VoxAffordAffordance> Affordances = new List<VoxAffordAffordance>();
     	}
 
-    	/// <summary>
-    	/// EMBODIMENT
-    	/// </summary>
-    	public class VoxEmbodiment {
+        /// <summary>
+        /// EMBODIMENT
+        /// </summary>
+        [Serializable]
+        public class VoxEmbodiment {
     		public string Scale = "";
 
     		public bool Movable = false;
     		//public int Density = 0;
     	}
 
-    	/// <summary>
-    	/// ATTRIBUTES
-    	/// </summary>
-    	public class VoxAttributesAttr {
+        /// <summary>
+        /// ATTRIBUTES
+        /// </summary>
+        [Serializable]
+        public class VoxAttributesAttr {
     		[XmlAttribute]
             public string Value { get; set; }
     	}
 
-    	public class VoxAttributes {
+        [Serializable]
+        public class VoxAttributes {
     		[XmlArray("Attrs")]
             [XmlArrayItem("Attr")]
     		public List<VoxAttributesAttr> Attrs = new List<VoxAttributesAttr>();
@@ -176,6 +194,7 @@ namespace VoxSimPlatform {
         /// <summary>
         ///  VOXEME
         /// </summary>
+        [Serializable]
         public class VoxML {
     		// all VoxML entities encode a subset of the following structures
     		public VoxEntity Entity = new VoxEntity();
@@ -186,7 +205,7 @@ namespace VoxSimPlatform {
     		public VoxEmbodiment Embodiment = new VoxEmbodiment();
     		public VoxAttributes Attributes = new VoxAttributes();
 
-    		public void Save(string path) {
+            public void Save(string path) {
     			XmlSerializer serializer = new XmlSerializer(typeof(VoxML));
     			using (var stream = new FileStream(path, FileMode.Create)) {
     				serializer.Serialize(stream, this);

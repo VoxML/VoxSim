@@ -146,7 +146,32 @@ namespace VoxSimPlatform {
     		});
 
     		private List<string> _attribs = new List<string>(new[] {
-    			"brown",
+                "b",
+                "c",
+                "d",
+                "e",
+                "f",
+                "g",
+                "h",
+                "i",
+                "j",
+                "k",
+                "l",
+                "m",
+                "n",
+                "o",
+                "p",
+                "q",
+                "r",
+                "s",
+                "t",
+                "u",
+                "v",
+                "w",
+                "x",
+                "y",
+                "z",
+                "brown",
     			"blue",
     			"black",
     			"green",
@@ -166,6 +191,8 @@ namespace VoxSimPlatform {
     		private List<string> _determiners = new List<string>(new[] {
     			"the",
     			"a",
+                "an",
+                "another",
     			"this",
     			"that",
     			"two"
@@ -398,7 +425,7 @@ namespace VoxSimPlatform {
                 throw new System.NotImplementedException();
             }
 
-            public void InitParserService(RestClient restClient, Type expectedSyntax) {
+            public void InitParserService(RESTClient restClient, Type expectedSyntax) {
                 throw new System.NotImplementedException();
             }
 

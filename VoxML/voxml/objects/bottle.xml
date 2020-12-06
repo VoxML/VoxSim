@@ -2,7 +2,7 @@
 <VoxML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Entity Type="Object" />
   <Lex>
-    <Pred>bottle</Pred>
+    <Pred></Pred>
     <Type>physobj*artifact</Type>
   </Lex>
   <Type>
@@ -37,8 +37,8 @@
     <Affordances>
       <Affordance Formula="H-&gt;[put(x, on([1]))]support([1], x)" />
       <Affordance Formula="H-&gt;[put(x, in([2]))]contain([2], x)" />
+      <Affordance Formula="H-&gt;[grasp(x, [1])]hold(x, [1])" />
       <Affordance Formula="H-&gt;[lift(x, [1])]hold(x, [1])" />
-      <Affordance Formula="H-&gt;[grasp(x, [1])]" />
     </Affordances>
   </Afford_Str>
   <Embodiment>
