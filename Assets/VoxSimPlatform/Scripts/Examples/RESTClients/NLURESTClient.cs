@@ -31,7 +31,7 @@ namespace VoxSimPlatform {
 
                     Debug.Log("Payload is: " + payload);
 
-                    if (payload != "0") {
+                    if (method == "POST" && payload != "0") {
                         var form = new WWWForm();
                         form.AddField("sentence", payload); // IMPORTANT: Assumes there is a form with THIS PARICULAR NAME OF FIELD
                         webRequest = UnityWebRequest.Post(url, form);
