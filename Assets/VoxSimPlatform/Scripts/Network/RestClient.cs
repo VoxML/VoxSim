@@ -209,6 +209,7 @@ namespace VoxSimPlatform {
             }
 
             public void GET_okay(object parameter) {
+                isConnected = true;
                 OnGetOkay(this, new RESTEventArgs(parameter));
             }
 
@@ -217,7 +218,6 @@ namespace VoxSimPlatform {
             }
 
             public void POST_okay(object parameter) {
-                isConnected = true;
                 OnPostOkay(this, null);
             }
 
