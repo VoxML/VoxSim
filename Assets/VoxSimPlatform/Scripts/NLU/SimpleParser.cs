@@ -35,6 +35,7 @@ namespace VoxSimPlatform {
     		private List<string> _objects = new List<string>(new[] {
     			"block",
     			"ball",
+                "cylinder",
     			"plate",
     			"cup",
     			"cup1",
@@ -89,7 +90,8 @@ namespace VoxSimPlatform {
     			// not even a goddamn stemmer
     			{"blocks", "block"},
     			{"balls", "ball"},
-    			{"plates", "plate"},
+                {"cylinders", "cylinder"},
+                {"plates", "plate"},
     			{"cups", "cup"},
     			{"discs", "disc"},
     			{"spoons", "spoon"},
