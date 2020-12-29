@@ -933,7 +933,7 @@ namespace VoxSimPlatform {
                 }
             }
 
-            public void Reset() {
+            public void ResetVoxeme() {
                 if (gameObject.transform.parent != null) {
                     GameObject parent = gameObject.transform.parent.gameObject;
                     Voxeme parentVox = GlobalHelper.GetMostImmediateParentVoxeme(parent).GetComponent<Voxeme>();
