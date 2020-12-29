@@ -178,7 +178,7 @@ namespace VoxSimPlatform {
         		relationTracker.relations.Clear();
         		PhysicsHelper.ResolveAllPhysicsDiscrepancies(false);
         		foreach (Voxeme voxeme in allVoxemes) {
-        			voxeme.Reset();
+        			voxeme.ResetVoxeme();
         		}
         	}
 
