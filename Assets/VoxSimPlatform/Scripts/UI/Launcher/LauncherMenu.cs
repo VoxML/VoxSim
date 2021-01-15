@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
@@ -720,13 +720,21 @@ namespace VoxSimPlatform {
             	}
 
                 void GetMyIP() {
-                // get IP address
+                    // get IP address
 #if !UNITY_IOS
-                    foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
-                        if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
-                            //Debug.Log(ipAddress.ToString());
-                            ip = ipAddress.ToString();
+                    try {
+                        foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
+                            if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
+                                //Debug.Log(ipAddress.ToString());
+                                ip = ipAddress.ToString();
+                            }
                         }
+                    }
+                    catch (SocketException e) {
+                        Debug.LogWarningFormat("SocketException source: {0}; message: {1}", e.Source, e.Message);
+                    }
+                    catch (Exception e) {
+                        Debug.LogWarningFormat("Exception source: {0}; message: {1}", e.Source, e.Message);
                     }
 #else
                     foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces()){
