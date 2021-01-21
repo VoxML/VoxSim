@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
+#if !UNITY_WEBGL
 using VoxSimPlatform.Network;
+#endif
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -423,13 +425,16 @@ namespace VoxSimPlatform {
     			return ++cur;
     		}
 
-            public void InitParserService(SocketConnection socketConnection, Type expectedSyntax) {
-                throw new System.NotImplementedException();
-            }
+#if !UNITY_WEBGL
+			public void InitParserService(SocketConnection socketConnection, Type expectedSyntax)
+			{
+				throw new System.NotImplementedException();
+			} 
 
-            public void InitParserService(RESTClient restClient, Type expectedSyntax) {
+			public void InitParserService(RESTClient restClient, Type expectedSyntax) {
                 throw new System.NotImplementedException();
             }
+#endif
 
             public string ConcludeNLParse() {
                 throw new System.NotImplementedException();

@@ -6,23 +6,33 @@ using System.Collections.Generic;
 
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
+#if !UNITY_WEBGL
 using VoxSimPlatform.Network;
+# endif
 using VoxSimPlatform.Vox;
 
 namespace VoxSimPlatform {
     namespace Logging {
         public class StateExtractor : MonoBehaviour {
         	EventManager em;
-        	CommunicationsBridge commBridge;
-        	ObjectSelector objectSelector;
+#if !UNITY_WEBGL
+			CommunicationsBridge commBridge;
+#else
+            NLU.INLParser commBridge;
+#endif
+            ObjectSelector objectSelector;
 
-        	// Use this for initialization
-        	void Start() {
+			// Use this for initialization
+			void Start() {
         		em = gameObject.GetComponent<EventManager>();
-        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
-        		objectSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
+#if !UNITY_WEBGL
+				commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
+#else
+                commBridge = GameObject.Find("SimpleParser").GetComponent<NLU.SimpleParser>();
+#endif        		
+                objectSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
-        		em.QueueEmpty += QueueEmpty;
+				em.QueueEmpty += QueueEmpty;
         	}
 
         	// Update is called once per frame
@@ -38,16 +48,20 @@ namespace VoxSimPlatform {
         			}
         		}
 
-        		if (commBridge != null) {
-                    Examples.SocketConnections.RelationExtractorSocket commander =
-                        (Examples.SocketConnections.RelationExtractorSocket)commBridge.FindSocketConnectionByLabel("Extractor");
+#if !UNITY_WEBGL
+				if (commBridge != null)
+				{
+					Examples.SocketConnections.RelationExtractorSocket commander =
+						(Examples.SocketConnections.RelationExtractorSocket)commBridge.FindSocketConnectionByLabel("Extractor");
 
-                    if (commander != null) {
-                        byte[] bytes = Encoding.ASCII.GetBytes("").ToArray<byte>();
-                        commander.Write(bytes);
-        			}
-        		}
-        	}
+					if (commander != null)
+					{
+						byte[] bytes = Encoding.ASCII.GetBytes("").ToArray<byte>();
+						commander.Write(bytes);
+					}
+				} 
+#endif
+			}
         }
     }
 }

@@ -71,52 +71,59 @@ namespace VoxSimPlatform {
     			return jsonString;
     		}
 
-    		public static string JsonifyEpistemicStateInitiation(EpistemicState collections) {
-    			return string.Format("{{{0}}}",
-    				string.Join(", ",
-    					collections.GetAllConcepts().Select(JsonifyConceptDefinitions)
-    						.ToArray()));
-    		}
+#if !UNITY_WEBGL
+			public static string JsonifyEpistemicStateInitiation(EpistemicState collections)
+			{
+				return string.Format("{{{0}}}",
+					string.Join(", ",
+						collections.GetAllConcepts().Select(JsonifyConceptDefinitions)
+							.ToArray()));
+			}
 
-    		public static string JsonifyUpdatedConcepts(EpistemicState state, params Concept[] concepts) {
-    			if (concepts.Length <= 0) return "[]";
-    			var updatedConceptIndices = new string[concepts.Length];
-    			for (int i = 0; i < concepts.Length; i++) {
-    				var concept = concepts[i];
-    				var collection = state.GetConcepts(concept.Type);
-    				updatedConceptIndices[i] =
-    					string.Format("\"{0}{5}{1}{5}{2}{4}{3:0.00}\"",
-    						(int) concept.Type,
-    						(int) concept.Mode,
-    						collection.GetIndex(concept),
-    						concept.Certainty,
-    						CertaintySep, JsonRelationConnector);
-    			}
+			public static string JsonifyUpdatedConcepts(EpistemicState state, params Concept[] concepts)
+			{
+				if (concepts.Length <= 0) return "[]";
+				var updatedConceptIndices = new string[concepts.Length];
+				for (int i = 0; i < concepts.Length; i++)
+				{
+					var concept = concepts[i];
+					var collection = state.GetConcepts(concept.Type);
+					updatedConceptIndices[i] =
+						string.Format("\"{0}{5}{1}{5}{2}{4}{3:0.00}\"",
+							(int)concept.Type,
+							(int)concept.Mode,
+							collection.GetIndex(concept),
+							concept.Certainty,
+							CertaintySep, JsonRelationConnector);
+				}
 
-    			return string.Format("[{0}]", string.Join(", ", updatedConceptIndices));
-    		}
+				return string.Format("[{0}]", string.Join(", ", updatedConceptIndices));
+			}
 
-    		public static string JsonifyUpdatedRelations(EpistemicState state, params Relation[] relations) {
-    			if (relations.Length <= 0) return "[]";
-    			var collection = state.GetConcepts(relations[0].Origin.Type);
-    			return string.Format("[{0}]", string.Join(", ",
-    				relations.Select(relation =>
-    					string.Format("\"{0}{7}{1}{7}{2}{7}{3}{7}{4}{6}{5:0.00}\"",
-    						(int) collection.Type(),
-    						(int) relation.Origin.Mode,
-    						collection.GetIndex(relation.Origin),
-    						(int) relation.Destination.Mode,
-    						collection.GetIndex(relation.Destination),
-    						relation.Certainty,
-    						CertaintySep, JsonRelationConnector
-    					)).ToArray()));
-    		}
+			public static string JsonifyUpdatedRelations(EpistemicState state, params Relation[] relations)
+			{
+				if (relations.Length <= 0) return "[]";
+				var collection = state.GetConcepts(relations[0].Origin.Type);
+				return string.Format("[{0}]", string.Join(", ",
+					relations.Select(relation =>
+						string.Format("\"{0}{7}{1}{7}{2}{7}{3}{7}{4}{6}{5:0.00}\"",
+							(int)collection.Type(),
+							(int)relation.Origin.Mode,
+							collection.GetIndex(relation.Origin),
+							(int)relation.Destination.Mode,
+							collection.GetIndex(relation.Destination),
+							relation.Certainty,
+							CertaintySep, JsonRelationConnector
+						)).ToArray()));
+			}
 
-    		public static string JsonifyUpdates(EpistemicState state, Concept[] concepts, Relation[] relations) {
-    			return string.Format("{{\"c\": {0}, \"r\": {1}}}",
-    				JsonifyUpdatedConcepts(state, concepts),
-    				JsonifyUpdatedRelations(state, relations));
-    		}
-    	}
+			public static string JsonifyUpdates(EpistemicState state, Concept[] concepts, Relation[] relations)
+			{
+				return string.Format("{{\"c\": {0}, \"r\": {1}}}",
+					JsonifyUpdatedConcepts(state, concepts),
+					JsonifyUpdatedRelations(state, relations));
+			} 
+#endif
+		}
     }
 }
