@@ -1,4 +1,4 @@
-#if !UNITY_EDITOR && !UNITY_STANDALONE && !UNITY_IOS
+#if !UNITY_EDITOR && !UNITY_STANDALONE && !UNITY_IOS && !UNITY_WEBGL
 using System;
 
 using NUnit.Framework;
