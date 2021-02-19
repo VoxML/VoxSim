@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using VoxSimPlatform.Core;
-using VoxSimPlatform.Network;
+#if !UNITY_WEBGL
+using VoxSimPlatform.Network; 
+#endif
 using VoxSimPlatform.UI;
 
 namespace VoxSimPlatform {
@@ -52,9 +54,12 @@ namespace VoxSimPlatform {
         	String[] commands;
         	EventManager eventManager;
 
-        	CommunicationsBridge commBridge;
-
-        	ObjectSelector objSelector;
+#if !UNITY_WEBGL
+			CommunicationsBridge commBridge;
+#else
+            NLU.INLParser commBridge;
+#endif
+            ObjectSelector objSelector;
         	//ExitToMenuUIButton exitToMenu;
 
         	String disableEnable;
@@ -90,11 +95,15 @@ namespace VoxSimPlatform {
         		eventManager = bc.GetComponent<EventManager>();
 
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-        		//exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
+                //exitToMenu = GameObject.Find ("VoxWorld").GetComponent<ExitToMenuUIButton> ();
 
-        		commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>();
+#if !UNITY_WEBGL
+				commBridge = GameObject.Find("CommunicationsBridge").GetComponent<CommunicationsBridge>(); 
+#else
+                commBridge = GameObject.Find("SimpleParser").GetComponent<NLU.SimpleParser>();  //This means that WEBGL scenes should use a SimpleParser object, not a CommunicationsBridge one
+#endif
 
-        		labelStyle = new GUIStyle("Label");
+                labelStyle = new GUIStyle("Label");
         		textFieldStyle = new GUIStyle("TextField");
         		buttonStyle = new GUIStyle("Button");
         		labelStyle.fontSize = fontSize;
@@ -261,12 +270,15 @@ namespace VoxSimPlatform {
         			InputEventArgs inputArgs = new InputEventArgs(inputString);
         			OnInputReceived(this, inputArgs);
 
-                    if (inputString.StartsWith("qsr:")) {
-                        SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
-                            (SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
-                        qsrLibSocket.SendQSRRequest(inputString);
-                        return;
-                    }
+#if !UNITY_WEBGL
+					if (inputString.StartsWith("qsr:"))
+					{
+						SpatialReasoning.QSR.QSRLibSocket qsrLibSocket =
+							(SpatialReasoning.QSR.QSRLibSocket)commBridge.FindSocketConnectionByType(typeof(SpatialReasoning.QSR.QSRLibIOClient));
+						qsrLibSocket.SendQSRRequest(inputString);
+						return;
+					} 
+#endif
 
                     if (directToEventManager) {
                         Debug.Log("User entered: " + inputString);

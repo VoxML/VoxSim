@@ -51,18 +51,20 @@ namespace VoxSimPlatform {
     #if UNITY_EDITOR
     		public static string voxmlDataPath = Application.dataPath.Remove(Application.dataPath.LastIndexOf('/') + 1) +
     		                                     string.Format("VoxML/voxml");
-    #elif UNITY_STANDALONE_OSX
+#elif UNITY_STANDALONE_OSX
     		public static string voxmlDataPath =
      Application.dataPath.Remove (Application.dataPath.LastIndexOf('/', Application.dataPath.LastIndexOf('/') - 1)) + string.Format ("/VoxML/voxml");
-    #elif UNITY_STANDALONE_WIN
+#elif UNITY_STANDALONE_WIN
     		public static string voxmlDataPath =
      Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("VoxML/voxml");
-    #elif UNITY_IOS
+#elif UNITY_IOS
     		public static string voxmlDataPath =
      Application.dataPath.Remove (Application.dataPath.LastIndexOf ('/') + 1) + string.Format ("/VoxML/voxml");
-    #endif
+#elif UNITY_WEBGL
+    		public static string voxmlDataPath = "TemplateData/voxml";
+#endif
 
-    		public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs) {
+            public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs) {
     			// Get the subdirectories for the specified directory.
     			DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 

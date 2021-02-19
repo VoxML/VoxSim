@@ -1,6 +1,8 @@
 ﻿using System;
 
+#if !UNITY_WEBGL
 using VoxSimPlatform.Network;
+#endif
 
 namespace VoxSimPlatform {
     namespace NLU {
@@ -13,8 +15,11 @@ namespace VoxSimPlatform {
 
 
             //void InitParserService(NLUServerHandler nlu_server = null);
-            void InitParserService(SocketConnection socketConnection = null, Type expectedSyntax = null);
-            void InitParserService(RESTClient restClient = null, Type expectedSyntax = null);
+#if !UNITY_WEBGL
+
+			void InitParserService(SocketConnection socketConnection = null, Type expectedSyntax = null);
+			void InitParserService(RESTClient restClient = null, Type expectedSyntax = null); 
+#endif
         }
     }
 }

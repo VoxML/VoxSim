@@ -2,8 +2,10 @@
 using UnityEngine.SceneManagement;
 using System.Collections;
 
+#if !UNITY_WEBGL
 using VoxSimPlatform.Network;
 
+#endif
 namespace VoxSimPlatform {
     namespace Global {
         /// <summary>
