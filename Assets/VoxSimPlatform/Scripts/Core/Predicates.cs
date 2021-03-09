@@ -829,7 +829,26 @@ namespace VoxSimPlatform {
         		return string.Join(",", objNames.ToArray());
         	}
 
-        	public String LEFTMOST(object[] args) {
+            // IN: Objects
+            // OUT: String
+            [DeferredEvaluation]
+            public String ALL(object[] args) {
+                List<String> objNames = new List<String>();
+
+                if (args[0] is GameObject) {
+                    // assume all inputs are of same type
+                    for (int index = 0; index < args.Length; index++) {
+                        if (!objNames.Contains((args[index] as GameObject).name)) {
+                            // make sure all entries are distinct
+                            objNames.Add((args[index] as GameObject).name);
+                        }
+                    }
+                }
+
+                return string.Join(",", objNames.ToArray());
+            }
+
+            public String LEFTMOST(object[] args) {
         		String objName = "";
 
         		if (args[0] is GameObject) {

@@ -189,7 +189,7 @@ namespace VoxSimPlatform {
     			"rightmost"
     		});
 
-            // A far from exhaustive list. of determiners
+            // A far from exhaustive list of determiners
     		private List<string> _determiners = new List<string>(new[] {
     			"the",
     			"a",
@@ -197,7 +197,8 @@ namespace VoxSimPlatform {
                 "another",
     			"this",
     			"that",
-    			"two"
+    			"two",
+                "all"
     		});
 
     		private List<string> _exclude = new List<string>();
