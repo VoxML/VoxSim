@@ -823,7 +823,12 @@ namespace VoxSimPlatform {
         					}
         				}
         			}
-        		}
+                    else {
+                        for (int i = 0; i < args.Length; i++) {
+                            objNames.Add((args[i] as GameObject).name);
+                        }
+                    }
+                }
 
         		//Debug.Log(string.Join(",",objNames.ToArray()));
         		return string.Join(",", objNames.ToArray());
