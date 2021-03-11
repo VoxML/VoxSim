@@ -824,8 +824,13 @@ namespace VoxSimPlatform {
         				}
         			}
                     else {
-                        for (int i = 0; i < args.Length; i++) {
-                            objNames.Add((args[i] as GameObject).name);
+                        for (int i = 0; i < 2; i++) {
+                            if (i < args.Length) {
+                                objNames.Add((args[i] as GameObject).name);
+                            }
+                            else {
+                                objNames.Add("NULL");
+                            }
                         }
                     }
                 }
