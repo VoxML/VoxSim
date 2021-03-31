@@ -4,81 +4,82 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
+using VoxSimPlatform.Global;
 #if !UNITY_WEBGL
 using VoxSimPlatform.Network;
 #endif
 
 namespace VoxSimPlatform {
     namespace NLU {
-    	public class SimpleParser : INLParser {
-    		private List<string> _events = new List<string>(new[] {
-    			"grasp",
-    			"hold",
-    			"touch",
-    			"move",
-    			"turn",
-    			"roll",
-    			"spin",
-    			"stack",
-    			"put",
-    			"lean on",
-    			"lean against",
-    			"flip on edge",
-    			"flip at center",
-    			"flip",
-    			"close",
-    			"open",
-    			"lift",
-    			"drop",
-    			"reach",
-    			"slide"
-    		});
+        public class SimpleParser : INLParser {
+            private List<string> _events = new List<string>(new[] {
+                "grasp",
+                "hold",
+                "touch",
+                "move",
+                "turn",
+                "roll",
+                "spin",
+                "stack",
+                "put",
+                "lean on",
+                "lean against",
+                "flip on edge",
+                "flip at center",
+                "flip",
+                "close",
+                "open",
+                "lift",
+                "drop",
+                "reach",
+                "slide"
+            });
 
-    		private List<string> _objects = new List<string>(new[] {
-    			"block",
-    			"ball",
+            private List<string> _objects = new List<string>(new[] {
+                "block",
+                "ball",
                 "cylinder",
-    			"plate",
-    			"cup",
-    			"cup1",
-    			"cup2",
-    			"cup3",
-    			"cups",
-    			"disc",
-    			"spoon",
-    			"fork",
-    			"book",
-    			"blackboard",
-    			"bottle",
-    			"grape",
-    			"apple",
-    			"banana",
-    			"table",
-    			"bowl",
-    			"knife",
-    			"pencil",
-    			"paper_sheet",
-    			"hand",
-    			"arm",
-    			"mug",
-    			"block1",
-    			"block2",
-    			"block3",
-    			"block4",
-    			"block5",
-    			"block6",
+                "plate",
+                "cup",
+                "cup1",
+                "cup2",
+                "cup3",
+                "cups",
+                "disc",
+                "spoon",
+                "fork",
+                "book",
+                "blackboard",
+                "bottle",
+                "grape",
+                "apple",
+                "banana",
+                "table",
+                "bowl",
+                "knife",
+                "pencil",
+                "paper_sheet",
+                "hand",
+                "arm",
+                "mug",
+                "block1",
+                "block2",
+                "block3",
+                "block4",
+                "block5",
+                "block6",
                 "block7",
-    			"blocks",
-    			"lid",
-    			"stack",
-    			"staircase",
-    			"pyramid",
-    			"cork",
-    		});
+                "blocks",
+                "lid",
+                "stack",
+                "staircase",
+                "pyramid",
+                "cork",
+            });
 
-    		private List<string> _objectVars = new List<string>(new[] {
-    			"{0}"
-    		});
+            private List<string> _objectVars = new List<string>(new[] {
+                "{0}"
+            });
 
             private List<string> _anaphorVars = new List<string>(new[] {
                 "{2}"
@@ -90,66 +91,66 @@ namespace VoxSimPlatform {
             /// </summary>
     		private Dictionary<string, string> shittyPorterStemmer = new Dictionary<string, string>() {
     			// not even a goddamn stemmer
-    			{"blocks", "block"},
-    			{"balls", "ball"},
-                {"cylinders", "cylinder"},
-                {"plates", "plate"},
-    			{"cups", "cup"},
-    			{"discs", "disc"},
-    			{"spoons", "spoon"},
-    			{"forks", "fork"},
-    			{"books", "book"},
-    			{"blackboards", "blackboard"},
-    			{"bottles", "bottle"},
-    			{"grapes", "grape"},
-    			{"apples", "apple"},
-    			{"bananas", "banana"},
-    			{"tables", "table"},
-    			{"bowls", "bowl"},
-    			{"knives", "knife"},
-    			{"pencils", "pencil"},
-    			{"paper sheets", "paper_sheet"},
-    			{"mugs", "mug"},
-    			{"lids", "lid"},
-    			{"stack", "stack"},
-    			{"starcases", "staircase"},
-    			{"pyramids", "pyramid"},
-    			{"corks", "cork"}
+    			{"blocks", "block.pl"},
+                {"balls", "ball.pl"},
+                {"cylinders", "cylinder.pl"},
+                {"plates", "plate.pl"},
+                {"cups", "cup.pl"},
+                {"discs", "disc.pl"},
+                {"spoons", "spoon.pl"},
+                {"forks", "fork.pl"},
+                {"books", "book.pl"},
+                {"blackboards", "blackboard.pl"},
+                {"bottles", "bottle.pl"},
+                {"grapes", "grape.pl"},
+                {"apples", "apple.pl"},
+                {"bananas", "banana.pl"},
+                {"tables", "table.pl"},
+                {"bowls", "bowl.pl"},
+                {"knives", "knife.pl"},
+                {"pencils", "pencil.pl"},
+                {"paper sheets", "paper_sheet.pl"},
+                {"mugs", "mug.pl"},
+                {"lids", "lid.pl"},
+                {"stacks", "stack.pl"},
+                {"starcases", "staircase.pl"},
+                {"pyramids", "pyramid.pl"},
+                {"corks", "cork.pl"}
     			// sorry about this, Keigh
     			// let us delete this when EACL is over and never speak of it again
                 // 2019: still haven't deleted this crap (:
     		};
 
 
-    		private List<string> _relations = new List<string>(new[] {
-    			"touching",
-    			"in",
-    			"on",
+            private List<string> _relations = new List<string>(new[] {
+                "touching",
+                "in",
+                "on",
                 "atop", // prithee sirrah, put the black block atop the yellow block
                 "port",
                 "starboard",
                 "afore",
                 "astern",
-    			"at",
-    			"behind",
-    			"in front of",
+                "at",
+                "behind",
+                "in front of",
                 "beside",
                 "near",
-    			"left of",
-    			"right of",
-    			"center of",
-    			"edge of",
-    			"under",
-    			"against",
+                "left of",
+                "right of",
+                "center of",
+                "edge of",
+                "under",
+                "against",
                 "here",
                 "there"
-    		});
+            });
 
-    		private List<string> _relationVars = new List<string>(new[] {
-    			"{1}"
-    		});
+            private List<string> _relationVars = new List<string>(new[] {
+                "{1}"
+            });
 
-    		private List<string> _attribs = new List<string>(new[] {
+            private List<string> _attribs = new List<string>(new[] {
                 "b",
                 "c",
                 "d",
@@ -176,33 +177,45 @@ namespace VoxSimPlatform {
                 "y",
                 "z",
                 "brown",
-    			"blue",
-    			"black",
-    			"green",
-    			"yellow",
-    			"red",
-    			"orange",
-    			"pink",
-    			"white",
-    			"gray",
-    			"purple",
-    			"leftmost",
-    			"middle",
-    			"rightmost"
-    		});
+                "blue",
+                "black",
+                "green",
+                "yellow",
+                "red",
+                "orange",
+                "pink",
+                "white",
+                "gray",
+                "purple",
+                "leftmost",
+                "middle",
+                "rightmost"
+            });
 
-            // A far from exhaustive list. of determiners
-    		private List<string> _determiners = new List<string>(new[] {
-    			"the",
-    			"a",
+            // A far from exhaustive list of determiners
+            private List<string> _determiners = new List<string>(new[] {
+                "the",
+                "a",
                 "an",
                 "another",
-    			"this",
-    			"that",
-    			"two"
-    		});
+                "this",
+                "that",
+                "two",
+                "all"
+            });
 
-    		private List<string> _exclude = new List<string>();
+            private Dictionary<string, string> pluralDeterminers = new Dictionary<string, string>() {
+                {"the", "the_pl"},
+                {"a", "some"},
+                {"an", "some"},
+                {"another", "some_other"},
+                {"this", "these"},
+                {"that", "those"},
+                {"two", "two"},
+                {"all", "all"}
+            };
+
+            private List<string> _exclude = new List<string>();
 
             /// <summary>
             /// Only called in one place. Splits on any amount of spaces
@@ -301,15 +314,28 @@ namespace VoxSimPlatform {
     					cur += 1;
     				}
     				else if (_determiners.Contains(tokens[cur])) {
+                        string det = tokens[cur];
+                        form += tokens[cur] + "(";
+    					cur += ParseNextNP(tokens.Skip(cur + 1).ToArray(), ref form, ref lastObj);
+                        List<int> indices = form.FindAllIndicesOf(det);
+                        Debug.Log(form);
+                        Debug.Log(cur);
+                        if (cur < tokens.Length) {
+                            if (tokens[cur].Split('.').Length > 1) {
+                                if (tokens[cur].Split('.')[1] == "pl") {
+                                    if (indices.Count > 0) {
+                                        form = form.Remove(indices.Last(), det.Length).Insert(indices.Last(), pluralDeterminers[det]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (_attribs.Contains(tokens[cur])) {
     					form += tokens[cur] + "(";
     					cur += ParseNextNP(tokens.Skip(cur + 1).ToArray(), ref form, ref lastObj);
     				}
-    				else if (_attribs.Contains(tokens[cur])) {
-    					form += tokens[cur] + "(";
-    					cur += ParseNextNP(tokens.Skip(cur + 1).ToArray(), ref form, ref lastObj);
-    				}
-    				else if (_objects.Contains(tokens[cur])) {
-    					lastObj = tokens[cur];
+    				else if (_objects.Contains(tokens[cur].Split('.')[0])) {
+    					lastObj = tokens[cur].Split('.')[0];
     					form += lastObj;
     					//form = MatchParens(form);
     					cur++;

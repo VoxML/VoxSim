@@ -13,7 +13,7 @@ using System.Xml.Serialization;
 
 using VoxSimPlatform.Global;
 #if !UNITY_WEBGL
-using VoxSimPlatform.Network; 
+using VoxSimPlatform.Network;
 #endif
 using VoxSimPlatform.UI.ModalWindow;
 using VoxSimPlatform.UI.UIButtons;
@@ -742,6 +742,7 @@ namespace VoxSimPlatform {
             	}
 
                 void GetMyIP() {
+<<<<<<< HEAD
                 // get IP address
 #if !UNITY_IOS && !UNITY_WEBGL
                     foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
@@ -751,6 +752,25 @@ namespace VoxSimPlatform {
                         }
                     }
 #elif UNITY_IOS
+=======
+                    // get IP address
+#if !UNITY_IOS
+                    try {
+                        foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList) {
+                            if (ipAddress.AddressFamily.ToString() == "InterNetwork") {
+                                //Debug.Log(ipAddress.ToString());
+                                ip = ipAddress.ToString();
+                            }
+                        }
+                    }
+                    catch (SocketException e) {
+                        Debug.LogWarningFormat("SocketException source: {0}; message: {1}", e.Source, e.Message);
+                    }
+                    catch (Exception e) {
+                        Debug.LogWarningFormat("Exception source: {0}; message: {1}", e.Source, e.Message);
+                    }
+#else
+>>>>>>> master
                     foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces()){
                         if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet) {
                             //Debug.Log(ni.Name);

@@ -1479,7 +1479,7 @@ namespace VoxSimPlatform {
                                                 }
                                                 else {
                                                     foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                                                        if (voxeme.voxml.Lex.Pred.Equals(arg)) {
+                                                        if (voxeme.voxml.Lex.Pred.Equals(((string)arg).Split('.')[0])) {
                                                             matches.Add(voxeme.gameObject);
                                                         }
                                                     }

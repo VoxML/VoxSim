@@ -722,30 +722,70 @@ namespace VoxSimPlatform {
                 //System.Random random = new System.Random ();
 
                 if (args[0] is GameObject) {
-        			// assume all inputs are of same type
-        			for (int index = 0; index < args.Length; index++) {
-        				if (args[index] is GameObject) {
-                            objNames.Add((args[index] as GameObject).name);
-        				}
-        			}
+                    // assume all inputs are of same type
+                    if (args.Length > 1) {
+                        eventManager.OnDisambiguationError(this,
+                        new EventDisambiguationArgs("the",
+                            string.Empty, string.Empty,
+                            args.Select(o => (o as GameObject).GetComponent<Voxeme>()).ToArray())
+                        );
+                    }
+                    else {
+                        objNames.Add((args[0] as GameObject).name);
+                    }
         		}
         		else if (args[0] is String) {
-        			// assume all inputs are of same type
-        			for (int index = 0; index < args.Length; index++) {
-        				if (args[index] is String) {
-                            GameObject go = GameObject.Find(args[index] as String);
-        					if (go != null) {
-	        					objNames.Add(args[index] as String);        						
-        					}
-        				}
+                    // assume all inputs are of same type
+                    if (args.Length > 1) {
+                        eventManager.OnDisambiguationError(this,
+                        new EventDisambiguationArgs("the",
+                            string.Empty, string.Empty,
+                            args.Select(o => (o as GameObject).GetComponent<Voxeme>()).ToArray())
+                        );
+                    }
+                    else {
+                        GameObject go = GameObject.Find(args[0] as String);
+                        if (go != null)
+                        {
+                            objNames.Add(args[0] as String);
+                        }
         			}
         		}
 
                 return string.Join(",", objNames.ToArray());
         	}
 
-        	// IN: Objects
-        	// OUT: String
+            // IN: Objects
+            // OUT: String
+            public String THE_PL(object[] args) {
+                List<String> objNames = new List<String>();
+                //System.Random random = new System.Random ();
+
+                if (args[0] is GameObject) {
+                    // assume all inputs are of same type
+                    for (int index = 0; index < args.Length; index++) {
+                        if (args[index] is GameObject) {
+                            objNames.Add((args[index] as GameObject).name);
+                        }
+                    }
+                }
+                else if (args[0] is String) {
+                    // assume all inputs are of same type
+                    for (int index = 0; index < args.Length; index++) {
+                        if (args[index] is String) {
+                            GameObject go = GameObject.Find(args[index] as String);
+                            if (go != null) {
+                                objNames.Add(args[index] as String);
+                            }
+                        }
+                    }
+                }
+
+                return string.Join(",", objNames.ToArray());
+            }
+
+            // IN: Objects
+            // OUT: String
             [DeferredEvaluation]
         	public String A(object[] args) {
         		String objName = "";
@@ -823,13 +863,42 @@ namespace VoxSimPlatform {
         					}
         				}
         			}
-        		}
+                    else {
+                        for (int i = 0; i < 2; i++) {
+                            if (i < args.Length) {
+                                objNames.Add((args[i] as GameObject).name);
+                            }
+                            else {
+                                objNames.Add("NULL");
+                            }
+                        }
+                    }
+                }
 
         		//Debug.Log(string.Join(",",objNames.ToArray()));
         		return string.Join(",", objNames.ToArray());
         	}
 
-        	public String LEFTMOST(object[] args) {
+            // IN: Objects
+            // OUT: String
+            [DeferredEvaluation]
+            public String ALL(object[] args) {
+                List<String> objNames = new List<String>();
+
+                if (args[0] is GameObject) {
+                    // assume all inputs are of same type
+                    for (int index = 0; index < args.Length; index++) {
+                        if (!objNames.Contains((args[index] as GameObject).name)) {
+                            // make sure all entries are distinct
+                            objNames.Add((args[index] as GameObject).name);
+                        }
+                    }
+                }
+
+                return string.Join(",", objNames.ToArray());
+            }
+
+            public String LEFTMOST(object[] args) {
         		String objName = "";
 
         		if (args[0] is GameObject) {
