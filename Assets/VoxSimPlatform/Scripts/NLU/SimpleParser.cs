@@ -319,7 +319,7 @@ namespace VoxSimPlatform {
                         Debug.Log(form);
                         Debug.Log(cur);
                         if (cur < tokens.Length) {
-                            if (tokens[cur].Split('.').Length > 0) {
+                            if (tokens[cur].Split('.').Length > 1) {
                                 if (tokens[cur].Split('.')[1] == "pl") {
                                     if (indices.Count > 0) {
                                         form = form.Remove(indices.Last(), det.Length).Insert(indices.Last(), pluralDeterminers[det]);
