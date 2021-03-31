@@ -318,8 +318,6 @@ namespace VoxSimPlatform {
                         form += tokens[cur] + "(";
     					cur += ParseNextNP(tokens.Skip(cur + 1).ToArray(), ref form, ref lastObj);
                         List<int> indices = form.FindAllIndicesOf(det);
-                        Debug.Log(form);
-                        Debug.Log(cur);
                         if (cur < tokens.Length) {
                             if (tokens[cur].Split('.').Length > 1) {
                                 if (tokens[cur].Split('.')[1] == "pl") {
