@@ -6199,9 +6199,9 @@ namespace VoxSimPlatform {
                                 for (int i = 0; i < objBoundPoints.Count; i++) {
                                     objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
                                         objBoundPoints[i];
-                                    Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
                                     objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized*Constants.EPSILON);
-                                    Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
                                 }
 
                                 ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);

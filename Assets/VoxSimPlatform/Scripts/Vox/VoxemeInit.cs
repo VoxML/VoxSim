@@ -101,9 +101,14 @@ namespace VoxSimPlatform {
                             //	Destroy(fixHandRotation);
                             //}
 
-        					//// set up for physics
-        					//// add box colliders and rigid bodies to all subobjects that have MeshFilters
-        					Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+                            // set up for physics
+                            //Debug.Log("Creating Rigidbody on " + container);
+                            //Rigidbody voxRigidBody = container.AddComponent<Rigidbody>();
+                            //voxRigidBody.mass = 0;
+                            //voxRigidBody.drag = 0;
+
+                            // add box colliders and rigid bodies to all subobjects that have MeshFilters
+                            Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
         					foreach (Renderer renderer in renderers) {
         						GameObject subObj = renderer.gameObject;
         						if (subObj.GetComponent<MeshFilter>() != null) {
@@ -129,6 +134,7 @@ namespace VoxSimPlatform {
         										float y = GlobalHelper.GetObjectWorldSize(subObj).size.y;
         										float z = GlobalHelper.GetObjectWorldSize(subObj).size.z;
         										rigidbody.mass = x * y * z * (container.GetComponent<Voxeme>().density);
+                                                //voxRigidBody.mass += rigidbody.mass;
 
         										// bunch of crap assumptions to calculate drag:
         										// air density: 1.225 kg/m^3
@@ -139,6 +145,7 @@ namespace VoxSimPlatform {
         										rigidbody.drag =
         											1.225f * voxeme.moveSpeed * ((2 * x * y) + (2 * y * z) + (2 * x * z)) *
         											1.0f;
+                                                //voxRigidBody.drag += rigidbody.drag;
            									}
 
         									// log the orientational displacement of each rigidbody relative to the main body
@@ -164,8 +171,8 @@ namespace VoxSimPlatform {
         						container.GetComponent<Rigging>().ActivatePhysics(false);
         					}
                                 
-                            foreach(Transform transform in go.transform) {
-                                transform.gameObject.tag = go.tag;
+                            foreach(Transform t in go.transform) {
+                                t.gameObject.tag = go.tag;
                             }
                             container.tag = go.tag;
 
@@ -183,7 +190,8 @@ namespace VoxSimPlatform {
                     if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null) &&
                         (go.GetComponent<Voxeme>().isActiveAndEnabled)) {
                         // remove BoxCollider and Rigidbody on non-top level objects
-                        if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
+                        if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != 
+                            GlobalHelper.GetMostImmediateParentVoxeme(go).GetComponent<Voxeme>().defaultParent) &&
         				    (go.transform.root.tag != "Agent")) {
         					BoxCollider boxCollider = go.GetComponent<BoxCollider>();
         					if (boxCollider != null) {
@@ -192,6 +200,7 @@ namespace VoxSimPlatform {
 
         					Rigidbody rigidbody = go.GetComponent<Rigidbody>();
         					if (rigidbody != null) {
+                                Debug.Log("Removing Rigidbody on " + go);
         						Destroy(rigidbody);
         					}
         				}

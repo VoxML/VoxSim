@@ -971,6 +971,11 @@ namespace VoxSimPlatform {
                     float t = (Time.deltaTime * moveSpeed) / offset.magnitude;
 
                     if (rigging.usePhysicsRig) {
+                        //Rigidbody rb = gameObject.GetComponent<Rigidbody>();
+                        //if (rb != null) {
+                        //    rb.MovePosition(Vector3.Lerp(transform.position, target, t));
+                        //}
+
                         Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
                         foreach (Rigidbody rigidbody in rigidbodies) {
                             //rigidbody.MovePosition(new Vector3(
@@ -1046,6 +1051,10 @@ namespace VoxSimPlatform {
 
                     if (rigging.usePhysicsRig) {
                         float displacementAngle = 360.0f;
+                        //Rigidbody rb = gameObject.GetComponent<Rigidbody>();
+                        //if (rb != null) {
+                        //    rb.MoveRotation(rot);
+                        //}
                         Rigidbody[] rigidbodies = gameObject.GetComponentsInChildren<Rigidbody>();
                         foreach (Rigidbody rigidbody in rigidbodies) {
                             rigidbody.MoveRotation(rot);
