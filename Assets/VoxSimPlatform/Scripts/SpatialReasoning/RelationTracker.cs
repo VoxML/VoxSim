@@ -43,12 +43,12 @@ namespace VoxSimPlatform {
 
         		foreach (DictionaryEntry pair in relations) {
         			if (!IsSatisfied((pair.Value as string), (pair.Key as List<GameObject>))) {
-        				toRemove.Add(pair.Key as List<GameObject>, pair.Value as string);
+                        toRemove.Add(pair.Key as List<GameObject>, pair.Value as string);
         			}
         		}
 
-        		foreach (object key in toRemove) {
-        			RemoveRelation(key as List<GameObject>, toRemove[key as List<GameObject>]);
+        		foreach (KeyValuePair<List<GameObject>,string> kvp in toRemove) {
+                    RemoveRelation(kvp.Key as List<GameObject>, toRemove[kvp.Key as List<GameObject>]);
         		}
         	}
 
