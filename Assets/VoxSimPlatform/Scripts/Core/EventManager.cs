@@ -946,6 +946,7 @@ namespace VoxSimPlatform {
                 events.Clear();
                 evalOrig.Clear();
                 evalResolved.Clear();
+                stayExecution = false;
                 OnForceClear(this, null);
             }
 
