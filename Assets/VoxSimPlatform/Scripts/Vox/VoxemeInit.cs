@@ -113,8 +113,8 @@ namespace VoxSimPlatform {
         						GameObject subObj = renderer.gameObject;
         						if (subObj.GetComponent<MeshFilter>() != null) {
         							if (go.tag != "UnPhysic") {
-        								if (subObj.GetComponent<BoxCollider>() == null) {
-        									// may already have one -- goddamn overachieving scene artists
+        								if (subObj.GetComponent<Collider>() == null) {
+        									// may already have a collider -- goddamn overachieving scene artists
         									BoxCollider collider = subObj.AddComponent<BoxCollider>();
         								}
         							}
