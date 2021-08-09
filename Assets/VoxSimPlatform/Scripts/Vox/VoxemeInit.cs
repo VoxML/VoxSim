@@ -126,23 +126,23 @@ namespace VoxSimPlatform {
 
         								if (subObj.GetComponent<Rigidbody>() == null) {
         									// may already have one -- goddamn overachieving scene artists
-        									Rigidbody rigidbody = subObj.AddComponent<Rigidbody>();
-        									if (rigidbody != null) {
+        									Rigidbody rb = subObj.AddComponent<Rigidbody>();
+        									if (rb != null) {
         										// assume mass is a volume of uniform density
         										// assumption: all objects have the same density
         										float x = GlobalHelper.GetObjectWorldSize(subObj).size.x;
         										float y = GlobalHelper.GetObjectWorldSize(subObj).size.y;
         										float z = GlobalHelper.GetObjectWorldSize(subObj).size.z;
-        										rigidbody.mass = x * y * z * (container.GetComponent<Voxeme>().density);
+                                                rb.mass = x * y * z * (container.GetComponent<Voxeme>().density);
                                                 //voxRigidBody.mass += rigidbody.mass;
 
-        										// bunch of crap assumptions to calculate drag:
-        										// air density: 1.225 kg/m^3
-        										// flow velocity = parent voxeme moveSpeed
-        										// use box collider surface area for reference area
-        										// use Reynolds number for drag coefficient - assume 1
-        										// https://en.wikipedia.org/wiki/Drag_coefficient
-        										rigidbody.drag =
+                                                // bunch of crap assumptions to calculate drag:
+                                                // air density: 1.225 kg/m^3
+                                                // flow velocity = parent voxeme moveSpeed
+                                                // use box collider surface area for reference area
+                                                // use Reynolds number for drag coefficient - assume 1
+                                                // https://en.wikipedia.org/wiki/Drag_coefficient
+                                                rb.drag =
         											1.225f * voxeme.moveSpeed * ((2 * x * y) + (2 * y * z) + (2 * x * z)) *
         											1.0f;
                                                 //voxRigidBody.drag += rigidbody.drag;
@@ -152,17 +152,17 @@ namespace VoxSimPlatform {
         									// relativeDisplacement = rotation to get from main body rotation to rigidbody rotation
         									// = rigidbody rotation * (main body rotation)^-1
         									Vector3 displacement =
-        										rigidbody.transform.localPosition; //-container.transform.position;
+                                                rb.transform.localPosition; //-container.transform.position;
         									Vector3 rotationalDisplacement =
-        										rigidbody.transform
+                                                rb.transform
         											.localEulerAngles; //(rigidbody.transform.localRotation * Quaternion.Inverse (container.transform.rotation)).eulerAngles;
         									//Debug.Log(rotationalDisplacement);
         									//Debug.Log(rigidbody.name);
         									container.GetComponent<Voxeme>().displacement
-        										.Add(rigidbody.gameObject, displacement);
+        										.Add(rb.gameObject, displacement);
         									container.GetComponent<Voxeme>().rotationalDisplacement
-        										.Add(rigidbody.gameObject, rotationalDisplacement);
-        								}
+        										.Add(rb.gameObject, rotationalDisplacement);
+                                        }
         							}
         						}
         					}
@@ -198,10 +198,10 @@ namespace VoxSimPlatform {
         						Destroy(boxCollider);
         					}
 
-        					Rigidbody rigidbody = go.GetComponent<Rigidbody>();
-        					if (rigidbody != null) {
+        					Rigidbody rb = go.GetComponent<Rigidbody>();
+        					if (rb != null) {
                                 Debug.Log("Removing Rigidbody on " + go);
-        						Destroy(rigidbody);
+        						Destroy(rb);
         					}
         				}
 

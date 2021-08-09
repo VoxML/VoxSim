@@ -302,6 +302,11 @@ namespace VoxSimPlatform {
 
                 return boundsEqual;
             }
+
+            public bool IsPointWithinCollider(Collider collider, Vector3 point)
+            {
+                return (collider.ClosestPoint(point) - point).sqrMagnitude < Constants.EPSILON;
+            }
         }
 
     	/// <summary>

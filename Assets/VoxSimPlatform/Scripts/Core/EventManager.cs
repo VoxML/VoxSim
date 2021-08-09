@@ -56,12 +56,16 @@ namespace VoxSimPlatform {
 	    public class CalculatedPositionArgs : EventArgs {
 		    public string Formula { get; set; }
 		    public Vector3 Position { get; set; }
+            public Vector3 Direction { get; set; }
+            public float Distance { get; set; }
 
-		    public CalculatedPositionArgs(string formula, Vector3 position) {
+            public CalculatedPositionArgs(string formula, Vector3 position, Vector3 dir, float dist) {
 			    this.Formula = formula;
 			    this.Position = position;
-		    }
-	    }
+                this.Direction = dir;
+                this.Distance = dist;
+            }
+        }
 
         public class EventDisambiguationArgs : EventArgs {
             public string Event { get; set; }
@@ -1044,7 +1048,7 @@ namespace VoxSimPlatform {
                             }
                             else {
                                 Debug.LogWarning(string.Format("VoxMLEntityTypeDict doesn't contain entry for \"{0}.\" " +
-                                    "No primitive predicate \"{1}\" found.  Expect errors!",
+                                    "No primitive predicate \"{1}\" found.  Either \"{1}\" is not a predicate or errors may occur.",
                                     GlobalHelper.GetTopPredicate((String)entry.Value),GlobalHelper.GetTopPredicate((String)entry.Value).ToUpper()));
 	                            argsStrings = ((String)entry.Value).Split(',','+','-','*','/').ToList();
                             }

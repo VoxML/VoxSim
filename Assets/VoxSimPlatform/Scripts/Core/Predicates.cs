@@ -6195,33 +6195,94 @@ namespace VoxSimPlatform {
                         if (args[0] is GameObject) {
                             if (args[1] is Vector3) {
                                 // check that object arg[0]'s projected bounds will fit at location args[1]
-                                List<Vector3> objBoundPoints = GlobalHelper.GetObjectOrientedSize(args[0] as GameObject, true).Points;
-                                for (int i = 0; i < objBoundPoints.Count; i++) {
-                                    objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
-                                        objBoundPoints[i];
-                                    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
-                                    objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized*Constants.EPSILON);
-                                    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
-                                }
+                                //List<Vector3> objBoundPoints = GlobalHelper.GetObjectOrientedSize(args[0] as GameObject, true).Points;
+                                //for (int i = 0; i < objBoundPoints.Count; i++) {
+                                //    objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
+                                //        objBoundPoints[i];
+                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                //    objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized*Constants.EPSILON);
+                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                //}
 
-                                ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
+                                //ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
 
-                                foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                                    if (voxeme.gameObject != args[0] as GameObject) { 
-                                    ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
-                                    foreach (Vector3 point in testBounds.Points) {
-                                        if (projectedBounds.Contains(point)) {
-                                            // not a valid location: abort
-                                            Debug.Log(string.Format("Projected bounds of {0} contains {1}!",
-                                                (args[0] as GameObject).name, GlobalHelper.VectorToParsable(point)));
-                                            Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
-                                                (args[0] as GameObject).name, voxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
-                                            eventManager.OnInvalidPositionError(this,
-                                                new CalculatedPositionArgs(string.Format("move({0},{1})",
-                                                    (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
-                                            return;
+                                //foreach (Voxeme voxeme in objSelector.allVoxemes) {
+                                //    if (voxeme.gameObject != args[0] as GameObject) { 
+                                //    ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
+                                //    foreach (Vector3 point in testBounds.Points) {
+                                //        if (projectedBounds.Contains(point)) {
+                                //            // not a valid location: abort
+                                //            Debug.Log(string.Format("Projected bounds of {0} contains {1}!",
+                                //                (args[0] as GameObject).name, GlobalHelper.VectorToParsable(point)));
+                                //            Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
+                                //                (args[0] as GameObject).name, voxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
+                                //            eventManager.OnInvalidPositionError(this,
+                                //                new CalculatedPositionArgs(string.Format("move({0},{1})",
+                                //                    (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
+                                //            return;
+                                //            }
+                                //        }
+                                //    }
+                                //}
+
+                                //List <Vector3> objBoundPoints = GlobalHelper.GetObjectOrientedSize(args[0] as GameObject, true).Points;
+                                //for (int i = 0; i < objBoundPoints.Count; i++)
+                                //{
+                                //    objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
+                                //        objBoundPoints[i];
+                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                //    objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized * Constants.EPSILON);
+                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
+                                //}
+
+                                //ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
+
+                                Vector3 dir = Vector3.zero;
+                                float dist = 0;
+
+                                GameObject obj = args[0] as GameObject;
+
+                                foreach (Voxeme otherVoxeme in objSelector.allVoxemes) {
+                                    if (otherVoxeme.gameObject != obj) {
+                                        Collider otherCollider = otherVoxeme.gameObject.GetComponentInChildren<Collider>(false);
+
+                                        if (otherCollider != null) {
+                                            bool interpenetrate = Physics.ComputePenetration(
+                                                (args[0] as GameObject).GetComponentInChildren<Collider>(false),
+                                                (Vector3)args[1],
+                                                (args[0] as GameObject).transform.rotation,
+                                                otherCollider,
+                                                otherVoxeme.gameObject.transform.position,
+                                                otherVoxeme.gameObject.transform.rotation,
+                                                out dir, out dist) && (dist > Constants.EPSILON);
+
+                                            if (interpenetrate) {
+                                                Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
+                                                    (args[0] as GameObject).name, otherVoxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
+                                                eventManager.OnInvalidPositionError(this,
+                                                    new CalculatedPositionArgs(string.Format("move({0},{1})",
+                                                    (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1],
+                                                    dir, dist));
+                                                return;
                                             }
                                         }
+
+                                        //ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
+                                        //foreach (Vector3 point in testBounds.Points)
+                                        //{
+                                        //    if (projectedBounds.Contains(point))
+                                        //    {
+                                        //        // not a valid location: abort
+                                        //        Debug.Log(string.Format("Projected bounds of {0} contains {1}!",
+                                        //            (args[0] as GameObject).name, GlobalHelper.VectorToParsable(point)));
+                                        //        Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
+                                        //            (args[0] as GameObject).name, voxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
+                                        //        eventManager.OnInvalidPositionError(this,
+                                        //            new CalculatedPositionArgs(string.Format("move({0},{1})",
+                                        //                (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
+                                        //        return;
+                                        //    }
+                                        //}
                                     }
                                 }
 
@@ -6321,10 +6382,19 @@ namespace VoxSimPlatform {
                                             }
                                         }
 
-                                        voxComponent.targetPosition = voxComponent.interTargetPositions.Last();
+                                        if (((List<Vector3>)path).Count > 0) {
+                                            voxComponent.targetPosition = voxComponent.interTargetPositions.Last();
 
-                                        Debug.Log(string.Format("Path is: [{0}]",
-                                            string.Join(", ",((List<Vector3>)path).Select(n => GlobalHelper.VectorToParsable(n)))));
+                                            Debug.Log(string.Format("Path is: [{0}]",
+                                                string.Join(", ",((List<Vector3>)path).Select(n => GlobalHelper.VectorToParsable(n)))));
+                                        }
+                                        else{
+                                            Debug.Log(string.Format("Path is of length 0.  Moving {0} directly to {1}.",
+                                                GlobalHelper.VectorToParsable((args[0] as GameObject).transform.position),
+                                                GlobalHelper.VectorToParsable((Vector3)args[1])));
+                                            voxComponent.targetPosition = (Vector3)args[1];
+                                            AStarSearch.OnComputedPath(null, new ComputedPathEventArgs(new List<Vector3> { voxComponent.targetPosition }));
+                                        }
                                     }
                                 }
                                 else {

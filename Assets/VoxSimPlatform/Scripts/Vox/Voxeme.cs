@@ -108,6 +108,20 @@ namespace VoxSimPlatform {
                 }
             }
 
+            public bool _rigidbodiesOutOfSync;
+            public bool rigidbodiesOutOfSync {
+                get { return _rigidbodiesOutOfSync; }
+                set {
+                    if (_rigidbodiesOutOfSync != value) {
+                        Debug.Log(string.Format("==================== rigidbodiesOutOfSync changed ==================== {0}: {1}->{2}",
+                             gameObject.name,
+                             _rigidbodiesOutOfSync,
+                             value));
+                    }
+                    _rigidbodiesOutOfSync = value;
+                }
+            }
+
             public bool isGrasped = false;
             public Transform graspTracker = null;
             public Transform grasperCoord = null;
@@ -398,6 +412,11 @@ namespace VoxSimPlatform {
                             GUILayout.EndHorizontal();
                         }
                     }
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Rigidbodies Out Of Sync", GUILayout.Width(120));
+                    ((Voxeme)target).rigidbodiesOutOfSync = GUILayout.Toggle(((Voxeme)target).rigidbodiesOutOfSync, string.Empty, GUILayout.MaxWidth(200));
+                    GUILayout.EndHorizontal();
 
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Start Position", GUILayout.Width(120));
@@ -826,6 +845,55 @@ namespace VoxSimPlatform {
                 }
 
                 // check relationships
+            }
+
+            void FixedUpdate() {
+                //foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+                //{
+                //    Debug.Log(string.Format("Voxeme.FixedUpdate: sync {0} {1} {2}",
+                //                rb.name, GlobalHelper.VectorToParsable(transform.position),
+                //                GlobalHelper.VectorToParsable(rb.transform.position)));
+                //}
+
+                if (rigidbodiesOutOfSync) {
+                    Debug.Log(string.Format("Voxeme.FixedUpdate: {0} rigidbodies out of sync", name));
+
+                    Rigidbody[] rigidbodies = GetComponentsInChildren<Rigidbody>();
+                    foreach (Rigidbody rb in rigidbodies)
+                    {
+                        if (displacement.ContainsKey(rb.gameObject))
+                        {
+                            Debug.Log(string.Format("Voxeme.FixedUpdate: Before sync {0} {1} {2} {3}",
+                                rb.name, GlobalHelper.VectorToParsable(transform.position),
+                                GlobalHelper.VectorToParsable(rb.transform.position),
+                                GlobalHelper.VectorToParsable(rb.transform.localPosition)));
+                            transform.position = rb.transform.position - displacement[rb.gameObject];
+                            rb.transform.localPosition = displacement[rb.gameObject];
+                            targetPosition = transform.position;
+                            Debug.Log(string.Format("Voxeme.FixedUpdate: After sync {0} {1} {2} {3}",
+                                rb.name, GlobalHelper.VectorToParsable(transform.position),
+                                GlobalHelper.VectorToParsable(rb.transform.position),
+                                GlobalHelper.VectorToParsable(rb.transform.localPosition)));
+                        }
+
+                        if (rotationalDisplacement.ContainsKey(rb.gameObject))
+                        {
+                            Debug.Log(string.Format("Voxeme.FixedUpdate: Before sync {0} {1} {2} {3}",
+                                rb.name, GlobalHelper.VectorToParsable(transform.eulerAngles),
+                                GlobalHelper.VectorToParsable(rb.transform.eulerAngles),
+                                GlobalHelper.VectorToParsable(rb.transform.localEulerAngles)));
+                            transform.eulerAngles = rb.transform.eulerAngles - rotationalDisplacement[rb.gameObject];
+                            rb.transform.localEulerAngles = rotationalDisplacement[rb.gameObject];
+                            targetRotation = transform.eulerAngles;
+                            Debug.Log(string.Format("Voxeme.FixedUpdate: After sync {0} {1} {2} {3}",
+                                rb.name, GlobalHelper.VectorToParsable(transform.eulerAngles),
+                                GlobalHelper.VectorToParsable(rb.transform.eulerAngles),
+                                GlobalHelper.VectorToParsable(rb.transform.localEulerAngles)));
+                        }
+                    }
+
+                    rigidbodiesOutOfSync = false;
+                }
             }
 
             void AdjustToSupportingSurface() {
