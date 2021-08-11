@@ -6266,23 +6266,6 @@ namespace VoxSimPlatform {
                                                 return;
                                             }
                                         }
-
-                                        //ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
-                                        //foreach (Vector3 point in testBounds.Points)
-                                        //{
-                                        //    if (projectedBounds.Contains(point))
-                                        //    {
-                                        //        // not a valid location: abort
-                                        //        Debug.Log(string.Format("Projected bounds of {0} contains {1}!",
-                                        //            (args[0] as GameObject).name, GlobalHelper.VectorToParsable(point)));
-                                        //        Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
-                                        //            (args[0] as GameObject).name, voxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
-                                        //        eventManager.OnInvalidPositionError(this,
-                                        //            new CalculatedPositionArgs(string.Format("move({0},{1})",
-                                        //                (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
-                                        //        return;
-                                        //    }
-                                        //}
                                     }
                                 }
 
