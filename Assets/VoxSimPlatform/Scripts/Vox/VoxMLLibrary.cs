@@ -80,23 +80,29 @@ namespace VoxSimPlatform {
             }
 
             private void WalkDir(string sDir) {
+#if UNITY_WEBGL
+
+                Debug.Log("Loading all voxml XML files from Resources folder.");
+                foreach(TextAsset v in Resources.LoadAll<TextAsset>("voxml")) {
+                    VoxML voxml = VoxML.LoadFromText(v.text, v.name);
+                    Debug.Log(String.Format("Adding VoxML Entity: {0} : {1}", v.name, voxml.Entity.Type.ToString().ToLower() + "s"));
+                    VoxMLEntityTypeDict.Add(v.name, voxml.Entity.Type.ToString().ToLower() + "s");
+                    VoxMLPredicateDict.Add(v.name, voxml.Lex.Pred);
+                }
+#else
                 Debug.Log(string.Format("Walking directory: {0}", sDir));
-                try {
-                    foreach (string d in Directory.GetDirectories(sDir)) {
-                        foreach (string f in Directory.GetFiles(d, "*.xml")) {
-                            Debug.Log(string.Format("Adding VoxML Entity: {0}", Path.GetFileNameWithoutExtension(f)));
-                            VoxMLEntityTypeDict.Add(Path.GetFileNameWithoutExtension(f), Path.GetFileName(d));
-                            using (StreamReader sr = new StreamReader(f)) {
-                                VoxML voxml = VoxML.LoadFromText(sr.ReadToEnd(), Path.GetFileNameWithoutExtension(f));
-                                VoxMLPredicateDict.Add(Path.GetFileNameWithoutExtension(f), voxml.Lex.Pred);
-                            }
+                foreach (string d in Directory.GetDirectories(sDir)) {
+                    foreach (string f in Directory.GetFiles(d, "*.xml")) {
+                        Debug.Log(string.Format("Adding VoxML Entity: {0} : {1}", Path.GetFileNameWithoutExtension(f), Path.GetFileName(d)));
+                        VoxMLEntityTypeDict.Add(Path.GetFileNameWithoutExtension(f), Path.GetFileName(d));
+                        using (StreamReader sr = new StreamReader(f)) {
+                            VoxML voxml = VoxML.LoadFromText(sr.ReadToEnd(), Path.GetFileNameWithoutExtension(f));
+                            VoxMLPredicateDict.Add(Path.GetFileNameWithoutExtension(f), voxml.Lex.Pred);
                         }
-                        WalkDir(d);
                     }
+                    WalkDir(d);
                 }
-                catch (Exception excpt) {
-                    Debug.LogError(excpt.Message);
-                }
+#endif
             }
 
             public void OnLoadedFromText(object sender, VoxMLObjectEventArgs e) {
