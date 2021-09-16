@@ -5979,202 +5979,22 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void GRASP(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-        		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
-        		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
+                if (args[0] is GameObject)
+                {
+                    GameObject obj = args[0] as GameObject;
+                    obj.GetComponent<Rigging>().ActivatePhysics(false);
+                }
+            }
 
-        		string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("grasp", "") : "";
-        		Debug.Log(prep);
-
-        		if (agent != null) {
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					//foreach (object arg in args) {
-        					if (prep == "_with") {
-        						if (args[0] is GameObject) {
-        							InteractionObject interactionObject =
-        								(args[0] as GameObject).GetComponent<InteractionObject>();
-        							Debug.Log(interactionObject);
-        							if (interactionObject != null) {
-        								if (args[1] is GameObject) {
-        									InteractionTarget interactionTarget = null;
-        									foreach (InteractionTarget target in (args[0] as GameObject)
-        										.GetComponentsInChildren<InteractionTarget>()) {
-        										if (target.gameObject == (args[1] as GameObject)) {
-        											Debug.Log(target.gameObject);
-        											interactionTarget = target;
-        											break;
-        										}
-        									}
-
-        									Debug.Log(string.Format("Starting {0} interaction with {1}",
-        										InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)).name,
-        										(args[1] as GameObject).name));
-
-        									if (interactionTarget.gameObject.name.StartsWith("lHand")) {
-        										InteractionHelper.SetLeftHandTarget(agent, interactionTarget.transform);
-        										agent.GetComponent<InteractionSystem>()
-        											.StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
-        									}
-        									else if (interactionTarget.gameObject.name.StartsWith("rHand")) {
-        										InteractionHelper.SetRightHandTarget(agent, interactionTarget.transform);
-        										agent.GetComponent<InteractionSystem>()
-        											.StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
-        									}
-        								}
-        							}
-        						}
-        					}
-        					else {
-        						if (args[0] is GameObject) {
-        							InteractionObject interactionObject =
-        								(args[0] as GameObject).GetComponent<InteractionObject>();
-        							Debug.Log(interactionObject);
-        							if (interactionObject != null) {
-        								if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) == leftGrasper) {
-        									foreach (InteractionTarget interactionTarget in (args[0] as GameObject)
-        										.GetComponentsInChildren<InteractionTarget>()) {
-        										if (interactionTarget.gameObject.name.StartsWith("lHand")) {
-        											interactionTarget.gameObject.SetActive(true);
-        										}
-        										else if (interactionTarget.gameObject.name.StartsWith("rHand")) {
-        											interactionTarget.gameObject.SetActive(false);
-        										}
-        									}
-
-        									Debug.Log(string.Format("Starting {0} interaction with {1}", leftGrasper.name,
-        										(args[0] as GameObject).name));
-
-        									InteractionHelper.SetLeftHandTarget(agent,
-        										(args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
-        									agent.GetComponent<InteractionSystem>()
-        										.StartInteraction(FullBodyBipedEffector.LeftHand, interactionObject, true);
-
-        									// get parent obj
-        									if ((args[0] as GameObject).transform.parent != null) {
-        										RiggingHelper.UnRig((args[0] as GameObject),
-        											(args[0] as GameObject).transform.parent.gameObject);
-        									}
-
-        									//(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
-        								}
-        								else if (InteractionHelper.GetCloserHand(agent, (args[0] as GameObject)) ==
-        								         rightGrasper) {
-        									foreach (InteractionTarget interactionTarget in (args[0] as GameObject)
-        										.GetComponent<Voxeme>().interactionTargets) {
-        										if (interactionTarget.gameObject.name.StartsWith("lHand")) {
-        											interactionTarget.gameObject.SetActive(false);
-        										}
-        										else if (interactionTarget.gameObject.name.StartsWith("rHand")) {
-        											interactionTarget.gameObject.SetActive(true);
-        										}
-        									}
-
-        									Debug.Log(string.Format("Starting {0} interaction with {1}", rightGrasper.name,
-        										(args[0] as GameObject).name));
-
-        									InteractionHelper.SetRightHandTarget(agent,
-        										(args[0] as GameObject).GetComponentInChildren<InteractionTarget>().transform);
-        									agent.GetComponent<InteractionSystem>()
-        										.StartInteraction(FullBodyBipedEffector.RightHand, interactionObject, true);
-
-        									// get parent obj
-        									if ((args[0] as GameObject).transform.parent != null) {
-        										RiggingHelper.UnRig((args[0] as GameObject),
-        											(args[0] as GameObject).transform.parent.gameObject);
-        									}
-
-        									//(args[0] as GameObject).GetComponent<Voxeme>().isGrasped = true;
-        								}
-
-                                        Rigging rigging = (args[0] as GameObject).GetComponent<Rigging>();
-                                        if (rigging != null) {
-                                            rigging.ActivatePhysics(false);
-                                        }
-        							}
-        							else {
-        								OutputHelper.PrintOutput(Role.Affector, "I can't interact with that object.");
-        							}
-        						}
-        					}
-
-        					//}
-        				}
-        			}
-        		}
-        	}
-
-        	// IN: Objects
-        	// OUT: none
-        	public void UNGRASP(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-
-        		FullBodyBipedIK ik = agent.GetComponent<FullBodyBipedIK>();
-        		InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
-        		IKControl ikControl = agent.GetComponent<IKControl>();
-
-        		GameObject leftGrasper = ik.references.leftHand.gameObject;
-        		GameObject rightGrasper = ik.references.rightHand.gameObject;
-
-        		if (agent != null) {
-        			if (args[args.Length - 1] is bool) {
-        				if ((bool) args[args.Length - 1] == true) {
-        					foreach (object arg in args) {
-        						if (arg is GameObject) {
-        							InteractionObject interactionObject = (arg as GameObject).GetComponent<InteractionObject>();
-        							if (interactionObject != null) {
-        								if (interactionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
-        								    interactionSystem.IsInInteraction(FullBodyBipedEffector.LeftHand)) {
-        									Debug.Log(string.Format("Ending {0} interaction with {1}", leftGrasper.name,
-        										(arg as GameObject).name));
-        									Debug.Log(GlobalHelper.VectorToParsable((arg as GameObject).GetComponent<Voxeme>()
-        										.targetPosition));
-        									//InteractionHelper.SetLeftHandTarget (agent, null);
-
-        									//InteractionHelper.SetLeftHandTarget (agent, ikControl.leftHandObj);
-        									InteractionHelper.SetLeftHandTarget(agent, null);
-        									ik.solver.SetEffectorWeights(FullBodyBipedEffector.LeftHand, 0.0f, 0.0f);
-        									agent.GetComponent<InteractionSystem>()
-        										.StopInteraction(FullBodyBipedEffector.LeftHand);
-        									//(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;
-        								}
-        								else if (interactionSystem.IsPaused(FullBodyBipedEffector.RightHand) ||
-        								         interactionSystem.IsInInteraction(FullBodyBipedEffector.RightHand)) {
-        									Debug.Log(string.Format("Ending {0} interaction with {1}", rightGrasper.name,
-        										(arg as GameObject).name));
-
-        									//InteractionHelper.SetRightHandTarget (agent, null);
-
-        									//InteractionHelper.SetRightHandTarget (agent, ikControl.rightHandObj);
-        									InteractionHelper.SetRightHandTarget(agent, null);
-        									ik.solver.SetEffectorWeights(FullBodyBipedEffector.RightHand, 0.0f, 0.0f);
-        									agent.GetComponent<InteractionSystem>()
-        										.StopInteraction(FullBodyBipedEffector.RightHand);
-        									//(arg as GameObject).GetComponent<Voxeme>().isGrasped = false;
-
-        //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).positionWeight);
-        //									Debug.Log (ik.solver.GetEffector (FullBodyBipedEffector.RightHand).rotationWeight);
-        								}
-
-        								foreach (InteractionTarget interactionTarget in (arg as GameObject)
-        									.GetComponent<Voxeme>().interactionTargets) {
-        									interactionTarget.gameObject.SetActive(true);
-        								}
-
-                                        Rigging rigging = (args[0] as GameObject).GetComponent<Rigging>();
-                                        if (rigging != null) {
-                                            rigging.ActivatePhysics(true);
-                                        }
-        							}
-        							else {
-        								OutputHelper.PrintOutput(Role.Affector, "I can't interact with that object.");
-        							}
-        						}
-        					}
-        				}
-        			}
-        		}
-        	}
+            // IN: Objects
+            // OUT: none
+            public void UNGRASP(object[] args) {
+                if (args[0] is GameObject)
+                {
+                    GameObject obj = args[0] as GameObject;
+                    obj.GetComponent<Rigging>().ActivatePhysics(true);
+                }
+            }
 
             // IN: Objects
             // OUT: none
@@ -6195,48 +6015,6 @@ namespace VoxSimPlatform {
                         if (args[0] is GameObject) {
                             if (args[1] is Vector3) {
                                 // check that object arg[0]'s projected bounds will fit at location args[1]
-                                //List<Vector3> objBoundPoints = GlobalHelper.GetObjectOrientedSize(args[0] as GameObject, true).Points;
-                                //for (int i = 0; i < objBoundPoints.Count; i++) {
-                                //    objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
-                                //        objBoundPoints[i];
-                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
-                                //    objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized*Constants.EPSILON);
-                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
-                                //}
-
-                                //ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
-
-                                //foreach (Voxeme voxeme in objSelector.allVoxemes) {
-                                //    if (voxeme.gameObject != args[0] as GameObject) { 
-                                //    ObjBounds testBounds = GlobalHelper.GetObjectOrientedSize(voxeme.gameObject, true);
-                                //    foreach (Vector3 point in testBounds.Points) {
-                                //        if (projectedBounds.Contains(point)) {
-                                //            // not a valid location: abort
-                                //            Debug.Log(string.Format("Projected bounds of {0} contains {1}!",
-                                //                (args[0] as GameObject).name, GlobalHelper.VectorToParsable(point)));
-                                //            Debug.Log(string.Format("Object {0} would interpenetrate {1} if moved to {2}!",
-                                //                (args[0] as GameObject).name, voxeme.gameObject.name, GlobalHelper.VectorToParsable((Vector3)args[1])));
-                                //            eventManager.OnInvalidPositionError(this,
-                                //                new CalculatedPositionArgs(string.Format("move({0},{1})",
-                                //                    (args[0] as GameObject), GlobalHelper.VectorToParsable((Vector3)args[1])), (Vector3)args[1]));
-                                //            return;
-                                //            }
-                                //        }
-                                //    }
-                                //}
-
-                                //List <Vector3> objBoundPoints = GlobalHelper.GetObjectOrientedSize(args[0] as GameObject, true).Points;
-                                //for (int i = 0; i < objBoundPoints.Count; i++)
-                                //{
-                                //    objBoundPoints[i] = ((Vector3)args[1] - (args[0] as GameObject).transform.position) +
-                                //        objBoundPoints[i];
-                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
-                                //    objBoundPoints[i] = objBoundPoints[i] - ((objBoundPoints[i] - (Vector3)args[1]).normalized * Constants.EPSILON);
-                                //    //Debug.Log(GlobalHelper.VectorToParsable(objBoundPoints[i]));
-                                //}
-
-                                //ObjBounds projectedBounds = new ObjBounds((Vector3)args[1], objBoundPoints);
-
                                 Vector3 dir = Vector3.zero;
                                 float dist = 0;
 
