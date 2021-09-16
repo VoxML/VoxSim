@@ -70,13 +70,18 @@ namespace VoxSimPlatform {
             }
 #endif
 
-            void Start() {
+            void Awake() {
                 VoxMLEntityTypeDict = new Dictionary<string, string>();
                 VoxMLPredicateDict = new Dictionary<string, string>();
                 VoxMLObjectDict = new Dictionary<string, VoxML>();
                 VoxML.LoadedFromText += OnLoadedFromText;
 
                 WalkDir(Data.voxmlDataPath);
+            }
+
+            private void Start()
+            {
+                
             }
 
             private void WalkDir(string sDir) {
