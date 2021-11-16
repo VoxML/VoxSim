@@ -1,8 +1,10 @@
-﻿using UnityEditor;
+﻿//Comment out FinalIK code. *BC 16NOV21
+
+using UnityEditor;
 using UnityEngine;
 using System.Linq;
 
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.Vox;
 
@@ -30,7 +32,7 @@ namespace EditorMenus {
 
             obj.layer = 10;//blocks=perceived layer
 
-            if (selected.Length == 2) {
+            /*if (selected.Length == 2) {
                 // Kinda clunky, there's probably a more correct way to write this in c sharp
                 if (selected[0] == obj && ((GameObject) selected[1]).GetComponents<InteractionSystem>().Length > 0) {
                     agent = selected[1];
@@ -38,7 +40,7 @@ namespace EditorMenus {
                 else if (selected[1] == obj && ((GameObject)selected[0]).GetComponents<InteractionSystem>().Length > 0) {
                     agent = selected[0];
                 }
-            }
+            }*/
 
             // Add a number of properties
             // Check whether each exists beforehand.
@@ -57,7 +59,7 @@ namespace EditorMenus {
             
             // Rotate With Me
             // Fix Hand Rotation (one for each hand)
-            if(obj.GetComponents<FixHandRotation>().Length == 0) {
+            /*if(obj.GetComponents<FixHandRotation>().Length == 0) {
                 lHandRot = obj.AddComponent<FixHandRotation>();
                 rHandRot = obj.AddComponent<FixHandRotation>();
                 lHandRot.effectorType = FullBodyBipedEffector.LeftHand;
@@ -73,17 +75,17 @@ namespace EditorMenus {
                     rHandRot.rootJoint = agent.GetComponent<FullBodyBipedIK>().references.rightUpperArm.gameObject;
                     rHandRot.overrideDirection = true;
                 }
-            }
+            }*/
             
             // Interaction Object, rotate with me
-            if (obj.GetComponent<InteractionObject>() == null) {
+            /*if (obj.GetComponent<InteractionObject>() == null) {
                 obj.AddComponent<InteractionObject>();
-            }
-            if(obj.GetComponent<RotateWithMe>() == null) {
+            }*/
+            /*if(obj.GetComponent<RotateWithMe>() == null) {
                 RotateWithMe rotWithMe = obj.AddComponent<RotateWithMe>();
                 rotWithMe.source = agent;
                 rotWithMe.rotateAround = RotateWithMe.Axis.Y;
-            }
+            }*/
 
             // v Unnecessary Components v
             // Box collider
