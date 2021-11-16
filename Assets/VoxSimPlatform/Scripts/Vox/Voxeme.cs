@@ -777,7 +777,8 @@ namespace VoxSimPlatform {
                 }
 
                 // Don't let the object sink below supporting surface
-                AdjustToSupportingSurface();
+                //Comment out line below. Not needed. *BC 16NOV21
+                //AdjustToSupportingSurface();
 
                 if (rigging != null) {
                     if (rigging.usePhysicsRig) {
