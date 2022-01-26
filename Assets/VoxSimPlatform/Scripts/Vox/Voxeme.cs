@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 
 using MajorAxes;
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.CogPhysics;
 using VoxSimPlatform.Core;
@@ -39,7 +39,7 @@ namespace VoxSimPlatform {
 
             public GameObject graspConvention = null;
 
-            public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
+            //public List<InteractionTarget> interactionTargets = new List<InteractionTarget>();
 
             public LinkedList<Vector3> interTargetPositions = new LinkedList<Vector3>();
 
@@ -212,7 +212,7 @@ namespace VoxSimPlatform {
                         ((Voxeme)target).graspConvention.ToString(), GUILayout.MaxWidth(200));
                     GUILayout.EndHorizontal();
 
-                    GUILayout.Label("Interaction Targets", bold);
+                    /*GUILayout.Label("Interaction Targets", bold);
                     if (((Voxeme)target).interactionTargets != null) {
                         foreach (InteractionTarget item in ((Voxeme)target).interactionTargets) {
                             GUILayout.BeginHorizontal();
@@ -220,7 +220,7 @@ namespace VoxSimPlatform {
                             GUILayout.TextField(item.ToString(), GUILayout.MaxWidth(200));
                             GUILayout.EndHorizontal();
                         }
-                    }
+                    }*/
 
                     GUILayout.Label("Inter Target Positions", bold);
                     if (((Voxeme)target).interTargetPositions != null) {
@@ -915,11 +915,11 @@ namespace VoxSimPlatform {
                     : new Vector3(contactPointX.x, transform.position.y, contactPointX.z);
 
                 bool grasped = false;
-                InteractionObject interactionObject = gameObject.GetComponent<InteractionObject>();
+                /*InteractionObject interactionObject = gameObject.GetComponent<InteractionObject>();
                 if ((interactionObject != null) && (interactionObject.lastUsedInteractionSystem != null)) {
                     grasped = interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.LeftHand) ||
                               interactionObject.lastUsedInteractionSystem.IsPaused(FullBodyBipedEffector.RightHand);
-                }
+                }*/
 
                 RaycastHit[] hits;
 

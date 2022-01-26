@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Timers;
 
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Pathfinding;
@@ -82,12 +82,12 @@ namespace VoxSimPlatform {
         }
 
         public class EventManager : MonoBehaviour {
-            public FullBodyBipedIK bodyIk;
-            public InteractionLookAt lookAt = new InteractionLookAt();
-            public InteractionSystem interactionSystem;
+            //public FullBodyBipedIK bodyIk;
+            //public InteractionLookAt lookAt = new InteractionLookAt();
+            //public InteractionSystem interactionSystem;
 
             //public GameObject leftHandTarget;
-            public InteractionObject interactionObject;
+            //public InteractionObject interactionObject;
 
             public OrderedDictionary eventsStatus = new OrderedDictionary();
             public ObjectSelector objSelector;

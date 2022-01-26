@@ -1,10 +1,10 @@
-﻿using RootMotion.FinalIK;
+﻿//using RootMotion.FinalIK;
 using UnityEngine;
 using VoxSimPlatform.Global;
 
 namespace VoxSimPlatform {
     namespace Agent {
-    	public static class InteractionHelper {
+    	public static class InteractionHelper {/*
     		public static GameObject GetCloserHand(GameObject agent, GameObject obj) {
     			GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
     			GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
@@ -90,7 +90,7 @@ namespace VoxSimPlatform {
     			else {
     				ik.solver.IKPositionWeight = 0.0f;
     			}
-    		}
+    		}*/
     	}
     }
 }

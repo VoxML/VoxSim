@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using System;
 
-using Crosstales.RTVoice;
-using Crosstales.RTVoice.Model;
+//using Crosstales.RTVoice;
+//using Crosstales.RTVoice.Model;
 
 namespace VoxSimPlatform {
     namespace Agent {
@@ -62,7 +62,7 @@ namespace VoxSimPlatform {
             Zuzana
         };
 
-        public class AgentVoiceController : MonoBehaviour {
+        public class AgentVoiceController : MonoBehaviour {/*
             /// <summary>
             /// For attaching to the agent insead of to an IOController
             /// </summary>
@@ -81,7 +81,7 @@ namespace VoxSimPlatform {
             public Role role;
             public Gender Gender;
 
-            private LiveSpeaker _speaker;
+             LiveSpeaker _speaker;
             private string _outputstring;
             private Voice v;
 
@@ -133,7 +133,7 @@ namespace VoxSimPlatform {
             }
 
             void OnGUI() {
-            }
+            }*/
         }
     }
 }

@@ -2,7 +2,7 @@
 
 using UnityEditor;
 
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.Global;
 
@@ -17,7 +17,7 @@ namespace EditorMenus {
     /// Whatever agent it is attached to will be deleted.
     /// </summary>
 
-    public class CreateHandPose : MonoBehaviour {
+    public class CreateHandPose : MonoBehaviour {/*
 
 
         [MenuItem("VoxSim/Hand Poses/Create Hand Pose %#r")] // it was available
@@ -101,6 +101,6 @@ namespace EditorMenus {
             return (Selection.activeGameObject != null) && (Selection.activeGameObject.activeSelf) &&
                    ((Selection.activeGameObject.name.StartsWith("lHand")) ||
                     (Selection.activeGameObject.name.StartsWith("rHand")));
-        }
+        }*/
     }
 }

@@ -36,7 +36,7 @@ namespace VoxSimPlatform {
             // May be extraneous with forceSpeak parameter in SpeakOutput.
             internal void ForceRepeat() {
                 Debug.Log(string.Format("Speaking: \"{0}\"", outputString));
-                voice.Speak(outputString);
+                //voice.Speak(outputString);
             }
 
             internal void PrintOutput(String str) {
@@ -54,7 +54,7 @@ namespace VoxSimPlatform {
                     if(str != outputString || forceSpeak) {
                         Debug.Log(string.Format("Speaking: \"{0}\"", str));
                         outputString = str;
-                        voice.Speak(str);
+                        //voice.Speak(str);
                     }
                 }
                 else {

@@ -126,12 +126,12 @@ namespace VoxSimPlatform {
 
         					// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
         					VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>(); // Should be on agent
-        					foreach (VoiceController voice in voices) {
+        					/*foreach (VoiceController voice in voices) {
         						if (voice.role == role) {
         							Debug.Log(string.Format("Speaking: \"{0}\"", str));
         							voice.Speak(str);
         						}
-        					}
+        					}*/
         				}
         				else if (forceSpeak) {
         					ForceRepeat(role);
@@ -163,12 +163,12 @@ namespace VoxSimPlatform {
         			if (outputController.role == role) {
         				// TODO 6/6/2017-23:17 krim - need a dedicated "agent" game object, not a general "IOcontroller"
         				VoiceController[] voices = GameObject.Find("IOController").GetComponents<VoiceController>();
-        				foreach (VoiceController voice in voices) {
+        				/*foreach (VoiceController voice in voices) {
         					if (voice.role == role) {
         						Debug.Log(string.Format("Speaking: \"{0}\"", outputController.outputString));
         						voice.Speak(outputController.outputString);
         					}
-        				}
+        				}*/
         			}
         		}
         	}

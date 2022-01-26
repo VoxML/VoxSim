@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.Global;
 
@@ -26,7 +26,7 @@ namespace EditorMenus {
 	///  "Valid hand pose" is here defined as an object that contains an InteractionTarget component
 	///   and whose name begins with "[lr]Hand."
 	/// </summary>
-	public class MirrorHandPose : MonoBehaviour {
+	public class MirrorHandPose : MonoBehaviour {/*
 		/// <summary>
 		/// Clones and flips handedness of the selected hand pose.
 		/// </summary>
@@ -287,6 +287,6 @@ namespace EditorMenus {
 			       (Selection.activeGameObject.GetComponent<InteractionTarget>() != null) &&
 			       ((Selection.activeGameObject.name.StartsWith("lHand")) ||
 			        (Selection.activeGameObject.name.StartsWith("rHand")));
-		}
+		}*/
 	}
 }

@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Timers;
 
 using Random = System.Random;
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.CogPhysics;
 using VoxSimPlatform.GenLex;
@@ -5855,7 +5855,7 @@ namespace VoxSimPlatform {
 
             // IN: Objects
             // OUT: none
-            public void DROP(object[] args) {
+            /*public void DROP(object[] args) {
                 GameObject agent = GameObject.FindGameObjectWithTag("Agent");
                 if (agent != null) {
                     Animator anim = agent.GetComponentInChildren<Animator>();
@@ -5904,7 +5904,7 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
-            }
+            }*/
 
             // IN: Objects
             // OUT: none

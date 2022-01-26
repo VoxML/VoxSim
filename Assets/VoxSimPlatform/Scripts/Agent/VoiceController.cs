@@ -1,14 +1,14 @@
 using UnityEngine;
 using System;
 
-using Crosstales.RTVoice;
-using Crosstales.RTVoice.Model;
+//using Crosstales.RTVoice;
+//using Crosstales.RTVoice.Model;
 
 // TODO: to be deprecated by end of refactor
 
 namespace VoxSimPlatform {
     namespace Agent {
-    	public class VoiceController : MonoBehaviour {
+    	public class VoiceController : MonoBehaviour {/*
     		private static readonly String MAC_F = "Samantha";
     		private static readonly String MAC_M = "Fred";
     		private static readonly String WIN_F = "Microsoft Zira Desktop";
@@ -74,7 +74,7 @@ namespace VoxSimPlatform {
     		}
 
     		void OnGUI() {
-    		}
+    		}*/
     	}
     }
 }

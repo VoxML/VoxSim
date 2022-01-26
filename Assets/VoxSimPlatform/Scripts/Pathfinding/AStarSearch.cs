@@ -5,7 +5,7 @@ using System.Linq;
 
 using Arc = VoxSimPlatform.Global.Pair<UnityEngine.Vector3, UnityEngine.Vector3>;
 using Debug = UnityEngine.Debug;
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.Global;
 using VoxSimPlatform.Vox;
@@ -196,11 +196,11 @@ namespace VoxSimPlatform {
         		return path;
         	}
 
-            static float GetErgonomicScore(FullBodyBipedIK bodyIk, Vector3 point) {
+            /*static float GetErgonomicScore(FullBodyBipedIK bodyIk, Vector3 point) {
         		return (bodyIk.solver.rightArmChain.nodes[0].transform.position - point).magnitude;
-        	}
+        	}*/
 
-        	static float GetGScoreErgonomic(GameObject agent, Vector3 fromPoint, Vector3 explorePoint, float rigAttractionWeight,
+        	/*static float GetGScoreErgonomic(GameObject agent, Vector3 fromPoint, Vector3 explorePoint, float rigAttractionWeight,
                 Dictionary<Vector3, float> gScoreDict) {
                 FullBodyBipedIK bodyIk = null;
 
@@ -232,7 +232,7 @@ namespace VoxSimPlatform {
         		else {
         			return (goalPoint - explorePoint).magnitude;
         		}
-        	}
+        	}*/
 
         	// path planner
         	public static List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
@@ -325,8 +325,8 @@ namespace VoxSimPlatform {
         		}
 
         		gScore[startPos] = 0;
-        		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
-        		hScore[startPos] = GetHScoreErgonomic(eventManager.GetActiveAgent(), startPos, goalPos, prefs.rigAttractionWeight);
+        		hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
+        		//hScore[startPos] = GetHScoreErgonomic(eventManager.GetActiveAgent(), startPos, goalPos, prefs.rigAttractionWeight);
 
         		Debug.Log(" ========= obj.transform.position ======== " + GlobalHelper.VectorToParsable(obj.transform.position));
         		Debug.Log(" ======== start ====== " + GlobalHelper.VectorToParsable(startPos));
@@ -380,14 +380,14 @@ namespace VoxSimPlatform {
 
         				foreach (var neighbor in neighbors) {
         					if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor)) {
-        						float tentativeGScore = GetGScoreErgonomic(eventManager.GetActiveAgent(), curPos, neighbor, prefs.rigAttractionWeight, gScore);
+        						/*float tentativeGScore = GetGScoreErgonomic(eventManager.GetActiveAgent(), curPos, neighbor, prefs.rigAttractionWeight, gScore);
 
         						if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
         							continue;
 
         						cameFrom[neighbor] = curPos;
         						gScore[neighbor] = tentativeGScore;
-        						hScore[neighbor] = GetHScoreErgonomic(eventManager.GetActiveAgent(), neighbor, goalPos, prefs.rigAttractionWeight);
+        						hScore[neighbor] = GetHScoreErgonomic(eventManager.GetActiveAgent(), neighbor, goalPos, prefs.rigAttractionWeight);*/
         						// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
 
         						// If neighbor is not yet in openset 

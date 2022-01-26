@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Object = UnityEngine.Object;
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.Core;
 using VoxSimPlatform.CogPhysics;

@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Object = UnityEngine.Object;
-using RootMotion.FinalIK;
+//using RootMotion.FinalIK;
 using VoxSimPlatform.Agent;
 using VoxSimPlatform.Animation;
 using VoxSimPlatform.CogPhysics;
@@ -186,7 +186,7 @@ namespace VoxSimPlatform {
                 }
                     
                 // PRIMITIVE MOTIONS
-                if (predString == "grasp") {
+                /*if (predString == "grasp") {
                     // satisfy grasp
                     satisfied = true;
 
@@ -243,7 +243,7 @@ namespace VoxSimPlatform {
                         }
                     }
                 }
-                else if (predString == "move") {
+                else*/ if (predString == "move") {
                     // satisfy move
                     GameObject theme = GameObject.Find(argsStrings[0] as String);
                     if (theme != null) {
