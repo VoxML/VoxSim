@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 
-using GracesGames.SimpleFileBrowser.Scripts;
+//using GracesGames.SimpleFileBrowser.Scripts;
 #if !UNITY_WEBGL
 using VoxSimPlatform.Network; 
 #endif
@@ -46,7 +46,7 @@ namespace VoxSimPlatform {
 
             		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
             			launcher.Draw = false;
-            			OpenFileBrowser(FileBrowserMode.Load);
+            			//OpenFileBrowser(FileBrowserMode.Load);
             			return;
             		}
 
@@ -96,7 +96,7 @@ namespace VoxSimPlatform {
             	}
 
             	// Open a file browser to save and load files
-            	public void OpenFileBrowser(FileBrowserMode fileBrowserMode) {
+            	/*public void OpenFileBrowser(FileBrowserMode fileBrowserMode) {
             		// Create the file browser and name it
             		GameObject fileBrowserObject = Instantiate(FileBrowserPrefab, transform);
             		fileBrowserObject.name = "FileBrowser";
@@ -120,7 +120,7 @@ namespace VoxSimPlatform {
             		foreach (Text text in filePanel.GetComponentsInChildren<Text>()) {
             			text.fontSize = 20;
             		}
-            	}
+            	}*/
 
             	// Loads a file using a path
             	private void LoadFileUsingPath(string path) {

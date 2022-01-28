@@ -7,7 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Serialization;
 
-using GracesGames.SimpleFileBrowser.Scripts;
+//using GracesGames.SimpleFileBrowser.Scripts;
 using VoxSimPlatform.UI.Launcher;
 
 namespace VoxSimPlatform {
@@ -46,7 +46,7 @@ namespace VoxSimPlatform {
             		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
             			launcher.Draw = false;
             			prefsToSave = ExportPrefs();
-            			OpenFileBrowser(FileBrowserMode.Save);
+            			//OpenFileBrowser(FileBrowserMode.Save);
             			return;
             		}
 
@@ -70,7 +70,7 @@ namespace VoxSimPlatform {
             	}
 
             	// Open a file browser to save and load files
-            	public void OpenFileBrowser(FileBrowserMode fileBrowserMode) {
+            	/*public void OpenFileBrowser(FileBrowserMode fileBrowserMode) {
             		// Create the file browser and name it
             		GameObject fileBrowserObject = Instantiate(FileBrowserPrefab, transform);
             		fileBrowserObject.name = "FileBrowser";
@@ -94,7 +94,7 @@ namespace VoxSimPlatform {
             		foreach (Text text in filePanel.GetComponentsInChildren<Text>()) {
             			text.fontSize = 20;
             		}
-            	}
+            	}*/
 
             	// Saves a file with the textToSave using a path
             	private void SaveFileUsingPath(string path) {
