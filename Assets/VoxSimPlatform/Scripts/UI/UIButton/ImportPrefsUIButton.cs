@@ -5,6 +5,7 @@ using System.IO;
 using System.Xml.Serialization;
 
 //using GracesGames.SimpleFileBrowser.Scripts;
+using SFB; //StandaloneFileBroswer
 #if !UNITY_WEBGL
 using VoxSimPlatform.Network; 
 #endif
@@ -46,8 +47,9 @@ namespace VoxSimPlatform {
 
             		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
             			launcher.Draw = false;
-            			//OpenFileBrowser(FileBrowserMode.Load);
-            			return;
+                        //OpenFileBrowser(FileBrowserMode.Load);
+                        StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false); //Call to SFB to open
+                        return;
             		}
 
             		base.OnGUI();

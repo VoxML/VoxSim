@@ -8,6 +8,7 @@ using System.Text;
 using System.Xml.Serialization;
 
 //using GracesGames.SimpleFileBrowser.Scripts;
+using SFB; //StandaloneFileBroswer
 using VoxSimPlatform.UI.Launcher;
 
 namespace VoxSimPlatform {
@@ -46,8 +47,9 @@ namespace VoxSimPlatform {
             		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
             			launcher.Draw = false;
             			prefsToSave = ExportPrefs();
-            			//OpenFileBrowser(FileBrowserMode.Save);
-            			return;
+                        //OpenFileBrowser(FileBrowserMode.Save);
+                        StandaloneFileBrowser.SaveFilePanel("Save File", "", "NewPrefs", "xml");//Call to SFB to save
+                        return;
             		}
 
             		base.OnGUI();
