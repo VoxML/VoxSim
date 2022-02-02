@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 #if !UNITY_WEBGL
-using System.Net;
+using System.Net.NetworkInformation;
 #endif
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
@@ -787,16 +787,7 @@ namespace VoxSimPlatform
                 void GetMyIP()
                 {
                     // get IP address
-#if !UNITY_IOS && !UNITY_WEBGL
-                    foreach (IPAddress ipAddress in Dns.GetHostEntry(Dns.GetHostName()).AddressList)
-                    {
-                        if (ipAddress.AddressFamily.ToString() == "InterNetwork")
-                        {
-                            //Debug.Log(ipAddress.ToString());
-                            ip = ipAddress.ToString();
-                        }
-                    }
-#elif UNITY_IOS
+#if !UNITY_WEBGL
                     foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces()){
                         if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet) {
                             //Debug.Log(ni.Name);
