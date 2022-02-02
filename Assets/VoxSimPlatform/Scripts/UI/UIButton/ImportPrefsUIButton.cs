@@ -47,8 +47,8 @@ namespace VoxSimPlatform {
 
             		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
             			launcher.Draw = false;
-                        //OpenFileBrowser(FileBrowserMode.Load);
-                        StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false); //Call to SFB to open
+                        string[] path = StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false); //Call to SFB to open
+                        LoadFileUsingPath(path[0]);
                         return;
             		}
 
