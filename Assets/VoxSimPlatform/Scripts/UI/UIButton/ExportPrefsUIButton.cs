@@ -74,33 +74,6 @@ namespace VoxSimPlatform {
             		return prefsObject;
             	}
 
-            	// Open a file browser to save and load files
-            	/*public void OpenFileBrowser(FileBrowserMode fileBrowserMode) {
-            		// Create the file browser and name it
-            		GameObject fileBrowserObject = Instantiate(FileBrowserPrefab, transform);
-            		fileBrowserObject.name = "FileBrowser";
-            		// Set the mode to save or load
-            		FileBrowser fileBrowserScript = fileBrowserObject.GetComponent<FileBrowser>();
-            		fileBrowserScript.SetupFileBrowser(ViewMode.Landscape);
-            		if (fileBrowserMode == FileBrowserMode.Save) {
-            			fileBrowserScript.SaveFilePanel("NewPrefs", new string[] {"xml"});
-            			fileBrowserScript.OnFileSelect += SaveFileUsingPath;
-            		}
-
-            		GameObject uiObject = GameObject.Find(fileBrowserObject.name + "UI");
-            		uiObject.GetComponent<RectTransform>().transform.localScale = new Vector3(0.6f, 0.6f, 1.0f);
-
-            		GameObject directoryPanel = GameObject.Find(uiObject.name + "/FileBrowserPanel/DirectoryPanel");
-            		foreach (Text text in directoryPanel.GetComponentsInChildren<Text>()) {
-            			text.fontSize = 20;
-            		}
-
-            		GameObject filePanel = GameObject.Find(uiObject.name + "/FileBrowserPanel/FilePanel");
-            		foreach (Text text in filePanel.GetComponentsInChildren<Text>()) {
-            			text.fontSize = 20;
-            		}
-            	}*/
-
             	// Saves a file with the textToSave using a path
             	private void SaveFileUsingPath(string path) {
             		// Make sure path and _textToSave is not null or empty
