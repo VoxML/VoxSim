@@ -47,9 +47,12 @@ namespace VoxSimPlatform {
             		if (GUI.Button(buttonRect, buttonText, buttonStyle)) {
             			launcher.Draw = false;
             			prefsToSave = ExportPrefs();
-                        //OpenFileBrowser(FileBrowserMode.Save);
-                        StandaloneFileBrowser.SaveFilePanel("Save File", "", "NewPrefs", "xml");//Call to SFB to save
-                        return;
+                        string path = StandaloneFileBrowser.SaveFilePanel("Save File", "", "NewPrefs", "xml");//Call to SFB to save
+                        Debug.Log(path);
+                        if (!string.IsNullOrEmpty(path))
+                        {
+                            SaveFileUsingPath(path);
+                        }
             		}
 
             		base.OnGUI();
