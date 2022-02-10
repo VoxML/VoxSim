@@ -170,3 +170,4 @@ local_config
 
 # __pycache__
 *__pycache__*
+Assets/Models*
