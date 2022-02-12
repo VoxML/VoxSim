@@ -170,3 +170,7 @@ local_config
 
 # __pycache__
 *__pycache__*
+
+# models and materials
+Assets/Materials*
+Assets/Models*
