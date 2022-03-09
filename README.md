@@ -1,9 +1,27 @@
 # VoxSim
-VoxSim is a semantically-informed event simulation engine created by the Brandeis University Lab for Language and Computation (Department of Computer Science), for creating custom intelligent agent behaviors.  This work is funded by the DARPA Communicating with Computers (CwC) progam.
+VoxSim is a semantically-informed event simulation engine created by the Brandeis University Lab for Language and Computation (Department of Computer Science) and the Colorado State University Situated Grounding and Natural Language Lab, for creating custom intelligent agent behaviors.  This work was funded by the DARPA Communicating with Computers (CwC) program, and further research is being funded by the NSF.
 
 ## Quick Start
 
-There is a forkable "Quick Start" repository at: https://github.com/VoxML/VoxWorld-QS. Once the setup is complete, the VoxSim submodule will be installed in a Unity project that contains a sample scene with all required VoxWorld components that you can begin working in immediately.
+There is a forkable "Quick Start" repository at: https://github.com/VoxML/VoxWorld-QS. Clone this repo and then install VoxSim using one of the two methods below:
+
+## Installing VoxSim
+
+To install VoxSim in the `VoxWorld-QS` (or any other) project:
+
+### Latest Stable Package
+
+Download the required VoxSim required assets as a package [here](), and import the package into your project.  Everything should uncompress into the *Plugins* folder.
+
+[//]: # (NOTE: Add instruction to delete empty VoxSimPlatform file, or just remove the submodule from the QS project?)
+
+### Bleeding-edge Version
+
+The trouble with bleeding-edge versions is that you can bleed a lot.  If you feel brave, follow the instructions under "Add VoxSim as a submodule in your own Unity project" below.
+
+### Optional Assets
+
+Some additional artwork (models, textures) is available [here](https://github.com/VoxML/voxicon/blob/master/packages/VoxSimObjectLibrary.unitypackage.zip?raw=true).  Please note that this is provided without support or guarantees.
 
 ## API Documentation
 
@@ -46,6 +64,8 @@ VoxSim depends on the following 3rd-party Unity libraries which are not included
 * SimpleFileBrowser
 
 VoxSim also depends on Newtonsoft's JsonDotNet package, which is included as a .zip file.  Unzip the package from within *VoxSimPlatform/Packages* and place the result directly under *VoxSimPlatform*
+
+[//]: # (NOTE: remove this section)
 
 ## Keep your Unity project up to date with VoxSim
 
