@@ -11,7 +11,7 @@ To install VoxSim in the `VoxWorld-QS` (or any other) project:
 
 ### Latest Stable Package
 
-Download the required VoxSim required assets as a package [here](), and import the package into your project.  Everything should uncompress into the *Plugins* folder.
+Download the required VoxSim required assets as a package [here](https://github.com/VoxML/voxicon/blob/master/packages/VoxSimPlatform.unitypackage.zip?raw=true), and import the package into your project.  Everything should uncompress into the *Plugins* folder.
 
 [//]: # (NOTE: Add instruction to delete empty VoxSimPlatform file, or just remove the submodule from the QS project?)
 
