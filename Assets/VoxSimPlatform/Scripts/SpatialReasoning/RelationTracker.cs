@@ -181,8 +181,8 @@ namespace VoxSimPlatform {
         				// --> get support axis info from habitat
         				if (Vector3.Dot(objs[1].transform.up, Vector3.up) < 0.5f) {
         					// --> get support axis info from habitat
-        					// break relation
-        					objs[1].transform.parent = null;
+        					// break relation   
+        					objs[1].transform.parent = objs[1].GetComponent<Voxeme>().defaultParent;
         					objs[1].GetComponent<Voxeme>().enabled = true;
         					objs[1].GetComponent<Voxeme>().supportingSurface = null;
         					objs[1].GetComponent<Rigging>().ActivatePhysics(true);

@@ -207,10 +207,10 @@ namespace VoxSimPlatform {
 
         				Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
         				foreach (Renderer r1 in renderers) {
-        					GameObject sub1 = r1.gameObject;
-        					foreach (Renderer r2 in renderers) {
+                            GameObject sub1 = r1.gameObject;
+                            foreach (Renderer r2 in renderers) {
         						GameObject sub2 = r2.gameObject;
-        						if (sub1 != sub2) {
+                                if (sub1 != sub2) {
                                     // can't connect body to itself
                                     // add connections between all bodies EXCEPT:
                                     //  if the connectedBody is on a GameObject that has a Voxeme component AND IS NOT the top-level voxeme
