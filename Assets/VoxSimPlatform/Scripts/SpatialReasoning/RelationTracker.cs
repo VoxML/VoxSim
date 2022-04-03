@@ -42,12 +42,14 @@ namespace VoxSimPlatform {
         		Dictionary<List<GameObject>, string> toRemove = new Dictionary<List<GameObject>, string>();
 
         		foreach (DictionaryEntry pair in relations) {
-        			if (!IsSatisfied((pair.Value as string), (pair.Key as List<GameObject>))) {
-                        toRemove.Add(pair.Key as List<GameObject>, pair.Value as string);
-        			}
+                    foreach (string rel in (pair.Value as string).Split(',')) {
+                        if (!IsSatisfied(rel, (pair.Key as List<GameObject>))) {
+                            toRemove.Add(pair.Key as List<GameObject>, rel);
+                        }
+                    }
         		}
 
-        		foreach (KeyValuePair<List<GameObject>,string> kvp in toRemove) {
+                foreach (KeyValuePair<List<GameObject>,string> kvp in toRemove) {
                     RemoveRelation(kvp.Key as List<GameObject>, toRemove[kvp.Key as List<GameObject>]);
         		}
         	}
@@ -159,7 +161,26 @@ namespace VoxSimPlatform {
         		UpdateRelationStrings();
         	}
 
-        	void UpdateRelationStrings() {
+            public bool IsSatisfied(string relation, List<GameObject> objs) {
+                bool satisfied = true;
+
+                if (relation == "support") {
+                    // x support y - binary relation
+                    if (Vector3.Dot((objs[1].transform.position-objs[0].transform.position).normalized, Vector3.up) < 0.5f) {
+                        // --> get support axis info from habitat
+                        // break relation   
+                        objs[1].transform.parent = objs[1].GetComponent<Voxeme>().defaultParent;
+                        objs[1].GetComponent<Voxeme>().enabled = true;
+                        objs[1].GetComponent<Voxeme>().supportingSurface = null;
+                        objs[1].GetComponent<Rigging>().ActivatePhysics(true);
+                        satisfied = false;
+                    }
+                }
+
+                return satisfied;
+            }
+
+            void UpdateRelationStrings() {
         		relStrings.Clear();
         		foreach (DictionaryEntry entry in relations) {
         			String str = (String) entry.Value;
@@ -170,28 +191,6 @@ namespace VoxSimPlatform {
         //			Debug.Log (str);
         			relStrings.Add(str);
         		}
-        	}
-
-        	bool IsSatisfied(string relation, List<GameObject> objs) {
-        		bool satisfied = true;
-
-        		if (relation == "support") {
-        			// x support y - binary relation
-        			if (Vector3.Dot(objs[0].transform.up, Vector3.up) <= 0.0f) {
-        				// --> get support axis info from habitat
-        				if (Vector3.Dot(objs[1].transform.up, Vector3.up) < 0.5f) {
-        					// --> get support axis info from habitat
-        					// break relation   
-        					objs[1].transform.parent = objs[1].GetComponent<Voxeme>().defaultParent;
-        					objs[1].GetComponent<Voxeme>().enabled = true;
-        					objs[1].GetComponent<Voxeme>().supportingSurface = null;
-        					objs[1].GetComponent<Rigging>().ActivatePhysics(true);
-        					satisfied = false;
-        				}
-        			}
-        		}
-
-        		return satisfied;
         	}
         }
     }

@@ -1233,7 +1233,7 @@ namespace VoxSimPlatform {
     //                                                                            }
     //                                                                        }
 
-                                                                        // TODO: only instantiate a relation if it goes both ways (i.e. only if x can be contained AND y can contain something
+                                                                        // TODO: only instantiate a relation if it goes both ways (i.e. only if x can be contained AND y can contain something)
                                                                         if (result != "") {
                                                                             result = result.Replace("x",
                                                                                 test.gameObject.name);
@@ -1312,6 +1312,35 @@ namespace VoxSimPlatform {
                                                                         }
                                                                     }
                                                                 }
+                                                                else {
+                                                                    result = test.opVox.Affordance.Affordances[
+                                                                            testHabitat][i].Item2.Item2;
+
+                                                                    // remove if present
+                                                                    if (result != "") {
+                                                                        result = result.Replace("x",
+                                                                                test.gameObject.name);
+                                                                        // any component reentrancy ultimately inherits from the parent voxeme itself
+                                                                        result = reentrancyForm.Replace(result,
+                                                                            obj.gameObject.name);
+                                                                        result = GlobalHelper.GetTopPredicate(result);
+
+                                                                        // TODO: maybe switch object order here below => passivize relation?
+                                                                        if (groundComponentFirst.Match(ev).Length > 0) {
+                                                                            relationTracker.RemoveRelation(
+                                                                                new List<GameObject>
+                                                                                    {obj.gameObject, test.gameObject},
+                                                                                result);
+                                                                        }
+                                                                        else if (groundComponentSecond.Match(ev)
+                                                                                     .Length > 0) {
+                                                                            relationTracker.RemoveRelation(
+                                                                                new List<GameObject>
+                                                                                    {test.gameObject, obj.gameObject},
+                                                                                result);
+                                                                        }
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1346,7 +1375,7 @@ namespace VoxSimPlatform {
                                 }
 
                                 if (relationIndependent) {
-    //                                Debug.Log (obj.opVox.Lex.Pred);
+                                    //Debug.Log (obj.opVox.Lex.Pred);
                             
                                     result = affStr.Affordances[objHabitat][i].Item2.Item2.Replace(" ",string.Empty);
                                     //Debug.Log (result);
