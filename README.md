@@ -11,9 +11,9 @@ To install VoxSim in the `VoxWorld-QS` (or any other) project:
 
 ### Latest Stable Package
 
-Download the required VoxSim required assets as a package [here](https://github.com/VoxML/voxicon/blob/master/packages/VoxSimPlatform.unitypackage.zip?raw=true), and import the package into your project.  Everything should uncompress into the *Plugins* folder.
+Download the required VoxSim assets as a package [here](https://github.com/VoxML/voxicon/blob/master/packages/VoxSimPlatform.unitypackage.zip?raw=true), and extract the Unity package from the zip file. In Unity, delete the file that is in the Plugins folder titled `VoxSimPlatform`. Import the downloaded Unity package. Everything should appear in the *Plugins* folder.
 
-[//]: # (NOTE: Add instruction to delete empty VoxSimPlatform file, or just remove the submodule from the QS project?)
+Open manifest.json (path is VoxWorld-QS/Packages/manifest.json) and add `"com.unity.nuget.newtonsoft-json": "2.0.0"` to the end of the list in this file.
 
 ### Bleeding-edge Version
 
@@ -53,19 +53,6 @@ Then:
 ```
 $ git submodule foreach git pull
 ```
-
-## Dependencies
-
-VoxSim depends on the following 3rd-party Unity libraries which are not included in the repository.  Find them on the Unity Asset Store.
-* RTVoice
-* FinalIK
-* FlashbackRecorder
-* ConsoleEnhanced Free
-* SimpleFileBrowser
-
-VoxSim also depends on Newtonsoft's JsonDotNet package, which is included as a .zip file.  Unzip the package from within *VoxSimPlatform/Packages* and place the result directly under *VoxSimPlatform*
-
-[//]: # (NOTE: remove this section)
 
 ## Keep your Unity project up to date with VoxSim
 
