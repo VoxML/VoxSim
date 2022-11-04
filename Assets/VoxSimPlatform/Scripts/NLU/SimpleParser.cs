@@ -70,6 +70,7 @@ namespace VoxSimPlatform {
                 "block7",
     			"blocks",
     			"lid",
+                "scale",
     			"stack",
     			"staircase",
     			"pyramid",
