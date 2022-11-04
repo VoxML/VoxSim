@@ -70,7 +70,7 @@ namespace VoxSimPlatform {
             }
 #endif
 
-            void Start() {
+            void Awake() {
                 VoxMLEntityTypeDict = new Dictionary<string, string>();
                 VoxMLPredicateDict = new Dictionary<string, string>();
                 VoxMLObjectDict = new Dictionary<string, VoxML>();

@@ -20,7 +20,7 @@ namespace VoxSimPlatform {
         	public bool usePhysicsRigging;
 
         	// Use this for initialization
-        	void Start() {
+        	void Awake() {
         		objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
 
         		InitializeVoxemes();
@@ -45,34 +45,35 @@ namespace VoxSimPlatform {
         				Rigging rigging = go.GetComponent<Rigging>();
         				if ((voxeme != null) && (voxeme.enabled) && (rigging == null)) {
                             Debug.Log(string.Format("Initalizing object {0} as voxeme",go.name));
-        					// object has Voxeme component and no Rigging
-        					GameObject container = new GameObject(go.name, typeof(Voxeme), typeof(Rigging));
+                            // object has Voxeme component and no Rigging
+                            //GameObject container = new GameObject(go.name, typeof(Voxeme), typeof(Rigging));
+                            go.AddComponent(typeof(Rigging));
 
-                            container.GetComponent<Voxeme>().defaultParent = go.transform.parent;
+                            go.GetComponent<Voxeme>().defaultParent = go.transform.parent;
 
-        					if (go.transform.root != go.transform) {
+        					//if (go.transform.root != go.transform) {
         						// not a top-level object
-        						container.transform.parent = go.transform.parent;
-        					}
+        						//container.transform.parent = go.transform.parent;
+        					//}
 
-                            container.transform.position = go.transform.position;
-        					container.transform.rotation = go.transform.rotation;
-        					go.transform.parent = container.transform;
-        					go.name += "*";
-                            voxeme.enabled = false;
+                            //container.transform.position = go.transform.position;
+        					//container.transform.rotation = go.transform.rotation;
+        					//go.transform.parent = container.transform;
+        					//go.name += "*";
+                            //voxeme.enabled = false;
 
-                            container.GetComponent<Voxeme>().predicate = voxeme.predicate;
-                            container.GetComponent<Voxeme>().density = voxeme.density;
+                            //container.GetComponent<Voxeme>().predicate = voxeme.predicate;
+                            //container.GetComponent<Voxeme>().density = voxeme.density;
 
         					// copy attribute set
-        					AttributeSet newAttrSet = container.AddComponent<AttributeSet>();
-        					AttributeSet attrSet = go.GetComponent<AttributeSet>();
-        					if (attrSet != null) {
-        						foreach (string s in attrSet.attributes) {
-                                    Debug.Log(string.Format("Adding attribute {0} to object {1}", s, container.name));
-        							newAttrSet.attributes.Add(s);
-        						}
-        					}
+        					//AttributeSet newAttrSet = go.AddComponent<AttributeSet>();
+        					//AttributeSet attrSet = go.GetComponent<AttributeSet>();
+        					//if (attrSet != null) {
+        					//	foreach (string s in attrSet.attributes) {
+                            //        Debug.Log(string.Format("Adding attribute {0} to object {1}", s, go.name));
+        					//		newAttrSet.attributes.Add(s);
+        					//	}
+        					//}
 
                             // copy interaction object
                             //InteractionObject interactionObject = go.GetComponent<InteractionObject>();
@@ -115,8 +116,8 @@ namespace VoxSimPlatform {
         							}
 
         							if ((go.tag != "UnPhysic") && (go.tag != "Ground")) {
-        								if (container.GetComponent<Voxeme>().density == 0) {
-        									container.GetComponent<Voxeme>().density = 1;
+        								if (go.GetComponent<Voxeme>().density == 0) {
+        									go.GetComponent<Voxeme>().density = 1;
         								}
 
         								if (subObj.GetComponent<Rigidbody>() == null) {
@@ -128,7 +129,7 @@ namespace VoxSimPlatform {
         										float x = GlobalHelper.GetObjectWorldSize(subObj).size.x;
         										float y = GlobalHelper.GetObjectWorldSize(subObj).size.y;
         										float z = GlobalHelper.GetObjectWorldSize(subObj).size.z;
-        										rigidbody.mass = x * y * z * (container.GetComponent<Voxeme>().density);
+        										rigidbody.mass = x * y * z * (go.GetComponent<Voxeme>().density);
 
         										// bunch of crap assumptions to calculate drag:
         										// air density: 1.225 kg/m^3
@@ -151,9 +152,9 @@ namespace VoxSimPlatform {
         											.localEulerAngles; //(rigidbody.transform.localRotation * Quaternion.Inverse (container.transform.rotation)).eulerAngles;
         									//Debug.Log(rotationalDisplacement);
         									//Debug.Log(rigidbody.name);
-        									container.GetComponent<Voxeme>().displacement
+        									go.GetComponent<Voxeme>().displacement
         										.Add(rigidbody.gameObject, displacement);
-        									container.GetComponent<Voxeme>().rotationalDisplacement
+        									go.GetComponent<Voxeme>().rotationalDisplacement
         										.Add(rigidbody.gameObject, rotationalDisplacement);
         								}
         							}
@@ -161,16 +162,16 @@ namespace VoxSimPlatform {
         					}
 
         					if (!usePhysicsRigging) {
-        						container.GetComponent<Rigging>().ActivatePhysics(false);
+        						go.GetComponent<Rigging>().ActivatePhysics(false);
         					}
                                 
                             foreach(Transform transform in go.transform) {
                                 transform.gameObject.tag = go.tag;
                             }
-                            container.tag = go.tag;
+                            //go.tag = go.tag;
 
         					// add to master voxeme list
-        					objSelector.allVoxemes.Add(container.GetComponent<Voxeme>());
+        					objSelector.allVoxemes.Add(go.GetComponent<Voxeme>());
         					//Debug.Log(GlobalHelper.VectorToParsable(container.transform.position -
         					//                                  GlobalHelper.GetObjectWorldSize(container).center));
         				}
@@ -183,6 +184,8 @@ namespace VoxSimPlatform {
                     if ((go.activeInHierarchy) && (go.GetComponent<Voxeme>() != null) &&
                         (go.GetComponent<Voxeme>().isActiveAndEnabled)) {
                         // remove BoxCollider and Rigidbody on non-top level objects
+
+                        /**
                         if ((GlobalHelper.GetMostImmediateParentVoxeme(go).gameObject.transform.parent != null) &&
         				    (go.transform.root.tag != "Agent")) {
         					BoxCollider boxCollider = go.GetComponent<BoxCollider>();
@@ -195,6 +198,7 @@ namespace VoxSimPlatform {
         						Destroy(rigidbody);
         					}
         				}
+                        **/
 
         				Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
         				foreach (Renderer r1 in renderers) {

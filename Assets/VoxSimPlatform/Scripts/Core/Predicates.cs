@@ -6240,7 +6240,7 @@ namespace VoxSimPlatform {
 	                                    Debug.Log(string.Format("No path from {0} to {1} given.  Moving {0} directly.",
 	                                    	GlobalHelper.VectorToParsable((args[0] as GameObject).transform.position),
 	                                    	GlobalHelper.VectorToParsable((Vector3)args[1])));
-                                        voxComponent.targetPosition = (Vector3)args[1];
+                                        voxComponent.interTargetPositions.AddLast((Vector3)args[1]);
                                         AStarSearch.OnComputedPath(null, new ComputedPathEventArgs(new List<Vector3>{ voxComponent.targetPosition }));
                                     }
                                     else {

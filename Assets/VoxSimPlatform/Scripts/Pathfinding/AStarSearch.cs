@@ -415,6 +415,7 @@ namespace VoxSimPlatform {
         		}
 
         		path = ReconstructPath(startPos, bestLastPos, cameFrom);
+                path.Add(goalPos);
         		Debug.Log(string.Format("====== path ====== {0}",string.Join(",",path.Select(n => GlobalHelper.VectorToParsable(n)).ToArray())));
 
                 return path;

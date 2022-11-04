@@ -618,7 +618,8 @@ namespace VoxSimPlatform {
                         // has valid destination
                         if (!isGrasped) {
                             if (transform.position != targetPosition) {
-                                Vector3 offset = MoveToward(targetPosition);
+                                //Vector3 offset = MoveToward(targetPosition);
+                                targetPosition = transform.position;
 
                                 //if (offset.sqrMagnitude <= Constants.EPSILON) {
                                 //    transform.position = targetPosition;
