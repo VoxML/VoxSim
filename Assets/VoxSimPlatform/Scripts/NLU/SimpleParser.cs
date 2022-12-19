@@ -31,7 +31,10 @@ namespace VoxSimPlatform {
     			"lift",
     			"drop",
     			"reach",
-    			"slide"
+    			"slide",
+                "heavier",
+                "lighter",
+                "weigh"
     		});
 
     		private List<string> _objects = new List<string>(new[] {
@@ -77,7 +80,14 @@ namespace VoxSimPlatform {
     			"cork",
     		});
 
-    		private List<string> _objectVars = new List<string>(new[] {
+            private List<string> _comparators = new List<string>(new[] {
+                "heavier",
+                "lighter",
+                "equal"
+            });
+
+
+            private List<string> _objectVars = new List<string>(new[] {
     			"{0}"
     		});
 
@@ -211,10 +221,10 @@ namespace VoxSimPlatform {
             /// </summary>
             /// <param name="sent"></param>
             /// <returns>a list of tokens (as strings) </returns>
-    		private string[] SentSplit(string sent) {
+    		private List<string> SentSplit(string sent) {
     			sent = sent.ToLower().Replace("paper sheet", "paper_sheet");
-    			var tokens = new List<string>(Regex.Split(sent, " +"));
-    			return tokens.Where(token => !_exclude.Contains(token)).ToArray();
+                var tokens = new List<string>(Regex.Split(sent, " +"));
+                return tokens.Where(token => !_exclude.Contains(token)).ToList();
     		}
 
     		public string NLParse(string rawSent) {
@@ -224,13 +234,22 @@ namespace VoxSimPlatform {
     			}
 
     			var tokens = SentSplit(rawSent);
-    			var form = tokens[0] + "(";
+
+                if (tokens.Count() > 1 && tokens[0] == "is" || (tokens[0] == "what" && tokens[1] == "does"))
+                {
+                    string predicate = tokens.Where(token => _events.Contains(token)).First();
+                    tokens.Remove(predicate);
+                    tokens.Remove(tokens.First());
+                    tokens.Insert(0, predicate);
+                }
+
+                var form = tokens[0] + "(";
     			var cur = 1;
-    			var end = tokens.Length;
+    			var end = tokens.Count;
     			var lastObj = "";
 
     			while (cur < end) {
-    				if (tokens[cur] == "and") {
+    				if (tokens[cur] == "and" || tokens[cur] == "than" || tokens[cur] == "to") {
     					form += ",";
     					cur++;
     				}
@@ -297,7 +316,12 @@ namespace VoxSimPlatform {
 
                     /// Lots of potential categories.
                     //??? Just "{1}"
-    				else if (_relationVars.Contains(tokens[cur])) {
+                    else if (_events.Contains(tokens[cur]))
+                    {
+                        form += tokens[cur] + "(";
+                        cur += 1;
+                    }
+                    else if (_relationVars.Contains(tokens[cur])) {
     					form += "," + tokens[cur];
     					cur += 1;
     				}
