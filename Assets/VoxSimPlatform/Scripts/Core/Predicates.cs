@@ -41,6 +41,7 @@ namespace VoxSimPlatform {
         	public MonoBehaviour primitivesOverride;
 
         	public Timer waitTimer = new Timer();
+            public GameObject agent;
 
         	EventManager eventManager;
         	ObjectSelector objSelector;
@@ -901,9 +902,6 @@ namespace VoxSimPlatform {
         		string prep = rdfTriples.Count > 0 ? rdfTriples[0].Item2.Replace("put", "") : "";
         		Debug.Log(prep);
 
-        		// look for agent
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-
         		// add agent-dependent preconditions
         		if (agent != null) {
         			if (args[0] is GameObject) {
@@ -916,7 +914,7 @@ namespace VoxSimPlatform {
         				//				return;
         				//			}
         				//			else {
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
         					eventManager.InsertEvent(
         						eventManager.evalOrig[
@@ -1970,7 +1968,7 @@ namespace VoxSimPlatform {
                         // plan path to destination
                         if (!GlobalHelper.VectorIsNaN(targetPosition)) {
                             List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
-                                (args[0] as GameObject),
+                                (args[0] as GameObject), agent,
                                 GameObject.Find(rdfTriples[0].Item3) != null
                                     ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
                                     : null);
@@ -2040,8 +2038,7 @@ namespace VoxSimPlatform {
         	// IN: Objects
         	// OUT: none
         	public void LIFT_1(object[] args) {
-        		// look for agent
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+
         		if (agent != null) {
         			if (args[0] is GameObject) {
         				// add preconditions
@@ -2058,7 +2055,7 @@ namespace VoxSimPlatform {
         				//				return;
         				//			}
         				//			else {
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
         					if (args.Length > 2) {
         						eventManager.InsertEvent(
@@ -2171,8 +2168,7 @@ namespace VoxSimPlatform {
         	// IN: Objects
         	// OUT: none
         	public void SLIDE_1(object[] args) {
-        		// look for agent
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
+
         		if (agent != null) {
         			if (args[0] is GameObject) {
         				// add preconditions
@@ -2189,7 +2185,7 @@ namespace VoxSimPlatform {
         				//				return;
         				//			}
         				//			else {
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
         					if (args.Length > 2) {
         						eventManager.InsertEvent(
@@ -2714,7 +2710,7 @@ namespace VoxSimPlatform {
                                 new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
 
                             List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
-                                (args[0] as GameObject),
+                                (args[0] as GameObject), agent,
                                 GameObject.Find(rdfTriples[0].Item3) != null
                                     ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
                                     : null, "Y");
@@ -2735,11 +2731,10 @@ namespace VoxSimPlatform {
         		string originalEval = eventManager.events[0];
 
         		// look for agent
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
         		if (agent != null) {
         			if (args[0] is GameObject) {
         				// add preconditions
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
         					if (args.Length > 2) {
         						eventManager.InsertEvent(
@@ -3279,7 +3274,7 @@ namespace VoxSimPlatform {
                                 new Vector3(surfaceBounds.max.x, objBounds.max.y, surfaceBounds.max.z));
 
                             List<Vector3> path = AStarSearch.PlanPath((args[0] as GameObject).transform.position, targetPosition,
-                                (args[0] as GameObject),
+                                (args[0] as GameObject), agent,
                                 ((GameObject.Find(rdfTriples[0].Item1) != null) && (GameObject.Find(rdfTriples[0].Item3) != null))
                                     ? GameObject.Find(rdfTriples[0].Item3).GetComponent<Voxeme>()
                                     : null, "Y");
@@ -3297,13 +3292,10 @@ namespace VoxSimPlatform {
         	// IN: Objects, Location
         	// OUT: none
         	public void ROLL(object[] args) {
-        		// look for agent
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
-
-        		// add agent-dependent preconditions
+        	    // add agent-dependent preconditions
         		if (agent != null) {
         			if (args[0] is GameObject) {
-        				if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name))) {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("reach({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("reach({0})", (args[0] as GameObject).name), 0);
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 1);
         					if (args.Length > 2) {
@@ -3320,7 +3312,7 @@ namespace VoxSimPlatform {
         					eventManager.RemoveEvent(3);
         					return;
         				}
-        				else if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        				else if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
         					if (args.Length > 2) {
         						eventManager.InsertEvent(
@@ -3523,7 +3515,7 @@ namespace VoxSimPlatform {
         				//Debug.Log (Quaternion.FromToRotation (objRotAxis, worldRotAxis).eulerAngles);
 
         				if (!SatisfactionTest.IsSatisfied(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
-        					GlobalHelper.VectorToParsable(objRotAxis), GlobalHelper.VectorToParsable(worldRotAxis)))) {
+        					GlobalHelper.VectorToParsable(objRotAxis), GlobalHelper.VectorToParsable(worldRotAxis)), eventManager)) {
         					Debug.Log(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
         						GlobalHelper.VectorToParsable(obj.transform.rotation * objRotAxis),
         						GlobalHelper.VectorToParsable(worldRotAxis)));
@@ -3854,11 +3846,10 @@ namespace VoxSimPlatform {
         		string rotAxis = "";
 
         		// look for agent
-        		GameObject agent = null; //GameObject.FindGameObjectWithTag("Agent");
         		if (agent != null) {
         			if (args[0] is GameObject) {
         				// add preconditions
-        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name))) {
+        				if (!SatisfactionTest.IsSatisfied(string.Format("grasp({0})", (args[0] as GameObject).name), eventManager)) {
         					eventManager.InsertEvent(string.Format("grasp({0})", (args[0] as GameObject).name), 0);
         					if (args.Length > 4) {
         						eventManager.InsertEvent(eventManager.evalOrig[string.Format("turn({0},{1},{2},{3})",
@@ -4704,7 +4695,7 @@ namespace VoxSimPlatform {
         				if (!SatisfactionTest.IsSatisfied(string.Format("turn({0},{1},{2},{3})", (args[0] as GameObject).name,
         					GlobalHelper.VectorToParsable(objMajorAxis),
         					GlobalHelper.VectorToParsable(Quaternion.Euler(majorTilt) * Constants.yAxis),
-        					GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * objMinorAxis)))) {
+        					GlobalHelper.VectorToParsable((args[0] as GameObject).transform.rotation * objMinorAxis)), eventManager)) {
         					eventManager.InsertEvent(string.Format("turn({0},{1},{2})", (args[0] as GameObject).name,
         						GlobalHelper.VectorToParsable(objMinorAxis),
         						GlobalHelper.VectorToParsable(Quaternion.Euler(minorTilt) * Constants.yAxis)), 0);
@@ -5787,7 +5778,6 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void DROP(object[] args) {
-                GameObject agent = GameObject.FindGameObjectWithTag("Agent");
                 if (agent != null) {
                     Animator anim = agent.GetComponentInChildren<Animator>();
                     GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
@@ -5840,7 +5830,6 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void TOUCH(object[] args) {
-                GameObject agent = GameObject.FindGameObjectWithTag("Agent");
                 if (agent != null) {
                     Animator anim = agent.GetComponentInChildren<Animator>();
                     GameObject leftGrasper = anim.GetBoneTransform(HumanBodyBones.LeftHand).transform.gameObject;
@@ -5910,7 +5899,6 @@ namespace VoxSimPlatform {
             // IN: Objects
             // OUT: none
             public void GRASP(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
         		GameObject leftGrasper = agent.GetComponent<FullBodyBipedIK>().references.leftHand.gameObject;
         		GameObject rightGrasper = agent.GetComponent<FullBodyBipedIK>().references.rightHand.gameObject;
 
@@ -6038,7 +6026,6 @@ namespace VoxSimPlatform {
         	// IN: Objects
         	// OUT: none
         	public void UNGRASP(object[] args) {
-        		GameObject agent = GameObject.FindGameObjectWithTag("Agent");
 
         		FullBodyBipedIK ik = agent.GetComponent<FullBodyBipedIK>();
         		InteractionSystem interactionSystem = agent.GetComponent<InteractionSystem>();
@@ -6954,7 +6941,7 @@ namespace VoxSimPlatform {
                             string.Join(", ", (args[0] as ObjBounds).Points.Select(p => GlobalHelper.VectorToParsable(p))),
                         voxml.Type.Args[1].Value.Split(':')[0], GlobalHelper.VectorToParsable((args[1] as ObjBounds).Center),
                             string.Join(", ", (args[1] as ObjBounds).Points.Select(p => GlobalHelper.VectorToParsable(p)))));
-                    retVal = SatisfactionTest.IsSatisfied(voxml, args.ToList());
+                    retVal = SatisfactionTest.IsSatisfied(voxml, args.ToList(), eventManager);
                 }
                 else {                                      // otherwise calc location/region
                     string relStr = string.Empty;

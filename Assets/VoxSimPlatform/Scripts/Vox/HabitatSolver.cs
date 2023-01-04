@@ -14,8 +14,8 @@ namespace VoxSimPlatform {
 
         	// Use this for initialization
         	void Start() {
-                em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
-                preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
+                em = gameObject.GetComponent<EventManager>();
+                preds = gameObject.GetComponent<Predicates>();
         	}
 
         	// IN: GameObject args[0]: the object in question

@@ -235,10 +235,8 @@ namespace VoxSimPlatform {
         	}
 
         	// path planner
-        	public static List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj,
+        	public static List<Vector3> PlanPath(Vector3 startPos, Vector3 goalPos, GameObject obj, GameObject avatar,
         		params object[] constraints) {
-
-                EventManager eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
                 AStarSearchPrefs prefs = GameObject.Find("VoxWorld").GetComponent<AStarSearchPrefs>();
 
         		Dictionary<Vector3, Vector3> cameFrom = new Dictionary<Vector3, Vector3>();
@@ -326,7 +324,7 @@ namespace VoxSimPlatform {
 
         		gScore[startPos] = 0;
         		//hScore [startPos] = new Vector3 (endPos.x - startPos.x, endPos.y - startPos.y, endPos.z - startPos.z).magnitude;
-        		hScore[startPos] = GetHScoreErgonomic(eventManager.GetActiveAgent(), startPos, goalPos, prefs.rigAttractionWeight);
+        		hScore[startPos] = GetHScoreErgonomic(avatar, startPos, goalPos, prefs.rigAttractionWeight);
 
         		Debug.Log(" ========= obj.transform.position ======== " + GlobalHelper.VectorToParsable(obj.transform.position));
         		Debug.Log(" ======== start ====== " + GlobalHelper.VectorToParsable(startPos));
@@ -380,14 +378,14 @@ namespace VoxSimPlatform {
 
         				foreach (var neighbor in neighbors) {
         					if (!closedSet.Contains(neighbor) && !IsBlocked(objectBound, curPos, neighbor)) {
-        						float tentativeGScore = GetGScoreErgonomic(eventManager.GetActiveAgent(), curPos, neighbor, prefs.rigAttractionWeight, gScore);
+        						float tentativeGScore = GetGScoreErgonomic(avatar, curPos, neighbor, prefs.rigAttractionWeight, gScore);
 
         						if (gScore.ContainsKey(neighbor) && tentativeGScore > gScore[neighbor])
         							continue;
 
         						cameFrom[neighbor] = curPos;
         						gScore[neighbor] = tentativeGScore;
-        						hScore[neighbor] = GetHScoreErgonomic(eventManager.GetActiveAgent(), neighbor, goalPos, prefs.rigAttractionWeight);
+        						hScore[neighbor] = GetHScoreErgonomic(avatar, neighbor, goalPos, prefs.rigAttractionWeight);
         						// Debug.Log ("=== candidate === (" + neighbor + ") " + gScore [neighbor] + " " + hScore [neighbor] + " " + (gScore [neighbor] + hScore [neighbor]));
 
         						// If neighbor is not yet in openset 

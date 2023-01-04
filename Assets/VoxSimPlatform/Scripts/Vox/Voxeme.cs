@@ -649,7 +649,7 @@ namespace VoxSimPlatform {
                     else {
                         // cannot execute motion
                         OutputHelper.PrintOutput(Role.Affector, "I'm sorry, I can't do that.");
-                        GameObject.Find("BehaviorController").GetComponent<EventManager>().SendMessage("AbortEvent");
+                        //GameObject.Find("BehaviorController").GetComponent<EventManager>().SendMessage("AbortEvent");
                         targetPosition = transform.position;
                     }
                 }
@@ -718,7 +718,7 @@ namespace VoxSimPlatform {
                     else {
                         // cannot execute motion
                         OutputHelper.PrintOutput(Role.Affector, "I'm sorry, I can't do that.");
-                        GameObject.Find("BehaviorController").GetComponent<EventManager>().SendMessage("AbortEvent");
+                        //GameObject.Find("Controller").GetComponent<EventManager>().SendMessage("AbortEvent");
                         targetRotation = transform.eulerAngles;
                     }
                 }

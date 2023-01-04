@@ -13,7 +13,6 @@ using VoxSimPlatform.Global;
 namespace VoxSimPlatform {
     namespace Vox {
         public class VoxemeInit : MonoBehaviour {
-        	Predicates preds;
         	ObjectSelector objSelector;
 
             public List<Transform> topLevelObjectContainers; 
@@ -29,8 +28,6 @@ namespace VoxSimPlatform {
         	}
 
         	public void InitializeVoxemes() {
-        		preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-
         		/* MAKE GLOBAL OBJECT RUNTIME ALTERATIONS */
 
         		// get all objects

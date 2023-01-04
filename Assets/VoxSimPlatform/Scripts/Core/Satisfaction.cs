@@ -32,10 +32,9 @@ namespace VoxSimPlatform {
 
             // if a relational predicate is satisfied
             // checks for presence of that relation in RelationTracker
-            public static bool IsSatisfied(String pred, List<object> args) {
+            public static bool IsSatisfied(String pred, List<object> args, EventManager em) {
                 bool satisfied = false;
 
-                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
                 RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
 
                 if (em.voxmlLibrary.VoxMLEntityTypeDict.ContainsKey(pred)) {
@@ -54,11 +53,10 @@ namespace VoxSimPlatform {
                 return satisfied;
             }
 
-            public static bool IsSatisfied(VoxML voxml, List<object> args) {
+            public static bool IsSatisfied(VoxML voxml, List<object> args, EventManager em) {
                 bool satisfied = false;
 
-                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
-                RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
+	            RelationTracker relationTracker = GameObject.Find("BehaviorController").GetComponent<RelationTracker>();
 
                 if (voxml.Entity.Type == VoxEntity.EntityType.Program) {
                     for (int i = 0; i < voxml.Type.Args.Count; i++) {
@@ -168,15 +166,13 @@ namespace VoxSimPlatform {
                 return satisfied;
             }
 
-            public static bool IsSatisfied(String test) {
+            public static bool IsSatisfied(String test, EventManager em) {
                 bool satisfied = false;
                 Hashtable predArgs = GlobalHelper.ParsePredicate(test);
                 String predString = "";
                 String[] argsStrings = null;
 
-                PhysicsPrimitives physicsManager = GameObject.Find("BehaviorController").GetComponent<PhysicsPrimitives>();
-                Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+	            Predicates preds = em.gameObject.GetComponent<Predicates>();
 
                 bool isMacroEvent = false;
 
@@ -572,17 +568,16 @@ namespace VoxSimPlatform {
                 return satisfied;
             }
 
-            public static bool ComputeSatisfactionConditions(String command) {
+            public static bool ComputeSatisfactionConditions(String command, EventManager em) {
                 Hashtable predArgs = GlobalHelper.ParsePredicate(command);
                 String pred = GlobalHelper.GetTopPredicate(command);
                 ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
-                EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
                 bool validPredExists = false;
 
                 if (predArgs.Count > 0) {
                     LinkedList<String> argsStrings = new LinkedList<String>(((String) predArgs[pred]).Split(new char[] {','}));
                     List<object> objs = new List<object>();
-                    Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
+	                Predicates preds = em.gameObject.GetComponent<Predicates>();
                     object invocationTarget = preds;
 
                     MethodInfo methodToCall = null;
@@ -1015,7 +1010,7 @@ namespace VoxSimPlatform {
 
                 // get relation tracker
                 RelationTracker relationTracker =
-                    (RelationTracker) GameObject.Find("BehaviorController").GetComponent("RelationTracker");
+                    (RelationTracker)GameObject.Find("BehaviorController").GetComponent("RelationTracker");
 
                 ObjectSelector objSelector = GameObject.Find("VoxWorld").GetComponent<ObjectSelector>();
                 SpatialReasoningPrefs srPrefs = GameObject.Find("VoxWorld").GetComponent<SpatialReasoningPrefs>();
@@ -1437,7 +1432,7 @@ namespace VoxSimPlatform {
             }
 
             public static bool TestHabitat(GameObject obj, int habitatIndex) {
-                HabitatSolver habitatSolver = GameObject.Find("BehaviorController").GetComponent<HabitatSolver>();
+                HabitatSolver habitatSolver = GameObject.FindGameObjectsWithTag("BehaviorController")[0].GetComponent<HabitatSolver>();
 
                 MethodInfo methodToCall;
                 bool r = true;
@@ -1907,7 +1902,7 @@ namespace VoxSimPlatform {
                     Bounds testBounds = new Bounds();
                     Voxeme[] voxemes;
                     RelationTracker relationTracker =
-                        (RelationTracker) GameObject.Find("BehaviorController").GetComponent("RelationTracker");
+                        (RelationTracker)GameObject.Find("BehaviorController").GetComponent("RelationTracker");
                     foreach (GameObject test in allObjects) {
                         if (test != obj) {
                             voxemes = test.GetComponentsInChildren<Voxeme>();

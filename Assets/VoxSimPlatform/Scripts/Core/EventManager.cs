@@ -304,7 +304,7 @@ namespace VoxSimPlatform {
             // Update is called once per frame
             void Update() {
                 if (events.Count > 0) {
-                    bool q = SatisfactionTest.IsSatisfied(events[0]);
+	                bool q = SatisfactionTest.IsSatisfied(events[0], this);
 
                     if (q) {
                         Debug.Log("Satisfied " + events[0]);
@@ -477,7 +477,7 @@ namespace VoxSimPlatform {
                 Hashtable predArgs = GlobalHelper.ParsePredicate(events[0]);
                 String pred = GlobalHelper.GetTopPredicate(events[0]);
 
-                if (SatisfactionTest.ComputeSatisfactionConditions(events[0])) {
+                if (SatisfactionTest.ComputeSatisfactionConditions(events[0], this)) {
                     executionPhase = EventExecutionPhase.Execution;
                     ExecuteCommand(events[0]);
                 }
@@ -961,7 +961,7 @@ namespace VoxSimPlatform {
                     if ((bool) eventsStatus[keys[i]] == false) {
                         nextIncompleteEvent = keys[i];
                         if (i < events.Count - 1) {
-                            SatisfactionTest.ComputeSatisfactionConditions(events[i + 1]);
+                            SatisfactionTest.ComputeSatisfactionConditions(events[i + 1], this);
                             eventsStatus.Keys.CopyTo(keys, 0);
                             eventsStatus.Values.CopyTo(values, 0);
                             nextQueuedEvent = keys[i + 1];
@@ -1746,11 +1746,11 @@ namespace VoxSimPlatform {
                                                 (voxml == null) ? string.Empty : string.Format("\"{0}\" ",voxml.Lex.Pred), objs));
                                         object obj = null;
                                         if (voxml == null) {
-                                            obj = SatisfactionTest.IsSatisfied(methodToCall.Name, objs);
+                                            obj = SatisfactionTest.IsSatisfied(methodToCall.Name, objs, this);
                                             //obj = methodToCall.Invoke(preds, new object[] {objs.ToArray()});
                                         }
                                         else {
-                                            obj = SatisfactionTest.IsSatisfied(voxml, objs);
+                                            obj = SatisfactionTest.IsSatisfied(voxml, objs, this);
                                             //obj = methodToCall.Invoke(preds, new object[] {voxml, objs.ToArray()});
                                         } 
                                         Debug.Log(string.Format("EvaluateSkolemConstants ({0}): IsSatisfied({1}) returns {2} (typeof({3}))",

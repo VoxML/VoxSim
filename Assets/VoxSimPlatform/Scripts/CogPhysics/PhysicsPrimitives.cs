@@ -32,7 +32,7 @@ namespace VoxSimPlatform {
 
         	// Use this for initialization
         	void Start() {
-        		eventManager = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+        		eventManager = gameObject.GetComponent<EventManager>();
 
         		resolveDiscrepancies = false;
 

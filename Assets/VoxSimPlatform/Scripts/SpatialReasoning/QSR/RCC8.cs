@@ -304,8 +304,8 @@ namespace VoxSimPlatform {
                     // // (that is, the first object in relation of type ObjBounds,
                     // // or create ObjBounds of 0 extents if no ObjBounds to copy exists)
 
-                    Predicates preds = GameObject.Find("BehaviorController").GetComponent<Predicates>();
-                    EventManager em = GameObject.Find("BehaviorController").GetComponent<EventManager>();
+                    Predicates preds = GameObject.FindGameObjectsWithTag("BehaviorController")[0].GetComponent<Predicates>();
+                    EventManager em = GameObject.FindGameObjectsWithTag("BehaviorController")[0].GetComponent<EventManager>();
 
                     List<string> constraintPreds = new List<string>();
 
