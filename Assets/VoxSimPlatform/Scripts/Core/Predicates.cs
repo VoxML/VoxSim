@@ -17,6 +17,7 @@ using VoxSimPlatform.Global;
 using VoxSimPlatform.Pathfinding;
 using VoxSimPlatform.SpatialReasoning;
 using VoxSimPlatform.Vox;
+using System.Diagnostics.Contracts;
 
 namespace VoxSimPlatform {
     namespace Core {
@@ -6147,6 +6148,9 @@ namespace VoxSimPlatform {
                                     if (args[2] is MethodInfo) {
                                         Debug.Log("Type signature match.");
                                         if (((MethodInfo)args[2]).IsStatic) {
+                                            //manually add the eventmanager argument, replacing bool check
+                                            args[args.Length - 1] = eventManager.activeAgent;
+
                                             // path not already computed
                                             if (((MethodInfo)args[2]).ReturnType == typeof(List<Vector3>)) {
                                                 Debug.Log(string.Format("{0} returns {1}", ((MethodInfo)args[2]).Name, typeof(List<Vector3>)));
@@ -6164,7 +6168,7 @@ namespace VoxSimPlatform {
                                                 Debug.Log(string.Format("{0} takes {1} required parameters + additional params array",
                                                     ((MethodInfo)args[2]).Name, ((MethodInfo)args[2]).GetParameters().Length));
                                                 object[] additionalParams = new ArraySegment<object>(
-                                                    args, 3 + numMethodParams, args.Length - (4 + numMethodParams)).ToArray();
+                                                    args, 2 + numMethodParams, args.Length - (3 + numMethodParams)).ToArray();
                                                 Debug.Log(string.Format("{0} additional parameters supplied",
                                                     additionalParams.Length));
 
@@ -6175,7 +6179,7 @@ namespace VoxSimPlatform {
                                                 // we then append additional params as a single argument
                                                 //  because custom-defined methods need a params argument
                                                 //  though this may be an empty array
-                                                object[] requiredParams = new ArraySegment<object>(args, 3, args.Length - 4).ToArray();
+                                                object[] requiredParams = new ArraySegment<object>(args, 3, numMethodParams).ToArray();
 
                                                 // now invoke the specified method (must be static in order to pass null),
                                                 //  with requiredParams concatenated with the additional params array as an object
